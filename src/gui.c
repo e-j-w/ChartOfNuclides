@@ -91,13 +91,21 @@ SDL_FColor getHalfLifeCol(const double halflifeSeconds){
   return col;
 }
 
+void drawNuclBoxLabel(const drawing_state *restrict ds, resource_data *restrict rdat, const int xPos, const int yPos, SDL_Color col, const uint16_t N, const uint16_t Z){
+  if(ds->chartZoomScale >= 8.0f){
+    float numLblWidth = drawTextFromCache(rdat,xPos,yPos,col,ALIGN_LEFT,(uint16_t)(N+Z)); //draw number label
+    drawTextFromCache(rdat,xPos+(int)numLblWidth+2,yPos+10,col,ALIGN_LEFT,MAX_MASS_NUM+Z); //draw element label
+  }else{
+    drawTextFromCache(rdat,xPos,yPos,col,ALIGN_LEFT,MAX_MASS_NUM+MAX_PROTON_NUM+Z); //draw element label only
+  }
+}
+
 void drawChartOfNuclides(const app_data *restrict dat, const app_state *restrict state, resource_data *restrict rdat){
 
   float minX = getMinChartN(&state->ds);
   float maxX = getMaxChartN(&state->ds);
   float minY = getMinChartZ(&state->ds);
   float maxY = getMaxChartZ(&state->ds);
-  char tmpstr[8];
   //printf("N range: [%0.2f %0.2f], Z range: [%0.2f %0.2f]\n",(double)minX,(double)maxX,(double)minY,(double)maxY);
 
   SDL_FRect rect;
@@ -118,16 +126,7 @@ void drawChartOfNuclides(const app_data *restrict dat, const app_state *restrict
             if(state->ds.chartZoomScale >= 4.0f){
               int txtX = (int)(rect.x + NUCLBOX_NAME_MARGIN*state->ds.chartZoomScale);
               int txtY = (int)(rect.y + NUCLBOX_NAME_MARGIN*state->ds.chartZoomScale);
-              SDL_Color txtCol = (hl > 1.0E4) ? whiteCol8Bit : BlackCol8Bit; //set color based on box background color
-              if(state->ds.chartZoomScale >= 8.0f){
-                snprintf(tmpstr,8,"%u",(uint32_t)(dat->ndat.nuclData[i].N + dat->ndat.nuclData[i].Z));
-                float tw = drawTextAlignedSized(rdat,txtX,txtY,rdat->smallFont,txtCol,255,tmpstr,ALIGN_LEFT,16384);
-                txtX += ((int)(tw) + 2);
-                txtY += 10;
-                drawTextAligned(rdat,txtX,txtY,rdat->bigFont,txtCol,getElemStr((uint8_t)(dat->ndat.nuclData[i].Z)),ALIGN_LEFT);
-              }else{
-                drawTextAligned(rdat,txtX,txtY,rdat->font,txtCol,getElemStr((uint8_t)(dat->ndat.nuclData[i].Z)),ALIGN_LEFT);
-              }
+              drawNuclBoxLabel(&state->ds,rdat,txtX,txtY,(hl > 1.0E4) ? whiteCol8Bit : BlackCol8Bit,(uint16_t)(dat->ndat.nuclData[i].N),(uint16_t)(dat->ndat.nuclData[i].Z));
             }
           }
         }

@@ -324,6 +324,59 @@ SDL_Rect getDefaultTextDim(const ui_theme_rules *restrict uirules, resource_data
   return getTextDim(uirules,rdat,txt,rdat->font);
 }
 
+//generates a texture in the text texture cache for the suuplied text string
+void drawTextToCache(resource_data *restrict rdat, TTF_Font *font, const SDL_Color textColor, const char *txt, const uint8_t wrapAlign, const Uint32 wrapWidth, const uint16_t cacheInd){
+  if(cacheInd < TEXT_TEX_CACHE_SIZE){
+    if(wrapAlign == ALIGN_RIGHT){
+      TTF_SetFontWrappedAlign(font,TTF_WRAPPED_ALIGN_RIGHT);
+    }else if(wrapAlign == ALIGN_CENTER){
+      TTF_SetFontWrappedAlign(font,TTF_WRAPPED_ALIGN_CENTER);
+    }else{
+      TTF_SetFontWrappedAlign(font,TTF_WRAPPED_ALIGN_LEFT);
+    }
+    SDL_Surface *textSurface = TTF_RenderUTF8_Blended_Wrapped(font,txt,textColor,wrapWidth);
+    if(rdat->textTexCache[cacheInd] != NULL){
+      SDL_DestroyTexture(rdat->textTexCache[cacheInd]);
+    }
+    rdat->textTexCache[cacheInd] = SDL_CreateTextureFromSurface(rdat->renderer,textSurface);
+    SDL_DestroySurface(textSurface);
+  }
+}
+//draws a texture from the text texture cache
+//returns the width of the drawn text (can be used for alignment purposes)
+float drawTextFromCache(resource_data *restrict rdat, const int xPos, const int yPos, const SDL_Color colMod, const uint8_t alignment, const uint16_t cacheInd){
+  SDL_FRect drawPos;
+  int w,h;
+  SDL_QueryTexture(rdat->textTexCache[cacheInd],NULL,NULL,&w,&h);
+  drawPos.w = (float)w;
+  drawPos.h = (float)h;
+  drawPos.x = ((float)xPos*rdat->uiScale);
+  drawPos.y = ((float)yPos*rdat->uiScale);
+  if(alignment == ALIGN_RIGHT){
+    drawPos.x = drawPos.x - drawPos.w;
+  }else if(alignment == ALIGN_CENTER){
+    drawPos.x = drawPos.x - drawPos.w/2;
+    drawPos.y = drawPos.y - drawPos.h/2;
+  }
+  SDL_SetTextureColorMod(rdat->textTexCache[cacheInd],colMod.r,colMod.g,colMod.b);
+  SDL_RenderTexture(rdat->renderer,rdat->textTexCache[cacheInd],NULL,&drawPos);
+  return drawPos.w;
+}
+
+void generateTextCache(resource_data *restrict rdat){
+	char tmpStr[16];
+	for(uint16_t i=0; i<MAX_MASS_NUM; i++){
+		snprintf(tmpStr,10,"%u",i);
+		drawTextToCache(rdat,rdat->smallFont,whiteCol8Bit,tmpStr,ALIGN_LEFT,16384,i);
+	}
+	for(uint8_t i=0; i<MAX_PROTON_NUM; i++){
+		drawTextToCache(rdat,rdat->bigFont,whiteCol8Bit,getElemStr(i),ALIGN_LEFT,16384,i+MAX_MASS_NUM);
+	}
+  for(uint8_t i=0; i<MAX_PROTON_NUM; i++){
+		drawTextToCache(rdat,rdat->font,whiteCol8Bit,getElemStr(i),ALIGN_LEFT,16384,i+MAX_MASS_NUM+MAX_PROTON_NUM);
+	}
+}
+
 //returns the width of the drawn text (can be used for alignment purposes)
 float drawTextAlignedSized(resource_data *restrict rdat, const int xPos, const int yPos, TTF_Font *font, const SDL_Color textColor, const uint8_t alpha, const char *txt, const uint8_t alignment, const Uint32 maxWidth){
   SDL_FRect drawPos;

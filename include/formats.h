@@ -23,13 +23,12 @@
 #define MAX_RENDER_WIDTH  16384
 #define MAX_RENDER_HEIGHT 16384
 
-//app data parameters (should all be powers of 2)
-#define MAX_ARRAY_SIZE                 65536 //to avoid overflows, none of the values below should be larger than this 
-#define MAX_NUM_STRINGS                512  //maximum number of text strings
+//texture cache parameters
+#define TEXT_TEX_CACHE_SIZE 1024
 
-//thread pool parameters
-#define MAX_NUM_THREADS 64 //maximum number of threads allowed in the thread pool
-#define THREAD_UPDATE_DELAY 10 //delay (in ms) for each thread to update its state
+//app data parameters (should all be powers of 2)
+#define MAX_ARRAY_SIZE                 65536
+#define MAX_NUM_STRINGS                512  //maximum number of text strings
 
 //increasing these numbers will increase the size of 
 //the nuclear database stored in memory (and on disk)
@@ -40,6 +39,9 @@
 #define MAXNUMNUCL 3500
 #define MAXNUMLVLS 200000
 #define MAXNUMTRAN 300000
+#define MAX_NEUTRON_NUM          200
+#define MAX_PROTON_NUM           130
+#define MAX_MASS_NUM             350
 
 #define MAXNUMPARSERVALS 10 //maximum number of values that can parsed at once on a line
 
@@ -180,6 +182,7 @@ typedef struct
   float uiScale; //scaling factor for UI, in units of 32px
   SDL_Surface *iconSurface; //surface for the application icon
   SDL_Texture *uiThemeTex; //the main texture atlas
+  SDL_Texture *textTexCache[TEXT_TEX_CACHE_SIZE]; //cached textures for text rendering
   SDL_Texture *tempTex; //used to store temporary texture data during draw operations
   //using different fonts (rather than resizing a single font) decreases CPU usage at the expense of memory
   TTF_Font *smallFont, *font, *bigFont, *hugeFont; //the default font (in 3 sizes)
@@ -199,32 +202,10 @@ typedef struct
   uint16_t locStringIDs[LOCSTR_ENUM_LENGTH];
 }app_data; //structure for all imported app data
 
-typedef struct
-{
-  //pointers to app data accessible to threads go here
-  uint8_t threadNum; //unique identifier for this threa
-  uint8_t numThreads; //overall number of threads
-  uint8_t threadState; //state of the thread, values from thread_state_enum
-  uint8_t threadPar; //thread parameter (eg. map cell number to generate)
-  uint8_t threadPar2;
-  //data that the thread has access to
-  app_state *state;        //the temporary state information for the app (which is not saved to disk)
-  drawing_state *ds;          //the state used for drawing/positioning elements on the screen
-  app_data *dat;              //the application data
-}thread_data; //data passed to a thread in the thread pool
-
-typedef struct
-{
-  uint8_t numThreads; //number of threads to have active in the thread pool
-  thread_data threadData[MAX_NUM_THREADS]; //data to give to each thread
-  uint8_t masterThreadState; //what state the threads are expected to be in, values from thread_state_enum
-}thread_manager_state; //structure for thread management
-
 //structure containing all application data
 //used so that all app data can be allocated in a single block of memory
 typedef struct
 {
-  thread_manager_state tms;  //the state information for thread management
   app_state state;
   app_data dat;
   resource_data rdat;

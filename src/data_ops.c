@@ -127,13 +127,13 @@ void updateDrawingState(app_state *restrict state, const float deltaTime){
 	//clamp chart display range
 	if(state->ds.chartPosX < 0.0f){
 		state->ds.chartPosX = 0.0f;
-	}else if(state->ds.chartPosX > MAX_CHART_X){
-		state->ds.chartPosX = MAX_CHART_X;
+	}else if(state->ds.chartPosX > MAX_NEUTRON_NUM){
+		state->ds.chartPosX = (float)MAX_NEUTRON_NUM;
 	}
 	if(state->ds.chartPosY < 0.0f){
 		state->ds.chartPosY = 0.0f;
-	}else if(state->ds.chartPosY > MAX_CHART_Y){
-		state->ds.chartPosY = MAX_CHART_Y;
+	}else if(state->ds.chartPosY > MAX_PROTON_NUM){
+		state->ds.chartPosY = (float)MAX_PROTON_NUM;
 	}
 }
 
@@ -517,11 +517,11 @@ void mouseWheelAction(app_state *restrict state){
 			float yZoomFrac = (state->ds.chartZoomStartMouseZ - getMinChartZ(&state->ds))/getChartHeightZ(&state->ds);
 			float afterZoomMinZ = state->ds.chartZoomStartMouseZ - getChartHeightZAfterZoom(&state->ds)*yZoomFrac;
 			state->ds.chartZoomToY = afterZoomMinZ + getChartHeightZAfterZoom(&state->ds)*0.5f;
-			if(state->ds.chartZoomToX > MAX_CHART_X){
-				state->ds.chartZoomToX = MAX_CHART_X;
+			if(state->ds.chartZoomToX > MAX_NEUTRON_NUM){
+				state->ds.chartZoomToX = (float)MAX_NEUTRON_NUM;
 			}
-			if(state->ds.chartZoomToY > MAX_CHART_Y){
-				state->ds.chartZoomToY = MAX_CHART_Y;
+			if(state->ds.chartZoomToY > MAX_PROTON_NUM){
+				state->ds.chartZoomToY = (float)MAX_PROTON_NUM;
 			}
 			//printf("xZoomFrac: %0.3f, afterZoomMinN: %0.3f\n",(double)xZoomFrac,(double)afterZoomMinN);
 			//printf("yZoomFrac: %0.3f, afterZoomMinZ: %0.3f\n",(double)yZoomFrac,(double)afterZoomMinZ);
@@ -645,6 +645,7 @@ void updateUIElemPositions(drawing_state *restrict ds){
     }
   }
 }
+
 
 void updateWindowRes(drawing_state *restrict ds, resource_data *restrict rdat){
   int wwidth, wheight;

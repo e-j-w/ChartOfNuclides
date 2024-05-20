@@ -24,6 +24,10 @@ int getDefaultTextWidth(const ui_theme_rules *restrict uirules, resource_data *r
 SDL_Rect getTextDim(const ui_theme_rules *restrict uirules, resource_data *restrict rdat, const char *txt, TTF_Font *font);
 SDL_Rect getDefaultTextDim(const ui_theme_rules *restrict uirules, resource_data *restrict rdat, const char *txt);
 
+void drawTextToCache(resource_data *restrict rdat, TTF_Font *font, const SDL_Color textColor, const char *txt, const uint8_t wrapAlign, const Uint32 wrapWidth, const uint16_t cacheInd);
+float drawTextFromCache(resource_data *restrict rdat, const int xPos, const int yPos, const SDL_Color colMod, const uint8_t alignment, const uint16_t cacheInd);
+void generateTextCache(resource_data *restrict rdat);
+
 float drawTextAlignedSized(resource_data *restrict rdat, const int xPos, const int yPos, TTF_Font *font, const SDL_Color textColor, const uint8_t alpha, const char *txt, const uint8_t alignment, const Uint32 maxWidth);
 void drawTextAligned(resource_data *restrict rdat, const int xPos, const int yPos, TTF_Font *font, const SDL_Color textColor, const char *txt, const uint8_t alignment);
 void drawText(resource_data *restrict rdat, const int xPos, const int yPos, TTF_Font *font, const SDL_Color textColor, const char *txt);
