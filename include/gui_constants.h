@@ -57,9 +57,9 @@ static const uint8_t UITHEME_ICON_TILE_Y[NUM_THEME_ICONS] = {10,10,10};
 //chart of nuclides
 #define DEFAULT_NUCLBOX_DIM          8.0f
 #define MIN_CHART_ZOOM_SCALE         0.5f
-#define MAX_CHART_ZOOM_SCALE         16.0f
-#define MAX_CHART_ZOOM_X             200.0f
-#define MAX_CHART_ZOOM_Y             130.0f
+#define MAX_CHART_ZOOM_SCALE         32.0f
+#define MAX_CHART_X                  200.0f
+#define MAX_CHART_Y                  130.0f
 #define CHART_ZOOM_TIME              0.2f //time (in seconds) for the zoom animation to finish
 
 //performance overlay

@@ -14,9 +14,10 @@ void startUIAnimation(drawing_state *ds, const uint8_t uiAnim);
 void stopUIAnimation(drawing_state *ds, const uint8_t uiAnim);
 void updateUIAnimationTimes(drawing_state *ds, const float deltaTime);
 
-void updateDrawingState(drawing_state *ds, const float deltaTime);
+void updateDrawingState(app_state *restrict state, const float deltaTime);
 
-double getNuclLevelHalfLifeSeconds(const ndata *restrict nd, const uint16_t nuclide, const uint16_t nuclLevel);
+double getNuclLevelHalfLifeSeconds(const ndata *restrict nd, const uint16_t nuclInd, const uint16_t nuclLevel);
+double getNuclGSHalfLifeSeconds(const ndata *restrict nd, const uint16_t nuclInd);
 
 float mouseXtoN(const drawing_state *restrict ds, const float mouseX);
 float mouseYtoZ(const drawing_state *restrict ds, const float mouseY);

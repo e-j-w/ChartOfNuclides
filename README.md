@@ -28,4 +28,4 @@ The current version has been tested under Arch Linux as of May 2024.
 
 TBD.
 
-For now SDL3 and its libraries has to be compiled manually.
+For now SDL3 and its libraries probably has to be compiled manually, as they aren't (yet) packaged for major Linux distros.

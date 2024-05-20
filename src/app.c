@@ -147,7 +147,7 @@ int main(int argc, char *argv[]){
 
     updateUIAnimationTimes(&gdat->state.ds,deltaTime);
 
-    updateDrawingState(&gdat->state.ds,deltaTime);
+    updateDrawingState(&gdat->state,deltaTime);
 
     processFrameEvents(&gdat->state,&gdat->rdat); //can block the main thread to save CPU, see process_events.h
     

@@ -33,6 +33,8 @@ void initializeTempState(app_state *restrict state){
 	state->ds.chartZoomStartScale = state->ds.chartZoomScale;
 	state->ds.zoomFinished = 0;
 	state->ds.zoomInProgress = 0;
+	state->ds.dragFinished = 0;
+	state->ds.dragInProgress = 0;
 
   //check that constants are valid
   if(UIELEM_ENUM_LENGTH > /* DISABLES CODE */ (32)){
@@ -88,32 +90,50 @@ void updateUIAnimationTimes(drawing_state *ds, const float deltaTime){
 }
 
 //called once per frame
-void updateDrawingState(drawing_state *ds, const float deltaTime){
-	if(ds->zoomFinished){
+void updateDrawingState(app_state *restrict state, const float deltaTime){
+	if(state->ds.zoomFinished){
 		//we want the zooming flag to persist for 1 frame beyond the
 		//end of the zoom, to force the UI to redraw
 		//printf("Finished zoom.\n");
-		ds->zoomInProgress = 0;
-		ds->zoomFinished = 0; //reset flag
+		state->ds.zoomInProgress = 0;
+		state->ds.zoomFinished = 0; //reset flag
 	}
-	if(ds->zoomInProgress){
-		ds->timeSinceZoomStart += deltaTime;
-		ds->chartZoomScale = ds->chartZoomStartScale + ((ds->chartZoomToScale - ds->chartZoomStartScale)*ds->timeSinceZoomStart/CHART_ZOOM_TIME);
-		if(ds->chartZoomToScale > ds->chartZoomStartScale){
-			ds->chartPosX = ds->chartZoomStartX + ((ds->chartZoomToX - ds->chartZoomStartX)*juice_smoothStop2(ds->timeSinceZoomStart/CHART_ZOOM_TIME));
-			ds->chartPosY = ds->chartZoomStartY + ((ds->chartZoomToY - ds->chartZoomStartY)*juice_smoothStop2(ds->timeSinceZoomStart/CHART_ZOOM_TIME));
+	if(state->ds.dragFinished){
+		state->ds.dragInProgress = 0;
+		state->ds.dragFinished = 0; //reset flag
+	}
+	if(state->ds.zoomInProgress){
+		state->ds.timeSinceZoomStart += deltaTime;
+		state->ds.chartZoomScale = state->ds.chartZoomStartScale + ((state->ds.chartZoomToScale - state->ds.chartZoomStartScale)*state->ds.timeSinceZoomStart/CHART_ZOOM_TIME);
+		if(state->ds.chartZoomToScale > state->ds.chartZoomStartScale){
+			state->ds.chartPosX = state->ds.chartZoomStartX + ((state->ds.chartZoomToX - state->ds.chartZoomStartX)*juice_smoothStop2(state->ds.timeSinceZoomStart/CHART_ZOOM_TIME));
+			state->ds.chartPosY = state->ds.chartZoomStartY + ((state->ds.chartZoomToY - state->ds.chartZoomStartY)*juice_smoothStop2(state->ds.timeSinceZoomStart/CHART_ZOOM_TIME));
 		}else{
-			ds->chartPosX = ds->chartZoomStartX + ((ds->chartZoomToX - ds->chartZoomStartX)*juice_smoothStart2(ds->timeSinceZoomStart/CHART_ZOOM_TIME));
-			ds->chartPosY = ds->chartZoomStartY + ((ds->chartZoomToY - ds->chartZoomStartY)*juice_smoothStart2(ds->timeSinceZoomStart/CHART_ZOOM_TIME));
+			state->ds.chartPosX = state->ds.chartZoomStartX + ((state->ds.chartZoomToX - state->ds.chartZoomStartX)*juice_smoothStart2(state->ds.timeSinceZoomStart/CHART_ZOOM_TIME));
+			state->ds.chartPosY = state->ds.chartZoomStartY + ((state->ds.chartZoomToY - state->ds.chartZoomStartY)*juice_smoothStart2(state->ds.timeSinceZoomStart/CHART_ZOOM_TIME));
 		}
-		if(ds->timeSinceZoomStart >= CHART_ZOOM_TIME){
-			ds->chartZoomScale = ds->chartZoomToScale;
-			ds->chartPosX = ds->chartZoomToX;
-			ds->chartPosY = ds->chartZoomToY;
-			ds->zoomFinished = 1;
+		if(state->ds.timeSinceZoomStart >= CHART_ZOOM_TIME){
+			state->ds.chartZoomScale = state->ds.chartZoomToScale;
+			state->ds.chartPosX = state->ds.chartZoomToX;
+			state->ds.chartPosY = state->ds.chartZoomToY;
+			state->ds.zoomFinished = 1;
 		}
-		
-		//printf("zoom scale: %0.4f\n",(double)ds->chartZoomScale);
+		//printf("zoom scale: %0.4f\n",(double)state->ds.chartZoomScale);
+	}
+	if(state->ds.dragInProgress){
+		state->ds.chartPosX = state->ds.chartDragStartX + ((state->ds.chartDragStartMouseX - state->mouseX)/(DEFAULT_NUCLBOX_DIM*state->ds.chartZoomScale));
+		state->ds.chartPosY = state->ds.chartDragStartY - ((state->ds.chartDragStartMouseY - state->mouseY)/(DEFAULT_NUCLBOX_DIM*state->ds.chartZoomScale));
+	}
+	//clamp chart display range
+	if(state->ds.chartPosX < 0.0f){
+		state->ds.chartPosX = 0.0f;
+	}else if(state->ds.chartPosX > MAX_CHART_X){
+		state->ds.chartPosX = MAX_CHART_X;
+	}
+	if(state->ds.chartPosY < 0.0f){
+		state->ds.chartPosY = 0.0f;
+	}else if(state->ds.chartPosY > MAX_CHART_Y){
+		state->ds.chartPosY = MAX_CHART_Y;
 	}
 }
 
@@ -175,6 +195,18 @@ double getNuclLevelHalfLifeSeconds(const ndata *restrict nd, const uint16_t nucl
 	}
 }
 
+double getNuclGSHalfLifeSeconds(const ndata *restrict nd, const uint16_t nuclInd){
+	//try the first few levels, and take the first one with a known half-life
+	//this is done in case there are low lying levels with unknown lifetime listed first
+	for(uint16_t i=0; i<5; i++){
+		double hl = getNuclLevelHalfLifeSeconds(nd,nuclInd,i);
+		if(hl >= -1.0){
+			return hl;
+		}
+	}
+	return -2.0; //couldn't find half-life
+}
+
 float mouseXtoN(const drawing_state *restrict ds, const float mouseX){
 	return ds->chartPosX + ((mouseX - ds->windowXRes/2.0f)/(DEFAULT_NUCLBOX_DIM*ds->chartZoomScale));
 }
@@ -227,11 +259,11 @@ void mouseWheelAction(app_state *restrict state){
 			float yZoomFrac = (state->ds.chartZoomStartMouseZ - getMinChartZ(&state->ds))/getChartHeightZ(&state->ds);
 			float afterZoomMinZ = state->ds.chartZoomStartMouseZ - getChartHeightZAfterZoom(&state->ds)*yZoomFrac;
 			state->ds.chartZoomToY = afterZoomMinZ + getChartHeightZAfterZoom(&state->ds)*0.5f;
-			if(state->ds.chartZoomToX > MAX_CHART_ZOOM_X){
-				state->ds.chartZoomToX = MAX_CHART_ZOOM_X;
+			if(state->ds.chartZoomToX > MAX_CHART_X){
+				state->ds.chartZoomToX = MAX_CHART_X;
 			}
-			if(state->ds.chartZoomToY > MAX_CHART_ZOOM_Y){
-				state->ds.chartZoomToY = MAX_CHART_ZOOM_Y;
+			if(state->ds.chartZoomToY > MAX_CHART_Y){
+				state->ds.chartZoomToY = MAX_CHART_Y;
 			}
 			//printf("xZoomFrac: %0.3f, afterZoomMinN: %0.3f\n",(double)xZoomFrac,(double)afterZoomMinN);
 			//printf("yZoomFrac: %0.3f, afterZoomMinZ: %0.3f\n",(double)yZoomFrac,(double)afterZoomMinZ);
@@ -349,12 +381,6 @@ void updateUIElemPositions(drawing_state *restrict ds){
         ds->uiElemPosY[i] = (uint16_t)((ds->windowYRes + MESSAGE_BOX_HEIGHT)/2 - MESSAGE_BOX_OK_BUTTON_YB - UI_TILE_SIZE);
         ds->uiElemWidth[i] = MESSAGE_BOX_OK_BUTTON_WIDTH;
         ds->uiElemHeight[i] = UI_TILE_SIZE;
-        break;
-      case UIELEM_CHARTDRAW_AREA:
-        ds->uiElemPosX[i] = 0;
-        ds->uiElemPosY[i] = (uint16_t)(MENU_BAR_HEIGHT);
-        ds->uiElemWidth[i] = (uint16_t)(ds->windowXRes);
-        ds->uiElemHeight[i] = (uint16_t)((ds->windowYRes - MENU_BAR_HEIGHT));
         break;
       default:
         break;

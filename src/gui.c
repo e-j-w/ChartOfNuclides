@@ -112,7 +112,7 @@ void drawChartOfNuclides(const app_data *restrict dat, const app_state *restrict
             rect.x = ((float)dat->ndat.nuclData[i].N - minX)*rect.w;
             rect.y = (maxY - (float)dat->ndat.nuclData[i].Z)*rect.h;
             //printf("N: %i, Z: %i, pos: [%0.2f %0.2f %0.2f %0.2f]\n",dat->ndat.nuclData[i].N,dat->ndat.nuclData[i].Z,(double)rect.x,(double)rect.y,(double)rect.w,(double)rect.h);
-            drawFlatRect(rdat,rect,getHalfLifeCol(getNuclLevelHalfLifeSeconds(&dat->ndat,(uint16_t)i,0)));
+            drawFlatRect(rdat,rect,getHalfLifeCol(getNuclGSHalfLifeSeconds(&dat->ndat,(uint16_t)i)));
           }
         }
       }

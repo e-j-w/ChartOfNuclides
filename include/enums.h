@@ -37,7 +37,6 @@ UIELEM_MENU_BUTTON,
 UIELEM_PRIMARY_MENU,
 UIELEM_MSG_BOX, //used to show warnings or errors
 UIELEM_MSG_BOX_OK_BUTTON,
-UIELEM_CHARTDRAW_AREA, //chart of nuclides drawing area
 UIELEM_ENUM_LENGTH
 };
 enum ui_state_enum{

@@ -9,23 +9,39 @@
 void processMouse(app_state *restrict state){
 
   state->mouseoverElement = UIELEM_ENUM_LENGTH; //by default, no element is moused over
+  state->mouseholdElement = UIELEM_ENUM_LENGTH;
 
-  for(uint8_t i=0; i<UIELEM_ENUM_LENGTH; i++){
-    if(state->interactableElement & (uint32_t)(1U << i)){
-      if((state->mouseX >= state->ds.uiElemPosX[i])&&(state->mouseX < (state->ds.uiElemPosX[i]+state->ds.uiElemWidth[i]))&&(state->mouseY >= state->ds.uiElemPosY[i])&&(state->mouseY < (state->ds.uiElemPosY[i]+state->ds.uiElemHeight[i]))){
-        state->mouseoverElement = i;
+  if(state->ds.dragInProgress == 0){
+    for(uint8_t i=0; i<UIELEM_ENUM_LENGTH; i++){
+      if(state->interactableElement & (uint32_t)(1U << i)){
         if((state->mouseHoldStartPosX >= state->ds.uiElemPosX[i])&&(state->mouseHoldStartPosX < (state->ds.uiElemPosX[i]+state->ds.uiElemWidth[i]))&&(state->mouseHoldStartPosY >= state->ds.uiElemPosY[i])&&(state->mouseHoldStartPosY < (state->ds.uiElemPosY[i]+state->ds.uiElemHeight[i]))){
           state->mouseholdElement = i;
-        }else{
-          state->mouseholdElement = UIELEM_ENUM_LENGTH;
         }
-        if((state->mouseClickPosX >= state->ds.uiElemPosX[i])&&(state->mouseClickPosX < (state->ds.uiElemPosX[i]+state->ds.uiElemWidth[i]))&&(state->mouseClickPosY >= state->ds.uiElemPosY[i])&&(state->mouseClickPosY < (state->ds.uiElemPosY[i]+state->ds.uiElemHeight[i]))){
-          //take action
-          uiElemClickAction(state,i);
-          return;
+        if((state->mouseX >= state->ds.uiElemPosX[i])&&(state->mouseX < (state->ds.uiElemPosX[i]+state->ds.uiElemWidth[i]))&&(state->mouseY >= state->ds.uiElemPosY[i])&&(state->mouseY < (state->ds.uiElemPosY[i]+state->ds.uiElemHeight[i]))){
+          state->mouseoverElement = i;
+          if((state->mouseClickPosX >= state->ds.uiElemPosX[i])&&(state->mouseClickPosX < (state->ds.uiElemPosX[i]+state->ds.uiElemWidth[i]))&&(state->mouseClickPosY >= state->ds.uiElemPosY[i])&&(state->mouseClickPosY < (state->ds.uiElemPosY[i]+state->ds.uiElemHeight[i]))){
+            //take action
+            uiElemClickAction(state,i);
+            return;
+          }
         }
       }
     }
+
+    //handle click and drag on the chart of nuclides
+    if((state->uiState == UISTATE_DEFAULT)&&(state->mouseholdElement == UIELEM_ENUM_LENGTH)&&(state->mouseHoldStartPosX >= 0.0f)){
+      state->ds.chartDragStartX = state->ds.chartPosX;
+      state->ds.chartDragStartY = state->ds.chartPosY;
+      state->ds.chartDragStartMouseX = state->mouseX;
+      state->ds.chartDragStartMouseY = state->mouseY;
+      state->ds.dragInProgress = 1;
+      //printf("start drag\n");
+    }
+  }
+
+  //check for mouse release
+  if(state->mouseHoldStartPosX < 0.0f){
+    state->ds.dragFinished = 1;
   }
 
   //only get here if no button was clicked
@@ -115,26 +131,26 @@ void processSingleEvent(app_state *restrict state, resource_data *restrict rdat,
     case SDL_EVENT_MOUSE_WHEEL:
       if(evt.wheel.direction == SDL_MOUSEWHEEL_NORMAL){
         if(evt.wheel.y > 0){
-          printf("Mouse wheel up.\n");
+          //printf("Mouse wheel up.\n");
           state->mouseWheelPosX = state->mouseX;
           state->mouseWheelPosY = state->mouseY;
           state->mouseWheelDir = 1;
         }
         else if(evt.wheel.y < 0){
-          printf("Mouse wheel down.\n");
+          //printf("Mouse wheel down.\n");
           state->mouseWheelPosX = state->mouseX;
           state->mouseWheelPosY = state->mouseY;
           state->mouseWheelDir = 2;
         }
       }else{
         if(evt.wheel.y > 0){
-          printf("Mouse wheel down.\n");
+          //printf("Mouse wheel down.\n");
           state->mouseWheelPosX = state->mouseX;
           state->mouseWheelPosY = state->mouseY;
           state->mouseWheelDir = 2;
         }
         else if(evt.wheel.y < 0){
-          printf("Mouse wheel up.\n");
+          //printf("Mouse wheel up.\n");
           state->mouseWheelPosX = state->mouseX;
           state->mouseWheelPosY = state->mouseY;
           state->mouseWheelDir = 1;
@@ -232,7 +248,7 @@ void processFrameEvents(app_state *restrict state, resource_data *restrict rdat)
     state->mouseClickPosY = -1.0f;
     state->mouseWheelDir = 0;
 
-    if((state->ds.uiAnimPlaying != 0)||(state->ds.zoomInProgress)){
+    if((state->ds.uiAnimPlaying != 0)||(state->ds.zoomInProgress)||(state->ds.dragInProgress)){
       //a UI animation is playing, don't block the main thread
       state->ds.forceRedraw = 1;
     }

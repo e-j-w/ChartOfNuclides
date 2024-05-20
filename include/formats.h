@@ -130,6 +130,8 @@ typedef struct
   float chartZoomStartScale, chartZoomToScale; //start and target zoom scale
   float chartZoomStartX, chartZoomToX, chartZoomStartY, chartZoomToY;
   float chartZoomStartMouseN, chartZoomStartMouseZ;
+  float chartDragStartX, chartDragStartY;
+  float chartDragStartMouseX, chartDragStartMouseY; //in scaled pixels
   float timeSinceZoomStart;
   uint32_t shownElements; //bit pattern describing which UI elements are being shown, values from ui_element_enum
   uint32_t uiAnimPlaying; //bit pattern describing which UI animations are playing
@@ -138,6 +140,8 @@ typedef struct
   uint16_t windowXRenderRes, windowYRenderRes; //render resolution (in pixels) taking HI-DPI into account
   uint16_t uiElemPosX[UIELEM_ENUM_LENGTH], uiElemPosY[UIELEM_ENUM_LENGTH], uiElemWidth[UIELEM_ENUM_LENGTH], uiElemHeight[UIELEM_ENUM_LENGTH];
   uint8_t texModR, texModG, texModB, texModA; //texture color and alpha modulation values
+  unsigned int dragInProgress : 1;
+  unsigned int dragFinished : 1;
   unsigned int zoomInProgress : 1;
   unsigned int zoomFinished : 1;
   unsigned int useZoomAnimations : 1;

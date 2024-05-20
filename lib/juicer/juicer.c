@@ -1,5 +1,6 @@
 #include "juicer.h"
 
+
 float juice_smoothStart2(const float inp){
   return inp*inp;
 }
