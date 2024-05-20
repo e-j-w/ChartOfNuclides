@@ -28,8 +28,10 @@ which can be referenced by both the GUI draw code as well as the interaction cod
 static const uint8_t UITHEME_ICON_TILE_X[NUM_THEME_ICONS] = {0,1,2};
 static const uint8_t UITHEME_ICON_TILE_Y[NUM_THEME_ICONS] = {10,10,10};
 
+#define SMALL_FONT_SIZE      12
 #define DEFAULT_FONT_SIZE    15
 #define BIG_FONT_SIZE        18
+#define HUGE_FONT_SIZE       24
 
 /* UI LAYOUT CONSTANTS */
 /* see updateUIElemPositions in data_ops.c for how these values are assigned */
@@ -61,6 +63,7 @@ static const uint8_t UITHEME_ICON_TILE_Y[NUM_THEME_ICONS] = {10,10,10};
 #define MAX_CHART_X                  200.0f
 #define MAX_CHART_Y                  130.0f
 #define CHART_ZOOM_TIME              0.2f //time (in seconds) for the zoom animation to finish
+#define NUCLBOX_NAME_MARGIN          1 //in scaled pixels
 
 //performance overlay
 #define PERF_OVERLAY_BUTTON_X_ANCHOR  16
@@ -70,5 +73,8 @@ static const uint8_t UITHEME_ICON_TILE_Y[NUM_THEME_ICONS] = {10,10,10};
 //colors for drawing
 static const SDL_FColor grayCol = {0.5f,0.5f,0.5f,1.0f};
 static const SDL_FColor redCol = {1.0f,0.0f,0.0f,1.0f};
+
+static const SDL_Color whiteCol8Bit = {255,255,255,255};
+static const SDL_Color BlackCol8Bit = {0,0,0,255};
 
 #endif

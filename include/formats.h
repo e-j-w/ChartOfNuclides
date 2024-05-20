@@ -87,7 +87,6 @@ typedef struct
 
 typedef struct
 {
-  char nuclName[10]; //name of the nuclide, eg. '68SE'
   int16_t N; //neutrons in nuclide
   int16_t Z; //protons in nuclide
   float qbeta, qalpha;
@@ -183,7 +182,7 @@ typedef struct
   SDL_Texture *uiThemeTex; //the main texture atlas
   SDL_Texture *tempTex; //used to store temporary texture data during draw operations
   //using different fonts (rather than resizing a single font) decreases CPU usage at the expense of memory
-  TTF_Font *font, *bigFont; //the default font (in 2 sizes)
+  TTF_Font *smallFont, *font, *bigFont, *hugeFont; //the default font (in 3 sizes)
   void *fontData; //memory adresses of the font data (must stay alive as long as fonts are used)
   SDL_Gamepad *gamepad;
   SDL_Renderer *renderer;

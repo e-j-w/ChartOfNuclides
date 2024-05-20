@@ -16,6 +16,8 @@ void updateUIAnimationTimes(drawing_state *ds, const float deltaTime);
 
 void updateDrawingState(app_state *restrict state, const float deltaTime);
 
+const char* getElemStr(const uint8_t Z);
+
 double getNuclLevelHalfLifeSeconds(const ndata *restrict nd, const uint16_t nuclInd, const uint16_t nuclLevel);
 double getNuclGSHalfLifeSeconds(const ndata *restrict nd, const uint16_t nuclInd);
 

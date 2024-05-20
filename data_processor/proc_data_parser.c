@@ -587,19 +587,19 @@ void parseSpinPar(level * lev, char * spstring){
 }
 
 
-void getNuclNZ(nucl * nuc)
-{
+void getNuclNZ(nucl *nuc, const char *nucName){
+
 	char str[256];
 	int16_t A,Z,N;
 	char *tok;
 	
 	//get mass number
-	strcpy(str,nuc->nuclName); //copy the nucleus name
+	strcpy(str,nucName); //copy the nucleus name
 	tok=strtok(str,"ABCDEFGHIJKLMNOPQRSTUVWXYZ");
 	A=(int16_t)atoi(tok);
 	
 	//get proton number
-	strcpy(str,nuc->nuclName); //copy the nucleus name
+	strcpy(str,nucName); //copy the nucleus name
 	tok=strtok(str,"0123456789");
 	if(tok!=NULL){
 		if(strcmp(tok,"H")==0)
@@ -875,6 +875,7 @@ int readENSDFFile(const char * filePath, ndata * nd){
   FILE *config;
   char *tok;
   char str[256];//string to be read from file (will be tokenized)
+  char nuclNameStr[10];
   char line[256],val[MAXNUMPARSERVALS][256];
   int tokPos;//position when tokenizing
   int firstQLine = 1; //flag to specify whether Q values have been read in for a specific nucleus
@@ -925,9 +926,9 @@ int readENSDFFile(const char * filePath, ndata * nd){
 					nd->numNucl++;
 					subSec=0; //we're at the beginning of the entry for this nucleus 
 					//printf("Adding gamma data for nucleus %s\n",val[0]);
-					memcpy(nd->nuclData[nd->numNucl].nuclName,val[0],10);
-					nd->nuclData[nd->numNucl].nuclName[9] = '\0'; //terminate string
-					getNuclNZ(&nd->nuclData[nd->numNucl]); //get N and Z
+					memcpy(nuclNameStr,val[0],10);
+					nuclNameStr[9] = '\0'; //terminate string
+					getNuclNZ(&nd->nuclData[nd->numNucl],nuclNameStr); //get N and Z
 				}
 			}
 			/*//parse the nucleus name
@@ -947,7 +948,7 @@ int readENSDFFile(const char * filePath, ndata * nd){
 
 			//add gamma levels
 			if(nd->numNucl>=0){ //check that indices are valid
-				if(strncmp(val[0],nd->nuclData[nd->numNucl].nuclName,10)==0){
+				if(strncmp(val[0],nuclNameStr,10)==0){
 					if(subSec==0){ //adopted gamma levels subsection
 						if(nd->numLvls<MAXNUMLVLS){
 							if(strcmp(typebuff," L")==0){
@@ -987,7 +988,7 @@ int readENSDFFile(const char * filePath, ndata * nd){
 			//add gamma rays
 			if(nd->numNucl>=0) //check that indices are valid
 				if(nd->nuclData[nd->numNucl].numLevels>0) //check that indices are valid
-					if(strcmp(val[0],nd->nuclData[nd->numNucl].nuclName)==0)
+					if(strcmp(val[0],nuclNameStr)==0)
 						if(subSec==0)//adopted gamma levels subsection
 							if(nd->levels[nd->numLvls-1].numTransitions<MAXGAMMASPERLEVEL)
 								if(strcmp(typebuff," G")==0){
@@ -1007,7 +1008,7 @@ int readENSDFFile(const char * filePath, ndata * nd){
 								}
 			//add Q-values and separation energies
 			if(nd->numNucl>=0){ //check that indices are valid
-				if(strcmp(val[0],nd->nuclData[nd->numNucl].nuclName)==0)
+				if(strcmp(val[0],nuclNameStr)==0)
 					if(subSec==0)//adopted gamma levels subsection
 						if(strcmp(typebuff," Q")==0){
 							if(firstQLine==1){

@@ -131,8 +131,12 @@ int importAppData(app_data *restrict dat, resource_data *restrict rdat){
     return -1;
   }
   
+  //cache font glyphs in 3 sizes, to prevent having to dynamically scale them,
+  //which would wreck performance
+  rdat->smallFont = TTF_OpenFontIO(SDL_IOFromConstMem(rdat->fontData,(size_t)fontFilesize),1,(int)(SMALL_FONT_SIZE*rdat->uiScale));
   rdat->font = TTF_OpenFontIO(SDL_IOFromConstMem(rdat->fontData,(size_t)fontFilesize),1,(int)(DEFAULT_FONT_SIZE*rdat->uiScale));
   rdat->bigFont = TTF_OpenFontIO(SDL_IOFromConstMem(rdat->fontData,(size_t)fontFilesize),1,(int)(BIG_FONT_SIZE*rdat->uiScale));
+  rdat->hugeFont = TTF_OpenFontIO(SDL_IOFromConstMem(rdat->fontData,(size_t)fontFilesize),1,(int)(HUGE_FONT_SIZE*rdat->uiScale));
   if(rdat->font==NULL){
     SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,"Error","App data file read error - unable to load resource.",rdat->window);
     printf("ERROR: importAppData - couldn't read font resource - %s.\n",SDL_GetError());

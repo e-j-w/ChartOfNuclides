@@ -324,8 +324,8 @@ SDL_Rect getDefaultTextDim(const ui_theme_rules *restrict uirules, resource_data
   return getTextDim(uirules,rdat,txt,rdat->font);
 }
 
-
-void drawTextAlignedSized(resource_data *restrict rdat, const int xPos, const int yPos, TTF_Font *font, const SDL_Color textColor, const uint8_t alpha, const char *txt, const uint8_t alignment, const Uint32 maxWidth){
+//returns the width of the drawn text (can be used for alignment purposes)
+float drawTextAlignedSized(resource_data *restrict rdat, const int xPos, const int yPos, TTF_Font *font, const SDL_Color textColor, const uint8_t alpha, const char *txt, const uint8_t alignment, const Uint32 maxWidth){
   SDL_FRect drawPos;
   if(alignment == ALIGN_RIGHT){
     TTF_SetFontWrappedAlign(font,TTF_WRAPPED_ALIGN_RIGHT);
@@ -356,6 +356,7 @@ void drawTextAlignedSized(resource_data *restrict rdat, const int xPos, const in
   }
   SDL_RenderTexture(rdat->renderer,rdat->tempTex,NULL,&drawPos);
   SDL_DestroyTexture(rdat->tempTex);
+  return drawPos.w;
 }
 void drawTextAligned(resource_data *restrict rdat, const int xPos, const int yPos, TTF_Font *font, const SDL_Color textColor, const char *txt, const uint8_t alignment){
   drawTextAlignedSized(rdat,xPos,yPos,font,textColor,255,txt,alignment,16384);
