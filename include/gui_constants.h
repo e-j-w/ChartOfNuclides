@@ -28,9 +28,9 @@ which can be referenced by both the GUI draw code as well as the interaction cod
 static const uint8_t UITHEME_ICON_TILE_X[NUM_THEME_ICONS] = {0,1,2};
 static const uint8_t UITHEME_ICON_TILE_Y[NUM_THEME_ICONS] = {10,10,10};
 
-#define SMALL_FONT_SIZE      12
+#define SMALL_FONT_SIZE      13
 #define DEFAULT_FONT_SIZE    15
-#define BIG_FONT_SIZE        18
+#define BIG_FONT_SIZE        19
 #define HUGE_FONT_SIZE       24
 
 /* UI LAYOUT CONSTANTS */

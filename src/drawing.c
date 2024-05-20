@@ -360,7 +360,7 @@ float drawTextFromCache(resource_data *restrict rdat, const int xPos, const int 
   }
   SDL_SetTextureColorMod(rdat->textTexCache[cacheInd],colMod.r,colMod.g,colMod.b);
   SDL_RenderTexture(rdat->renderer,rdat->textTexCache[cacheInd],NULL,&drawPos);
-  return drawPos.w;
+  return drawPos.w/rdat->uiScale;
 }
 
 void generateTextCache(resource_data *restrict rdat){

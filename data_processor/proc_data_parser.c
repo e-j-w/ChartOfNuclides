@@ -1088,19 +1088,8 @@ int buildENSDFDatabase(const char *appBasePath, ndata *nd){
 			printf("ERROR: no valid ENSDF data was found.\nPlease check that ENSDF files exist in the directory under the ENDSF environment variable.\n");
 			return -1;
 		}
-	printf("Database generated.  Writing to disk...\n");
-	FILE *db;
-  strcpy(filePath,"");
-	strcat(filePath,appBasePath);
-  strcat(filePath,"ensdf.dat");
-	if((db=fopen(filePath,"w"))==NULL){
-    printf("ERROR: cannot open the output file '%s'.\n",filePath);
-    return -1;
-  }
-	fwrite(nd,sizeof(ndata),1,db);
-	fclose(db);
 	printf("ENSDF database build finished.\n");
-  return 0;
+	return 0;
 }
 
 //parse all app data

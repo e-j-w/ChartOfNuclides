@@ -3,6 +3,7 @@
 
 #include "juicer.h"
 #include "data_ops.h"
+#include "drawing.h"
 #include "load_data.h"
 #include "gui_constants.h"
 #include "basename.h" //SDL_basename implementation, based on https://github.com/libsdl-org/SDL/issues/7915, remove once this is added to SDL3
@@ -656,8 +657,8 @@ void updateWindowRes(drawing_state *restrict ds, resource_data *restrict rdat){
     ds->forceRedraw = 1;
   }
 	float newScale = (float)rwidth/((float)wwidth);
-	if(rdat->uiScale != newScale){
-		printf("Re-scaling UI.\n");
+	if(fabsf(rdat->uiScale - newScale) > 0.001f){
+		printf("Re-scaling UI from %0.9f to %0.9f.\n",(double)rdat->uiScale,(double)newScale);
 		rdat->uiScale = newScale; //set UI scale properly for HI-DPI
 		if(rdat->font){
 			//rescale fonts as well
@@ -665,6 +666,7 @@ void updateWindowRes(drawing_state *restrict ds, resource_data *restrict rdat){
 			TTF_SetFontSize(rdat->font,(int)(DEFAULT_FONT_SIZE*rdat->uiScale));
 			TTF_SetFontSize(rdat->bigFont,(int)(BIG_FONT_SIZE*rdat->uiScale));
 			TTF_SetFontSize(rdat->hugeFont,(int)(HUGE_FONT_SIZE*rdat->uiScale));
+			generateTextCache(rdat);
 		}
 	}
   ds->windowXRes = (uint16_t)wwidth;

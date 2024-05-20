@@ -109,7 +109,7 @@ void drawChartOfNuclides(const app_data *restrict dat, const app_state *restrict
   //printf("N range: [%0.2f %0.2f], Z range: [%0.2f %0.2f]\n",(double)minX,(double)maxX,(double)minY,(double)maxY);
 
   SDL_FRect rect;
-  rect.w = DEFAULT_NUCLBOX_DIM*state->ds.chartZoomScale;
+  rect.w = DEFAULT_NUCLBOX_DIM*state->ds.chartZoomScale*rdat->uiScale;
   rect.h = rect.w;
 
   for(int i=0;i<dat->ndat.numNucl;i++){
@@ -124,8 +124,8 @@ void drawChartOfNuclides(const app_data *restrict dat, const app_state *restrict
             const double hl = getNuclGSHalfLifeSeconds(&dat->ndat,(uint16_t)i);
             drawFlatRect(rdat,rect,getHalfLifeCol(hl));
             if(state->ds.chartZoomScale >= 4.0f){
-              int txtX = (int)(rect.x + NUCLBOX_NAME_MARGIN*state->ds.chartZoomScale);
-              int txtY = (int)(rect.y + NUCLBOX_NAME_MARGIN*state->ds.chartZoomScale);
+              int txtX = (int)(rect.x/rdat->uiScale + NUCLBOX_NAME_MARGIN*state->ds.chartZoomScale);
+              int txtY = (int)(rect.y/rdat->uiScale + NUCLBOX_NAME_MARGIN*state->ds.chartZoomScale);
               drawNuclBoxLabel(&state->ds,rdat,txtX,txtY,(hl > 1.0E4) ? whiteCol8Bit : BlackCol8Bit,(uint16_t)(dat->ndat.nuclData[i].N),(uint16_t)(dat->ndat.nuclData[i].Z));
             }
           }
