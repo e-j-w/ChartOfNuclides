@@ -16,6 +16,8 @@ void updateUIAnimationTimes(drawing_state *ds, const float deltaTime);
 
 void updateDrawingState(drawing_state *ds, const float deltaTime);
 
+double getNuclLevelHalfLifeSeconds(const ndata *restrict nd, const uint16_t nuclide, const uint16_t nuclLevel);
+
 float mouseXtoN(const drawing_state *restrict ds, const float mouseX);
 float mouseYtoZ(const drawing_state *restrict ds, const float mouseY);
 float getMinChartN(const drawing_state *restrict ds);

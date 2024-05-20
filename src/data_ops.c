@@ -92,7 +92,7 @@ void updateDrawingState(drawing_state *ds, const float deltaTime){
 	if(ds->zoomFinished){
 		//we want the zooming flag to persist for 1 frame beyond the
 		//end of the zoom, to force the UI to redraw
-		printf("Finished zoom.\n");
+		//printf("Finished zoom.\n");
 		ds->zoomInProgress = 0;
 		ds->zoomFinished = 0; //reset flag
 	}
@@ -124,6 +124,55 @@ void setupMessageBox(app_state *restrict state, const char *headerTxt, const cha
   state->ds.shownElements |= (uint32_t)(1U << UIELEM_MSG_BOX);
   startUIAnimation(&state->ds,UIANIM_MSG_BOX_SHOW);
   changeUIState(state,UISTATE_MSG_BOX);
+}
+
+double getLevelHalfLifeSeconds(const ndata *restrict nd, const uint32_t levelInd){
+	if(levelInd < nd->numLvls){
+		double hl = (double)(nd->levels[levelInd].halfLife);
+		if(hl < 0.0){
+			//unknown half-life
+			return -2.0;
+		}
+		uint8_t hlUnit = nd->levels[levelInd].halfLifeUnit;
+		switch(hlUnit){
+			case HALFLIFE_UNIT_STABLE:
+				return -1.0; //stable
+			case HALFLIFE_UNIT_YEARS:
+				return hl*365.25*24*3600;
+			case HALFLIFE_UNIT_DAYS:
+				return hl*24*3600;
+			case HALFLIFE_UNIT_HOURS:
+				return hl*3600;
+			case HALFLIFE_UNIT_MINUTES:
+				return hl*60;
+			case HALFLIFE_UNIT_SECONDS:
+				return hl;
+			case HALFLIFE_UNIT_MILLISECONDS:
+				return hl*0.001;
+			case HALFLIFE_UNIT_MICROSECONDS:
+				return hl*0.000001;
+			case HALFLIFE_UNIT_NANOSECONDS:
+				return hl*0.000000001;
+			case HALFLIFE_UNIT_PICOSECONDS:
+				return hl*0.000000000001;
+			case HALFLIFE_UNIT_FEMTOSECONDS:
+				return hl*0.000000000000001;
+			case HALFLIFE_UNIT_ATTOSECONDS:
+				return hl*0.000000000000000001;
+			default:
+				return -2.0; //couldn't find half-life
+		}
+	}else{
+		return -2.0; //couldn't find half-life
+	}
+}
+
+double getNuclLevelHalfLifeSeconds(const ndata *restrict nd, const uint16_t nuclInd, const uint16_t nuclLevel){
+	if((nuclInd < nd->numNucl)&&(nuclLevel < nd->nuclData[nuclInd].numLevels)){
+		return getLevelHalfLifeSeconds(nd,(uint32_t)(nd->nuclData[nuclInd].firstLevel + (uint32_t)nuclLevel));
+	}else{
+		return -2.0; //couldn't find half-life
+	}
 }
 
 float mouseXtoN(const drawing_state *restrict ds, const float mouseX){
@@ -184,9 +233,9 @@ void mouseWheelAction(app_state *restrict state){
 			if(state->ds.chartZoomToY > MAX_CHART_ZOOM_Y){
 				state->ds.chartZoomToY = MAX_CHART_ZOOM_Y;
 			}
-			printf("xZoomFrac: %0.3f, afterZoomMinN: %0.3f\n",(double)xZoomFrac,(double)afterZoomMinN);
-			printf("yZoomFrac: %0.3f, afterZoomMinZ: %0.3f\n",(double)yZoomFrac,(double)afterZoomMinZ);
-			printf("N: %0.1f, Z: %0.1f, start: [%0.1f %0.1f], zoom to: [%0.1f %0.1f]\n",(double)mouseXtoN(&state->ds,state->mouseX),(double)mouseYtoZ(&state->ds,state->mouseY),(double)state->ds.chartZoomStartX,(double)state->ds.chartZoomStartY,(double)state->ds.chartZoomToX,(double)state->ds.chartZoomToY);
+			//printf("xZoomFrac: %0.3f, afterZoomMinN: %0.3f\n",(double)xZoomFrac,(double)afterZoomMinN);
+			//printf("yZoomFrac: %0.3f, afterZoomMinZ: %0.3f\n",(double)yZoomFrac,(double)afterZoomMinZ);
+			//printf("N: %0.1f, Z: %0.1f, start: [%0.1f %0.1f], zoom to: [%0.1f %0.1f]\n",(double)mouseXtoN(&state->ds,state->mouseX),(double)mouseYtoZ(&state->ds,state->mouseY),(double)state->ds.chartZoomStartX,(double)state->ds.chartZoomStartY,(double)state->ds.chartZoomToX,(double)state->ds.chartZoomToY);
 			state->ds.timeSinceZoomStart = 0.0f;
 			state->ds.zoomInProgress = 1;
 			state->ds.zoomFinished = 0;
@@ -215,9 +264,9 @@ void mouseWheelAction(app_state *restrict state){
 			if(state->ds.chartZoomToY < 0.0f){
 				state->ds.chartZoomToY = 0.0f;
 			}
-			printf("xZoomFrac: %0.3f, afterZoomMinN: %0.3f\n",(double)xZoomFrac,(double)afterZoomMinN);
-			printf("yZoomFrac: %0.3f, afterZoomMinZ: %0.3f\n",(double)yZoomFrac,(double)afterZoomMinZ);
-			printf("N: %0.1f, Z: %0.1f, start: [%0.1f %0.1f], zoom to: [%0.1f %0.1f]\n",(double)mouseXtoN(&state->ds,state->mouseX),(double)mouseYtoZ(&state->ds,state->mouseY),(double)state->ds.chartZoomStartX,(double)state->ds.chartZoomStartY,(double)state->ds.chartZoomToX,(double)state->ds.chartZoomToY);
+			//printf("xZoomFrac: %0.3f, afterZoomMinN: %0.3f\n",(double)xZoomFrac,(double)afterZoomMinN);
+			//printf("yZoomFrac: %0.3f, afterZoomMinZ: %0.3f\n",(double)yZoomFrac,(double)afterZoomMinZ);
+			//printf("N: %0.1f, Z: %0.1f, start: [%0.1f %0.1f], zoom to: [%0.1f %0.1f]\n",(double)mouseXtoN(&state->ds,state->mouseX),(double)mouseYtoZ(&state->ds,state->mouseY),(double)state->ds.chartZoomStartX,(double)state->ds.chartZoomStartY,(double)state->ds.chartZoomToX,(double)state->ds.chartZoomToY);
 			state->ds.timeSinceZoomStart = 0.0f;
 			state->ds.zoomInProgress = 1;
 			state->ds.zoomFinished = 0;

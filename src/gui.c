@@ -8,9 +8,91 @@
 #include "drawing.h"
 #include "data_ops.h"
 
+SDL_FColor getHalfLifeCol(const double halflifeSeconds){
+  //printf("half-life: %0.6f\n",halflifeSeconds);
+  SDL_FColor col;
+  col.r = 1.0f;
+  col.g = 1.0f;
+  col.b = 1.0f;
+  col.a = 1.0f;
+  if((halflifeSeconds > 1.0E15)||(halflifeSeconds == -1.0)){
+    col.r = 0.0f;
+    col.g = 0.0f;
+    col.b = 0.0f;
+  }else if(halflifeSeconds > 1.0E10){
+    col.r = 0.0f;
+    col.g = 0.1f;
+    col.b = 0.3f;
+  }else if(halflifeSeconds > 1.0E7){
+    col.r = 0.1f;
+    col.g = 0.2f;
+    col.b = 0.5f;
+  }else if(halflifeSeconds > 1.0E5){
+    col.r = 0.1f;
+    col.g = 0.3f;
+    col.b = 0.7f;
+  }else if(halflifeSeconds > 1.0E4){
+    col.r = 0.2f;
+    col.g = 0.4f;
+    col.b = 0.8f;
+  }else if(halflifeSeconds > 1.0E3){
+    col.r = 0.3f;
+    col.g = 0.5f;
+    col.b = 0.8f;
+  }else if(halflifeSeconds > 1.0E2){
+    col.r = 0.3f;
+    col.g = 0.7f;
+    col.b = 0.7f;
+  }else if(halflifeSeconds > 1.0E1){
+    col.r = 0.3f;
+    col.g = 0.9f;
+    col.b = 0.7f;
+  }else if(halflifeSeconds > 1.0E0){
+    col.r = 0.5f;
+    col.g = 1.0f;
+    col.b = 0.7f;
+  }else if(halflifeSeconds > 1.0E-1){
+    col.r = 0.7f;
+    col.g = 0.9f;
+    col.b = 0.5f;
+  }else if(halflifeSeconds > 1.0E-2){
+    col.r = 0.9f;
+    col.g = 0.9f;
+    col.b = 0.4f;
+  }else if(halflifeSeconds > 1.0E-3){
+    col.r = 1.0f;
+    col.g = 1.0f;
+    col.b = 0.2f;
+  }else if(halflifeSeconds > 1.0E-4){
+    col.r = 1.0f;
+    col.g = 0.8f;
+    col.b = 0.4f;
+  }else if(halflifeSeconds > 1.0E-5){
+    col.r = 1.0f;
+    col.g = 0.7f;
+    col.b = 0.5f;
+  }else if(halflifeSeconds > 1.0E-6){
+    col.r = 1.0f;
+    col.g = 0.6f;
+    col.b = 0.7f;
+  }else if(halflifeSeconds > 1.0E-7){
+    col.r = 1.0f;
+    col.g = 0.6f;
+    col.b = 0.7f;
+  }else if(halflifeSeconds > 1.0E-15){
+    col.r = 1.0f;
+    col.g = 0.6f;
+    col.b = 0.8f;
+  }else{
+    col.r = 1.0f;
+    col.g = 0.6f;
+    col.b = 1.0f;
+  }
+  return col;
+}
 
 void drawChartOfNuclides(const app_data *restrict dat, const app_state *restrict state, resource_data *restrict rdat){
-  
+
   float minX = getMinChartN(&state->ds);
   float maxX = getMaxChartN(&state->ds);
   float minY = getMinChartZ(&state->ds);
@@ -30,7 +112,7 @@ void drawChartOfNuclides(const app_data *restrict dat, const app_state *restrict
             rect.x = ((float)dat->ndat.nuclData[i].N - minX)*rect.w;
             rect.y = (maxY - (float)dat->ndat.nuclData[i].Z)*rect.h;
             //printf("N: %i, Z: %i, pos: [%0.2f %0.2f %0.2f %0.2f]\n",dat->ndat.nuclData[i].N,dat->ndat.nuclData[i].Z,(double)rect.x,(double)rect.y,(double)rect.w,(double)rect.h);
-            drawFlatRect(rdat,rect,grayCol);
+            drawFlatRect(rdat,rect,getHalfLifeCol(getNuclLevelHalfLifeSeconds(&dat->ndat,(uint16_t)i,0)));
           }
         }
       }
