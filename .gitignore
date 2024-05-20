@@ -1,19 +1,24 @@
-#executables and compiler stuff
+# executables and compiler stuff
+con
+proc_data
 levelup
 *.o
-#ENSDF data files
+# ENSDF data files
+data
 ensdf
 ensdf.*
-ensdf_db
+*.dat
 #files generated when testing program
 list
 *tmpdatafile*
-#data file types
+# data file types
 *.mca
 *.fmca
 *.spe
 *.root
-#temporary files from text editors
+*.ini
+# temporary files from text editors
 *.save
 *~
+.vscode
 sample_parameters
