@@ -91,10 +91,13 @@ SDL_FColor getHalfLifeCol(const double halflifeSeconds){
   return col;
 }
 
-void drawNuclBoxLabel(const drawing_state *restrict ds, resource_data *restrict rdat, const int xPos, const int yPos, SDL_Color col, const uint16_t N, const uint16_t Z){
+void drawNuclBoxLabel(const drawing_state *restrict ds, resource_data *restrict rdat, const int xPos, const int yPos, SDL_Color col, const uint16_t N, const uint16_t Z, const uint32_t nuclInd){
   if(ds->chartZoomScale >= 8.0f){
     float numLblWidth = drawTextFromCache(rdat,xPos,yPos,col,ALIGN_LEFT,(uint16_t)(N+Z)); //draw number label
     drawTextFromCache(rdat,xPos+(int)numLblWidth+2,yPos+10,col,ALIGN_LEFT,MAX_MASS_NUM+Z); //draw element label
+    if(ds->chartZoomScale >= 12.0f){
+      drawTextFromCache(rdat,xPos,yPos+36,col,ALIGN_LEFT,MAX_MASS_NUM+MAX_PROTON_NUM+MAX_PROTON_NUM+nuclInd); //draw half-life label
+    }
   }else{
     drawTextFromCache(rdat,xPos,yPos,col,ALIGN_LEFT,MAX_MASS_NUM+MAX_PROTON_NUM+Z); //draw element label only
   }
@@ -126,7 +129,7 @@ void drawChartOfNuclides(const app_data *restrict dat, const app_state *restrict
             if(state->ds.chartZoomScale >= 4.0f){
               int txtX = (int)(rect.x/rdat->uiScale + NUCLBOX_NAME_MARGIN*state->ds.chartZoomScale);
               int txtY = (int)(rect.y/rdat->uiScale + NUCLBOX_NAME_MARGIN*state->ds.chartZoomScale);
-              drawNuclBoxLabel(&state->ds,rdat,txtX,txtY,(hl > 1.0E4) ? whiteCol8Bit : BlackCol8Bit,(uint16_t)(dat->ndat.nuclData[i].N),(uint16_t)(dat->ndat.nuclData[i].Z));
+              drawNuclBoxLabel(&state->ds,rdat,txtX,txtY,(hl > 1.0E4) ? whiteCol8Bit : BlackCol8Bit,(uint16_t)(dat->ndat.nuclData[i].N),(uint16_t)(dat->ndat.nuclData[i].Z),(uint32_t)i);
             }
           }
         }

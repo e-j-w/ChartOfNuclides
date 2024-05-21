@@ -24,7 +24,7 @@
 #define MAX_RENDER_HEIGHT 16384
 
 //texture cache parameters
-#define TEXT_TEX_CACHE_SIZE 1024
+#define TEXT_TEX_CACHE_SIZE 8192
 
 //app data parameters (should all be powers of 2)
 #define MAX_ARRAY_SIZE                 65536
@@ -46,12 +46,6 @@
 #define MAXNUMPARSERVALS 10 //maximum number of values that can parsed at once on a line
 
 //structures
-typedef struct
-{
-  int16_t nucl[MAXNUMNUCL]; //nuclide indices
-  float rankVal[MAXNUMNUCL]; //nuclide rank values
-}nuclide_rank_info; //an individual gamma cascade
-
 typedef struct
 {
   int16_t numLevels; //number of steps in the cascade

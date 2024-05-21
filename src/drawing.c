@@ -325,7 +325,7 @@ SDL_Rect getDefaultTextDim(const ui_theme_rules *restrict uirules, resource_data
 }
 
 //generates a texture in the text texture cache for the suuplied text string
-void drawTextToCache(resource_data *restrict rdat, TTF_Font *font, const SDL_Color textColor, const char *txt, const uint8_t wrapAlign, const Uint32 wrapWidth, const uint16_t cacheInd){
+void drawTextToCache(resource_data *restrict rdat, TTF_Font *font, const SDL_Color textColor, const char *txt, const uint8_t wrapAlign, const Uint32 wrapWidth, const uint32_t cacheInd){
   if(cacheInd < TEXT_TEX_CACHE_SIZE){
     if(wrapAlign == ALIGN_RIGHT){
       TTF_SetFontWrappedAlign(font,TTF_WRAPPED_ALIGN_RIGHT);
@@ -340,11 +340,13 @@ void drawTextToCache(resource_data *restrict rdat, TTF_Font *font, const SDL_Col
     }
     rdat->textTexCache[cacheInd] = SDL_CreateTextureFromSurface(rdat->renderer,textSurface);
     SDL_DestroySurface(textSurface);
+  }else{
+    printf("WARNING: trying to generate text cache entry %u, maximum allowed is %u.\n",cacheInd,TEXT_TEX_CACHE_SIZE);
   }
 }
 //draws a texture from the text texture cache
 //returns the width of the drawn text (can be used for alignment purposes)
-float drawTextFromCache(resource_data *restrict rdat, const int xPos, const int yPos, const SDL_Color colMod, const uint8_t alignment, const uint16_t cacheInd){
+float drawTextFromCache(resource_data *restrict rdat, const int xPos, const int yPos, const SDL_Color colMod, const uint8_t alignment, const uint32_t cacheInd){
   SDL_FRect drawPos;
   int w,h;
   SDL_QueryTexture(rdat->textTexCache[cacheInd],NULL,NULL,&w,&h);
@@ -363,18 +365,37 @@ float drawTextFromCache(resource_data *restrict rdat, const int xPos, const int 
   return drawPos.w/rdat->uiScale;
 }
 
-void generateTextCache(resource_data *restrict rdat){
-	char tmpStr[16];
+void generateTextCache(const app_data *restrict dat, resource_data *restrict rdat){
+  char tmpStr[32];
+  uint32_t cacheInd = 0;
 	for(uint16_t i=0; i<MAX_MASS_NUM; i++){
-		snprintf(tmpStr,10,"%u",i);
-		drawTextToCache(rdat,rdat->smallFont,whiteCol8Bit,tmpStr,ALIGN_LEFT,16384,i);
+		snprintf(tmpStr,32,"%u",i);
+		drawTextToCache(rdat,rdat->smallFont,whiteCol8Bit,tmpStr,ALIGN_LEFT,16384,cacheInd);
+    cacheInd++;
 	}
 	for(uint8_t i=0; i<MAX_PROTON_NUM; i++){
-		drawTextToCache(rdat,rdat->bigFont,whiteCol8Bit,getElemStr(i),ALIGN_LEFT,16384,i+MAX_MASS_NUM);
+		drawTextToCache(rdat,rdat->bigFont,whiteCol8Bit,getElemStr(i),ALIGN_LEFT,16384,cacheInd);
+    cacheInd++;
 	}
   for(uint8_t i=0; i<MAX_PROTON_NUM; i++){
-		drawTextToCache(rdat,rdat->font,whiteCol8Bit,getElemStr(i),ALIGN_LEFT,16384,i+MAX_MASS_NUM+MAX_PROTON_NUM);
+		drawTextToCache(rdat,rdat->font,whiteCol8Bit,getElemStr(i),ALIGN_LEFT,16384,cacheInd);
+    cacheInd++;
 	}
+  for(uint16_t i=0; i< MAXNUMNUCL; i++){
+    uint16_t gsInd = getNuclGSLevInd(&dat->ndat,i);
+    if(dat->ndat.levels[(int)(dat->ndat.nuclData[i].firstLevel + gsInd)].halfLife > 0.0f){
+      if(dat->ndat.levels[(int)(dat->ndat.nuclData[i].firstLevel + gsInd)].halfLife < 1000.0f){
+        snprintf(tmpStr,32,"%0.1f %s",(double)(dat->ndat.levels[(int)(dat->ndat.nuclData[i].firstLevel + gsInd)].halfLife),getHalfLifeUnitShortStr(dat->ndat.levels[(int)(dat->ndat.nuclData[i].firstLevel + gsInd)].halfLifeUnit));
+      }else{
+        snprintf(tmpStr,32,"%0.1e %s",(double)(dat->ndat.levels[(int)(dat->ndat.nuclData[i].firstLevel + gsInd)].halfLife),getHalfLifeUnitShortStr(dat->ndat.levels[(int)(dat->ndat.nuclData[i].firstLevel + gsInd)].halfLifeUnit));
+      }
+    }else{
+      snprintf(tmpStr,32," ");
+    }
+    drawTextToCache(rdat,rdat->font,whiteCol8Bit,tmpStr,ALIGN_LEFT,16384,cacheInd);
+    //printf("%s\n",tmpStr);
+    cacheInd++;
+  }
 }
 
 //returns the width of the drawn text (can be used for alignment purposes)

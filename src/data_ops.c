@@ -409,6 +409,43 @@ const char* getElemStr(const uint8_t Z){
 	}
 }
 
+const char* getHalfLifeUnitShortStr(const uint8_t unit){
+	switch(unit){
+		case HALFLIFE_UNIT_STABLE:
+			return "STABLE"; //stable
+		case HALFLIFE_UNIT_YEARS:
+			return "y";
+		case HALFLIFE_UNIT_DAYS:
+			return "d";
+		case HALFLIFE_UNIT_HOURS:
+			return "h";
+		case HALFLIFE_UNIT_MINUTES:
+			return "m";
+		case HALFLIFE_UNIT_SECONDS:
+			return "s";
+		case HALFLIFE_UNIT_MILLISECONDS:
+			return "ms";
+		case HALFLIFE_UNIT_MICROSECONDS:
+			return "us";
+		case HALFLIFE_UNIT_NANOSECONDS:
+			return "ns";
+		case HALFLIFE_UNIT_PICOSECONDS:
+			return "ps";
+		case HALFLIFE_UNIT_FEMTOSECONDS:
+			return "fs";
+		case HALFLIFE_UNIT_ATTOSECONDS:
+			return "as";
+		case HALFLIFE_UNIT_EV:
+			return "eV";
+		case HALFLIFE_UNIT_KEV:
+			return "keV";
+		case HALFLIFE_UNIT_MEV:
+			return "MeV";
+		default:
+			return "";																						
+	}
+}
+
 double getLevelHalfLifeSeconds(const ndata *restrict nd, const uint32_t levelInd){
 	if(levelInd < nd->numLvls){
 		double hl = (double)(nd->levels[levelInd].halfLife);
@@ -461,13 +498,25 @@ double getNuclLevelHalfLifeSeconds(const ndata *restrict nd, const uint16_t nucl
 double getNuclGSHalfLifeSeconds(const ndata *restrict nd, const uint16_t nuclInd){
 	//try the first few levels, and take the first one with a known half-life
 	//this is done in case there are low lying levels with unknown lifetime listed first
-	for(uint16_t i=0; i<5; i++){
+	for(uint16_t i=0; i<10; i++){
 		double hl = getNuclLevelHalfLifeSeconds(nd,nuclInd,i);
 		if(hl >= -1.0){
 			return hl;
 		}
 	}
 	return -2.0; //couldn't find half-life
+}
+
+uint16_t getNuclGSLevInd(const ndata *restrict nd, const uint16_t nuclInd){
+	//try the first few levels, and take the first one with a known half-life
+	//this is done in case there are low lying levels with unknown lifetime listed first
+	for(uint16_t i=0; i<10; i++){
+		double hl = getNuclLevelHalfLifeSeconds(nd,nuclInd,i);
+		if(hl >= -1.0){
+			return i;
+		}
+	}
+	return 0; //couldn't find half-life, assume first state listed is ground state
 }
 
 float mouseXtoN(const drawing_state *restrict ds, const float mouseX){
@@ -652,7 +701,7 @@ void updateUIElemPositions(drawing_state *restrict ds){
 }
 
 
-void updateWindowRes(drawing_state *restrict ds, resource_data *restrict rdat){
+void updateWindowRes(const app_data *restrict dat, drawing_state *restrict ds, resource_data *restrict rdat){
   int wwidth, wheight;
   int rwidth, rheight;
   SDL_GetWindowSize(rdat->window, &wwidth, &wheight);
@@ -670,7 +719,7 @@ void updateWindowRes(drawing_state *restrict ds, resource_data *restrict rdat){
 			TTF_SetFontSize(rdat->font,(int)(DEFAULT_FONT_SIZE*rdat->uiScale));
 			TTF_SetFontSize(rdat->bigFont,(int)(BIG_FONT_SIZE*rdat->uiScale));
 			TTF_SetFontSize(rdat->hugeFont,(int)(HUGE_FONT_SIZE*rdat->uiScale));
-			generateTextCache(rdat);
+			generateTextCache(dat,rdat);
 		}
 	}
   ds->windowXRes = (uint16_t)wwidth;
@@ -682,7 +731,7 @@ void updateWindowRes(drawing_state *restrict ds, resource_data *restrict rdat){
   updateUIElemPositions(ds); //UI element positions
 }
 
-void handleScreenGraphicsMode(drawing_state *restrict ds, resource_data *restrict rdat){
+void handleScreenGraphicsMode(const app_data *restrict dat, drawing_state *restrict ds, resource_data *restrict rdat){
 
   //handle vsync and frame cap
   SDL_SetRenderVSync(rdat->renderer,1); //vsync always enabled
@@ -692,13 +741,13 @@ void handleScreenGraphicsMode(drawing_state *restrict ds, resource_data *restric
     if(SDL_SetWindowFullscreen(rdat->window,SDL_TRUE) != 0){
       printf("WARNING: cannot set fullscreen mode - %s\n",SDL_GetError());
     }
-    updateWindowRes(ds,rdat);
+    updateWindowRes(dat,ds,rdat);
     //printf("Full screen display mode.  Window resolution: %u x %u.\n",ds->windowXRes,ds->windowYRes);
   }else{
     if(SDL_SetWindowFullscreen(rdat->window,0) != 0){
       printf("WARNING: cannot set windowed mode - %s\n",SDL_GetError());
     }
-    updateWindowRes(ds,rdat);
+    updateWindowRes(dat,ds,rdat);
     //printf("Windowed display mode.  Window resolution: %u x %u.\n",ds->windowXRes,ds->windowYRes);
   }
 }

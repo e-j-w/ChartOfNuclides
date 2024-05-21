@@ -101,7 +101,7 @@ int main(int argc, char *argv[]){
   SDL_SetRenderDrawBlendMode(gdat->rdat.renderer,SDL_BLENDMODE_BLEND);
   SDL_SetWindowMinimumSize(gdat->rdat.window,MIN_RENDER_WIDTH,MIN_RENDER_HEIGHT);
   SDL_SetWindowMaximumSize(gdat->rdat.window,MAX_RENDER_WIDTH,MAX_RENDER_HEIGHT);
-  handleScreenGraphicsMode(&gdat->state.ds,&gdat->rdat); //handle fullscreen
+  handleScreenGraphicsMode(&gdat->dat,&gdat->state.ds,&gdat->rdat); //handle fullscreen
   gdat->state.ds.forceRedraw = 1; //force draw the first frame
   
   //setup splash screen
@@ -119,7 +119,7 @@ int main(int argc, char *argv[]){
   SDL_SetWindowIcon(gdat->rdat.window,gdat->rdat.iconSurface);
   SDL_SetWindowTitle(gdat->rdat.window,gdat->dat.rules.appName);
 
-  generateTextCache(&gdat->rdat); //drawing.c
+  generateTextCache(&gdat->dat,&gdat->rdat); //drawing.c
 
   //timing
   uint64_t timeNow = SDL_GetPerformanceCounter();
@@ -151,7 +151,7 @@ int main(int argc, char *argv[]){
 
     updateDrawingState(&gdat->state,deltaTime);
 
-    processFrameEvents(&gdat->state,&gdat->rdat,deltaTime); //can block the main thread to save CPU, see process_events.h
+    processFrameEvents(&gdat->dat,&gdat->state,&gdat->rdat,deltaTime); //can block the main thread to save CPU, see process_events.h
     
     //SDL_RenderClear(gdat->rdat.renderer); //clear the window, disabled for optimization purposes
 

@@ -57,14 +57,14 @@ void processMouse(app_state *restrict state){
 
 }
 
-void processSingleEvent(app_state *restrict state, resource_data *restrict rdat, const SDL_Event evt, const float deltaTime){
+void processSingleEvent(const app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat, const SDL_Event evt, const float deltaTime){
   switch(evt.type){
     case SDL_EVENT_QUIT:
       state->quitAppFlag = 1; //quit game
       break;
     case SDL_EVENT_WINDOW_RESIZED:
     case SDL_EVENT_WINDOW_DISPLAY_SCALE_CHANGED:
-      updateWindowRes(&state->ds,rdat);
+      updateWindowRes(dat,&state->ds,rdat);
       break;
     case SDL_EVENT_GAMEPAD_ADDED:
       //setup the gamepad
@@ -214,7 +214,7 @@ void processSingleEvent(app_state *restrict state, resource_data *restrict rdat,
           break;
         case SDL_SCANCODE_F11:
           state->ds.windowFullscreenMode = !state->ds.windowFullscreenMode;
-          handleScreenGraphicsMode(&state->ds,rdat);
+          handleScreenGraphicsMode(dat,&state->ds,rdat);
         default:
           break;
       }
@@ -285,7 +285,7 @@ void processSingleEvent(app_state *restrict state, resource_data *restrict rdat,
 
 //called once per frame, processes user inputs and other SDL events
 //takes input flags from the previous frame as an argument, returns flags for the current frame
-void processFrameEvents(app_state *restrict state, resource_data *restrict rdat, const float deltaTime){
+void processFrameEvents(const app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat, const float deltaTime){
 
     //reset values
     state->mouseClickPosX = -1.0f;
@@ -304,15 +304,15 @@ void processFrameEvents(app_state *restrict state, resource_data *restrict rdat,
       //effectively forces a re-draw later on in the main loop
       //useful if eg. an animation is playing
       while(SDL_PollEvent(&evt)){
-        processSingleEvent(state,rdat,evt,deltaTime);
+        processSingleEvent(dat,state,rdat,evt,deltaTime);
       }
       state->ds.forceRedraw = 0; //reset flag
     }else{
       //block, ie. wait for the first event to occur before doing anything (saves CPU)
       if(SDL_WaitEvent(&evt)){ 
-        processSingleEvent(state,rdat,evt,deltaTime);
+        processSingleEvent(dat,state,rdat,evt,deltaTime);
         while(SDL_PollEvent(&evt)){
-          processSingleEvent(state,rdat,evt,deltaTime);
+          processSingleEvent(dat,state,rdat,evt,deltaTime);
         }
       }
     }
