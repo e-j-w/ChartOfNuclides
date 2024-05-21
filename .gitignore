@@ -21,4 +21,5 @@ list
 *.save
 *~
 .vscode
+*.code-workspace
 sample_parameters

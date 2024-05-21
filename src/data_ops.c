@@ -503,10 +503,10 @@ float getChartHeightZAfterZoom(const drawing_state *restrict ds){
 
 void mouseWheelAction(app_state *restrict state){
 	if(state->uiState == UISTATE_DEFAULT){
-		if(state->mouseWheelDir == 1){
+		if(state->mouseWheelVal > 0){
 			//zoom in
 			state->ds.chartZoomStartScale = state->ds.chartZoomScale;
-			state->ds.chartZoomToScale = state->ds.chartZoomToScale*2.0f;
+			state->ds.chartZoomToScale += state->mouseWheelVal;
 			state->ds.chartZoomStartX = state->ds.chartPosX;
 			state->ds.chartZoomStartY = state->ds.chartPosY;
 			if(state->ds.chartZoomToScale > MAX_CHART_ZOOM_SCALE){
@@ -534,10 +534,10 @@ void mouseWheelAction(app_state *restrict state){
 			state->ds.timeSinceZoomStart = 0.0f;
 			state->ds.zoomInProgress = 1;
 			state->ds.zoomFinished = 0;
-		}else if(state->mouseWheelDir == 2){
+		}else if(state->mouseWheelVal < 0){
 			//zoom out
 			state->ds.chartZoomStartScale = state->ds.chartZoomScale;
-			state->ds.chartZoomToScale = state->ds.chartZoomToScale*0.5f;
+			state->ds.chartZoomToScale += state->mouseWheelVal;
 			state->ds.chartZoomStartX = state->ds.chartPosX;
 			state->ds.chartZoomStartY = state->ds.chartPosY;
 			if(state->ds.chartZoomToScale < MIN_CHART_ZOOM_SCALE){

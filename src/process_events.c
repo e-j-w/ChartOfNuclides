@@ -51,7 +51,7 @@ void processMouse(app_state *restrict state){
     uiElemClickAction(state,UIELEM_ENUM_LENGTH);
   }
 
-  if(state->mouseWheelDir != 0){
+  if(state->mouseWheelUsed != 0){
     mouseWheelAction(state);
   }
 
@@ -131,29 +131,31 @@ void processSingleEvent(app_state *restrict state, resource_data *restrict rdat,
     case SDL_EVENT_MOUSE_WHEEL:
       if(evt.wheel.direction == SDL_MOUSEWHEEL_NORMAL){
         if(evt.wheel.y > 0){
-          //printf("Mouse wheel up.\n");
+          //printf("Mouse wheel up %0.3f.\n",(double)evt.wheel.y);
           state->mouseWheelPosX = state->mouseX;
           state->mouseWheelPosY = state->mouseY;
-          state->mouseWheelDir = 1;
-        }
-        else if(evt.wheel.y < 0){
-          //printf("Mouse wheel down.\n");
+          state->mouseWheelVal = evt.wheel.y;
+          state->mouseWheelUsed = 1;
+        }else if(evt.wheel.y < 0){
+          //printf("Mouse wheel down %0.3f.\n",(double)evt.wheel.y);
           state->mouseWheelPosX = state->mouseX;
           state->mouseWheelPosY = state->mouseY;
-          state->mouseWheelDir = 2;
+          state->mouseWheelVal = evt.wheel.y;
+          state->mouseWheelUsed = 1;
         }
       }else{
         if(evt.wheel.y > 0){
-          //printf("Mouse wheel down.\n");
+          //printf("Mouse wheel down %0.3f.\n",(double)evt.wheel.y);
           state->mouseWheelPosX = state->mouseX;
           state->mouseWheelPosY = state->mouseY;
-          state->mouseWheelDir = 2;
-        }
-        else if(evt.wheel.y < 0){
-          //printf("Mouse wheel up.\n");
+          state->mouseWheelVal = evt.wheel.y;
+          state->mouseWheelUsed = 1;
+        }else if(evt.wheel.y < 0){
+          //printf("Mouse wheel up %0.3f.\n",(double)evt.wheel.y);
           state->mouseWheelPosX = state->mouseX;
           state->mouseWheelPosY = state->mouseY;
-          state->mouseWheelDir = 1;
+          state->mouseWheelVal = evt.wheel.y;
+          state->mouseWheelUsed = 1;
         }
       }
       break;
@@ -163,6 +165,7 @@ void processSingleEvent(app_state *restrict state, resource_data *restrict rdat,
       state->mouseY = -1.0f;
       //state->ds.forceRedraw = 1;
       break;
+    
     case SDL_EVENT_KEY_DOWN: //pressing key
       state->lastInputType = INPUT_TYPE_KEYBOARD; //set keyboard input
       switch(evt.key.keysym.scancode){
@@ -287,7 +290,7 @@ void processFrameEvents(app_state *restrict state, resource_data *restrict rdat,
     //reset values
     state->mouseClickPosX = -1.0f;
     state->mouseClickPosY = -1.0f;
-    state->mouseWheelDir = 0;
+    state->mouseWheelUsed = 0;
 
     if((state->ds.uiAnimPlaying != 0)||(state->ds.zoomInProgress)||(state->ds.dragInProgress)||(state->ds.panInProgress)){
       //a UI animation is playing, don't block the main thread
