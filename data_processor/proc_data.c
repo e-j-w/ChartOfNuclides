@@ -64,7 +64,7 @@ int main(int argc, char *argv[]){
     return 0;
   }
 
-  const char fileName[16] = "appdata.dat";
+  const char fileName[16] = "con.dat";
   const char headerStr[6] = "<>|<>";
   const uint8_t version = 0; //revision of data format
   const char *appBasePath = SDL_GetBasePath();

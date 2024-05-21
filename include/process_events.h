@@ -6,6 +6,6 @@
 
 #include "formats.h"
 
-void processFrameEvents(app_state *restrict state, resource_data *restrict rdat);
+void processFrameEvents(app_state *restrict state, resource_data *restrict rdat, const float deltaTime);
 
 #endif

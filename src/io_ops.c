@@ -107,7 +107,7 @@ static int writeConfigFile(FILE *file, const app_rules *restrict rules, const ap
 void updateConfigFile(const char *configPath, const app_rules *restrict rules, const app_state *restrict state){
 
   char configFilePath[512];
-  snprintf(configFilePath,512,"%sapp.ini",configPath);
+  snprintf(configFilePath,512,"%scon.ini",configPath);
   FILE *configFile = fopen(configFilePath, "w");
 
   if(configFile != NULL){
@@ -122,7 +122,7 @@ void updateConfigFile(const char *configPath, const app_rules *restrict rules, c
 void updatePrefsFromConfigFile(const char *configPath, const app_rules *restrict rules, app_state *restrict state){
 
   char configFilePath[512];
-  snprintf(configFilePath,512,"%sapp.ini",configPath);
+  snprintf(configFilePath,512,"%scon.ini",configPath);
   FILE *configFile = fopen(configFilePath, "r");
 
   if(configFile != NULL){

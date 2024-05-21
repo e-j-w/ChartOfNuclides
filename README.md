@@ -8,6 +8,8 @@ An offline viewer of ENSDF data, **extremely early in development and basically 
 
 The program parses plaintext ENSDF data files (available [here](https://www.nndc.bnl.gov/ensarchivals/)) into a binary database, eventually one will be able to query this for information on various nuclei (levels, cascades, gamma-rays).
 
+The goal is to develop a program that will be useful in both professional (nuclear structure research) and educational contexts.
+
 ## Features
 
 TBD

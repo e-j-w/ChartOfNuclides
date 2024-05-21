@@ -12,10 +12,10 @@ int importAppData(app_data *restrict dat, resource_data *restrict rdat){
   int64_t fileSize;
   size_t totalAlloc = 0;
   
-  snprintf(filePath,270,"%sappdata.dat",rdat->appBasePath);
+  snprintf(filePath,270,"%scon.dat",rdat->appBasePath);
   SDL_IOStream *inp = SDL_IOFromFile(filePath, "rb");
   if(inp==NULL){
-    SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,"Error","App data file (appdata.dat) doesn't exist or is unreadable.",rdat->window);
+    SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,"Error","App data file (con.dat) doesn't exist or is unreadable.",rdat->window);
     printf("ERROR: importAppData - couldn't read data package file %s.\n",filePath);
     return -1;
   }

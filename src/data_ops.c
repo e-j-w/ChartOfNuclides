@@ -103,6 +103,10 @@ void updateDrawingState(app_state *restrict state, const float deltaTime){
 		state->ds.dragInProgress = 0;
 		state->ds.dragFinished = 0; //reset flag
 	}
+	if(state->ds.panFinished){
+		state->ds.panInProgress = 0;
+		state->ds.panFinished = 0; //reset flag
+	}
 	if(state->ds.zoomInProgress){
 		state->ds.timeSinceZoomStart += deltaTime;
 		state->ds.chartZoomScale = state->ds.chartZoomStartScale + ((state->ds.chartZoomToScale - state->ds.chartZoomStartScale)*state->ds.timeSinceZoomStart/CHART_ZOOM_TIME);

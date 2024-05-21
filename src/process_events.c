@@ -57,7 +57,7 @@ void processMouse(app_state *restrict state){
 
 }
 
-void processSingleEvent(app_state *restrict state, resource_data *restrict rdat, const SDL_Event evt){
+void processSingleEvent(app_state *restrict state, resource_data *restrict rdat, const SDL_Event evt, const float deltaTime){
   switch(evt.type){
     case SDL_EVENT_QUIT:
       state->quitAppFlag = 1; //quit game
@@ -169,6 +169,46 @@ void processSingleEvent(app_state *restrict state, resource_data *restrict rdat,
         case SDL_SCANCODE_P:
           state->ds.drawPerformanceStats = !state->ds.drawPerformanceStats;
           break;
+        case SDL_SCANCODE_LEFT:
+          if(state->uiState == UISTATE_DEFAULT){
+            state->ds.chartPosX -= (CHART_PAN_SPEED*deltaTime/state->ds.chartZoomScale);
+            if(state->ds.chartPosX < 0.0f){
+              state->ds.chartPosX = 0.0f;
+            }
+            state->ds.panInProgress = 1;
+            state->ds.panFinished = 0;
+          }
+          break;
+        case SDL_SCANCODE_RIGHT:
+          if(state->uiState == UISTATE_DEFAULT){
+            state->ds.chartPosX += (CHART_PAN_SPEED*deltaTime/state->ds.chartZoomScale);
+            if(state->ds.chartPosX > MAX_NEUTRON_NUM){
+              state->ds.chartPosX = MAX_NEUTRON_NUM;
+            }
+            state->ds.panInProgress = 1;
+            state->ds.panFinished = 0;
+          }
+          break;
+        case SDL_SCANCODE_UP:
+          if(state->uiState == UISTATE_DEFAULT){
+            state->ds.chartPosY += (CHART_PAN_SPEED*deltaTime/state->ds.chartZoomScale);
+            if(state->ds.chartPosY > MAX_PROTON_NUM){
+              state->ds.chartPosY = MAX_PROTON_NUM;
+            }
+            state->ds.panInProgress = 1;
+            state->ds.panFinished = 0;
+          }
+          break;
+        case SDL_SCANCODE_DOWN:
+          if(state->uiState == UISTATE_DEFAULT){
+            state->ds.chartPosY -= (CHART_PAN_SPEED*deltaTime/state->ds.chartZoomScale);
+            if(state->ds.chartPosY < 0.0f){
+              state->ds.chartPosY = 0.0f;
+            }
+            state->ds.panInProgress = 1;
+            state->ds.panFinished = 0;
+          }
+          break;
         case SDL_SCANCODE_F11:
           state->ds.windowFullscreenMode = !state->ds.windowFullscreenMode;
           handleScreenGraphicsMode(&state->ds,rdat);
@@ -179,6 +219,7 @@ void processSingleEvent(app_state *restrict state, resource_data *restrict rdat,
     case SDL_EVENT_GAMEPAD_BUTTON_UP:
       break;
     case SDL_EVENT_KEY_UP: //released key
+      state->ds.panFinished = 1;
       break;
     //analog stick control
     case SDL_EVENT_GAMEPAD_AXIS_MOTION: //gamepad axis, use large values to account for deadzone
@@ -241,14 +282,14 @@ void processSingleEvent(app_state *restrict state, resource_data *restrict rdat,
 
 //called once per frame, processes user inputs and other SDL events
 //takes input flags from the previous frame as an argument, returns flags for the current frame
-void processFrameEvents(app_state *restrict state, resource_data *restrict rdat){
+void processFrameEvents(app_state *restrict state, resource_data *restrict rdat, const float deltaTime){
 
     //reset values
     state->mouseClickPosX = -1.0f;
     state->mouseClickPosY = -1.0f;
     state->mouseWheelDir = 0;
 
-    if((state->ds.uiAnimPlaying != 0)||(state->ds.zoomInProgress)||(state->ds.dragInProgress)){
+    if((state->ds.uiAnimPlaying != 0)||(state->ds.zoomInProgress)||(state->ds.dragInProgress)||(state->ds.panInProgress)){
       //a UI animation is playing, don't block the main thread
       state->ds.forceRedraw = 1;
     }
@@ -260,15 +301,15 @@ void processFrameEvents(app_state *restrict state, resource_data *restrict rdat)
       //effectively forces a re-draw later on in the main loop
       //useful if eg. an animation is playing
       while(SDL_PollEvent(&evt)){
-        processSingleEvent(state,rdat,evt);
+        processSingleEvent(state,rdat,evt,deltaTime);
       }
       state->ds.forceRedraw = 0; //reset flag
     }else{
       //block, ie. wait for the first event to occur before doing anything (saves CPU)
       if(SDL_WaitEvent(&evt)){ 
-        processSingleEvent(state,rdat,evt);
+        processSingleEvent(state,rdat,evt,deltaTime);
         while(SDL_PollEvent(&evt)){
-          processSingleEvent(state,rdat,evt);
+          processSingleEvent(state,rdat,evt,deltaTime);
         }
       }
     }

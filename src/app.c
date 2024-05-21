@@ -151,7 +151,7 @@ int main(int argc, char *argv[]){
 
     updateDrawingState(&gdat->state,deltaTime);
 
-    processFrameEvents(&gdat->state,&gdat->rdat); //can block the main thread to save CPU, see process_events.h
+    processFrameEvents(&gdat->state,&gdat->rdat,deltaTime); //can block the main thread to save CPU, see process_events.h
     
     //SDL_RenderClear(gdat->rdat.renderer); //clear the window, disabled for optimization purposes
 

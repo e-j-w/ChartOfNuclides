@@ -141,6 +141,8 @@ typedef struct
   uint16_t windowXRenderRes, windowYRenderRes; //render resolution (in pixels) taking HI-DPI into account
   uint16_t uiElemPosX[UIELEM_ENUM_LENGTH], uiElemPosY[UIELEM_ENUM_LENGTH], uiElemWidth[UIELEM_ENUM_LENGTH], uiElemHeight[UIELEM_ENUM_LENGTH];
   uint8_t texModR, texModG, texModB, texModA; //texture color and alpha modulation values
+  unsigned int panInProgress : 1;
+  unsigned int panFinished : 1;
   unsigned int dragInProgress : 1;
   unsigned int dragFinished : 1;
   unsigned int zoomInProgress : 1;
