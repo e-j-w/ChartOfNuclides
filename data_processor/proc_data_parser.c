@@ -366,8 +366,9 @@ void parseHalfLife(level * lev, char * ltstring){
 	char str[256], val[MAXNUMPARSERVALS][256];
 	int numTok=0;
 
-	lev->halfLife=-1;
-	lev->halfLifeErr=-1;
+	lev->halfLife = -1.0f;
+	lev->halfLifeErr = -1.0f;
+  lev->halfLifeUnit=HALFLIFE_UNIT_NOVAL;
 
 	strcpy(str,ltstring);
 	tok = strtok (str, " ?");
@@ -393,7 +394,7 @@ void parseHalfLife(level * lev, char * ltstring){
 	numTok++;
 
 	if(strcmp(val[1],"STABLE")==0){
-		lev->halfLife = 0.;
+		lev->halfLife = 1.0E20f;
 		lev->halfLifeUnit = HALFLIFE_UNIT_STABLE;
 	}else{
 		lev->halfLife = (float)atof(val[0]);

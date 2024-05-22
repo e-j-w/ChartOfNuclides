@@ -22,7 +22,7 @@ SDL_FColor getHalfLifeCol(const double halflifeSeconds){
   }else if(halflifeSeconds > 1.0E10){
     col.r = 0.0f;
     col.g = 0.1f;
-    col.b = 0.3f;
+    col.b = 0.4f;
   }else if(halflifeSeconds > 1.0E7){
     col.r = 0.1f;
     col.g = 0.2f;

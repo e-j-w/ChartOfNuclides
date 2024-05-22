@@ -426,7 +426,7 @@ const char* getHalfLifeUnitShortStr(const uint8_t unit){
 		case HALFLIFE_UNIT_MILLISECONDS:
 			return "ms";
 		case HALFLIFE_UNIT_MICROSECONDS:
-			return "us";
+			return "µs";
 		case HALFLIFE_UNIT_NANOSECONDS:
 			return "ns";
 		case HALFLIFE_UNIT_PICOSECONDS:
@@ -441,6 +441,7 @@ const char* getHalfLifeUnitShortStr(const uint8_t unit){
 			return "keV";
 		case HALFLIFE_UNIT_MEV:
 			return "MeV";
+		case HALFLIFE_UNIT_NOVAL:
 		default:
 			return "";																						
 	}
@@ -555,7 +556,7 @@ void mouseWheelAction(app_state *restrict state){
 		if(state->mouseWheelVal > 0){
 			//zoom in
 			state->ds.chartZoomStartScale = state->ds.chartZoomScale;
-			state->ds.chartZoomToScale += state->mouseWheelVal;
+			state->ds.chartZoomToScale += state->mouseWheelVal*state->ds.chartZoomToScale;
 			state->ds.chartZoomStartX = state->ds.chartPosX;
 			state->ds.chartZoomStartY = state->ds.chartPosY;
 			if(state->ds.chartZoomToScale > MAX_CHART_ZOOM_SCALE){
@@ -586,7 +587,7 @@ void mouseWheelAction(app_state *restrict state){
 		}else if(state->mouseWheelVal < 0){
 			//zoom out
 			state->ds.chartZoomStartScale = state->ds.chartZoomScale;
-			state->ds.chartZoomToScale += state->mouseWheelVal;
+			state->ds.chartZoomToScale += state->mouseWheelVal*state->ds.chartZoomToScale*0.5f;
 			state->ds.chartZoomStartX = state->ds.chartPosX;
 			state->ds.chartZoomStartY = state->ds.chartPosY;
 			if(state->ds.chartZoomToScale < MIN_CHART_ZOOM_SCALE){
