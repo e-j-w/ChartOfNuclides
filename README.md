@@ -18,7 +18,7 @@ TBD
 
 ### Dependencies
 
-* gcc
+* gcc (or clang if the Makefile is edited)
 * make
 * SDL3
 * SDL_image
@@ -30,4 +30,4 @@ The current version has been tested under Arch Linux as of May 2024.
 
 TBD.
 
-For now SDL3 and its libraries probably has to be compiled manually, as they aren't (yet) packaged for major Linux distros.
+For now SDL3 and its libraries probably have to be compiled manually, as they aren't (yet) packaged for major Linux distros.

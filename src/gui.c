@@ -91,7 +91,7 @@ SDL_FColor getHalfLifeCol(const double halflifeSeconds){
   return col;
 }
 
-void drawNuclBoxLabel(const drawing_state *restrict ds, resource_data *restrict rdat, const int xPos, const int yPos, SDL_Color col, const uint16_t N, const uint16_t Z, const uint32_t nuclInd){
+void drawNuclBoxLabel(const drawing_state *restrict ds, resource_data *restrict rdat, const float xPos, const float yPos, SDL_Color col, const uint16_t N, const uint16_t Z, const uint32_t nuclInd){
   if(ds->chartZoomScale >= 8.0f){
     float numLblWidth = drawTextFromCache(rdat,xPos,yPos,col,ALIGN_LEFT,(uint16_t)(N+Z)); //draw number label
     drawTextFromCache(rdat,xPos+(int)numLblWidth+2,yPos+10,col,ALIGN_LEFT,MAX_MASS_NUM+Z); //draw element label
@@ -127,8 +127,8 @@ void drawChartOfNuclides(const app_data *restrict dat, const app_state *restrict
             const double hl = getNuclGSHalfLifeSeconds(&dat->ndat,(uint16_t)i);
             drawFlatRect(rdat,rect,getHalfLifeCol(hl));
             if(state->ds.chartZoomScale >= 4.0f){
-              int txtX = (int)(rect.x/rdat->uiScale + NUCLBOX_NAME_MARGIN*state->ds.chartZoomScale);
-              int txtY = (int)(rect.y/rdat->uiScale + NUCLBOX_NAME_MARGIN*state->ds.chartZoomScale);
+              float txtX = (rect.x/rdat->uiScale + NUCLBOX_NAME_MARGIN*state->ds.chartZoomScale);
+              float txtY = (rect.y/rdat->uiScale + NUCLBOX_NAME_MARGIN*state->ds.chartZoomScale);
               drawNuclBoxLabel(&state->ds,rdat,txtX,txtY,(hl > 1.0E4) ? whiteCol8Bit : BlackCol8Bit,(uint16_t)(dat->ndat.nuclData[i].N),(uint16_t)(dat->ndat.nuclData[i].Z),(uint32_t)i);
             }
           }
@@ -194,7 +194,7 @@ void drawMessageBox(const app_data *restrict dat, const app_state *restrict stat
     drawScreenDimmer(&state->ds,rdat,DIMMER_OPACITY);
   }
   
-  SDL_Rect msgBoxPanelRect;
+  SDL_FRect msgBoxPanelRect;
   msgBoxPanelRect.x = state->ds.uiElemPosX[UIELEM_MSG_BOX];
   msgBoxPanelRect.y = state->ds.uiElemPosY[UIELEM_MSG_BOX] + yOffset;
   msgBoxPanelRect.w = state->ds.uiElemWidth[UIELEM_MSG_BOX];
@@ -220,7 +220,7 @@ void drawUI(const app_data *restrict dat, app_state *restrict state, resource_da
   
   //draw menus/panels etc.
   if(state->ds.shownElements & (1U << UIELEM_PRIMARY_MENU)){
-    SDL_Rect menuRect;
+    SDL_FRect menuRect;
     menuRect.x = state->ds.uiElemPosX[UIELEM_PRIMARY_MENU];
     menuRect.y = state->ds.uiElemPosY[UIELEM_PRIMARY_MENU];
     menuRect.w = state->ds.uiElemWidth[UIELEM_PRIMARY_MENU];
