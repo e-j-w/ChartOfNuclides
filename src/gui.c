@@ -8,6 +8,22 @@
 #include "drawing.h"
 #include "data_ops.h"
 
+float getAxisTickSpacing(float range){
+  if(range < 12.0f){
+    return 2.0f;
+  }else if(range < 30.0f){
+    return 5.0f;
+  }else if(range < 60.0f){
+    return 10.0f;
+  }else if(range < 120.0f){
+    return 20.0f;
+  }else if(range < 180.0f){
+    return 30.0f;
+  }else{
+    return 40.0f;
+  }
+}
+
 SDL_FColor getHalfLifeCol(const double halflifeSeconds){
   //printf("half-life: %0.6f\n",halflifeSeconds);
   SDL_FColor col;
@@ -129,13 +145,54 @@ void drawChartOfNuclides(const app_data *restrict dat, const app_state *restrict
             if(state->ds.chartZoomScale >= 4.0f){
               float txtX = (rect.x/rdat->uiScale + NUCLBOX_NAME_MARGIN*state->ds.chartZoomScale);
               float txtY = (rect.y/rdat->uiScale + NUCLBOX_NAME_MARGIN*state->ds.chartZoomScale);
-              drawNuclBoxLabel(&state->ds,rdat,txtX,txtY,(hl > 1.0E4) ? whiteCol8Bit : BlackCol8Bit,(uint16_t)(dat->ndat.nuclData[i].N),(uint16_t)(dat->ndat.nuclData[i].Z),(uint32_t)i);
+              drawNuclBoxLabel(&state->ds,rdat,txtX,txtY,(hl > 1.0E4) ? whiteCol8Bit : blackCol8Bit,(uint16_t)(dat->ndat.nuclData[i].N),(uint16_t)(dat->ndat.nuclData[i].Z),(uint32_t)i);
             }
           }
         }
       }
     }
   }
+
+  //draw x and y axes
+  rect.w = state->ds.windowXRenderRes;
+  rect.h = CHART_AXIS_DEPTH*rdat->uiScale;
+  rect.x = 0;
+  rect.y = state->ds.windowYRenderRes - rect.h;
+  drawFlatRect(rdat,rect,whiteTransparentCol);
+  rect.w = rect.h;
+  rect.h = rect.y;
+  rect.y = 0;
+  drawFlatRect(rdat,rect,whiteTransparentCol);
+  drawTextAligned(rdat,CHART_AXIS_DEPTH*0.5f,CHART_AXIS_DEPTH*0.5f,rdat->bigFont,blackCol8Bit,"Z",ALIGN_CENTER);
+  drawTextAligned(rdat,state->ds.windowXRes - CHART_AXIS_DEPTH*0.5f,state->ds.windowYRes - CHART_AXIS_DEPTH*0.5f,rdat->bigFont,blackCol8Bit,"N",ALIGN_CENTER);
+  //draw ticks
+  rect.y = state->ds.windowYRes - CHART_AXIS_DEPTH*0.5f;
+  float tickSpacing = getAxisTickSpacing(maxX - minX);
+  for(float i=(minX-fmodf(minX,tickSpacing));i<maxX;i+=tickSpacing){
+    if(i >= 0.0f){
+      uint16_t numInd = (uint16_t)(floorf(i));
+      if((i<MAX_MASS_NUM)&&(i<=MAX_NEUTRON_NUM)){
+        rect.x = (i + 0.5f - minX)*DEFAULT_NUCLBOX_DIM*state->ds.chartZoomScale;
+        if(rect.x < (state->ds.windowXRes - CHART_AXIS_DEPTH)){ //dodge axis label
+          drawTextFromCache(rdat,rect.x,rect.y,blackCol8Bit,ALIGN_CENTER,numInd);
+        }
+      }
+    }
+  }
+  rect.x = CHART_AXIS_DEPTH*0.5f;
+  tickSpacing = getAxisTickSpacing(maxY - minY);
+  for(float i=(minY-fmodf(minY,tickSpacing));i<maxY;i+=tickSpacing){
+    if(i >= 0.0f){
+      uint16_t numInd = (uint16_t)(floorf(i));
+      if((i<MAX_MASS_NUM)&&(i<MAX_PROTON_NUM)){
+        rect.y = (maxY - i + 0.5f)*DEFAULT_NUCLBOX_DIM*state->ds.chartZoomScale;
+        if(rect.y > CHART_AXIS_DEPTH){ //dodge axis label
+          drawTextFromCache(rdat,rect.x,rect.y,blackCol8Bit,ALIGN_CENTER,numInd);
+        }
+      }
+    }
+  }
+
 }
 
 //draw some stats, ie. FPS overlay and further diagnostic info

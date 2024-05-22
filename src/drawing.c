@@ -457,7 +457,7 @@ void drawDefaultText(const ui_theme_rules *restrict uirules, resource_data *rest
 void drawFlatRect(resource_data *restrict rdat, const SDL_FRect rect, const SDL_FColor col){
 
   //draw a rectangle covering the screen
-  SDL_SetRenderDrawColorFloat(rdat->renderer, col.r, col.g, col.b, 255);
+  SDL_SetRenderDrawColorFloat(rdat->renderer, col.r, col.g, col.b, col.a);
   SDL_RenderFillRect(rdat->renderer, &rect);
 
 }
