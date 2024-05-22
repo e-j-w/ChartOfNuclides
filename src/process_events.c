@@ -14,12 +14,12 @@ void processMouse(app_state *restrict state){
   if(state->ds.dragInProgress == 0){
     for(uint8_t i=0; i<UIELEM_ENUM_LENGTH; i++){
       if(state->interactableElement & (uint32_t)(1U << i)){
-        if((state->mouseHoldStartPosX >= state->ds.uiElemPosX[i])&&(state->mouseHoldStartPosX < (state->ds.uiElemPosX[i]+state->ds.uiElemWidth[i]))&&(state->mouseHoldStartPosY >= state->ds.uiElemPosY[i])&&(state->mouseHoldStartPosY < (state->ds.uiElemPosY[i]+state->ds.uiElemHeight[i]))){
+        if((state->mouseHoldStartPosXPx >= state->ds.uiElemPosX[i])&&(state->mouseHoldStartPosXPx < (state->ds.uiElemPosX[i]+state->ds.uiElemWidth[i]))&&(state->mouseHoldStartPosYPx >= state->ds.uiElemPosY[i])&&(state->mouseHoldStartPosYPx < (state->ds.uiElemPosY[i]+state->ds.uiElemHeight[i]))){
           state->mouseholdElement = i;
         }
-        if((state->mouseX >= state->ds.uiElemPosX[i])&&(state->mouseX < (state->ds.uiElemPosX[i]+state->ds.uiElemWidth[i]))&&(state->mouseY >= state->ds.uiElemPosY[i])&&(state->mouseY < (state->ds.uiElemPosY[i]+state->ds.uiElemHeight[i]))){
+        if((state->mouseXPx >= state->ds.uiElemPosX[i])&&(state->mouseXPx < (state->ds.uiElemPosX[i]+state->ds.uiElemWidth[i]))&&(state->mouseYPx >= state->ds.uiElemPosY[i])&&(state->mouseYPx < (state->ds.uiElemPosY[i]+state->ds.uiElemHeight[i]))){
           state->mouseoverElement = i;
-          if((state->mouseClickPosX >= state->ds.uiElemPosX[i])&&(state->mouseClickPosX < (state->ds.uiElemPosX[i]+state->ds.uiElemWidth[i]))&&(state->mouseClickPosY >= state->ds.uiElemPosY[i])&&(state->mouseClickPosY < (state->ds.uiElemPosY[i]+state->ds.uiElemHeight[i]))){
+          if((state->mouseClickPosXPx >= state->ds.uiElemPosX[i])&&(state->mouseClickPosXPx < (state->ds.uiElemPosX[i]+state->ds.uiElemWidth[i]))&&(state->mouseClickPosYPx >= state->ds.uiElemPosY[i])&&(state->mouseClickPosYPx < (state->ds.uiElemPosY[i]+state->ds.uiElemHeight[i]))){
             //take action
             uiElemClickAction(state,i);
             return;
@@ -29,29 +29,29 @@ void processMouse(app_state *restrict state){
     }
 
     //handle click and drag on the chart of nuclides
-    if((state->uiState == UISTATE_DEFAULT)&&(state->mouseholdElement == UIELEM_ENUM_LENGTH)&&(state->mouseHoldStartPosX >= 0.0f)){
+    if((state->uiState == UISTATE_DEFAULT)&&(state->mouseholdElement == UIELEM_ENUM_LENGTH)&&(state->mouseHoldStartPosXPx >= 0.0f)){
       state->ds.chartDragStartX = state->ds.chartPosX;
       state->ds.chartDragStartY = state->ds.chartPosY;
-      state->ds.chartDragStartMouseX = state->mouseX;
-      state->ds.chartDragStartMouseY = state->mouseY;
+      state->ds.chartDragStartMouseX = state->mouseXPx;
+      state->ds.chartDragStartMouseY = state->mouseYPx;
       state->ds.dragInProgress = 1;
       //printf("start drag\n");
     }
   }
 
   //check for mouse release
-  if(state->mouseHoldStartPosX < 0.0f){
+  if(state->mouseHoldStartPosXPx < 0.0f){
     state->ds.dragFinished = 1;
   }
 
   //only get here if no button was clicked
   //check if a click was made outside of any button
-  if(state->mouseClickPosX >= 0.0f){
+  if(state->mouseClickPosXPx >= 0.0f){
     //unclick
     uiElemClickAction(state,UIELEM_ENUM_LENGTH);
   }
 
-  if(state->mouseWheelUsed != 0){
+  if((state->mouseWheelUsed != 0)&&(fabsf(state->mouseWheelVal)>0.05f)){
     mouseWheelAction(state);
   }
 
@@ -92,7 +92,7 @@ void processSingleEvent(const app_data *restrict dat, app_state *restrict state,
       state->lastInputType = INPUT_TYPE_GAMEPAD; //set gamepad input
       break;
     case SDL_EVENT_MOUSE_MOTION:
-      SDL_GetMouseState(&state->mouseX,&state->mouseY); //update mouse position
+      SDL_GetMouseState(&state->mouseXPx,&state->mouseYPx); //update mouse position
       if(state->lastInputType != INPUT_TYPE_MOUSE){
         state->lastInputType = INPUT_TYPE_MOUSE; //set mouse input
       }
@@ -103,9 +103,9 @@ void processSingleEvent(const app_data *restrict dat, app_state *restrict state,
       switch(evt.button.button){
         case SDL_BUTTON_LEFT:
           //printf("Left mouse button down.\n");
-          SDL_GetMouseState(&state->mouseX,&state->mouseY); //update mouse position
-          state->mouseHoldStartPosX = state->mouseX;
-          state->mouseHoldStartPosY = state->mouseY;
+          SDL_GetMouseState(&state->mouseXPx,&state->mouseYPx); //update mouse position
+          state->mouseHoldStartPosXPx = state->mouseXPx;
+          state->mouseHoldStartPosYPx = state->mouseYPx;
           break;
         default:
           break;
@@ -115,10 +115,10 @@ void processSingleEvent(const app_data *restrict dat, app_state *restrict state,
       state->lastInputType = INPUT_TYPE_MOUSE; //set mouse input
       switch(evt.button.button){
         case SDL_BUTTON_LEFT:
-          state->mouseHoldStartPosX = -1.0f;
-          state->mouseHoldStartPosY = -1.0f;
-          state->mouseClickPosX = state->mouseX;
-          state->mouseClickPosY = state->mouseY;
+          state->mouseHoldStartPosXPx = -1.0f;
+          state->mouseHoldStartPosYPx = -1.0f;
+          state->mouseClickPosXPx = state->mouseXPx;
+          state->mouseClickPosYPx = state->mouseYPx;
           //printf("Left mouse button up.\n");
           break;
         case SDL_BUTTON_RIGHT:
@@ -132,28 +132,20 @@ void processSingleEvent(const app_data *restrict dat, app_state *restrict state,
       if(evt.wheel.direction == SDL_MOUSEWHEEL_NORMAL){
         if(evt.wheel.y > 0){
           //printf("Mouse wheel up %0.3f.\n",(double)evt.wheel.y);
-          state->mouseWheelPosX = state->mouseX;
-          state->mouseWheelPosY = state->mouseY;
           state->mouseWheelVal = evt.wheel.y;
           state->mouseWheelUsed = 1;
         }else if(evt.wheel.y < 0){
           //printf("Mouse wheel down %0.3f.\n",(double)evt.wheel.y);
-          state->mouseWheelPosX = state->mouseX;
-          state->mouseWheelPosY = state->mouseY;
           state->mouseWheelVal = evt.wheel.y;
           state->mouseWheelUsed = 1;
         }
       }else{
         if(evt.wheel.y > 0){
           //printf("Mouse wheel down %0.3f.\n",(double)evt.wheel.y);
-          state->mouseWheelPosX = state->mouseX;
-          state->mouseWheelPosY = state->mouseY;
           state->mouseWheelVal = evt.wheel.y;
           state->mouseWheelUsed = 1;
         }else if(evt.wheel.y < 0){
           //printf("Mouse wheel up %0.3f.\n",(double)evt.wheel.y);
-          state->mouseWheelPosX = state->mouseX;
-          state->mouseWheelPosY = state->mouseY;
           state->mouseWheelVal = evt.wheel.y;
           state->mouseWheelUsed = 1;
         }
@@ -161,8 +153,8 @@ void processSingleEvent(const app_data *restrict dat, app_state *restrict state,
       break;
     case SDL_EVENT_WINDOW_MOUSE_LEAVE:
       state->mouseoverElement = UIELEM_ENUM_LENGTH; //nothing moused over if cursor out of window
-      state->mouseX = -1.0f;
-      state->mouseY = -1.0f;
+      state->mouseXPx = -1.0f;
+      state->mouseYPx = -1.0f;
       //state->ds.forceRedraw = 1;
       break;
     
@@ -288,8 +280,8 @@ void processSingleEvent(const app_data *restrict dat, app_state *restrict state,
 void processFrameEvents(const app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat, const float deltaTime){
 
     //reset values
-    state->mouseClickPosX = -1.0f;
-    state->mouseClickPosY = -1.0f;
+    state->mouseClickPosXPx = -1.0f;
+    state->mouseClickPosYPx = -1.0f;
     state->mouseWheelUsed = 0;
 
     if((state->ds.uiAnimPlaying != 0)||(state->ds.zoomInProgress)||(state->ds.dragInProgress)||(state->ds.panInProgress)){

@@ -11,10 +11,10 @@
 //Initializes the temporary (unsaved) portion of the app state.
 void initializeTempState(app_state *restrict state){
   //input
-  state->mouseX = -1;
-  state->mouseY = -1;
-  state->mouseHoldStartPosX = -1;
-  state->mouseHoldStartPosY = -1;
+  state->mouseXPx = -1;
+  state->mouseYPx = -1;
+  state->mouseHoldStartPosXPx = -1;
+  state->mouseHoldStartPosYPx = -1;
   state->lastAxisValX=0;
   state->lastAxisValY=0;
   state->activeAxis=0; //the last used axis
@@ -110,13 +110,12 @@ void updateDrawingState(app_state *restrict state, const float deltaTime){
 	if(state->ds.zoomInProgress){
 		state->ds.timeSinceZoomStart += deltaTime;
 		state->ds.chartZoomScale = state->ds.chartZoomStartScale + ((state->ds.chartZoomToScale - state->ds.chartZoomStartScale)*state->ds.timeSinceZoomStart/CHART_ZOOM_TIME);
-		if(state->ds.chartZoomToScale > state->ds.chartZoomStartScale){
-			state->ds.chartPosX = state->ds.chartZoomStartX + ((state->ds.chartZoomToX - state->ds.chartZoomStartX)*juice_smoothStop2(state->ds.timeSinceZoomStart/CHART_ZOOM_TIME));
-			state->ds.chartPosY = state->ds.chartZoomStartY + ((state->ds.chartZoomToY - state->ds.chartZoomStartY)*juice_smoothStop2(state->ds.timeSinceZoomStart/CHART_ZOOM_TIME));
-		}else{
-			state->ds.chartPosX = state->ds.chartZoomStartX + ((state->ds.chartZoomToX - state->ds.chartZoomStartX)*juice_smoothStart2(state->ds.timeSinceZoomStart/CHART_ZOOM_TIME));
-			state->ds.chartPosY = state->ds.chartZoomStartY + ((state->ds.chartZoomToY - state->ds.chartZoomStartY)*juice_smoothStart2(state->ds.timeSinceZoomStart/CHART_ZOOM_TIME));
-		}
+		//compute new x,y range on each axis at the new zoom scale
+		float xRange = getChartWidthN(&state->ds);
+		float yRange = getChartHeightZ(&state->ds);
+		//set the center focus such that the cursor is at the same fractional value of the screen axes
+		state->ds.chartPosX = state->ds.chartZoomStartMouseX + (0.5f - state->ds.chartZoomStartMouseXFrac)*xRange;
+		state->ds.chartPosY = state->ds.chartZoomStartMouseY + (0.5f - state->ds.chartZoomStartMouseYFrac)*yRange;
 		if(state->ds.timeSinceZoomStart >= CHART_ZOOM_TIME){
 			state->ds.chartZoomScale = state->ds.chartZoomToScale;
 			state->ds.chartPosX = state->ds.chartZoomToX;
@@ -126,8 +125,8 @@ void updateDrawingState(app_state *restrict state, const float deltaTime){
 		//printf("zoom scale: %0.4f\n",(double)state->ds.chartZoomScale);
 	}
 	if(state->ds.dragInProgress){
-		state->ds.chartPosX = state->ds.chartDragStartX + ((state->ds.chartDragStartMouseX - state->mouseX)/(DEFAULT_NUCLBOX_DIM*state->ds.chartZoomScale));
-		state->ds.chartPosY = state->ds.chartDragStartY - ((state->ds.chartDragStartMouseY - state->mouseY)/(DEFAULT_NUCLBOX_DIM*state->ds.chartZoomScale));
+		state->ds.chartPosX = state->ds.chartDragStartX + ((state->ds.chartDragStartMouseX - state->mouseXPx)/(DEFAULT_NUCLBOX_DIM*state->ds.chartZoomScale));
+		state->ds.chartPosY = state->ds.chartDragStartY - ((state->ds.chartDragStartMouseY - state->mouseYPx)/(DEFAULT_NUCLBOX_DIM*state->ds.chartZoomScale));
 	}
 	//clamp chart display range
 	if(state->ds.chartPosX < 0.0f){
@@ -520,10 +519,10 @@ uint16_t getNuclGSLevInd(const ndata *restrict nd, const uint16_t nuclInd){
 	return 0; //couldn't find half-life, assume first state listed is ground state
 }
 
-float mouseXtoN(const drawing_state *restrict ds, const float mouseX){
+float mouseXPxToN(const drawing_state *restrict ds, const float mouseX){
 	return ds->chartPosX + ((mouseX - ds->windowXRes/2.0f)/(DEFAULT_NUCLBOX_DIM*ds->chartZoomScale));
 }
-float mouseYtoZ(const drawing_state *restrict ds, const float mouseY){
+float mouseYPxToZ(const drawing_state *restrict ds, const float mouseY){
 	return ds->chartPosY - ((mouseY - ds->windowYRes/2.0f)/(DEFAULT_NUCLBOX_DIM*ds->chartZoomScale));
 }
 float getMinChartN(const drawing_state *restrict ds){
@@ -553,65 +552,43 @@ float getChartHeightZAfterZoom(const drawing_state *restrict ds){
 
 void mouseWheelAction(app_state *restrict state){
 	if(state->uiState == UISTATE_DEFAULT){
-		if(state->mouseWheelVal > 0){
-			//zoom in
+		if(state->mouseWheelVal != 0.0f){
 			state->ds.chartZoomStartScale = state->ds.chartZoomScale;
-			state->ds.chartZoomToScale += state->mouseWheelVal*state->ds.chartZoomToScale;
-			state->ds.chartZoomStartX = state->ds.chartPosX;
-			state->ds.chartZoomStartY = state->ds.chartPosY;
-			if(state->ds.chartZoomToScale > MAX_CHART_ZOOM_SCALE){
-				state->ds.chartZoomToScale = MAX_CHART_ZOOM_SCALE;
+			if(state->mouseWheelVal > 0){
+				//zoom in
+				state->ds.chartZoomToScale += state->mouseWheelVal*state->ds.chartZoomToScale;
+				if(state->ds.chartZoomToScale > MAX_CHART_ZOOM_SCALE){
+					state->ds.chartZoomToScale = MAX_CHART_ZOOM_SCALE;
+				}
+			}else{
+				//zoom out
+				state->ds.chartZoomToScale += state->mouseWheelVal*state->ds.chartZoomToScale*0.5f;
+				if(state->ds.chartZoomToScale < MIN_CHART_ZOOM_SCALE){
+					state->ds.chartZoomToScale = MIN_CHART_ZOOM_SCALE;
+				}
 			}
 			if(state->ds.zoomInProgress == 0){
-				state->ds.chartZoomStartMouseN = mouseXtoN(&state->ds,state->mouseX);
-				state->ds.chartZoomStartMouseZ = mouseYtoZ(&state->ds,state->mouseY);
+				state->ds.chartZoomStartMouseX = mouseXPxToN(&state->ds,state->mouseXPx);
+				state->ds.chartZoomStartMouseY = mouseYPxToZ(&state->ds,state->mouseYPx);
 			}
-			float xZoomFrac = (state->ds.chartZoomStartMouseN - getMinChartN(&state->ds))/getChartWidthN(&state->ds);
-			float afterZoomMinN = state->ds.chartZoomStartMouseN - getChartWidthNAfterZoom(&state->ds)*xZoomFrac;
+			state->ds.chartZoomStartMouseXFrac = (state->ds.chartZoomStartMouseX - getMinChartN(&state->ds))/getChartWidthN(&state->ds);
+			float afterZoomMinN = state->ds.chartZoomStartMouseX - getChartWidthNAfterZoom(&state->ds)*state->ds.chartZoomStartMouseXFrac;
 			state->ds.chartZoomToX = afterZoomMinN + getChartWidthNAfterZoom(&state->ds)*0.5f;
-			float yZoomFrac = (state->ds.chartZoomStartMouseZ - getMinChartZ(&state->ds))/getChartHeightZ(&state->ds);
-			float afterZoomMinZ = state->ds.chartZoomStartMouseZ - getChartHeightZAfterZoom(&state->ds)*yZoomFrac;
+			state->ds.chartZoomStartMouseYFrac = (state->ds.chartZoomStartMouseY - getMinChartZ(&state->ds))/getChartHeightZ(&state->ds);
+			float afterZoomMinZ = state->ds.chartZoomStartMouseY - getChartHeightZAfterZoom(&state->ds)*state->ds.chartZoomStartMouseYFrac;
 			state->ds.chartZoomToY = afterZoomMinZ + getChartHeightZAfterZoom(&state->ds)*0.5f;
 			if(state->ds.chartZoomToX > MAX_NEUTRON_NUM){
 				state->ds.chartZoomToX = (float)MAX_NEUTRON_NUM;
+			}else if(state->ds.chartZoomToX < 0.0f){
+				state->ds.chartZoomToX = 0.0f;
 			}
 			if(state->ds.chartZoomToY > MAX_PROTON_NUM){
 				state->ds.chartZoomToY = (float)MAX_PROTON_NUM;
-			}
-			//printf("xZoomFrac: %0.3f, afterZoomMinN: %0.3f\n",(double)xZoomFrac,(double)afterZoomMinN);
-			//printf("yZoomFrac: %0.3f, afterZoomMinZ: %0.3f\n",(double)yZoomFrac,(double)afterZoomMinZ);
-			//printf("N: %0.1f, Z: %0.1f, start: [%0.1f %0.1f], zoom to: [%0.1f %0.1f]\n",(double)mouseXtoN(&state->ds,state->mouseX),(double)mouseYtoZ(&state->ds,state->mouseY),(double)state->ds.chartZoomStartX,(double)state->ds.chartZoomStartY,(double)state->ds.chartZoomToX,(double)state->ds.chartZoomToY);
-			state->ds.timeSinceZoomStart = 0.0f;
-			state->ds.zoomInProgress = 1;
-			state->ds.zoomFinished = 0;
-		}else if(state->mouseWheelVal < 0){
-			//zoom out
-			state->ds.chartZoomStartScale = state->ds.chartZoomScale;
-			state->ds.chartZoomToScale += state->mouseWheelVal*state->ds.chartZoomToScale*0.5f;
-			state->ds.chartZoomStartX = state->ds.chartPosX;
-			state->ds.chartZoomStartY = state->ds.chartPosY;
-			if(state->ds.chartZoomToScale < MIN_CHART_ZOOM_SCALE){
-				state->ds.chartZoomToScale = MIN_CHART_ZOOM_SCALE;
-			}
-			if(state->ds.zoomInProgress == 0){
-				state->ds.chartZoomStartMouseN = mouseXtoN(&state->ds,state->mouseX);
-				state->ds.chartZoomStartMouseZ = mouseYtoZ(&state->ds,state->mouseY);
-			}
-			float xZoomFrac = (state->ds.chartZoomStartMouseN - getMinChartN(&state->ds))/getChartWidthN(&state->ds);
-			float afterZoomMinN = state->ds.chartZoomStartMouseN - getChartWidthNAfterZoom(&state->ds)*xZoomFrac;
-			state->ds.chartZoomToX = afterZoomMinN + getChartWidthNAfterZoom(&state->ds)*0.5f;
-			float yZoomFrac = (state->ds.chartZoomStartMouseZ - getMinChartZ(&state->ds))/getChartHeightZ(&state->ds);
-			float afterZoomMinZ = state->ds.chartZoomStartMouseZ - getChartHeightZAfterZoom(&state->ds)*yZoomFrac;
-			state->ds.chartZoomToY = afterZoomMinZ + getChartHeightZAfterZoom(&state->ds)*0.5f;
-			if(state->ds.chartZoomToX < 0.0f){
-				state->ds.chartZoomToX = 0.0f;
-			}
-			if(state->ds.chartZoomToY < 0.0f){
+			}else if(state->ds.chartZoomToY < 0.0f){
 				state->ds.chartZoomToY = 0.0f;
 			}
-			//printf("xZoomFrac: %0.3f, afterZoomMinN: %0.3f\n",(double)xZoomFrac,(double)afterZoomMinN);
-			//printf("yZoomFrac: %0.3f, afterZoomMinZ: %0.3f\n",(double)yZoomFrac,(double)afterZoomMinZ);
-			//printf("N: %0.1f, Z: %0.1f, start: [%0.1f %0.1f], zoom to: [%0.1f %0.1f]\n",(double)mouseXtoN(&state->ds,state->mouseX),(double)mouseYtoZ(&state->ds,state->mouseY),(double)state->ds.chartZoomStartX,(double)state->ds.chartZoomStartY,(double)state->ds.chartZoomToX,(double)state->ds.chartZoomToY);
+			//printf("xZoomFrac: %0.3f, afterZoomMinN: %0.3f\n",(double)state->ds.chartZoomStartMouseXFrac,(double)afterZoomMinN);
+			//printf("yZoomFrac: %0.3f, afterZoomMinZ: %0.3f\n",(double)state->ds.chartZoomStartMouseYFrac,(double)afterZoomMinZ);
 			state->ds.timeSinceZoomStart = 0.0f;
 			state->ds.zoomInProgress = 1;
 			state->ds.zoomFinished = 0;

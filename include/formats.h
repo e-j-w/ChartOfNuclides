@@ -121,10 +121,10 @@ typedef struct
 
 typedef struct
 {
-  float chartPosX, chartPosY, chartZoomScale;
+  float chartPosX, chartPosY, chartZoomScale; //x and y in chart units
   float chartZoomStartScale, chartZoomToScale; //start and target zoom scale
-  float chartZoomStartX, chartZoomToX, chartZoomStartY, chartZoomToY;
-  float chartZoomStartMouseN, chartZoomStartMouseZ;
+  float chartZoomToX, chartZoomToY; //in chart units
+  float chartZoomStartMouseX, chartZoomStartMouseY, chartZoomStartMouseXFrac, chartZoomStartMouseYFrac; //in chart units
   float chartDragStartX, chartDragStartY;
   float chartDragStartMouseX, chartDragStartMouseY; //in scaled pixels
   float timeSinceZoomStart;
@@ -152,11 +152,10 @@ typedef struct
   drawing_state ds;          //the state information for drawing
   char msgBoxHeaderTxt[32]; //text to show at the top of the message box
   char msgBoxTxt[256];      //main text to show in the message box
-  float mouseX, mouseY; //current position of the mouse
-  float mouseWheelPosX, mouseWheelPosY;
-  float mouseHoldStartPosX, mouseHoldStartPosY; //mouse position at the start of the last mouse button down event
-  float mouseClickPosX, mouseClickPosY; //mouse position at the start of a mouse (left) button up event
-  float mouseWheelVal;
+  float mouseXPx, mouseYPx; //current position of the mouse, in pixels
+  float mouseHoldStartPosXPx, mouseHoldStartPosYPx; //mouse position at the start of the last mouse button down event, in pixels
+  float mouseClickPosXPx, mouseClickPosYPx; //mouse position at the start of a mouse (left) button up event, in pixels
+  float mouseWheelVal; //scroll delta, can be very small for subtle touchpad events 
   uint16_t gamepadDeadzone,tmpGamepadDeadzone;
   int16_t lastAxisValX, lastAxisValY; //used to mask out spurious events in the gamepad axis deadzone
   uint8_t activeAxis; //the last used analog stick axis
