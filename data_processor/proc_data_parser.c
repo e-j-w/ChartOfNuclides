@@ -372,7 +372,7 @@ void parseHalfLife(level * lev, char * ltstring){
 
 	strcpy(str,ltstring);
 	tok = strtok (str, " ?");
-	if((tok == NULL)){
+	if(tok == NULL){
 		return;
 	}
 	strcpy(val[numTok],tok);
@@ -446,7 +446,7 @@ void parseSpinPar(level * lev, char * spstring){
 	//check for invalid strings
 	strcpy(str,spstring);
 	tok = strtok (str, " ");
-	if((tok == NULL)){
+	if(tok == NULL){
 		//printf("energy %f, strings: %s,%s\n",lev->energy,spstring,tok);
 		//printf("Not a valid spin-parity value.\n");
 		//getc(stdin);

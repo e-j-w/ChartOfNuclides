@@ -110,7 +110,7 @@ SDL_FColor getHalfLifeCol(const double halflifeSeconds){
 void drawNuclBoxLabel(const drawing_state *restrict ds, resource_data *restrict rdat, const float xPos, const float yPos, SDL_Color col, const uint16_t N, const uint16_t Z, const uint32_t nuclInd){
   if(ds->chartZoomScale >= 8.0f){
     float numLblWidth = drawTextFromCache(rdat,xPos,yPos,col,ALIGN_LEFT,(uint16_t)(N+Z)); //draw number label
-    drawTextFromCache(rdat,xPos+(int)numLblWidth+2,yPos+10,col,ALIGN_LEFT,MAX_MASS_NUM+Z); //draw element label
+    drawTextFromCache(rdat,xPos+numLblWidth+2.0f,yPos+10.0f,col,ALIGN_LEFT,MAX_MASS_NUM+Z); //draw element label
     if(ds->chartZoomScale >= 12.0f){
       drawTextFromCache(rdat,xPos,yPos+36,col,ALIGN_LEFT,MAX_MASS_NUM+MAX_PROTON_NUM+MAX_PROTON_NUM+nuclInd); //draw half-life label
     }

@@ -3,6 +3,7 @@
 
 #include "io_ops.h"
 #include "data_ops.h"
+#include "gui_constants.h"
 
 //CONFIG FILE FUNCTIONS
 //Functions handling reading/writing the .ini file containing game settings
@@ -59,6 +60,32 @@ static int readConfigFile(FILE *file, app_state *restrict state){
           printf("WARNING: invalid window y-resolution (%i) in config file, setting to default.\n",res);
           state->ds.windowYRes = MIN_RENDER_HEIGHT;
         }
+      }else if(strcmp(par,"chart_pos_x") == 0){
+        float posx = (float)atof(val);
+        if((posx>=0.0f)&&(posx<=MAX_NEUTRON_NUM)){
+          state->ds.chartPosX = posx;
+        }else{
+          printf("WARNING: invalid chart x-position (%f) in config file, setting to default.\n",(double)posx);
+          state->ds.chartPosX = 90.0f;
+        }
+      }else if(strcmp(par,"chart_pos_y") == 0){
+        float posy = (float)atof(val);
+        if((posy>=0.0f)&&(posy<=MAX_PROTON_NUM)){
+          state->ds.chartPosY = posy;
+        }else{
+          printf("WARNING: invalid chart y-position (%f) in config file, setting to default.\n",(double)posy);
+          state->ds.chartPosY = 55.0f;
+        }
+      }else if(strcmp(par,"zoom_scale") == 0){
+        float zs = (float)atof(val);
+        if((zs>=MIN_CHART_ZOOM_SCALE)&&(zs<=MAX_CHART_ZOOM_SCALE)){
+          state->ds.chartZoomScale = zs;
+        }else{
+          printf("WARNING: invalid chart zoom scale (%f) in config file, setting to default.\n",(double)zs);
+          state->ds.chartZoomScale = 1.0f;
+        }
+        state->ds.chartZoomToScale = state->ds.chartZoomScale;
+	      state->ds.chartZoomStartScale = state->ds.chartZoomScale;
       }else if(strcmp(par,"gamepad_deadzone") == 0){
         int dz = atoi(val);
         if((dz > 1000)&&(dz < 32768)){
@@ -89,6 +116,11 @@ static int writeConfigFile(FILE *file, const app_rules *restrict rules, const ap
   //fprintf(file,"# Windowed resolution: 0 = 1280 x 720, 1 = 1920 x 1080\n");
   fprintf(file,"window_res_x=%i\n",state->ds.windowXRes);
   fprintf(file,"window_res_y=%i\n",state->ds.windowYRes);
+
+  fprintf(file,"\n### Display Settings ###\n");
+  fprintf(file,"chart_pos_x=%0.3f\n",(double)state->ds.chartPosX);
+  fprintf(file,"chart_pos_y=%0.3f\n",(double)state->ds.chartPosY);
+  fprintf(file,"zoom_scale=%0.3f\n",(double)state->ds.chartZoomScale);
 
   fprintf(file,"\n### Gamepad Settings ###\n");
   fprintf(file,"gamepad_deadzone=%i\n",state->gamepadDeadzone);

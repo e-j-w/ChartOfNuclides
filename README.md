@@ -14,9 +14,9 @@ The goal is to develop a program that will be useful in both professional (nucle
 
 TBD
 
-## How to Install
+## Installing from source
 
-### Dependencies
+### Build dependencies
 
 * gcc (or clang if the Makefile is edited)
 * make
@@ -26,8 +26,27 @@ TBD
 
 The current version has been tested under Arch Linux as of May 2024.
 
-### Instructions
+### Build instructions
 
-TBD.
+The program relies on additional data files, which can be obtained from TBD.
 
-For now SDL3 and its libraries probably have to be compiled manually, as they aren't (yet) packaged for major Linux distros.
+Install all build dependencies listed above.  For now SDL3 and its libraries probably have to be compiled manually, as they aren't (yet) packaged for major Linux distros.
+
+First, run `make` in the source root directory. Two execulatables will be built: `proc_data` (which generates the data package `con.dat` used by the main application), and `con` (the main application). Generate the packaged data file (`con.dat`) by running: 
+
+```
+./proc_data
+```
+
+This will build the data package file `con.dat`. Then, the main application can be run:
+
+```
+./con
+```
+
+## Keyboard shortcuts
+
+| Key        | Action |
+| :--------- | :----- |
+| F11        | Toggle fullscreen mode |
+| P          | Toggle performance stats debug overlay |
