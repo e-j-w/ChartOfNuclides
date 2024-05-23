@@ -45,6 +45,9 @@
 
 #define MAXNUMPARSERVALS 10 //maximum number of values that can parsed at once on a line
 
+#define NUMSHELLCLOSURES 7
+static const uint16_t shellClosureValues[NUMSHELLCLOSURES] = {2,8,20,28,50,82,126};
+
 //structures
 typedef struct
 {

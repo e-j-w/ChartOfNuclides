@@ -57,13 +57,14 @@ static const uint8_t UITHEME_ICON_TILE_Y[NUM_THEME_ICONS] = {10,10,10};
 #define MESSAGE_BOX_OK_BUTTON_YB     (3*UI_PADDING_SIZE)
 
 //chart of nuclides
-#define DEFAULT_NUCLBOX_DIM          8.0f
-#define MIN_CHART_ZOOM_SCALE         0.5f
-#define MAX_CHART_ZOOM_SCALE         32.0f
-#define CHART_ZOOM_TIME              0.2f //time (in seconds) for the zoom animation to finish
-#define NUCLBOX_NAME_MARGIN          1 //in scaled pixels
-#define CHART_PAN_SPEED              200.0f //tiles/second (scaled by zoom factor)
-#define CHART_AXIS_DEPTH             40.0f //in scaled pixels
+#define DEFAULT_NUCLBOX_DIM                8.0f
+#define MIN_CHART_ZOOM_SCALE               0.5f
+#define MAX_CHART_ZOOM_SCALE               32.0f
+#define CHART_ZOOM_TIME                    0.2f //time (in seconds) for the zoom animation to finish
+#define NUCLBOX_NAME_MARGIN                1 //in scaled pixels
+#define CHART_PAN_SPEED                    200.0f //tiles/second (scaled by zoom factor)
+#define CHART_AXIS_DEPTH                   40.0f //in scaled pixels
+#define CHART_SHELLCLOSURELINE_THICKNESS   3.0f
 
 //performance overlay
 #define PERF_OVERLAY_BUTTON_X_ANCHOR  16
@@ -71,6 +72,7 @@ static const uint8_t UITHEME_ICON_TILE_Y[NUM_THEME_ICONS] = {10,10,10};
 #define PERF_OVERLAY_Y_SPACING        28
 
 //colors for drawing
+static const SDL_FColor blackCol = {0.0f,0.0f,0.0f,1.0f};
 static const SDL_FColor grayCol = {0.5f,0.5f,0.5f,1.0f};
 static const SDL_FColor redCol = {1.0f,0.0f,0.0f,1.0f};
 static const SDL_FColor whiteTransparentCol = {1.0f,1.0f,1.0f,0.7f};

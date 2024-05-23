@@ -153,6 +153,30 @@ void drawChartOfNuclides(const app_data *restrict dat, const app_state *restrict
     }
   }
 
+  //draw shell closure lines
+  //some fudging of line positions was needed to fix alignment with fractional scaling
+  SDL_FColor scCol = blackCol;
+  scCol.a = (state->ds.chartZoomScale/4.0f) - 0.25f;
+  if(scCol.a > 0.0f){
+    if(scCol.a > 1.0f){
+      scCol.a = 1.0f;
+    }
+    for(uint8_t i=0; i<NUMSHELLCLOSURES; i++){
+      if(shellClosureValues[i] >= (minX - 1.0f)){
+        if(shellClosureValues[i] <= (maxX + 1.0f)){
+          drawLine(rdat,(shellClosureValues[i] - minX)*DEFAULT_NUCLBOX_DIM*state->ds.chartZoomScale - 0.5f*CHART_SHELLCLOSURELINE_THICKNESS,0.0f,(shellClosureValues[i] - minX)*DEFAULT_NUCLBOX_DIM*state->ds.chartZoomScale - 0.5f*CHART_SHELLCLOSURELINE_THICKNESS,state->ds.windowYRes,CHART_SHELLCLOSURELINE_THICKNESS,scCol,scCol);
+          drawLine(rdat,(shellClosureValues[i] - minX + 1.0f)*DEFAULT_NUCLBOX_DIM*state->ds.chartZoomScale - 0.5f*CHART_SHELLCLOSURELINE_THICKNESS,0.0f,(shellClosureValues[i] - minX + 1.0f)*DEFAULT_NUCLBOX_DIM*state->ds.chartZoomScale - 0.5f*CHART_SHELLCLOSURELINE_THICKNESS,state->ds.windowYRes,CHART_SHELLCLOSURELINE_THICKNESS,scCol,scCol);
+        }
+      }
+      if(shellClosureValues[i] >= (minY - 1.0f)){
+        if(shellClosureValues[i] <= (maxY + 1.0f)){
+          drawLine(rdat,0.0f,(maxY - shellClosureValues[i])*DEFAULT_NUCLBOX_DIM*state->ds.chartZoomScale + CHART_SHELLCLOSURELINE_THICKNESS,state->ds.windowXRes,(maxY - shellClosureValues[i])*DEFAULT_NUCLBOX_DIM*state->ds.chartZoomScale + CHART_SHELLCLOSURELINE_THICKNESS,CHART_SHELLCLOSURELINE_THICKNESS,scCol,scCol);
+          drawLine(rdat,0.0f,(maxY - shellClosureValues[i] + 1.0f)*DEFAULT_NUCLBOX_DIM*state->ds.chartZoomScale + 0.5f*CHART_SHELLCLOSURELINE_THICKNESS,state->ds.windowXRes,(maxY - shellClosureValues[i] + 1.0f)*DEFAULT_NUCLBOX_DIM*state->ds.chartZoomScale + 0.5f*CHART_SHELLCLOSURELINE_THICKNESS,CHART_SHELLCLOSURELINE_THICKNESS,scCol,scCol);
+        }
+      }
+    }
+  }
+
   //draw x and y axes
   rect.w = state->ds.windowXRenderRes;
   rect.h = CHART_AXIS_DEPTH*rdat->uiScale;
