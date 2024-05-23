@@ -139,7 +139,7 @@ void drawChartOfNuclides(const app_data *restrict dat, const app_state *restrict
             //draw nuclide on chart
             rect.x = ((float)dat->ndat.nuclData[i].N - minX)*rect.w;
             rect.y = (maxY - (float)dat->ndat.nuclData[i].Z)*rect.h;
-            //printf("N: %i, Z: %i, pos: [%0.2f %0.2f %0.2f %0.2f]\n",dat->ndat.nuclData[i].N,dat->ndat.nuclData[i].Z,(double)rect.x,(double)rect.y,(double)rect.w,(double)rect.h);
+            //printf("N: %i, Z: %i, i: %i, pos: [%0.2f %0.2f %0.2f %0.2f]\n",dat->ndat.nuclData[i].N,dat->ndat.nuclData[i].Z,i,(double)rect.x,(double)rect.y,(double)rect.w,(double)rect.h);
             const double hl = getNuclGSHalfLifeSeconds(&dat->ndat,(uint16_t)i);
             drawFlatRect(rdat,rect,getHalfLifeCol(hl));
             if(state->ds.chartZoomScale >= 4.0f){
@@ -288,7 +288,11 @@ void drawUI(const app_data *restrict dat, app_state *restrict state, resource_da
     drawMessageBox(dat,state,rdat);
   }
 
-  
-  
+  if(state->ds.uiAnimPlaying & (1U << UIANIM_CHART_FADEIN)){
+    
+    SDL_FColor white = {1.0f,1.0f,1.0f,1.0f};
+    white.a = (float)(1.0f*juice_smoothStart2(state->ds.timeLeftInUIAnimation[UIANIM_CHART_FADEIN]/UI_ANIM_LENGTH));
+    drawFlatBG(&state->ds,rdat,white);
+  }
   
 }

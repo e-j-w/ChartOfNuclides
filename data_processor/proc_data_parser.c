@@ -376,20 +376,17 @@ void parseHalfLife(level * lev, char * ltstring){
 		return;
 	}
 	strcpy(val[numTok],tok);
-	while (tok != NULL)
-	{
-		tok = strtok (NULL, " ?");
-		if(tok!=NULL)
-			{
-				numTok++;
-				if(numTok<MAXNUMPARSERVALS){
-					strcpy(val[numTok],tok);
-				}else{
-					numTok--;
-					break;
-				}
-					
-			}
+	while(tok != NULL){
+		tok = strtok(NULL, " ?");
+		if(tok!=NULL){
+      numTok++;
+      if(numTok<MAXNUMPARSERVALS){
+        strcpy(val[numTok],tok);
+      }else{
+        numTok--;
+        break;
+      }
+    }
 	}
 	numTok++;
 
@@ -432,8 +429,6 @@ void parseHalfLife(level * lev, char * ltstring){
 			printf("Unknown half-life unit: %s (full string: %s)\n",val[1],ltstring);
 		}
 	}
-
-	
 
 }
 
@@ -825,16 +820,27 @@ void getNuclNZ(nucl *nuc, const char *nucName){
 			Z=110;
 		else if(strcmp(tok,"RG")==0)
 			Z=111;
+    else if(strcmp(tok,"CN")==0)
+			Z=112;
+    else if(strcmp(tok,"NH")==0)
+			Z=113;
+    else if(strcmp(tok,"FL")==0)
+			Z=114;
+    else if(strcmp(tok,"MC")==0)
+			Z=115;
+    else if(strcmp(tok,"LV")==0)
+			Z=116;
+    else if(strcmp(tok,"TS")==0)
+			Z=117;
+    else if(strcmp(tok,"OG")==0)
+			Z=118;
+    else if(strcmp(tok,"NN")==0)
+      Z=0;
 		else
 			Z=-1;
 
 		//get neutron number
-		if(strcmp(tok,"NN")==0){
-			N=2;
-			Z=A-N;
-		}else{
-			N=A-Z;
-		}
+    N=A-Z;
 	}else{
 		Z=-1;
 		N=-1;
@@ -947,15 +953,16 @@ int readENSDFFile(const char * filePath, ndata * nd){
 			memcpy(ebuff, &line[9], 9);
 			ebuff[9] = '\0';
 
-			//add gamma levels
+			//add levels
 			if(nd->numNucl>=0){ //check that indices are valid
 				if(strncmp(val[0],nuclNameStr,10)==0){
-					if(subSec==0){ //adopted gamma levels subsection
+					if(subSec==0){ //adopted levels subsection
 						if(nd->numLvls<MAXNUMLVLS){
 							if(strcmp(typebuff," L")==0){
 
 								float levelE = (float)atof(ebuff);
-								//printf("Found gamma level at %f keV.\n",atof(ebuff));
+                //printf("%s\n",line);
+                //printf("Found level at %f keV.\n",atof(ebuff));
 								//parse the energy error
 								char eebuff[3];
 								memcpy(eebuff, &line[19], 2);
@@ -972,12 +979,14 @@ int readENSDFFile(const char * filePath, ndata * nd){
 									char spbuff[16];
 									memcpy(spbuff, &line[21], 15);
 									spbuff[15] = '\0';
+                  //printf("%s\n",spbuff);
 									parseSpinPar(&nd->levels[nd->numLvls],spbuff);
 									//parse the half-life imformation
-									char ltbuff[11];
-									memcpy(ltbuff, &line[39], 10);
-									ltbuff[10] = '\0';
-									parseHalfLife(&nd->levels[nd->numLvls],ltbuff);
+									char hlbuff[11];
+									memcpy(hlbuff, &line[39], 10);
+									hlbuff[10] = '\0';
+                  //printf("%s\n",hlbuff);
+									parseHalfLife(&nd->levels[nd->numLvls],hlbuff);
 									nd->nuclData[nd->numNucl].numLevels++;
 									nd->numLvls++;
 								}
@@ -990,7 +999,7 @@ int readENSDFFile(const char * filePath, ndata * nd){
 			if(nd->numNucl>=0) //check that indices are valid
 				if(nd->nuclData[nd->numNucl].numLevels>0) //check that indices are valid
 					if(strcmp(val[0],nuclNameStr)==0)
-						if(subSec==0)//adopted gamma levels subsection
+						if(subSec==0)//adopted levels subsection
 							if(nd->levels[nd->numLvls-1].numTransitions<MAXGAMMASPERLEVEL)
 								if(strcmp(typebuff," G")==0){
 									//parse the gamma intensity
@@ -1010,7 +1019,7 @@ int readENSDFFile(const char * filePath, ndata * nd){
 			//add Q-values and separation energies
 			if(nd->numNucl>=0){ //check that indices are valid
 				if(strcmp(val[0],nuclNameStr)==0)
-					if(subSec==0)//adopted gamma levels subsection
+					if(subSec==0)//adopted levels subsection
 						if(strcmp(typebuff," Q")==0){
 							if(firstQLine==1){
 								//parse the beta Q-value

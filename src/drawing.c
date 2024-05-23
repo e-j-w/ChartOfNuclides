@@ -382,14 +382,18 @@ void generateTextCache(const app_data *restrict dat, resource_data *restrict rda
     cacheInd++;
 	}
   for(uint16_t i=0; i< MAXNUMNUCL; i++){
-    uint16_t gsInd = getNuclGSLevInd(&dat->ndat,i);
-    if(dat->ndat.levels[(int)(dat->ndat.nuclData[i].firstLevel + gsInd)].halfLifeUnit == HALFLIFE_UNIT_STABLE){
-      snprintf(tmpStr,32,"STABLE");
-    }else if(dat->ndat.levels[(int)(dat->ndat.nuclData[i].firstLevel + gsInd)].halfLife > 0.0f){
-      if(dat->ndat.levels[(int)(dat->ndat.nuclData[i].firstLevel + gsInd)].halfLife < 1000.0f){
-        snprintf(tmpStr,32,"%0.1f %s",(double)(dat->ndat.levels[(int)(dat->ndat.nuclData[i].firstLevel + gsInd)].halfLife),getHalfLifeUnitShortStr(dat->ndat.levels[(int)(dat->ndat.nuclData[i].firstLevel + gsInd)].halfLifeUnit));
+    if(dat->ndat.nuclData[i].numLevels > 0){
+      uint16_t gsInd = getNuclGSLevInd(&dat->ndat,i);
+      if(dat->ndat.levels[(int)(dat->ndat.nuclData[i].firstLevel + gsInd)].halfLifeUnit == HALFLIFE_UNIT_STABLE){
+        snprintf(tmpStr,32,"STABLE");
+      }else if(dat->ndat.levels[(int)(dat->ndat.nuclData[i].firstLevel + gsInd)].halfLife > 0.0f){
+        if(dat->ndat.levels[(int)(dat->ndat.nuclData[i].firstLevel + gsInd)].halfLife < 1000.0f){
+          snprintf(tmpStr,32,"%0.1f %s",(double)(dat->ndat.levels[(int)(dat->ndat.nuclData[i].firstLevel + gsInd)].halfLife),getHalfLifeUnitShortStr(dat->ndat.levels[(int)(dat->ndat.nuclData[i].firstLevel + gsInd)].halfLifeUnit));
+        }else{
+          snprintf(tmpStr,32,"%0.1e %s",(double)(dat->ndat.levels[(int)(dat->ndat.nuclData[i].firstLevel + gsInd)].halfLife),getHalfLifeUnitShortStr(dat->ndat.levels[(int)(dat->ndat.nuclData[i].firstLevel + gsInd)].halfLifeUnit));
+        }
       }else{
-        snprintf(tmpStr,32,"%0.1e %s",(double)(dat->ndat.levels[(int)(dat->ndat.nuclData[i].firstLevel + gsInd)].halfLife),getHalfLifeUnitShortStr(dat->ndat.levels[(int)(dat->ndat.nuclData[i].firstLevel + gsInd)].halfLifeUnit));
+        snprintf(tmpStr,32," ");
       }
     }else{
       snprintf(tmpStr,32," ");

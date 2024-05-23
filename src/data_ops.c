@@ -154,7 +154,7 @@ void setupMessageBox(app_state *restrict state, const char *headerTxt, const cha
 const char* getElemStr(const uint8_t Z){
 	switch(Z){
 		case 0:
-			return "Neutron";
+			return "n";
 		case 1:
 			return "H";
 		case 2:
@@ -499,9 +499,14 @@ double getNuclGSHalfLifeSeconds(const ndata *restrict nd, const uint16_t nuclInd
 	//try the first few levels, and take the first one with a known half-life
 	//this is done in case there are low lying levels with unknown lifetime listed first
 	for(uint16_t i=0; i<10; i++){
-		double hl = getNuclLevelHalfLifeSeconds(nd,nuclInd,i);
-		if(hl >= -1.0){
-			return hl;
+		if(i<nd->nuclData[nuclInd].numLevels){
+			double hl = getNuclLevelHalfLifeSeconds(nd,nuclInd,i);
+			//printf("nuclInd: %u, i: %u, hl: %f\n",nuclInd,i,hl);
+			if(hl >= -1.0){
+				return hl;
+			}
+		}else{
+			break;
 		}
 	}
 	return -2.0; //couldn't find half-life
@@ -511,9 +516,13 @@ uint16_t getNuclGSLevInd(const ndata *restrict nd, const uint16_t nuclInd){
 	//try the first few levels, and take the first one with a known half-life
 	//this is done in case there are low lying levels with unknown lifetime listed first
 	for(uint16_t i=0; i<10; i++){
-		double hl = getNuclLevelHalfLifeSeconds(nd,nuclInd,i);
-		if(hl >= -1.0){
-			return i;
+		if(i<nd->nuclData[nuclInd].numLevels){
+			double hl = getNuclLevelHalfLifeSeconds(nd,nuclInd,i);
+			if(hl >= -1.0){
+				return i;
+			}
+		}else{
+			break;
 		}
 	}
 	return 0; //couldn't find half-life, assume first state listed is ground state

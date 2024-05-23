@@ -133,6 +133,8 @@ int main(int argc, char *argv[]){
     printf("Disabling gamepad/gamepad from command line option.\n");
     gdat->state.gamepadDisabled = 1;
   }
+
+  startUIAnimation(&gdat->state.ds,UIANIM_CHART_FADEIN);
   
   //main loop
   while(!gdat->state.quitAppFlag){
