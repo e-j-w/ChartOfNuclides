@@ -266,9 +266,9 @@ void generateCascadeData(ndata *nd){
 	  for(i=0;i<nd->numNucl;i++){
 			nd->nuclData[i].numCascades=0;//initialize properly
 			for(j=0;j<nd->nuclData[i].numLevels;j++){
-				for(k=0;k<nd->levels[(int)(nd->nuclData[i].firstLevel) + j].numTransitions;k++){
+				for(k=0;k<nd->levels[(int)(nd->nuclData[i].firstLevel) + j].numTran;k++){
 					//check whether the level decays to another level
-					float trialLevelE = nd->levels[(int)(nd->nuclData[i].firstLevel) + j].energy - nd->transitions[(int)(nd->levels[(int)(nd->nuclData[i].firstLevel) + j].firstTransition) + k].energy;
+					float trialLevelE = nd->levels[(int)(nd->nuclData[i].firstLevel) + j].energy - nd->tran[(int)(nd->levels[(int)(nd->nuclData[i].firstLevel) + j].firstTran) + k].energy;
 					for(l=0;l<j;l++)
 						if(fudgeNumbers(trialLevelE, nd->levels[(int)(nd->nuclData[i].firstLevel) + l].energy, 2.)==1){
 								
@@ -440,7 +440,7 @@ void parseSpinPar(level * lev, char * spstring){
 	int i,j;
 	int numTok=0;
 
-	lev->numspinparvals=0;
+	lev->numSpinParVals=0;
 	//printf("--------\nstring: %s\n",spstring);
 
 	//check for invalid strings
@@ -492,19 +492,19 @@ void parseSpinPar(level * lev, char * spstring){
 	if(numTok<=0){
 		return;
 	}else if(strcmp(val[0],"GE")==0){
-		lev->spval[lev->numspinparvals].tentative = 3;
-		lev->spval[lev->numspinparvals].spinVal = (int16_t)atoi(val[1]);
-		lev->numspinparvals=1;
+		lev->spval[lev->numSpinParVals].tentative = 3;
+		lev->spval[lev->numSpinParVals].spinVal = (int16_t)atoi(val[1]);
+		lev->numSpinParVals=1;
 		return;
 	}else if((strcmp(val[0],"+")==0)&&(numTok==1)){
-		lev->spval[lev->numspinparvals].parVal = 1;
-		lev->spval[lev->numspinparvals].spinVal = -1;
-		lev->numspinparvals=1;
+		lev->spval[lev->numSpinParVals].parVal = 1;
+		lev->spval[lev->numSpinParVals].spinVal = -1;
+		lev->numSpinParVals=1;
 		return;
 	}else if((strcmp(val[0],"-")==0)&&(numTok==1)){
-		lev->spval[lev->numspinparvals].parVal = -1;
-		lev->spval[lev->numspinparvals].spinVal = -1;
-		lev->numspinparvals=1;
+		lev->spval[lev->numSpinParVals].parVal = -1;
+		lev->spval[lev->numSpinParVals].spinVal = -1;
+		lev->numSpinParVals=1;
 		return;
 	}else{
 		for(i=0;i<numTok;i++){
@@ -533,18 +533,18 @@ void parseSpinPar(level * lev, char * spstring){
 						//contains parity info
 						tok=strtok(val[i],"/(0123456789, ");
 						if((strcmp(tok,"+")==0)||(strcmp(tok,"+)")==0)){
-							lev->spval[lev->numspinparvals].parVal = 1;
+							lev->spval[lev->numSpinParVals].parVal = 1;
 						}else if((strcmp(tok,"-")==0)||(strcmp(tok,"-)")==0)){
-							lev->spval[lev->numspinparvals].parVal = -1;
+							lev->spval[lev->numSpinParVals].parVal = -1;
 						}else if(strcmp(tok,")-")==0){
 							//all spin values negative parity
-							for(j=0;j<=lev->numspinparvals;j++){
+							for(j=0;j<=lev->numSpinParVals;j++){
 								lev->spval[j].parVal = -1;
 								tentative = 2;
 							}
 						}else if(strcmp(tok,")+")==0){
 							//all spin values positive parity
-							for(j=0;j<=lev->numspinparvals;j++){
+							for(j=0;j<=lev->numSpinParVals;j++){
 								lev->spval[j].parVal = 1;
 								tentative = 2;
 							}
@@ -553,7 +553,7 @@ void parseSpinPar(level * lev, char * spstring){
 				}
 
 				//extract spin
-				lev->spval[lev->numspinparvals].spinVal = -1; //default to unknown spin
+				lev->spval[lev->numSpinParVals].spinVal = -1; //default to unknown spin
 				strcpy(tmpstr,val[i]);
 				tok=strtok(tmpstr,"()+-, ");
 				if(tok!=NULL){
@@ -561,20 +561,20 @@ void parseSpinPar(level * lev, char * spstring){
 					tok=strtok(tok,"/");
 					if(strcmp(tok,tmpstr2)!=0){
 						//printf("Detected half-integer spin.\n");
-						lev->spval[lev->numspinparvals].halfInt = 1;
-						lev->spval[lev->numspinparvals].spinVal=(int16_t)atoi(tok);
+						lev->spval[lev->numSpinParVals].halfInt = 1;
+						lev->spval[lev->numSpinParVals].spinVal=(int16_t)atoi(tok);
 					}else{
-						lev->spval[lev->numspinparvals].spinVal=(int16_t)atoi(tmpstr2);
+						lev->spval[lev->numSpinParVals].spinVal=(int16_t)atoi(tmpstr2);
 					}
 				}
 
-				lev->spval[lev->numspinparvals].tentative = tentative;
-				lev->numspinparvals++;
+				lev->spval[lev->numSpinParVals].tentative = tentative;
+				lev->numSpinParVals++;
 
-				//printf("%f keV Entry %i: spin %i (half-int %i), parity %i, tentative %i\n",lev->energy,lev->numspinparvals,lev->spval[lev->numspinparvals-1].spinVal,lev->spval[lev->numspinparvals-1].halfInt,lev->spval[lev->numspinparvals-1].parVal,lev->spval[lev->numspinparvals-1].tentative);
+				//printf("%f keV Entry %i: spin %i (half-int %i), parity %i, tentative %i\n",lev->energy,lev->numSpinParVals,lev->spval[lev->numSpinParVals-1].spinVal,lev->spval[lev->numSpinParVals-1].halfInt,lev->spval[lev->numSpinParVals-1].parVal,lev->spval[lev->numSpinParVals-1].tentative);
 			}
 		}
-		//printf("number of spin vals: %i\n",lev->numspinparvals);
+		//printf("number of spin vals: %i\n",lev->numSpinParVals);
 		
 	}
 
@@ -852,25 +852,28 @@ void getNuclNZ(nucl *nuc, const char *nucName){
 }
 
 //set initial databae values prior to importing data
-void initialize_database(ndata * nd) 
-{
-	int i;
+void initialize_database(ndata * nd){
 	
 	memset(nd,0,sizeof(ndata));
 	
 	nd->numNucl = -1;
 	nd->numLvls = 0;
 	nd->numTran = 0;
-	for(i=0;i<MAXNUMNUCL;i++){
+	for(uint32_t i=0;i<MAXNUMNUCL;i++){
 		nd->nuclData[i].numLevels = 0;
 	}
+	for(uint32_t i=0;i<MAXNUMLVLS;i++){
+		nd->levels[i].numDecModes = -1; //default if no decay mode info in data
+	}
+	
 }
 
 //checks whether a string is all whitespace and returns 1 if true
-int isEmpty(const char *str) {
-  while (*str != '\0') {
-    if (!isspace((unsigned char)*str))
-      return 0;
+int isEmpty(const char *str){
+  while(*str != '\0'){
+    if(!isspace((unsigned char)*str)){
+			return 0;
+		}
     str++;
   }
   return 1;
@@ -880,7 +883,7 @@ int isEmpty(const char *str) {
 int readENSDFFile(const char * filePath, ndata * nd){
 
   FILE *config;
-  char *tok;
+  char *tok, *tok2;
   char str[256];//string to be read from file (will be tokenized)
   char nuclNameStr[10];
   char line[256],val[MAXNUMPARSERVALS][256];
@@ -908,12 +911,11 @@ int readENSDFFile(const char * filePath, ndata * nd){
 				subSec++; //empty line, increment which subsection we're on
 				firstQLine = 1;
 			}else{
-				tok=strtok (str," ");
+				tok=strtok(str," ");
 				tokPos=0;
 				strcpy(val[tokPos],tok);
-				while (tok != NULL)
-				{
-					tok = strtok (NULL, " ");
+				while (tok != NULL){
+					tok = strtok(NULL, " ");
 					if(tok!=NULL){
 						tokPos++;
 						if(tokPos<MAXNUMPARSERVALS)
@@ -962,19 +964,124 @@ int readENSDFFile(const char * filePath, ndata * nd){
 
 								float levelE = (float)atof(ebuff);
                 //printf("%s\n",line);
+								if(line[9]=='%'){
+									//line contains decay mode info
+									uint8_t decModCtr = 0;
+									nd->levels[nd->numLvls].numDecModes = 0;
+									nd->levels[nd->numLvls].firstDecMode = nd->numDecModes;
+									char dmBuff[128], valBuff[16];
+									memcpy(dmBuff, &line[9], 127);
+									dmBuff[127] = '\0';
+									tok = strtok(dmBuff," =");
+									while(tok!=NULL){
+										//printf("tok at start: %s\n",tok);
+										if(strcmp(tok,"%IT")==0){
+											nd->dcyMode[nd->numDecModes].type = DECAYMODE_IT;
+										}else if(strcmp(tok,"%B-")==0){
+											nd->dcyMode[nd->numDecModes].type = DECAYMODE_BETAMINUS;
+										}else if(strcmp(tok,"%B+")==0){
+											nd->dcyMode[nd->numDecModes].type = DECAYMODE_BETAPLUS;
+										}else if(strcmp(tok,"%EC")==0){
+											nd->dcyMode[nd->numDecModes].type = DECAYMODE_EC;
+										}else if(strcmp(tok,"%EC+%B+")==0){
+											nd->dcyMode[nd->numDecModes].type = DECAYMODE_ECANDBETAPLUS;
+										}else if(strcmp(tok,"%B-N")==0){
+											nd->dcyMode[nd->numDecModes].type = DECAYMODE_BETAMINUS_NEUTRON;
+										}else if(strcmp(tok,"%ECP")==0){
+											nd->dcyMode[nd->numDecModes].type = DECAYMODE_EC_PROTON;
+										}else if(strcmp(tok,"%P")==0){
+											nd->dcyMode[nd->numDecModes].type = DECAYMODE_PROTON;
+										}else if(strcmp(tok,"%2P")==0){
+											nd->dcyMode[nd->numDecModes].type = DECAYMODE_TWOPROTON;
+										}else if(strcmp(tok,"%N")==0){
+											nd->dcyMode[nd->numDecModes].type = DECAYMODE_NEUTRON;
+										}else if(strcmp(tok,"%D")==0){
+											nd->dcyMode[nd->numDecModes].type = DECAYMODE_DEUTERON;
+										}else if(strcmp(tok,"%3HE")==0){
+											nd->dcyMode[nd->numDecModes].type = DECAYMODE_3HE;
+										}else if(strcmp(tok,"%A")==0){
+											nd->dcyMode[nd->numDecModes].type = DECAYMODE_ALPHA;
+										}else{
+											break;
+										}
+										tok = strtok(NULL,"$");
+										if(tok!=NULL){
+											//printf("%s\n",tok);
+											strncpy(valBuff,tok,15);
+											tok2 = strtok(valBuff," ");
+											if(tok2 != NULL){
+												//printf("%s\n",tok2);
+												if(strcmp(tok2,"GT")==0){
+													nd->dcyMode[nd->numDecModes].probType = VALUETYPE_GREATERTHAN;
+													tok2 = strtok(NULL," ");
+												}else if(strcmp(tok2,"GT")==0){
+													nd->dcyMode[nd->numDecModes].probType = VALUETYPE_GREATERTHAN;
+													tok2 = strtok(NULL," ");
+												}else if(strcmp(tok2,"GE")==0){
+													nd->dcyMode[nd->numDecModes].probType = VALUETYPE_GREATEROREQUALTHAN;
+													tok2 = strtok(NULL," ");
+												}else if(strcmp(tok2,"LT")==0){
+													nd->dcyMode[nd->numDecModes].probType = VALUETYPE_LESSTHAN;
+													tok2 = strtok(NULL," ");
+												}else if(strcmp(tok2,"LE")==0){
+													nd->dcyMode[nd->numDecModes].probType = VALUETYPE_LESSOREQUALTHAN;
+													tok2 = strtok(NULL," ");
+												}else if(strcmp(tok2,"AP")==0){
+													nd->dcyMode[nd->numDecModes].probType = VALUETYPE_APPROX;
+													tok2 = strtok(NULL," ");
+												}else if(strcmp(tok2,"?")==0){
+													nd->dcyMode[nd->numDecModes].probType = VALUETYPE_UNKNOWN;
+													tok2 = strtok(NULL," ");
+												}
+												if(tok2!=NULL){
+													//printf("%s\n",tok2);
+													nd->dcyMode[nd->numDecModes].prob = (float)atof(tok2);
+													tok2 = strtok(NULL,""); //get the rest of the string
+													if(tok2 != NULL){
+														//printf("%s\n",tok2);
+														nd->dcyMode[nd->numDecModes].probErr = (uint8_t)atoi(tok2);
+													}
+												}
+												
+											}
+											
+											//printf("Found decay with type %u and probability: %f %u (type %u)\n",nd->dcyMode[nd->numDecModes].type,(double)nd->dcyMode[nd->numDecModes].prob,nd->dcyMode[nd->numDecModes].probErr,nd->dcyMode[nd->numDecModes].probType);
+											nd->levels[nd->numLvls].numDecModes++;
+											nd->numDecModes++;
+											decModCtr++;
+											//go to the next decay mode
+											memcpy(dmBuff, &line[9], 127);
+											dmBuff[127] = '\0';
+											tok = strtok(dmBuff,"$");
+											for(uint8_t i=0;i<(decModCtr-1);i++){
+												if(tok!=NULL){
+													//printf("tok %u: %s\n",i,tok);
+													tok = strtok(NULL,"$");
+												}
+											}
+											if(tok!=NULL){
+												//printf("tok: %s\n",tok);
+												tok = strtok(NULL," =");
+											}
+										}
+									}
+									//getc(stdin);
+								}
+								
+
                 //printf("Found level at %f keV.\n",atof(ebuff));
 								//parse the energy error
-								char eebuff[3];
-								memcpy(eebuff, &line[19], 2);
-								eebuff[2] = '\0';
-								int16_t levelEerr = (int16_t)atoi(eebuff);
+								char eeBuff[3];
+								memcpy(eeBuff, &line[19], 2);
+								eeBuff[2] = '\0';
+								uint8_t levelEerr = (uint8_t)atoi(eeBuff);
 								if((nd->nuclData[nd->numNucl].numLevels==0)||(levelE>(nd->levels[nd->numLvls-1].energy))){
 									//the level energy represents a new level
 									if(nd->nuclData[nd->numNucl].numLevels == 0){
 										nd->nuclData[nd->numNucl].firstLevel = nd->numLvls;
 									}
 									nd->levels[nd->numLvls].energy=levelE;
-									nd->levels[nd->numLvls].energyerr=levelEerr;
+									nd->levels[nd->numLvls].energyErr=levelEerr;
 									//parse the level spin and parity
 									char spbuff[16];
 									memcpy(spbuff, &line[21], 15);
@@ -982,11 +1089,11 @@ int readENSDFFile(const char * filePath, ndata * nd){
                   //printf("%s\n",spbuff);
 									parseSpinPar(&nd->levels[nd->numLvls],spbuff);
 									//parse the half-life imformation
-									char hlbuff[11];
-									memcpy(hlbuff, &line[39], 10);
-									hlbuff[10] = '\0';
-                  //printf("%s\n",hlbuff);
-									parseHalfLife(&nd->levels[nd->numLvls],hlbuff);
+									char hlBuff[11];
+									memcpy(hlBuff, &line[39], 10);
+									hlBuff[10] = '\0';
+                  //printf("%s\n",hlBuff);
+									parseHalfLife(&nd->levels[nd->numLvls],hlBuff);
 									nd->nuclData[nd->numNucl].numLevels++;
 									nd->numLvls++;
 								}
@@ -996,26 +1103,31 @@ int readENSDFFile(const char * filePath, ndata * nd){
 				}
 			}
 			//add gamma rays
-			if(nd->numNucl>=0) //check that indices are valid
-				if(nd->nuclData[nd->numNucl].numLevels>0) //check that indices are valid
-					if(strcmp(val[0],nuclNameStr)==0)
-						if(subSec==0)//adopted levels subsection
-							if(nd->levels[nd->numLvls-1].numTransitions<MAXGAMMASPERLEVEL)
+			if(nd->numNucl>=0){ //check that indices are valid
+				if(nd->nuclData[nd->numNucl].numLevels>0){ //check that indices are valid
+					if(strcmp(val[0],nuclNameStr)==0){
+						if(subSec==0){ //adopted levels subsection
+							if(nd->levels[nd->numLvls-1].numTran<MAXGAMMASPERLEVEL){
 								if(strcmp(typebuff," G")==0){
 									//parse the gamma intensity
-									char ibuff[8];
-									memcpy(ibuff, &line[21], 7);
-									ibuff[7] = '\0';
-									if(nd->levels[nd->numLvls-1].numTransitions == 0){
-										nd->levels[nd->numLvls-1].firstTransition = nd->numTran;
+									char iBuff[8];
+									memcpy(iBuff, &line[21], 7);
+									iBuff[7] = '\0';
+									if(nd->levels[nd->numLvls-1].numTran == 0){
+										nd->levels[nd->numLvls-1].firstTran = nd->numTran;
 									}
-									nd->transitions[(int)(nd->levels[nd->numLvls-1].firstTransition) + nd->levels[nd->numLvls-1].numTransitions].energy=(float)atof(ebuff);
+									nd->tran[(int)(nd->levels[nd->numLvls-1].firstTran) + nd->levels[nd->numLvls-1].numTran].energy=(float)atof(ebuff);
 									//printf("-> Found gamma ray with energy %f keV.\n",atof(ebuff));
-									nd->transitions[(int)(nd->levels[nd->numLvls-1].firstTransition) + nd->levels[nd->numLvls-1].numTransitions].intensity=(float)atof(ibuff);
-									nd->levels[nd->numLvls-1].numTransitions++;
+									nd->tran[(int)(nd->levels[nd->numLvls-1].firstTran) + nd->levels[nd->numLvls-1].numTran].intensity=(float)atof(iBuff);
+									nd->levels[nd->numLvls-1].numTran++;
 									nd->numTran++;
 										
 								}
+							}
+						}
+					}
+				}
+			}
 			//add Q-values and separation energies
 			if(nd->numNucl>=0){ //check that indices are valid
 				if(strcmp(val[0],nuclNameStr)==0)
@@ -1023,32 +1135,32 @@ int readENSDFFile(const char * filePath, ndata * nd){
 						if(strcmp(typebuff," Q")==0){
 							if(firstQLine==1){
 								//parse the beta Q-value
-								char qbbuff[11];
-								memcpy(qbbuff, &line[9], 10);
-								qbbuff[10] = '\0';
+								char qbBuff[11];
+								memcpy(qbBuff, &line[9], 10);
+								qbBuff[10] = '\0';
 								
-								nd->nuclData[nd->numNucl].qbeta = (float)atof(qbbuff);
+								nd->nuclData[nd->numNucl].qbeta = (float)atof(qbBuff);
 
 								//parse the neutron sep energy
-								char nsbuff[9];
-								memcpy(nsbuff, &line[21], 8);
-								nsbuff[8] = '\0';
+								char nsBuff[9];
+								memcpy(nsBuff, &line[21], 8);
+								nsBuff[8] = '\0';
 
-								nd->nuclData[nd->numNucl].sn = (float)atof(nsbuff);
+								nd->nuclData[nd->numNucl].sn = (float)atof(nsBuff);
 
 								//parse the proton sep energy
-								char psbuff[9];
-								memcpy(psbuff, &line[31], 8);
-								psbuff[8] = '\0';
+								char psBuff[9];
+								memcpy(psBuff, &line[31], 8);
+								psBuff[8] = '\0';
 
-								nd->nuclData[nd->numNucl].sp = (float)atof(psbuff);
+								nd->nuclData[nd->numNucl].sp = (float)atof(psBuff);
 
 								//parse the alpha Q-value
-								char qabuff[9];
-								memcpy(qabuff, &line[41], 8);
-								qabuff[8] = '\0';
+								char qaBuff[9];
+								memcpy(qaBuff, &line[41], 8);
+								qaBuff[8] = '\0';
 								
-								nd->nuclData[nd->numNucl].qalpha = (float)atof(qabuff);
+								nd->nuclData[nd->numNucl].qalpha = (float)atof(qaBuff);
 							}
 							firstQLine = 0;
 						}
@@ -1088,7 +1200,7 @@ int buildENSDFDatabase(const char *appBasePath, ndata *nd){
 		strcat(filePath,str);
 		if(readENSDFFile(filePath,nd) == -1) return -1; //grab data from the ENSDF file (see parse_ENSDF.c)
 	}
-	printf("Data imported for %i nuclei, containing %u levels and %u transitions.\n",nd->numNucl,nd->numLvls,nd->numTran);
+	printf("Data imported for %i nuclei, containing %u levels, %u transitions, and %u decay branches.\n",nd->numNucl,nd->numLvls,nd->numTran,nd->numDecModes);
 	printf("Generating cascade data.\n");
 	generateCascadeData(nd);
 	

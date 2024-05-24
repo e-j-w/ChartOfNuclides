@@ -36,9 +36,10 @@
 #define MAXCASCDESPERNUCL 50
 #define MAXGAMMASPERLEVEL 10
 #define MAXSPPERLEVEL 3
-#define MAXNUMNUCL 3500
-#define MAXNUMLVLS 200000
-#define MAXNUMTRAN 300000
+#define MAXNUMNUCL               3500
+#define MAXNUMLVLS               200000
+#define MAXNUMTRAN               300000
+#define MAXNUMDECAYMODES         6000
 #define MAX_NEUTRON_NUM          200
 #define MAX_PROTON_NUM           130
 #define MAX_MASS_NUM             350
@@ -58,6 +59,14 @@ typedef struct
 
 typedef struct
 {
+  float prob;
+  uint8_t probErr;
+  uint8_t probType;
+  uint8_t type; //values from decay_mode_enum
+}decayMode; //decay mode for level
+
+typedef struct
+{
   int16_t spinVal; //the spin value (-1 if unknown)
   uint8_t halfInt; //if spin-parity value is half integer (1=true, in this case spinVal is multiplied by 0.5)
   int8_t parVal;  //the parity value (1 if positive, -1 if negative, 0 if unknown)
@@ -74,14 +83,17 @@ typedef struct
 typedef struct
 {
   float energy; //level energy in keV
-  int16_t energyerr; //energy uncertainty value
+  uint8_t energyErr; //energy uncertainty value
   float halfLife; //level half-life (-1 if unknown)
   uint8_t halfLifeUnit; //units for level half-life (values from halflife_unit_enum)
   int16_t halfLifeErr; //hal-life uncertainty value
-  int16_t numspinparvals; //number of assigned spin parity values
+  int16_t numSpinParVals; //number of assigned spin parity values
   spinparval spval[MAXSPPERLEVEL]; //assinged spin parity value(s) 
-  int16_t numTransitions; //number of gamma rays in this level
-  uint32_t firstTransition; //index of first transition from this level
+  int16_t numTran; //number of gamma rays in this level
+  uint32_t firstTran; //index of first transition from this level
+  int8_t numDecModes; //-1 by default for no decay modes specified (assume 100% IT in that case)
+  uint32_t firstDecMode;
+  float decayProb[DECAYMODE_ENUM_LENGTH]; //% probability of each decay mode for this level
 }level; //an individual excited level
 
 typedef struct
@@ -101,9 +113,11 @@ typedef struct
   int16_t numNucl; //number of nuclides for which data is stored (-1 if no nuclides)
   uint32_t numLvls; //number of levels across all nuclides
   uint32_t numTran; //number of transitions across all levels
+  uint32_t numDecModes; //number of decay modes across all levels
   nucl nuclData[MAXNUMNUCL]; //data for individual nuclides
   level levels[MAXNUMLVLS]; //levels belonging to nuclides
-  transition transitions[MAXNUMTRAN]; //transitions between levels
+  transition tran[MAXNUMTRAN]; //transitions between levels
+  decayMode dcyMode[MAXNUMDECAYMODES]; //decay modes of levels
 }ndata; //complete set of gamma data for all nuclides
 
 
