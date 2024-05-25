@@ -360,74 +360,137 @@ void generateCascadeData(ndata *nd){
 
 
 //parse half-life values for a given level
-void parseHalfLife(level * lev, char * ltstring){
+void parseHalfLife(level * lev, char * hlstring){
 
 	char *tok;
-	char str[256], val[MAXNUMPARSERVALS][256];
-	int numTok=0;
-
-	lev->halfLife = -1.0f;
-	lev->halfLifeErr = -1.0f;
-  lev->halfLifeUnit=HALFLIFE_UNIT_NOVAL;
-
-	strcpy(str,ltstring);
-	tok = strtok (str, " ?");
-	if(tok == NULL){
-		return;
-	}
-	strcpy(val[numTok],tok);
-	while(tok != NULL){
-		tok = strtok(NULL, " ?");
-		if(tok!=NULL){
-      numTok++;
-      if(numTok<MAXNUMPARSERVALS){
-        strcpy(val[numTok],tok);
-      }else{
-        numTok--;
-        break;
+  char hlAndUnitVal[11]; //both the half-life and its unit
+  char hlVal[11], hlUnitVal[4];
+  char hlErrVal[7];
+  hlVal[0] = '\0';
+  hlUnitVal[0] = '\0';
+  hlErrVal[0] = '\0';
+  memcpy(hlAndUnitVal,&hlstring[0],10);
+  hlAndUnitVal[10] = '\0'; //terminate string
+  tok = strtok(hlAndUnitVal, " ");
+  if(tok!=NULL){
+    //printf("%s\n",tok);
+    strcpy(hlVal,tok);
+    tok = strtok(NULL, "");
+    if(tok!=NULL){
+      //printf("%s\n",tok);
+      memcpy(hlUnitVal,tok,3);
+      for(uint8_t i=0;i<3;i++){
+        if(isspace(hlUnitVal[i])){
+          hlUnitVal[i] = '\0'; //terminate string at first space
+        }
       }
     }
-	}
-	numTok++;
+  }
+  memcpy(hlErrVal,&hlstring[10],6);
+  hlErrVal[6] = '\0'; //terminate string
 
-	if(strcmp(val[1],"STABLE")==0){
+	lev->halfLife = -1.0f;
+	lev->halfLifeErr = -1;
+  lev->halfLifeFormat = 0;
+  lev->halfLifeUnit=HALFLIFE_UNIT_NOVAL;
+
+  //printf("%s\n",hlstring);
+  //printf("hlVal = %s, hlUnitVal = %s, hlErrVal = %s\n",hlVal,hlUnitVal,hlErrVal);
+
+	if(strcmp(hlVal,"")==0){
+    //printf("Couldn't parse half-life info from string: %s\n",hlstring);
+    return;
+  }else if(strcmp(hlVal,"?")==0){
+		return; //no measured value
+	}else if(strcmp(hlVal,"STABLE")==0){
 		lev->halfLife = 1.0E20f;
 		lev->halfLifeUnit = HALFLIFE_UNIT_STABLE;
 	}else{
-		lev->halfLife = (float)atof(val[0]);
-		if(lev->halfLife<=0.0f){
-			lev->halfLifeUnit = HALFLIFE_UNIT_STABLE;
-		}else if(strcmp(val[1],"Y")==0){
-			lev->halfLifeUnit = HALFLIFE_UNIT_YEARS;
-		}else if(strcmp(val[1],"D")==0){
-			lev->halfLifeUnit = HALFLIFE_UNIT_DAYS;
-		}else if(strcmp(val[1],"H")==0){
-			lev->halfLifeUnit = HALFLIFE_UNIT_HOURS;
-		}else if(strcmp(val[1],"M")==0){
-			lev->halfLifeUnit = HALFLIFE_UNIT_MINUTES;
-		}else if(strcmp(val[1],"S")==0){
-			lev->halfLifeUnit = HALFLIFE_UNIT_SECONDS;
-		}else if(strcmp(val[1],"MS")==0){
-			lev->halfLifeUnit = HALFLIFE_UNIT_MILLISECONDS;
-		}else if(strcmp(val[1],"US")==0){
-			lev->halfLifeUnit = HALFLIFE_UNIT_MICROSECONDS;
-		}else if(strcmp(val[1],"NS")==0){
-			lev->halfLifeUnit = HALFLIFE_UNIT_NANOSECONDS;
-		}else if(strcmp(val[1],"PS")==0){
-			lev->halfLifeUnit = HALFLIFE_UNIT_PICOSECONDS;
-		}else if(strcmp(val[1],"FS")==0){
-			lev->halfLifeUnit = HALFLIFE_UNIT_FEMTOSECONDS;
-		}else if(strcmp(val[1],"AS")==0){
-			lev->halfLifeUnit = HALFLIFE_UNIT_ATTOSECONDS;
-		}else if(strcmp(val[1],"EV")==0){
-			lev->halfLifeUnit = HALFLIFE_UNIT_EV;
-		}else if(strcmp(val[1],"KEV")==0){
-			lev->halfLifeUnit = HALFLIFE_UNIT_KEV;
-		}else if(strcmp(val[1],"MEV")==0){
-			lev->halfLifeUnit = HALFLIFE_UNIT_MEV;
-		}else{
-			printf("Unknown half-life unit: %s (full string: %s)\n",val[1],ltstring);
-		}
+		lev->halfLife = (float)atof(hlVal);
+    tok = strtok(hlVal,".");
+    if(tok!=NULL){
+      //printf("%s\n",tok);
+      tok = strtok(NULL,"E+-");
+      if(tok!=NULL){
+        //printf("%s\n",tok);
+        lev->halfLifeFormat = (uint8_t)strlen(tok);
+        if(lev->halfLifeFormat > 15U){
+          lev->halfLifeFormat = 15U; //only 4 bits available for precision
+        }
+        tok = strtok(NULL,""); //get the rest of the string (the part after the exponent, if it exists)
+        if(tok!=NULL){
+          //printf("%s\n",tok);
+          //value was in exponent format
+          lev->halfLifeFormat |= (uint8_t)(1U << 4);
+        }
+      }else{
+        tok = strtok(hlVal,"E");
+        if(tok!=NULL){
+          tok = strtok(NULL,""); //get the rest of the string (the part after the exponent, if it exists)
+          if(tok!=NULL){
+            //printf("%s\n",tok);
+            //value was in exponent format
+            lev->halfLifeFormat |= (uint8_t)(1U << 4);
+          }
+        }
+      }
+
+    }
+
+    if(lev->halfLife<=0.0f){
+      lev->halfLifeUnit = HALFLIFE_UNIT_STABLE;
+    }else if(strcmp(hlUnitVal,"Y")==0){
+      lev->halfLifeUnit = HALFLIFE_UNIT_YEARS;
+    }else if(strcmp(hlUnitVal,"D")==0){
+      lev->halfLifeUnit = HALFLIFE_UNIT_DAYS;
+    }else if(strcmp(hlUnitVal,"H")==0){
+      lev->halfLifeUnit = HALFLIFE_UNIT_HOURS;
+    }else if(strcmp(hlUnitVal,"M")==0){
+      lev->halfLifeUnit = HALFLIFE_UNIT_MINUTES;
+    }else if(strcmp(hlUnitVal,"S")==0){
+      lev->halfLifeUnit = HALFLIFE_UNIT_SECONDS;
+    }else if(strcmp(hlUnitVal,"MS")==0){
+      lev->halfLifeUnit = HALFLIFE_UNIT_MILLISECONDS;
+    }else if(strcmp(hlUnitVal,"US")==0){
+      lev->halfLifeUnit = HALFLIFE_UNIT_MICROSECONDS;
+    }else if(strcmp(hlUnitVal,"NS")==0){
+      lev->halfLifeUnit = HALFLIFE_UNIT_NANOSECONDS;
+    }else if(strcmp(hlUnitVal,"PS")==0){
+      lev->halfLifeUnit = HALFLIFE_UNIT_PICOSECONDS;
+    }else if(strcmp(hlUnitVal,"FS")==0){
+      lev->halfLifeUnit = HALFLIFE_UNIT_FEMTOSECONDS;
+    }else if(strcmp(hlUnitVal,"AS")==0){
+      lev->halfLifeUnit = HALFLIFE_UNIT_ATTOSECONDS;
+    }else if(strcmp(hlUnitVal,"EV")==0){
+      lev->halfLifeUnit = HALFLIFE_UNIT_EV;
+    }else if(strcmp(hlUnitVal,"KEV")==0){
+      lev->halfLifeUnit = HALFLIFE_UNIT_KEV;
+    }else if(strcmp(hlUnitVal,"MEV")==0){
+      lev->halfLifeUnit = HALFLIFE_UNIT_MEV;
+    }else{
+      printf("Unknown half-life unit: %s (full string: %s)\n",hlUnitVal,hlstring);
+    }
+
+    //check for special value type
+    tok = strtok(hlErrVal, " ");
+    if(tok!=NULL){
+      if(strcmp(tok,"GT")==0){
+        lev->halfLifeFormat |= (uint8_t)(VALUETYPE_GREATERTHAN << 5);
+      }else if(strcmp(tok,"GT")==0){
+        lev->halfLifeFormat |= (uint8_t)(VALUETYPE_GREATERTHAN << 5);
+      }else if(strcmp(tok,"GE")==0){
+        lev->halfLifeFormat |= (uint8_t)(VALUETYPE_GREATEROREQUALTHAN << 5);
+      }else if(strcmp(tok,"LT")==0){
+        lev->halfLifeFormat |= (uint8_t)(VALUETYPE_LESSTHAN << 5);
+      }else if(strcmp(tok,"LE")==0){
+        lev->halfLifeFormat |= (uint8_t)(VALUETYPE_LESSOREQUALTHAN << 5);
+      }else if(strcmp(tok,"AP")==0){
+        lev->halfLifeFormat |= (uint8_t)(VALUETYPE_APPROX << 5);
+      }else if(strcmp(tok,"?")==0){
+        lev->halfLifeFormat |= (uint8_t)(VALUETYPE_UNKNOWN << 5);
+      }
+    }
+    
 	}
 
 }
@@ -1089,9 +1152,9 @@ int readENSDFFile(const char * filePath, ndata * nd){
                   //printf("%s\n",spbuff);
 									parseSpinPar(&nd->levels[nd->numLvls],spbuff);
 									//parse the half-life imformation
-									char hlBuff[11];
-									memcpy(hlBuff, &line[39], 10);
-									hlBuff[10] = '\0';
+									char hlBuff[18];
+									memcpy(hlBuff, &line[39], 17);
+									hlBuff[17] = '\0';
                   //printf("%s\n",hlBuff);
 									parseHalfLife(&nd->levels[nd->numLvls],hlBuff);
 									nd->nuclData[nd->numNucl].numLevels++;
@@ -1216,6 +1279,12 @@ int buildENSDFDatabase(const char *appBasePath, ndata *nd){
 
 //parse all app data
 int parseAppData(app_data *restrict dat, const char *appBasePath){
+
+  //check validity of data format
+  if(VALUETYPE_ENUM_LENGTH > /* DISABLES CODE */ (8)){
+    printf("ERROR: VALUETYPE_ENUM_LENGTH is too long, can't store as 3 bits in a bit pattern (eg. level->halfLifeFormat).\n");
+    return -1;
+  }
 
   asset_mapping *restrict stringIDmap=(asset_mapping*)SDL_calloc(1,sizeof(asset_mapping)); //allocated on heap to not overflow the stack
 

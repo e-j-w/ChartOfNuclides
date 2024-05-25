@@ -386,17 +386,30 @@ void generateTextCache(const app_data *restrict dat, resource_data *restrict rda
       uint16_t gsInd = getNuclGSLevInd(&dat->ndat,i);
       if(dat->ndat.levels[(int)(dat->ndat.nuclData[i].firstLevel + gsInd)].halfLifeUnit == HALFLIFE_UNIT_STABLE){
         snprintf(tmpStr,32,"STABLE");
+      }else if(dat->ndat.levels[(int)(dat->ndat.nuclData[i].firstLevel + gsInd)].halfLifeUnit == HALFLIFE_UNIT_NOVAL){
+        snprintf(tmpStr,32,"Unknown");
       }else if(dat->ndat.levels[(int)(dat->ndat.nuclData[i].firstLevel + gsInd)].halfLife > 0.0f){
-        if(dat->ndat.levels[(int)(dat->ndat.nuclData[i].firstLevel + gsInd)].halfLife < 1000.0f){
-          snprintf(tmpStr,32,"%0.1f %s",(double)(dat->ndat.levels[(int)(dat->ndat.nuclData[i].firstLevel + gsInd)].halfLife),getHalfLifeUnitShortStr(dat->ndat.levels[(int)(dat->ndat.nuclData[i].firstLevel + gsInd)].halfLifeUnit));
+        uint8_t hlPrecision = (uint8_t)(dat->ndat.levels[(int)(dat->ndat.nuclData[i].firstLevel + gsInd)].halfLifeFormat & 15U);
+        uint8_t hlExponent = (uint8_t)((dat->ndat.levels[(int)(dat->ndat.nuclData[i].firstLevel + gsInd)].halfLifeFormat >> 4U) & 1U);
+        uint8_t hlValueType = (uint8_t)((dat->ndat.levels[(int)(dat->ndat.nuclData[i].firstLevel + gsInd)].halfLifeFormat >> 5U) & 7U);
+        if(hlPrecision > 0){
+          if(hlExponent == 0){
+            snprintf(tmpStr,32,"%s%.*f %s",getValueTypeShortStr(hlValueType),hlPrecision,(double)(dat->ndat.levels[(int)(dat->ndat.nuclData[i].firstLevel + gsInd)].halfLife),getHalfLifeUnitShortStr(dat->ndat.levels[(int)(dat->ndat.nuclData[i].firstLevel + gsInd)].halfLifeUnit));
+          }else{
+            snprintf(tmpStr,32,"%s%.*e %s",getValueTypeShortStr(hlValueType),hlPrecision,(double)(dat->ndat.levels[(int)(dat->ndat.nuclData[i].firstLevel + gsInd)].halfLife),getHalfLifeUnitShortStr(dat->ndat.levels[(int)(dat->ndat.nuclData[i].firstLevel + gsInd)].halfLifeUnit));
+          }
         }else{
-          snprintf(tmpStr,32,"%0.1e %s",(double)(dat->ndat.levels[(int)(dat->ndat.nuclData[i].firstLevel + gsInd)].halfLife),getHalfLifeUnitShortStr(dat->ndat.levels[(int)(dat->ndat.nuclData[i].firstLevel + gsInd)].halfLifeUnit));
+          if(hlExponent == 0){
+            snprintf(tmpStr,32,"%s%.0f %s",getValueTypeShortStr(hlValueType),(double)(dat->ndat.levels[(int)(dat->ndat.nuclData[i].firstLevel + gsInd)].halfLife),getHalfLifeUnitShortStr(dat->ndat.levels[(int)(dat->ndat.nuclData[i].firstLevel + gsInd)].halfLifeUnit));
+          }else{
+            snprintf(tmpStr,32,"%s%.0e %s",getValueTypeShortStr(hlValueType),(double)(dat->ndat.levels[(int)(dat->ndat.nuclData[i].firstLevel + gsInd)].halfLife),getHalfLifeUnitShortStr(dat->ndat.levels[(int)(dat->ndat.nuclData[i].firstLevel + gsInd)].halfLifeUnit));
+          }
         }
       }else{
         snprintf(tmpStr,32," ");
       }
     }else{
-      snprintf(tmpStr,32," ");
+      snprintf(tmpStr,32,"Unknown");
     }
     drawTextToCache(rdat,rdat->font,whiteCol8Bit,tmpStr,ALIGN_LEFT,16384,cacheInd);
     //printf("%s\n",tmpStr);

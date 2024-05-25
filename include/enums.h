@@ -92,8 +92,8 @@ DECAYMODE_DEUTERON,
 DECAYMODE_3HE,
 DECAYMODE_ENUM_LENGTH
 };
-enum value_type__enum{
-VALUETYPE_NUMBER,
+enum value_type_enum{
+VALUETYPE_NUMBER, //should always be the first (default) entry in the enum
 VALUETYPE_GREATERTHAN,
 VALUETYPE_GREATEROREQUALTHAN,
 VALUETYPE_LESSTHAN,

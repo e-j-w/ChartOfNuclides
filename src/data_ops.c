@@ -109,7 +109,7 @@ void updateDrawingState(app_state *restrict state, const float deltaTime){
 	}
 	if(state->ds.zoomInProgress){
 		state->ds.timeSinceZoomStart += deltaTime;
-		state->ds.chartZoomScale = state->ds.chartZoomStartScale + ((state->ds.chartZoomToScale - state->ds.chartZoomStartScale)*state->ds.timeSinceZoomStart/CHART_ZOOM_TIME);
+		state->ds.chartZoomScale = state->ds.chartZoomStartScale + ((state->ds.chartZoomToScale - state->ds.chartZoomStartScale)*juice_smoothStop2(state->ds.timeSinceZoomStart/CHART_ZOOM_TIME));
 		//compute new x,y range on each axis at the new zoom scale
 		float xRange = getChartWidthN(&state->ds);
 		float yRange = getChartHeightZ(&state->ds);
@@ -441,6 +441,26 @@ const char* getHalfLifeUnitShortStr(const uint8_t unit){
 		case HALFLIFE_UNIT_MEV:
 			return "MeV";
 		case HALFLIFE_UNIT_NOVAL:
+		default:
+			return "";																						
+	}
+}
+
+const char* getValueTypeShortStr(const uint8_t type){
+	switch(type){
+		case VALUETYPE_APPROX:
+			return "≈ ";
+		case VALUETYPE_GREATERTHAN:
+			return "> ";
+		case VALUETYPE_GREATEROREQUALTHAN:
+			return "≥ ";
+		case VALUETYPE_LESSTHAN:
+			return "< ";
+		case VALUETYPE_LESSOREQUALTHAN:
+			return "≤ ";
+		case VALUETYPE_UNKNOWN:
+			return " ?";
+		case VALUETYPE_NUMBER:
 		default:
 			return "";																						
 	}

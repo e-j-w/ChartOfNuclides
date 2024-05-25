@@ -86,6 +86,7 @@ typedef struct
   uint8_t energyErr; //energy uncertainty value
   float halfLife; //level half-life (-1 if unknown)
   uint8_t halfLifeUnit; //units for level half-life (values from halflife_unit_enum)
+  uint8_t halfLifeFormat; //bits 0-3: number of sig figs after the decimal place, bit 4: whether or not to use exponent, bits:5-7 value type (from value_type_enum);
   int16_t halfLifeErr; //hal-life uncertainty value
   int16_t numSpinParVals; //number of assigned spin parity values
   spinparval spval[MAXSPPERLEVEL]; //assinged spin parity value(s) 

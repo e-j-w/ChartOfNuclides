@@ -18,6 +18,7 @@ void updateDrawingState(app_state *restrict state, const float deltaTime);
 
 const char* getElemStr(const uint8_t Z);
 const char* getHalfLifeUnitShortStr(const uint8_t unit);
+const char* getValueTypeShortStr(const uint8_t type);
 
 double getNuclLevelHalfLifeSeconds(const ndata *restrict nd, const uint16_t nuclInd, const uint16_t nuclLevel);
 double getNuclGSHalfLifeSeconds(const ndata *restrict nd, const uint16_t nuclInd);
