@@ -33,7 +33,6 @@
 //increasing these numbers will increase the size of 
 //the nuclear database stored in memory (and on disk)
 #define MAXCASCDELENGTH 20
-#define MAXCASCDESPERNUCL 50
 #define MAXGAMMASPERLEVEL 10
 #define MAXSPPERLEVEL 3
 #define MAXNUMNUCL               3500
@@ -50,13 +49,6 @@
 static const uint16_t shellClosureValues[NUMSHELLCLOSURES] = {2,8,20,28,50,82,126};
 
 //structures
-typedef struct
-{
-  int16_t numLevels; //number of steps in the cascade
-  float energies[MAXCASCDELENGTH]; //energies of the levels in the cascade in keV
-  float gammaEnergies[MAXCASCDELENGTH];
-}gamma_cascade; //an individual gamma cascade
-
 typedef struct
 {
   float prob;
@@ -106,7 +98,6 @@ typedef struct
   uint32_t firstLevel; //index of first level in this nuclide
   uint16_t numLevels; //number of excited levels in this nuclide
   int16_t numCascades; //number of cascades stored for this nuclide
-  gamma_cascade cascades[MAXCASCDESPERNUCL]; //cascades belonging to the nuclide
 }nucl; //gamma data for a given nuclide
 
 typedef struct

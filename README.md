@@ -32,7 +32,7 @@ The program relies on additional data files, which can be obtained from TBD.
 
 Install all build dependencies listed above.  For now SDL3 and its libraries probably have to be compiled manually, as they aren't (yet) packaged for major Linux distros.
 
-First, run `make` in the source root directory. Two execulatables will be built: `proc_data` (which generates the data package `con.dat` used by the main application), and `con` (the main application). Generate the packaged data file (`con.dat`) by running: 
+First, run `make` in the source root directory. Two executables will be built: `proc_data` (which generates the data package `con.dat` used by the main application), and `con` (the main application). Generate the packaged data file (`con.dat`) by running: 
 
 ```
 ./proc_data
