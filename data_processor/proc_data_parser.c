@@ -172,9 +172,6 @@ static int parseAppRules(app_data *restrict dat, asset_mapping *restrict stringI
   dat->locStringIDs[LOCSTR_APPLY] = (uint16_t)nameToAssetID("apply",stringIDmap);
   dat->locStringIDs[LOCSTR_CANCEL] = (uint16_t)nameToAssetID("cancel",stringIDmap);
   dat->locStringIDs[LOCSTR_OK] = (uint16_t)nameToAssetID("ok",stringIDmap);
-  dat->locStringIDs[LOCSTR_OPENFILE] = (uint16_t)nameToAssetID("open_file",stringIDmap);
-  dat->locStringIDs[LOCSTR_FILE_FILTER_NAME] = (uint16_t)nameToAssetID("file_filter_name",stringIDmap);
-  dat->locStringIDs[LOCSTR_FILE_FILTER_PATTERN] = (uint16_t)nameToAssetID("file_filter_pattern",stringIDmap);
   dat->locStringIDs[LOCSTR_NODB] = (uint16_t)nameToAssetID("no_db",stringIDmap);
 
   return 0; //success
@@ -930,6 +927,8 @@ int readENSDFFile(const char * filePath, ndata * nd){
 											nd->dcyMode[nd->numDecModes].type = DECAYMODE_3HE;
 										}else if(strcmp(tok,"%A")==0){
 											nd->dcyMode[nd->numDecModes].type = DECAYMODE_ALPHA;
+										}else if(strcmp(tok,"%SF")==0){
+											nd->dcyMode[nd->numDecModes].type = DECAYMODE_SPONTANEOUSFISSION;
 										}else{
 											break;
 										}
@@ -1110,12 +1109,11 @@ int readENSDFFile(const char * filePath, ndata * nd){
 
 int buildENSDFDatabase(const char *appBasePath, ndata *nd){
 
-	int i;
 	char filePath[256],str[8];
 	
 	initialize_database(nd);
 	
-	for(i=1;i<350;i++){
+	for(uint16_t i=1;i<350;i++){
 		strcpy(filePath,"");
 		strcat(filePath,appBasePath);
     strcat(filePath,"data/ensdf/");
@@ -1125,18 +1123,37 @@ int buildENSDFDatabase(const char *appBasePath, ndata *nd){
 			strcat(filePath,"ensdf.0");
 		else
 			strcat(filePath,"ensdf.");
-		sprintf(str,"%i",i);
+		sprintf(str,"%u",i);
 		strcat(filePath,str);
-		if(readENSDFFile(filePath,nd) == -1) return -1; //grab data from the ENSDF file (see parse_ENSDF.c)
+		if(readENSDFFile(filePath,nd) == -1){ //grab data from the ENSDF file (see parse_ENSDF.c)
+      return -1;
+    }
 	}
 	printf("Data imported for %i nuclei, containing %u levels, %u transitions, and %u decay branches.\n",nd->numNucl,nd->numLvls,nd->numTran,nd->numDecModes);
 	
+  //post-process the data
+  //find ground state level
+  for(uint16_t i=0;i<nd->numNucl;i++){
+    for(uint16_t j=0; j<nd->nuclData[i].numLevels; j++){
+      double hl = getNuclLevelHalfLifeSeconds(nd,i,j);
+      if(hl >= -1.0){
+        //if(j!=0) printf("GS ind for nucleus %u: %u\n",i,j);
+        if(j>255){
+          printf("WARNING: GS level index for nuclide %u is too high (%u).\n",i,j);
+          nd->nuclData[i].gsLevel = 0;
+        }else{
+          nd->nuclData[i].gsLevel = (uint8_t)j;
+        }
+        break;
+      }
+    }
+  }
+
 	//write the database to disk
-	if(nd->numNucl<=0)
-		{
-			printf("ERROR: no valid ENSDF data was found.\nPlease check that ENSDF files exist in the directory under the ENDSF environment variable.\n");
-			return -1;
-		}
+	if(nd->numNucl<=0){
+    printf("ERROR: no valid ENSDF data was found.\nPlease check that ENSDF files exist in the directory under the ENDSF environment variable.\n");
+    return -1;
+  }
 	printf("ENSDF database build finished.\n");
 	return 0;
 }

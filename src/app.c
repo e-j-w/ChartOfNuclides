@@ -119,7 +119,7 @@ int main(int argc, char *argv[]){
   SDL_SetWindowIcon(gdat->rdat.window,gdat->rdat.iconSurface);
   SDL_SetWindowTitle(gdat->rdat.window,gdat->dat.rules.appName);
 
-  generateTextCache(&gdat->dat,&gdat->rdat); //drawing.c
+  generateTextCache(&gdat->dat,&gdat->rdat); //data_ops.c
 
   //timing
   uint64_t timeNow = SDL_GetPerformanceCounter();

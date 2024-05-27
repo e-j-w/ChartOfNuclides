@@ -85,27 +85,27 @@ typedef struct
   int16_t numTran; //number of gamma rays in this level
   uint32_t firstTran; //index of first transition from this level
   int8_t numDecModes; //-1 by default for no decay modes specified (assume 100% IT in that case)
-  uint32_t firstDecMode;
+  uint16_t firstDecMode;
   float decayProb[DECAYMODE_ENUM_LENGTH]; //% probability of each decay mode for this level
 }level; //an individual excited level
 
 typedef struct
 {
-  int16_t N; //neutrons in nuclide
-  int16_t Z; //protons in nuclide
   float qbeta, qalpha;
   float sp, sn; //proton and neutron separation energies
+  int16_t N; //neutrons in nuclide
+  int16_t Z; //protons in nuclide
   uint32_t firstLevel; //index of first level in this nuclide
   uint16_t numLevels; //number of excited levels in this nuclide
-  int16_t numCascades; //number of cascades stored for this nuclide
+  uint8_t gsLevel; //which level in the nucleus (0 indexed) is the ground state (determined when parsing ENSDF, not always 0)
 }nucl; //gamma data for a given nuclide
 
 typedef struct
 {
-  int16_t numNucl; //number of nuclides for which data is stored (-1 if no nuclides)
   uint32_t numLvls; //number of levels across all nuclides
   uint32_t numTran; //number of transitions across all levels
-  uint32_t numDecModes; //number of decay modes across all levels
+  int16_t numNucl; //number of nuclides for which data is stored (-1 if no nuclides)
+  uint16_t numDecModes; //number of decay modes across all levels
   nucl nuclData[MAXNUMNUCL]; //data for individual nuclides
   level levels[MAXNUMLVLS]; //levels belonging to nuclides
   transition tran[MAXNUMTRAN]; //transitions between levels

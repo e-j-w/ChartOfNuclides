@@ -22,7 +22,6 @@ const char* getValueTypeShortStr(const uint8_t type);
 
 double getNuclLevelHalfLifeSeconds(const ndata *restrict nd, const uint16_t nuclInd, const uint16_t nuclLevel);
 double getNuclGSHalfLifeSeconds(const ndata *restrict nd, const uint16_t nuclInd);
-uint16_t getNuclGSLevInd(const ndata *restrict nd, const uint16_t nuclInd);
 
 float mouseXtoN(const drawing_state *restrict ds, const float mouseX);
 float mouseYtoZ(const drawing_state *restrict ds, const float mouseY);
@@ -37,6 +36,8 @@ void mouseWheelAction(app_state *restrict state);
 
 void changeUIState(app_state *restrict state, const uint8_t newState);
 void uiElemClickAction(app_state *restrict state, const uint8_t uiElemID);
+
+void generateTextCache(const app_data *restrict dat, resource_data *restrict rdat);
 
 void updateWindowRes(const app_data *restrict dat, drawing_state *restrict ds, resource_data *restrict rdat);
 void handleScreenGraphicsMode(const app_data *restrict dat, drawing_state *restrict ds, resource_data *restrict rdat);

@@ -365,57 +365,7 @@ float drawTextFromCache(resource_data *restrict rdat, const float xPos, const fl
   return drawPos.w/rdat->uiScale;
 }
 
-void generateTextCache(const app_data *restrict dat, resource_data *restrict rdat){
-  char tmpStr[32];
-  uint32_t cacheInd = 0;
-	for(uint16_t i=0; i<MAX_MASS_NUM; i++){
-		snprintf(tmpStr,32,"%u",i);
-		drawTextToCache(rdat,rdat->smallFont,whiteCol8Bit,tmpStr,ALIGN_LEFT,16384,cacheInd);
-    cacheInd++;
-	}
-	for(uint8_t i=0; i<MAX_PROTON_NUM; i++){
-		drawTextToCache(rdat,rdat->bigFont,whiteCol8Bit,getElemStr(i),ALIGN_LEFT,16384,cacheInd);
-    cacheInd++;
-	}
-  for(uint8_t i=0; i<MAX_PROTON_NUM; i++){
-		drawTextToCache(rdat,rdat->font,whiteCol8Bit,getElemStr(i),ALIGN_LEFT,16384,cacheInd);
-    cacheInd++;
-	}
-  for(uint16_t i=0; i< MAXNUMNUCL; i++){
-    if(dat->ndat.nuclData[i].numLevels > 0){
-      uint16_t gsInd = getNuclGSLevInd(&dat->ndat,i);
-      if(dat->ndat.levels[(int)(dat->ndat.nuclData[i].firstLevel + gsInd)].halfLifeUnit == HALFLIFE_UNIT_STABLE){
-        snprintf(tmpStr,32,"STABLE");
-      }else if(dat->ndat.levels[(int)(dat->ndat.nuclData[i].firstLevel + gsInd)].halfLifeUnit == HALFLIFE_UNIT_NOVAL){
-        snprintf(tmpStr,32,"Unknown");
-      }else if(dat->ndat.levels[(int)(dat->ndat.nuclData[i].firstLevel + gsInd)].halfLife > 0.0f){
-        uint8_t hlPrecision = (uint8_t)(dat->ndat.levels[(int)(dat->ndat.nuclData[i].firstLevel + gsInd)].halfLifeFormat & 15U);
-        uint8_t hlExponent = (uint8_t)((dat->ndat.levels[(int)(dat->ndat.nuclData[i].firstLevel + gsInd)].halfLifeFormat >> 4U) & 1U);
-        uint8_t hlValueType = (uint8_t)((dat->ndat.levels[(int)(dat->ndat.nuclData[i].firstLevel + gsInd)].halfLifeFormat >> 5U) & 7U);
-        if(hlPrecision > 0){
-          if(hlExponent == 0){
-            snprintf(tmpStr,32,"%s%.*f %s",getValueTypeShortStr(hlValueType),hlPrecision,(double)(dat->ndat.levels[(int)(dat->ndat.nuclData[i].firstLevel + gsInd)].halfLife),getHalfLifeUnitShortStr(dat->ndat.levels[(int)(dat->ndat.nuclData[i].firstLevel + gsInd)].halfLifeUnit));
-          }else{
-            snprintf(tmpStr,32,"%s%.*e %s",getValueTypeShortStr(hlValueType),hlPrecision,(double)(dat->ndat.levels[(int)(dat->ndat.nuclData[i].firstLevel + gsInd)].halfLife),getHalfLifeUnitShortStr(dat->ndat.levels[(int)(dat->ndat.nuclData[i].firstLevel + gsInd)].halfLifeUnit));
-          }
-        }else{
-          if(hlExponent == 0){
-            snprintf(tmpStr,32,"%s%.0f %s",getValueTypeShortStr(hlValueType),(double)(dat->ndat.levels[(int)(dat->ndat.nuclData[i].firstLevel + gsInd)].halfLife),getHalfLifeUnitShortStr(dat->ndat.levels[(int)(dat->ndat.nuclData[i].firstLevel + gsInd)].halfLifeUnit));
-          }else{
-            snprintf(tmpStr,32,"%s%.0e %s",getValueTypeShortStr(hlValueType),(double)(dat->ndat.levels[(int)(dat->ndat.nuclData[i].firstLevel + gsInd)].halfLife),getHalfLifeUnitShortStr(dat->ndat.levels[(int)(dat->ndat.nuclData[i].firstLevel + gsInd)].halfLifeUnit));
-          }
-        }
-      }else{
-        snprintf(tmpStr,32," ");
-      }
-    }else{
-      snprintf(tmpStr,32,"Unknown");
-    }
-    drawTextToCache(rdat,rdat->font,whiteCol8Bit,tmpStr,ALIGN_LEFT,16384,cacheInd);
-    //printf("%s\n",tmpStr);
-    cacheInd++;
-  }
-}
+
 
 //returns the width of the drawn text (can be used for alignment purposes)
 float drawTextAlignedSized(resource_data *restrict rdat, const float xPos, const float yPos, TTF_Font *font, const SDL_Color textColor, const uint8_t alpha, const char *txt, const uint8_t alignment, const Uint32 maxWidth){

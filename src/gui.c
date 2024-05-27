@@ -107,12 +107,22 @@ SDL_FColor getHalfLifeCol(const double halflifeSeconds){
   return col;
 }
 
-void drawNuclBoxLabel(const drawing_state *restrict ds, resource_data *restrict rdat, const float xPos, const float yPos, SDL_Color col, const uint16_t N, const uint16_t Z, const uint32_t nuclInd){
+void drawNuclBoxLabel(const app_data *restrict dat, const drawing_state *restrict ds, resource_data *restrict rdat, const float xPos, const float yPos, SDL_Color col, const uint32_t nuclInd){
+  uint16_t Z = (uint16_t)dat->ndat.nuclData[nuclInd].Z;
   if(ds->chartZoomScale >= 8.0f){
+    uint16_t N = (uint16_t)dat->ndat.nuclData[nuclInd].N;
     float numLblWidth = drawTextFromCache(rdat,xPos,yPos,col,ALIGN_LEFT,(uint16_t)(N+Z)); //draw number label
     drawTextFromCache(rdat,xPos+numLblWidth+2.0f,yPos+10.0f,col,ALIGN_LEFT,MAX_MASS_NUM+Z); //draw element label
     if(ds->chartZoomScale >= 12.0f){
       drawTextFromCache(rdat,xPos,yPos+36,col,ALIGN_LEFT,MAX_MASS_NUM+MAX_PROTON_NUM+MAX_PROTON_NUM+nuclInd); //draw half-life label
+      /*uint32_t gsLevInd = (uint32_t)(dat->ndat.nuclData[nuclInd].firstLevel + dat->ndat.nuclData[nuclInd].gsLevel);
+      if((ds->chartZoomScale >= 20.0f)||(dat->ndat.levels[gsLevInd].numDecModes <= 2)){
+        float yOffset = 60.0f;
+        for(int8_t i=0; i<dat->ndat.levels[gsLevInd].numDecModes; i++){
+          drawTextFromCache(rdat,xPos,yPos+yOffset,col,ALIGN_LEFT,(uint32_t)(MAX_MASS_NUM+MAX_PROTON_NUM+MAX_PROTON_NUM+MAXNUMNUCL+dat->ndat.levels[gsLevInd].firstDecMode + i));
+          yOffset += 20.0f;
+        }
+      }*/
     }
   }else{
     drawTextFromCache(rdat,xPos,yPos,col,ALIGN_LEFT,MAX_MASS_NUM+MAX_PROTON_NUM+Z); //draw element label only
@@ -145,7 +155,7 @@ void drawChartOfNuclides(const app_data *restrict dat, const app_state *restrict
             if(state->ds.chartZoomScale >= 4.0f){
               float txtX = (rect.x/rdat->uiScale + NUCLBOX_NAME_MARGIN*state->ds.chartZoomScale);
               float txtY = (rect.y/rdat->uiScale + NUCLBOX_NAME_MARGIN*state->ds.chartZoomScale);
-              drawNuclBoxLabel(&state->ds,rdat,txtX,txtY,(hl > 1.0E4) ? whiteCol8Bit : blackCol8Bit,(uint16_t)(dat->ndat.nuclData[i].N),(uint16_t)(dat->ndat.nuclData[i].Z),(uint32_t)i);
+              drawNuclBoxLabel(dat,&state->ds,rdat,txtX,txtY,(hl > 1.0E4) ? whiteCol8Bit : blackCol8Bit,(uint32_t)i);
             }
           }
         }

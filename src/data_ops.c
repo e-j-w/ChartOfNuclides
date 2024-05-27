@@ -462,6 +462,41 @@ const char* getValueTypeShortStr(const uint8_t type){
 			return " ?";
 		case VALUETYPE_NUMBER:
 		default:
+			return "";
+	}
+}
+
+const char* getDecayTypeShortStr(const uint8_t type){
+	switch(type){
+		case DECAYMODE_BETAMINUS:
+			return "β-";
+		case DECAYMODE_BETAPLUS:
+			return "β+";
+		case DECAYMODE_ALPHA:
+			return "α";
+		case DECAYMODE_BETAMINUS_NEUTRON:
+			return "β-n";
+		case DECAYMODE_EC:
+			return "ε";
+		case DECAYMODE_EC_PROTON:
+			return "εp";
+		case DECAYMODE_ECANDBETAPLUS:
+			return "ε/β+";
+		case DECAYMODE_IT:
+			return "IT";
+		case DECAYMODE_3HE:
+			return "3He";
+		case DECAYMODE_DEUTERON:
+			return "d";
+		case DECAYMODE_NEUTRON:
+			return "n";
+		case DECAYMODE_PROTON:
+			return "p";
+		case DECAYMODE_TWOPROTON:
+			return "2p";
+		case DECAYMODE_SPONTANEOUSFISSION:
+			return "SF";
+		default:
 			return "";																						
 	}
 }
@@ -516,37 +551,9 @@ double getNuclLevelHalfLifeSeconds(const ndata *restrict nd, const uint16_t nucl
 }
 
 double getNuclGSHalfLifeSeconds(const ndata *restrict nd, const uint16_t nuclInd){
-	//try the first few levels, and take the first one with a known half-life
-	//this is done in case there are low lying levels with unknown lifetime listed first
-	for(uint16_t i=0; i<10; i++){
-		if(i<nd->nuclData[nuclInd].numLevels){
-			double hl = getNuclLevelHalfLifeSeconds(nd,nuclInd,i);
-			//printf("nuclInd: %u, i: %u, hl: %f\n",nuclInd,i,hl);
-			if(hl >= -1.0){
-				return hl;
-			}
-		}else{
-			break;
-		}
-	}
-	return -2.0; //couldn't find half-life
+	return getNuclLevelHalfLifeSeconds(nd,nuclInd,nd->nuclData[nuclInd].gsLevel);
 }
 
-uint16_t getNuclGSLevInd(const ndata *restrict nd, const uint16_t nuclInd){
-	//try the first few levels, and take the first one with a known half-life
-	//this is done in case there are low lying levels with unknown lifetime listed first
-	for(uint16_t i=0; i<10; i++){
-		if(i<nd->nuclData[nuclInd].numLevels){
-			double hl = getNuclLevelHalfLifeSeconds(nd,nuclInd,i);
-			if(hl >= -1.0){
-				return i;
-			}
-		}else{
-			break;
-		}
-	}
-	return 0; //couldn't find half-life, assume first state listed is ground state
-}
 
 float mouseXPxToN(const drawing_state *restrict ds, const float mouseX){
 	return ds->chartPosX + ((mouseX - ds->windowXRes/2.0f)/(DEFAULT_NUCLBOX_DIM*ds->chartZoomScale));
@@ -705,6 +712,74 @@ void updateUIElemPositions(drawing_state *restrict ds){
         break;
     }
   }
+}
+
+void generateTextCache(const app_data *restrict dat, resource_data *restrict rdat){
+  char tmpStr[32];
+  uint32_t cacheInd = 0;
+	//Number strings (small size, for superscripts or subscripts)
+	for(uint16_t i=0; i<MAX_MASS_NUM; i++){
+		snprintf(tmpStr,32,"%u",i);
+		drawTextToCache(rdat,rdat->smallFont,whiteCol8Bit,tmpStr,ALIGN_LEFT,16384,cacheInd);
+    cacheInd++;
+	}
+	//Element strings (large size)
+	for(uint8_t i=0; i<MAX_PROTON_NUM; i++){
+		drawTextToCache(rdat,rdat->bigFont,whiteCol8Bit,getElemStr(i),ALIGN_LEFT,16384,cacheInd);
+    cacheInd++;
+	}
+	//Element strings (normal size) 
+  for(uint8_t i=0; i<MAX_PROTON_NUM; i++){
+		drawTextToCache(rdat,rdat->font,whiteCol8Bit,getElemStr(i),ALIGN_LEFT,16384,cacheInd);
+    cacheInd++;
+	}
+	//GS half-life strings
+  for(uint16_t i=0; i< MAXNUMNUCL; i++){
+    if(dat->ndat.nuclData[i].numLevels > 0){
+      int gsLvlInd = (int)(dat->ndat.nuclData[i].firstLevel + dat->ndat.nuclData[i].gsLevel);
+      if(dat->ndat.levels[gsLvlInd].halfLifeUnit == HALFLIFE_UNIT_STABLE){
+        snprintf(tmpStr,32,"STABLE");
+      }else if(dat->ndat.levels[gsLvlInd].halfLifeUnit == HALFLIFE_UNIT_NOVAL){
+        snprintf(tmpStr,32,"Unknown");
+      }else if(dat->ndat.levels[gsLvlInd].halfLife > 0.0f){
+        uint8_t hlPrecision = (uint8_t)(dat->ndat.levels[gsLvlInd].halfLifeFormat & 15U);
+        uint8_t hlExponent = (uint8_t)((dat->ndat.levels[gsLvlInd].halfLifeFormat >> 4U) & 1U);
+        uint8_t hlValueType = (uint8_t)((dat->ndat.levels[gsLvlInd].halfLifeFormat >> 5U) & 7U);
+        if(hlPrecision > 0){
+          if(hlExponent == 0){
+            snprintf(tmpStr,32,"%s%.*f %s",getValueTypeShortStr(hlValueType),hlPrecision,(double)(dat->ndat.levels[gsLvlInd].halfLife),getHalfLifeUnitShortStr(dat->ndat.levels[gsLvlInd].halfLifeUnit));
+          }else{
+            snprintf(tmpStr,32,"%s%.*e %s",getValueTypeShortStr(hlValueType),hlPrecision,(double)(dat->ndat.levels[gsLvlInd].halfLife),getHalfLifeUnitShortStr(dat->ndat.levels[gsLvlInd].halfLifeUnit));
+          }
+        }else{
+          if(hlExponent == 0){
+            snprintf(tmpStr,32,"%s%.0f %s",getValueTypeShortStr(hlValueType),(double)(dat->ndat.levels[gsLvlInd].halfLife),getHalfLifeUnitShortStr(dat->ndat.levels[gsLvlInd].halfLifeUnit));
+          }else{
+            snprintf(tmpStr,32,"%s%.0e %s",getValueTypeShortStr(hlValueType),(double)(dat->ndat.levels[gsLvlInd].halfLife),getHalfLifeUnitShortStr(dat->ndat.levels[gsLvlInd].halfLifeUnit));
+          }
+        }
+      }else{
+        snprintf(tmpStr,32," ");
+      }
+    }else{
+      snprintf(tmpStr,32,"Unknown");
+    }
+    drawTextToCache(rdat,rdat->font,whiteCol8Bit,tmpStr,ALIGN_LEFT,16384,cacheInd);
+    //printf("%s\n",tmpStr);
+    cacheInd++;
+  }
+	//decay mode strings
+	for(uint16_t i=0; i<dat->ndat.numDecModes; i++){
+		uint8_t decValueType = dat->ndat.dcyMode[i].probType;
+		uint8_t decType = dat->ndat.dcyMode[i].type;
+		if(decValueType == VALUETYPE_NUMBER){
+			snprintf(tmpStr,32,"%s=%.1f",getDecayTypeShortStr(decType),(double)dat->ndat.dcyMode[i].prob);
+		}else{
+			snprintf(tmpStr,32,"%s%s%.1f",getDecayTypeShortStr(decType),getValueTypeShortStr(decValueType),(double)dat->ndat.dcyMode[i].prob);
+		}
+		drawTextToCache(rdat,rdat->font,whiteCol8Bit,tmpStr,ALIGN_LEFT,16384,cacheInd);
+		cacheInd++;
+	}
 }
 
 
