@@ -297,31 +297,31 @@ void drawScreenDimmer(const drawing_state *restrict ds, resource_data *restrict 
 }
 
 //returns the width of text rendered using the specified font
-int getTextWidth(const ui_theme_rules *restrict uirules, resource_data *restrict rdat, const char *txt, TTF_Font *font){
+int getTextWidth(const char *txt, TTF_Font *font){
   SDL_Rect rect;
-  SDL_Surface *textSurface = TTF_RenderUTF8_Solid(font,txt,uirules->textColNormal);
-  rdat->tempTex = SDL_CreateTextureFromSurface(rdat->renderer, textSurface);
-  SDL_DestroySurface(textSurface);
-  SDL_QueryTexture(rdat->tempTex,NULL,NULL,&rect.w,&rect.h);
-  SDL_DestroyTexture(rdat->tempTex);
+  if(TTF_SizeUTF8(font,txt,&rect.w,&rect.h) != 0){
+    printf("WARNING: getTextDim - couldn't get dimensions.\n");
+    rect.w = 0;
+  }
   return rect.w;
 }
-int getDefaultTextWidth(const ui_theme_rules *restrict uirules, resource_data *restrict rdat, const char *txt){
-  return getTextWidth(uirules,rdat,txt,rdat->font);
+int getDefaultTextWidth(resource_data *restrict rdat, const char *txt){
+  return getTextWidth(txt,rdat->font);
 }
 
 //returns the dimensions of text rendered using the specified font
-SDL_Rect getTextDim(const ui_theme_rules *restrict uirules, resource_data *restrict rdat, const char *txt, TTF_Font *font){
+SDL_Rect getTextDim(const char *txt, TTF_Font *font){
+  
   SDL_Rect rect;
-  SDL_Surface *textSurface = TTF_RenderUTF8_Solid(font,txt,uirules->textColNormal);
-  rdat->tempTex = SDL_CreateTextureFromSurface(rdat->renderer, textSurface);
-  SDL_DestroySurface(textSurface);
-  SDL_QueryTexture(rdat->tempTex,NULL,NULL,&rect.w,&rect.h);
-  SDL_DestroyTexture(rdat->tempTex);
+  if(TTF_SizeUTF8(font,txt,&rect.w,&rect.h) != 0){
+    printf("WARNING: getTextDim - couldn't get dimensions.\n");
+    rect.w = 0;
+    rect.h = 0;
+  }
   return rect;
 }
-SDL_Rect getDefaultTextDim(const ui_theme_rules *restrict uirules, resource_data *restrict rdat, const char *txt){
-  return getTextDim(uirules,rdat,txt,rdat->font);
+SDL_Rect getDefaultTextDim(resource_data *restrict rdat, const char *txt){
+  return getTextDim(txt,rdat->font);
 }
 
 //generates a texture in the text texture cache for the suuplied text string

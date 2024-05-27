@@ -773,10 +773,13 @@ void generateTextCache(const app_data *restrict dat, resource_data *restrict rda
 		uint8_t decValueType = dat->ndat.dcyMode[i].probType;
 		uint8_t decType = dat->ndat.dcyMode[i].type;
 		if(decValueType == VALUETYPE_NUMBER){
-			snprintf(tmpStr,32,"%s=%.1f",getDecayTypeShortStr(decType),(double)dat->ndat.dcyMode[i].prob);
+			snprintf(tmpStr,32,"%s=%.0f%%",getDecayTypeShortStr(decType),(double)dat->ndat.dcyMode[i].prob);
+		}else if(decValueType == VALUETYPE_UNKNOWN){
+			snprintf(tmpStr,32,"%s%s",getDecayTypeShortStr(decType),getValueTypeShortStr(decValueType));
 		}else{
-			snprintf(tmpStr,32,"%s%s%.1f",getDecayTypeShortStr(decType),getValueTypeShortStr(decValueType),(double)dat->ndat.dcyMode[i].prob);
+			snprintf(tmpStr,32,"%s %s%.0f%%",getDecayTypeShortStr(decType),getValueTypeShortStr(decValueType),(double)dat->ndat.dcyMode[i].prob);
 		}
+		//printf("%s\n",tmpStr);
 		drawTextToCache(rdat,rdat->font,whiteCol8Bit,tmpStr,ALIGN_LEFT,16384,cacheInd);
 		cacheInd++;
 	}

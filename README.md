@@ -28,7 +28,7 @@ The current version has been tested under Arch Linux as of May 2024.
 
 ### Build instructions
 
-The program relies on additional data files, which can be obtained from TBD.
+The program relies on additional data files, which can be obtained from **TBD**.  The embedded font used needs to support special UTF-8 characters in order to display info such as decay modes correctly.
 
 Install all build dependencies listed above.  For now SDL3 and its libraries probably have to be compiled manually, as they aren't (yet) packaged for major Linux distros.
 

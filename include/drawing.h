@@ -18,11 +18,11 @@ void drawIconButton(const ui_theme_rules *restrict uirules, resource_data *restr
 
 void drawScreenDimmer(const drawing_state *restrict ds, resource_data *restrict rdat, const float alpha);
 
-int getTextWidth(const ui_theme_rules *restrict uirules, resource_data *restrict rdat, const char *txt, TTF_Font *font);
-int getDefaultTextWidth(const ui_theme_rules *restrict uirules, resource_data *restrict rdat, const char *txt);
+int getTextWidth(const char *txt, TTF_Font *font);
+int getDefaultTextWidth(resource_data *restrict rdat, const char *txt);
 
-SDL_Rect getTextDim(const ui_theme_rules *restrict uirules, resource_data *restrict rdat, const char *txt, TTF_Font *font);
-SDL_Rect getDefaultTextDim(const ui_theme_rules *restrict uirules, resource_data *restrict rdat, const char *txt);
+SDL_Rect getTextDim(const char *txt, TTF_Font *font);
+SDL_Rect getDefaultTextDim(resource_data *restrict rdat, const char *txt);
 
 void drawTextToCache(resource_data *restrict rdat, TTF_Font *font, const SDL_Color textColor, const char *txt, const uint8_t wrapAlign, const Uint32 wrapWidth, const uint32_t cacheInd);
 float drawTextFromCache(resource_data *restrict rdat, const float xPos, const float yPos, const SDL_Color colMod, const uint8_t alignment, const uint32_t cacheInd);
