@@ -101,6 +101,11 @@ int main(int argc, char *argv[]){
   SDL_SetRenderDrawBlendMode(gdat->rdat.renderer,SDL_BLENDMODE_BLEND);
   SDL_SetWindowMinimumSize(gdat->rdat.window,MIN_RENDER_WIDTH,MIN_RENDER_HEIGHT);
   SDL_SetWindowMaximumSize(gdat->rdat.window,MAX_RENDER_WIDTH,MAX_RENDER_HEIGHT);
+  //set UI scale
+  int wwidth, wheight, rwidth, rheight;
+  SDL_GetWindowSize(gdat->rdat.window, &wwidth, &wheight);
+  SDL_GetWindowSizeInPixels(gdat->rdat.window, &rwidth, &rheight);
+	gdat->rdat.uiScale = (float)rwidth/((float)wwidth);
   handleScreenGraphicsMode(&gdat->dat,&gdat->state.ds,&gdat->rdat); //handle fullscreen
   gdat->state.ds.forceRedraw = 1; //force draw the first frame
   

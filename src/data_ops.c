@@ -820,7 +820,6 @@ void handleScreenGraphicsMode(const app_data *restrict dat, drawing_state *restr
 
   //handle vsync and frame cap
   SDL_SetRenderVSync(rdat->renderer,1); //vsync always enabled
-  rdat->uiScale = 1.0f;
 
   if(ds->windowFullscreenMode){
     if(SDL_SetWindowFullscreen(rdat->window,SDL_TRUE) != 0){
