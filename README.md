@@ -50,3 +50,8 @@ This will build the data package file `con.dat`. Then, the main application can 
 | :--------- | :----- |
 | F11        | Toggle fullscreen mode |
 | P          | Toggle performance stats debug overlay |
+
+
+## Acknowledgements
+
+Uses a slightly modified version of the [SDL_FontCache](https://github.com/grimfang4/SDL_FontCache) library for fast text rendering.

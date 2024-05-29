@@ -6,7 +6,6 @@
 #include "drawing.h"
 #include "load_data.h"
 #include "gui_constants.h"
-#include "basename.h" //SDL_basename implementation, based on https://github.com/libsdl-org/SDL/issues/7915, remove once this is added to SDL3
 
 //Initializes the temporary (unsaved) portion of the app state.
 void initializeTempState(app_state *restrict state){

@@ -3,8 +3,8 @@ CFLAGS = -O2 -Wall -Wextra -Wpedantic -Wc++-compat -Wdouble-promotion -Wshadow -
 #CFLAGS += $(DEBUG_FLAGS)
 SDL = `pkg-config sdl3 --libs --cflags` -lSDL3_image -lSDL3_ttf
 COMMON = include/formats.h include/enums.h include/gui_constants.h
-OBJ = lib/juicer.o lib/basename.o io_ops.o load_data.o data_ops.o gui.o drawing.o process_events.o
-INC =  -I./include -I./src -I./lib/basename -I./lib/juicer
+OBJ = lib/fontcache.o lib/juicer.o io_ops.o load_data.o data_ops.o gui.o drawing.o process_events.o
+INC =  -I./include -I./src -I./lib/fontcache -I./lib/juicer
 CC = gcc
 #CC = clang
 
@@ -22,8 +22,8 @@ con: src/*.c include/*.h $(OBJ)
 lib/juicer.o: lib/juicer/*.c lib/juicer/*.h
 	$(CC) lib/juicer/juicer.c $(CFLAGS) -c -o lib/juicer.o
 
-lib/basename.o: lib/basename/*.c lib/basename/*.h
-	$(CC) lib/basename/basename.c $(CFLAGS) -c -o lib/basename.o
+lib/fontcache.o: lib/fontcache/*.c lib/fontcache/*.h
+	$(CC) lib/fontcache/SDL_FontCache.c $(CFLAGS) -c -o lib/fontcache.o
 
 io_ops.o: src/io_ops.c include/io_ops.h $(COMMON)
 	$(CC) src/io_ops.c $(INC) $(CFLAGS) -c -o io_ops.o
