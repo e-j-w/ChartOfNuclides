@@ -500,6 +500,41 @@ const char* getDecayTypeShortStr(const uint8_t type){
 	}
 }
 
+void getHalfLifeStr(char strOut[32], const ndata *restrict nd, const uint32_t lev){
+	//are the snprintf lines slow?
+	if(lev < nd->numLvls){
+		if(nd->levels[lev].halfLifeUnit == HALFLIFE_UNIT_STABLE){
+			snprintf(strOut,32,"STABLE");
+		}else if(nd->levels[lev].halfLifeUnit == HALFLIFE_UNIT_NOVAL){
+			snprintf(strOut,32,"Unknown");
+		}else if(nd->levels[lev].halfLife > 0.0f){
+			uint8_t hlPrecision = (uint8_t)(nd->levels[lev].halfLifeFormat & 15U);
+			uint8_t hlExponent = (uint8_t)((nd->levels[lev].halfLifeFormat >> 4U) & 1U);
+			uint8_t hlValueType = (uint8_t)((nd->levels[lev].halfLifeFormat >> 5U) & 7U);
+			if(hlPrecision > 0){
+				if(hlExponent == 0){
+					snprintf(strOut,32,"%s%.*f %s",getValueTypeShortStr(hlValueType),hlPrecision,(double)(nd->levels[lev].halfLife),getHalfLifeUnitShortStr(nd->levels[lev].halfLifeUnit));
+				}else{
+					snprintf(strOut,32,"%s%.*e %s",getValueTypeShortStr(hlValueType),hlPrecision,(double)(nd->levels[lev].halfLife),getHalfLifeUnitShortStr(nd->levels[lev].halfLifeUnit));
+				}
+			}else{
+				if(hlExponent == 0){
+					snprintf(strOut,32,"%s%.0f %s",getValueTypeShortStr(hlValueType),(double)(nd->levels[lev].halfLife),getHalfLifeUnitShortStr(nd->levels[lev].halfLifeUnit));
+				}else{
+					snprintf(strOut,32,"%s%.0e %s",getValueTypeShortStr(hlValueType),(double)(nd->levels[lev].halfLife),getHalfLifeUnitShortStr(nd->levels[lev].halfLifeUnit));
+				}
+			}
+		}else{
+			snprintf(strOut,32," ");
+		}
+	}else{
+		snprintf(strOut,32,"Unknown");
+	}
+}
+void getGSHalfLifeStr(char strOut[32], const ndata *restrict nd, const uint16_t nuclInd){
+	getHalfLifeStr(strOut,nd,nd->nuclData[nuclInd].firstLevel + nd->nuclData[nuclInd].gsLevel);
+}
+
 double getLevelHalfLifeSeconds(const ndata *restrict nd, const uint32_t levelInd){
 	if(levelInd < nd->numLvls){
 		double hl = (double)(nd->levels[levelInd].halfLife);
@@ -713,79 +748,8 @@ void updateUIElemPositions(drawing_state *restrict ds){
   }
 }
 
-void generateTextCache(const app_data *restrict dat, resource_data *restrict rdat){
-  char tmpStr[32];
-  uint32_t cacheInd = 0;
-	//Number strings (small size, for superscripts or subscripts)
-	for(uint16_t i=0; i<MAX_MASS_NUM; i++){
-		snprintf(tmpStr,32,"%u",i);
-		drawTextToCache(rdat,rdat->smallFont,whiteCol8Bit,tmpStr,ALIGN_LEFT,16384,cacheInd);
-    cacheInd++;
-	}
-	//Element strings (large size)
-	for(uint8_t i=0; i<MAX_PROTON_NUM; i++){
-		drawTextToCache(rdat,rdat->bigFont,whiteCol8Bit,getElemStr(i),ALIGN_LEFT,16384,cacheInd);
-    cacheInd++;
-	}
-	//Element strings (normal size) 
-  for(uint8_t i=0; i<MAX_PROTON_NUM; i++){
-		drawTextToCache(rdat,rdat->font,whiteCol8Bit,getElemStr(i),ALIGN_LEFT,16384,cacheInd);
-    cacheInd++;
-	}
-	//GS half-life strings
-  for(uint16_t i=0; i< MAXNUMNUCL; i++){
-    if(dat->ndat.nuclData[i].numLevels > 0){
-      int gsLvlInd = (int)(dat->ndat.nuclData[i].firstLevel + dat->ndat.nuclData[i].gsLevel);
-      if(dat->ndat.levels[gsLvlInd].halfLifeUnit == HALFLIFE_UNIT_STABLE){
-        snprintf(tmpStr,32,"STABLE");
-      }else if(dat->ndat.levels[gsLvlInd].halfLifeUnit == HALFLIFE_UNIT_NOVAL){
-        snprintf(tmpStr,32,"Unknown");
-      }else if(dat->ndat.levels[gsLvlInd].halfLife > 0.0f){
-        uint8_t hlPrecision = (uint8_t)(dat->ndat.levels[gsLvlInd].halfLifeFormat & 15U);
-        uint8_t hlExponent = (uint8_t)((dat->ndat.levels[gsLvlInd].halfLifeFormat >> 4U) & 1U);
-        uint8_t hlValueType = (uint8_t)((dat->ndat.levels[gsLvlInd].halfLifeFormat >> 5U) & 7U);
-        if(hlPrecision > 0){
-          if(hlExponent == 0){
-            snprintf(tmpStr,32,"%s%.*f %s",getValueTypeShortStr(hlValueType),hlPrecision,(double)(dat->ndat.levels[gsLvlInd].halfLife),getHalfLifeUnitShortStr(dat->ndat.levels[gsLvlInd].halfLifeUnit));
-          }else{
-            snprintf(tmpStr,32,"%s%.*e %s",getValueTypeShortStr(hlValueType),hlPrecision,(double)(dat->ndat.levels[gsLvlInd].halfLife),getHalfLifeUnitShortStr(dat->ndat.levels[gsLvlInd].halfLifeUnit));
-          }
-        }else{
-          if(hlExponent == 0){
-            snprintf(tmpStr,32,"%s%.0f %s",getValueTypeShortStr(hlValueType),(double)(dat->ndat.levels[gsLvlInd].halfLife),getHalfLifeUnitShortStr(dat->ndat.levels[gsLvlInd].halfLifeUnit));
-          }else{
-            snprintf(tmpStr,32,"%s%.0e %s",getValueTypeShortStr(hlValueType),(double)(dat->ndat.levels[gsLvlInd].halfLife),getHalfLifeUnitShortStr(dat->ndat.levels[gsLvlInd].halfLifeUnit));
-          }
-        }
-      }else{
-        snprintf(tmpStr,32," ");
-      }
-    }else{
-      snprintf(tmpStr,32,"Unknown");
-    }
-    drawTextToCache(rdat,rdat->font,whiteCol8Bit,tmpStr,ALIGN_LEFT,16384,cacheInd);
-    //printf("%s\n",tmpStr);
-    cacheInd++;
-  }
-	//decay mode strings
-	for(uint16_t i=0; i<dat->ndat.numDecModes; i++){
-		uint8_t decValueType = dat->ndat.dcyMode[i].probType;
-		uint8_t decType = dat->ndat.dcyMode[i].type;
-		if(decValueType == VALUETYPE_NUMBER){
-			snprintf(tmpStr,32,"%s=%.0f%%",getDecayTypeShortStr(decType),(double)dat->ndat.dcyMode[i].prob);
-		}else if(decValueType == VALUETYPE_UNKNOWN){
-			snprintf(tmpStr,32,"%s%s",getDecayTypeShortStr(decType),getValueTypeShortStr(decValueType));
-		}else{
-			snprintf(tmpStr,32,"%s %s%.0f%%",getDecayTypeShortStr(decType),getValueTypeShortStr(decValueType),(double)dat->ndat.dcyMode[i].prob);
-		}
-		//printf("%s\n",tmpStr);
-		drawTextToCache(rdat,rdat->font,whiteCol8Bit,tmpStr,ALIGN_LEFT,16384,cacheInd);
-		cacheInd++;
-	}
-}
 
-
-void updateWindowRes(const app_data *restrict dat, drawing_state *restrict ds, resource_data *restrict rdat){
+void updateWindowRes(app_data *restrict dat, drawing_state *restrict ds, resource_data *restrict rdat){
   int wwidth, wheight;
   int rwidth, rheight;
   SDL_GetWindowSize(rdat->window, &wwidth, &wheight);
@@ -798,12 +762,8 @@ void updateWindowRes(const app_data *restrict dat, drawing_state *restrict ds, r
 		printf("Re-scaling UI from %0.9f to %0.9f.\n",(double)rdat->uiScale,(double)newScale);
 		rdat->uiScale = newScale; //set UI scale properly for HI-DPI
 		if(rdat->font){
-			//rescale fonts as well
-			TTF_SetFontSize(rdat->font,(int)(SMALL_FONT_SIZE*rdat->uiScale));
-			TTF_SetFontSize(rdat->font,(int)(DEFAULT_FONT_SIZE*rdat->uiScale));
-			TTF_SetFontSize(rdat->bigFont,(int)(BIG_FONT_SIZE*rdat->uiScale));
-			TTF_SetFontSize(rdat->hugeFont,(int)(HUGE_FONT_SIZE*rdat->uiScale));
-			generateTextCache(dat,rdat);
+			//rescale fonts as well, this requires loading them from the app data file
+			regenerateFontCache(dat,rdat); //load_data.c
 		}
 	}
   ds->windowXRes = (uint16_t)wwidth;
@@ -815,7 +775,7 @@ void updateWindowRes(const app_data *restrict dat, drawing_state *restrict ds, r
   updateUIElemPositions(ds); //UI element positions
 }
 
-void handleScreenGraphicsMode(const app_data *restrict dat, drawing_state *restrict ds, resource_data *restrict rdat){
+void handleScreenGraphicsMode(app_data *restrict dat, drawing_state *restrict ds, resource_data *restrict rdat){
 
   //handle vsync and frame cap
   SDL_SetRenderVSync(rdat->renderer,1); //vsync always enabled

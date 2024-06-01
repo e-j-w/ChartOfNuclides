@@ -5,7 +5,7 @@
 void shutdownApp(const global_data *gdat, const uint8_t skipDealloc){
   updateConfigFile(gdat->rdat.appBasePath,&gdat->dat.rules,&gdat->state); //save settings to disk
   if(!skipDealloc){
-    TTF_CloseFont(gdat->rdat.font);
+    FC_FreeFont(gdat->rdat.font);
     if(gdat->rdat.fontData!=NULL){
       SDL_free(gdat->rdat.fontData);
     }
@@ -118,13 +118,12 @@ int main(int argc, char *argv[]){
   SDL_RenderPresent(gdat->rdat.renderer); //tell the renderer to actually show the image
 
   //import game data and resources
+  //initial text cache is also gneerated here
   if(importAppData(&gdat->dat,&gdat->rdat)!=0){
     shutdownApp(gdat,1);
   }
   SDL_SetWindowIcon(gdat->rdat.window,gdat->rdat.iconSurface);
   SDL_SetWindowTitle(gdat->rdat.window,gdat->dat.rules.appName);
-
-  generateTextCache(&gdat->dat,&gdat->rdat); //data_ops.c
 
   //timing
   uint64_t timeNow = SDL_GetPerformanceCounter();

@@ -10,5 +10,6 @@
 #include "gui_constants.h"
 
 int importAppData(app_data *restrict dat, resource_data *restrict rdat);
+int regenerateFontCache(app_data *restrict dat, resource_data *restrict rdat);
 
 #endif

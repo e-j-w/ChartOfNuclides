@@ -18,7 +18,9 @@ void updateDrawingState(app_state *restrict state, const float deltaTime);
 
 const char* getElemStr(const uint8_t Z);
 const char* getHalfLifeUnitShortStr(const uint8_t unit);
-const char* getValueTypeShortStr(const uint8_t type);
+const char* getValueTypeShortStr(const uint8_t type);\
+void getHalfLifeStr(char strOut[32], const ndata *restrict nd, const uint32_t lev);
+void getGSHalfLifeStr(char strOut[32], const ndata *restrict nd, const uint16_t nuclInd);
 
 double getNuclLevelHalfLifeSeconds(const ndata *restrict nd, const uint16_t nuclInd, const uint16_t nuclLevel);
 double getNuclGSHalfLifeSeconds(const ndata *restrict nd, const uint16_t nuclInd);
@@ -37,9 +39,7 @@ void mouseWheelAction(app_state *restrict state);
 void changeUIState(app_state *restrict state, const uint8_t newState);
 void uiElemClickAction(app_state *restrict state, const uint8_t uiElemID);
 
-void generateTextCache(const app_data *restrict dat, resource_data *restrict rdat);
-
-void updateWindowRes(const app_data *restrict dat, drawing_state *restrict ds, resource_data *restrict rdat);
-void handleScreenGraphicsMode(const app_data *restrict dat, drawing_state *restrict ds, resource_data *restrict rdat);
+void updateWindowRes(app_data *restrict dat, drawing_state *restrict ds, resource_data *restrict rdat);
+void handleScreenGraphicsMode(app_data *restrict dat, drawing_state *restrict ds, resource_data *restrict rdat);
 
 #endif

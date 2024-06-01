@@ -13,6 +13,8 @@
 #include <SDL3_image/SDL_image.h>
 #include <SDL3_ttf/SDL_ttf.h>
 
+#include "SDL_FontCache.h"
+
 #include "enums.h"
 
 //minimum dimensions of the window
@@ -22,9 +24,6 @@
 //maximum dimensions of the window
 #define MAX_RENDER_WIDTH  16384
 #define MAX_RENDER_HEIGHT 16384
-
-//texture cache parameters
-#define TEXT_TEX_CACHE_SIZE 8192
 
 //app data parameters (should all be powers of 2)
 #define MAX_ARRAY_SIZE                 65536
@@ -184,13 +183,13 @@ typedef struct
 
 typedef struct
 {
+  size_t fontOffset; //data file offset for the embedded font
   float uiScale; //scaling factor for UI, in units of 32px
   SDL_Surface *iconSurface; //surface for the application icon
   SDL_Texture *uiThemeTex; //the main texture atlas
-  SDL_Texture *textTexCache[TEXT_TEX_CACHE_SIZE]; //cached textures for text rendering
   SDL_Texture *tempTex; //used to store temporary texture data during draw operations
   //using different fonts (rather than resizing a single font) decreases CPU usage at the expense of memory
-  TTF_Font *smallFont, *font, *bigFont, *hugeFont; //the default font (in 3 sizes)
+  FC_Font *smallFont, *font, *bigFont, *hugeFont; //the default font (in 3 sizes)
   void *fontData; //memory adresses of the font data (must stay alive as long as fonts are used)
   SDL_Gamepad *gamepad;
   SDL_Renderer *renderer;

@@ -18,18 +18,9 @@ void drawIconButton(const ui_theme_rules *restrict uirules, resource_data *restr
 
 void drawScreenDimmer(const drawing_state *restrict ds, resource_data *restrict rdat, const float alpha);
 
-int getTextWidth(const char *txt, TTF_Font *font);
-int getDefaultTextWidth(resource_data *restrict rdat, const char *txt);
-
-SDL_Rect getTextDim(const char *txt, TTF_Font *font);
-SDL_Rect getDefaultTextDim(resource_data *restrict rdat, const char *txt);
-
-void drawTextToCache(resource_data *restrict rdat, TTF_Font *font, const SDL_Color textColor, const char *txt, const uint8_t wrapAlign, const Uint32 wrapWidth, const uint32_t cacheInd);
-float drawTextFromCache(resource_data *restrict rdat, const float xPos, const float yPos, const SDL_Color colMod, const uint8_t alignment, const uint32_t cacheInd);
-
-float drawTextAlignedSized(resource_data *restrict rdat, const float xPos, const float yPos, TTF_Font *font, const SDL_Color textColor, const uint8_t alpha, const char *txt, const uint8_t alignment, const Uint32 maxWidth);
-void drawTextAligned(resource_data *restrict rdat, const float xPos, const float yPos, TTF_Font *font, const SDL_Color textColor, const char *txt, const uint8_t alignment);
-void drawText(resource_data *restrict rdat, const float xPos, const float yPos, TTF_Font *font, const SDL_Color textColor, const char *txt);
+float drawTextAlignedSized(resource_data *restrict rdat, const float xPos, const float yPos, FC_Font *font, const SDL_Color textColor, const Uint8 alpha, const char *txt, const uint8_t alignment, const Uint16 maxWidth);
+void drawTextAligned(resource_data *restrict rdat, const float xPos, const float yPos, FC_Font *font, const SDL_Color textColor, const char *txt, const uint8_t alignment);
+void drawText(resource_data *restrict rdat, const float xPos, const float yPos, FC_Font *font, const SDL_Color textColor, const char *txt);
 void drawColoredTextAligned(resource_data *restrict rdat, const float xPos, const float yPos, const SDL_Color textColor, const char *txt, const uint8_t alignment);
 void drawColoredText(resource_data *restrict rdat, const float xPos, const float yPos, const SDL_Color textColor, const char *txt);
 void drawDefaultTextAligned(const ui_theme_rules *restrict uirules, resource_data *restrict rdat, const float xPos, const float yPos, const char *txt, const uint8_t alignment);

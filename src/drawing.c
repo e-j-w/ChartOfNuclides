@@ -239,25 +239,14 @@ void drawButton(const ui_theme_rules *restrict uirules, resource_data *restrict 
 //draw a button with a text label
 void drawTextButton(const ui_theme_rules *restrict uirules, resource_data *restrict rdat, const uint16_t x, const uint16_t y, const uint16_t w, const uint8_t highlightState, const uint8_t alpha, const char *text){
   drawButton(uirules,rdat,x,y,w,highlightState,alpha);
-  SDL_Surface *textSurface = TTF_RenderUTF8_Blended(rdat->font,text,uirules->textColNormal);
-  rdat->tempTex = SDL_CreateTextureFromSurface(rdat->renderer,textSurface);
-  SDL_DestroySurface(textSurface);
-  if(SDL_SetTextureAlphaMod(rdat->tempTex,alpha)<0){
-    printf("WARNING: drawTextButton - cannot set texture alpha - %s\n",SDL_GetError());
-  }
-  SDL_FRect drawPos;
   //get the text width and height
   //these should already fit a 1 tile height button well, with the default font size
   //(remember that the font size is scaled by the UI scale, during font import)
-  int textw,texth;
-  SDL_QueryTexture(rdat->tempTex,NULL,NULL,&textw,&texth);
-  drawPos.w = (float)textw;
-  drawPos.h = (float)texth;
-  drawPos.x = (float)(x*rdat->uiScale) + (float)(w*rdat->uiScale)/2.0f - drawPos.w/2.0f;
-  drawPos.y = (float)(y*rdat->uiScale) + (float)(UI_TILE_SIZE*rdat->uiScale)/2.0f - drawPos.h/2.0f;
-  //printf("drawPos: %i %i %i %i\n",drawPos.x,drawPos.y,drawPos.w,drawPos.h);
-  SDL_RenderTexture(rdat->renderer,rdat->tempTex,NULL,&drawPos);
-  SDL_DestroyTexture(rdat->tempTex);
+  float textW = (float)FC_GetWidth(rdat->font,text);
+  float textH = (float)FC_GetHeight(rdat->font,text);
+  float textX = (float)(x*rdat->uiScale) + (float)(w*rdat->uiScale)/2.0f - textW/2.0f;
+  float textY = (float)(y*rdat->uiScale) + (float)(UI_TILE_SIZE*rdat->uiScale)/2.0f - textH/2.0f;
+  drawTextAlignedSized(rdat,textX,textY,rdat->font,uirules->textColNormal,255,text,ALIGN_CENTER,(Uint16)w);
 }
 
 void drawIconButton(const ui_theme_rules *restrict uirules, resource_data *restrict rdat, const uint16_t x, const uint16_t y, const uint16_t w, const uint8_t highlightState, const uint8_t alpha, const uint8_t iconInd){
@@ -296,115 +285,33 @@ void drawScreenDimmer(const drawing_state *restrict ds, resource_data *restrict 
 
 }
 
-//returns the width of text rendered using the specified font
-int getTextWidth(const char *txt, TTF_Font *font){
-  SDL_Rect rect;
-  if(TTF_SizeUTF8(font,txt,&rect.w,&rect.h) != 0){
-    printf("WARNING: getTextDim - couldn't get dimensions.\n");
-    rect.w = 0;
-  }
-  return rect.w;
-}
-int getDefaultTextWidth(resource_data *restrict rdat, const char *txt){
-  return getTextWidth(txt,rdat->font);
-}
-
-//returns the dimensions of text rendered using the specified font
-SDL_Rect getTextDim(const char *txt, TTF_Font *font){
-  
-  SDL_Rect rect;
-  if(TTF_SizeUTF8(font,txt,&rect.w,&rect.h) != 0){
-    printf("WARNING: getTextDim - couldn't get dimensions.\n");
-    rect.w = 0;
-    rect.h = 0;
-  }
-  return rect;
-}
-SDL_Rect getDefaultTextDim(resource_data *restrict rdat, const char *txt){
-  return getTextDim(txt,rdat->font);
-}
-
-//generates a texture in the text texture cache for the suuplied text string
-void drawTextToCache(resource_data *restrict rdat, TTF_Font *font, const SDL_Color textColor, const char *txt, const uint8_t wrapAlign, const Uint32 wrapWidth, const uint32_t cacheInd){
-  if(cacheInd < TEXT_TEX_CACHE_SIZE){
-    if(wrapAlign == ALIGN_RIGHT){
-      TTF_SetFontWrappedAlign(font,TTF_WRAPPED_ALIGN_RIGHT);
-    }else if(wrapAlign == ALIGN_CENTER){
-      TTF_SetFontWrappedAlign(font,TTF_WRAPPED_ALIGN_CENTER);
-    }else{
-      TTF_SetFontWrappedAlign(font,TTF_WRAPPED_ALIGN_LEFT);
-    }
-    SDL_Surface *textSurface = TTF_RenderUTF8_Blended_Wrapped(font,txt,textColor,wrapWidth);
-    if(rdat->textTexCache[cacheInd] != NULL){
-      SDL_DestroyTexture(rdat->textTexCache[cacheInd]);
-    }
-    rdat->textTexCache[cacheInd] = SDL_CreateTextureFromSurface(rdat->renderer,textSurface);
-    SDL_DestroySurface(textSurface);
-  }else{
-    printf("WARNING: trying to generate text cache entry %u, maximum allowed is %u.\n",cacheInd,TEXT_TEX_CACHE_SIZE);
-  }
-}
-//draws a texture from the text texture cache
 //returns the width of the drawn text (can be used for alignment purposes)
-float drawTextFromCache(resource_data *restrict rdat, const float xPos, const float yPos, const SDL_Color colMod, const uint8_t alignment, const uint32_t cacheInd){
-  SDL_FRect drawPos;
-  int w,h;
-  SDL_QueryTexture(rdat->textTexCache[cacheInd],NULL,NULL,&w,&h);
-  drawPos.w = (float)w;
-  drawPos.h = (float)h;
-  drawPos.x = xPos*rdat->uiScale;
-  drawPos.y = yPos*rdat->uiScale;
+float drawTextAlignedSized(resource_data *restrict rdat, const float xPos, const float yPos, FC_Font *font, const SDL_Color textColor, const Uint8 alpha, const char *txt, const uint8_t alignment, const Uint16 maxWidth){
+  float drawX = xPos*rdat->uiScale;
+  float drawY = yPos*rdat->uiScale;
   if(alignment == ALIGN_RIGHT){
-    drawPos.x = drawPos.x - drawPos.w;
+    float drawW = (float)FC_GetWidth(font,txt);
+    drawX = drawX - drawW;
   }else if(alignment == ALIGN_CENTER){
-    drawPos.x = drawPos.x - drawPos.w/2;
-    drawPos.y = drawPos.y - drawPos.h/2;
+    float drawW = (float)FC_GetWidth(font,txt);
+    float drawH = (float)FC_GetHeight(font,txt);
+    drawX = drawX - drawW/2.0f;
+    drawY = drawY - drawH/2.0f;
   }
-  SDL_SetTextureColorMod(rdat->textTexCache[cacheInd],colMod.r,colMod.g,colMod.b);
-  SDL_RenderTexture(rdat->renderer,rdat->textTexCache[cacheInd],NULL,&drawPos);
-  return drawPos.w/rdat->uiScale;
-}
-
-
-
-//returns the width of the drawn text (can be used for alignment purposes)
-float drawTextAlignedSized(resource_data *restrict rdat, const float xPos, const float yPos, TTF_Font *font, const SDL_Color textColor, const uint8_t alpha, const char *txt, const uint8_t alignment, const Uint32 maxWidth){
-  SDL_FRect drawPos;
-  if(alignment == ALIGN_RIGHT){
-    TTF_SetFontWrappedAlign(font,TTF_WRAPPED_ALIGN_RIGHT);
-  }else if(alignment == ALIGN_CENTER){
-    TTF_SetFontWrappedAlign(font,TTF_WRAPPED_ALIGN_CENTER);
+  if(alpha != textColor.a){
+    SDL_Color drawCol = textColor;
+    drawCol.a = alpha;
+    SDL_FRect drawPos = FC_DrawColumnColor(font,rdat->renderer,drawX,drawY,maxWidth,drawCol,txt);
+    return drawPos.w;
   }else{
-    TTF_SetFontWrappedAlign(font,TTF_WRAPPED_ALIGN_LEFT);
+    SDL_FRect drawPos = FC_DrawColumnColor(font,rdat->renderer,drawX,drawY,maxWidth,textColor,txt);
+    return drawPos.w;
   }
-  SDL_Surface *textSurface = TTF_RenderUTF8_Blended_Wrapped(font,txt,textColor,maxWidth);  
-  rdat->tempTex = SDL_CreateTextureFromSurface(rdat->renderer, textSurface);
-  SDL_DestroySurface(textSurface);
-  if(alpha != 255){
-    if(SDL_SetTextureAlphaMod(rdat->tempTex,alpha)<0){
-      printf("WARNING: drawTextAlignedSized - cannot set texture alpha - %s\n",SDL_GetError());
-    }
-  }
-  int w,h;
-  SDL_QueryTexture(rdat->tempTex,NULL,NULL,&w,&h);
-  drawPos.w = (float)w;
-  drawPos.h = (float)h;
-  drawPos.x = (xPos*rdat->uiScale);
-  drawPos.y = (yPos*rdat->uiScale);
-  if(alignment == ALIGN_RIGHT){
-    drawPos.x = drawPos.x - drawPos.w;
-  }else if(alignment == ALIGN_CENTER){
-    drawPos.x = drawPos.x - drawPos.w/2;
-    drawPos.y = drawPos.y - drawPos.h/2;
-  }
-  SDL_RenderTexture(rdat->renderer,rdat->tempTex,NULL,&drawPos);
-  SDL_DestroyTexture(rdat->tempTex);
-  return drawPos.w;
 }
-void drawTextAligned(resource_data *restrict rdat, const float xPos, const float yPos, TTF_Font *font, const SDL_Color textColor, const char *txt, const uint8_t alignment){
+void drawTextAligned(resource_data *restrict rdat, const float xPos, const float yPos, FC_Font *font, const SDL_Color textColor, const char *txt, const uint8_t alignment){
   drawTextAlignedSized(rdat,xPos,yPos,font,textColor,255,txt,alignment,16384);
 }
-void drawText(resource_data *restrict rdat, const float xPos, const float yPos, TTF_Font *font, const SDL_Color textColor, const char *txt){
+void drawText(resource_data *restrict rdat, const float xPos, const float yPos, FC_Font *font, const SDL_Color textColor, const char *txt){
   drawTextAligned(rdat,xPos,yPos,font,textColor,txt,ALIGN_LEFT);
 }
 void drawColoredTextAligned(resource_data *restrict rdat, const float xPos, const float yPos, const SDL_Color textColor, const char *txt, const uint8_t alignment){

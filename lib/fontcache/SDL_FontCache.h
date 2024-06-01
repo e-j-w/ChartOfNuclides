@@ -51,20 +51,11 @@ extern "C" {
 // Let's pretend this exists...
 #define TTF_STYLE_OUTLINE	16
 
-
-
-// Differences between SDL_Renderer and SDL_gpu
-#ifdef FC_USE_SDL_GPU
-#define FC_Rect GPU_Rect
-#define FC_Target GPU_Target
-#define FC_Image GPU_Image
-#define FC_Log GPU_LogError
-#else
+// Originally needed to handle differences between SDL_Renderer and SDL_gpu
 #define FC_Rect SDL_FRect
 #define FC_Target SDL_Renderer
 #define FC_Image SDL_Texture
 #define FC_Log SDL_Log
-#endif
 
 
 // SDL_FontCache types

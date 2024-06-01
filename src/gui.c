@@ -107,14 +107,17 @@ SDL_FColor getHalfLifeCol(const double halflifeSeconds){
   return col;
 }
 
-void drawNuclBoxLabel(const app_data *restrict dat, const drawing_state *restrict ds, resource_data *restrict rdat, const float xPos, const float yPos, SDL_Color col, const uint32_t nuclInd){
+void drawNuclBoxLabel(const app_data *restrict dat, const drawing_state *restrict ds, resource_data *restrict rdat, const float xPos, const float yPos, SDL_Color col, const uint16_t nuclInd){
+  char tmpStr[32];
   uint16_t Z = (uint16_t)dat->ndat.nuclData[nuclInd].Z;
   if(ds->chartZoomScale >= 8.0f){
     uint16_t N = (uint16_t)dat->ndat.nuclData[nuclInd].N;
-    float numLblWidth = drawTextFromCache(rdat,xPos,yPos,col,ALIGN_LEFT,(uint16_t)(N+Z)); //draw number label
-    drawTextFromCache(rdat,xPos+numLblWidth+2.0f,yPos+10.0f,col,ALIGN_LEFT,MAX_MASS_NUM+Z); //draw element label
+    snprintf(tmpStr,32,"%u",N+Z); //is this slow?
+    float numLblWidth = drawTextAlignedSized(rdat,xPos,yPos,rdat->smallFont,col,255,tmpStr,ALIGN_LEFT,16384); //draw number label
+    drawTextAlignedSized(rdat,xPos+numLblWidth+2.0f,yPos+10.0f,rdat->bigFont,col,255,getElemStr((uint8_t)Z),ALIGN_LEFT,16384); //draw element label
     if(ds->chartZoomScale >= 12.0f){
-      drawTextFromCache(rdat,xPos,yPos+36,col,ALIGN_LEFT,MAX_MASS_NUM+MAX_PROTON_NUM+MAX_PROTON_NUM+nuclInd); //draw half-life label
+      getGSHalfLifeStr(tmpStr,&dat->ndat,nuclInd);
+      drawTextAlignedSized(rdat,xPos,yPos+36.0f,rdat->font,col,255,tmpStr,ALIGN_LEFT,16384); //draw GS half-life label
       /*uint32_t gsLevInd = (uint32_t)(dat->ndat.nuclData[nuclInd].firstLevel + dat->ndat.nuclData[nuclInd].gsLevel);
       if((ds->chartZoomScale >= 20.0f)||(dat->ndat.levels[gsLevInd].numDecModes <= 2)){
         float yOffset = 60.0f;
@@ -125,7 +128,7 @@ void drawNuclBoxLabel(const app_data *restrict dat, const drawing_state *restric
       }*/
     }
   }else{
-    drawTextFromCache(rdat,xPos,yPos,col,ALIGN_LEFT,MAX_MASS_NUM+MAX_PROTON_NUM+Z); //draw element label only
+    drawTextAlignedSized(rdat,xPos,yPos,rdat->font,col,255,getElemStr((uint8_t)Z),ALIGN_LEFT,16384); //draw element label only
   }
 }
 
@@ -155,7 +158,7 @@ void drawChartOfNuclides(const app_data *restrict dat, const app_state *restrict
             if(state->ds.chartZoomScale >= 4.0f){
               float txtX = (rect.x/rdat->uiScale + NUCLBOX_NAME_MARGIN*state->ds.chartZoomScale);
               float txtY = (rect.y/rdat->uiScale + NUCLBOX_NAME_MARGIN*state->ds.chartZoomScale);
-              drawNuclBoxLabel(dat,&state->ds,rdat,txtX,txtY,(hl > 1.0E4) ? whiteCol8Bit : blackCol8Bit,(uint32_t)i);
+              drawNuclBoxLabel(dat,&state->ds,rdat,txtX,txtY,(hl > 1.0E4) ? whiteCol8Bit : blackCol8Bit,(uint16_t)i);
             }
           }
         }
@@ -200,6 +203,7 @@ void drawChartOfNuclides(const app_data *restrict dat, const app_state *restrict
   drawTextAligned(rdat,CHART_AXIS_DEPTH*0.5f,CHART_AXIS_DEPTH*0.5f,rdat->bigFont,blackCol8Bit,"Z",ALIGN_CENTER);
   drawTextAligned(rdat,state->ds.windowXRes - CHART_AXIS_DEPTH*0.5f,state->ds.windowYRes - CHART_AXIS_DEPTH*0.5f,rdat->bigFont,blackCol8Bit,"N",ALIGN_CENTER);
   //draw ticks
+  char tmpStr[32];
   rect.y = state->ds.windowYRes - CHART_AXIS_DEPTH*0.5f;
   float tickSpacing = getAxisTickSpacing(maxX - minX);
   for(float i=(minX-fmodf(minX,tickSpacing));i<maxX;i+=tickSpacing){
@@ -208,7 +212,8 @@ void drawChartOfNuclides(const app_data *restrict dat, const app_state *restrict
       if((i<MAX_MASS_NUM)&&(i<=MAX_NEUTRON_NUM)){
         rect.x = (i + 0.5f - minX)*DEFAULT_NUCLBOX_DIM*state->ds.chartZoomScale;
         if(rect.x < (state->ds.windowXRes - CHART_AXIS_DEPTH)){ //dodge axis label
-          drawTextFromCache(rdat,rect.x,rect.y,blackCol8Bit,ALIGN_CENTER,numInd);
+          snprintf(tmpStr,32,"%u",numInd); //is this slow?
+          drawTextAlignedSized(rdat,rect.x,rect.y,rdat->font,blackCol8Bit,255,tmpStr,ALIGN_CENTER,16384); //draw number label
         }
       }
     }
@@ -221,7 +226,8 @@ void drawChartOfNuclides(const app_data *restrict dat, const app_state *restrict
       if((i<MAX_MASS_NUM)&&(i<MAX_PROTON_NUM)){
         rect.y = (maxY - i + 0.5f)*DEFAULT_NUCLBOX_DIM*state->ds.chartZoomScale;
         if(rect.y > CHART_AXIS_DEPTH){ //dodge axis label
-          drawTextFromCache(rdat,rect.x,rect.y,blackCol8Bit,ALIGN_CENTER,numInd);
+          snprintf(tmpStr,32,"%u",numInd); //is this slow?
+          drawTextAlignedSized(rdat,rect.x,rect.y,rdat->font,blackCol8Bit,255,tmpStr,ALIGN_CENTER,16384); //draw number label
         }
       }
     }
@@ -292,8 +298,8 @@ void drawMessageBox(const app_data *restrict dat, const app_state *restrict stat
   msgBoxPanelRect.h = state->ds.uiElemHeight[UIELEM_MSG_BOX];
   drawPanelBG(rdat,msgBoxPanelRect,alpha);
 
-  drawTextAlignedSized(rdat,msgBoxPanelRect.x+(msgBoxPanelRect.w/2),msgBoxPanelRect.y+MESSAGE_BOX_HEADERTXT_Y,rdat->bigFont,dat->rules.themeRules.textColNormal,(uint8_t)floorf(alpha*255.0f),state->msgBoxHeaderTxt,ALIGN_CENTER,(Uint32)(msgBoxPanelRect.w - 2*UI_PADDING_SIZE));
-  drawTextAlignedSized(rdat,msgBoxPanelRect.x+(msgBoxPanelRect.w/2),msgBoxPanelRect.y+(msgBoxPanelRect.h/2),rdat->font,dat->rules.themeRules.textColNormal,(uint8_t)floorf(alpha*255.0f),state->msgBoxTxt,ALIGN_CENTER,(Uint32)(msgBoxPanelRect.w - 2*UI_PADDING_SIZE));
+  drawTextAlignedSized(rdat,msgBoxPanelRect.x+(msgBoxPanelRect.w/2),msgBoxPanelRect.y+MESSAGE_BOX_HEADERTXT_Y,rdat->bigFont,dat->rules.themeRules.textColNormal,(uint8_t)floorf(alpha*255.0f),state->msgBoxHeaderTxt,ALIGN_CENTER,(Uint16)(msgBoxPanelRect.w - 2*UI_PADDING_SIZE));
+  drawTextAlignedSized(rdat,msgBoxPanelRect.x+(msgBoxPanelRect.w/2),msgBoxPanelRect.y+(msgBoxPanelRect.h/2),rdat->font,dat->rules.themeRules.textColNormal,(uint8_t)floorf(alpha*255.0f),state->msgBoxTxt,ALIGN_CENTER,(Uint16)(msgBoxPanelRect.w - 2*UI_PADDING_SIZE));
   drawTextButton(&dat->rules.themeRules,rdat,state->ds.uiElemPosX[UIELEM_MSG_BOX_OK_BUTTON],state->ds.uiElemPosY[UIELEM_MSG_BOX_OK_BUTTON]+yOffset,state->ds.uiElemWidth[UIELEM_MSG_BOX_OK_BUTTON],getHighlightState(state,UIELEM_MSG_BOX_OK_BUTTON),(uint8_t)floorf(alpha*255.0f),dat->strings[dat->locStringIDs[LOCSTR_OK]]);
   //printf("%.3f %.3f alpha %u\n",(double)state->ds.timeLeftInUIAnimation[UIANIM_MSG_BOX_SHOW],(double)state->ds.timeLeftInUIAnimation[UIANIM_MSG_BOX_HIDE],alpha);
 }

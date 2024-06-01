@@ -11,6 +11,7 @@ int importAppData(app_data *restrict dat, resource_data *restrict rdat){
   uint8_t version = 255;
   int64_t fileSize;
   size_t totalAlloc = 0;
+  rdat->fontOffset = 0;
   
   snprintf(filePath,270,"%scon.dat",rdat->appBasePath);
   SDL_IOStream *inp = SDL_IOFromFile(filePath, "rb");
@@ -112,8 +113,8 @@ int importAppData(app_data *restrict dat, resource_data *restrict rdat){
   SDL_DestroySurface(surface);
   
   //load font
-  int64_t fontFilesize;
-  fontFilesize=0;
+  rdat->fontOffset = (size_t)SDL_TellIO(inp);
+  int64_t fontFilesize=0;
   if((SDL_ReadIO(inp,&fontFilesize,sizeof(int64_t))!=sizeof(int64_t))||(fontFilesize<=0)){
     SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,"Error","App data file read error - invalid data size.",rdat->window);
     printf("ERROR: importAppData - invalid font filesize (%li) from file %s - %s.\n",(long int)fontFilesize,filePath,SDL_GetError());
@@ -131,12 +132,12 @@ int importAppData(app_data *restrict dat, resource_data *restrict rdat){
     return -1;
   }
   
-  //cache font glyphs in 3 sizes, to prevent having to dynamically scale them,
+  //cache font glyphs in 4 sizes, to prevent having to dynamically scale them,
   //which would wreck performance
-  rdat->smallFont = TTF_OpenFontIO(SDL_IOFromConstMem(rdat->fontData,(size_t)fontFilesize),1,(int)(SMALL_FONT_SIZE*rdat->uiScale));
-  rdat->font = TTF_OpenFontIO(SDL_IOFromConstMem(rdat->fontData,(size_t)fontFilesize),1,(int)(DEFAULT_FONT_SIZE*rdat->uiScale));
-  rdat->bigFont = TTF_OpenFontIO(SDL_IOFromConstMem(rdat->fontData,(size_t)fontFilesize),1,(int)(BIG_FONT_SIZE*rdat->uiScale));
-  rdat->hugeFont = TTF_OpenFontIO(SDL_IOFromConstMem(rdat->fontData,(size_t)fontFilesize),1,(int)(HUGE_FONT_SIZE*rdat->uiScale));
+  FC_LoadFont_RW(rdat->smallFont, rdat->renderer,SDL_IOFromConstMem(rdat->fontData,(size_t)fontFilesize),0,(Uint32)(SMALL_FONT_SIZE*rdat->uiScale),whiteCol8Bit,TTF_STYLE_NORMAL);
+  FC_LoadFont_RW(rdat->font, rdat->renderer,SDL_IOFromConstMem(rdat->fontData,(size_t)fontFilesize),0,(Uint32)(DEFAULT_FONT_SIZE*rdat->uiScale),whiteCol8Bit,TTF_STYLE_NORMAL);
+  FC_LoadFont_RW(rdat->bigFont, rdat->renderer,SDL_IOFromConstMem(rdat->fontData,(size_t)fontFilesize),0,(Uint32)(BIG_FONT_SIZE*rdat->uiScale),whiteCol8Bit,TTF_STYLE_NORMAL);
+  FC_LoadFont_RW(rdat->hugeFont, rdat->renderer,SDL_IOFromConstMem(rdat->fontData,(size_t)fontFilesize),0,(Uint32)(HUGE_FONT_SIZE*rdat->uiScale),whiteCol8Bit,TTF_STYLE_NORMAL);
   if(rdat->font==NULL){
     SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,"Error","App data file read error - unable to load resource.",rdat->window);
     printf("ERROR: importAppData - couldn't read font resource - %s.\n",SDL_GetError());
@@ -167,5 +168,67 @@ int importAppData(app_data *restrict dat, resource_data *restrict rdat){
   //getc(stdin);
   return 0; //success
   
+}
+
+//similar to importAppData, but only handles loading and rescaling the font data
+int regenerateFontCache(app_data *restrict dat, resource_data *restrict rdat){
+  
+  if(rdat->fontOffset <= 0){
+    printf("WARNING: regenerateFontCache - attempting to regenerate cache when app data was not previously imported. Doing that now...\n");
+    return importAppData(dat,rdat);
+  }
+
+  char filePath[270];
+  snprintf(filePath,270,"%scon.dat",rdat->appBasePath);
+
+  SDL_IOStream *inp = SDL_IOFromFile(filePath, "rb");
+  if(inp==NULL){
+    SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,"Error","App data file (con.dat) doesn't exist or is unreadable.",rdat->window);
+    printf("ERROR: regenerateFontCache - couldn't read data package file %s.\n",filePath);
+    return -1;
+  }
+  if(SDL_SeekIO(inp,(Sint64)rdat->fontOffset,SDL_IO_SEEK_SET)<0){
+    SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,"Error","App data file I/O error.",rdat->window);
+    printf("ERROR: regenerateFontCache - couldn't seek to font data in file %s - %s.\n",filePath,SDL_GetError());
+    return -1;
+  }
+  //load font
+  rdat->fontOffset = (size_t)SDL_TellIO(inp);
+  int64_t fontFilesize=0;
+  if((SDL_ReadIO(inp,&fontFilesize,sizeof(int64_t))!=sizeof(int64_t))||(fontFilesize<=0)){
+    SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,"Error","App data file read error - invalid data size.",rdat->window);
+    printf("ERROR: regenerateFontCache - invalid font filesize (%li) from file %s - %s.\n",(long int)fontFilesize,filePath,SDL_GetError());
+    return -1;
+  }
+  rdat->fontData=(void*)SDL_calloc(1,(size_t)fontFilesize);
+  if(rdat->fontData==NULL){
+    SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,"Error","App data file read error - could not allocate memory.",rdat->window);
+    printf("ERROR: regenerateFontCache - couldn't allocate memory for font data.\n");
+    exit(-1);
+  }
+  if(SDL_ReadIO(inp,rdat->fontData,(size_t)fontFilesize)!=(size_t)fontFilesize){
+    printf("ERROR: regenerateFontCache - couldn't read font data from file %s - %s.\n",filePath,SDL_GetError());
+    return -1;
+  }
+  
+  //cache font glyphs in 4 sizes, to prevent having to dynamically scale them,
+  //which would wreck performance
+  FC_LoadFont_RW(rdat->smallFont, rdat->renderer,SDL_IOFromConstMem(rdat->fontData,(size_t)fontFilesize),0,(Uint32)(SMALL_FONT_SIZE*rdat->uiScale),whiteCol8Bit,TTF_STYLE_NORMAL);
+  FC_LoadFont_RW(rdat->font, rdat->renderer,SDL_IOFromConstMem(rdat->fontData,(size_t)fontFilesize),0,(Uint32)(DEFAULT_FONT_SIZE*rdat->uiScale),whiteCol8Bit,TTF_STYLE_NORMAL);
+  FC_LoadFont_RW(rdat->bigFont, rdat->renderer,SDL_IOFromConstMem(rdat->fontData,(size_t)fontFilesize),0,(Uint32)(BIG_FONT_SIZE*rdat->uiScale),whiteCol8Bit,TTF_STYLE_NORMAL);
+  FC_LoadFont_RW(rdat->hugeFont, rdat->renderer,SDL_IOFromConstMem(rdat->fontData,(size_t)fontFilesize),0,(Uint32)(HUGE_FONT_SIZE*rdat->uiScale),whiteCol8Bit,TTF_STYLE_NORMAL);
+  if(rdat->font==NULL){
+    SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,"Error","App data file read error - unable to load resource.",rdat->window);
+    printf("ERROR: regenerateFontCache - couldn't read font resource - %s.\n",SDL_GetError());
+    return -1;
+  }
+
+  if(SDL_CloseIO(inp)!=0){
+    SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,"Error","App data file I/O error.",rdat->window);
+    printf("ERROR: regenerateFontCache - failed to close data file %s\n",filePath);
+    return -1;
+  }
+  return 0; //success
+
 }
 

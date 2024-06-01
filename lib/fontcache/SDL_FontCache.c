@@ -853,12 +853,7 @@ static Uint8 FC_GrowGlyphCache(FC_Font* font)
 {
     if(font == NULL)
         return 0;
-    #ifdef FC_USE_SDL_GPU
-    GPU_Image* new_level = GPU_CreateImage(font->height * 12, font->height * 12, GPU_FORMAT_RGBA);
-    GPU_SetAnchor(new_level, 0.5f, 0.5f);  // Just in case the default is different
-    #else
     SDL_Texture* new_level = SDL_CreateTexture(font->renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, font->height * 12, font->height * 12);
-    #endif
     if(new_level == NULL || !FC_SetGlyphCacheLevel(font, font->glyph_cache_count, new_level))
     {
         FC_Log("Error: SDL_FontCache ran out of packing space and could not add another cache level.\n");
@@ -873,48 +868,44 @@ static Uint8 FC_GrowGlyphCache(FC_Font* font)
     //      , most functions use set_color_for_all_caches()
     //   - for evading this bug, you must use FC_SetDefaultColor(), before using any draw functions
     set_color(new_level, font->default_color.r, font->default_color.g, font->default_color.b, FC_GET_ALPHA(font->default_color));
-#ifndef FC_USE_SDL_GPU
-    {
-        Uint8 r, g, b, a;
-        SDL_Texture* prev_target = SDL_GetRenderTarget(font->renderer);
-        SDL_FRect prev_clip;
-        SDL_Rect prev_viewport;
-        int prev_logicalw = 0, prev_logicalh = 0;
-        Uint8 prev_clip_enabled;
-        float prev_scalex, prev_scaley;
-        // only backup if previous target existed (SDL will preserve them for the default target)
-        if (prev_target) {
-            prev_clip_enabled = has_clip(font->renderer);
-            if (prev_clip_enabled)
-                prev_clip = get_clip(font->renderer);
-            SDL_GetRenderViewport(font->renderer, &prev_viewport);
-            SDL_GetRenderScale(font->renderer, &prev_scalex, &prev_scaley);
-            SDL_GetRenderLogicalPresentation(font->renderer, &prev_logicalw, &prev_logicalh, NULL, NULL);
-        }
-        SDL_SetTextureBlendMode(new_level, SDL_BLENDMODE_BLEND);
-        SDL_SetRenderTarget(font->renderer, new_level);
-        SDL_GetRenderDrawColor(font->renderer, &r, &g, &b, &a);
-        SDL_SetRenderDrawColor(font->renderer, 0, 0, 0, 0);
-        SDL_RenderClear(font->renderer);
-        SDL_SetRenderDrawColor(font->renderer, r, g, b, a);
-        SDL_SetRenderTarget(font->renderer, prev_target);
-        if (prev_target) {
-            if (prev_clip_enabled)
-                set_clip(font->renderer, &prev_clip);
-            if (prev_logicalw && prev_logicalh)
-                SDL_SetRenderLogicalPresentation(
-                    font->renderer,
-                    prev_logicalw, 
-                    prev_logicalh,
-                    SDL_LOGICAL_PRESENTATION_DISABLED,
-                    SDL_SCALEMODE_LINEAR);
-            else {
-                SDL_SetRenderViewport(font->renderer, &prev_viewport);
-                SDL_SetRenderScale(font->renderer, prev_scalex, prev_scaley);
-            }
+    Uint8 r, g, b, a;
+    SDL_Texture* prev_target = SDL_GetRenderTarget(font->renderer);
+    SDL_FRect prev_clip;
+    SDL_Rect prev_viewport;
+    int prev_logicalw = 0, prev_logicalh = 0;
+    Uint8 prev_clip_enabled;
+    float prev_scalex, prev_scaley;
+    // only backup if previous target existed (SDL will preserve them for the default target)
+    if (prev_target) {
+        prev_clip_enabled = has_clip(font->renderer);
+        if (prev_clip_enabled)
+            prev_clip = get_clip(font->renderer);
+        SDL_GetRenderViewport(font->renderer, &prev_viewport);
+        SDL_GetRenderScale(font->renderer, &prev_scalex, &prev_scaley);
+        SDL_GetRenderLogicalPresentation(font->renderer, &prev_logicalw, &prev_logicalh, NULL, NULL);
+    }
+    SDL_SetTextureBlendMode(new_level, SDL_BLENDMODE_BLEND);
+    SDL_SetRenderTarget(font->renderer, new_level);
+    SDL_GetRenderDrawColor(font->renderer, &r, &g, &b, &a);
+    SDL_SetRenderDrawColor(font->renderer, 0, 0, 0, 0);
+    SDL_RenderClear(font->renderer);
+    SDL_SetRenderDrawColor(font->renderer, r, g, b, a);
+    SDL_SetRenderTarget(font->renderer, prev_target);
+    if (prev_target) {
+        if (prev_clip_enabled)
+            set_clip(font->renderer, &prev_clip);
+        if (prev_logicalw && prev_logicalh)
+            SDL_SetRenderLogicalPresentation(
+                font->renderer,
+                prev_logicalw, 
+                prev_logicalh,
+                SDL_LOGICAL_PRESENTATION_DISABLED,
+                SDL_SCALEMODE_LINEAR);
+        else {
+            SDL_SetRenderViewport(font->renderer, &prev_viewport);
+            SDL_SetRenderScale(font->renderer, prev_scalex, prev_scaley);
         }
     }
-#endif
     return 1;
 }
 
@@ -922,14 +913,6 @@ Uint8 FC_UploadGlyphCache(FC_Font* font, int cache_level, SDL_Surface* data_surf
 {
     if(font == NULL || data_surface == NULL)
         return 0;
-    #ifdef FC_USE_SDL_GPU
-    GPU_Image* new_level = GPU_CopyImageFromSurface(data_surface);
-    GPU_SetAnchor(new_level, 0.5f, 0.5f);  // Just in case the default is different
-    if(FC_GetFilterMode(font) == FC_FILTER_LINEAR)
-        GPU_SetImageFilter(new_level, GPU_FILTER_LINEAR);
-    else
-        GPU_SetImageFilter(new_level, GPU_FILTER_NEAREST);
-    #else
     SDL_Texture* new_level;
     if(!fc_has_render_target_support)
         new_level = SDL_CreateTextureFromSurface(font->renderer, data_surface);
@@ -984,7 +967,6 @@ Uint8 FC_UploadGlyphCache(FC_Font* font, int cache_level, SDL_Surface* data_surf
             SDL_DestroyTexture(temp);
         }
     }
-    #endif
     if(new_level == NULL || !FC_SetGlyphCacheLevel(font, cache_level, new_level))
     {
         FC_Log("Error: SDL_FontCache ran out of packing space and could not add another cache level.\n");

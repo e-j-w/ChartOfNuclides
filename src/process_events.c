@@ -57,7 +57,7 @@ void processMouse(app_state *restrict state){
 
 }
 
-void processSingleEvent(const app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat, const SDL_Event evt, const float deltaTime){
+void processSingleEvent(app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat, const SDL_Event evt, const float deltaTime){
   switch(evt.type){
     case SDL_EVENT_QUIT:
       state->quitAppFlag = 1; //quit game
@@ -277,7 +277,7 @@ void processSingleEvent(const app_data *restrict dat, app_state *restrict state,
 
 //called once per frame, processes user inputs and other SDL events
 //takes input flags from the previous frame as an argument, returns flags for the current frame
-void processFrameEvents(const app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat, const float deltaTime){
+void processFrameEvents(app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat, const float deltaTime){
 
     //reset values
     state->mouseClickPosXPx = -1.0f;
