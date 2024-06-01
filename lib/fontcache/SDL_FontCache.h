@@ -36,11 +36,6 @@ THE SOFTWARE.
 #include <SDL3/SDL.h>
 #include <SDL3_ttf/SDL_ttf.h>
 
-#ifdef FC_USE_SDL_GPU
-    #include "SDL_gpu.h"
-#endif
-
-
 #include <stdarg.h>
 
 #ifdef __cplusplus
@@ -55,8 +50,7 @@ extern "C" {
 #define FC_Rect SDL_FRect
 #define FC_Target SDL_Renderer
 #define FC_Image SDL_Texture
-#define FC_Log SDL_Log
-
+#define FC_Log printf
 
 // SDL_FontCache types
 
@@ -120,24 +114,14 @@ FC_GlyphData FC_MakeGlyphData(int cache_level, Sint16 x, Sint16 y, Uint16 w, Uin
 
 FC_Font* FC_CreateFont(void);
 
-#ifdef FC_USE_SDL_GPU
-Uint8 FC_LoadFont(FC_Font* font, const char* filename_ttf, Uint32 pointSize, SDL_Color color, int style);
-
-Uint8 FC_LoadFontFromTTF(FC_Font* font, TTF_Font* ttf, SDL_Color color);
-
-Uint8 FC_LoadFont_RW(FC_Font* font, SDL_RWops* file_rwops_ttf, Uint8 own_rwops, Uint32 pointSize, SDL_Color color, int style);
-#else
 Uint8 FC_LoadFont(FC_Font* font, SDL_Renderer* renderer, const char* filename_ttf, Uint32 pointSize, SDL_Color color, int style);
 
 Uint8 FC_LoadFontFromTTF(FC_Font* font, SDL_Renderer* renderer, TTF_Font* ttf, SDL_Color color);
 
 Uint8 FC_LoadFont_RW(FC_Font* font, SDL_Renderer* renderer, SDL_IOStream* file_iostream_ttf, Uint8 own_rwops, Uint32 pointSize, SDL_Color color, int style);
-#endif
 
-#ifndef FC_USE_SDL_GPU
 // note: handle SDL event types SDL_RENDER_TARGETS_RESET(>= SDL 2.0.2) and SDL_RENDER_DEVICE_RESET(>= SDL 2.0.4)
 void FC_ResetFontFromRendererReset(FC_Font* font, SDL_Renderer* renderer, Uint32 evType);
-#endif
 
 void FC_ClearFont(FC_Font* font);
 

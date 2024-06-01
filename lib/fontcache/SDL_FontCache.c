@@ -84,9 +84,7 @@ __inline int c99_snprintf(char *outBuf, size_t size, const char *format, ...)
 
 static Uint8 has_clip(FC_Target* dest)
 {
-    #ifdef FC_USE_SDL_GPU
-    return dest->use_clip_rect;
-    #elif defined(ENABLE_SDL_CLIPPING)
+    #if defined(ENABLE_SDL_CLIPPING)
     return (Uint8)SDL_RenderClipEnabled(dest);
     #else
     return 0;
@@ -95,9 +93,7 @@ static Uint8 has_clip(FC_Target* dest)
 
 static FC_Rect get_clip(FC_Target* dest)
 {
-    #ifdef FC_USE_SDL_GPU
-    return dest->clip_rect;
-    #elif defined(ENABLE_SDL_CLIPPING)
+    #if defined(ENABLE_SDL_CLIPPING)
     SDL_Rect r;
     SDL_GetRenderClipRect(dest, &r);
     FC_Rect fr = {(float)r.x, (float)r.y, (float)r.w, (float)r.h}; //frfr no cap
@@ -110,12 +106,7 @@ static FC_Rect get_clip(FC_Target* dest)
 
 static void set_clip(FC_Target* dest, FC_Rect* rect)
 {
-    #ifdef FC_USE_SDL_GPU
-    if(rect != NULL)
-        GPU_SetClipRect(dest, *rect);
-    else
-        GPU_UnsetClip(dest);
-    #elif defined(ENABLE_SDL_CLIPPING)
+    #if defined(ENABLE_SDL_CLIPPING)
     const SDL_Rect ri = {(int)rect->x, (int)rect->y, (int)rect->w, (int)rect->h};
     SDL_SetRenderClipRect(dest, &ri);
     #endif
@@ -123,12 +114,8 @@ static void set_clip(FC_Target* dest, FC_Rect* rect)
 
 static void set_color(FC_Image* src, Uint8 r, Uint8 g, Uint8 b, Uint8 a)
 {
-    #ifdef FC_USE_SDL_GPU
-    GPU_SetRGBA(src, r, g, b, a);
-    #else
     SDL_SetTextureColorMod(src, r, g, b);
     SDL_SetTextureAlphaMod(src, a);
-    #endif
 }
 
 
@@ -622,35 +609,26 @@ FC_Rect FC_DefaultRenderCallback(FC_Image* src, FC_Rect* srcrect, FC_Target* des
     FC_Rect result;
 
     // FIXME: Why does the scaled offset look so wrong?
-    #ifdef FC_USE_SDL_GPU
+    SDL_FlipMode flip = SDL_FLIP_NONE;
+    if(xscale < 0)
     {
-        GPU_Rect r = *srcrect;
-        GPU_BlitScale(src, &r, dest, x + xscale*r.w/2.0f, y + r.h/2.0f, xscale, yscale);
+        xscale = -xscale;
+        flip = (SDL_FlipMode) ((int)flip | (int)SDL_FLIP_HORIZONTAL);
     }
-    #else
+    if(yscale < 0)
     {
-        SDL_FlipMode flip = SDL_FLIP_NONE;
-        if(xscale < 0)
-        {
-            xscale = -xscale;
-            flip = (SDL_FlipMode) ((int)flip | (int)SDL_FLIP_HORIZONTAL);
-        }
-        if(yscale < 0)
-        {
-            yscale = -yscale;
-            flip = (SDL_FlipMode) ((int)flip | (int)SDL_FLIP_VERTICAL);
-        }
+        yscale = -yscale;
+        flip = (SDL_FlipMode) ((int)flip | (int)SDL_FLIP_VERTICAL);
+    }
 
-        SDL_FRect r = { 
-            (float)srcrect->x, 
-            (float)srcrect->y, 
-            (float)srcrect->w,
-            (float)srcrect->h
-        };
-        SDL_FRect dr = {(float)x, (float)y, (float)(xscale*r.w), (float)(yscale*r.h)};
-        SDL_RenderTextureRotated(dest, src, &r, &dr, 0, NULL, flip);
-    }
-    #endif
+    SDL_FRect r = { 
+        (float)srcrect->x, 
+        (float)srcrect->y, 
+        (float)srcrect->w,
+        (float)srcrect->h
+    };
+    SDL_FRect dr = {(float)x, (float)y, (float)(xscale*r.w), (float)(yscale*r.h)};
+    SDL_RenderTextureRotated(dest, src, &r, &dr, 0, NULL, flip);
 
     result.x = x;
     result.y = y;
@@ -857,11 +835,7 @@ static Uint8 FC_GrowGlyphCache(FC_Font* font)
     if(new_level == NULL || !FC_SetGlyphCacheLevel(font, font->glyph_cache_count, new_level))
     {
         FC_Log("Error: SDL_FontCache ran out of packing space and could not add another cache level.\n");
-        #ifdef FC_USE_SDL_GPU
-        GPU_FreeImage(new_level);
-        #else
         SDL_DestroyTexture(new_level);
-        #endif
         return 0;
     }
     // bug: we do not have the correct color here, this might be the wrong color!
@@ -970,11 +944,7 @@ Uint8 FC_UploadGlyphCache(FC_Font* font, int cache_level, SDL_Surface* data_surf
     if(new_level == NULL || !FC_SetGlyphCacheLevel(font, cache_level, new_level))
     {
         FC_Log("Error: SDL_FontCache ran out of packing space and could not add another cache level.\n");
-        #ifdef FC_USE_SDL_GPU
-        GPU_FreeImage(new_level);
-        #else
         SDL_DestroyTexture(new_level);
-        #endif
         return 0;
     }
     return 1;
@@ -1099,15 +1069,11 @@ Uint8 FC_LoadFontFromTTF(FC_Font* font, SDL_Renderer* renderer, TTF_Font* ttf, S
 
 
     // Might as well check render target support here
-    #ifdef FC_USE_SDL_GPU
-    fc_has_render_target_support = GPU_IsFeatureEnabled(GPU_FEATURE_RENDER_TARGETS);
-    #else
     SDL_RendererInfo info;
     SDL_GetRendererInfo(renderer, &info);
     fc_has_render_target_support = 0; // (info.flags & SDL_RENDERER_TARGETTEXTURE);
 
     font->renderer = renderer;
-    #endif
 
     font->ttf_source = ttf;
 
@@ -1211,12 +1177,7 @@ Uint8 FC_LoadFontFromTTF(FC_Font* font, SDL_Renderer* renderer, TTF_Font* ttf, S
     return 1;
 }
 
-
-#ifdef FC_USE_SDL_GPU
-Uint8 FC_LoadFont(FC_Font* font, const char* filename_ttf, Uint32 pointSize, SDL_Color color, int style)
-#else
 Uint8 FC_LoadFont(FC_Font* font, FC_Target* renderer, const char* filename_ttf, Uint32 pointSize, SDL_Color color, int style)
-#endif
 {
     SDL_IOStream* iostream;
 
@@ -1231,18 +1192,10 @@ Uint8 FC_LoadFont(FC_Font* font, FC_Target* renderer, const char* filename_ttf, 
         return 0;
     }
 
-    #ifdef FC_USE_SDL_GPU
-    return FC_LoadFont_RW(font, rwops, 1, pointSize, color, style);
-    #else
     return FC_LoadFont_RW(font, renderer, iostream, 1, pointSize, color, style);
-    #endif
 }
 
-#ifdef FC_USE_SDL_GPU
-Uint8 FC_LoadFont_RW(FC_Font* font, SDL_RWops* file_rwops_ttf, Uint8 own_rwops, Uint32 pointSize, SDL_Color color, int style)
-#else
 Uint8 FC_LoadFont_RW(FC_Font* font, FC_Target* renderer, SDL_IOStream* file_iostream_ttf, Uint8 own_rwops, Uint32 pointSize, SDL_Color color, int style)
-#endif
 {
     Uint8 result;
     TTF_Font* ttf;
@@ -1277,11 +1230,7 @@ Uint8 FC_LoadFont_RW(FC_Font* font, FC_Target* renderer, SDL_IOStream* file_iost
     }
     TTF_SetFontStyle(ttf, style);
 
-    #ifdef FC_USE_SDL_GPU
-    result = FC_LoadFontFromTTF(font, ttf, color);
-    #else
     result = FC_LoadFontFromTTF(font, renderer, ttf, color);
-    #endif
 
     // Can only load new (uncached) glyphs if we can keep the SDL_RWops open.
     font->owns_ttf_source = own_rwops;
@@ -1290,6 +1239,8 @@ Uint8 FC_LoadFont_RW(FC_Font* font, FC_Target* renderer, SDL_IOStream* file_iost
         TTF_CloseFont(font->ttf_source);
         font->ttf_source = NULL;
     }
+
+    //FC_Log("Loaded font with result: %u\n",result);
 
     return result;
 }
@@ -1344,11 +1295,7 @@ void FC_ClearFont(FC_Font* font)
     // Delete glyph cache
     for(i = 0; i < font->glyph_cache_count; ++i)
     {
-        #ifdef FC_USE_SDL_GPU
-        GPU_FreeImage(font->glyph_cache[i]);
-        #else
         SDL_DestroyTexture(font->glyph_cache[i]);
-        #endif
     }
     free(font->glyph_cache);
     font->glyph_cache = NULL;
@@ -1374,11 +1321,7 @@ void FC_FreeFont(FC_Font* font)
     // Delete glyph cache
     for(i = 0; i < font->glyph_cache_count; ++i)
     {
-        #ifdef FC_USE_SDL_GPU
-        GPU_FreeImage(font->glyph_cache[i]);
-        #else
         SDL_DestroyTexture(font->glyph_cache[i]);
-        #endif
     }
     free(font->glyph_cache);
 
@@ -1412,69 +1355,49 @@ Uint8 FC_AddGlyphToCache(FC_Font* font, SDL_Surface* glyph_surface)
     if(dest == NULL)
         return 0;
 
-    #ifdef FC_USE_SDL_GPU
-    {
-        GPU_Target* target = GPU_LoadTarget(dest);
-        if(target == NULL)
-            return 0;
-        GPU_Image* img = GPU_CopyImageFromSurface(glyph_surface);
-        GPU_SetAnchor(img, 0.5f, 0.5f);  // Just in case the default is different
-        GPU_SetImageFilter(img, GPU_FILTER_NEAREST);
-        GPU_SetBlendMode(img, GPU_BLEND_SET);
-
-        SDL_Rect destrect = font->last_glyph.rect;
-        GPU_Blit(img, NULL, target, destrect.x + destrect.w/2, destrect.y + destrect.h/2);
-
-        GPU_FreeImage(img);
-        GPU_FreeTarget(target);
+    SDL_Renderer* renderer = font->renderer;
+    SDL_Texture* img;
+    SDL_FRect destrect;
+    SDL_Texture* prev_target = SDL_GetRenderTarget(renderer);
+    SDL_FRect prev_clip;
+    SDL_Rect prev_viewport;
+    int prev_logicalw = 0, prev_logicalh = 0;
+    Uint8 prev_clip_enabled;
+    float prev_scalex, prev_scaley;
+    // only backup if previous target existed (SDL will preserve them for the default target)
+    if (prev_target) {
+        prev_clip_enabled = has_clip(renderer);
+        if (prev_clip_enabled)
+            prev_clip = get_clip(renderer);
+        SDL_GetRenderViewport(renderer, &prev_viewport);
+        SDL_GetRenderScale(renderer, &prev_scalex, &prev_scaley);
+        SDL_GetRenderLogicalPresentation(renderer, &prev_logicalw, &prev_logicalh, NULL, NULL);
     }
-    #else
-    {
-        SDL_Renderer* renderer = font->renderer;
-        SDL_Texture* img;
-        SDL_FRect destrect;
-        SDL_Texture* prev_target = SDL_GetRenderTarget(renderer);
-        SDL_FRect prev_clip;
-        SDL_Rect prev_viewport;
-        int prev_logicalw = 0, prev_logicalh = 0;
-        Uint8 prev_clip_enabled;
-        float prev_scalex, prev_scaley;
-        // only backup if previous target existed (SDL will preserve them for the default target)
-        if (prev_target) {
-            prev_clip_enabled = has_clip(renderer);
-            if (prev_clip_enabled)
-                prev_clip = get_clip(renderer);
-            SDL_GetRenderViewport(renderer, &prev_viewport);
-            SDL_GetRenderScale(renderer, &prev_scalex, &prev_scaley);
-            SDL_GetRenderLogicalPresentation(renderer, &prev_logicalw, &prev_logicalh, NULL, NULL);
+
+    img = SDL_CreateTextureFromSurface(renderer, glyph_surface);
+
+    destrect.x = (float)font->last_glyph.rect.x;
+    destrect.y = (float)font->last_glyph.rect.y;
+    destrect.w = (float)font->last_glyph.rect.w;
+    destrect.h = (float)font->last_glyph.rect.h;
+    SDL_SetRenderTarget(renderer, dest);
+    SDL_RenderTextureRotated(renderer, img, NULL, &destrect, 0, NULL, SDL_FLIP_NONE);
+
+    SDL_SetRenderTarget(renderer, prev_target);
+    if (prev_target) {
+        if (prev_clip_enabled)
+            set_clip(renderer, &prev_clip);
+        if (prev_logicalw && prev_logicalh)
+            SDL_SetRenderLogicalPresentation(renderer, prev_logicalw, prev_logicalh,
+                SDL_LOGICAL_PRESENTATION_DISABLED,
+                SDL_SCALEMODE_LINEAR);
+        else {
+            SDL_SetRenderViewport(renderer, &prev_viewport);
+            SDL_SetRenderScale(renderer, prev_scalex, prev_scaley);
         }
-
-        img = SDL_CreateTextureFromSurface(renderer, glyph_surface);
-
-        destrect.x = (float)font->last_glyph.rect.x;
-        destrect.y = (float)font->last_glyph.rect.y;
-        destrect.w = (float)font->last_glyph.rect.w;
-        destrect.h = (float)font->last_glyph.rect.h;
-        SDL_SetRenderTarget(renderer, dest);
-        SDL_RenderTextureRotated(renderer, img, NULL, &destrect, 0, NULL, SDL_FLIP_NONE);
-
-        SDL_SetRenderTarget(renderer, prev_target);
-        if (prev_target) {
-            if (prev_clip_enabled)
-                set_clip(renderer, &prev_clip);
-            if (prev_logicalw && prev_logicalh)
-                SDL_SetRenderLogicalPresentation(renderer, prev_logicalw, prev_logicalh,
-                    SDL_LOGICAL_PRESENTATION_DISABLED,
-                    SDL_SCALEMODE_LINEAR);
-            else {
-                SDL_SetRenderViewport(renderer, &prev_viewport);
-                SDL_SetRenderScale(renderer, prev_scalex, prev_scaley);
-            }
-        }
-
-        SDL_DestroyTexture(img);
     }
-    #endif
+
+    SDL_DestroyTexture(img);
 
     return 1;
 }
@@ -1546,12 +1469,7 @@ Uint8 FC_GetGlyphData(FC_Font* font, FC_GlyphData* result, Uint32 codepoint)
             return 0;
         }
 
-        #ifdef FC_USE_SDL_GPU
-        w = cache_image->w;
-        h = cache_image->h;
-        #else
         SDL_QueryTexture(cache_image, NULL, NULL, &w, &h);
-        #endif
 
         surf = TTF_RenderUTF8_Blended(font->ttf_source, buff, white);
         if(surf == NULL)
@@ -1650,14 +1568,7 @@ static FC_Rect FC_RenderLeft(FC_Font* font, FC_Target* dest, float x, float y, F
         if(destY >= dest->h)
             continue;*/
 
-        #ifdef FC_USE_SDL_GPU
-        srcRect.x = glyph.rect.x;
-        srcRect.y = glyph.rect.y;
-        srcRect.w = glyph.rect.w;
-        srcRect.h = glyph.rect.h;
-        #else
         srcRect = glyph.rect;
-        #endif
         dstRect = fc_render_callback(FC_GetGlyphCacheLevel(font, glyph.cache_level), &srcRect, dest, destX, destY, scale.x, scale.y);
         if(dirtyRect.w == 0 || dirtyRect.h == 0)
             dirtyRect = dstRect;
@@ -2649,21 +2560,6 @@ void FC_SetFilterMode(FC_Font* font, FC_FilterEnum filter)
     if(font->filter != filter)
     {
         font->filter = filter;
-
-        #ifdef FC_USE_SDL_GPU
-        // Update each texture to use this filter mode
-        {
-            int i;
-            GPU_FilterEnum gpu_filter = GPU_FILTER_NEAREST;
-            if(FC_GetFilterMode(font) == FC_FILTER_LINEAR)
-                gpu_filter = GPU_FILTER_LINEAR;
-
-            for(i = 0; i < font->glyph_cache_count; ++i)
-            {
-                GPU_SetImageFilter(font->glyph_cache[i], gpu_filter);
-            }
-        }
-        #endif
     }
 }
 

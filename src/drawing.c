@@ -289,11 +289,10 @@ void drawScreenDimmer(const drawing_state *restrict ds, resource_data *restrict 
 float drawTextAlignedSized(resource_data *restrict rdat, const float xPos, const float yPos, FC_Font *font, const SDL_Color textColor, const Uint8 alpha, const char *txt, const uint8_t alignment, const Uint16 maxWidth){
   float drawX = xPos*rdat->uiScale;
   float drawY = yPos*rdat->uiScale;
+  float drawW = (float)FC_GetWidth(font,txt);
   if(alignment == ALIGN_RIGHT){
-    float drawW = (float)FC_GetWidth(font,txt);
     drawX = drawX - drawW;
   }else if(alignment == ALIGN_CENTER){
-    float drawW = (float)FC_GetWidth(font,txt);
     float drawH = (float)FC_GetHeight(font,txt);
     drawX = drawX - drawW/2.0f;
     drawY = drawY - drawH/2.0f;
@@ -301,11 +300,11 @@ float drawTextAlignedSized(resource_data *restrict rdat, const float xPos, const
   if(alpha != textColor.a){
     SDL_Color drawCol = textColor;
     drawCol.a = alpha;
-    SDL_FRect drawPos = FC_DrawColumnColor(font,rdat->renderer,drawX,drawY,maxWidth,drawCol,txt);
-    return drawPos.w;
+    FC_DrawColumnColor(font,rdat->renderer,drawX,drawY,maxWidth,drawCol,txt);
+    return drawW;
   }else{
-    SDL_FRect drawPos = FC_DrawColumnColor(font,rdat->renderer,drawX,drawY,maxWidth,textColor,txt);
-    return drawPos.w;
+    FC_DrawColumnColor(font,rdat->renderer,drawX,drawY,maxWidth,textColor,txt);
+    return drawW;
   }
 }
 void drawTextAligned(resource_data *restrict rdat, const float xPos, const float yPos, FC_Font *font, const SDL_Color textColor, const char *txt, const uint8_t alignment){
