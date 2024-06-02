@@ -118,12 +118,16 @@ void drawNuclBoxLabel(const app_data *restrict dat, const drawing_state *restric
     if(ds->chartZoomScale >= 12.0f){
       getGSHalfLifeStr(tmpStr,&dat->ndat,nuclInd);
       drawTextAlignedSized(rdat,xPos,yPos+36.0f,rdat->font,col,255,tmpStr,ALIGN_LEFT,16384); //draw GS half-life label
-      /*uint32_t gsLevInd = (uint32_t)(dat->ndat.nuclData[nuclInd].firstLevel + dat->ndat.nuclData[nuclInd].gsLevel);
-      if((ds->chartZoomScale >= 20.0f)||(dat->ndat.levels[gsLevInd].numDecModes <= 2)){
-        float yOffset = 60.0f;
-        for(int8_t i=0; i<dat->ndat.levels[gsLevInd].numDecModes; i++){
-          drawTextFromCache(rdat,xPos,yPos+yOffset,col,ALIGN_LEFT,(uint32_t)(MAX_MASS_NUM+MAX_PROTON_NUM+MAX_PROTON_NUM+MAXNUMNUCL+dat->ndat.levels[gsLevInd].firstDecMode + i));
-          yOffset += 20.0f;
+      /*if(dat->ndat.nuclData[nuclInd].numLevels > 0){
+        uint32_t gsLevInd = (uint32_t)(dat->ndat.nuclData[nuclInd].firstLevel + dat->ndat.nuclData[nuclInd].gsLevel);
+        if((ds->chartZoomScale >= 20.0f)||(dat->ndat.levels[gsLevInd].numDecModes <= 2)){
+          float yOffset = 60.0f;
+          for(int8_t i=0; i<dat->ndat.levels[gsLevInd].numDecModes; i++){
+            getDecayModeStr(tmpStr,&dat->ndat,dat->ndat.levels[gsLevInd].firstDecMode + (uint32_t)i);
+            //printf("%s\n",tmpStr);
+            drawTextAlignedSized(rdat,xPos,yPos+yOffset,rdat->font,col,255,tmpStr,ALIGN_LEFT,16384); //draw decay mode label
+            yOffset += 20.0f;
+          }
         }
       }*/
     }

@@ -539,6 +539,22 @@ void getGSHalfLifeStr(char strOut[32], const ndata *restrict nd, const uint16_t 
 	}
 }
 
+void getDecayModeStr(char strOut[32], const ndata *restrict nd, const uint32_t dcyModeInd){
+	if(dcyModeInd < nd->numDecModes){
+		uint8_t decValueType = nd->dcyMode[dcyModeInd].probType;
+		uint8_t decType = nd->dcyMode[dcyModeInd].type;
+		if(decValueType == VALUETYPE_NUMBER){
+			snprintf(strOut,32,"%s=%.0f%%%%",getDecayTypeShortStr(decType),(double)nd->dcyMode[dcyModeInd].prob); //%%%% will be parsed to "%%" in tmpStr, which will then be parsed as a format string by SDL_FontCacahe, leaving "%"
+		}else if(decValueType == VALUETYPE_UNKNOWN){
+			snprintf(strOut,32,"%s%s",getDecayTypeShortStr(decType),getValueTypeShortStr(decValueType));
+		}else{
+			snprintf(strOut,32,"%s %s%.0f%%%%",getDecayTypeShortStr(decType),getValueTypeShortStr(decValueType),(double)nd->dcyMode[dcyModeInd].prob); //%%%% will be parsed to "%%" in tmpStr, which will then be parsed as a format string by SDL_FontCacahe, leaving "%"
+		}
+	}else{
+		snprintf(strOut,32," ");
+	}
+}
+
 double getLevelHalfLifeSeconds(const ndata *restrict nd, const uint32_t levelInd){
 	if(levelInd < nd->numLvls){
 		double hl = (double)(nd->levels[levelInd].halfLife);

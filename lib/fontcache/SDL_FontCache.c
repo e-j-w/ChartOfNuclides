@@ -822,6 +822,7 @@ static void FC_Init(FC_Font* font)
 
 	if (font->loading_string == NULL)
 		font->loading_string = FC_GetStringASCII();
+    //FC_Log("%s\n",font->loading_string);
 
     if(fc_buffer == NULL)
         fc_buffer = (char*)malloc(fc_buffer_size);
