@@ -532,7 +532,11 @@ void getHalfLifeStr(char strOut[32], const ndata *restrict nd, const uint32_t le
 	}
 }
 void getGSHalfLifeStr(char strOut[32], const ndata *restrict nd, const uint16_t nuclInd){
-	getHalfLifeStr(strOut,nd,nd->nuclData[nuclInd].firstLevel + nd->nuclData[nuclInd].gsLevel);
+	if(nd->nuclData[nuclInd].numLevels > 0){
+		getHalfLifeStr(strOut,nd,nd->nuclData[nuclInd].firstLevel + nd->nuclData[nuclInd].gsLevel);
+	}else{
+		snprintf(strOut,32,"Unknown");
+	}
 }
 
 double getLevelHalfLifeSeconds(const ndata *restrict nd, const uint32_t levelInd){
