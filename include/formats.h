@@ -105,6 +105,10 @@ typedef struct
   uint32_t numTran; //number of transitions across all levels
   int16_t numNucl; //number of nuclides for which data is stored (-1 if no nuclides)
   uint16_t numDecModes; //number of decay modes across all levels
+  uint16_t minNforZ[MAX_PROTON_NUM];
+  uint16_t maxNforZ[MAX_PROTON_NUM];
+  uint16_t minZforN[MAX_NEUTRON_NUM];
+  uint16_t maxZforN[MAX_NEUTRON_NUM];
   nucl nuclData[MAXNUMNUCL]; //data for individual nuclides
   level levels[MAXNUMLVLS]; //levels belonging to nuclides
   transition tran[MAXNUMTRAN]; //transitions between levels

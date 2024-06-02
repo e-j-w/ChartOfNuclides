@@ -791,6 +791,12 @@ void initialize_database(ndata * nd){
 	for(uint32_t i=0;i<MAXNUMLVLS;i++){
 		nd->levels[i].numDecModes = -1; //default if no decay mode info in data
 	}
+	for(uint32_t i=0; i<MAX_PROTON_NUM; i++){
+		nd->minNforZ[i] = MAX_NEUTRON_NUM+1;
+	}
+	for(uint32_t i=0; i<MAX_NEUTRON_NUM; i++){
+		nd->minZforN[i] = MAX_PROTON_NUM+1;
+	}
 	
 }
 
@@ -864,6 +870,26 @@ int readENSDFFile(const char * filePath, ndata * nd){
 					memcpy(nuclNameStr,val[0],10);
 					nuclNameStr[9] = '\0'; //terminate string
 					getNuclNZ(&nd->nuclData[nd->numNucl],nuclNameStr); //get N and Z
+					if((nd->nuclData[nd->numNucl].N > MAX_NEUTRON_NUM)||(nd->nuclData[nd->numNucl].Z > MAX_PROTON_NUM)){
+						printf("ERROR: readENSDFFile - invalid proton (%i) or neutron (%i) number.\n",nd->nuclData[nd->numNucl].Z,nd->nuclData[nd->numNucl].N);
+						return -1;
+					}
+					if(nd->nuclData[nd->numNucl].N > nd->maxNforZ[nd->nuclData[nd->numNucl].Z]){
+						nd->maxNforZ[nd->nuclData[nd->numNucl].Z] = (uint16_t)nd->nuclData[nd->numNucl].N;
+					}
+					if(nd->nuclData[nd->numNucl].N < nd->minNforZ[nd->nuclData[nd->numNucl].Z]){
+						if(nd->nuclData[nd->numNucl].N >= 0){
+							nd->minNforZ[nd->nuclData[nd->numNucl].Z] = (uint16_t)nd->nuclData[nd->numNucl].N;
+						}
+					}
+					if(nd->nuclData[nd->numNucl].Z > nd->maxZforN[nd->nuclData[nd->numNucl].N]){
+						nd->maxZforN[nd->nuclData[nd->numNucl].N] = (uint16_t)nd->nuclData[nd->numNucl].Z;
+					}
+					if(nd->nuclData[nd->numNucl].Z < nd->minZforN[nd->nuclData[nd->numNucl].N]){
+						if(nd->nuclData[nd->numNucl].Z >= 0){
+							nd->minZforN[nd->nuclData[nd->numNucl].N] = (uint16_t)nd->nuclData[nd->numNucl].Z;
+						}
+					}
 				}
 			}
 			/*//parse the nucleus name
