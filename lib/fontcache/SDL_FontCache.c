@@ -898,48 +898,46 @@ Uint8 FC_UploadGlyphCache(FC_Font* font, int cache_level, SDL_Surface* data_surf
         new_level = SDL_CreateTexture(renderer, data_surface->format->format, SDL_TEXTUREACCESS_TARGET, data_surface->w, data_surface->h);
         SDL_SetTextureBlendMode(new_level, SDL_BLENDMODE_BLEND);
 
-        {
-            Uint8 r, g, b, a;
-            SDL_Texture* temp = SDL_CreateTextureFromSurface(renderer, data_surface);
-            SDL_Texture* prev_target = SDL_GetRenderTarget(renderer);
-            SDL_FRect prev_clip;
-            SDL_Rect prev_viewport;
-            int prev_logicalw, prev_logicalh;
-            Uint8 prev_clip_enabled;
-            float prev_scalex, prev_scaley;
-            // only backup if previous target existed (SDL will preserve them for the default target)
-            if (prev_target) {
-                prev_clip_enabled = has_clip(renderer);
-                if (prev_clip_enabled)
-                    prev_clip = get_clip(renderer);
-                SDL_GetRenderViewport(renderer, &prev_viewport);
-                SDL_GetRenderScale(renderer, &prev_scalex, &prev_scaley);
-                SDL_GetRenderLogicalPresentation(renderer, &prev_logicalw, &prev_logicalh, NULL, NULL);
-            }
-            SDL_SetTextureBlendMode(temp, SDL_BLENDMODE_NONE);
-            SDL_SetRenderTarget(renderer, new_level);
-
-            SDL_GetRenderDrawColor(renderer, &r, &g, &b, &a);
-            SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
-            SDL_RenderClear(renderer);
-            SDL_SetRenderDrawColor(renderer, r, g, b, a);
-            SDL_RenderTextureRotated(renderer, temp, NULL, NULL, 0, NULL, SDL_FLIP_NONE);
-            SDL_SetRenderTarget(renderer, prev_target);
-            if (prev_target) {
-                if (prev_clip_enabled)
-                    set_clip(renderer, &prev_clip);
-                if (prev_logicalw && prev_logicalh)
-                    SDL_SetRenderLogicalPresentation(renderer, prev_logicalw, prev_logicalh,
-                        SDL_LOGICAL_PRESENTATION_DISABLED,
-                        SDL_SCALEMODE_LINEAR);
-                else {
-                    SDL_SetRenderViewport(renderer, &prev_viewport);
-                    SDL_SetRenderScale(renderer, prev_scalex, prev_scaley);
-                }
-            }
-
-            SDL_DestroyTexture(temp);
+        Uint8 r, g, b, a;
+        SDL_Texture* temp = SDL_CreateTextureFromSurface(renderer, data_surface);
+        SDL_Texture* prev_target = SDL_GetRenderTarget(renderer);
+        SDL_FRect prev_clip;
+        SDL_Rect prev_viewport;
+        int prev_logicalw, prev_logicalh;
+        Uint8 prev_clip_enabled;
+        float prev_scalex, prev_scaley;
+        // only backup if previous target existed (SDL will preserve them for the default target)
+        if (prev_target) {
+            prev_clip_enabled = has_clip(renderer);
+            if (prev_clip_enabled)
+                prev_clip = get_clip(renderer);
+            SDL_GetRenderViewport(renderer, &prev_viewport);
+            SDL_GetRenderScale(renderer, &prev_scalex, &prev_scaley);
+            SDL_GetRenderLogicalPresentation(renderer, &prev_logicalw, &prev_logicalh, NULL, NULL);
         }
+        SDL_SetTextureBlendMode(temp, SDL_BLENDMODE_NONE);
+        SDL_SetRenderTarget(renderer, new_level);
+
+        SDL_GetRenderDrawColor(renderer, &r, &g, &b, &a);
+        SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
+        SDL_RenderClear(renderer);
+        SDL_SetRenderDrawColor(renderer, r, g, b, a);
+        SDL_RenderTextureRotated(renderer, temp, NULL, NULL, 0, NULL, SDL_FLIP_NONE);
+        SDL_SetRenderTarget(renderer, prev_target);
+        if (prev_target) {
+            if (prev_clip_enabled)
+                set_clip(renderer, &prev_clip);
+            if (prev_logicalw && prev_logicalh)
+                SDL_SetRenderLogicalPresentation(renderer, prev_logicalw, prev_logicalh,
+                    SDL_LOGICAL_PRESENTATION_DISABLED,
+                    SDL_SCALEMODE_LINEAR);
+            else {
+                SDL_SetRenderViewport(renderer, &prev_viewport);
+                SDL_SetRenderScale(renderer, prev_scalex, prev_scaley);
+            }
+        }
+
+        SDL_DestroyTexture(temp);
     }
     if(new_level == NULL || !FC_SetGlyphCacheLevel(font, cache_level, new_level))
     {
@@ -1052,26 +1050,19 @@ FC_Font* FC_CreateFont(void)
 // Assume this many will be enough...
 #define FC_LOAD_MAX_SURFACES 10
 
-#ifdef FC_USE_SDL_GPU
-Uint8 FC_LoadFontFromTTF(FC_Font* font, TTF_Font* ttf, SDL_Color color)
-#else
 Uint8 FC_LoadFontFromTTF(FC_Font* font, SDL_Renderer* renderer, TTF_Font* ttf, SDL_Color color)
-#endif
 {
     if(font == NULL || ttf == NULL)
         return 0;
-    #ifndef FC_USE_SDL_GPU
     if(renderer == NULL)
         return 0;
-    #endif
 
     FC_ClearFont(font);
-
 
     // Might as well check render target support here
     SDL_RendererInfo info;
     SDL_GetRendererInfo(renderer, &info);
-    fc_has_render_target_support = 0; // (info.flags & SDL_RENDERER_TARGETTEXTURE);
+    fc_has_render_target_support = 1; //JW: render to texture is always supported in SDL3, setting this to 0 apparently prevents rendering of UTF-8 characters
 
     font->renderer = renderer;
 
@@ -1137,9 +1128,7 @@ Uint8 FC_LoadFontFromTTF(FC_Font* font, SDL_Renderer* renderer, TTF_Font* ttf, S
                 // Upload the current surface to the glyph cache now so we can keep the cache level packing cursor up to date as we go.
                 FC_UploadGlyphCache(font, i, surfaces[i]);
                 SDL_DestroySurface(surfaces[i]);
-                #ifndef FC_USE_SDL_GPU
                 SDL_SetTextureBlendMode(font->glyph_cache[i], SDL_BLENDMODE_BLEND);
-                #endif
                 // Update the glyph cursor to the new cache level.  We need to do this here because the actual cache lags behind our use of the packing above.
                 font->last_glyph.cache_level = num_surfaces;
 
@@ -1168,9 +1157,7 @@ Uint8 FC_LoadFontFromTTF(FC_Font* font, SDL_Renderer* renderer, TTF_Font* ttf, S
             int i = num_surfaces-1;
             FC_UploadGlyphCache(font, i, surfaces[i]);
             SDL_DestroySurface(surfaces[i]);
-            #ifndef FC_USE_SDL_GPU
             SDL_SetTextureBlendMode(font->glyph_cache[i], SDL_BLENDMODE_BLEND);
-            #endif
         }
     }
 
@@ -1245,8 +1232,6 @@ Uint8 FC_LoadFont_RW(FC_Font* font, FC_Target* renderer, SDL_IOStream* file_iost
     return result;
 }
 
-
-#ifndef FC_USE_SDL_GPU
 void FC_ResetFontFromRendererReset(FC_Font* font, SDL_Renderer* renderer, Uint32 evType)
 {
     TTF_Font* ttf;
@@ -1273,7 +1258,6 @@ void FC_ResetFontFromRendererReset(FC_Font* font, SDL_Renderer* renderer, Uint32
         FC_LoadFontFromTTF(font, renderer, ttf, col);
     font->owns_ttf_source = owns_ttf;
 }
-#endif
 
 void FC_ClearFont(FC_Font* font)
 {
@@ -1461,6 +1445,7 @@ Uint8 FC_GetGlyphData(FC_Font* font, FC_GlyphData* result, Uint32 codepoint)
             return 0;
 
         FC_GetUTF8FromCodepoint(buff, codepoint);
+        //FC_Log("buff: %s\n",buff);
 
         cache_image = FC_GetGlyphCacheLevel(font, font->last_glyph.cache_level);
         if(cache_image == NULL)
@@ -1487,6 +1472,7 @@ Uint8 FC_GetGlyphData(FC_Font* font, FC_GlyphData* result, Uint32 codepoint)
             e = FC_PackGlyphData(font, codepoint, (Uint16)surf->w, (Uint16)w, (Uint16)h);
             if(e == NULL)
             {
+                FC_Log("FC_GetGlyphData - packing failed.\n");
                 SDL_DestroySurface(surf);
                 return 0;
             }
@@ -1515,6 +1501,9 @@ FC_GlyphData* FC_SetGlyphData(FC_Font* font, Uint32 codepoint, FC_GlyphData glyp
 // Drawing
 static FC_Rect FC_RenderLeft(FC_Font* font, FC_Target* dest, float x, float y, FC_Scale scale, const char* text)
 {
+
+    //FC_Log("Rendering text: %s\n",text);
+
     const char* c = text;
     FC_Rect srcRect;
     FC_Rect dstRect;
@@ -1551,8 +1540,10 @@ static FC_Rect FC_RenderLeft(FC_Font* font, FC_Target* dest, float x, float y, F
         }
 
         codepoint = FC_GetCodepointFromUTF8(&c, 1);  // Increments 'c' to skip the extra UTF-8 bytes
+        //FC_Log("codept: %u\n",codepoint);
         if(!FC_GetGlyphData(font, &glyph, codepoint))
         {
+            //FC_Log("Couldn't get glyph data for codepoint: %u\n",codepoint);
             codepoint = ' ';
             if(!FC_GetGlyphData(font, &glyph, codepoint))
                 continue;  // Skip bad characters
