@@ -301,11 +301,10 @@ float drawTextAlignedSized(resource_data *restrict rdat, const float xPos, const
     SDL_Color drawCol = textColor;
     drawCol.a = alpha;
     FC_DrawColumnColor(font,rdat->renderer,drawX,drawY,maxWidth,drawCol,txt);
-    return drawW;
   }else{
     FC_DrawColumnColor(font,rdat->renderer,drawX,drawY,maxWidth,textColor,txt);
-    return drawW;
   }
+  return drawW/rdat->uiScale;
 }
 void drawTextAligned(resource_data *restrict rdat, const float xPos, const float yPos, FC_Font *font, const SDL_Color textColor, const char *txt, const uint8_t alignment){
   drawTextAlignedSized(rdat,xPos,yPos,font,textColor,255,txt,alignment,16384);
