@@ -37,7 +37,7 @@
 #define MAXNUMNUCL               3500
 #define MAXNUMLVLS               200000
 #define MAXNUMTRAN               300000
-#define MAXNUMDECAYMODES         6000
+#define MAXNUMDECAYMODES         20000
 #define MAX_NEUTRON_NUM          200
 #define MAX_PROTON_NUM           130
 #define MAX_MASS_NUM             350
