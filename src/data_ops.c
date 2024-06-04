@@ -656,7 +656,7 @@ float getChartHeightZAfterZoom(const drawing_state *restrict ds){
 	return (ds->windowYRes/(DEFAULT_NUCLBOX_DIM*ds->chartZoomToScale));
 }
 
-void mouseWheelAction(app_state *restrict state){
+void mouseWheelAction(const ndata *restrict nd, app_state *restrict state){
 	if(state->uiState == UISTATE_DEFAULT){
 		if(state->mouseWheelVal != 0.0f){
 			state->ds.chartZoomStartScale = state->ds.chartZoomScale;
@@ -676,6 +676,16 @@ void mouseWheelAction(app_state *restrict state){
 			if(state->ds.zoomInProgress == 0){
 				state->ds.chartZoomStartMouseX = mouseXPxToN(&state->ds,state->mouseXPx);
 				state->ds.chartZoomStartMouseY = mouseYPxToZ(&state->ds,state->mouseYPx);
+				if(state->ds.chartZoomStartMouseX > nd->maxN){
+					state->ds.chartZoomStartMouseX = (float)nd->maxN;
+				}else if(state->ds.chartZoomStartMouseX < 0.0f){
+					state->ds.chartZoomStartMouseX = 0.0f;
+				}
+				if(state->ds.chartZoomStartMouseY > nd->maxZ){
+					state->ds.chartZoomStartMouseY = (float)nd->maxZ;
+				}else if(state->ds.chartZoomStartMouseY < 0.0f){
+					state->ds.chartZoomStartMouseY = 0.0f;
+				}
 			}
 			state->ds.chartZoomStartMouseXFrac = (state->ds.chartZoomStartMouseX - getMinChartN(&state->ds))/getChartWidthN(&state->ds);
 			float afterZoomMinN = state->ds.chartZoomStartMouseX - getChartWidthNAfterZoom(&state->ds)*state->ds.chartZoomStartMouseXFrac;
@@ -683,13 +693,13 @@ void mouseWheelAction(app_state *restrict state){
 			state->ds.chartZoomStartMouseYFrac = (state->ds.chartZoomStartMouseY - getMinChartZ(&state->ds))/getChartHeightZ(&state->ds);
 			float afterZoomMinZ = state->ds.chartZoomStartMouseY - getChartHeightZAfterZoom(&state->ds)*state->ds.chartZoomStartMouseYFrac;
 			state->ds.chartZoomToY = afterZoomMinZ + getChartHeightZAfterZoom(&state->ds)*0.5f;
-			if(state->ds.chartZoomToX > MAX_NEUTRON_NUM){
-				state->ds.chartZoomToX = (float)MAX_NEUTRON_NUM;
+			if(state->ds.chartZoomToX > nd->maxN){
+				state->ds.chartZoomToX = (float)nd->maxN;
 			}else if(state->ds.chartZoomToX < 0.0f){
 				state->ds.chartZoomToX = 0.0f;
 			}
-			if(state->ds.chartZoomToY > MAX_PROTON_NUM){
-				state->ds.chartZoomToY = (float)MAX_PROTON_NUM;
+			if(state->ds.chartZoomToY > nd->maxZ){
+				state->ds.chartZoomToY = (float)nd->maxZ;
 			}else if(state->ds.chartZoomToY < 0.0f){
 				state->ds.chartZoomToY = 0.0f;
 			}

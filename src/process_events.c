@@ -6,7 +6,7 @@
 #include "gui_constants.h" //to compute mouse/pointer interactions
 
 //leftButton: values from input_state_enum
-void processMouse(app_state *restrict state){
+void processMouse(const app_data *restrict dat, app_state *restrict state){
 
   state->mouseoverElement = UIELEM_ENUM_LENGTH; //by default, no element is moused over
   state->mouseholdElement = UIELEM_ENUM_LENGTH;
@@ -52,7 +52,7 @@ void processMouse(app_state *restrict state){
   }
 
   if((state->mouseWheelUsed != 0)&&(fabsf(state->mouseWheelVal)>0.05f)){
-    mouseWheelAction(state);
+    mouseWheelAction(&dat->ndat,state);
   }
 
 }
@@ -327,7 +327,7 @@ void processFrameEvents(app_data *restrict dat, app_state *restrict state, resou
     }
 
     //process the results of input state
-    processMouse(state);
+    processMouse(dat,state);
 
 }
 
