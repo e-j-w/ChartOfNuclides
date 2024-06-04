@@ -109,6 +109,8 @@ typedef struct
   uint16_t maxNforZ[MAX_PROTON_NUM];
   uint16_t minZforN[MAX_NEUTRON_NUM];
   uint16_t maxZforN[MAX_NEUTRON_NUM];
+  uint16_t maxZ;
+  uint16_t maxN;
   nucl nuclData[MAXNUMNUCL]; //data for individual nuclides
   level levels[MAXNUMLVLS]; //levels belonging to nuclides
   transition tran[MAXNUMTRAN]; //transitions between levels
@@ -136,10 +138,12 @@ typedef struct
   float chartPosX, chartPosY, chartZoomScale; //x and y in chart units
   float chartZoomStartScale, chartZoomToScale; //start and target zoom scale
   float chartZoomToX, chartZoomToY; //in chart units
+  float chartPanToX, chartPanToY; //in chart units
   float chartZoomStartMouseX, chartZoomStartMouseY, chartZoomStartMouseXFrac, chartZoomStartMouseYFrac; //in chart units
+  float chartPanStartX, chartPanStartY;
   float chartDragStartX, chartDragStartY;
   float chartDragStartMouseX, chartDragStartMouseY; //in scaled pixels
-  float timeSinceZoomStart;
+  float timeSinceZoomStart, timeSincePanStart;
   uint32_t shownElements; //bit pattern describing which UI elements are being shown, values from ui_element_enum
   uint32_t uiAnimPlaying; //bit pattern describing which UI animations are playing
   float timeLeftInUIAnimation[UIANIM_ENUM_LENGTH]; //time left in each UI animation

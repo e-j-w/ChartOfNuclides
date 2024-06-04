@@ -57,7 +57,7 @@ void processMouse(app_state *restrict state){
 
 }
 
-void processSingleEvent(app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat, const SDL_Event evt, const float deltaTime){
+void processSingleEvent(app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat, const SDL_Event evt){
   switch(evt.type){
     case SDL_EVENT_QUIT:
       state->quitAppFlag = 1; //quit game
@@ -166,40 +166,57 @@ void processSingleEvent(app_data *restrict dat, app_state *restrict state, resou
           break;
         case SDL_SCANCODE_LEFT:
           if(state->uiState == UISTATE_DEFAULT){
-            state->ds.chartPosX -= (CHART_PAN_SPEED*deltaTime/state->ds.chartZoomScale);
-            if(state->ds.chartPosX < 0.0f){
-              state->ds.chartPosX = 0.0f;
+            state->ds.chartPanStartX = state->ds.chartPosX;
+            state->ds.chartPanStartY = state->ds.chartPosY;
+            state->ds.chartPanToX = state->ds.chartPosX - (CHART_PAN_DIST/state->ds.chartZoomScale);
+            state->ds.chartPanToY = state->ds.chartPosY;
+            if(state->ds.chartPanToX <= 0.0f){
+              state->ds.chartPanToX = 0.0f;
             }
+            state->ds.timeSincePanStart = 0.0f;
             state->ds.panInProgress = 1;
             state->ds.panFinished = 0;
           }
           break;
         case SDL_SCANCODE_RIGHT:
           if(state->uiState == UISTATE_DEFAULT){
-            state->ds.chartPosX += (CHART_PAN_SPEED*deltaTime/state->ds.chartZoomScale);
-            if(state->ds.chartPosX > MAX_NEUTRON_NUM){
-              state->ds.chartPosX = MAX_NEUTRON_NUM;
+            state->ds.chartPanStartX = state->ds.chartPosX;
+            state->ds.chartPanStartY = state->ds.chartPosY;
+            state->ds.chartPanToX = state->ds.chartPosX + (CHART_PAN_DIST/state->ds.chartZoomScale);
+            state->ds.chartPanToY = state->ds.chartPosY;
+            if(state->ds.chartPanToX >= (dat->ndat.maxN+1)){
+              state->ds.chartPanToX = dat->ndat.maxN+1.0f;
             }
+            state->ds.timeSincePanStart = 0.0f;
             state->ds.panInProgress = 1;
             state->ds.panFinished = 0;
           }
           break;
         case SDL_SCANCODE_UP:
           if(state->uiState == UISTATE_DEFAULT){
-            state->ds.chartPosY += (CHART_PAN_SPEED*deltaTime/state->ds.chartZoomScale);
-            if(state->ds.chartPosY > MAX_PROTON_NUM){
-              state->ds.chartPosY = MAX_PROTON_NUM;
+            state->ds.chartPanStartX = state->ds.chartPosX;
+            state->ds.chartPanStartY = state->ds.chartPosY;
+            state->ds.chartPanToX = state->ds.chartPosX;
+            state->ds.chartPanToY = state->ds.chartPosY + (CHART_PAN_DIST/state->ds.chartZoomScale);
+            if(state->ds.chartPanToY >= (dat->ndat.maxZ+1)){
+              state->ds.chartPanToY = dat->ndat.maxZ+1.0f;
             }
+            state->ds.timeSincePanStart = 0.0f;
             state->ds.panInProgress = 1;
             state->ds.panFinished = 0;
+            //printf("pan start: [%0.2f %0.2f], pan to: [%0.2f %0.2f]\n",(double)state->ds.chartPanStartX,(double)state->ds.chartPanStartY,(double)state->ds.chartPanToX,(double)state->ds.chartPanToY);
           }
           break;
         case SDL_SCANCODE_DOWN:
           if(state->uiState == UISTATE_DEFAULT){
-            state->ds.chartPosY -= (CHART_PAN_SPEED*deltaTime/state->ds.chartZoomScale);
-            if(state->ds.chartPosY < 0.0f){
-              state->ds.chartPosY = 0.0f;
+            state->ds.chartPanStartX = state->ds.chartPosX;
+            state->ds.chartPanStartY = state->ds.chartPosY;
+            state->ds.chartPanToX = state->ds.chartPosX;
+            state->ds.chartPanToY = state->ds.chartPosY - (CHART_PAN_DIST/state->ds.chartZoomScale);
+            if(state->ds.chartPanToY <= 0.0f){
+              state->ds.chartPanToY = 0.0f;
             }
+            state->ds.timeSincePanStart = 0.0f;
             state->ds.panInProgress = 1;
             state->ds.panFinished = 0;
           }
@@ -277,7 +294,7 @@ void processSingleEvent(app_data *restrict dat, app_state *restrict state, resou
 
 //called once per frame, processes user inputs and other SDL events
 //takes input flags from the previous frame as an argument, returns flags for the current frame
-void processFrameEvents(app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat, const float deltaTime){
+void processFrameEvents(app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat){
 
     //reset values
     state->mouseClickPosXPx = -1.0f;
@@ -296,15 +313,15 @@ void processFrameEvents(app_data *restrict dat, app_state *restrict state, resou
       //effectively forces a re-draw later on in the main loop
       //useful if eg. an animation is playing
       while(SDL_PollEvent(&evt)){
-        processSingleEvent(dat,state,rdat,evt,deltaTime);
+        processSingleEvent(dat,state,rdat,evt);
       }
       state->ds.forceRedraw = 0; //reset flag
     }else{
       //block, ie. wait for the first event to occur before doing anything (saves CPU)
       if(SDL_WaitEvent(&evt)){ 
-        processSingleEvent(dat,state,rdat,evt,deltaTime);
+        processSingleEvent(dat,state,rdat,evt);
         while(SDL_PollEvent(&evt)){
-          processSingleEvent(dat,state,rdat,evt,deltaTime);
+          processSingleEvent(dat,state,rdat,evt);
         }
       }
     }

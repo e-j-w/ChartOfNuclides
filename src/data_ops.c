@@ -90,7 +90,7 @@ void updateUIAnimationTimes(drawing_state *ds, const float deltaTime){
 }
 
 //called once per frame
-void updateDrawingState(app_state *restrict state, const float deltaTime){
+void updateDrawingState(const app_data *restrict dat, app_state *restrict state, const float deltaTime){
 	if(state->ds.zoomFinished){
 		//we want the zooming flag to persist for 1 frame beyond the
 		//end of the zoom, to force the UI to redraw
@@ -127,16 +127,26 @@ void updateDrawingState(app_state *restrict state, const float deltaTime){
 		state->ds.chartPosX = state->ds.chartDragStartX + ((state->ds.chartDragStartMouseX - state->mouseXPx)/(DEFAULT_NUCLBOX_DIM*state->ds.chartZoomScale));
 		state->ds.chartPosY = state->ds.chartDragStartY - ((state->ds.chartDragStartMouseY - state->mouseYPx)/(DEFAULT_NUCLBOX_DIM*state->ds.chartZoomScale));
 	}
+	if(state->ds.panInProgress){
+		state->ds.timeSincePanStart += deltaTime;
+		state->ds.chartPosX = state->ds.chartPanStartX + (state->ds.chartPanToX - state->ds.chartPanStartX)*juice_smoothStop2(state->ds.timeSincePanStart/CHART_PAN_TIME);
+		state->ds.chartPosY = state->ds.chartPanStartY + (state->ds.chartPanToY - state->ds.chartPanStartY)*juice_smoothStop2(state->ds.timeSincePanStart/CHART_PAN_TIME);
+		if(state->ds.timeSincePanStart >= CHART_PAN_TIME){
+			state->ds.chartPosX = state->ds.chartPanToX;
+			state->ds.chartPosY = state->ds.chartPanToY;
+			state->ds.panFinished = 1;
+		}
+	}
 	//clamp chart display range
 	if(state->ds.chartPosX < 0.0f){
 		state->ds.chartPosX = 0.0f;
-	}else if(state->ds.chartPosX > MAX_NEUTRON_NUM){
-		state->ds.chartPosX = (float)MAX_NEUTRON_NUM;
+	}else if(state->ds.chartPosX > (dat->ndat.maxN+1)){
+		state->ds.chartPosX = (float)dat->ndat.maxN+1.0f;
 	}
 	if(state->ds.chartPosY < 0.0f){
 		state->ds.chartPosY = 0.0f;
-	}else if(state->ds.chartPosY > MAX_PROTON_NUM){
-		state->ds.chartPosY = (float)MAX_PROTON_NUM;
+	}else if(state->ds.chartPosY > (dat->ndat.maxZ+1)){
+		state->ds.chartPosY = (float)dat->ndat.maxZ+1.0f;
 	}
 }
 

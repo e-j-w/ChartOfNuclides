@@ -155,9 +155,9 @@ int main(int argc, char *argv[]){
 
     updateUIAnimationTimes(&gdat->state.ds,deltaTime);
 
-    updateDrawingState(&gdat->state,deltaTime);
+    updateDrawingState(&gdat->dat,&gdat->state,deltaTime);
 
-    processFrameEvents(&gdat->dat,&gdat->state,&gdat->rdat,deltaTime); //can block the main thread to save CPU, see process_events.h
+    processFrameEvents(&gdat->dat,&gdat->state,&gdat->rdat); //can block the main thread to save CPU, see process_events.h
     
     //SDL_RenderClear(gdat->rdat.renderer); //clear the window, disabled for optimization purposes
 

@@ -4,11 +4,11 @@ Maintainer: Jonathan Williams
 
 ## Description
 
-An offline viewer of ENSDF data, **extremely early in development and basically non-functional right now**.  Based on the command line program [LevelUp](https://github.com/e-j-w/LevelUp) with a UI implemented in [SDL3](https://github.com/libsdl-org/SDL).
+An offline viewer of ENSDF data, **extremely early in development and basically non-functional right now**.  The UI is implemented in [SDL](https://github.com/libsdl-org/SDL) (so you can browse nuclear half-lives using some of the same code that powers [Half-Life](https://www.pcgamingwiki.com/wiki/Half-Life#Middleware)).
 
 The program parses plaintext ENSDF data files (available [here](https://www.nndc.bnl.gov/ensarchivals/)) into a binary database, eventually one will be able to query this for information on various nuclei (levels, cascades, gamma-rays).
 
-The goal is to develop a program that will be useful in both professional (nuclear structure research) and educational contexts.
+The goal is to develop a performant and multiplatform tool that will be useful in both professional (nuclear structure research) and educational contexts.
 
 ## Features
 

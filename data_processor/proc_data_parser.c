@@ -890,6 +890,12 @@ int readENSDFFile(const char * filePath, ndata * nd){
 							nd->minZforN[nd->nuclData[nd->numNucl].N] = (uint16_t)nd->nuclData[nd->numNucl].Z;
 						}
 					}
+					if(nd->nuclData[nd->numNucl].N > nd->maxN){
+						nd->maxN = (uint16_t)nd->nuclData[nd->numNucl].N;
+					}
+					if(nd->nuclData[nd->numNucl].Z > nd->maxZ){
+						nd->maxZ = (uint16_t)nd->nuclData[nd->numNucl].Z;
+					}
 				}
 			}
 			/*//parse the nucleus name

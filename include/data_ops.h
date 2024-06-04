@@ -14,7 +14,7 @@ void startUIAnimation(drawing_state *ds, const uint8_t uiAnim);
 void stopUIAnimation(drawing_state *ds, const uint8_t uiAnim);
 void updateUIAnimationTimes(drawing_state *ds, const float deltaTime);
 
-void updateDrawingState(app_state *restrict state, const float deltaTime);
+void updateDrawingState(const app_data *restrict dat, app_state *restrict state, const float deltaTime);
 
 const char* getElemStr(const uint8_t Z);
 const char* getHalfLifeUnitShortStr(const uint8_t unit);
