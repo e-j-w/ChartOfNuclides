@@ -44,7 +44,7 @@ This will build the data package file `con.dat`. Then, the main application can 
 ./con
 ```
 
-## Keyboard shortcuts
+### Keyboard shortcuts
 
 | Key        | Action |
 | :--------- | :----- |
@@ -53,7 +53,7 @@ This will build the data package file `con.dat`. Then, the main application can 
 
 ## Disclaimer
 
-Authors make no guarantee of the accuracy or completeness of the information provided.  As stated in the [license](COPYING.md), this program is provided without any warranty.  Please file a bug report if you spot any inaccuracies (where the data reported by the program differs from the ENSDF data).
+The author(s) make no guarantee of the accuracy or completeness of the information provided.  As stated in the [license](COPYING.md), this program is provided without any warranty.  Please file a bug report if you spot any inaccuracies (where the data reported by the program differs from the ENSDF data).
 
 ## Acknowledgements
 

@@ -171,7 +171,8 @@ typedef struct
   float mouseXPx, mouseYPx; //current position of the mouse, in pixels
   float mouseHoldStartPosXPx, mouseHoldStartPosYPx; //mouse position at the start of the last mouse button down event, in pixels
   float mouseClickPosXPx, mouseClickPosYPx; //mouse position at the start of a mouse (left) button up event, in pixels
-  float mouseWheelVal; //scroll delta, can be very small for subtle touchpad events 
+  float zoomDeltaVal; //amount to zoom by, equivalent to mouse wheel or touchpad scroll delta, can be very small for subtle touchpad events
+  uint32_t inputFlags;
   uint16_t gamepadDeadzone,tmpGamepadDeadzone;
   int16_t lastAxisValX, lastAxisValY; //used to mask out spurious events in the gamepad axis deadzone
   uint8_t activeAxis; //the last used analog stick axis
@@ -182,8 +183,6 @@ typedef struct
   uint8_t mouseholdElement; //which UI element is the mouse button being held over, =UIELEM_ENUM_LENGTH if none
   uint8_t uiState; //modal state of the UI, values from ui_state_enum
   uint32_t interactableElement; //bit pattern describing which UI elements are interactable, values from ui_element_enum
-  unsigned int mouseWheelUsed : 1;
-  unsigned int holdingScrollbar : 1; //whether or not a scrollbar is being held
   unsigned int lastInputType : 2; //0=keyboard, 1=apppad, 2=mouse
   unsigned int gamepadDisabled : 1; //1=gamepad/apppad disabled
   unsigned int quitAppFlag : 1; //0=take no action, 1=quit app

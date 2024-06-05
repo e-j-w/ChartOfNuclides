@@ -5,8 +5,82 @@
 #include "data_ops.h"
 #include "gui_constants.h" //to compute mouse/pointer interactions
 
-//leftButton: values from input_state_enum
-void processMouse(const app_data *restrict dat, app_state *restrict state){
+void processInputFlags(const app_data *restrict dat, app_state *restrict state){
+  
+  /* Handle directional input */
+  
+  if(state->uiState == UISTATE_DEFAULT){
+
+    //in main chart view, handle chart panning
+    uint32_t up = (state->inputFlags & (1U << INPUT_UP));
+    uint32_t down = (state->inputFlags & (1U << INPUT_DOWN));
+    uint32_t left = (state->inputFlags & (1U << INPUT_LEFT));
+    uint32_t right = (state->inputFlags & (1U << INPUT_RIGHT));
+    //printf("dir: [%u %u %u %u]\n",!(up==0),!(down==0),!(left==0),!(right==0));
+    
+    if(!left && !right && !up && !down){
+      //no directional inputs, pan is finished
+      state->ds.panFinished = 1;
+    }else{
+      if(left && !right){
+        state->ds.chartPanStartX = state->ds.chartPosX;
+        state->ds.chartPanStartY = state->ds.chartPosY;
+        state->ds.chartPanToX = state->ds.chartPosX - (CHART_PAN_DIST/state->ds.chartZoomScale);
+        if(state->ds.panInProgress == 0){
+          state->ds.chartPanToY = state->ds.chartPosY;
+        }
+        if(state->ds.chartPanToX <= 0.0f){
+          state->ds.chartPanToX = 0.0f;
+        }
+        state->ds.timeSincePanStart = 0.0f;
+        state->ds.panInProgress = 1;
+        state->ds.panFinished = 0;
+      }else if(right && !left){
+        state->ds.chartPanStartX = state->ds.chartPosX;
+        state->ds.chartPanStartY = state->ds.chartPosY;
+        state->ds.chartPanToX = state->ds.chartPosX + (CHART_PAN_DIST/state->ds.chartZoomScale);
+        if(state->ds.panInProgress == 0){
+          state->ds.chartPanToY = state->ds.chartPosY;
+        }
+        if(state->ds.chartPanToX >= (dat->ndat.maxN+1)){
+          state->ds.chartPanToX = dat->ndat.maxN+1.0f;
+        }
+        state->ds.timeSincePanStart = 0.0f;
+        state->ds.panInProgress = 1;
+        state->ds.panFinished = 0;
+      }
+      if(up && !down){
+        state->ds.chartPanStartX = state->ds.chartPosX;
+        state->ds.chartPanStartY = state->ds.chartPosY;
+        if(state->ds.panInProgress == 0){
+          state->ds.chartPanToX = state->ds.chartPosX;
+        }
+        state->ds.chartPanToY = state->ds.chartPosY + (CHART_PAN_DIST/state->ds.chartZoomScale);
+        if(state->ds.chartPanToY >= (dat->ndat.maxZ+1)){
+          state->ds.chartPanToY = dat->ndat.maxZ+1.0f;
+        }
+        state->ds.timeSincePanStart = 0.0f;
+        state->ds.panInProgress = 1;
+        state->ds.panFinished = 0;
+        //printf("pan start: [%0.2f %0.2f], pan to: [%0.2f %0.2f]\n",(double)state->ds.chartPanStartX,(double)state->ds.chartPanStartY,(double)state->ds.chartPanToX,(double)state->ds.chartPanToY);
+      }else if(down && !up){
+        state->ds.chartPanStartX = state->ds.chartPosX;
+        state->ds.chartPanStartY = state->ds.chartPosY;
+        if(state->ds.panInProgress == 0){
+          state->ds.chartPanToX = state->ds.chartPosX;
+        }
+        state->ds.chartPanToY = state->ds.chartPosY - (CHART_PAN_DIST/state->ds.chartZoomScale);
+        if(state->ds.chartPanToY <= 0.0f){
+          state->ds.chartPanToY = 0.0f;
+        }
+        state->ds.timeSincePanStart = 0.0f;
+        state->ds.panInProgress = 1;
+        state->ds.panFinished = 0;
+      }
+    }
+  }
+
+  /* Handle mouse input */
 
   state->mouseoverElement = UIELEM_ENUM_LENGTH; //by default, no element is moused over
   state->mouseholdElement = UIELEM_ENUM_LENGTH;
@@ -51,8 +125,70 @@ void processMouse(const app_data *restrict dat, app_state *restrict state){
     uiElemClickAction(state,UIELEM_ENUM_LENGTH);
   }
 
-  if((state->mouseWheelUsed != 0)&&(fabsf(state->mouseWheelVal)>0.05f)){
-    mouseWheelAction(&dat->ndat,state);
+  /* Handle zoom input */
+
+  if((state->inputFlags & (1U << INPUT_ZOOM))&&(fabsf(state->zoomDeltaVal)>0.05f)){
+    if(state->uiState == UISTATE_DEFAULT){
+      if(state->zoomDeltaVal != 0.0f){
+        state->ds.chartZoomStartScale = state->ds.chartZoomScale;
+        if(state->zoomDeltaVal > 0){
+          //zoom in
+          state->ds.chartZoomToScale += state->zoomDeltaVal*state->ds.chartZoomToScale;
+          if(state->ds.chartZoomToScale > MAX_CHART_ZOOM_SCALE){
+            state->ds.chartZoomToScale = MAX_CHART_ZOOM_SCALE;
+          }
+        }else{
+          //zoom out
+          state->ds.chartZoomToScale += state->zoomDeltaVal*state->ds.chartZoomToScale*0.5f;
+          if(state->ds.chartZoomToScale < MIN_CHART_ZOOM_SCALE){
+            state->ds.chartZoomToScale = MIN_CHART_ZOOM_SCALE;
+          }
+        }
+        if(state->ds.zoomInProgress == 0){
+          if(state->lastInputType == INPUT_TYPE_MOUSE){
+            //zoom using mouse wheel/touchpad, zoom to cursor location
+            state->ds.chartZoomStartMouseX = mouseXPxToN(&state->ds,state->mouseXPx);
+            state->ds.chartZoomStartMouseY = mouseYPxToZ(&state->ds,state->mouseYPx);
+          }else{
+            //zoom using keyboard or gamepad, zoom to center of screen
+            state->ds.chartZoomStartMouseX = state->ds.chartPosX;
+            state->ds.chartZoomStartMouseY = state->ds.chartPosY;
+          }
+          if(state->ds.chartZoomStartMouseX > dat->ndat.maxN){
+            state->ds.chartZoomStartMouseX = (float)dat->ndat.maxN;
+          }else if(state->ds.chartZoomStartMouseX < 0.0f){
+            state->ds.chartZoomStartMouseX = 0.0f;
+          }
+          if(state->ds.chartZoomStartMouseY > dat->ndat.maxZ){
+            state->ds.chartZoomStartMouseY = (float)dat->ndat.maxZ;
+          }else if(state->ds.chartZoomStartMouseY < 0.0f){
+            state->ds.chartZoomStartMouseY = 0.0f;
+          }
+        }
+        state->ds.chartZoomStartMouseXFrac = (state->ds.chartZoomStartMouseX - getMinChartN(&state->ds))/getChartWidthN(&state->ds);
+        float afterZoomMinN = state->ds.chartZoomStartMouseX - getChartWidthNAfterZoom(&state->ds)*state->ds.chartZoomStartMouseXFrac;
+        state->ds.chartZoomToX = afterZoomMinN + getChartWidthNAfterZoom(&state->ds)*0.5f;
+        state->ds.chartZoomStartMouseYFrac = (state->ds.chartZoomStartMouseY - getMinChartZ(&state->ds))/getChartHeightZ(&state->ds);
+        float afterZoomMinZ = state->ds.chartZoomStartMouseY - getChartHeightZAfterZoom(&state->ds)*state->ds.chartZoomStartMouseYFrac;
+        state->ds.chartZoomToY = afterZoomMinZ + getChartHeightZAfterZoom(&state->ds)*0.5f;
+        if(state->ds.chartZoomToX > dat->ndat.maxN){
+          state->ds.chartZoomToX = (float)dat->ndat.maxN;
+        }else if(state->ds.chartZoomToX < 0.0f){
+          state->ds.chartZoomToX = 0.0f;
+        }
+        if(state->ds.chartZoomToY > dat->ndat.maxZ){
+          state->ds.chartZoomToY = (float)dat->ndat.maxZ;
+        }else if(state->ds.chartZoomToY < 0.0f){
+          state->ds.chartZoomToY = 0.0f;
+        }
+        //printf("xZoomFrac: %0.3f, afterZoomMinN: %0.3f\n",(double)state->ds.chartZoomStartMouseXFrac,(double)afterZoomMinN);
+        //printf("yZoomFrac: %0.3f, afterZoomMinZ: %0.3f\n",(double)state->ds.chartZoomStartMouseYFrac,(double)afterZoomMinZ);
+        state->ds.timeSinceZoomStart = 0.0f;
+        state->ds.zoomInProgress = 1;
+        state->ds.zoomFinished = 0;
+      }
+    }
+    //printf("scale: %0.2f\n",(double)state->ds.chartZoomScale);
   }
 
 }
@@ -132,22 +268,22 @@ void processSingleEvent(app_data *restrict dat, app_state *restrict state, resou
       if(evt.wheel.direction == SDL_MOUSEWHEEL_NORMAL){
         if(evt.wheel.y > 0){
           //printf("Mouse wheel up %0.3f.\n",(double)evt.wheel.y);
-          state->mouseWheelVal = evt.wheel.y;
-          state->mouseWheelUsed = 1;
+          state->zoomDeltaVal = evt.wheel.y;
+          state->inputFlags |= (1U << INPUT_ZOOM);
         }else if(evt.wheel.y < 0){
           //printf("Mouse wheel down %0.3f.\n",(double)evt.wheel.y);
-          state->mouseWheelVal = evt.wheel.y;
-          state->mouseWheelUsed = 1;
+          state->zoomDeltaVal = evt.wheel.y;
+          state->inputFlags |= (1U << INPUT_ZOOM);
         }
       }else{
         if(evt.wheel.y > 0){
           //printf("Mouse wheel down %0.3f.\n",(double)evt.wheel.y);
-          state->mouseWheelVal = evt.wheel.y;
-          state->mouseWheelUsed = 1;
+          state->zoomDeltaVal = evt.wheel.y;
+          state->inputFlags |= (1U << INPUT_ZOOM);
         }else if(evt.wheel.y < 0){
           //printf("Mouse wheel up %0.3f.\n",(double)evt.wheel.y);
-          state->mouseWheelVal = evt.wheel.y;
-          state->mouseWheelUsed = 1;
+          state->zoomDeltaVal = evt.wheel.y;
+          state->inputFlags |= (1U << INPUT_ZOOM);
         }
       }
       break;
@@ -161,65 +297,32 @@ void processSingleEvent(app_data *restrict dat, app_state *restrict state, resou
     case SDL_EVENT_KEY_DOWN: //pressing key
       state->lastInputType = INPUT_TYPE_KEYBOARD; //set keyboard input
       switch(evt.key.keysym.scancode){
-        case SDL_SCANCODE_P:
-          state->ds.drawPerformanceStats = !state->ds.drawPerformanceStats;
-          break;
         case SDL_SCANCODE_LEFT:
-          if(state->uiState == UISTATE_DEFAULT){
-            state->ds.chartPanStartX = state->ds.chartPosX;
-            state->ds.chartPanStartY = state->ds.chartPosY;
-            state->ds.chartPanToX = state->ds.chartPosX - (CHART_PAN_DIST/state->ds.chartZoomScale);
-            state->ds.chartPanToY = state->ds.chartPosY;
-            if(state->ds.chartPanToX <= 0.0f){
-              state->ds.chartPanToX = 0.0f;
-            }
-            state->ds.timeSincePanStart = 0.0f;
-            state->ds.panInProgress = 1;
-            state->ds.panFinished = 0;
-          }
+        case SDL_SCANCODE_A:
+          state->inputFlags |= (1U << INPUT_LEFT);
           break;
         case SDL_SCANCODE_RIGHT:
-          if(state->uiState == UISTATE_DEFAULT){
-            state->ds.chartPanStartX = state->ds.chartPosX;
-            state->ds.chartPanStartY = state->ds.chartPosY;
-            state->ds.chartPanToX = state->ds.chartPosX + (CHART_PAN_DIST/state->ds.chartZoomScale);
-            state->ds.chartPanToY = state->ds.chartPosY;
-            if(state->ds.chartPanToX >= (dat->ndat.maxN+1)){
-              state->ds.chartPanToX = dat->ndat.maxN+1.0f;
-            }
-            state->ds.timeSincePanStart = 0.0f;
-            state->ds.panInProgress = 1;
-            state->ds.panFinished = 0;
-          }
+        case SDL_SCANCODE_D:
+          state->inputFlags |= (1U << INPUT_RIGHT);
           break;
         case SDL_SCANCODE_UP:
-          if(state->uiState == UISTATE_DEFAULT){
-            state->ds.chartPanStartX = state->ds.chartPosX;
-            state->ds.chartPanStartY = state->ds.chartPosY;
-            state->ds.chartPanToX = state->ds.chartPosX;
-            state->ds.chartPanToY = state->ds.chartPosY + (CHART_PAN_DIST/state->ds.chartZoomScale);
-            if(state->ds.chartPanToY >= (dat->ndat.maxZ+1)){
-              state->ds.chartPanToY = dat->ndat.maxZ+1.0f;
-            }
-            state->ds.timeSincePanStart = 0.0f;
-            state->ds.panInProgress = 1;
-            state->ds.panFinished = 0;
-            //printf("pan start: [%0.2f %0.2f], pan to: [%0.2f %0.2f]\n",(double)state->ds.chartPanStartX,(double)state->ds.chartPanStartY,(double)state->ds.chartPanToX,(double)state->ds.chartPanToY);
-          }
+        case SDL_SCANCODE_W:
+          state->inputFlags |= (1U << INPUT_UP);
           break;
         case SDL_SCANCODE_DOWN:
-          if(state->uiState == UISTATE_DEFAULT){
-            state->ds.chartPanStartX = state->ds.chartPosX;
-            state->ds.chartPanStartY = state->ds.chartPosY;
-            state->ds.chartPanToX = state->ds.chartPosX;
-            state->ds.chartPanToY = state->ds.chartPosY - (CHART_PAN_DIST/state->ds.chartZoomScale);
-            if(state->ds.chartPanToY <= 0.0f){
-              state->ds.chartPanToY = 0.0f;
-            }
-            state->ds.timeSincePanStart = 0.0f;
-            state->ds.panInProgress = 1;
-            state->ds.panFinished = 0;
-          }
+        case SDL_SCANCODE_S:
+          state->inputFlags |= (1U << INPUT_DOWN);
+          break;
+        case SDL_SCANCODE_EQUALS:
+          state->zoomDeltaVal = 1.0f;
+          state->inputFlags |= (1U << INPUT_ZOOM);
+          break;
+        case SDL_SCANCODE_MINUS:
+          state->zoomDeltaVal = -1.0f;
+          state->inputFlags |= (1U << INPUT_ZOOM);
+          break;
+        case SDL_SCANCODE_P:
+          state->ds.drawPerformanceStats = !state->ds.drawPerformanceStats;
           break;
         case SDL_SCANCODE_F11:
           state->ds.windowFullscreenMode = !state->ds.windowFullscreenMode;
@@ -231,7 +334,26 @@ void processSingleEvent(app_data *restrict dat, app_state *restrict state, resou
     case SDL_EVENT_GAMEPAD_BUTTON_UP:
       break;
     case SDL_EVENT_KEY_UP: //released key
-      state->ds.panFinished = 1;
+      switch(evt.key.keysym.scancode){
+        case SDL_SCANCODE_LEFT:
+        case SDL_SCANCODE_A:
+          state->inputFlags &= ~(1U << INPUT_LEFT);
+          break;
+        case SDL_SCANCODE_RIGHT:
+        case SDL_SCANCODE_D:
+          state->inputFlags &= ~(1U << INPUT_RIGHT);
+          break;
+        case SDL_SCANCODE_UP:
+        case SDL_SCANCODE_W:
+          state->inputFlags &= ~(1U << INPUT_UP);
+          break;
+        case SDL_SCANCODE_DOWN:
+        case SDL_SCANCODE_S:
+          state->inputFlags &= ~(1U << INPUT_DOWN);
+          break;
+        default:
+          break;
+      }
       break;
     //analog stick control
     case SDL_EVENT_GAMEPAD_AXIS_MOTION: //gamepad axis, use large values to account for deadzone
@@ -299,7 +421,7 @@ void processFrameEvents(app_data *restrict dat, app_state *restrict state, resou
     //reset values
     state->mouseClickPosXPx = -1.0f;
     state->mouseClickPosYPx = -1.0f;
-    state->mouseWheelUsed = 0;
+    state->inputFlags &= ~(1U << INPUT_ZOOM);
 
     if((state->ds.uiAnimPlaying != 0)||(state->ds.zoomInProgress)||(state->ds.dragInProgress)||(state->ds.panInProgress)){
       //a UI animation is playing, don't block the main thread
@@ -327,7 +449,7 @@ void processFrameEvents(app_data *restrict dat, app_state *restrict state, resou
     }
 
     //process the results of input state
-    processMouse(dat,state);
+    processInputFlags(dat,state);
 
 }
 

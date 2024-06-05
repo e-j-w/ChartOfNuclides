@@ -35,7 +35,10 @@ float getMaxChartZ(const drawing_state *restrict ds);
 float getChartWidthN(const drawing_state *restrict ds);
 float getChartHeightZ(const drawing_state *restrict ds);
 
-void mouseWheelAction(const ndata *restrict nd, app_state *restrict state);
+float mouseXPxToN(const drawing_state *restrict ds, const float mouseX);
+float mouseYPxToZ(const drawing_state *restrict ds, const float mouseY);
+float getChartWidthNAfterZoom(const drawing_state *restrict ds);
+float getChartHeightZAfterZoom(const drawing_state *restrict ds);
 
 void changeUIState(app_state *restrict state, const uint8_t newState);
 void uiElemClickAction(app_state *restrict state, const uint8_t uiElemID);

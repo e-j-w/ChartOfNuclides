@@ -5,6 +5,10 @@ enum input_type_enum{
 INPUT_TYPE_KEYBOARD, INPUT_TYPE_GAMEPAD, INPUT_TYPE_MOUSE,
 INPUT_TYPE_ENUM_LENGTH
 };
+enum input_enum {
+INPUT_DOWN, INPUT_UP, INPUT_LEFT, INPUT_RIGHT, //directional inputs
+INPUT_ZOOM, INPUT_ENUM_LENGTH
+};
 enum loc_string_enum{LOCSTR_APPLY,LOCSTR_CANCEL,LOCSTR_OK,LOCSTR_NODB,LOCSTR_ENUM_LENGTH
 }; //localization srings
 enum draw_opt_enum{
