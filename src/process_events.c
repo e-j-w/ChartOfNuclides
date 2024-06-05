@@ -265,6 +265,7 @@ void processSingleEvent(app_data *restrict dat, app_state *restrict state, resou
       }
       break;
     case SDL_EVENT_MOUSE_WHEEL:
+      state->lastInputType = INPUT_TYPE_MOUSE; //set mouse input
       if(evt.wheel.direction == SDL_MOUSEWHEEL_NORMAL){
         if(evt.wheel.y > 0){
           //printf("Mouse wheel up %0.3f.\n",(double)evt.wheel.y);
