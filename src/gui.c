@@ -11,15 +11,15 @@
 float getAxisTickSpacing(float range){
   //printf("range: %f\n",(double)range);
   if(range < 12.0f){
-    return 2.0f;
+    return 1.0f;
   }else if(range < 30.0f){
-    return 5.0f;
+    return 2.0f;
   }else if(range < 60.0f){
+    return 5.0f;
+  }else if(range < 90.0f){
     return 10.0f;
-  }else if(range < 120.0f){
+  }else if(range < 200.0f){
     return 20.0f;
-  }else if(range < 180.0f){
-    return 30.0f;
   }else{
     return 40.0f;
   }
