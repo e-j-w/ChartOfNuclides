@@ -4,7 +4,7 @@ Maintainer: Jonathan Williams
 
 ## Description
 
-An offline viewer of ENSDF data, **extremely early in development and basically non-functional right now**.  The UI is implemented in [SDL](https://github.com/libsdl-org/SDL) (so you can browse nuclear half-lives using some of the same code that powers [Half-Life](https://www.pcgamingwiki.com/wiki/Half-Life#Middleware)).
+An offline viewer of isotope and nuclear structure data, **extremely early in development and basically non-functional right now**.  The UI is implemented in [SDL](https://github.com/libsdl-org/SDL) (so you can browse nuclear half-lives using some of the same code that powers [Half-Life](https://www.pcgamingwiki.com/wiki/Half-Life#Middleware)).
 
 The program parses various plaintext nuclear structure data (listed [here](#collect-data)) into a binary database, eventually one will be able to query this for information on various nuclei (levels, cascades, gamma-rays).
 

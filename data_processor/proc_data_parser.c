@@ -1256,11 +1256,6 @@ int parseAbundanceData(const char * filePath, ndata * nd){
 	}
 	fclose(afile);
 	
-	if(nd->numNucl>=MAXNUMNUCL){
-		printf("ERROR: Attempted to import data for too many nuclei.  Increase the value of MAXNUMNUCL in levelup.h\n");
-		return -1;
-	}
-	
 	printf("Finished reading abundance data file: %s\n",filePath);
   return 0;
 }
@@ -1321,7 +1316,7 @@ int buildDatabase(const char *appBasePath, ndata *nd){
     printf("ERROR: no valid ENSDF data was found.\nPlease check that ENSDF files exist in the directory under the ENDSF environment variable.\n");
     return -1;
   }
-	printf("ENSDF database build finished.\n");
+	printf("Database build finished.\n");
 	return 0;
 }
 
