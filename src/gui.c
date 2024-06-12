@@ -121,20 +121,40 @@ void drawNuclBoxLabel(const app_data *restrict dat, const drawing_state *restric
     if(ds->chartZoomScale >= 12.0f){
       getGSHalfLifeStr(tmpStr,&dat->ndat,nuclInd);
       drawTextAlignedSized(rdat,drawXPos,drawYPos+36.0f,rdat->font,col,255,tmpStr,ALIGN_LEFT,16384); //draw GS half-life label
-      if((ds->chartZoomScale >= 16.0f)&&(dat->ndat.nuclData[nuclInd].numLevels > 0)){
-        uint32_t gsLevInd = (uint32_t)(dat->ndat.nuclData[nuclInd].firstLevel + dat->ndat.nuclData[nuclInd].gsLevel);
-        if((ds->chartZoomScale >= 20.0f)||(dat->ndat.levels[gsLevInd].numDecModes <= 2)){
-          float yOffset = 60.0f;
-          for(int8_t i=0; i<dat->ndat.levels[gsLevInd].numDecModes; i++){
-            getDecayModeStr(tmpStr,&dat->ndat,dat->ndat.levels[gsLevInd].firstDecMode + (uint32_t)i);
-            //printf("%s\n",tmpStr);
-            drawTextAlignedSized(rdat,drawXPos,drawYPos+yOffset,rdat->font,col,255,tmpStr,ALIGN_LEFT,16384); //draw decay mode label
-            yOffset += 20.0f;
+      if((ds->chartZoomScale >= 15.0f)&&(dat->ndat.nuclData[nuclInd].numLevels > 0)){
+        uint8_t yOffsets = 3;
+        uint8_t yOffsetLimit = 3;
+        if(ds->chartZoomScale < 18.0f){
+          yOffsetLimit += 1;
+        }else if(ds->chartZoomScale < 22.0f){
+          yOffsetLimit += 2;
+        }else if(ds->chartZoomScale < 28.0f){
+          yOffsetLimit += 3;
+        }else if(ds->chartZoomScale < 30.0f){
+          yOffsetLimit += 4;
+        }else{
+          yOffsetLimit += 5;
+        }
+        if(dat->ndat.nuclData[nuclInd].abundance.unit == VALUE_UNIT_PERCENT){
+          getAbundanceStr(tmpStr,&dat->ndat,nuclInd);
+          if(yOffsets < yOffsetLimit){
+            drawTextAlignedSized(rdat,drawXPos,drawYPos+(yOffsets*20.0f),rdat->font,col,255,tmpStr,ALIGN_LEFT,16384); //draw abundance label
+            yOffsets += 1;
+          }else{
+            drawTextAlignedSized(rdat,drawXPos,drawYPos+(yOffsets*20.0f),rdat->font,col,255,"(...)",ALIGN_LEFT,16384);
           }
-        }else if(dat->ndat.levels[gsLevInd].numDecModes > 2){
-          getDecayModeStr(tmpStr,&dat->ndat,dat->ndat.levels[gsLevInd].firstDecMode);
-          drawTextAlignedSized(rdat,drawXPos,drawYPos+60.0f,rdat->font,col,255,tmpStr,ALIGN_LEFT,16384); //draw decay mode label
-          drawTextAlignedSized(rdat,drawXPos,drawYPos+80.0f,rdat->font,col,255,"(...)",ALIGN_LEFT,16384);
+        }
+        uint32_t gsLevInd = (uint32_t)(dat->ndat.nuclData[nuclInd].firstLevel + dat->ndat.nuclData[nuclInd].gsLevel);
+        for(int8_t i=0; i<dat->ndat.levels[gsLevInd].numDecModes; i++){
+          getDecayModeStr(tmpStr,&dat->ndat,dat->ndat.levels[gsLevInd].firstDecMode + (uint32_t)i);
+          //printf("%s\n",tmpStr);
+          if(yOffsets < yOffsetLimit){
+            drawTextAlignedSized(rdat,drawXPos,drawYPos+(yOffsets*20.0f),rdat->font,col,255,tmpStr,ALIGN_LEFT,16384); //draw abundance label
+            yOffsets += 1;
+          }else{
+            drawTextAlignedSized(rdat,drawXPos,drawYPos+(yOffsets*20.0f),rdat->font,col,255,"(...)",ALIGN_LEFT,16384);
+            break;
+          }
         }
       }
     }
@@ -156,18 +176,20 @@ void drawChartOfNuclides(const app_data *restrict dat, const app_state *restrict
   rect.h = rect.w;
 
   for(int i=0;i<dat->ndat.numNucl;i++){
-    if((dat->ndat.nuclData[i].N >= (int16_t)floorf(minX))&&(dat->ndat.nuclData[i].N >= 0)){
-      if(dat->ndat.nuclData[i].N <= (int16_t)ceilf(maxX)){
-        if((dat->ndat.nuclData[i].Z >= (int16_t)floorf(minY))&&(dat->ndat.nuclData[i].Z >= 0)){
-          if(dat->ndat.nuclData[i].Z <= (int16_t)ceilf(maxY)){
-            //draw nuclide on chart
-            rect.x = ((float)dat->ndat.nuclData[i].N - minX)*rect.w;
-            rect.y = (maxY - (float)dat->ndat.nuclData[i].Z)*rect.h;
-            //printf("N: %i, Z: %i, i: %i, pos: [%0.2f %0.2f %0.2f %0.2f]\n",dat->ndat.nuclData[i].N,dat->ndat.nuclData[i].Z,i,(double)rect.x,(double)rect.y,(double)rect.w,(double)rect.h);
-            const double hl = getNuclGSHalfLifeSeconds(&dat->ndat,(uint16_t)i);
-            drawFlatRect(rdat,rect,getHalfLifeCol(hl));
-            if(state->ds.chartZoomScale >= 4.0f){
-              drawNuclBoxLabel(dat,&state->ds,rdat,rect.x/rdat->uiScale,rect.y/rdat->uiScale,rect.w/rdat->uiScale,(hl > 1.0E4) ? whiteCol8Bit : blackCol8Bit,(uint16_t)i);
+    if((dat->ndat.nuclData[i].flags & 3U) == OBSFLAG_OBSERVED){
+      if((dat->ndat.nuclData[i].N >= (int16_t)floorf(minX))&&(dat->ndat.nuclData[i].N >= 0)){
+        if(dat->ndat.nuclData[i].N <= (int16_t)ceilf(maxX)){
+          if((dat->ndat.nuclData[i].Z >= (int16_t)floorf(minY))&&(dat->ndat.nuclData[i].Z >= 0)){
+            if(dat->ndat.nuclData[i].Z <= (int16_t)ceilf(maxY)){
+              //draw nuclide on chart
+              rect.x = ((float)dat->ndat.nuclData[i].N - minX)*rect.w;
+              rect.y = (maxY - (float)dat->ndat.nuclData[i].Z)*rect.h;
+              //printf("N: %i, Z: %i, i: %i, pos: [%0.2f %0.2f %0.2f %0.2f]\n",dat->ndat.nuclData[i].N,dat->ndat.nuclData[i].Z,i,(double)rect.x,(double)rect.y,(double)rect.w,(double)rect.h);
+              const double hl = getNuclGSHalfLifeSeconds(&dat->ndat,(uint16_t)i);
+              drawFlatRect(rdat,rect,getHalfLifeCol(hl));
+              if(state->ds.chartZoomScale >= 4.0f){
+                drawNuclBoxLabel(dat,&state->ds,rdat,rect.x/rdat->uiScale,rect.y/rdat->uiScale,rect.w/rdat->uiScale,(hl > 1.0E4) ? whiteCol8Bit : blackCol8Bit,(uint16_t)i);
+              }
             }
           }
         }

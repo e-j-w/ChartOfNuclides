@@ -6,7 +6,7 @@ Maintainer: Jonathan Williams
 
 An offline viewer of ENSDF data, **extremely early in development and basically non-functional right now**.  The UI is implemented in [SDL](https://github.com/libsdl-org/SDL) (so you can browse nuclear half-lives using some of the same code that powers [Half-Life](https://www.pcgamingwiki.com/wiki/Half-Life#Middleware)).
 
-The program parses plaintext ENSDF data files (available [here](https://www.nndc.bnl.gov/ensarchivals/)) into a binary database, eventually one will be able to query this for information on various nuclei (levels, cascades, gamma-rays).
+The program parses various plaintext nuclear structure data (listed [here](#collect-data)) into a binary database, eventually one will be able to query this for information on various nuclei (levels, cascades, gamma-rays).
 
 The goal is to develop a performant and multiplatform tool that will be useful in both professional (nuclear structure research) and educational contexts.
 
@@ -16,7 +16,18 @@ TBD
 
 ## Installing from source
 
-### Build dependencies
+**NOTE: Instructions are still incomplete and are missing critical steps.  Don't try this at home (yet)!**
+
+### Collect data
+
+If building the database from scratch, you will need various isotope and nuclear structure data, from the sources below:
+
+| Data       | Source location | Instructions |
+| :--------- | :---------------| :----------- |
+| Nuclear structure data    |  [ENSDF](https://www.nndc.bnl.gov/ensarchivals/) | Download the zip archive from the link in the 'Latest Dataset' section. Unzip it in the source tree into the directory `data/ensdf/` (such that the `ensdf` subdirectory contains the files `ensdf.001`, `ensdf.002`, etc.). |
+| Isotope abundance data    | [NIST](https://www.nist.gov/pml/atomic-weights-and-isotopic-compositions-relative-atomic-masses) | Under 'Search the Database', select 'All Elements', output type 'Linearized ASCII Output', with the option 'Most common isotopes'.  Select 'Get Data'.  Copy the resulting plaintext data into a text file, save the text file in the source tree under `data/abundances.txt`. |
+
+### Install build dependencies
 
 * gcc (or clang if the Makefile is edited)
 * make
@@ -26,13 +37,13 @@ TBD
 
 The current version has been tested under Arch Linux as of May 2024.
 
-### Build instructions
+### Build the database and program
 
 The program relies on additional data files, which can be obtained from **TBD**.  The embedded font used needs to support special UTF-8 characters in order to display info such as decay modes correctly.
 
 Install all build dependencies listed above.  For now SDL3 and its libraries probably have to be compiled manually, as they aren't (yet) packaged for major Linux distros.
 
-First, run `make` in the source root directory. Two executables will be built: `proc_data` (which generates the data package `con.dat` used by the main application), and `con` (the main application). Generate the packaged data file (`con.dat`) by running: 
+First, run `make` in the source root directory. Two executables will be built: `proc_data` (which generates the data package `con.dat` containing the nuclear structure database used by the main application), and `con` (the main application). Build the database and generate the packaged data file (`con.dat`) by running: 
 
 ```
 ./proc_data
@@ -43,6 +54,10 @@ This will build the data package file `con.dat`. Then, the main application can 
 ```
 ./con
 ```
+
+## Using the program
+
+Zoom and pan with the mouse, the controls are basically identical to something like Google Maps.
 
 ### Keyboard shortcuts
 

@@ -10,6 +10,8 @@
 #include "formats.h" //includes data formats (structs) used in the game
 #include "data_ops.h"
 
+#define MAXNUMPARSERVALS 10 //maximum number of values that can parsed at once on a line
+
 //struct which is used temporarily during data import to map names to indices 
 typedef struct
 {

@@ -42,17 +42,21 @@
 #define MAX_PROTON_NUM           130
 #define MAX_MASS_NUM             350
 
-#define MAXNUMPARSERVALS 10 //maximum number of values that can parsed at once on a line
-
 #define NUMSHELLCLOSURES 7
 static const uint16_t shellClosureValues[NUMSHELLCLOSURES] = {2,8,20,28,50,82,126};
 
 //structures
 typedef struct
 {
-  float prob;
-  uint8_t probErr;
-  uint8_t probType;
+  float val;
+  uint8_t unit; //unit, (from halflife_unit_enum for half-lives)
+  uint8_t err; //uncertainty value (on trailing sig figs)
+  uint8_t format; //bits 0-3: number of sig figs after the decimal place, bit 4: whether or not to use exponent, bits:5-7 value type (from value_type_enum)
+}valWithErr; //parsed value with an error
+
+typedef struct
+{
+  valWithErr prob;
   uint8_t type; //values from decay_mode_enum
 }decayMode; //decay mode for level
 
@@ -75,10 +79,7 @@ typedef struct
 {
   float energy; //level energy in keV
   uint8_t energyErr; //energy uncertainty value
-  float halfLife; //level half-life (-1 if unknown)
-  uint8_t halfLifeUnit; //units for level half-life (values from halflife_unit_enum)
-  uint8_t halfLifeFormat; //bits 0-3: number of sig figs after the decimal place, bit 4: whether or not to use exponent, bits:5-7 value type (from value_type_enum);
-  int16_t halfLifeErr; //hal-life uncertainty value
+  valWithErr halfLife;
   int16_t numSpinParVals; //number of assigned spin parity values
   spinparval spval[MAXSPPERLEVEL]; //assinged spin parity value(s) 
   int16_t numTran; //number of gamma rays in this level
@@ -97,6 +98,8 @@ typedef struct
   uint32_t firstLevel; //index of first level in this nuclide
   uint16_t numLevels; //number of excited levels in this nuclide
   uint8_t gsLevel; //which level in the nucleus (0 indexed) is the ground state (determined when parsing ENSDF, not always 0)
+  valWithErr abundance;
+  uint8_t flags; //bits 0 to 1: observation flag (observed/unobserved/inferred/tentative)
 }nucl; //gamma data for a given nuclide
 
 typedef struct

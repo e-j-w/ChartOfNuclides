@@ -420,37 +420,37 @@ const char* getElemStr(const uint8_t Z){
 
 const char* getHalfLifeUnitShortStr(const uint8_t unit){
 	switch(unit){
-		case HALFLIFE_UNIT_STABLE:
+		case VALUE_UNIT_STABLE:
 			return "STABLE"; //stable
-		case HALFLIFE_UNIT_YEARS:
+		case VALUE_UNIT_YEARS:
 			return "y";
-		case HALFLIFE_UNIT_DAYS:
+		case VALUE_UNIT_DAYS:
 			return "d";
-		case HALFLIFE_UNIT_HOURS:
+		case VALUE_UNIT_HOURS:
 			return "h";
-		case HALFLIFE_UNIT_MINUTES:
+		case VALUE_UNIT_MINUTES:
 			return "m";
-		case HALFLIFE_UNIT_SECONDS:
+		case VALUE_UNIT_SECONDS:
 			return "s";
-		case HALFLIFE_UNIT_MILLISECONDS:
+		case VALUE_UNIT_MILLISECONDS:
 			return "ms";
-		case HALFLIFE_UNIT_MICROSECONDS:
+		case VALUE_UNIT_MICROSECONDS:
 			return "µs";
-		case HALFLIFE_UNIT_NANOSECONDS:
+		case VALUE_UNIT_NANOSECONDS:
 			return "ns";
-		case HALFLIFE_UNIT_PICOSECONDS:
+		case VALUE_UNIT_PICOSECONDS:
 			return "ps";
-		case HALFLIFE_UNIT_FEMTOSECONDS:
+		case VALUE_UNIT_FEMTOSECONDS:
 			return "fs";
-		case HALFLIFE_UNIT_ATTOSECONDS:
+		case VALUE_UNIT_ATTOSECONDS:
 			return "as";
-		case HALFLIFE_UNIT_EV:
+		case VALUE_UNIT_EV:
 			return "eV";
-		case HALFLIFE_UNIT_KEV:
+		case VALUE_UNIT_KEV:
 			return "keV";
-		case HALFLIFE_UNIT_MEV:
+		case VALUE_UNIT_MEV:
 			return "MeV";
-		case HALFLIFE_UNIT_NOVAL:
+		case VALUE_UNIT_NOVAL:
 		default:
 			return "";																						
 	}
@@ -520,25 +520,25 @@ const char* getDecayTypeShortStr(const uint8_t type){
 void getHalfLifeStr(char strOut[32], const ndata *restrict nd, const uint32_t lev){
 	//are the snprintf lines slow?
 	if(lev < nd->numLvls){
-		if(nd->levels[lev].halfLifeUnit == HALFLIFE_UNIT_STABLE){
+		if(nd->levels[lev].halfLife.unit == VALUE_UNIT_STABLE){
 			snprintf(strOut,32,"STABLE");
-		}else if(nd->levels[lev].halfLifeUnit == HALFLIFE_UNIT_NOVAL){
+		}else if(nd->levels[lev].halfLife.unit == VALUE_UNIT_NOVAL){
 			snprintf(strOut,32,"Unknown");
-		}else if(nd->levels[lev].halfLife > 0.0f){
-			uint8_t hlPrecision = (uint8_t)(nd->levels[lev].halfLifeFormat & 15U);
-			uint8_t hlExponent = (uint8_t)((nd->levels[lev].halfLifeFormat >> 4U) & 1U);
-			uint8_t hlValueType = (uint8_t)((nd->levels[lev].halfLifeFormat >> 5U) & 7U);
+		}else if(nd->levels[lev].halfLife.val > 0.0f){
+			uint8_t hlPrecision = (uint8_t)(nd->levels[lev].halfLife.format & 15U);
+			uint8_t hlExponent = (uint8_t)((nd->levels[lev].halfLife.format >> 4U) & 1U);
+			uint8_t hlValueType = (uint8_t)((nd->levels[lev].halfLife.format >> 5U) & 7U);
 			if(hlPrecision > 0){
 				if(hlExponent == 0){
-					snprintf(strOut,32,"%s%.*f %s",getValueTypeShortStr(hlValueType),hlPrecision,(double)(nd->levels[lev].halfLife),getHalfLifeUnitShortStr(nd->levels[lev].halfLifeUnit));
+					snprintf(strOut,32,"%s%.*f %s",getValueTypeShortStr(hlValueType),hlPrecision,(double)(nd->levels[lev].halfLife.val),getHalfLifeUnitShortStr(nd->levels[lev].halfLife.unit));
 				}else{
-					snprintf(strOut,32,"%s%.*e %s",getValueTypeShortStr(hlValueType),hlPrecision,(double)(nd->levels[lev].halfLife),getHalfLifeUnitShortStr(nd->levels[lev].halfLifeUnit));
+					snprintf(strOut,32,"%s%.*e %s",getValueTypeShortStr(hlValueType),hlPrecision,(double)(nd->levels[lev].halfLife.val),getHalfLifeUnitShortStr(nd->levels[lev].halfLife.unit));
 				}
 			}else{
 				if(hlExponent == 0){
-					snprintf(strOut,32,"%s%.0f %s",getValueTypeShortStr(hlValueType),(double)(nd->levels[lev].halfLife),getHalfLifeUnitShortStr(nd->levels[lev].halfLifeUnit));
+					snprintf(strOut,32,"%s%.0f %s",getValueTypeShortStr(hlValueType),(double)(nd->levels[lev].halfLife.val),getHalfLifeUnitShortStr(nd->levels[lev].halfLife.unit));
 				}else{
-					snprintf(strOut,32,"%s%.0e %s",getValueTypeShortStr(hlValueType),(double)(nd->levels[lev].halfLife),getHalfLifeUnitShortStr(nd->levels[lev].halfLifeUnit));
+					snprintf(strOut,32,"%s%.0e %s",getValueTypeShortStr(hlValueType),(double)(nd->levels[lev].halfLife.val),getHalfLifeUnitShortStr(nd->levels[lev].halfLife.unit));
 				}
 			}
 		}else{
@@ -558,14 +558,27 @@ void getGSHalfLifeStr(char strOut[32], const ndata *restrict nd, const uint16_t 
 
 void getDecayModeStr(char strOut[32], const ndata *restrict nd, const uint32_t dcyModeInd){
 	if(dcyModeInd < nd->numDecModes){
-		uint8_t decValueType = nd->dcyMode[dcyModeInd].probType;
+		uint8_t decValueType = nd->dcyMode[dcyModeInd].prob.unit;
 		uint8_t decType = nd->dcyMode[dcyModeInd].type;
 		if(decValueType == VALUETYPE_NUMBER){
-			snprintf(strOut,32,"%s=%.0f%%%%",getDecayTypeShortStr(decType),(double)nd->dcyMode[dcyModeInd].prob); //%%%% will be parsed to "%%" in tmpStr, which will then be parsed as a format string by SDL_FontCacahe, leaving "%"
+			snprintf(strOut,32,"%s=%.0f%%%%",getDecayTypeShortStr(decType),(double)nd->dcyMode[dcyModeInd].prob.val); //%%%% will be parsed to "%%" in tmpStr, which will then be parsed as a format string by SDL_FontCacahe, leaving "%"
 		}else if(decValueType == VALUETYPE_UNKNOWN){
 			snprintf(strOut,32,"%s%s",getDecayTypeShortStr(decType),getValueTypeShortStr(decValueType));
 		}else{
-			snprintf(strOut,32,"%s %s%.0f%%%%",getDecayTypeShortStr(decType),getValueTypeShortStr(decValueType),(double)nd->dcyMode[dcyModeInd].prob); //%%%% will be parsed to "%%" in tmpStr, which will then be parsed as a format string by SDL_FontCacahe, leaving "%"
+			snprintf(strOut,32,"%s %s%.0f%%%%",getDecayTypeShortStr(decType),getValueTypeShortStr(decValueType),(double)nd->dcyMode[dcyModeInd].prob.val); //%%%% will be parsed to "%%" in tmpStr, which will then be parsed as a format string by SDL_FontCacahe, leaving "%"
+		}
+	}else{
+		snprintf(strOut,32," ");
+	}
+}
+
+void getAbundanceStr(char strOut[32], const ndata *restrict nd, const uint16_t nuclInd){
+	if(nuclInd < nd->numNucl){
+		if(nd->nuclData[nuclInd].abundance.unit == VALUE_UNIT_PERCENT){
+			uint8_t abPrecision = (uint8_t)(nd->nuclData[nuclInd].abundance.format & 15U);
+			snprintf(strOut,32,"%.*f%%%%",abPrecision,(double)nd->nuclData[nuclInd].abundance.val); //%%%% will be parsed to "%%" in tmpStr, which will then be parsed as a format string by SDL_FontCacahe, leaving "%"
+		}else{
+			snprintf(strOut,32," ");
 		}
 	}else{
 		snprintf(strOut,32," ");
@@ -574,36 +587,36 @@ void getDecayModeStr(char strOut[32], const ndata *restrict nd, const uint32_t d
 
 double getLevelHalfLifeSeconds(const ndata *restrict nd, const uint32_t levelInd){
 	if(levelInd < nd->numLvls){
-		double hl = (double)(nd->levels[levelInd].halfLife);
+		double hl = (double)(nd->levels[levelInd].halfLife.val);
 		if(hl < 0.0){
 			//unknown half-life
 			return -2.0;
 		}
-		uint8_t hlUnit = nd->levels[levelInd].halfLifeUnit;
+		uint8_t hlUnit = nd->levels[levelInd].halfLife.unit;
 		switch(hlUnit){
-			case HALFLIFE_UNIT_STABLE:
+			case VALUE_UNIT_STABLE:
 				return 1.0E30; //stable
-			case HALFLIFE_UNIT_YEARS:
+			case VALUE_UNIT_YEARS:
 				return hl*365.25*24*3600;
-			case HALFLIFE_UNIT_DAYS:
+			case VALUE_UNIT_DAYS:
 				return hl*24*3600;
-			case HALFLIFE_UNIT_HOURS:
+			case VALUE_UNIT_HOURS:
 				return hl*3600;
-			case HALFLIFE_UNIT_MINUTES:
+			case VALUE_UNIT_MINUTES:
 				return hl*60;
-			case HALFLIFE_UNIT_SECONDS:
+			case VALUE_UNIT_SECONDS:
 				return hl;
-			case HALFLIFE_UNIT_MILLISECONDS:
+			case VALUE_UNIT_MILLISECONDS:
 				return hl*0.001;
-			case HALFLIFE_UNIT_MICROSECONDS:
+			case VALUE_UNIT_MICROSECONDS:
 				return hl*0.000001;
-			case HALFLIFE_UNIT_NANOSECONDS:
+			case VALUE_UNIT_NANOSECONDS:
 				return hl*0.000000001;
-			case HALFLIFE_UNIT_PICOSECONDS:
+			case VALUE_UNIT_PICOSECONDS:
 				return hl*0.000000000001;
-			case HALFLIFE_UNIT_FEMTOSECONDS:
+			case VALUE_UNIT_FEMTOSECONDS:
 				return hl*0.000000000000001;
-			case HALFLIFE_UNIT_ATTOSECONDS:
+			case VALUE_UNIT_ATTOSECONDS:
 				return hl*0.000000000000000001;
 			default:
 				return -2.0; //couldn't find half-life
@@ -625,6 +638,17 @@ double getNuclGSHalfLifeSeconds(const ndata *restrict nd, const uint16_t nuclInd
 	return getNuclLevelHalfLifeSeconds(nd,nuclInd,nd->nuclData[nuclInd].gsLevel);
 }
 
+uint16_t getNuclInd(const ndata *restrict nd, const int16_t N, const int16_t Z){
+	for(uint16_t i=0; i<nd->numNucl;i++){
+		if(nd->nuclData[i].Z == Z){
+			if(nd->nuclData[i].N == N){
+				return i;
+			}
+		}
+	}
+	//printf("WARNING: getNuclInd - couldn't find nucleus with N,Z = [%i %i].\n",N,Z);
+	return 65535U;
+}
 
 float mouseXPxToN(const drawing_state *restrict ds, const float mouseX){
 	return ds->chartPosX + ((mouseX - ds->windowXRes/2.0f)/(DEFAULT_NUCLBOX_DIM*ds->chartZoomScale));

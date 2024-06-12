@@ -22,9 +22,12 @@ const char* getValueTypeShortStr(const uint8_t type);\
 void getHalfLifeStr(char strOut[32], const ndata *restrict nd, const uint32_t lev);
 void getGSHalfLifeStr(char strOut[32], const ndata *restrict nd, const uint16_t nuclInd);
 void getDecayModeStr(char strOut[32], const ndata *restrict nd, const uint32_t dcyModeInd);
+void getAbundanceStr(char strOut[32], const ndata *restrict nd, const uint16_t nuclInd);
 
 double getNuclLevelHalfLifeSeconds(const ndata *restrict nd, const uint16_t nuclInd, const uint16_t nuclLevel);
 double getNuclGSHalfLifeSeconds(const ndata *restrict nd, const uint16_t nuclInd);
+
+uint16_t getNuclInd(const ndata *restrict nd, const int16_t N, const int16_t Z);
 
 float mouseXtoN(const drawing_state *restrict ds, const float mouseX);
 float mouseYtoZ(const drawing_state *restrict ds, const float mouseY);

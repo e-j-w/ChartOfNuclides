@@ -252,10 +252,10 @@ void parseHalfLife(level * lev, char * hlstring){
   memcpy(hlErrVal,&hlstring[10],6);
   hlErrVal[6] = '\0'; //terminate string
 
-	lev->halfLife = -1.0f;
-	lev->halfLifeErr = -1;
-  lev->halfLifeFormat = 0;
-  lev->halfLifeUnit=HALFLIFE_UNIT_NOVAL;
+	lev->halfLife.val = -1.0f;
+	lev->halfLife.err = 0;
+  lev->halfLife.format = 0;
+  lev->halfLife.unit=VALUE_UNIT_NOVAL;
 
   //printf("%s\n",hlstring);
   //printf("hlVal = %s, hlUnitVal = %s, hlErrVal = %s\n",hlVal,hlUnitVal,hlErrVal);
@@ -266,25 +266,25 @@ void parseHalfLife(level * lev, char * hlstring){
   }else if(strcmp(hlVal,"?")==0){
 		return; //no measured value
 	}else if(strcmp(hlVal,"STABLE")==0){
-		lev->halfLife = 1.0E20f;
-		lev->halfLifeUnit = HALFLIFE_UNIT_STABLE;
+		lev->halfLife.val = 1.0E20f;
+		lev->halfLife.unit = VALUE_UNIT_STABLE;
 	}else{
-		lev->halfLife = (float)atof(hlVal);
+		lev->halfLife.val = (float)atof(hlVal);
     tok = strtok(hlVal,".");
     if(tok!=NULL){
       //printf("%s\n",tok);
       tok = strtok(NULL,"E+-");
       if(tok!=NULL){
         //printf("%s\n",tok);
-        lev->halfLifeFormat = (uint8_t)strlen(tok);
-        if(lev->halfLifeFormat > 15U){
-          lev->halfLifeFormat = 15U; //only 4 bits available for precision
+        lev->halfLife.format = (uint8_t)strlen(tok);
+        if(lev->halfLife.format > 15U){
+          lev->halfLife.format = 15U; //only 4 bits available for precision
         }
         tok = strtok(NULL,""); //get the rest of the string (the part after the exponent, if it exists)
         if(tok!=NULL){
           //printf("%s\n",tok);
           //value was in exponent format
-          lev->halfLifeFormat |= (uint8_t)(1U << 4);
+          lev->halfLife.format |= (uint8_t)(1U << 4);
         }
       }else{
         tok = strtok(hlVal,"E");
@@ -293,43 +293,43 @@ void parseHalfLife(level * lev, char * hlstring){
           if(tok!=NULL){
             //printf("%s\n",tok);
             //value was in exponent format
-            lev->halfLifeFormat |= (uint8_t)(1U << 4);
+            lev->halfLife.format |= (uint8_t)(1U << 4);
           }
         }
       }
 
     }
 
-    if(lev->halfLife<=0.0f){
-      lev->halfLifeUnit = HALFLIFE_UNIT_STABLE;
+    if(lev->halfLife.val<=0.0f){
+      lev->halfLife.unit = VALUE_UNIT_STABLE;
     }else if(strcmp(hlUnitVal,"Y")==0){
-      lev->halfLifeUnit = HALFLIFE_UNIT_YEARS;
+      lev->halfLife.unit = VALUE_UNIT_YEARS;
     }else if(strcmp(hlUnitVal,"D")==0){
-      lev->halfLifeUnit = HALFLIFE_UNIT_DAYS;
+      lev->halfLife.unit = VALUE_UNIT_DAYS;
     }else if(strcmp(hlUnitVal,"H")==0){
-      lev->halfLifeUnit = HALFLIFE_UNIT_HOURS;
+      lev->halfLife.unit = VALUE_UNIT_HOURS;
     }else if(strcmp(hlUnitVal,"M")==0){
-      lev->halfLifeUnit = HALFLIFE_UNIT_MINUTES;
+      lev->halfLife.unit = VALUE_UNIT_MINUTES;
     }else if(strcmp(hlUnitVal,"S")==0){
-      lev->halfLifeUnit = HALFLIFE_UNIT_SECONDS;
+      lev->halfLife.unit = VALUE_UNIT_SECONDS;
     }else if(strcmp(hlUnitVal,"MS")==0){
-      lev->halfLifeUnit = HALFLIFE_UNIT_MILLISECONDS;
+      lev->halfLife.unit = VALUE_UNIT_MILLISECONDS;
     }else if(strcmp(hlUnitVal,"US")==0){
-      lev->halfLifeUnit = HALFLIFE_UNIT_MICROSECONDS;
+      lev->halfLife.unit = VALUE_UNIT_MICROSECONDS;
     }else if(strcmp(hlUnitVal,"NS")==0){
-      lev->halfLifeUnit = HALFLIFE_UNIT_NANOSECONDS;
+      lev->halfLife.unit = VALUE_UNIT_NANOSECONDS;
     }else if(strcmp(hlUnitVal,"PS")==0){
-      lev->halfLifeUnit = HALFLIFE_UNIT_PICOSECONDS;
+      lev->halfLife.unit = VALUE_UNIT_PICOSECONDS;
     }else if(strcmp(hlUnitVal,"FS")==0){
-      lev->halfLifeUnit = HALFLIFE_UNIT_FEMTOSECONDS;
+      lev->halfLife.unit = VALUE_UNIT_FEMTOSECONDS;
     }else if(strcmp(hlUnitVal,"AS")==0){
-      lev->halfLifeUnit = HALFLIFE_UNIT_ATTOSECONDS;
+      lev->halfLife.unit = VALUE_UNIT_ATTOSECONDS;
     }else if(strcmp(hlUnitVal,"EV")==0){
-      lev->halfLifeUnit = HALFLIFE_UNIT_EV;
+      lev->halfLife.unit = VALUE_UNIT_EV;
     }else if(strcmp(hlUnitVal,"KEV")==0){
-      lev->halfLifeUnit = HALFLIFE_UNIT_KEV;
+      lev->halfLife.unit = VALUE_UNIT_KEV;
     }else if(strcmp(hlUnitVal,"MEV")==0){
-      lev->halfLifeUnit = HALFLIFE_UNIT_MEV;
+      lev->halfLife.unit = VALUE_UNIT_MEV;
     }else{
       printf("Unknown half-life unit: %s (full string: %s)\n",hlUnitVal,hlstring);
     }
@@ -338,19 +338,19 @@ void parseHalfLife(level * lev, char * hlstring){
     tok = strtok(hlErrVal, " ");
     if(tok!=NULL){
       if(strcmp(tok,"GT")==0){
-        lev->halfLifeFormat |= (uint8_t)(VALUETYPE_GREATERTHAN << 5);
+        lev->halfLife.format |= (uint8_t)(VALUETYPE_GREATERTHAN << 5);
       }else if(strcmp(tok,"GT")==0){
-        lev->halfLifeFormat |= (uint8_t)(VALUETYPE_GREATERTHAN << 5);
+        lev->halfLife.format |= (uint8_t)(VALUETYPE_GREATERTHAN << 5);
       }else if(strcmp(tok,"GE")==0){
-        lev->halfLifeFormat |= (uint8_t)(VALUETYPE_GREATEROREQUALTHAN << 5);
+        lev->halfLife.format |= (uint8_t)(VALUETYPE_GREATEROREQUALTHAN << 5);
       }else if(strcmp(tok,"LT")==0){
-        lev->halfLifeFormat |= (uint8_t)(VALUETYPE_LESSTHAN << 5);
+        lev->halfLife.format |= (uint8_t)(VALUETYPE_LESSTHAN << 5);
       }else if(strcmp(tok,"LE")==0){
-        lev->halfLifeFormat |= (uint8_t)(VALUETYPE_LESSOREQUALTHAN << 5);
+        lev->halfLife.format |= (uint8_t)(VALUETYPE_LESSOREQUALTHAN << 5);
       }else if(strcmp(tok,"AP")==0){
-        lev->halfLifeFormat |= (uint8_t)(VALUETYPE_APPROX << 5);
+        lev->halfLife.format |= (uint8_t)(VALUETYPE_APPROX << 5);
       }else if(strcmp(tok,"?")==0){
-        lev->halfLifeFormat |= (uint8_t)(VALUETYPE_UNKNOWN << 5);
+        lev->halfLife.format |= (uint8_t)(VALUETYPE_UNKNOWN << 5);
       }
     }
     
@@ -812,9 +812,9 @@ int isEmpty(const char *str){
 }
 
 //function to parse ENSDF data files
-int readENSDFFile(const char * filePath, ndata * nd){
+int parseENSDFFile(const char * filePath, ndata * nd){
 
-  FILE *config;
+  FILE *efile;
   char *tok, *tok2;
   char str[256];//string to be read from file (will be tokenized)
   char nuclNameStr[10];
@@ -828,14 +828,14 @@ int readENSDFFile(const char * filePath, ndata * nd){
   int subSec=0;
   
   //open the file and read all parameters
-  if((config=fopen(filePath,"r"))==NULL){
+  if((efile=fopen(filePath,"r"))==NULL){
     //file doesn't exist, and will be omitted from the database
 		//printf("WARNING: Cannot open the ENSDF file %s\n",filePath);
 		return 0;
 	}
-  while(!(feof(config))){ //go until the end of file is reached
+  while(!(feof(efile))){ //go until the end of file is reached
 
-		if(fgets(str,256,config)!=NULL){ //get an entire line
+		if(fgets(str,256,efile)!=NULL){ //get an entire line
 
 			strcpy(line,str); //store the entire line
 			//printf("%s\n",line);
@@ -865,36 +865,52 @@ int readENSDFFile(const char * filePath, ndata * nd){
 			if(strcmp(hbuff,"ADOPTED LEVELS")==0){
 				if(nd->numNucl<MAXNUMNUCL){
 					nd->numNucl++;
-					subSec=0; //we're at the beginning of the entry for this nucleus 
+					subSec=0; //we're at the beginning of the entry for this nucleus
+					nd->nuclData[nd->numNucl].abundance.unit = VALUE_UNIT_NOVAL; //default
 					//printf("Adding gamma data for nucleus %s\n",val[0]);
 					memcpy(nuclNameStr,val[0],10);
 					nuclNameStr[9] = '\0'; //terminate string
 					getNuclNZ(&nd->nuclData[nd->numNucl],nuclNameStr); //get N and Z
 					if((nd->nuclData[nd->numNucl].N > MAX_NEUTRON_NUM)||(nd->nuclData[nd->numNucl].Z > MAX_PROTON_NUM)){
-						printf("ERROR: readENSDFFile - invalid proton (%i) or neutron (%i) number.\n",nd->nuclData[nd->numNucl].Z,nd->nuclData[nd->numNucl].N);
+						printf("ERROR: parseENSDFFile - invalid proton (%i) or neutron (%i) number.\n",nd->nuclData[nd->numNucl].Z,nd->nuclData[nd->numNucl].N);
 						return -1;
 					}
-					if(nd->nuclData[nd->numNucl].N > nd->maxNforZ[nd->nuclData[nd->numNucl].Z]){
-						nd->maxNforZ[nd->nuclData[nd->numNucl].Z] = (uint16_t)nd->nuclData[nd->numNucl].N;
-					}
-					if(nd->nuclData[nd->numNucl].N < nd->minNforZ[nd->nuclData[nd->numNucl].Z]){
-						if(nd->nuclData[nd->numNucl].N >= 0){
-							nd->minNforZ[nd->nuclData[nd->numNucl].Z] = (uint16_t)nd->nuclData[nd->numNucl].N;
+					//check for unobserved/inferred/tentative nuclei
+					char obsbuff[8];
+					memcpy(obsbuff, &line[23], 7);
+					obsbuff[7] = '\0';
+					if(strcmp(obsbuff,":NOT OB")==0){
+						nd->nuclData[nd->numNucl].flags = OBSFLAG_UNOBSERVED;
+					}else if(strcmp(obsbuff,":UNOBSE")==0){
+						nd->nuclData[nd->numNucl].flags = OBSFLAG_UNOBSERVED;
+					}else if(strcmp(obsbuff,":INFERR")==0){
+						nd->nuclData[nd->numNucl].flags = OBSFLAG_INFERRED;
+					}else if(strcmp(obsbuff,":TENTAT")==0){
+						nd->nuclData[nd->numNucl].flags = OBSFLAG_TENTATIVE;
+					}else{
+						nd->nuclData[nd->numNucl].flags = OBSFLAG_OBSERVED;
+						if(nd->nuclData[nd->numNucl].N > nd->maxNforZ[nd->nuclData[nd->numNucl].Z]){
+							nd->maxNforZ[nd->nuclData[nd->numNucl].Z] = (uint16_t)nd->nuclData[nd->numNucl].N;
 						}
-					}
-					if(nd->nuclData[nd->numNucl].Z > nd->maxZforN[nd->nuclData[nd->numNucl].N]){
-						nd->maxZforN[nd->nuclData[nd->numNucl].N] = (uint16_t)nd->nuclData[nd->numNucl].Z;
-					}
-					if(nd->nuclData[nd->numNucl].Z < nd->minZforN[nd->nuclData[nd->numNucl].N]){
-						if(nd->nuclData[nd->numNucl].Z >= 0){
-							nd->minZforN[nd->nuclData[nd->numNucl].N] = (uint16_t)nd->nuclData[nd->numNucl].Z;
+						if(nd->nuclData[nd->numNucl].N < nd->minNforZ[nd->nuclData[nd->numNucl].Z]){
+							if(nd->nuclData[nd->numNucl].N >= 0){
+								nd->minNforZ[nd->nuclData[nd->numNucl].Z] = (uint16_t)nd->nuclData[nd->numNucl].N;
+							}
 						}
-					}
-					if(nd->nuclData[nd->numNucl].N > nd->maxN){
-						nd->maxN = (uint16_t)nd->nuclData[nd->numNucl].N;
-					}
-					if(nd->nuclData[nd->numNucl].Z > nd->maxZ){
-						nd->maxZ = (uint16_t)nd->nuclData[nd->numNucl].Z;
+						if(nd->nuclData[nd->numNucl].Z > nd->maxZforN[nd->nuclData[nd->numNucl].N]){
+							nd->maxZforN[nd->nuclData[nd->numNucl].N] = (uint16_t)nd->nuclData[nd->numNucl].Z;
+						}
+						if(nd->nuclData[nd->numNucl].Z < nd->minZforN[nd->nuclData[nd->numNucl].N]){
+							if(nd->nuclData[nd->numNucl].Z >= 0){
+								nd->minZforN[nd->nuclData[nd->numNucl].N] = (uint16_t)nd->nuclData[nd->numNucl].Z;
+							}
+						}
+						if(nd->nuclData[nd->numNucl].N > nd->maxN){
+							nd->maxN = (uint16_t)nd->nuclData[nd->numNucl].N;
+						}
+						if(nd->nuclData[nd->numNucl].Z > nd->maxZ){
+							nd->maxZ = (uint16_t)nd->nuclData[nd->numNucl].Z;
+						}
 					}
 				}
 			}
@@ -1024,41 +1040,39 @@ int readENSDFFile(const char * filePath, ndata * nd){
 										if(tok2 != NULL){
 											//printf("tok2: %s\n",tok2);
 											if(strcmp(tok2,"GT")==0){
-												nd->dcyMode[nd->numDecModes].probType = VALUETYPE_GREATERTHAN;
+												nd->dcyMode[nd->numDecModes].prob.unit = VALUETYPE_GREATERTHAN;
 												tok2 = strtok(NULL," ");
 											}else if(strcmp(tok2,"GT")==0){
-												nd->dcyMode[nd->numDecModes].probType = VALUETYPE_GREATERTHAN;
+												nd->dcyMode[nd->numDecModes].prob.unit = VALUETYPE_GREATERTHAN;
 												tok2 = strtok(NULL," ");
 											}else if(strcmp(tok2,"GE")==0){
-												nd->dcyMode[nd->numDecModes].probType = VALUETYPE_GREATEROREQUALTHAN;
+												nd->dcyMode[nd->numDecModes].prob.unit = VALUETYPE_GREATEROREQUALTHAN;
 												tok2 = strtok(NULL," ");
 											}else if(strcmp(tok2,"LT")==0){
-												nd->dcyMode[nd->numDecModes].probType = VALUETYPE_LESSTHAN;
+												nd->dcyMode[nd->numDecModes].prob.unit = VALUETYPE_LESSTHAN;
 												tok2 = strtok(NULL," ");
 											}else if(strcmp(tok2,"LE")==0){
-												nd->dcyMode[nd->numDecModes].probType = VALUETYPE_LESSOREQUALTHAN;
+												nd->dcyMode[nd->numDecModes].prob.unit = VALUETYPE_LESSOREQUALTHAN;
 												tok2 = strtok(NULL," ");
 											}else if(strcmp(tok2,"AP")==0){
-												nd->dcyMode[nd->numDecModes].probType = VALUETYPE_APPROX;
+												nd->dcyMode[nd->numDecModes].prob.unit = VALUETYPE_APPROX;
 												tok2 = strtok(NULL," ");
 											}else if(strcmp(tok2,"?")==0){
-												nd->dcyMode[nd->numDecModes].probType = VALUETYPE_UNKNOWN;
+												nd->dcyMode[nd->numDecModes].prob.unit = VALUETYPE_UNKNOWN;
 												tok2 = strtok(NULL," ");
 											}
 											if(tok2!=NULL){
 												//printf("%s\n",tok2);
-												nd->dcyMode[nd->numDecModes].prob = (float)atof(tok2);
+												nd->dcyMode[nd->numDecModes].prob.val = (float)atof(tok2);
 												tok2 = strtok(NULL,""); //get the rest of the string
 												if(tok2 != NULL){
 													//printf("%s\n",tok2);
-													nd->dcyMode[nd->numDecModes].probErr = (uint8_t)atoi(tok2);
+													nd->dcyMode[nd->numDecModes].prob.err = (uint8_t)atoi(tok2);
 												}
 											}
-											
 										}
-
 										
-										//printf("Found decay with type %u and probability: %f %u (type %u)\n",nd->dcyMode[nd->numDecModes].type,(double)nd->dcyMode[nd->numDecModes].prob,nd->dcyMode[nd->numDecModes].probErr,nd->dcyMode[nd->numDecModes].probType);
+										//printf("Found decay with type %u and probability: %f %u (type %u)\n",nd->dcyMode[nd->numDecModes].type,(double)nd->dcyMode[nd->numDecModes].prob,nd->dcyMode[nd->numDecModes].prob.err,nd->dcyMode[nd->numDecModes].prob.unit);
 										nd->levels[nd->numLvls-1].numDecModes++;
 										nd->numDecModes++;
 										decModCtr++;
@@ -1149,7 +1163,7 @@ int readENSDFFile(const char * filePath, ndata * nd){
 
 		}
 	}
-	fclose(config);
+	fclose(efile);
 	
 	if(nd->numNucl>=MAXNUMNUCL){
 		printf("ERROR: Attempted to import data for too many nuclei.  Increase the value of MAXNUMNUCL in levelup.h\n");
@@ -1160,12 +1174,104 @@ int readENSDFFile(const char * filePath, ndata * nd){
   return 0;
 }
 
-int buildENSDFDatabase(const char *appBasePath, ndata *nd){
+//function to parse isotopic abundance data file
+//assumes ENSDF data has already been parsed
+int parseAbundanceData(const char * filePath, ndata * nd){
+
+  FILE *afile;
+  char *tok;
+  char str[256];//string to be read from file (will be tokenized)
+  char line[256],val[MAXNUMPARSERVALS][256],tmpVal[256];
+  int tokPos;//position when tokenizing
+  
+  int16_t Z = 0;
+	int16_t A = 0;
+	int16_t N = 0;
+  
+  //open the file and read all parameters
+  if((afile=fopen(filePath,"r"))==NULL){
+		printf("ERROR: Cannot open the abundance data file %s\n",filePath);
+		return -1;
+	}
+  while(!(feof(afile))){ //go until the end of file is reached
+
+		if(fgets(str,256,afile)!=NULL){ //get an entire line
+
+			strcpy(line,str); //store the entire line
+			//printf("%s\n",line);
+
+			//tokenize
+			tok=strtok(str,"=");
+			tokPos=0;
+			strcpy(val[tokPos],tok);
+			while(tok != NULL){
+				tok = strtok(NULL, "=");
+				if(tok!=NULL){
+					tokPos++;
+					if(tokPos<MAXNUMPARSERVALS)
+						strcpy(val[tokPos],tok);
+					else
+						break;
+				}
+			}
+
+			if(tokPos == 1){
+				if(strcmp(val[0],"Atomic Number ")==0){
+					Z = (int16_t)atoi(val[1]);
+				}else if(strcmp(val[0],"Mass Number ")==0){
+					A = (int16_t)atoi(val[1]);
+					N = (int16_t)(A - Z);
+				}else if(strcmp(val[0],"Isotopic Composition ")==0){
+					uint16_t nuclInd = getNuclInd(nd,N,Z);
+					if(nuclInd < nd->numNucl){
+						strcpy(tmpVal,val[1]);
+						tok=strtok(tmpVal,"(");
+						if(tok!=NULL){
+							nd->nuclData[nuclInd].abundance.val = (float)(atof(tok)*100.0);
+							nd->nuclData[nuclInd].abundance.format = (uint8_t)(strlen(tok)-5);
+							if(nd->nuclData[nuclInd].abundance.format > 15U){
+								nd->nuclData[nuclInd].abundance.format = 15U; //only 4 bits available for precision
+							}
+							tok=strtok(NULL,")");
+							if(tok!=NULL){
+								nd->nuclData[nuclInd].abundance.err = (uint8_t)atoi(tok);
+								nd->nuclData[nuclInd].abundance.unit = VALUE_UNIT_PERCENT;
+								//printf("Abundance for N,Z = [%i %i]: %.*f %u\n",N,Z,nd->nuclData[nuclInd].abundance.format,(double)nd->nuclData[nuclInd].abundance.val,nd->nuclData[nuclInd].abundance.err);
+							}else{
+								//check special cases
+								if(atoi(val[1])==1){
+									//100% abundance case
+									nd->nuclData[nuclInd].abundance.val = 100.0f;
+									nd->nuclData[nuclInd].abundance.format = 0;
+									nd->nuclData[nuclInd].abundance.err = 0;
+									nd->nuclData[nuclInd].abundance.unit = VALUE_UNIT_PERCENT;
+								}
+							}
+						}
+					}
+				}
+			}
+
+		}
+	}
+	fclose(afile);
+	
+	if(nd->numNucl>=MAXNUMNUCL){
+		printf("ERROR: Attempted to import data for too many nuclei.  Increase the value of MAXNUMNUCL in levelup.h\n");
+		return -1;
+	}
+	
+	printf("Finished reading abundance data file: %s\n",filePath);
+  return 0;
+}
+
+int buildDatabase(const char *appBasePath, ndata *nd){
 
 	char filePath[256],str[8];
 	
 	initialize_database(nd);
 	
+	//parse ENSDF data files
 	for(uint16_t i=1;i<350;i++){
 		strcpy(filePath,"");
 		strcat(filePath,appBasePath);
@@ -1178,12 +1284,20 @@ int buildENSDFDatabase(const char *appBasePath, ndata *nd){
 			strcat(filePath,"ensdf.");
 		sprintf(str,"%u",i);
 		strcat(filePath,str);
-		if(readENSDFFile(filePath,nd) == -1){ //grab data from the ENSDF file (see parse_ENSDF.c)
+		if(parseENSDFFile(filePath,nd) == -1){ //grab data from the ENSDF file
       return -1;
     }
 	}
 	printf("Data imported for %i nuclei, containing %u levels, %u transitions, and %u decay branches.\n",nd->numNucl,nd->numLvls,nd->numTran,nd->numDecModes);
 	
+	//parse abundance data file
+	strcpy(filePath,"");
+	strcat(filePath,appBasePath);
+	strcat(filePath,"data/abundances.txt");
+	if(parseAbundanceData(filePath,nd) == -1){
+		return -1;
+	}
+
   //post-process the data
   //find ground state level
   for(uint16_t i=0;i<nd->numNucl;i++){
@@ -1216,7 +1330,7 @@ int parseAppData(app_data *restrict dat, const char *appBasePath){
 
   //check validity of data format
   if(VALUETYPE_ENUM_LENGTH > /* DISABLES CODE */ (8)){
-    printf("ERROR: VALUETYPE_ENUM_LENGTH is too long, can't store as 3 bits in a bit pattern (eg. level->halfLifeFormat).\n");
+    printf("ERROR: VALUETYPE_ENUM_LENGTH is too long, can't store as 3 bits in a bit pattern (eg. level->halfLife.format).\n");
     return -1;
   }
 
@@ -1230,7 +1344,7 @@ int parseAppData(app_data *restrict dat, const char *appBasePath){
   if(parseStrings(dat,stringIDmap,appBasePath)==-1) return -1;
   if(parseAppRules(dat,stringIDmap,appBasePath)==-1) return -1;
 
-  if(buildENSDFDatabase(appBasePath,&dat->ndat)==-1) return -1;
+  if(buildDatabase(appBasePath,&dat->ndat)==-1) return -1;
 
   //summarize
   printf("Data parsing complete.\n");
