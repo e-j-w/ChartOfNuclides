@@ -1,12 +1,14 @@
-# **Chart of Nuclides GUI**
+<div align = center><img src="https://raw.githubusercontent.com/e-j-w/ChartOfNuclides/master/data/icon.svg" width="150" height="150" alt="icon">
 
-Maintainer: Jonathan Williams
+<b>Chart of Nuclides GUI</b>
+
+</div>
 
 ## Description
 
-An offline viewer of isotope and nuclear structure data, **extremely early in development and basically non-functional right now**.  The UI is implemented in [SDL](https://github.com/libsdl-org/SDL) (so you can browse nuclear half-lives using some of the same code that powers [Half-Life](https://www.pcgamingwiki.com/wiki/Half-Life#Middleware)).
+**NOTE: This is extremely early in development and has very limited functionality right now.**
 
-The program parses various plaintext nuclear structure data (listed [here](#collect-data)) into a binary database, eventually one will be able to query this for information on various nuclei (levels, cascades, gamma-rays).
+An offline viewer of isotope and nuclear structure data, presented in the familiar [Chart of Nuclides / Segrè chart](https://en.wikipedia.org/wiki/Table_of_nuclides) format.  The UI is implemented in [SDL](https://github.com/libsdl-org/SDL) (so you can browse nuclear half-lives using some of the same code that powers [Half-Life](https://www.pcgamingwiki.com/wiki/Half-Life#Middleware)).  The program parses various plaintext nuclear structure data (listed [here](#collect-data)) into a binary database, eventually one will be able to query this for information on various nuclei (levels, cascades, gamma-rays).
 
 The goal is to develop a performant and multiplatform tool that will be useful in both professional (nuclear structure research) and educational contexts.
 
@@ -35,7 +37,7 @@ If building the database from scratch, you will need various isotope and nuclear
 * SDL_image
 * SDL_ttf
 
-The current version has been tested under Arch Linux as of May 2024.
+The current version has been tested under Arch Linux as of June 2024.
 
 ### Build the database and program
 
@@ -61,15 +63,19 @@ Zoom and pan with the mouse, the controls are basically identical to something l
 
 ### Keyboard shortcuts
 
-| Key        | Action |
-| :--------- | :----- |
-| F11        | Toggle fullscreen mode |
-| P          | Toggle performance stats debug overlay |
+| Key               | Action |
+| :---------------- | :----- |
+| Arrow keys / WASD | Pan chart view |
+| +/-               | Zoom in/out on chart |
+| F11               | Toggle fullscreen mode |
+| P                 | Toggle performance stats debug overlay |
 
 ## Disclaimer
 
-The author(s) make no guarantee of the accuracy or completeness of the information provided.  As stated in the [license](COPYING.md), this program is provided without any warranty.  Please file a bug report if you spot any inaccuracies (where the data reported by the program differs from the ENSDF data).
+The author(s) make no guarantee of the accuracy or completeness of the information provided.  As stated in the [license](COPYING.md), this program is provided without any warranty.  Please file a bug report if you spot any inaccuracies (eg. the data reported by the program differs from the source ENSDF/NIST data).
 
-## Acknowledgements
+## Credits
 
-A slightly modified version of the [SDL_FontCache](https://github.com/grimfang4/SDL_FontCache) library by Jonathan Dearborn is used for text rendering.
+Developed and maintained by [Jonathan Williams](https://e-j-w.github.io/).
+
+A slightly modified version of the [SDL_FontCache](https://github.com/grimfang4/SDL_FontCache) library by Jonathan Dearborn is used for fast text rendering.
