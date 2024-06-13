@@ -565,42 +565,6 @@ static_inline FC_Rect FC_RectUnion(FC_Rect A, FC_Rect B)
     }
 }
 
-// Adapted from SDL_IntersectRect
-static_inline FC_Rect FC_RectIntersect(FC_Rect A, FC_Rect B)
-{
-    FC_Rect result;
-	float Amin, Amax, Bmin, Bmax;
-
-	// Horizontal intersection
-	Amin = A.x;
-	Amax = Amin + A.w;
-	Bmin = B.x;
-	Bmax = Bmin + B.w;
-	if(Bmin > Amin)
-	        Amin = Bmin;
-	result.x = Amin;
-	if(Bmax < Amax)
-	        Amax = Bmax;
-	result.w = Amax - Amin > 0 ? Amax - Amin : 0;
-
-	// Vertical intersection
-	Amin = A.y;
-	Amax = Amin + A.h;
-	Bmin = B.y;
-	Bmax = Bmin + B.h;
-	if(Bmin > Amin)
-	        Amin = Bmin;
-	result.y = Amin;
-	if(Bmax < Amax)
-	        Amax = Bmax;
-	result.h = Amax - Amin > 0 ? Amax - Amin : 0;
-
-	return result;
-}
-
-
-
-
 
 FC_Rect FC_DefaultRenderCallback(FC_Image* src, FC_Rect* srcrect, FC_Target* dest, float x, float y, float xscale, float yscale)
 {
@@ -705,24 +669,24 @@ Uint32 FC_GetCodepointFromUTF8(const char** c, Uint8 advance_pointer)
         result = (Uint32)(*str);
     else if((unsigned char)*str < 0xE0)
     {
-        result |= (unsigned char)(*str) << 8;
+        result |= (Uint32)((unsigned char)(*str) << 8);
         result |= (unsigned char)(*(str+1));
         if(advance_pointer)
             *c += 1;
     }
     else if((unsigned char)*str < 0xF0)
     {
-        result |= (unsigned char)(*str) << 16;
-        result |= (unsigned char)(*(str+1)) << 8;
+        result |= (Uint32)((unsigned char)(*str) << 16);
+        result |= (Uint32)((unsigned char)(*(str+1)) << 8);
         result |= (unsigned char)(*(str+2));
         if(advance_pointer)
             *c += 2;
     }
     else
     {
-        result |= (unsigned char)(*str) << 24;
-        result |= (unsigned char)(*(str+1)) << 16;
-        result |= (unsigned char)(*(str+2)) << 8;
+        result |= (Uint32)((unsigned char)(*str) << 24);
+        result |= (Uint32)((unsigned char)(*(str+1)) << 16);
+        result |= (Uint32)((unsigned char)(*(str+2)) << 8);
         result |= (unsigned char)(*(str+3));
         if(advance_pointer)
             *c += 3;
@@ -2224,13 +2188,11 @@ FC_Rect FC_GetCharacterOffset(FC_Font* font, Uint16 position_index, int column_w
     for(iter = ls; iter != NULL;)
     {
         char* line;
-        int i = 0;
         FC_StringList* next_iter = iter->next;
 
         ++num_lines;
         for(line = iter->value; line != NULL && *line != '\0'; line = (char*)U8_next(line))
         {
-            ++i;
             --position_index;
             if(position_index == 0)
             {
@@ -2492,7 +2454,7 @@ Uint16 FC_GetPositionFromOffset(FC_Font* font, float x, float y, int column_widt
 
         current_x = 0;
         current_y += height;
-        if(y < current_y)
+        if(y < (float)current_y)
             break;
     }
     FC_StringListFree(ls);

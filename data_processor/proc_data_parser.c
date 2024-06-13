@@ -33,30 +33,30 @@ static int parseAppRules(app_data *restrict dat, asset_mapping *restrict stringI
           if(SDL_strcmp(tok,"app_name") == 0){
             tok = strtok(NULL,""); //get the rest of the string
             strncpy(dat->rules.appName,tok,63);
-          }else if(SDL_strcmp(tok,"white_bg_col") == 0){
+          }else if(SDL_strcmp(tok,"bg_col") == 0){
             tok = strtok(NULL,""); //get the rest of the string
             strncpy(str2,tok,255);
             tok = strtok(str2,",");
             if(tok!=NULL){
-              dat->rules.themeRules.whiteBGCol.r = (float)atof(tok);
+              dat->rules.themeRules.bgCol.r = (float)atof(tok);
               tok = strtok(NULL,",");
               if(tok!=NULL){
-                dat->rules.themeRules.whiteBGCol.g = (float)atof(tok);
+                dat->rules.themeRules.bgCol.g = (float)atof(tok);
                 tok = strtok(NULL,",");
                 if(tok!=NULL){
-                  dat->rules.themeRules.whiteBGCol.b = (float)atof(tok);
-                  dat->rules.themeRules.whiteBGCol.a = 1.0f;
+                  dat->rules.themeRules.bgCol.b = (float)atof(tok);
+                  dat->rules.themeRules.bgCol.a = 1.0f;
                 }else{
                   printf("ERROR: could not white_bg_col color string in file: %s.\n",filePath);
-                  exit(-1);
+                  return -1;
                 }
               }else{
                 printf("ERROR: could not white_bg_col color string in file: %s.\n",filePath);
-                exit(-1);
+                return -1;
               }
             }else{
               printf("ERROR: could not white_bg_col color string in file: %s.\n",filePath);
-              exit(-1);
+              return -1;
             }
           }else if(SDL_strcmp(tok,"text_col") == 0){
             tok = strtok(NULL,""); //get the rest of the string
@@ -73,15 +73,15 @@ static int parseAppRules(app_data *restrict dat, asset_mapping *restrict stringI
                   dat->rules.themeRules.textColNormal.a = 255;
                 }else{
                   printf("ERROR: could not text_col color string in file: %s.\n",filePath);
-                  exit(-1);
+                  return -1;
                 }
               }else{
                 printf("ERROR: could not text_col color string in file: %s.\n",filePath);
-                exit(-1);
+                return -1;
               }
             }else{
               printf("ERROR: could not text_col color string in file: %s.\n",filePath);
-              exit(-1);
+              return -1;
             }
           }else if(SDL_strcmp(tok,"mod_col_normal") == 0){
             tok = strtok(NULL,""); //get the rest of the string
@@ -98,15 +98,15 @@ static int parseAppRules(app_data *restrict dat, asset_mapping *restrict stringI
                   dat->rules.themeRules.modNormalCol.a = 1.0f;
                 }else{
                   printf("ERROR: could not mod_col_normal color string in file: %s.\n",filePath);
-                  exit(-1);
+                  return -1;
                 }
               }else{
                 printf("ERROR: could not mod_col_normal color string in file: %s.\n",filePath);
-                exit(-1);
+                return -1;
               }
             }else{
               printf("ERROR: could not mod_col_normal color string in file: %s.\n",filePath);
-              exit(-1);
+              return -1;
             }
           }else if(SDL_strcmp(tok,"mod_col_mouseover") == 0){
             tok = strtok(NULL,""); //get the rest of the string
@@ -123,15 +123,15 @@ static int parseAppRules(app_data *restrict dat, asset_mapping *restrict stringI
                   dat->rules.themeRules.modMouseOverCol.a = 1.0f;
                 }else{
                   printf("ERROR: could not mod_col_mouseover color string in file: %s.\n",filePath);
-                  exit(-1);
+                  return -1;
                 }
               }else{
                 printf("ERROR: could not mod_col_mouseover color string in file: %s.\n",filePath);
-                exit(-1);
+                return -1;
               }
             }else{
               printf("ERROR: could not mod_col_mouseover color string in file: %s.\n",filePath);
-              exit(-1);
+              return -1;
             }
           }else if(SDL_strcmp(tok,"mod_col_selected") == 0){
             tok = strtok(NULL,""); //get the rest of the string
@@ -148,17 +148,20 @@ static int parseAppRules(app_data *restrict dat, asset_mapping *restrict stringI
                   dat->rules.themeRules.modSelectedCol.a = 1.0f;
                 }else{
                   printf("ERROR: could not mod_col_selected color string in file: %s.\n",filePath);
-                  exit(-1);
+                  return -1;
                 }
               }else{
                 printf("ERROR: could not mod_col_selected color string in file: %s.\n",filePath);
-                exit(-1);
+                return -1;
               }
             }else{
               printf("ERROR: could not mod_col_selected color string in file: %s.\n",filePath);
-              exit(-1);
+              return -1;
             }
-          }
+          }else{
+						printf("ERROR: unknown app rule (%s).\n",tok);
+						return -1;
+					}
         }
       }
     }

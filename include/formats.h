@@ -123,7 +123,7 @@ typedef struct
 
 typedef struct
 {
-  SDL_FColor whiteBGCol; //background colors
+  SDL_FColor bgCol; //background colors
   SDL_Color textColNormal; //colors for text (cannot be floating point as this is not supported by SDL_ttf)
   SDL_FColor modNormalCol, modMouseOverCol, modSelectedCol; //color modulations for UI elements in different states
 }ui_theme_rules; //struct containing global UI thene rules

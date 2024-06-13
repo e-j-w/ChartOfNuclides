@@ -643,12 +643,14 @@ uint16_t getNuclInd(const ndata *restrict nd, const int16_t N, const int16_t Z){
 	for(uint16_t i=0; i<nd->numNucl;i++){
 		if(nd->nuclData[i].Z == Z){
 			if(nd->nuclData[i].N == N){
-				return i;
+				if((nd->nuclData[i].flags & 3U) == OBSFLAG_OBSERVED){
+					return i;
+				}
 			}
 		}
 	}
 	//printf("WARNING: getNuclInd - couldn't find nucleus with N,Z = [%i %i].\n",N,Z);
-	return 65535U;
+	return MAXNUMNUCL;
 }
 
 float mouseXPxToN(const drawing_state *restrict ds, const float mouseX){

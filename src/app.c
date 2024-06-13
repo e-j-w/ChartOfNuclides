@@ -126,11 +126,11 @@ int main(int argc, char *argv[]){
   gdat->state.ds.forceRedraw = 1; //force draw the first frame
   
   //setup splash screen
-  gdat->dat.rules.themeRules.whiteBGCol.r = 255;
-  gdat->dat.rules.themeRules.whiteBGCol.g = 255;
-  gdat->dat.rules.themeRules.whiteBGCol.b = 255;
-  gdat->dat.rules.themeRules.whiteBGCol.a = 255;
-  drawFlatBG(&gdat->state.ds,&gdat->rdat,gdat->dat.rules.themeRules.whiteBGCol);
+  gdat->dat.rules.themeRules.bgCol.r = 255;
+  gdat->dat.rules.themeRules.bgCol.g = 255;
+  gdat->dat.rules.themeRules.bgCol.b = 255;
+  gdat->dat.rules.themeRules.bgCol.a = 255;
+  drawFlatBG(&gdat->state.ds,&gdat->rdat,gdat->dat.rules.themeRules.bgCol);
   SDL_RenderPresent(gdat->rdat.renderer); //tell the renderer to actually show the image
 
   //import game data and resources
@@ -178,7 +178,7 @@ int main(int argc, char *argv[]){
     //SDL_RenderClear(gdat->rdat.renderer); //clear the window, disabled for optimization purposes
 
     //draw to the screen
-    drawFlatBG(&gdat->state.ds,&gdat->rdat,gdat->dat.rules.themeRules.whiteBGCol);
+    drawFlatBG(&gdat->state.ds,&gdat->rdat,gdat->dat.rules.themeRules.bgCol);
     drawUI(&gdat->dat,&gdat->state,&gdat->rdat,deltaTime);
 
     if(gdat->state.ds.drawPerformanceStats == 1){
