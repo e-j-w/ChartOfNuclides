@@ -149,7 +149,7 @@ void drawNuclBoxLabel(const app_data *restrict dat, const drawing_state *restric
           getDecayModeStr(tmpStr,&dat->ndat,dat->ndat.levels[gsLevInd].firstDecMode + (uint32_t)i);
           //printf("%s\n",tmpStr);
           if((yOffsets < yOffsetLimit)||(i==(dat->ndat.levels[gsLevInd].numDecModes-1))){
-            drawTextAlignedSized(rdat,drawXPos,drawYPos+(yOffsets*20.0f),rdat->font,col,255,tmpStr,ALIGN_LEFT,16384); //draw abundance label
+            drawTextAlignedSized(rdat,drawXPos,drawYPos+(yOffsets*20.0f),rdat->font,col,255,tmpStr,ALIGN_LEFT,16384); //draw decay mode label
             yOffsets += 1;
           }else{
             drawTextAlignedSized(rdat,drawXPos,drawYPos+(yOffsets*20.0f),rdat->font,col,255,"(...)",ALIGN_LEFT,16384);
@@ -169,12 +169,6 @@ void drawChartOfNuclides(const app_data *restrict dat, const app_state *restrict
   float maxX = getMaxChartN(&state->ds);
   float minY = getMinChartZ(&state->ds);
   float maxY = getMaxChartZ(&state->ds);
-  float mouseX = -1.0f;
-  float mouseY = -1.0f;
-  if(state->lastInputType == INPUT_TYPE_MOUSE){
-    mouseX = mouseXPxToN(&state->ds,state->mouseXPx);
-    mouseY = mouseYPxToZ(&state->ds,state->mouseYPx);
-  }
   
   //printf("N range: [%0.2f %0.2f], Z range: [%0.2f %0.2f]\n",(double)minX,(double)maxX,(double)minY,(double)maxY);
 
@@ -193,23 +187,11 @@ void drawChartOfNuclides(const app_data *restrict dat, const app_state *restrict
               rect.y = (maxY - (float)dat->ndat.nuclData[i].Z)*rect.h;
               //printf("N: %i, Z: %i, i: %i, pos: [%0.2f %0.2f %0.2f %0.2f]\n",dat->ndat.nuclData[i].N,dat->ndat.nuclData[i].Z,i,(double)rect.x,(double)rect.y,(double)rect.w,(double)rect.h);
               const double hl = getNuclGSHalfLifeSeconds(&dat->ndat,(uint16_t)i);
-              SDL_FColor hlCol = getHalfLifeCol(hl);
-              //handle highlighting nuclide under cursor
-              if(state->lastInputType == INPUT_TYPE_MOUSE){
-                if((state->ds.dragInProgress == 0)&&(state->ds.zoomInProgress == 0)){
-                  if(fabsf(dat->ndat.nuclData[i].N - floorf(mouseX)) < 0.1f){
-                    if(fabsf(dat->ndat.nuclData[i].Z - floorf(mouseY) - 1.0f) < 0.1f){
-                      hlCol.r += 0.1f;
-                      hlCol.g += 0.1f;
-                      hlCol.b += 0.1f;
-                    }
-                  }
-                }
-              }
-              drawFlatRect(rdat,rect,hlCol);
+              drawFlatRect(rdat,rect,getHalfLifeCol(hl));
               if(state->ds.chartZoomScale >= 4.0f){
                 drawNuclBoxLabel(dat,&state->ds,rdat,rect.x/rdat->uiScale,rect.y/rdat->uiScale,rect.w/rdat->uiScale,(hl > 1.0E4) ? whiteCol8Bit : blackCol8Bit,(uint16_t)i);
               }
+              
             }
           }
         }
@@ -279,6 +261,13 @@ void drawChartOfNuclides(const app_data *restrict dat, const app_state *restrict
         }
       }
     }
+  }
+
+  //handle highlighting selected nuclide
+  if(state->chartSelectedNucl != MAXNUMNUCL){
+    rect.x = ((float)dat->ndat.nuclData[state->chartSelectedNucl].N - minX)*rect.w;
+    rect.y = (maxY - (float)dat->ndat.nuclData[state->chartSelectedNucl].Z)*rect.h;
+    drawSelectionRect(rdat,rect,whiteCol,3.0f);
   }
 
   //draw x and y axes

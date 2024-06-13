@@ -95,7 +95,7 @@ void processInputFlags(const app_data *restrict dat, app_state *restrict state){
           state->mouseoverElement = i;
           if((state->mouseClickPosXPx >= state->ds.uiElemPosX[i])&&(state->mouseClickPosXPx < (state->ds.uiElemPosX[i]+state->ds.uiElemWidth[i]))&&(state->mouseClickPosYPx >= state->ds.uiElemPosY[i])&&(state->mouseClickPosYPx < (state->ds.uiElemPosY[i]+state->ds.uiElemHeight[i]))){
             //take action
-            uiElemClickAction(state,i);
+            uiElemClickAction(dat,state,i);
             return;
           }
         }
@@ -120,13 +120,12 @@ void processInputFlags(const app_data *restrict dat, app_state *restrict state){
 
   //only get here if no button was clicked
   //check if a click was made outside of any button
-  if(state->mouseClickPosXPx >= 0.0f){
-    //unclick
-    uiElemClickAction(state,UIELEM_ENUM_LENGTH);
+  if((state->mouseClickPosXPx >= 0.0f) && (fabsf(state->ds.chartDragStartMouseX - state->mouseXPx) < 5.0f) && (fabsf(state->ds.chartDragStartMouseY - state->mouseYPx) < 5.0f) ){
+    //unclick (or click on chart view)
+    uiElemClickAction(dat,state,UIELEM_ENUM_LENGTH);
   }
 
   /* Handle zoom input */
-
   if((state->inputFlags & (1U << INPUT_ZOOM))&&(fabsf(state->zoomDeltaVal)>0.05f)){
     if(state->uiState == UISTATE_DEFAULT){
       if(state->zoomDeltaVal != 0.0f){

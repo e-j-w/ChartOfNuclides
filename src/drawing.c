@@ -272,6 +272,27 @@ void drawIconButton(const ui_theme_rules *restrict uirules, resource_data *restr
   SDL_SetTextureAlphaMod(rdat->uiThemeTex,255);
 }
 
+//draws a selection indicator with the position and size specified by the input SDL_Rect
+void drawSelectionRect(resource_data *restrict rdat, const SDL_FRect pos, const SDL_FColor col, const float thicknessPx){
+  float scaledThickness = thicknessPx*rdat->uiScale;
+  SDL_SetRenderDrawColorFloat(rdat->renderer,col.r,col.g,col.b,col.a);
+  SDL_FRect rect;
+  rect.x = pos.x;
+  rect.y = pos.y;
+  rect.w = pos.w;
+  rect.h = scaledThickness;
+  SDL_RenderFillRect(rdat->renderer,&rect);
+  rect.y = pos.y + pos.h - scaledThickness;
+  SDL_RenderFillRect(rdat->renderer,&rect);
+  rect.x = pos.x;
+  rect.y = pos.y + scaledThickness;
+  rect.w = scaledThickness;
+  rect.h = pos.h - 2*scaledThickness;
+  SDL_RenderFillRect(rdat->renderer,&rect);
+  rect.x = pos.x + pos.w - scaledThickness;
+  SDL_RenderFillRect(rdat->renderer,&rect);
+}
+
 //draw a transparent black overlay over the full screen
 void drawScreenDimmer(const drawing_state *restrict ds, resource_data *restrict rdat, const float alpha){
   

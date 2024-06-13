@@ -76,6 +76,7 @@ static const uint8_t UITHEME_ICON_TILE_Y[NUM_THEME_ICONS] = {10,10,10};
 static const SDL_FColor blackCol = {0.0f,0.0f,0.0f,1.0f};
 static const SDL_FColor grayCol = {0.5f,0.5f,0.5f,1.0f};
 static const SDL_FColor redCol = {1.0f,0.0f,0.0f,1.0f};
+static const SDL_FColor whiteCol = {1.0f,1.0f,1.0f,1.0f};
 static const SDL_FColor whiteTransparentCol = {1.0f,1.0f,1.0f,0.7f};
 
 static const SDL_Color whiteCol8Bit = {255,255,255,255};

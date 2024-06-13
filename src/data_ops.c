@@ -20,6 +20,7 @@ void initializeTempState(app_state *restrict state){
   state->lastInputType = INPUT_TYPE_KEYBOARD; //default input type
 	state->inputFlags = 0;
   //app state
+	state->chartSelectedNucl = MAXNUMNUCL;
   state->quitAppFlag = 0;
   //ui state
   changeUIState(state,UISTATE_DEFAULT);
@@ -704,7 +705,7 @@ void changeUIState(app_state *restrict state, const uint8_t newState){
 }
 
 //take action after clicking a button or other UI element
-void uiElemClickAction(app_state *restrict state, const uint8_t uiElemID){
+void uiElemClickAction(const app_data *restrict dat, app_state *restrict state, const uint8_t uiElemID){
   state->clickedUIElem = uiElemID;
   switch(uiElemID){
     case UIELEM_MENU_BUTTON:
@@ -719,9 +720,22 @@ void uiElemClickAction(app_state *restrict state, const uint8_t uiElemID){
       changeUIState(state,UISTATE_DEFAULT);
       startUIAnimation(&state->ds,UIANIM_MSG_BOX_HIDE); //message box will be closed after animation finishes
       break;
+		case UIELEM_ENUM_LENGTH:
     default:
+			//clicked outside of a button or UI element
       if(state->uiState == UISTATE_DEFAULT){
-        state->ds.shownElements = 0; //close any menu being shown
+				if((state->ds.shownElements == 0)||(state->ds.shownElements == (1U << UIELEM_NUCL_INFOBOX))){
+					//clicked on the chart view
+					float mouseX = mouseXPxToN(&state->ds,state->mouseXPx);
+    			float mouseY = mouseYPxToZ(&state->ds,state->mouseYPx);
+					//select nucleus
+					state->chartSelectedNucl = getNuclInd(&dat->ndat,(int16_t)floorf(mouseX),(int16_t)floorf(mouseY + 1.0f));
+					//printf("Selected nucleus: %u\n",state->chartSelectedNucl);
+					state->ds.shownElements |= (1U << UIELEM_NUCL_INFOBOX);
+				}else{
+					//clicked out of a menu
+					state->ds.shownElements = 0; //close any menu being shown
+				}
       }
       break;
   }
