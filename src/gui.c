@@ -115,12 +115,12 @@ void drawNuclBoxLabel(const app_data *restrict dat, const drawing_state *restric
   if(ds->chartZoomScale >= 8.0f){
     uint16_t N = (uint16_t)dat->ndat.nuclData[nuclInd].N;
     snprintf(tmpStr,32,"%u",N+Z);
-    float totalLblWidth = (float)(FC_GetWidth(rdat->smallFont,tmpStr) + FC_GetWidth(rdat->bigFont,getElemStr((uint8_t)Z)));
+    float totalLblWidth = ((float)(FC_GetWidth(rdat->smallFont,tmpStr) + FC_GetWidth(rdat->bigFont,getElemStr((uint8_t)Z))))/rdat->uiScale;
     drawXPos = xPos+boxWidth*0.5f - totalLblWidth*0.5f;
     if(ds->chartZoomScale >= 12.0f){
       drawYPos = yPos + NUCLBOX_LABEL_MARGIN*ds->chartZoomScale;
     }else{
-      float totalLblHeight = (float)(FC_GetHeight(rdat->smallFont,tmpStr) + FC_GetHeight(rdat->bigFont,getElemStr((uint8_t)Z)));
+      float totalLblHeight = ((float)(FC_GetHeight(rdat->smallFont,tmpStr) + FC_GetHeight(rdat->bigFont,getElemStr((uint8_t)Z))))/rdat->uiScale;
       drawYPos = yPos+boxWidth*0.5f - totalLblHeight*0.5f;
     }
     drawXPos += drawTextAlignedSized(rdat,drawXPos,drawYPos,rdat->smallFont,col,255,tmpStr,ALIGN_LEFT,16384); //draw number label
