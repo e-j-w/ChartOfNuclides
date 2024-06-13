@@ -110,15 +110,24 @@ SDL_FColor getHalfLifeCol(const double halflifeSeconds){
 
 void drawNuclBoxLabel(const app_data *restrict dat, const drawing_state *restrict ds, resource_data *restrict rdat, const float xPos, const float yPos, const float boxWidth, SDL_Color col, const uint16_t nuclInd){
   char tmpStr[32];
-  float drawXPos = xPos + NUCLBOX_NAME_MARGIN*ds->chartZoomScale;
-  float drawYPos = yPos + NUCLBOX_NAME_MARGIN*ds->chartZoomScale;
+  float drawXPos, drawYPos;
   uint16_t Z = (uint16_t)dat->ndat.nuclData[nuclInd].Z;
   if(ds->chartZoomScale >= 8.0f){
     uint16_t N = (uint16_t)dat->ndat.nuclData[nuclInd].N;
-    snprintf(tmpStr,32,"%u",N+Z); //is this slow?
-    float numLblWidth = drawTextAlignedSized(rdat,drawXPos,drawYPos,rdat->smallFont,col,255,tmpStr,ALIGN_LEFT,16384); //draw number label
-    drawTextAlignedSized(rdat,drawXPos+numLblWidth+2.0f,drawYPos+10.0f,rdat->bigFont,col,255,getElemStr((uint8_t)Z),ALIGN_LEFT,16384); //draw element label
+    snprintf(tmpStr,32,"%u",N+Z);
+    float totalLblWidth = (float)(FC_GetWidth(rdat->smallFont,tmpStr) + FC_GetWidth(rdat->bigFont,getElemStr((uint8_t)Z)));
+    drawXPos = xPos+boxWidth*0.5f - totalLblWidth*0.5f;
     if(ds->chartZoomScale >= 12.0f){
+      drawYPos = yPos + NUCLBOX_LABEL_MARGIN*ds->chartZoomScale;
+    }else{
+      float totalLblHeight = (float)(FC_GetHeight(rdat->smallFont,tmpStr) + FC_GetHeight(rdat->bigFont,getElemStr((uint8_t)Z)));
+      drawYPos = yPos+boxWidth*0.5f - totalLblHeight*0.5f;
+    }
+    drawXPos += drawTextAlignedSized(rdat,drawXPos,drawYPos,rdat->smallFont,col,255,tmpStr,ALIGN_LEFT,16384); //draw number label
+    drawTextAlignedSized(rdat,drawXPos,drawYPos+10.0f,rdat->bigFont,col,255,getElemStr((uint8_t)Z),ALIGN_LEFT,16384); //draw element label
+    if(ds->chartZoomScale >= 12.0f){
+      drawXPos = xPos + NUCLBOX_LABEL_MARGIN*ds->chartZoomScale;
+      drawYPos = yPos + NUCLBOX_LABEL_MARGIN*ds->chartZoomScale;
       getGSHalfLifeStr(tmpStr,&dat->ndat,nuclInd);
       drawTextAlignedSized(rdat,drawXPos,drawYPos+36.0f,rdat->font,col,255,tmpStr,ALIGN_LEFT,16384); //draw GS half-life label
       if((ds->chartZoomScale >= 15.0f)&&(dat->ndat.nuclData[nuclInd].numLevels > 0)){
@@ -265,9 +274,17 @@ void drawChartOfNuclides(const app_data *restrict dat, const app_state *restrict
 
   //handle highlighting selected nuclide
   if(state->chartSelectedNucl != MAXNUMNUCL){
-    rect.x = ((float)dat->ndat.nuclData[state->chartSelectedNucl].N - minX)*rect.w;
-    rect.y = (maxY - (float)dat->ndat.nuclData[state->chartSelectedNucl].Z)*rect.h;
-    drawSelectionRect(rdat,rect,whiteCol,3.0f);
+    if(state->ds.chartZoomScale >= 2.0f){
+      rect.x = ((float)dat->ndat.nuclData[state->chartSelectedNucl].N - minX)*rect.w - CHART_SHELLCLOSURELINE_THICKNESS;
+      rect.w += 2.0f*CHART_SHELLCLOSURELINE_THICKNESS;
+      rect.y = (maxY - (float)dat->ndat.nuclData[state->chartSelectedNucl].Z)*rect.h - CHART_SHELLCLOSURELINE_THICKNESS;
+      rect.h += 2.0f*CHART_SHELLCLOSURELINE_THICKNESS;
+      drawSelectionRect(rdat,rect,whiteCol,2.0f*CHART_SHELLCLOSURELINE_THICKNESS);
+    }else{
+      rect.x = ((float)dat->ndat.nuclData[state->chartSelectedNucl].N - minX)*rect.w;
+      rect.y = (maxY - (float)dat->ndat.nuclData[state->chartSelectedNucl].Z)*rect.h;
+      drawFlatRect(rdat,rect,whiteCol);
+    }
   }
 
   //draw x and y axes

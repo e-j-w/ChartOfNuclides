@@ -61,7 +61,7 @@ static const uint8_t UITHEME_ICON_TILE_Y[NUM_THEME_ICONS] = {10,10,10};
 #define MIN_CHART_ZOOM_SCALE               0.5f
 #define MAX_CHART_ZOOM_SCALE               32.0f
 #define CHART_ZOOM_TIME                    0.2f //time (in seconds) for the zoom animation to finish
-#define NUCLBOX_NAME_MARGIN                1 //in scaled pixels
+#define NUCLBOX_LABEL_MARGIN               1.0f //in scaled pixels
 #define CHART_PAN_TIME                     0.2f //time (in seconds) for the pan animation to finish
 #define CHART_PAN_DIST                     20.0f //in tiles (scaled by zoom factor)
 #define CHART_AXIS_DEPTH                   40.0f //in scaled pixels
