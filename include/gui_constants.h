@@ -8,7 +8,7 @@ which can be referenced by both the GUI draw code as well as the interaction cod
 
 /* GLOBAL GUI PARAMETERS */
 
-#define UI_ANIM_LENGTH       0.3f //length of UI animations, in seconds
+#define UI_ANIM_LENGTH       0.2f //length of UI animations, in seconds
 #define SPEC_ZOOM_TIME       0.5f //amount of time for spectrum zoom animations
 
 #define UI_TILE_SIZE         32  //pixel size of a UI tile at 1x scaling

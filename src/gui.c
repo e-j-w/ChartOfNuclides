@@ -273,16 +273,24 @@ void drawChartOfNuclides(const app_data *restrict dat, const app_state *restrict
 
   //handle highlighting selected nuclide
   if(state->chartSelectedNucl != MAXNUMNUCL){
+    float alpha = 1.0f;
+    if(state->ds.uiAnimPlaying & (1U << UIANIM_NUCLHIGHLIGHT_HIDE)){
+      alpha = (float)(juice_smoothStart2(state->ds.timeLeftInUIAnimation[UIANIM_NUCLHIGHLIGHT_HIDE]/UI_ANIM_LENGTH));
+    }else if(state->ds.uiAnimPlaying & (1U << UIANIM_NUCLHIGHLIGHT_SHOW)){
+      alpha = (float)(juice_smoothStop2(1.0f - state->ds.timeLeftInUIAnimation[UIANIM_NUCLHIGHLIGHT_SHOW]/UI_ANIM_LENGTH));
+    }
+    SDL_FColor selectionCol = whiteCol;
+    selectionCol.a = alpha;
     if(state->ds.chartZoomScale >= 2.0f){
       rect.x = ((float)dat->ndat.nuclData[state->chartSelectedNucl].N - minX)*rect.w - CHART_SHELLCLOSURELINE_THICKNESS;
       rect.w += 2.0f*CHART_SHELLCLOSURELINE_THICKNESS;
       rect.y = (maxY - (float)dat->ndat.nuclData[state->chartSelectedNucl].Z)*rect.h - CHART_SHELLCLOSURELINE_THICKNESS;
       rect.h += 2.0f*CHART_SHELLCLOSURELINE_THICKNESS;
-      drawSelectionRect(rdat,rect,whiteCol,2.0f*CHART_SHELLCLOSURELINE_THICKNESS);
+      drawSelectionRect(rdat,rect,selectionCol,2.0f*CHART_SHELLCLOSURELINE_THICKNESS);
     }else{
       rect.x = ((float)dat->ndat.nuclData[state->chartSelectedNucl].N - minX)*rect.w;
       rect.y = (maxY - (float)dat->ndat.nuclData[state->chartSelectedNucl].Z)*rect.h;
-      drawFlatRect(rdat,rect,whiteCol);
+      drawFlatRect(rdat,rect,selectionCol);
     }
   }
 
@@ -371,20 +379,11 @@ uint8_t getHighlightState(const app_state *restrict state, const uint8_t uiElem)
 
 void drawNuclInfoBox(const app_data *restrict dat, const app_state *restrict state, resource_data *restrict rdat, const uint16_t nuclInd){
   
-  float alpha = 1.0f;
   uint16_t yOffset = 0;
   if(state->ds.uiAnimPlaying & (1U << UIANIM_NUCLINFOBOX_HIDE)){
-    alpha = (float)(DIMMER_OPACITY*juice_smoothStart2(state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_HIDE]/UI_ANIM_LENGTH));
-    drawScreenDimmer(&state->ds,rdat,alpha);
-    alpha = (float)(255.0f*juice_smoothStart2(state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_HIDE]/(UI_ANIM_LENGTH)));
     yOffset = (uint16_t)(300.0f*juice_smoothStop2(1.0f - state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_HIDE]/UI_ANIM_LENGTH));
   }else if(state->ds.uiAnimPlaying & (1U << UIANIM_NUCLINFOBOX_SHOW)){
-    alpha = (float)(DIMMER_OPACITY*juice_smoothStop2(1.0f - state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_SHOW]/UI_ANIM_LENGTH));
-    drawScreenDimmer(&state->ds,rdat,alpha);
-    alpha = (float)(255.0f*juice_smoothStop2(1.0f - state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_SHOW]/UI_ANIM_LENGTH));
     yOffset = (uint16_t)(300.0f*juice_smoothStart2(state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_SHOW]/(UI_ANIM_LENGTH)));
-  }else{
-    drawScreenDimmer(&state->ds,rdat,DIMMER_OPACITY);
   }
   
   //draw panel background
@@ -393,7 +392,7 @@ void drawNuclInfoBox(const app_data *restrict dat, const app_state *restrict sta
   infoBoxPanelRect.y = state->ds.uiElemPosY[UIELEM_NUCL_INFOBOX] + yOffset;
   infoBoxPanelRect.w = state->ds.uiElemWidth[UIELEM_NUCL_INFOBOX];
   infoBoxPanelRect.h = state->ds.uiElemHeight[UIELEM_NUCL_INFOBOX];
-  drawPanelBG(rdat,infoBoxPanelRect,alpha);
+  drawPanelBG(rdat,infoBoxPanelRect,1.0f);
 
   //draw strings
   char tmpStr[32];

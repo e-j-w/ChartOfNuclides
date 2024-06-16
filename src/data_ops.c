@@ -736,13 +736,17 @@ void uiElemClickAction(const app_data *restrict dat, app_state *restrict state, 
 					//select nucleus
 					uint16_t selNucl = getNuclInd(&dat->ndat,(int16_t)floorf(mouseX),(int16_t)floorf(mouseY + 1.0f));
 					//printf("Selected nucleus: %u\n",state->chartSelectedNucl);
-					if(selNucl < MAXNUMNUCL){
+					if((selNucl < MAXNUMNUCL)&&(selNucl != state->chartSelectedNucl)){
 						state->chartSelectedNucl = selNucl;
-						state->ds.shownElements |= (1U << UIELEM_NUCL_INFOBOX);
-						startUIAnimation(&state->ds,UIANIM_NUCLINFOBOX_SHOW);
+						if(!(state->ds.shownElements & (1U << UIELEM_NUCL_INFOBOX))){
+							state->ds.shownElements |= (1U << UIELEM_NUCL_INFOBOX);
+							startUIAnimation(&state->ds,UIANIM_NUCLINFOBOX_SHOW);
+						}
+						startUIAnimation(&state->ds,UIANIM_NUCLHIGHLIGHT_SHOW);
 					}else{
 						if(state->ds.shownElements & (1U << UIELEM_NUCL_INFOBOX)){
 							startUIAnimation(&state->ds,UIANIM_NUCLINFOBOX_HIDE); //hide the info box, see stopUIAnimation() for info box hiding action
+							startUIAnimation(&state->ds,UIANIM_NUCLHIGHLIGHT_HIDE);
 						}else{
 							state->chartSelectedNucl = selNucl;
 						}
