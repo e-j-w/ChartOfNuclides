@@ -169,7 +169,7 @@ int main(int argc, char *argv[]){
       deltaTime = 0.033f; //because of main thread blocking, set maximum delta to prevent weird timing bugs
     }
 
-    updateUIAnimationTimes(&gdat->state.ds,deltaTime);
+    updateUIAnimationTimes(&gdat->state,deltaTime);
 
     updateDrawingState(&gdat->dat,&gdat->state,deltaTime);
 

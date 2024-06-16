@@ -369,6 +369,43 @@ uint8_t getHighlightState(const app_state *restrict state, const uint8_t uiElem)
   }
 }
 
+void drawNuclInfoBox(const app_data *restrict dat, const app_state *restrict state, resource_data *restrict rdat, const uint16_t nuclInd){
+  
+  float alpha = 1.0f;
+  uint16_t yOffset = 0;
+  if(state->ds.uiAnimPlaying & (1U << UIANIM_NUCLINFOBOX_HIDE)){
+    alpha = (float)(DIMMER_OPACITY*juice_smoothStart2(state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_HIDE]/UI_ANIM_LENGTH));
+    drawScreenDimmer(&state->ds,rdat,alpha);
+    alpha = (float)(255.0f*juice_smoothStart2(state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_HIDE]/(UI_ANIM_LENGTH)));
+    yOffset = (uint16_t)(300.0f*juice_smoothStop2(1.0f - state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_HIDE]/UI_ANIM_LENGTH));
+  }else if(state->ds.uiAnimPlaying & (1U << UIANIM_NUCLINFOBOX_SHOW)){
+    alpha = (float)(DIMMER_OPACITY*juice_smoothStop2(1.0f - state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_SHOW]/UI_ANIM_LENGTH));
+    drawScreenDimmer(&state->ds,rdat,alpha);
+    alpha = (float)(255.0f*juice_smoothStop2(1.0f - state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_SHOW]/UI_ANIM_LENGTH));
+    yOffset = (uint16_t)(300.0f*juice_smoothStart2(state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_SHOW]/(UI_ANIM_LENGTH)));
+  }else{
+    drawScreenDimmer(&state->ds,rdat,DIMMER_OPACITY);
+  }
+  
+  //draw panel background
+  SDL_FRect infoBoxPanelRect;
+  infoBoxPanelRect.x = state->ds.uiElemPosX[UIELEM_NUCL_INFOBOX];
+  infoBoxPanelRect.y = state->ds.uiElemPosY[UIELEM_NUCL_INFOBOX] + yOffset;
+  infoBoxPanelRect.w = state->ds.uiElemWidth[UIELEM_NUCL_INFOBOX];
+  infoBoxPanelRect.h = state->ds.uiElemHeight[UIELEM_NUCL_INFOBOX];
+  drawPanelBG(rdat,infoBoxPanelRect,alpha);
+
+  //draw strings
+  char tmpStr[32];
+  float drawXPos = (float)(infoBoxPanelRect.x + 4*UI_PADDING_SIZE);
+  float drawYPos = (float)(infoBoxPanelRect.y + 4*UI_PADDING_SIZE);
+  snprintf(tmpStr,32,"%u",(uint16_t)(dat->ndat.nuclData[nuclInd].Z + dat->ndat.nuclData[nuclInd].N));
+  drawXPos += drawTextAlignedSized(rdat,drawXPos,drawYPos,rdat->smallFont,blackCol8Bit,255,tmpStr,ALIGN_LEFT,16384); //draw number label
+  drawTextAlignedSized(rdat,drawXPos,drawYPos+10.0f,rdat->bigFont,blackCol8Bit,255,getElemStr((uint8_t)dat->ndat.nuclData[nuclInd].Z),ALIGN_LEFT,16384); //draw element label
+
+  //printf("%.3f %.3f alpha %u\n",(double)state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_SHOW],(double)state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_HIDE],alpha);
+}
+
 void drawMessageBox(const app_data *restrict dat, const app_state *restrict state, resource_data *restrict rdat){
   
   float alpha = 1.0f;
@@ -422,6 +459,9 @@ void drawUI(const app_data *restrict dat, app_state *restrict state, resource_da
   }
   if(state->ds.shownElements & (1U << UIELEM_MSG_BOX)){
     drawMessageBox(dat,state,rdat);
+  }
+  if(state->ds.shownElements & (1U << UIELEM_NUCL_INFOBOX)){
+    drawNuclInfoBox(dat,state,rdat,state->chartSelectedNucl);
   }
 
   if(state->ds.uiAnimPlaying & (1U << UIANIM_CHART_FADEIN)){

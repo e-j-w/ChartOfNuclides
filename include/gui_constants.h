@@ -67,6 +67,9 @@ static const uint8_t UITHEME_ICON_TILE_Y[NUM_THEME_ICONS] = {10,10,10};
 #define CHART_AXIS_DEPTH                   40.0f //in scaled pixels
 #define CHART_SHELLCLOSURELINE_THICKNESS   3.0f
 
+#define NUCL_INFOBOX_WIDTH            (MIN_RENDER_WIDTH-2*UI_PADDING_SIZE-2*CHART_AXIS_DEPTH) //in unscaled pixels
+#define NUCL_INFOBOX_HEIGHT           240 //in unscaled pixels
+
 //performance overlay
 #define PERF_OVERLAY_BUTTON_X_ANCHOR  16
 #define PERF_OVERLAY_BUTTON_Y_ANCHOR  16

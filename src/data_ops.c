@@ -50,7 +50,7 @@ void initializeTempState(app_state *restrict state){
 }
 
 
-void startUIAnimation(drawing_state *ds, const uint8_t uiAnim){
+void startUIAnimation(drawing_state *restrict ds, const uint8_t uiAnim){
   if(uiAnim >= UIANIM_ENUM_LENGTH){
     printf("WARNING: startUIAnimation - invalid animation ID (%u, max %u).\n",uiAnim,UIANIM_ENUM_LENGTH-1);
     return;
@@ -58,34 +58,37 @@ void startUIAnimation(drawing_state *ds, const uint8_t uiAnim){
   ds->timeLeftInUIAnimation[uiAnim] = UI_ANIM_LENGTH;
   ds->uiAnimPlaying |= (1U << uiAnim);
 }
-void stopUIAnimation(drawing_state *ds, const uint8_t uiAnim){
+void stopUIAnimation(app_state *restrict state, const uint8_t uiAnim){
   if(uiAnim >= UIANIM_ENUM_LENGTH){
     printf("WARNING: stopUIAnimation - invalid animation ID (%u, max %u).\n",uiAnim,UIANIM_ENUM_LENGTH-1);
     return;
   }
-  ds->timeLeftInUIAnimation[uiAnim] = 0.0f;
-  ds->uiAnimPlaying &= ~(1U << uiAnim);
+  state->ds.timeLeftInUIAnimation[uiAnim] = 0.0f;
+  state->ds.uiAnimPlaying &= ~(1U << uiAnim);
 
   //take action at the end of the animation
   switch(uiAnim){
     case UIANIM_MSG_BOX_HIDE:
-      ds->shownElements &= (uint32_t)(~(1U << UIELEM_MSG_BOX)); //close the message box
+      state->ds.shownElements &= (uint32_t)(~(1U << UIELEM_MSG_BOX)); //close the message box
       break;
+		case UIANIM_NUCLINFOBOX_HIDE:
+			state->ds.shownElements &= (uint32_t)(~(1U << UIELEM_NUCL_INFOBOX)); //close the info box
+			state->chartSelectedNucl = MAXNUMNUCL;
     default:
       break;
   }
-  ds->forceRedraw = 1;
+  state->ds.forceRedraw = 1;
 
   //printf("Stopped anim %u.\n",uiAnim);
 }
-void updateUIAnimationTimes(drawing_state *ds, const float deltaTime){
+void updateUIAnimationTimes(app_state *restrict state, const float deltaTime){
   for(uint8_t i=0;i<UIANIM_ENUM_LENGTH;i++){
-    if(ds->uiAnimPlaying & (uint32_t)(1U << i)){
-      ds->timeLeftInUIAnimation[i] -= deltaTime;
-      //printf("anim %u dt %.3f timeleft %.3f\n",i,(double)deltaTime,(double)ds->timeLeftInUIAnimation[i]);
-      if(ds->timeLeftInUIAnimation[i] <= 0.0f){
-        ds->timeLeftInUIAnimation[i] = 0.0f;
-        stopUIAnimation(ds,i);
+    if(state->ds.uiAnimPlaying & (uint32_t)(1U << i)){
+      state->ds.timeLeftInUIAnimation[i] -= deltaTime;
+      //printf("anim %u dt %.3f timeleft %.3f\n",i,(double)deltaTime,(double)state->ds.timeLeftInUIAnimation[i]);
+      if(state->ds.timeLeftInUIAnimation[i] <= 0.0f){
+        state->ds.timeLeftInUIAnimation[i] = 0.0f;
+        stopUIAnimation(state,i);
       }
     }
   }
@@ -731,9 +734,19 @@ void uiElemClickAction(const app_data *restrict dat, app_state *restrict state, 
 					float mouseX = mouseXPxToN(&state->ds,state->mouseXPx);
     			float mouseY = mouseYPxToZ(&state->ds,state->mouseYPx);
 					//select nucleus
-					state->chartSelectedNucl = getNuclInd(&dat->ndat,(int16_t)floorf(mouseX),(int16_t)floorf(mouseY + 1.0f));
+					uint16_t selNucl = getNuclInd(&dat->ndat,(int16_t)floorf(mouseX),(int16_t)floorf(mouseY + 1.0f));
 					//printf("Selected nucleus: %u\n",state->chartSelectedNucl);
-					state->ds.shownElements |= (1U << UIELEM_NUCL_INFOBOX);
+					if(selNucl < MAXNUMNUCL){
+						state->chartSelectedNucl = selNucl;
+						state->ds.shownElements |= (1U << UIELEM_NUCL_INFOBOX);
+						startUIAnimation(&state->ds,UIANIM_NUCLINFOBOX_SHOW);
+					}else{
+						if(state->ds.shownElements & (1U << UIELEM_NUCL_INFOBOX)){
+							startUIAnimation(&state->ds,UIANIM_NUCLINFOBOX_HIDE); //hide the info box, see stopUIAnimation() for info box hiding action
+						}else{
+							state->chartSelectedNucl = selNucl;
+						}
+					}
 				}else{
 					//clicked out of a menu
 					state->ds.shownElements = 0; //close any menu being shown
@@ -772,6 +785,11 @@ void updateUIElemPositions(drawing_state *restrict ds){
         ds->uiElemWidth[i] = MESSAGE_BOX_OK_BUTTON_WIDTH;
         ds->uiElemHeight[i] = UI_TILE_SIZE;
         break;
+			case UIELEM_NUCL_INFOBOX:
+				ds->uiElemPosX[i] = (uint16_t)((ds->windowXRes - NUCL_INFOBOX_WIDTH)/2);
+        ds->uiElemPosY[i] = (uint16_t)(ds->windowYRes - NUCL_INFOBOX_HEIGHT - UI_PADDING_SIZE - (int32_t)CHART_AXIS_DEPTH);
+        ds->uiElemWidth[i] = NUCL_INFOBOX_WIDTH;
+        ds->uiElemHeight[i] = NUCL_INFOBOX_HEIGHT;
       default:
         break;
     }
