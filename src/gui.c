@@ -398,9 +398,16 @@ void drawNuclInfoBox(const app_data *restrict dat, const app_state *restrict sta
   char tmpStr[32];
   float drawXPos = (float)(infoBoxPanelRect.x + 4*UI_PADDING_SIZE);
   float drawYPos = (float)(infoBoxPanelRect.y + 4*UI_PADDING_SIZE);
+  drawTextAlignedSized(rdat,drawXPos,drawYPos+40.0f,rdat->font,blackCol8Bit,255,dat->strings[LOCSTR_GM_STATE],ALIGN_LEFT,state->ds.uiElemWidth[UIELEM_NUCL_INFOBOX]);
+  drawTextAlignedSized(rdat,drawXPos+NUCL_INFOBOX_ENERGY_COL_OFFSET,drawYPos+70.0f,rdat->font,blackCol8Bit,255,dat->strings[LOCSTR_ENERGY_KEV],ALIGN_LEFT,state->ds.uiElemWidth[UIELEM_NUCL_INFOBOX]);
+  drawTextAlignedSized(rdat,drawXPos+NUCL_INFOBOX_JPI_COL_OFFSET,drawYPos+70.0f,rdat->font,blackCol8Bit,255,dat->strings[LOCSTR_JPI],ALIGN_LEFT,state->ds.uiElemWidth[UIELEM_NUCL_INFOBOX]);
+  drawTextAlignedSized(rdat,drawXPos+NUCL_INFOBOX_HALFLIFE_COL_OFFSET,drawYPos+70.0f,rdat->font,blackCol8Bit,255,dat->strings[LOCSTR_HALFLIFE],ALIGN_LEFT,state->ds.uiElemWidth[UIELEM_NUCL_INFOBOX]);
+  drawTextAlignedSized(rdat,drawXPos+NUCL_INFOBOX_DECAYMODE_COL_OFFSET,drawYPos+70.0f,rdat->font,blackCol8Bit,255,dat->strings[LOCSTR_DECAYMODE],ALIGN_LEFT,state->ds.uiElemWidth[UIELEM_NUCL_INFOBOX]);
+
   snprintf(tmpStr,32,"%u",(uint16_t)(dat->ndat.nuclData[nuclInd].Z + dat->ndat.nuclData[nuclInd].N));
   drawXPos += drawTextAlignedSized(rdat,drawXPos,drawYPos,rdat->smallFont,blackCol8Bit,255,tmpStr,ALIGN_LEFT,16384); //draw number label
   drawTextAlignedSized(rdat,drawXPos,drawYPos+10.0f,rdat->bigFont,blackCol8Bit,255,getElemStr((uint8_t)dat->ndat.nuclData[nuclInd].Z),ALIGN_LEFT,16384); //draw element label
+
 
   //printf("%.3f %.3f alpha %u\n",(double)state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_SHOW],(double)state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_HIDE],alpha);
 }

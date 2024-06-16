@@ -1,0 +1,9 @@
+apply|Apply
+cancel|Cancel
+ok|OK
+no_db|No ENSDF database loaded.
+gm_state|Ground and isomeric state information:
+energy_kev|Energy (keV)
+jpi|Jπ
+halflife|t1/2
+decay_mode|Decay Mode

@@ -791,6 +791,10 @@ void updateUIElemPositions(drawing_state *restrict ds){
         break;
 			case UIELEM_NUCL_INFOBOX:
 				ds->uiElemPosX[i] = (uint16_t)((ds->windowXRes - NUCL_INFOBOX_WIDTH)/2);
+				uint16_t freeXSpace = (uint16_t)(ds->windowXRes - NUCL_INFOBOX_WIDTH);
+				if(freeXSpace < 4*NUCL_INFOBOX_X_PADDING){
+					ds->uiElemPosX[i] += (uint16_t)(NUCL_INFOBOX_X_PADDING - freeXSpace/4); //make sure info box doesn't bump up against y-axis
+				}
         ds->uiElemPosY[i] = (uint16_t)(ds->windowYRes - NUCL_INFOBOX_HEIGHT - UI_PADDING_SIZE - (int32_t)CHART_AXIS_DEPTH);
         ds->uiElemWidth[i] = NUCL_INFOBOX_WIDTH;
         ds->uiElemHeight[i] = NUCL_INFOBOX_HEIGHT;
