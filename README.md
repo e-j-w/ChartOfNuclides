@@ -16,20 +16,20 @@ The goal is to develop a performant and multiplatform tool that will be useful i
 
 TBD
 
-## Installing from source
+## Building and installing from source
 
 **NOTE: Instructions are still incomplete and are missing critical steps.  Don't try this at home (yet)!**
 
 ### Collect data
 
-If building the database from scratch, you will need various isotope and nuclear structure data, from the sources below:
+If you're building the database from scratch, you'll need various isotope and nuclear structure data, from the sources below:
 
 | Data       | Source location | Instructions |
 | :--------- | :---------------| :----------- |
 | Nuclear structure data    |  [ENSDF](https://www.nndc.bnl.gov/ensarchivals/) | Download the zip archive from the link in the 'Latest Dataset' section. Unzip it in the source tree into the directory `data/ensdf/` (such that the `ensdf` subdirectory contains the files `ensdf.001`, `ensdf.002`, etc.). |
 | Isotope abundance data    | [NIST](https://www.nist.gov/pml/atomic-weights-and-isotopic-compositions-relative-atomic-masses) | Under 'Search the Database', select 'All Elements', output type 'Linearized ASCII Output', with the option 'Most common isotopes'.  Select 'Get Data'.  Copy the resulting plaintext data into a text file, save the text file in the source tree under `data/abundances.txt`. |
 
-### Install build dependencies
+### Build dependencies
 
 * gcc (or clang if the Makefile is edited)
 * make

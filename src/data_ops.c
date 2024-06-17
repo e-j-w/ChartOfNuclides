@@ -521,28 +521,28 @@ const char* getDecayTypeShortStr(const uint8_t type){
 	}
 }
 
-void getHalfLifeStr(char strOut[32], const ndata *restrict nd, const uint32_t lev){
+void getHalfLifeStr(char strOut[32], const ndata *restrict nd, const uint32_t lvlInd){
 	//are the snprintf lines slow?
-	if(lev < nd->numLvls){
-		if(nd->levels[lev].halfLife.unit == VALUE_UNIT_STABLE){
+	if(lvlInd < nd->numLvls){
+		if(nd->levels[lvlInd].halfLife.unit == VALUE_UNIT_STABLE){
 			snprintf(strOut,32,"STABLE");
-		}else if(nd->levels[lev].halfLife.unit == VALUE_UNIT_NOVAL){
+		}else if(nd->levels[lvlInd].halfLife.unit == VALUE_UNIT_NOVAL){
 			snprintf(strOut,32,"Unknown");
-		}else if(nd->levels[lev].halfLife.val > 0.0f){
-			uint8_t hlPrecision = (uint8_t)(nd->levels[lev].halfLife.format & 15U);
-			uint8_t hlExponent = (uint8_t)((nd->levels[lev].halfLife.format >> 4U) & 1U);
-			uint8_t hlValueType = (uint8_t)((nd->levels[lev].halfLife.format >> 5U) & 7U);
+		}else if(nd->levels[lvlInd].halfLife.val > 0.0f){
+			uint8_t hlPrecision = (uint8_t)(nd->levels[lvlInd].halfLife.format & 15U);
+			uint8_t hlExponent = (uint8_t)((nd->levels[lvlInd].halfLife.format >> 4U) & 1U);
+			uint8_t hlValueType = (uint8_t)((nd->levels[lvlInd].halfLife.format >> 5U) & 7U);
 			if(hlPrecision > 0){
 				if(hlExponent == 0){
-					snprintf(strOut,32,"%s%.*f %s",getValueTypeShortStr(hlValueType),hlPrecision,(double)(nd->levels[lev].halfLife.val),getHalfLifeUnitShortStr(nd->levels[lev].halfLife.unit));
+					snprintf(strOut,32,"%s%.*f %s",getValueTypeShortStr(hlValueType),hlPrecision,(double)(nd->levels[lvlInd].halfLife.val),getHalfLifeUnitShortStr(nd->levels[lvlInd].halfLife.unit));
 				}else{
-					snprintf(strOut,32,"%s%.*e %s",getValueTypeShortStr(hlValueType),hlPrecision,(double)(nd->levels[lev].halfLife.val),getHalfLifeUnitShortStr(nd->levels[lev].halfLife.unit));
+					snprintf(strOut,32,"%s%.*e %s",getValueTypeShortStr(hlValueType),hlPrecision,(double)(nd->levels[lvlInd].halfLife.val),getHalfLifeUnitShortStr(nd->levels[lvlInd].halfLife.unit));
 				}
 			}else{
 				if(hlExponent == 0){
-					snprintf(strOut,32,"%s%.0f %s",getValueTypeShortStr(hlValueType),(double)(nd->levels[lev].halfLife.val),getHalfLifeUnitShortStr(nd->levels[lev].halfLife.unit));
+					snprintf(strOut,32,"%s%.0f %s",getValueTypeShortStr(hlValueType),(double)(nd->levels[lvlInd].halfLife.val),getHalfLifeUnitShortStr(nd->levels[lvlInd].halfLife.unit));
 				}else{
-					snprintf(strOut,32,"%s%.0e %s",getValueTypeShortStr(hlValueType),(double)(nd->levels[lev].halfLife.val),getHalfLifeUnitShortStr(nd->levels[lev].halfLife.unit));
+					snprintf(strOut,32,"%s%.0e %s",getValueTypeShortStr(hlValueType),(double)(nd->levels[lvlInd].halfLife.val),getHalfLifeUnitShortStr(nd->levels[lvlInd].halfLife.unit));
 				}
 			}
 		}else{
@@ -586,6 +586,40 @@ void getAbundanceStr(char strOut[32], const ndata *restrict nd, const uint16_t n
 		}
 	}else{
 		snprintf(strOut,32," ");
+	}
+}
+
+void getSpinParStr(char strOut[32], const ndata *restrict nd, const uint32_t lvlInd){
+
+	char val[16];
+
+	strcpy(strOut,""); //clear the string
+
+	for(int i=0;i<nd->levels[lvlInd].numSpinParVals;i++){
+		if((nd->levels[lvlInd].spval[i].tentative == 1)||(nd->levels[lvlInd].spval[i].tentative == 2)){
+			if((i==0)||((i>0)&&((nd->levels[lvlInd].spval[i-1].tentative != 1)&&(nd->levels[lvlInd].spval[i-1].tentative != 2)))){
+				strcat(strOut,"(");
+			}
+		}
+		if(nd->levels[lvlInd].spval[i].halfInt == 1){
+			sprintf(val,"%i/2",nd->levels[lvlInd].spval[i].spinVal);
+		}else{
+			sprintf(val,"%i",nd->levels[lvlInd].spval[i].spinVal);
+		}
+		strcat(strOut,val);
+		if(nd->levels[lvlInd].spval[i].parVal == -1){
+			strcat(strOut,"-");
+		}else if(nd->levels[lvlInd].spval[i].parVal == 1){
+			strcat(strOut,"+");
+		}
+		if((nd->levels[lvlInd].spval[i].tentative == 1)||(nd->levels[lvlInd].spval[i].tentative == 2)){
+			if((i==nd->levels[lvlInd].numSpinParVals-1)||((i<nd->levels[lvlInd].numSpinParVals-1)&&((nd->levels[lvlInd].spval[i+1].tentative != 1)&&(nd->levels[lvlInd].spval[i+1].tentative != 2)))){
+				strcat(strOut,")");
+			}
+		}
+		if(i!=nd->levels[lvlInd].numSpinParVals-1){
+			strcat(strOut,",");
+		}
 	}
 }
 
