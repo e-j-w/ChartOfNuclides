@@ -1,5 +1,19 @@
-/* © J. Williams 2017-2024 */
-/* Data formats used in the app */
+/*
+Copyright (C) 2017-2024 J. Williams
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <https://www.gnu.org/licenses/>.
+*/
 
 #ifndef FORMATS_H
 #define FORMATS_H
@@ -63,7 +77,6 @@ typedef struct
 typedef struct
 {
   int16_t spinVal; //the spin value (-1 if unknown)
-  uint8_t halfInt; //if spin-parity value is half integer (1=true, in this case spinVal is multiplied by 0.5)
   int8_t parVal;  //the parity value (1 if positive, -1 if negative, 0 if unknown)
   uint8_t tentative; //0 if not tentative, 1 if all tentative, 2 if only spin tentative, 3 if GE
 }spinparval; //spin parity value
@@ -82,6 +95,7 @@ typedef struct
   valWithErr halfLife;
   int16_t numSpinParVals; //number of assigned spin parity values
   spinparval spval[MAXSPPERLEVEL]; //assinged spin parity value(s) 
+  uint8_t halfInt; //if spin-parity values are half integer (1=true, in this case spinVal is multiplied by 0.5)
   int16_t numTran; //number of gamma rays in this level
   uint32_t firstTran; //index of first transition from this level
   int8_t numDecModes; //-1 by default for no decay modes specified (assume 100% IT in that case)
@@ -98,6 +112,7 @@ typedef struct
   uint32_t firstLevel; //index of first level in this nuclide
   uint16_t numLevels; //number of excited levels in this nuclide
   uint8_t gsLevel; //which level in the nucleus (0 indexed) is the ground state (determined when parsing ENSDF, not always 0)
+  uint32_t longestIsomerLevel; //which isomer in the nucleus is longest lived (=0 if no isomers)
   valWithErr abundance;
   uint8_t flags; //bits 0 to 1: observation flag (observed/unobserved/inferred/tentative)
 }nucl; //gamma data for a given nuclide

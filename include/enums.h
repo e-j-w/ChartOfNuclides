@@ -1,5 +1,21 @@
-/* © J. Williams 2017-2024 */
-/* As the filename says, these are enums used throughout the engine */
+/*
+Copyright (C) 2017-2024 J. Williams
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <https://www.gnu.org/licenses/>.
+*/
+
+/* As the filename says, these are enums used throughout the app */
 
 enum input_type_enum{
 INPUT_TYPE_KEYBOARD, INPUT_TYPE_GAMEPAD, INPUT_TYPE_MOUSE,
@@ -107,6 +123,14 @@ DECAYMODE_DEUTERON,
 DECAYMODE_3HE,
 DECAYMODE_SPONTANEOUSFISSION,
 DECAYMODE_ENUM_LENGTH
+};
+enum tentative_enum{
+TENTATIVE_NONE,
+TENTATIVE_SPINANDPARITY,
+TENTATIVE_SPINONLY,
+TENTATIVE_NOSPIN,
+TENTATIVE_GE,
+TENTATIVE_ENUM_LENGTH
 };
 enum observation_flag_enum{
 OBSFLAG_OBSERVED,

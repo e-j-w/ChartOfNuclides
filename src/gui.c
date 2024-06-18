@@ -1,4 +1,20 @@
-/* © J. Williams 2017-2024 */
+/*
+Copyright (C) 2017-2024 J. Williams
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <https://www.gnu.org/licenses/>.
+*/
+
 /* Higher-level drawing functions handling display of the user interface. */
 /* The UI scale shouldn't be handled here, it should instead be handled in the lower level functions of state->ds.sds.h*/
 
@@ -430,6 +446,33 @@ void drawNuclInfoBox(const app_data *restrict dat, const app_state *restrict sta
         drawYPos += 20.0f;
       }else{
         break;
+      }
+    }
+  }
+
+  //longest isomer
+  //printf("Isomer index: %u\n",dat->ndat.nuclData[nuclInd].longestIsomerLevel);
+  lvlInd = dat->ndat.nuclData[nuclInd].longestIsomerLevel;
+  if((lvlInd != MAXNUMLVLS)&&(lvlInd != (dat->ndat.nuclData[nuclInd].firstLevel + dat->ndat.nuclData[nuclInd].gsLevel))){
+    drawYPos += 30.0f;
+    snprintf(tmpStr,32,"%.0f",(double)dat->ndat.levels[lvlInd].energy);
+    drawTextAlignedSized(rdat,drawXPos+NUCL_INFOBOX_ENERGY_COL_OFFSET,drawYPos,rdat->font,blackCol8Bit,alpha,tmpStr,ALIGN_LEFT,state->ds.uiElemWidth[UIELEM_NUCL_INFOBOX]);
+    getSpinParStr(tmpStr,&dat->ndat,lvlInd);
+    drawTextAlignedSized(rdat,drawXPos+NUCL_INFOBOX_JPI_COL_OFFSET,drawYPos,rdat->font,blackCol8Bit,alpha,tmpStr,ALIGN_LEFT,state->ds.uiElemWidth[UIELEM_NUCL_INFOBOX]);
+    getHalfLifeStr(tmpStr,&dat->ndat,lvlInd);
+    drawTextAlignedSized(rdat,drawXPos+NUCL_INFOBOX_HALFLIFE_COL_OFFSET,drawYPos,rdat->font,blackCol8Bit,alpha,tmpStr,ALIGN_LEFT,state->ds.uiElemWidth[UIELEM_NUCL_INFOBOX]);
+    if(dat->ndat.levels[lvlInd].halfLife.unit == VALUE_UNIT_STABLE){
+      drawTextAlignedSized(rdat,drawXPos+NUCL_INFOBOX_DECAYMODE_COL_OFFSET,drawYPos,rdat->font,blackCol8Bit,alpha,"N/A",ALIGN_LEFT,state->ds.uiElemWidth[UIELEM_NUCL_INFOBOX]); //draw no decay mode label
+    }else{
+      for(int8_t i=0; i<dat->ndat.levels[lvlInd].numDecModes; i++){
+        getDecayModeStr(tmpStr,&dat->ndat,dat->ndat.levels[lvlInd].firstDecMode + (uint32_t)i);
+        //printf("%s\n",tmpStr);
+        if(drawYPos < (float)(state->ds.uiElemPosY[UIELEM_NUCL_INFOBOX] + state->ds.uiElemHeight[UIELEM_NUCL_INFOBOX])){
+          drawTextAlignedSized(rdat,drawXPos+NUCL_INFOBOX_DECAYMODE_COL_OFFSET,drawYPos,rdat->font,blackCol8Bit,alpha,tmpStr,ALIGN_LEFT,state->ds.uiElemWidth[UIELEM_NUCL_INFOBOX]); //draw decay mode label
+          drawYPos += 20.0f;
+        }else{
+          break;
+        }
       }
     }
   }

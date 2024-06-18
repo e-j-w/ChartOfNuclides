@@ -1,4 +1,20 @@
-/* © J. Williams 2017-2024 */
+/*
+Copyright (C) 2017-2024 J. Williams
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <https://www.gnu.org/licenses/>.
+*/
+
 /* Functions used to process raw app data files */
 
 #include "proc_data_parser.h"
@@ -421,23 +437,26 @@ void parseSpinPar(level * lev, char * spstring){
 	}
 	printf("\n");*/
 
-	uint8_t tentative=0;
+	uint8_t tentative = TENTATIVE_NONE;
+	uint8_t flipTentAfter = 0;
 
 	if(numTok<=0){
 		return;
 	}else if(strcmp(val[0],"GE")==0){
-		lev->spval[lev->numSpinParVals].tentative = 3;
+		lev->spval[lev->numSpinParVals].tentative = TENTATIVE_GE;
 		lev->spval[lev->numSpinParVals].spinVal = (int16_t)atoi(val[1]);
 		lev->numSpinParVals=1;
 		return;
 	}else if((strcmp(val[0],"+")==0)&&(numTok==1)){
 		lev->spval[lev->numSpinParVals].parVal = 1;
 		lev->spval[lev->numSpinParVals].spinVal = -1;
+		lev->spval[lev->numSpinParVals].tentative = TENTATIVE_NOSPIN;
 		lev->numSpinParVals=1;
 		return;
 	}else if((strcmp(val[0],"-")==0)&&(numTok==1)){
 		lev->spval[lev->numSpinParVals].parVal = -1;
 		lev->spval[lev->numSpinParVals].spinVal = -1;
+		lev->spval[lev->numSpinParVals].tentative = TENTATIVE_NOSPIN;
 		lev->numSpinParVals=1;
 		return;
 	}else{
@@ -445,17 +464,41 @@ void parseSpinPar(level * lev, char * spstring){
 			if(i<MAXSPPERLEVEL){
 
 				//check for brackets
+				uint8_t lsBrak = 0;
+				uint8_t rsBrak = 0;
 				strcpy(tmpstr,val[i]);
-				tok=strtok(tmpstr,"()");
+				tok=strtok(tmpstr,"(");
 				if(tok!=NULL){
 					if(strcmp(tok,val[i])!=0){
-						//printf("setting tentative marker...\n");
-						//tentative marker
-						if(tentative == 0)
-							tentative = 1;
-						else if(tentative == 1)
-							tentative = 0;
+						//bracket exists on left side
+						lsBrak = 1;
 					}
+				}
+				strcpy(tmpstr,val[i]);
+				tok=strtok(tmpstr,")");
+				if(tok!=NULL){
+					if(strcmp(tok,val[i])!=0){
+						//bracket exists on right side
+						rsBrak = 1;
+					}
+				}
+
+				if(flipTentAfter){
+					//printf("setting tentative marker...\n");
+					//tentative marker
+					if(tentative == TENTATIVE_NONE)
+						tentative = TENTATIVE_SPINANDPARITY;
+					else if(tentative == TENTATIVE_SPINANDPARITY)
+						tentative = TENTATIVE_NONE;
+				}
+				if(!lsBrak && rsBrak){
+					//right bracket only, tentativeness is the same as the previous value
+					//but the next value is outside of the brackets
+					flipTentAfter = 1;
+				}else if(lsBrak && !rsBrak){
+					tentative = TENTATIVE_SPINANDPARITY;
+				}else if(lsBrak && rsBrak){
+					tentative = TENTATIVE_SPINANDPARITY;
 				}
 
 				//check for parity
@@ -474,13 +517,13 @@ void parseSpinPar(level * lev, char * spstring){
 							//all spin values negative parity
 							for(j=0;j<=lev->numSpinParVals;j++){
 								lev->spval[j].parVal = -1;
-								tentative = 2;
+								tentative = TENTATIVE_SPINONLY;
 							}
 						}else if(strcmp(tok,")+")==0){
 							//all spin values positive parity
 							for(j=0;j<=lev->numSpinParVals;j++){
 								lev->spval[j].parVal = 1;
-								tentative = 2;
+								tentative = TENTATIVE_SPINONLY;
 							}
 						}
 					}
@@ -495,7 +538,6 @@ void parseSpinPar(level * lev, char * spstring){
 					tok=strtok(tok,"/");
 					if(strcmp(tok,tmpstr2)!=0){
 						//printf("Detected half-integer spin.\n");
-						lev->spval[lev->numSpinParVals].halfInt = 1;
 						lev->spval[lev->numSpinParVals].spinVal=(int16_t)atoi(tok);
 					}else{
 						lev->spval[lev->numSpinParVals].spinVal=(int16_t)atoi(tmpstr2);
@@ -829,6 +871,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
   char line[256],val[MAXNUMPARSERVALS][256];
   int tokPos;//position when tokenizing
   int firstQLine = 1; //flag to specify whether Q values have been read in for a specific nucleus
+	double longestIsomerHl = 0.0; //longest isomeric state half-life for a given nucleus
   
   //subsection of the entry for a particular nucleus that the parser is at
   //each nucleus has multiple entries, including adopted gammas, and gammas 
@@ -874,6 +917,8 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 				if(nd->numNucl<MAXNUMNUCL){
 					nd->numNucl++;
 					subSec=0; //we're at the beginning of the entry for this nucleus
+					longestIsomerHl = 0.0;
+					nd->nuclData[nd->numNucl].longestIsomerLevel = MAXNUMLVLS;
 					nd->nuclData[nd->numNucl].abundance.unit = VALUE_UNIT_NOVAL; //default
 					//printf("Adding gamma data for nucleus %s\n",val[0]);
 					memcpy(nuclNameStr,val[0],10);
@@ -950,27 +995,47 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 							memcpy(eeBuff, &line[19], 2);
 							eeBuff[2] = '\0';
 							uint8_t levelEerr = (uint8_t)atoi(eeBuff);
+							uint8_t halfInt = 0;
+							if(((nd->nuclData[nd->numNucl].N + nd->nuclData[nd->numNucl].Z) % 2) != 0){
+								halfInt = 1; //odd mass nucleus, half-integer spins
+							}
 							if((nd->nuclData[nd->numNucl].numLevels==0)||(levelE>(nd->levels[nd->numLvls-1].energy))){
 								//the level energy represents a new level
-								if(nd->nuclData[nd->numNucl].numLevels == 0){
-									nd->nuclData[nd->numNucl].firstLevel = nd->numLvls;
+								nd->nuclData[nd->numNucl].numLevels++;
+								nd->numLvls++;
+
+								if(nd->nuclData[nd->numNucl].numLevels == 1){
+									nd->nuclData[nd->numNucl].firstLevel = nd->numLvls-1;
 								}
-								nd->levels[nd->numLvls].energy=levelE;
-								nd->levels[nd->numLvls].energyErr=levelEerr;
+								nd->levels[nd->numLvls-1].energy=levelE;
+								nd->levels[nd->numLvls-1].energyErr=levelEerr;
+								nd->levels[nd->numLvls-1].halfInt = halfInt;
 								//parse the level spin and parity
 								char spbuff[16];
 								memcpy(spbuff, &line[21], 15);
 								spbuff[15] = '\0';
 								//printf("%s\n",spbuff);
-								parseSpinPar(&nd->levels[nd->numLvls],spbuff);
+								parseSpinPar(&nd->levels[nd->numLvls-1],spbuff);
 								//parse the half-life imformation
 								char hlBuff[18];
 								memcpy(hlBuff, &line[39], 17);
 								hlBuff[17] = '\0';
 								//printf("%s\n",hlBuff);
-								parseHalfLife(&nd->levels[nd->numLvls],hlBuff);
-								nd->nuclData[nd->numNucl].numLevels++;
-								nd->numLvls++;
+								parseHalfLife(&nd->levels[nd->numLvls-1],hlBuff);
+								//check isomerism
+								if(nd->levels[nd->numLvls-1].energy > 0.0f){
+									uint8_t hlValueType = (uint8_t)((nd->levels[nd->numLvls-1].halfLife.format >> 5U) & 7U);
+									if(!((hlValueType == VALUETYPE_LESSTHAN)||(hlValueType == VALUETYPE_LESSOREQUALTHAN))){
+										double hl = getLevelHalfLifeSeconds(nd,nd->numLvls-1);
+										//printf("hl: %f\n",hl);
+										if(hl >= 10.0E-9){\
+											if(hl > longestIsomerHl){
+												longestIsomerHl = hl;
+												nd->nuclData[nd->numNucl].longestIsomerLevel = nd->numLvls-1;
+											}
+										}
+									}
+								}
 							}
 						}
 					}

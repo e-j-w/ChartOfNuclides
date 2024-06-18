@@ -1,4 +1,20 @@
-/* © J. Williams 2017-2024 */
+/*
+Copyright (C) 2017-2024 J. Williams
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <https://www.gnu.org/licenses/>.
+*/
+
 /* Functions handling low-level operations on ENSDF database, or calculations using app data/state */
 
 #include "juicer.h"
@@ -596,12 +612,15 @@ void getSpinParStr(char strOut[32], const ndata *restrict nd, const uint32_t lvl
 	strcpy(strOut,""); //clear the string
 
 	for(int i=0;i<nd->levels[lvlInd].numSpinParVals;i++){
-		if((nd->levels[lvlInd].spval[i].tentative == 1)||(nd->levels[lvlInd].spval[i].tentative == 2)){
-			if((i==0)||((i>0)&&((nd->levels[lvlInd].spval[i-1].tentative != 1)&&(nd->levels[lvlInd].spval[i-1].tentative != 2)))){
+		
+		//printf("Spin: %i, parity: %i, tentative: %u\n\n",nd->levels[lvlInd].spval[i].spinVal,nd->levels[lvlInd].spval[i].parVal,nd->levels[lvlInd].spval[i].tentative);
+		
+		if((nd->levels[lvlInd].spval[i].tentative == 1)||(nd->levels[lvlInd].spval[i].tentative == TENTATIVE_SPINONLY)){
+			if((i==0)||((i>0)&&((nd->levels[lvlInd].spval[i-1].tentative != TENTATIVE_SPINANDPARITY)&&(nd->levels[lvlInd].spval[i-1].tentative != TENTATIVE_SPINONLY)))){
 				strcat(strOut,"(");
 			}
 		}
-		if(nd->levels[lvlInd].spval[i].halfInt == 1){
+		if(nd->levels[lvlInd].halfInt == 1){
 			sprintf(val,"%i/2",nd->levels[lvlInd].spval[i].spinVal);
 		}else{
 			sprintf(val,"%i",nd->levels[lvlInd].spval[i].spinVal);
@@ -612,8 +631,8 @@ void getSpinParStr(char strOut[32], const ndata *restrict nd, const uint32_t lvl
 		}else if(nd->levels[lvlInd].spval[i].parVal == 1){
 			strcat(strOut,"+");
 		}
-		if((nd->levels[lvlInd].spval[i].tentative == 1)||(nd->levels[lvlInd].spval[i].tentative == 2)){
-			if((i==nd->levels[lvlInd].numSpinParVals-1)||((i<nd->levels[lvlInd].numSpinParVals-1)&&((nd->levels[lvlInd].spval[i+1].tentative != 1)&&(nd->levels[lvlInd].spval[i+1].tentative != 2)))){
+		if((nd->levels[lvlInd].spval[i].tentative == 1)||(nd->levels[lvlInd].spval[i].tentative == TENTATIVE_SPINONLY)){
+			if((i==nd->levels[lvlInd].numSpinParVals-1)||((i<nd->levels[lvlInd].numSpinParVals-1)&&((nd->levels[lvlInd].spval[i+1].tentative != TENTATIVE_SPINANDPARITY)&&(nd->levels[lvlInd].spval[i+1].tentative != TENTATIVE_SPINONLY)))){
 				strcat(strOut,")");
 			}
 		}
