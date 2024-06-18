@@ -49,6 +49,7 @@ void initializeTempState(app_state *restrict state){
 	state->ds.chartZoomScale = 1.0f;
 	state->ds.chartZoomToScale = state->ds.chartZoomScale;
 	state->ds.chartZoomStartScale = state->ds.chartZoomScale;
+	state->ds.totalPanTime = CHART_KEY_PAN_TIME;
 	state->ds.zoomFinished = 0;
 	state->ds.zoomInProgress = 0;
 	state->ds.dragFinished = 0;
@@ -150,13 +151,14 @@ void updateDrawingState(const app_data *restrict dat, app_state *restrict state,
 	}
 	if(state->ds.panInProgress){
 		state->ds.timeSincePanStart += deltaTime;
-		state->ds.chartPosX = state->ds.chartPanStartX + (state->ds.chartPanToX - state->ds.chartPanStartX)*juice_smoothStop2(state->ds.timeSincePanStart/CHART_PAN_TIME);
-		state->ds.chartPosY = state->ds.chartPanStartY + (state->ds.chartPanToY - state->ds.chartPanStartY)*juice_smoothStop2(state->ds.timeSincePanStart/CHART_PAN_TIME);
-		if(state->ds.timeSincePanStart >= CHART_PAN_TIME){
+		state->ds.chartPosX = state->ds.chartPanStartX + (state->ds.chartPanToX - state->ds.chartPanStartX)*juice_smoothStop2(state->ds.timeSincePanStart/state->ds.totalPanTime);
+		state->ds.chartPosY = state->ds.chartPanStartY + (state->ds.chartPanToY - state->ds.chartPanStartY)*juice_smoothStop2(state->ds.timeSincePanStart/state->ds.totalPanTime);
+		if(state->ds.timeSincePanStart >= state->ds.totalPanTime){
 			state->ds.chartPosX = state->ds.chartPanToX;
 			state->ds.chartPosY = state->ds.chartPanToY;
 			state->ds.panFinished = 1;
 		}
+		//printf("pan t: %0.3f\n",(double)state->ds.timeSincePanStart);
 	}
 	//clamp chart display range
 	if(state->ds.chartPosX < 0.0f){
@@ -758,12 +760,14 @@ void changeUIState(app_state *restrict state, const uint8_t newState){
     case UISTATE_DEFAULT:
     default:
       state->interactableElement |= (uint32_t)(1U << UIELEM_MENU_BUTTON);
+			state->interactableElement |= (uint32_t)(1U << UIELEM_NUCL_INFOBOX);
       break;
   }
 }
 
 //take action after clicking a button or other UI element
-void uiElemClickAction(const app_data *restrict dat, app_state *restrict state, const uint8_t uiElemID){
+void uiElemClickAction(const app_data *restrict dat, app_state *restrict state, const uint8_t doubleClick, const uint8_t uiElemID){
+
   state->clickedUIElem = uiElemID;
   switch(uiElemID){
     case UIELEM_MENU_BUTTON:
@@ -778,6 +782,8 @@ void uiElemClickAction(const app_data *restrict dat, app_state *restrict state, 
       changeUIState(state,UISTATE_DEFAULT);
       startUIAnimation(&state->ds,UIANIM_MSG_BOX_HIDE); //message box will be closed after animation finishes
       break;
+		case UIELEM_NUCL_INFOBOX:
+			break;
 		case UIELEM_ENUM_LENGTH:
     default:
 			//clicked outside of a button or UI element
@@ -809,7 +815,18 @@ void uiElemClickAction(const app_data *restrict dat, app_state *restrict state, 
 						}
 						startUIAnimation(&state->ds,UIANIM_NUCLHIGHLIGHT_SHOW);
 					}else{
-						if(state->ds.shownElements & (1U << UIELEM_NUCL_INFOBOX)){
+						if(doubleClick){
+							//pan chart to nuclide that is clicked
+							//printf("starting pan\n");
+							state->ds.chartPanStartX = state->ds.chartPosX;
+							state->ds.chartPanStartY = state->ds.chartPosY;
+							state->ds.chartPanToX = floorf(mouseX) + 0.5f;
+							state->ds.chartPanToY = floorf(mouseY) + 0.5f - (16.0f/state->ds.chartZoomScale);
+							state->ds.timeSincePanStart = 0.0f;
+							state->ds.totalPanTime = CHART_DOUBLECLICK_PAN_TIME;
+							state->ds.panInProgress = 1;
+							state->ds.panFinished = 0;
+						}else if(state->ds.shownElements & (1U << UIELEM_NUCL_INFOBOX)){
 							startUIAnimation(&state->ds,UIANIM_NUCLINFOBOX_HIDE); //hide the info box, see stopUIAnimation() for info box hiding action
 							startUIAnimation(&state->ds,UIANIM_NUCLHIGHLIGHT_HIDE);
 						}else{
@@ -861,7 +878,7 @@ void updateSingleUIElemPosition(drawing_state *restrict ds, const uint8_t uiElem
 			}
 			ds->uiElemHeight[uiElemInd] = (uint16_t)((float)NUCL_INFOBOX_MIN_HEIGHT + ds->infoBoxTableHeight);
 			ds->uiElemPosY[uiElemInd] = (uint16_t)(ds->windowYRes - ds->uiElemHeight[uiElemInd] - UI_PADDING_SIZE - (int32_t)CHART_AXIS_DEPTH);
-			ds->uiElemWidth[uiElemInd] = NUCL_INFOBOX_WIDTH;
+			ds->uiElemWidth[uiElemInd] = (uint16_t)(NUCL_INFOBOX_WIDTH);
 		default:
 			break;
 	}

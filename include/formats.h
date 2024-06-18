@@ -161,7 +161,7 @@ typedef struct
   float chartPanStartX, chartPanStartY;
   float chartDragStartX, chartDragStartY;
   float chartDragStartMouseX, chartDragStartMouseY; //in scaled pixels
-  float timeSinceZoomStart, timeSincePanStart;
+  float timeSinceZoomStart, timeSincePanStart, totalPanTime;
   float infoBoxTableHeight; //the height in unscaled pixels needed to show the info box ground and isomeric state info
   uint32_t shownElements; //bit pattern describing which UI elements are being shown, values from ui_element_enum
   uint32_t uiAnimPlaying; //bit pattern describing which UI animations are playing

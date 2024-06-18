@@ -34,10 +34,7 @@ void processInputFlags(const app_data *restrict dat, app_state *restrict state){
     uint32_t right = (state->inputFlags & (1U << INPUT_RIGHT));
     //printf("dir: [%u %u %u %u]\n",!(up==0),!(down==0),!(left==0),!(right==0));
     
-    if(!left && !right && !up && !down){
-      //no directional inputs, pan is finished
-      state->ds.panFinished = 1;
-    }else{
+    if(left || right || up || down){
       if(left && !right){
         state->ds.chartPanStartX = state->ds.chartPosX;
         state->ds.chartPanStartY = state->ds.chartPosY;
@@ -49,6 +46,7 @@ void processInputFlags(const app_data *restrict dat, app_state *restrict state){
           state->ds.chartPanToX = 0.0f;
         }
         state->ds.timeSincePanStart = 0.0f;
+        state->ds.totalPanTime = CHART_KEY_PAN_TIME;
         state->ds.panInProgress = 1;
         state->ds.panFinished = 0;
       }else if(right && !left){
@@ -62,6 +60,7 @@ void processInputFlags(const app_data *restrict dat, app_state *restrict state){
           state->ds.chartPanToX = dat->ndat.maxN+1.0f;
         }
         state->ds.timeSincePanStart = 0.0f;
+        state->ds.totalPanTime = CHART_KEY_PAN_TIME;
         state->ds.panInProgress = 1;
         state->ds.panFinished = 0;
       }
@@ -76,6 +75,7 @@ void processInputFlags(const app_data *restrict dat, app_state *restrict state){
           state->ds.chartPanToY = dat->ndat.maxZ+1.0f;
         }
         state->ds.timeSincePanStart = 0.0f;
+        state->ds.totalPanTime = CHART_KEY_PAN_TIME;
         state->ds.panInProgress = 1;
         state->ds.panFinished = 0;
         //printf("pan start: [%0.2f %0.2f], pan to: [%0.2f %0.2f]\n",(double)state->ds.chartPanStartX,(double)state->ds.chartPanStartY,(double)state->ds.chartPanToX,(double)state->ds.chartPanToY);
@@ -90,6 +90,7 @@ void processInputFlags(const app_data *restrict dat, app_state *restrict state){
           state->ds.chartPanToY = 0.0f;
         }
         state->ds.timeSincePanStart = 0.0f;
+        state->ds.totalPanTime = CHART_KEY_PAN_TIME;
         state->ds.panInProgress = 1;
         state->ds.panFinished = 0;
       }
@@ -102,7 +103,7 @@ void processInputFlags(const app_data *restrict dat, app_state *restrict state){
   state->mouseholdElement = UIELEM_ENUM_LENGTH;
 
   if(state->ds.dragInProgress == 0){
-    for(uint8_t i=0; i<UIELEM_ENUM_LENGTH; i++){
+    for(uint8_t i=0; i<UIELEM_ENUM_LENGTH; i++){ //ordering in ui_element_enum defines order in which UI elements receive input
       if(state->interactableElement & (uint32_t)(1U << i)){
         if((state->mouseHoldStartPosXPx >= state->ds.uiElemPosX[i])&&(state->mouseHoldStartPosXPx < (state->ds.uiElemPosX[i]+state->ds.uiElemWidth[i]))&&(state->mouseHoldStartPosYPx >= state->ds.uiElemPosY[i])&&(state->mouseHoldStartPosYPx < (state->ds.uiElemPosY[i]+state->ds.uiElemHeight[i]))){
           state->mouseholdElement = i;
@@ -111,7 +112,7 @@ void processInputFlags(const app_data *restrict dat, app_state *restrict state){
           state->mouseoverElement = i;
           if((state->mouseClickPosXPx >= state->ds.uiElemPosX[i])&&(state->mouseClickPosXPx < (state->ds.uiElemPosX[i]+state->ds.uiElemWidth[i]))&&(state->mouseClickPosYPx >= state->ds.uiElemPosY[i])&&(state->mouseClickPosYPx < (state->ds.uiElemPosY[i]+state->ds.uiElemHeight[i]))){
             //take action
-            uiElemClickAction(dat,state,i);
+            uiElemClickAction(dat,state,0,i);
             return;
           }
         }
@@ -134,11 +135,18 @@ void processInputFlags(const app_data *restrict dat, app_state *restrict state){
     state->ds.dragFinished = 1;
   }
 
+  uint32_t doubleClick = (state->inputFlags & (1U << INPUT_DOUBLECLICK));
+
   //only get here if no button was clicked
   //check if a click was made outside of any button
+  //printf("click pos x: %f, drag start: [%f %f]\n",(double)state->mouseClickPosXPx,(double)state->ds.chartDragStartMouseX,(double)state->ds.chartDragStartMouseY);
   if((state->mouseClickPosXPx >= 0.0f) && (fabsf(state->ds.chartDragStartMouseX - state->mouseXPx) < 5.0f) && (fabsf(state->ds.chartDragStartMouseY - state->mouseYPx) < 5.0f) ){
     //unclick (or click on chart view)
-    uiElemClickAction(dat,state,UIELEM_ENUM_LENGTH);
+    if(doubleClick){
+      uiElemClickAction(dat,state,1,UIELEM_ENUM_LENGTH);
+    }else{
+      uiElemClickAction(dat,state,0,UIELEM_ENUM_LENGTH);
+    }
   }
 
   /* Handle zoom input */
@@ -270,6 +278,10 @@ void processSingleEvent(app_data *restrict dat, app_state *restrict state, resou
           state->mouseHoldStartPosYPx = -1.0f;
           state->mouseClickPosXPx = state->mouseXPx;
           state->mouseClickPosYPx = state->mouseYPx;
+          if(evt.button.clicks > 1){
+            //printf("Double click.\n");
+            state->inputFlags |= (1U << INPUT_DOUBLECLICK);
+          }
           //printf("Left mouse button up.\n");
           break;
         case SDL_BUTTON_RIGHT:
@@ -438,6 +450,9 @@ void processFrameEvents(app_data *restrict dat, app_state *restrict state, resou
     state->mouseClickPosXPx = -1.0f;
     state->mouseClickPosYPx = -1.0f;
     state->inputFlags &= ~(1U << INPUT_ZOOM);
+    if(state->inputFlags & (1U << INPUT_DOUBLECLICK)){
+      state->inputFlags &= ~(1U << INPUT_DOUBLECLICK);
+    }
 
     if((state->ds.uiAnimPlaying != 0)||(state->ds.zoomInProgress)||(state->ds.dragInProgress)||(state->ds.panInProgress)){
       //a UI animation is playing, don't block the main thread

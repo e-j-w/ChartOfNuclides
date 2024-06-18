@@ -31,11 +31,9 @@ If you're building the database from scratch, you'll need various isotope and nu
 
 ### Build dependencies
 
-* gcc (or clang if the Makefile is edited)
-* make
-* SDL3
-* SDL_image
-* SDL_ttf
+* C compiler: gcc (or clang)
+* GNU make
+* SDL3, SDL_image, SDL_ttf
 
 The current version has been tested under Arch Linux as of June 2024.
 
@@ -45,7 +43,16 @@ The program relies on additional data files, which can be obtained from **TBD**.
 
 Install all build dependencies listed above.  For now SDL3 and its libraries probably have to be compiled manually, as they aren't (yet) packaged for major Linux distros.
 
-First, run `make` in the source root directory. Two executables will be built: `proc_data` (which generates the data package `con.dat` containing the nuclear structure database used by the main application), and `con` (the main application). Build the database and generate the packaged data file (`con.dat`) by running: 
+Build the application binaries using make (from the source tree root directory):
+
+```
+# using gcc:
+make all -j
+# alternatively, using clang:
+make all -j CC=clang
+```
+
+Two executables will be built: `proc_data` (which generates the data package `con.dat` containing the nuclear structure database used by the main application), and `con` (the main application). Obtain the [required data files](#collect-data), then build the nuclear structure database and generate the packaged data file (`con.dat`) by running: 
 
 ```
 ./proc_data
@@ -56,6 +63,8 @@ This will build the data package file `con.dat`. Then, the main application can 
 ```
 ./con
 ```
+
+Have fun!
 
 ## Using the program
 

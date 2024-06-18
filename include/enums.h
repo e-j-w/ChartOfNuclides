@@ -23,7 +23,7 @@ INPUT_TYPE_ENUM_LENGTH
 };
 enum input_enum {
 INPUT_DOWN, INPUT_UP, INPUT_LEFT, INPUT_RIGHT, //directional inputs
-INPUT_ZOOM, INPUT_ENUM_LENGTH
+INPUT_ZOOM, INPUT_DOUBLECLICK, INPUT_ENUM_LENGTH
 };
 enum loc_string_enum{LOCSTR_APPLY,LOCSTR_CANCEL,LOCSTR_OK,LOCSTR_NODB,
 LOCSTR_GM_STATE,LOCSTR_ENERGY_KEV,LOCSTR_JPI,LOCSTR_HALFLIFE,
@@ -55,13 +55,15 @@ HIGHLIGHT_SELECTED,
 HIGHLIGHT_ENUM_LENGTH
 };
 enum ui_element_enum{
+UIELEM_MSG_BOX_OK_BUTTON,
+UIELEM_MSG_BOX, //used to show warnings or errors
 UIELEM_MENU_BUTTON,
 UIELEM_PRIMARY_MENU,
-UIELEM_MSG_BOX, //used to show warnings or errors
-UIELEM_MSG_BOX_OK_BUTTON,
 UIELEM_NUCL_INFOBOX,
 UIELEM_ENUM_LENGTH
-};
+}; //order in which UI elements are defined here determines 
+//order in which they receive input, if they overlap 
+//(eariler entries in the enum receive input first)
 enum ui_state_enum{
 UISTATE_DEFAULT, //no menus open
 UISTATE_UNINTERACTABLE,
