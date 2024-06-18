@@ -90,6 +90,7 @@ void stopUIAnimation(app_state *restrict state, const uint8_t uiAnim){
       break;
 		case UIANIM_NUCLINFOBOX_HIDE:
 			state->ds.shownElements &= (uint32_t)(~(1U << UIELEM_NUCL_INFOBOX)); //close the info box
+			changeUIState(state,UISTATE_DEFAULT); //make info box un-interactable
 			state->chartSelectedNucl = MAXNUMNUCL;
     default:
       break;
@@ -760,7 +761,9 @@ void changeUIState(app_state *restrict state, const uint8_t newState){
     case UISTATE_DEFAULT:
     default:
       state->interactableElement |= (uint32_t)(1U << UIELEM_MENU_BUTTON);
-			state->interactableElement |= (uint32_t)(1U << UIELEM_NUCL_INFOBOX);
+			if(state->ds.shownElements & (1U << UIELEM_NUCL_INFOBOX)){
+				state->interactableElement |= (uint32_t)(1U << UIELEM_NUCL_INFOBOX);
+			}
       break;
   }
 }
@@ -811,6 +814,7 @@ void uiElemClickAction(const app_data *restrict dat, app_state *restrict state, 
 						updateSingleUIElemPosition(&state->ds,UIELEM_NUCL_INFOBOX);
 						if(!(state->ds.shownElements & (1U << UIELEM_NUCL_INFOBOX))){
 							state->ds.shownElements |= (1U << UIELEM_NUCL_INFOBOX);
+							changeUIState(state,UISTATE_DEFAULT); //make info box interactable
 							startUIAnimation(&state->ds,UIANIM_NUCLINFOBOX_SHOW);
 						}
 						startUIAnimation(&state->ds,UIANIM_NUCLHIGHLIGHT_SHOW);

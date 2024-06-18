@@ -43,7 +43,7 @@ The program relies on additional data files, which can be obtained from **TBD**.
 
 Install all build dependencies listed above.  For now SDL3 and its libraries probably have to be compiled manually, as they aren't (yet) packaged for major Linux distros.
 
-Build the application binaries using make (from the source tree root directory):
+Build the application binaries using `make` (from the source tree root directory):
 
 ```
 # using gcc:
