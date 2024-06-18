@@ -85,7 +85,9 @@ static const uint8_t UITHEME_ICON_TILE_Y[NUM_THEME_ICONS] = {10,10,10};
 
 #define NUCL_INFOBOX_X_PADDING             (UI_PADDING_SIZE+CHART_AXIS_DEPTH) //in unscaled pixels
 #define NUCL_INFOBOX_WIDTH                 (MIN_RENDER_WIDTH-2*NUCL_INFOBOX_X_PADDING) //in unscaled pixels
-#define NUCL_INFOBOX_HEIGHT                240 //in unscaled pixels
+#define NUCL_INFOBOX_MIN_HEIGHT            120 //in unscaled pixels
+#define NUCL_INFOBOX_BIGLINE_HEIGHT        30.0f //in unscaled pixels
+#define NUCL_INFOBOX_SMALLLINE_HEIGHT      20.0f //in unscaled pixels
 #define NUCL_INFOBOX_ENERGY_COL_OFFSET     0.0f //in unscaled pixels
 #define NUCL_INFOBOX_JPI_COL_OFFSET        140.0f //in unscaled pixels
 #define NUCL_INFOBOX_HALFLIFE_COL_OFFSET   220.0f //in unscaled pixels

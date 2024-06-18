@@ -791,6 +791,18 @@ void uiElemClickAction(const app_data *restrict dat, app_state *restrict state, 
 					//printf("Selected nucleus: %u\n",state->chartSelectedNucl);
 					if((selNucl < MAXNUMNUCL)&&(selNucl != state->chartSelectedNucl)){
 						state->chartSelectedNucl = selNucl;
+						//calculate the number of unscaled pixels needed to show the ground and isomeric state info
+						state->ds.infoBoxTableHeight = NUCL_INFOBOX_BIGLINE_HEIGHT;
+						if(dat->ndat.levels[dat->ndat.nuclData[selNucl].firstLevel + dat->ndat.nuclData[selNucl].gsLevel].numDecModes > 1){
+							state->ds.infoBoxTableHeight += NUCL_INFOBOX_SMALLLINE_HEIGHT*(dat->ndat.levels[dat->ndat.nuclData[selNucl].firstLevel + dat->ndat.nuclData[selNucl].gsLevel].numDecModes - 1);
+						}
+						if(dat->ndat.nuclData[selNucl].longestIsomerLevel != MAXNUMLVLS){
+							state->ds.infoBoxTableHeight += NUCL_INFOBOX_BIGLINE_HEIGHT;
+							if(dat->ndat.levels[dat->ndat.nuclData[selNucl].longestIsomerLevel].numDecModes > 1){
+								state->ds.infoBoxTableHeight += NUCL_INFOBOX_SMALLLINE_HEIGHT*(dat->ndat.levels[dat->ndat.nuclData[selNucl].longestIsomerLevel].numDecModes - 1);
+							}
+						}
+						updateSingleUIElemPosition(&state->ds,UIELEM_NUCL_INFOBOX);
 						if(!(state->ds.shownElements & (1U << UIELEM_NUCL_INFOBOX))){
 							state->ds.shownElements |= (1U << UIELEM_NUCL_INFOBOX);
 							startUIAnimation(&state->ds,UIANIM_NUCLINFOBOX_SHOW);
@@ -813,47 +825,50 @@ void uiElemClickAction(const app_data *restrict dat, app_state *restrict state, 
   }
 }
 
-//updates the UI element (buttons etc.) positions, based on the screen resolution
+//updates UI element (buttons etc.) positions, based on the screen resolution and other factors
 //positioning constants are defined in gui_constants.h
+void updateSingleUIElemPosition(drawing_state *restrict ds, const uint8_t uiElemInd){
+	switch(uiElemInd){
+		case UIELEM_MENU_BUTTON:
+			ds->uiElemPosX[uiElemInd] = (uint16_t)(ds->windowXRes-MENU_BUTTON_WIDTH-MENU_BUTTON_POS_XR);
+			ds->uiElemPosY[uiElemInd] = MENU_BUTTON_POS_Y;
+			ds->uiElemWidth[uiElemInd] = MENU_BUTTON_WIDTH;
+			ds->uiElemHeight[uiElemInd] = UI_TILE_SIZE;
+			break;
+		case UIELEM_PRIMARY_MENU:
+			ds->uiElemPosX[uiElemInd] = (uint16_t)(ds->windowXRes-PRIMARY_MENU_WIDTH-PRIMARY_MENU_POS_XR);
+			ds->uiElemPosY[uiElemInd] = PRIMARY_MENU_POS_Y;
+			ds->uiElemWidth[uiElemInd] = PRIMARY_MENU_WIDTH;
+			ds->uiElemHeight[uiElemInd] = PRIMARY_MENU_HEIGHT;
+			break;
+		case UIELEM_MSG_BOX:
+			ds->uiElemPosX[uiElemInd] = (uint16_t)((ds->windowXRes - MESSAGE_BOX_WIDTH)/2);
+			ds->uiElemPosY[uiElemInd] = (uint16_t)((ds->windowYRes - MESSAGE_BOX_HEIGHT)/2);
+			ds->uiElemWidth[uiElemInd] = MESSAGE_BOX_WIDTH;
+			ds->uiElemHeight[uiElemInd] = MESSAGE_BOX_HEIGHT;
+			break;
+		case UIELEM_MSG_BOX_OK_BUTTON:
+			ds->uiElemPosX[uiElemInd] = (uint16_t)((ds->windowXRes - MESSAGE_BOX_OK_BUTTON_WIDTH)/2);
+			ds->uiElemPosY[uiElemInd] = (uint16_t)((ds->windowYRes + MESSAGE_BOX_HEIGHT)/2 - MESSAGE_BOX_OK_BUTTON_YB - UI_TILE_SIZE);
+			ds->uiElemWidth[uiElemInd] = MESSAGE_BOX_OK_BUTTON_WIDTH;
+			ds->uiElemHeight[uiElemInd] = UI_TILE_SIZE;
+			break;
+		case UIELEM_NUCL_INFOBOX:
+			ds->uiElemPosX[uiElemInd] = (uint16_t)((ds->windowXRes - NUCL_INFOBOX_WIDTH)/2);
+			uint16_t freeXSpace = (uint16_t)(ds->windowXRes - NUCL_INFOBOX_WIDTH);
+			if(freeXSpace < 4*NUCL_INFOBOX_X_PADDING){
+				ds->uiElemPosX[uiElemInd] += (uint16_t)(NUCL_INFOBOX_X_PADDING - freeXSpace/4); //make sure info box doesn't bump up against y-axis
+			}
+			ds->uiElemHeight[uiElemInd] = (uint16_t)((float)NUCL_INFOBOX_MIN_HEIGHT + ds->infoBoxTableHeight);
+			ds->uiElemPosY[uiElemInd] = (uint16_t)(ds->windowYRes - ds->uiElemHeight[uiElemInd] - UI_PADDING_SIZE - (int32_t)CHART_AXIS_DEPTH);
+			ds->uiElemWidth[uiElemInd] = NUCL_INFOBOX_WIDTH;
+		default:
+			break;
+	}
+}
 void updateUIElemPositions(drawing_state *restrict ds){
   for(uint8_t i=0; i<UIELEM_ENUM_LENGTH; i++){
-    switch(i){
-      case UIELEM_MENU_BUTTON:
-        ds->uiElemPosX[i] = (uint16_t)(ds->windowXRes-MENU_BUTTON_WIDTH-MENU_BUTTON_POS_XR);
-        ds->uiElemPosY[i] = MENU_BUTTON_POS_Y;
-        ds->uiElemWidth[i] = MENU_BUTTON_WIDTH;
-        ds->uiElemHeight[i] = UI_TILE_SIZE;
-        break;
-      case UIELEM_PRIMARY_MENU:
-        ds->uiElemPosX[i] = (uint16_t)(ds->windowXRes-PRIMARY_MENU_WIDTH-PRIMARY_MENU_POS_XR);
-        ds->uiElemPosY[i] = PRIMARY_MENU_POS_Y;
-        ds->uiElemWidth[i] = PRIMARY_MENU_WIDTH;
-        ds->uiElemHeight[i] = PRIMARY_MENU_HEIGHT;
-        break;
-      case UIELEM_MSG_BOX:
-        ds->uiElemPosX[i] = (uint16_t)((ds->windowXRes - MESSAGE_BOX_WIDTH)/2);
-        ds->uiElemPosY[i] = (uint16_t)((ds->windowYRes - MESSAGE_BOX_HEIGHT)/2);
-        ds->uiElemWidth[i] = MESSAGE_BOX_WIDTH;
-        ds->uiElemHeight[i] = MESSAGE_BOX_HEIGHT;
-        break;
-      case UIELEM_MSG_BOX_OK_BUTTON:
-        ds->uiElemPosX[i] = (uint16_t)((ds->windowXRes - MESSAGE_BOX_OK_BUTTON_WIDTH)/2);
-        ds->uiElemPosY[i] = (uint16_t)((ds->windowYRes + MESSAGE_BOX_HEIGHT)/2 - MESSAGE_BOX_OK_BUTTON_YB - UI_TILE_SIZE);
-        ds->uiElemWidth[i] = MESSAGE_BOX_OK_BUTTON_WIDTH;
-        ds->uiElemHeight[i] = UI_TILE_SIZE;
-        break;
-			case UIELEM_NUCL_INFOBOX:
-				ds->uiElemPosX[i] = (uint16_t)((ds->windowXRes - NUCL_INFOBOX_WIDTH)/2);
-				uint16_t freeXSpace = (uint16_t)(ds->windowXRes - NUCL_INFOBOX_WIDTH);
-				if(freeXSpace < 4*NUCL_INFOBOX_X_PADDING){
-					ds->uiElemPosX[i] += (uint16_t)(NUCL_INFOBOX_X_PADDING - freeXSpace/4); //make sure info box doesn't bump up against y-axis
-				}
-        ds->uiElemPosY[i] = (uint16_t)(ds->windowYRes - NUCL_INFOBOX_HEIGHT - UI_PADDING_SIZE - (int32_t)CHART_AXIS_DEPTH);
-        ds->uiElemWidth[i] = NUCL_INFOBOX_WIDTH;
-        ds->uiElemHeight[i] = NUCL_INFOBOX_HEIGHT;
-      default:
-        break;
-    }
+    updateSingleUIElemPosition(ds,i);
   }
 }
 

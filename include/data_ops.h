@@ -48,6 +48,8 @@ float getChartHeightZAfterZoom(const drawing_state *restrict ds);
 void changeUIState(app_state *restrict state, const uint8_t newState);
 void uiElemClickAction(const app_data *restrict dat, app_state *restrict state, const uint8_t uiElemID);
 
+void updateSingleUIElemPosition(drawing_state *restrict ds, const uint8_t uiElemInd);
+
 void updateWindowRes(app_data *restrict dat, drawing_state *restrict ds, resource_data *restrict rdat);
 void handleScreenGraphicsMode(app_data *restrict dat, drawing_state *restrict ds, resource_data *restrict rdat);
 
