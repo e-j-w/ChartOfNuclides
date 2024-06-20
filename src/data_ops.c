@@ -774,11 +774,24 @@ void changeUIState(app_state *restrict state, const uint8_t newState){
   }
 }
 
-void panChartToPos(drawing_state *restrict ds, const uint16_t posN, const uint16_t posZ){
+void panChartToPos(const app_data *restrict dat, drawing_state *restrict ds, const uint16_t posN, const uint16_t posZ){
 	ds->chartPanStartX = ds->chartPosX;
 	ds->chartPanStartY = ds->chartPosY;
 	ds->chartPanToX = posN*1.0f + 0.5f;
 	ds->chartPanToY = posZ*1.0f + 0.5f - (16.0f/ds->chartZoomScale);
+	//printf("pos: %u %u, panning to: %f %f\n",posN,posZ,(double)ds->chartPanToX,(double)ds->chartPanToY);
+	//clamp chart display range
+	if(ds->chartPanToX < 0.0f){
+		ds->chartPanToX = 0.0f;
+	}else if(ds->chartPanToX > (dat->ndat.maxN+1)){
+		ds->chartPanToX = (float)dat->ndat.maxN+1.0f;
+	}
+	if(ds->chartPanToY < 0.0f){
+		ds->chartPanToY = 0.0f;
+	}else if(ds->chartPanToY > (dat->ndat.maxZ+1)){
+		ds->chartPanToY = (float)dat->ndat.maxZ+1.0f;
+	}
+	//printf("panning to: %f %f\n",(double)ds->chartPanToX,(double)ds->chartPanToY);
 	ds->timeSincePanStart = 0.0f;
 	ds->totalPanTime = CHART_DOUBLECLICK_PAN_TIME;
 	ds->panInProgress = 1;
@@ -842,15 +855,15 @@ void uiElemClickAction(const app_data *restrict dat, app_state *restrict state, 
 						if((xOcclLeft >= state->ds.uiElemPosX[UIELEM_NUCL_INFOBOX])&&(xOcclRight <= (state->ds.uiElemPosX[UIELEM_NUCL_INFOBOX] + state->ds.uiElemWidth[UIELEM_NUCL_INFOBOX]))){
 							if(yOcclTop >= state->ds.uiElemPosY[UIELEM_NUCL_INFOBOX]){
 								//pan chart to dodge occlusion
-								panChartToPos(&state->ds,(uint16_t)floorf(mouseX),(uint16_t)floorf(mouseY));
+								panChartToPos(dat,&state->ds,(uint16_t)floorf(fabsf(mouseX)),(uint16_t)floorf(fabsf(mouseY)));
 							}
 						}
 
 					}else{
 						if(doubleClick && (state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_HIDE]==0.0f)){
 							//pan chart to nuclide that is clicked
-							//printf("starting pan\n");
-							panChartToPos(&state->ds,(uint16_t)floorf(mouseX),(uint16_t)floorf(mouseY));
+							//printf("starting pan to: %f %f\n",(double)mouseX,(double)mouseY);
+							panChartToPos(dat,&state->ds,(uint16_t)floorf(fabsf(mouseX)),(uint16_t)floorf(fabsf(mouseY)));
 						}else if((state->ds.shownElements & (1U << UIELEM_NUCL_INFOBOX))&&(state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_HIDE]==0.0f)){
 							startUIAnimation(&state->ds,UIANIM_NUCLINFOBOX_HIDE); //hide the info box, see stopUIAnimation() for info box hiding action
 							startUIAnimation(&state->ds,UIANIM_NUCLHIGHLIGHT_HIDE);
