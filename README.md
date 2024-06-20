@@ -72,12 +72,13 @@ Zoom and pan with the mouse, the controls are basically identical to something l
 
 ### Keyboard shortcuts
 
-| Key               | Action |
-| :---------------- | :----- |
-| Arrow keys / WASD | Pan chart view |
-| +/-               | Zoom in/out on chart |
-| F11               | Toggle fullscreen mode |
-| P                 | Toggle performance stats debug overlay |
+| Key                | Action |
+| :----------------- | :----- |
+| Arrow keys / WASD  | Pan chart view |
+| +/-                | Zoom in/out on chart |
+| Escape / backspace | Exit out of open menus, cancel selection, etc. |
+| F11                | Toggle fullscreen mode |
+| P                  | Toggle performance stats debug overlay |
 
 ## Disclaimer
 

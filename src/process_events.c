@@ -96,6 +96,13 @@ void processInputFlags(const app_data *restrict dat, app_state *restrict state){
       }
     }
   }
+  if(state->inputFlags & (1U << INPUT_BACK)){
+    //escape open menus
+    if((state->ds.shownElements & (1U << UIELEM_NUCL_INFOBOX))&&(state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_HIDE]==0.0f)){
+      startUIAnimation(&state->ds,UIANIM_NUCLINFOBOX_HIDE); //hide the info box, see stopUIAnimation() for info box hiding action
+      startUIAnimation(&state->ds,UIANIM_NUCLHIGHLIGHT_HIDE);
+    }
+  }
 
   /* Handle mouse input */
 
@@ -341,6 +348,10 @@ void processSingleEvent(app_data *restrict dat, app_state *restrict state, resou
         case SDL_SCANCODE_S:
           state->inputFlags |= (1U << INPUT_DOWN);
           break;
+        case SDL_SCANCODE_ESCAPE:
+        case SDL_SCANCODE_BACKSPACE:
+          state->inputFlags |= (1U << INPUT_BACK);
+          break;
         case SDL_SCANCODE_EQUALS:
           state->zoomDeltaVal = 1.0f;
           state->inputFlags |= (1U << INPUT_ZOOM);
@@ -450,6 +461,7 @@ void processFrameEvents(app_data *restrict dat, app_state *restrict state, resou
     state->mouseClickPosXPx = -1.0f;
     state->mouseClickPosYPx = -1.0f;
     state->inputFlags &= ~(1U << INPUT_ZOOM);
+    state->inputFlags &= ~(1U << INPUT_BACK);
     if(state->inputFlags & (1U << INPUT_DOUBLECLICK)){
       state->inputFlags &= ~(1U << INPUT_DOUBLECLICK);
     }

@@ -718,6 +718,12 @@ float mouseXPxToN(const drawing_state *restrict ds, const float mouseX){
 float mouseYPxToZ(const drawing_state *restrict ds, const float mouseY){
 	return ds->chartPosY - ((mouseY - ds->windowYRes/2.0f)/(DEFAULT_NUCLBOX_DIM*ds->chartZoomScale));
 }
+float chartNtoXPx(const drawing_state *restrict ds, const float N){
+	return (ds->windowXRes/2.0f) + (N - ds->chartPosX)*DEFAULT_NUCLBOX_DIM*ds->chartZoomScale;
+}
+float chartZtoYPx(const drawing_state *restrict ds, const float Z){
+	return (ds->windowYRes/2.0f) + (ds->chartPosY - Z)*DEFAULT_NUCLBOX_DIM*ds->chartZoomScale;
+}
 float getMinChartN(const drawing_state *restrict ds){
 	return ds->chartPosX - (ds->windowXRes)/(2.0f*DEFAULT_NUCLBOX_DIM*ds->chartZoomScale);
 }
@@ -766,6 +772,17 @@ void changeUIState(app_state *restrict state, const uint8_t newState){
 			}
       break;
   }
+}
+
+void panChartToPos(drawing_state *restrict ds, const uint16_t posN, const uint16_t posZ){
+	ds->chartPanStartX = ds->chartPosX;
+	ds->chartPanStartY = ds->chartPosY;
+	ds->chartPanToX = posN*1.0f + 0.5f;
+	ds->chartPanToY = posZ*1.0f + 0.5f - (16.0f/ds->chartZoomScale);
+	ds->timeSincePanStart = 0.0f;
+	ds->totalPanTime = CHART_DOUBLECLICK_PAN_TIME;
+	ds->panInProgress = 1;
+	ds->panFinished = 0;
 }
 
 //take action after clicking a button or other UI element
@@ -818,19 +835,23 @@ void uiElemClickAction(const app_data *restrict dat, app_state *restrict state, 
 							startUIAnimation(&state->ds,UIANIM_NUCLINFOBOX_SHOW);
 						}
 						startUIAnimation(&state->ds,UIANIM_NUCLHIGHLIGHT_SHOW);
+						//check occlusion by info box
+						float xOcclLeft = chartNtoXPx(&state->ds,floorf(mouseX + 1.0f));
+						float xOcclRight = chartNtoXPx(&state->ds,floorf(mouseX));
+						float yOcclTop = chartZtoYPx(&state->ds,floorf(mouseY));
+						if((xOcclLeft >= state->ds.uiElemPosX[UIELEM_NUCL_INFOBOX])&&(xOcclRight <= (state->ds.uiElemPosX[UIELEM_NUCL_INFOBOX] + state->ds.uiElemWidth[UIELEM_NUCL_INFOBOX]))){
+							if(yOcclTop >= state->ds.uiElemPosY[UIELEM_NUCL_INFOBOX]){
+								//pan chart to dodge occlusion
+								panChartToPos(&state->ds,(uint16_t)floorf(mouseX),(uint16_t)floorf(mouseY));
+							}
+						}
+
 					}else{
-						if(doubleClick){
+						if(doubleClick && (state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_HIDE]==0.0f)){
 							//pan chart to nuclide that is clicked
 							//printf("starting pan\n");
-							state->ds.chartPanStartX = state->ds.chartPosX;
-							state->ds.chartPanStartY = state->ds.chartPosY;
-							state->ds.chartPanToX = floorf(mouseX) + 0.5f;
-							state->ds.chartPanToY = floorf(mouseY) + 0.5f - (16.0f/state->ds.chartZoomScale);
-							state->ds.timeSincePanStart = 0.0f;
-							state->ds.totalPanTime = CHART_DOUBLECLICK_PAN_TIME;
-							state->ds.panInProgress = 1;
-							state->ds.panFinished = 0;
-						}else if(state->ds.shownElements & (1U << UIELEM_NUCL_INFOBOX)){
+							panChartToPos(&state->ds,(uint16_t)floorf(mouseX),(uint16_t)floorf(mouseY));
+						}else if((state->ds.shownElements & (1U << UIELEM_NUCL_INFOBOX))&&(state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_HIDE]==0.0f)){
 							startUIAnimation(&state->ds,UIANIM_NUCLINFOBOX_HIDE); //hide the info box, see stopUIAnimation() for info box hiding action
 							startUIAnimation(&state->ds,UIANIM_NUCLHIGHLIGHT_HIDE);
 						}else{
