@@ -428,11 +428,11 @@ void drawNuclInfoBox(const app_data *restrict dat, const app_state *restrict sta
   //ground state
   drawYPos += NUCL_INFOBOX_BIGLINE_HEIGHT;
   uint32_t lvlInd = dat->ndat.nuclData[nuclInd].firstLevel + dat->ndat.nuclData[nuclInd].gsLevel;
-  snprintf(tmpStr,32,"%.0f",(double)dat->ndat.levels[lvlInd].energy);
+  getLvlEnergyStr(tmpStr,&dat->ndat,lvlInd,0);
   drawTextAlignedSized(rdat,drawXPos+NUCL_INFOBOX_ENERGY_COL_OFFSET,drawYPos,rdat->font,blackCol8Bit,alpha,tmpStr,ALIGN_LEFT,state->ds.uiElemWidth[UIELEM_NUCL_INFOBOX]);
   getSpinParStr(tmpStr,&dat->ndat,lvlInd);
   drawTextAlignedSized(rdat,drawXPos+NUCL_INFOBOX_JPI_COL_OFFSET,drawYPos,rdat->font,blackCol8Bit,alpha,tmpStr,ALIGN_LEFT,state->ds.uiElemWidth[UIELEM_NUCL_INFOBOX]);
-  getHalfLifeStr(tmpStr,&dat->ndat,lvlInd);
+  getHalfLifeStr(tmpStr,&dat->ndat,lvlInd,1);
   drawTextAlignedSized(rdat,drawXPos+NUCL_INFOBOX_HALFLIFE_COL_OFFSET,drawYPos,rdat->font,blackCol8Bit,alpha,tmpStr,ALIGN_LEFT,state->ds.uiElemWidth[UIELEM_NUCL_INFOBOX]);
   if(dat->ndat.levels[lvlInd].halfLife.unit == VALUE_UNIT_STABLE){
     drawTextAlignedSized(rdat,drawXPos+NUCL_INFOBOX_DECAYMODE_COL_OFFSET,drawYPos,rdat->font,blackCol8Bit,alpha,"N/A",ALIGN_LEFT,state->ds.uiElemWidth[UIELEM_NUCL_INFOBOX]); //draw no decay mode label
@@ -461,11 +461,11 @@ void drawNuclInfoBox(const app_data *restrict dat, const app_state *restrict sta
   lvlInd = dat->ndat.nuclData[nuclInd].longestIsomerLevel;
   if((lvlInd != MAXNUMLVLS)&&(lvlInd != (dat->ndat.nuclData[nuclInd].firstLevel + dat->ndat.nuclData[nuclInd].gsLevel))){
     drawYPos += (NUCL_INFOBOX_BIGLINE_HEIGHT - NUCL_INFOBOX_SMALLLINE_HEIGHT);
-    snprintf(tmpStr,32,"%.0f",(double)dat->ndat.levels[lvlInd].energy);
+    getLvlEnergyStr(tmpStr,&dat->ndat,lvlInd,1);
     drawTextAlignedSized(rdat,drawXPos+NUCL_INFOBOX_ENERGY_COL_OFFSET,drawYPos,rdat->font,blackCol8Bit,alpha,tmpStr,ALIGN_LEFT,state->ds.uiElemWidth[UIELEM_NUCL_INFOBOX]);
     getSpinParStr(tmpStr,&dat->ndat,lvlInd);
     drawTextAlignedSized(rdat,drawXPos+NUCL_INFOBOX_JPI_COL_OFFSET,drawYPos,rdat->font,blackCol8Bit,alpha,tmpStr,ALIGN_LEFT,state->ds.uiElemWidth[UIELEM_NUCL_INFOBOX]);
-    getHalfLifeStr(tmpStr,&dat->ndat,lvlInd);
+    getHalfLifeStr(tmpStr,&dat->ndat,lvlInd,1);
     drawTextAlignedSized(rdat,drawXPos+NUCL_INFOBOX_HALFLIFE_COL_OFFSET,drawYPos,rdat->font,blackCol8Bit,alpha,tmpStr,ALIGN_LEFT,state->ds.uiElemWidth[UIELEM_NUCL_INFOBOX]);
     if(dat->ndat.levels[lvlInd].halfLife.unit == VALUE_UNIT_STABLE){
       drawTextAlignedSized(rdat,drawXPos+NUCL_INFOBOX_DECAYMODE_COL_OFFSET,drawYPos,rdat->font,blackCol8Bit,alpha,"N/A",ALIGN_LEFT,state->ds.uiElemWidth[UIELEM_NUCL_INFOBOX]); //draw no decay mode label

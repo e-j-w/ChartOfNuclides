@@ -277,7 +277,7 @@ void parseHalfLife(level * lev, char * hlstring){
   hlErrVal[6] = '\0'; //terminate string
 
 	lev->halfLife.val = -1.0f;
-	lev->halfLife.err = 0;
+	lev->halfLife.err = (uint8_t)atoi(hlErrVal);
   lev->halfLife.format = 0;
   lev->halfLife.unit=VALUE_UNIT_NOVAL;
 
@@ -978,9 +978,9 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 			typebuff[3] = '\0';
 
 			//parse the energy
-			char ebuff[10];
-			memcpy(ebuff, &line[9], 9);
-			ebuff[9] = '\0';
+			char ebuff[11];
+			memcpy(ebuff, &line[9], 10);
+			ebuff[10] = '\0';
 
 			//add levels
 			if(nd->numNucl>=0){ //check that indices are valid
@@ -989,7 +989,8 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 						if(strcmp(typebuff,"  L")==0){
 
 							float levelE = (float)atof(ebuff);
-							//printf("Found level at %f keV.\n",atof(ebuff));
+							//printf("Found level at %f keV from string: %s.\n",atof(ebuff),ebuff);
+							
 							//parse the energy error
 							char eeBuff[3];
 							memcpy(eeBuff, &line[19], 2);
@@ -999,7 +1000,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 							if(((nd->nuclData[nd->numNucl].N + nd->nuclData[nd->numNucl].Z) % 2) != 0){
 								halfInt = 1; //odd mass nucleus, half-integer spins
 							}
-							if((nd->nuclData[nd->numNucl].numLevels==0)||(levelE>(nd->levels[nd->numLvls-1].energy))){
+							if((nd->nuclData[nd->numNucl].numLevels==0)||(levelE>(nd->levels[nd->numLvls-1].energy.val))){
 								//the level energy represents a new level
 								nd->nuclData[nd->numNucl].numLevels++;
 								nd->numLvls++;
@@ -1007,8 +1008,41 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 								if(nd->nuclData[nd->numNucl].numLevels == 1){
 									nd->nuclData[nd->numNucl].firstLevel = nd->numLvls-1;
 								}
-								nd->levels[nd->numLvls-1].energy=levelE;
-								nd->levels[nd->numLvls-1].energyErr=levelEerr;
+								//get the number of sig figs
+								nd->levels[nd->numLvls-1].energy.format = 0; //default
+								//printf("ebuff: %s\n",ebuff);
+								tok = strtok(ebuff,".");
+								if(tok!=NULL){
+									//printf("%s\n",tok);
+									tok = strtok(NULL,"E"); //some level energies are specified with exponents
+									if(tok!=NULL){
+										//printf("%s\n",tok);
+										nd->levels[nd->numLvls-1].energy.format = (uint8_t)strlen(tok);
+										//check for trailing empty spaces
+										for(uint8_t i=0;i<nd->levels[nd->numLvls-1].energy.format;i++){
+											if(isspace(tok[i])){
+												nd->levels[nd->numLvls-1].energy.format = i;
+												break;
+											}
+										}
+										if(nd->levels[nd->numLvls-1].energy.format > 15U){
+											nd->levels[nd->numLvls-1].energy.format = 15U; //only 4 bits available for precision
+										}
+										//printf("format: %u\n",nd->levels[nd->numLvls-1].energy.format);
+										tok = strtok(NULL,""); //get the remaining part of the string (only get past here if the value was expressed in exponent form)
+										if(tok!=NULL){
+											//printf("energy in exponent form: %s\n",ebuff);
+											//value was in exponent format
+            					nd->levels[nd->numLvls-1].energy.format |= (uint8_t)(1U << 4);
+										}
+									}
+								}
+								if((levelE==0.0f)&&(nd->levels[nd->numLvls-1].energy.format == 0)){
+									nd->levels[nd->numLvls-1].energy.format = 1; //always include at least one decimal place for ground states, for aesthetic purposes
+								}
+								nd->levels[nd->numLvls-1].energy.val=levelE;
+								nd->levels[nd->numLvls-1].energy.err=levelEerr;
+								nd->levels[nd->numLvls-1].energy.unit=VALUE_UNIT_KEV;
 								nd->levels[nd->numLvls-1].halfInt = halfInt;
 								nd->levels[nd->numLvls-1].numDecModes = 0;
 								nd->levels[nd->numLvls-1].firstDecMode = nd->numDecModes;
@@ -1025,7 +1059,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 								//printf("%s\n",hlBuff);
 								parseHalfLife(&nd->levels[nd->numLvls-1],hlBuff);
 								//check isomerism
-								if(nd->levels[nd->numLvls-1].energy > 0.0f){
+								if(nd->levels[nd->numLvls-1].energy.val > 0.0f){
 									uint8_t hlValueType = (uint8_t)((nd->levels[nd->numLvls-1].halfLife.format >> 5U) & 7U);
 									if(!((hlValueType == VALUETYPE_LESSTHAN)||(hlValueType == VALUETYPE_LESSOREQUALTHAN))){
 										double hl = getLevelHalfLifeSeconds(nd,nd->numLvls-1);

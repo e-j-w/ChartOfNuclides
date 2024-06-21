@@ -560,8 +560,27 @@ const char* getDecayTypeShortStr(const uint8_t type){
 	}
 }
 
-void getHalfLifeStr(char strOut[32], const ndata *restrict nd, const uint32_t lvlInd){
-	//are the snprintf lines slow?
+void getLvlEnergyStr(char strOut[32], const ndata *restrict nd, const uint32_t lvlInd, const uint8_t showErr){
+
+	uint8_t ePrecision = (uint8_t)(nd->levels[lvlInd].energy.format & 15U);
+	uint8_t eExponent = (uint8_t)((nd->levels[lvlInd].energy.format >> 4U) & 1U);
+	if(showErr == 0){
+		if(eExponent == 0){
+			snprintf(strOut,32,"%.*f",ePrecision,(double)(nd->levels[lvlInd].energy.val));
+		}else{
+			snprintf(strOut,32,"%.*e",ePrecision,(double)(nd->levels[lvlInd].energy.val));
+		}
+	}else{
+		if(eExponent == 0){
+			snprintf(strOut,32,"%.*f(%u)",ePrecision,(double)(nd->levels[lvlInd].energy.val),nd->levels[lvlInd].energy.err);
+		}else{
+			snprintf(strOut,32,"%.*e(%u)",ePrecision,(double)(nd->levels[lvlInd].energy.val),nd->levels[lvlInd].energy.err);
+		}
+	}
+	
+}
+
+void getHalfLifeStr(char strOut[32], const ndata *restrict nd, const uint32_t lvlInd, const uint8_t showErr){
 	if(lvlInd < nd->numLvls){
 		if(nd->levels[lvlInd].halfLife.unit == VALUE_UNIT_STABLE){
 			snprintf(strOut,32,"STABLE");
@@ -571,7 +590,7 @@ void getHalfLifeStr(char strOut[32], const ndata *restrict nd, const uint32_t lv
 			uint8_t hlPrecision = (uint8_t)(nd->levels[lvlInd].halfLife.format & 15U);
 			uint8_t hlExponent = (uint8_t)((nd->levels[lvlInd].halfLife.format >> 4U) & 1U);
 			uint8_t hlValueType = (uint8_t)((nd->levels[lvlInd].halfLife.format >> 5U) & 7U);
-			if(hlPrecision > 0){
+			if((showErr == 0)||(nd->levels[lvlInd].halfLife.err == 0)){
 				if(hlExponent == 0){
 					snprintf(strOut,32,"%s%.*f %s",getValueTypeShortStr(hlValueType),hlPrecision,(double)(nd->levels[lvlInd].halfLife.val),getHalfLifeUnitShortStr(nd->levels[lvlInd].halfLife.unit));
 				}else{
@@ -579,9 +598,9 @@ void getHalfLifeStr(char strOut[32], const ndata *restrict nd, const uint32_t lv
 				}
 			}else{
 				if(hlExponent == 0){
-					snprintf(strOut,32,"%s%.0f %s",getValueTypeShortStr(hlValueType),(double)(nd->levels[lvlInd].halfLife.val),getHalfLifeUnitShortStr(nd->levels[lvlInd].halfLife.unit));
+					snprintf(strOut,32,"%s%.*f(%u) %s",getValueTypeShortStr(hlValueType),hlPrecision,(double)(nd->levels[lvlInd].halfLife.val),nd->levels[lvlInd].halfLife.err,getHalfLifeUnitShortStr(nd->levels[lvlInd].halfLife.unit));
 				}else{
-					snprintf(strOut,32,"%s%.0e %s",getValueTypeShortStr(hlValueType),(double)(nd->levels[lvlInd].halfLife.val),getHalfLifeUnitShortStr(nd->levels[lvlInd].halfLife.unit));
+					snprintf(strOut,32,"%s%.*e(%u) %s",getValueTypeShortStr(hlValueType),hlPrecision,(double)(nd->levels[lvlInd].halfLife.val),nd->levels[lvlInd].halfLife.err,getHalfLifeUnitShortStr(nd->levels[lvlInd].halfLife.unit));
 				}
 			}
 		}else{
@@ -593,7 +612,7 @@ void getHalfLifeStr(char strOut[32], const ndata *restrict nd, const uint32_t lv
 }
 void getGSHalfLifeStr(char strOut[32], const ndata *restrict nd, const uint16_t nuclInd){
 	if(nd->nuclData[nuclInd].numLevels > 0){
-		getHalfLifeStr(strOut,nd,nd->nuclData[nuclInd].firstLevel + nd->nuclData[nuclInd].gsLevel);
+		getHalfLifeStr(strOut,nd,nd->nuclData[nuclInd].firstLevel + nd->nuclData[nuclInd].gsLevel,1);
 	}else{
 		snprintf(strOut,32,"Unknown");
 	}

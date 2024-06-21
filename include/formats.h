@@ -90,8 +90,7 @@ typedef struct
 
 typedef struct
 {
-  float energy; //level energy in keV
-  uint8_t energyErr; //energy uncertainty value
+  valWithErr energy; //level energy in keV
   valWithErr halfLife;
   int16_t numSpinParVals; //number of assigned spin parity values
   spinparval spval[MAXSPPERLEVEL]; //assinged spin parity value(s) 
