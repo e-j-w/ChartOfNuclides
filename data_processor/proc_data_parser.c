@@ -1010,6 +1010,8 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 								nd->levels[nd->numLvls-1].energy=levelE;
 								nd->levels[nd->numLvls-1].energyErr=levelEerr;
 								nd->levels[nd->numLvls-1].halfInt = halfInt;
+								nd->levels[nd->numLvls-1].numDecModes = 0;
+								nd->levels[nd->numLvls-1].firstDecMode = nd->numDecModes;
 								//parse the level spin and parity
 								char spbuff[16];
 								memcpy(spbuff, &line[21], 15);
@@ -1060,8 +1062,6 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 								//line contains decay mode info
 								//printf("dec mode found: %s\n",line);
 								uint8_t decModCtr = 0;
-								nd->levels[nd->numLvls-1].numDecModes = 0;
-								nd->levels[nd->numLvls-1].firstDecMode = nd->numDecModes;
 								char dmBuff[128], valBuff[16];
 								memcpy(dmBuff, &line[decStrStart], 127-decStrStart);
 								dmBuff[127-decStrStart] = '\0';
@@ -1100,8 +1100,28 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 										nd->dcyMode[nd->numDecModes].type = DECAYMODE_3HE;
 									}else if(strcmp(tok,"%A")==0){
 										nd->dcyMode[nd->numDecModes].type = DECAYMODE_ALPHA;
+									}else if(strcmp(tok,"%B-A")==0){
+										nd->dcyMode[nd->numDecModes].type = DECAYMODE_BETAMINUS_ALPHA;
 									}else if(strcmp(tok,"%SF")==0){
 										nd->dcyMode[nd->numDecModes].type = DECAYMODE_SPONTANEOUSFISSION;
+									}else if(strcmp(tok,"%B-SF")==0){
+										nd->dcyMode[nd->numDecModes].type = DECAYMODE_BETAMINUS_SPONTANEOUSFISSION;
+									}else if(strcmp(tok,"%2B-")==0){
+										nd->dcyMode[nd->numDecModes].type = DECAYMODE_2BETAMINUS;
+									}else if(strcmp(tok,"%2B+")==0){
+										nd->dcyMode[nd->numDecModes].type = DECAYMODE_2BETAPLUS;
+									}else if(strcmp(tok,"%2EC")==0){
+										nd->dcyMode[nd->numDecModes].type = DECAYMODE_2EC;
+									}else if(strcmp(tok,"%14C")==0){
+										nd->dcyMode[nd->numDecModes].type = DECAYMODE_14C;
+									}else if(strcmp(tok,"%{+20}Ne")==0){
+										nd->dcyMode[nd->numDecModes].type = DECAYMODE_20NE;
+									}else if(strcmp(tok,"%{+25}Ne")==0){
+										nd->dcyMode[nd->numDecModes].type = DECAYMODE_25NE;
+									}else if(strcmp(tok,"%{+28}Mg")==0){
+										nd->dcyMode[nd->numDecModes].type = DECAYMODE_28MG;
+									}else if(strcmp(tok,"%34SI")==0){
+										nd->dcyMode[nd->numDecModes].type = DECAYMODE_34SI;
 									}else{
 										break;
 									}

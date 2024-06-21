@@ -405,8 +405,6 @@ void drawNuclInfoBox(const app_data *restrict dat, const app_state *restrict sta
   if(state->ds.uiAnimPlaying & (1U << UIANIM_NUCLHIGHLIGHT_SHOW)){
     alpha = (uint8_t)(255.0f*juice_smoothStop2(1.0f - state->ds.timeLeftInUIAnimation[UIANIM_NUCLHIGHLIGHT_SHOW]/UI_ANIM_LENGTH));
   }
-
-  
   
   //draw panel background
   SDL_FRect infoBoxPanelRect;
@@ -440,16 +438,22 @@ void drawNuclInfoBox(const app_data *restrict dat, const app_state *restrict sta
     drawTextAlignedSized(rdat,drawXPos+NUCL_INFOBOX_DECAYMODE_COL_OFFSET,drawYPos,rdat->font,blackCol8Bit,alpha,"N/A",ALIGN_LEFT,state->ds.uiElemWidth[UIELEM_NUCL_INFOBOX]); //draw no decay mode label
     drawYPos += NUCL_INFOBOX_SMALLLINE_HEIGHT;
   }else{
-    for(int8_t i=0; i<dat->ndat.levels[lvlInd].numDecModes; i++){
-      getDecayModeStr(tmpStr,&dat->ndat,dat->ndat.levels[lvlInd].firstDecMode + (uint32_t)i);
-      //printf("%s\n",tmpStr);
-      if(drawYPos < (float)(state->ds.uiElemPosY[UIELEM_NUCL_INFOBOX] + state->ds.uiElemHeight[UIELEM_NUCL_INFOBOX])){
-        drawTextAlignedSized(rdat,drawXPos+NUCL_INFOBOX_DECAYMODE_COL_OFFSET,drawYPos,rdat->font,blackCol8Bit,alpha,tmpStr,ALIGN_LEFT,state->ds.uiElemWidth[UIELEM_NUCL_INFOBOX]); //draw decay mode label
-        drawYPos += NUCL_INFOBOX_SMALLLINE_HEIGHT;
-      }else{
-        break;
+    if(dat->ndat.levels[lvlInd].numDecModes > 0){
+      for(int8_t i=0; i<dat->ndat.levels[lvlInd].numDecModes; i++){
+        getDecayModeStr(tmpStr,&dat->ndat,dat->ndat.levels[lvlInd].firstDecMode + (uint32_t)i);
+        //printf("%s\n",tmpStr);
+        if(drawYPos < (float)(state->ds.uiElemPosY[UIELEM_NUCL_INFOBOX] + state->ds.uiElemHeight[UIELEM_NUCL_INFOBOX])){
+          drawTextAlignedSized(rdat,drawXPos+NUCL_INFOBOX_DECAYMODE_COL_OFFSET,drawYPos,rdat->font,blackCol8Bit,alpha,tmpStr,ALIGN_LEFT,state->ds.uiElemWidth[UIELEM_NUCL_INFOBOX]); //draw decay mode label
+          drawYPos += NUCL_INFOBOX_SMALLLINE_HEIGHT;
+        }else{
+          break;
+        }
       }
+    }else{
+      drawTextAlignedSized(rdat,drawXPos+NUCL_INFOBOX_DECAYMODE_COL_OFFSET,drawYPos,rdat->font,blackCol8Bit,alpha,"Unknown",ALIGN_LEFT,state->ds.uiElemWidth[UIELEM_NUCL_INFOBOX]); //draw decay mode label
+      drawYPos += NUCL_INFOBOX_SMALLLINE_HEIGHT;
     }
+    
   }
 
   //longest isomer

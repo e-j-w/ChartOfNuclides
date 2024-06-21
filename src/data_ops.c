@@ -507,6 +507,8 @@ const char* getDecayTypeShortStr(const uint8_t type){
 			return "β+";
 		case DECAYMODE_ALPHA:
 			return "α";
+		case DECAYMODE_BETAMINUS_ALPHA:
+			return "β-α";
 		case DECAYMODE_BETAMINUS_NEUTRON:
 			return "β-n";
 		case DECAYMODE_BETAPLUS_PROTON:
@@ -535,6 +537,24 @@ const char* getDecayTypeShortStr(const uint8_t type){
 			return "2p";
 		case DECAYMODE_SPONTANEOUSFISSION:
 			return "SF";
+		case DECAYMODE_BETAMINUS_SPONTANEOUSFISSION:
+			return "β-SF";
+		case DECAYMODE_2BETAMINUS:
+			return "2β-";
+		case DECAYMODE_2BETAPLUS:
+			return "2β+";
+		case DECAYMODE_2EC:
+			return "2ε";
+		case DECAYMODE_14C:
+			return "14C";
+		case DECAYMODE_20NE:
+			return "20Ne";
+		case DECAYMODE_25NE:
+			return "25Ne";
+		case DECAYMODE_28MG:
+			return "28Mg";
+		case DECAYMODE_34SI:
+			return "34Si";
 		default:
 			return "";																						
 	}
@@ -584,7 +604,7 @@ void getDecayModeStr(char strOut[32], const ndata *restrict nd, const uint32_t d
 		uint8_t decValueType = nd->dcyMode[dcyModeInd].prob.unit;
 		uint8_t decType = nd->dcyMode[dcyModeInd].type;
 		if(decValueType == VALUETYPE_NUMBER){
-			snprintf(strOut,32,"%s=%.0f%%%%",getDecayTypeShortStr(decType),(double)nd->dcyMode[dcyModeInd].prob.val); //%%%% will be parsed to "%%" in tmpStr, which will then be parsed as a format string by SDL_FontCacahe, leaving "%"
+			snprintf(strOut,32,"%s = %.0f%%%%",getDecayTypeShortStr(decType),(double)nd->dcyMode[dcyModeInd].prob.val); //%%%% will be parsed to "%%" in tmpStr, which will then be parsed as a format string by SDL_FontCacahe, leaving "%"
 		}else if(decValueType == VALUETYPE_UNKNOWN){
 			snprintf(strOut,32,"%s%s",getDecayTypeShortStr(decType),getValueTypeShortStr(decValueType));
 		}else{
@@ -836,9 +856,11 @@ void uiElemClickAction(const app_data *restrict dat, app_state *restrict state, 
 							state->ds.infoBoxTableHeight += NUCL_INFOBOX_SMALLLINE_HEIGHT*(dat->ndat.levels[dat->ndat.nuclData[selNucl].firstLevel + dat->ndat.nuclData[selNucl].gsLevel].numDecModes - 1);
 						}
 						if(dat->ndat.nuclData[selNucl].longestIsomerLevel != MAXNUMLVLS){
-							state->ds.infoBoxTableHeight += NUCL_INFOBOX_BIGLINE_HEIGHT;
-							if(dat->ndat.levels[dat->ndat.nuclData[selNucl].longestIsomerLevel].numDecModes > 1){
-								state->ds.infoBoxTableHeight += NUCL_INFOBOX_SMALLLINE_HEIGHT*(dat->ndat.levels[dat->ndat.nuclData[selNucl].longestIsomerLevel].numDecModes - 1);
+							if(dat->ndat.nuclData[selNucl].longestIsomerLevel != (dat->ndat.nuclData[selNucl].firstLevel + dat->ndat.nuclData[selNucl].gsLevel)){
+								state->ds.infoBoxTableHeight += NUCL_INFOBOX_BIGLINE_HEIGHT;
+								if(dat->ndat.levels[dat->ndat.nuclData[selNucl].longestIsomerLevel].numDecModes > 1){
+									state->ds.infoBoxTableHeight += NUCL_INFOBOX_SMALLLINE_HEIGHT*(dat->ndat.levels[dat->ndat.nuclData[selNucl].longestIsomerLevel].numDecModes - 1);
+								}
 							}
 						}
 						updateSingleUIElemPosition(&state->ds,UIELEM_NUCL_INFOBOX);
