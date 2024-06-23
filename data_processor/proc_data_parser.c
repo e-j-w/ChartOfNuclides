@@ -297,7 +297,7 @@ void parseHalfLife(level * lev, char * hlstring){
     tok = strtok(hlVal,".");
     if(tok!=NULL){
       //printf("%s\n",tok);
-      tok = strtok(NULL,"E+-");
+      tok = strtok(NULL,"E+");
       if(tok!=NULL){
         //printf("%s\n",tok);
         lev->halfLife.format = (uint8_t)strlen(tok);
@@ -306,18 +306,22 @@ void parseHalfLife(level * lev, char * hlstring){
         }
         tok = strtok(NULL,""); //get the rest of the string (the part after the exponent, if it exists)
         if(tok!=NULL){
-          //printf("%s\n",tok);
           //value was in exponent format
-          lev->halfLife.format |= (uint8_t)(1U << 4);
+					lev->halfLife.exponent = (int8_t)atoi(tok);
+					//printf("%s, parsed to %i\n",tok,lev->halfLife.exponent);
+					lev->halfLife.val = lev->halfLife.val / powf(10.0f,(float)(lev->halfLife.exponent));
+          lev->halfLife.format |= (uint8_t)(1U << 4); //exponent flag
         }
       }else{
         tok = strtok(hlVal,"E");
         if(tok!=NULL){
           tok = strtok(NULL,""); //get the rest of the string (the part after the exponent, if it exists)
           if(tok!=NULL){
-            //printf("%s\n",tok);
             //value was in exponent format
-            lev->halfLife.format |= (uint8_t)(1U << 4);
+            lev->halfLife.exponent = (int8_t)atoi(tok);
+						//printf("%s, parsed to %i\n",tok,lev->halfLife.exponent);
+						lev->halfLife.val = lev->halfLife.val / powf(10.0f,(float)(lev->halfLife.exponent));
+						lev->halfLife.format |= (uint8_t)(1U << 4); //exponent flag
           }
         }
       }
@@ -1033,7 +1037,9 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 										if(tok!=NULL){
 											//printf("energy in exponent form: %s\n",ebuff);
 											//value was in exponent format
-            					nd->levels[nd->numLvls-1].energy.format |= (uint8_t)(1U << 4);
+											nd->levels[nd->numLvls-1].energy.exponent = (int8_t)atoi(tok);
+											nd->levels[nd->numLvls-1].energy.val = nd->levels[nd->numLvls-1].energy.val / powf(10.0f,(float)(nd->levels[nd->numLvls-1].energy.exponent));
+											nd->levels[nd->numLvls-1].energy.format |= (uint8_t)(1U << 4); //exponent flag
 										}
 									}
 								}
@@ -1059,13 +1065,22 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 								//printf("%s\n",hlBuff);
 								parseHalfLife(&nd->levels[nd->numLvls-1],hlBuff);
 								//check isomerism
-								if(nd->levels[nd->numLvls-1].energy.val > 0.0f){
+								double en = getLevelEnergykeV(nd,nd->numLvls-1);
+								if(en > 0.0){
 									uint8_t hlValueType = (uint8_t)((nd->levels[nd->numLvls-1].halfLife.format >> 5U) & 7U);
 									if(!((hlValueType == VALUETYPE_LESSTHAN)||(hlValueType == VALUETYPE_LESSOREQUALTHAN))){
 										double hl = getLevelHalfLifeSeconds(nd,nd->numLvls-1);
 										//printf("hl: %f\n",hl);
-										if(hl >= 10.0E-9){\
+										if(hl >= 10.0E-9){
 											if(hl > longestIsomerHl){
+												longestIsomerHl = hl;
+												nd->nuclData[nd->numNucl].longestIsomerLevel = nd->numLvls-1;
+											}
+										}else if(en < 0.02){
+											//low energy levels are generally isomers (even if their half-life is unknown)
+											//229Th is a famous case
+											//only include these if no other long-lived isomers are found
+											if(!(longestIsomerHl > 0.0)&&(hl <= longestIsomerHl)){
 												longestIsomerHl = hl;
 												nd->nuclData[nd->numNucl].longestIsomerLevel = nd->numLvls-1;
 											}

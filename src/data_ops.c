@@ -568,13 +568,13 @@ void getLvlEnergyStr(char strOut[32], const ndata *restrict nd, const uint32_t l
 		if(eExponent == 0){
 			snprintf(strOut,32,"%.*f",ePrecision,(double)(nd->levels[lvlInd].energy.val));
 		}else{
-			snprintf(strOut,32,"%.*e",ePrecision,(double)(nd->levels[lvlInd].energy.val));
+			snprintf(strOut,32,"%.*fE%i",ePrecision,(double)(nd->levels[lvlInd].energy.val),nd->levels[lvlInd].energy.exponent);
 		}
 	}else{
 		if(eExponent == 0){
 			snprintf(strOut,32,"%.*f(%u)",ePrecision,(double)(nd->levels[lvlInd].energy.val),nd->levels[lvlInd].energy.err);
 		}else{
-			snprintf(strOut,32,"%.*e(%u)",ePrecision,(double)(nd->levels[lvlInd].energy.val),nd->levels[lvlInd].energy.err);
+			snprintf(strOut,32,"%.*f(%u)E%i",ePrecision,(double)(nd->levels[lvlInd].energy.val),nd->levels[lvlInd].energy.exponent,nd->levels[lvlInd].energy.err);
 		}
 	}
 	
@@ -594,13 +594,13 @@ void getHalfLifeStr(char strOut[32], const ndata *restrict nd, const uint32_t lv
 				if(hlExponent == 0){
 					snprintf(strOut,32,"%s%.*f %s",getValueTypeShortStr(hlValueType),hlPrecision,(double)(nd->levels[lvlInd].halfLife.val),getHalfLifeUnitShortStr(nd->levels[lvlInd].halfLife.unit));
 				}else{
-					snprintf(strOut,32,"%s%.*e %s",getValueTypeShortStr(hlValueType),hlPrecision,(double)(nd->levels[lvlInd].halfLife.val),getHalfLifeUnitShortStr(nd->levels[lvlInd].halfLife.unit));
+					snprintf(strOut,32,"%s%.*fE%i %s",getValueTypeShortStr(hlValueType),hlPrecision,(double)(nd->levels[lvlInd].halfLife.val),nd->levels[lvlInd].halfLife.exponent,getHalfLifeUnitShortStr(nd->levels[lvlInd].halfLife.unit));
 				}
 			}else{
 				if(hlExponent == 0){
 					snprintf(strOut,32,"%s%.*f(%u) %s",getValueTypeShortStr(hlValueType),hlPrecision,(double)(nd->levels[lvlInd].halfLife.val),nd->levels[lvlInd].halfLife.err,getHalfLifeUnitShortStr(nd->levels[lvlInd].halfLife.unit));
 				}else{
-					snprintf(strOut,32,"%s%.*e(%u) %s",getValueTypeShortStr(hlValueType),hlPrecision,(double)(nd->levels[lvlInd].halfLife.val),nd->levels[lvlInd].halfLife.err,getHalfLifeUnitShortStr(nd->levels[lvlInd].halfLife.unit));
+					snprintf(strOut,32,"%s%.*f(%u)E%i %s",getValueTypeShortStr(hlValueType),hlPrecision,(double)(nd->levels[lvlInd].halfLife.val),nd->levels[lvlInd].halfLife.err,nd->levels[lvlInd].halfLife.exponent,getHalfLifeUnitShortStr(nd->levels[lvlInd].halfLife.unit));
 				}
 			}
 		}else{
@@ -684,9 +684,41 @@ void getSpinParStr(char strOut[32], const ndata *restrict nd, const uint32_t lvl
 	}
 }
 
+double getRawValFromDB(const valWithErr *restrict valStruct){
+	double val = (double)(valStruct->val);
+	if(((valStruct->format >> 4U) & 1U) != 0){
+		//value in exponent form
+		val = val * pow(10.0,(double)(valStruct->exponent));
+	}
+	return val;
+}
+
+double getLevelEnergykeV(const ndata *restrict nd, const uint32_t levelInd){
+	if(levelInd < nd->numLvls){
+		double levelE = getRawValFromDB(&nd->levels[levelInd].energy);
+		if(levelE < 0.0){
+			//unknown level energy
+			return -2.0;
+		}
+		uint8_t eUnit = nd->levels[levelInd].energy.unit;
+		switch(eUnit){
+			case VALUE_UNIT_EV:
+				return levelE/1000.0;
+			case VALUE_UNIT_KEV:
+				return levelE;
+			case VALUE_UNIT_MEV:
+				return levelE*1000;
+			default:
+				return -2.0; //couldn't find level energy
+		}
+	}else{
+		return -2.0; //couldn't find level energy
+	}
+}
+
 double getLevelHalfLifeSeconds(const ndata *restrict nd, const uint32_t levelInd){
 	if(levelInd < nd->numLvls){
-		double hl = (double)(nd->levels[levelInd].halfLife.val);
+		double hl = getRawValFromDB(&nd->levels[levelInd].halfLife);
 		if(hl < 0.0){
 			//unknown half-life
 			return -2.0;

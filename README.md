@@ -6,7 +6,7 @@
 
 ## Description
 
-**NOTE: This is extremely early in development and has very limited functionality right now.**
+**NOTE: This is early in development and has limited functionality right now.**
 
 An offline viewer of isotope and nuclear structure data, presented in the familiar [Chart of Nuclides / Segrè chart](https://en.wikipedia.org/wiki/Table_of_nuclides) format.  The UI is implemented in [SDL](https://github.com/libsdl-org/SDL) (so you can browse nuclear half-lives using some of the same code that powers [Half-Life](https://www.pcgamingwiki.com/wiki/Half-Life#Middleware)).  The program parses various plaintext nuclear structure data (listed [here](#collect-data)) into a binary database, eventually one will be able to query this for information on various nuclei (levels, cascades, gamma-rays).
 
@@ -14,11 +14,11 @@ The goal is to develop a performant and multiplatform tool that will be useful i
 
 ## Features
 
-TBD
+- Runs locally, with no network connection needed.
+- Select individual nuclides to browse ground and isomeric state data.
+- More to come...
 
 ## Building and installing from source
-
-**NOTE: Instructions are still incomplete and are missing critical steps.  Don't try this at home (yet)!**
 
 ### Collect data
 
@@ -35,15 +35,11 @@ If you're building the database from scratch, you'll need various isotope and nu
 * GNU make
 * SDL3, SDL_image, SDL_ttf
 
-The current version has been tested under Arch Linux as of June 2024.
+The current version has been tested under Arch Linux as of June 2024.  For now SDL3 and its libraries probably have to be compiled manually, as they aren't (yet) packaged for major Linux distros.
 
 ### Build the database and program
 
-The program relies on additional data files, which can be obtained from **TBD**.  The embedded font used needs to support special UTF-8 characters in order to display info such as decay modes correctly.
-
-Install all build dependencies listed above.  For now SDL3 and its libraries probably have to be compiled manually, as they aren't (yet) packaged for major Linux distros.
-
-Build the application binaries using `make` (from the source tree root directory):
+Install all build dependencies listed above, then build the application binaries using `make` (from the source tree root directory):
 
 ```
 # using gcc:
@@ -89,3 +85,5 @@ The author(s) make no guarantee of the accuracy or completeness of the informati
 Developed and maintained by [Jonathan Williams](https://e-j-w.github.io/).
 
 A slightly modified version of the [SDL_FontCache](https://github.com/grimfang4/SDL_FontCache) library by Jonathan Dearborn is used for fast text rendering.
+
+The font used in this program (`data/font.ttf`) is a modified version of [Oxygen](https://github.com/KDE/oxygen-fonts) with some additional unicode glyphs from [Noto Sans](https://fonts.google.com/noto/specimen/Noto+Sans).  Both fonts are made available under the [Open Font License](https://openfontlicense.org/) (as described [here](https://fonts.google.com/specimen/Oxygen/about) and [here](https://fonts.google.com/noto/specimen/Noto+Sans/about)).
