@@ -808,6 +808,7 @@ void changeUIState(app_state *restrict state, const uint8_t newState){
       state->interactableElement |= (uint32_t)(1U << UIELEM_MENU_BUTTON);
 			if(state->ds.shownElements & (1U << UIELEM_NUCL_INFOBOX)){
 				state->interactableElement |= (uint32_t)(1U << UIELEM_NUCL_INFOBOX);
+				state->interactableElement |= (uint32_t)(1U << UIELEM_NUCL_INFOBOX_CLOSEBUTTON);
 			}
       break;
   }
@@ -856,6 +857,13 @@ void uiElemClickAction(const app_data *restrict dat, app_state *restrict state, 
       break;
 		case UIELEM_NUCL_INFOBOX:
 			break;
+		case UIELEM_NUCL_INFOBOX_CLOSEBUTTON:
+			//close the info box
+			if((state->ds.shownElements & (1U << UIELEM_NUCL_INFOBOX))&&(state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_HIDE]==0.0f)){
+				startUIAnimation(&state->ds,UIANIM_NUCLINFOBOX_HIDE); //hide the info box, see stopUIAnimation() for info box hiding action
+				startUIAnimation(&state->ds,UIANIM_NUCLHIGHLIGHT_HIDE);
+			}
+			break;
 		case UIELEM_ENUM_LENGTH:
     default:
 			//clicked outside of a button or UI element
@@ -883,6 +891,7 @@ void uiElemClickAction(const app_data *restrict dat, app_state *restrict state, 
 							}
 						}
 						updateSingleUIElemPosition(&state->ds,UIELEM_NUCL_INFOBOX);
+						updateSingleUIElemPosition(&state->ds,UIELEM_NUCL_INFOBOX_CLOSEBUTTON);
 						if(!(state->ds.shownElements & (1U << UIELEM_NUCL_INFOBOX))){
 							state->ds.shownElements |= (1U << UIELEM_NUCL_INFOBOX);
 							changeUIState(state,UISTATE_DEFAULT); //make info box interactable
@@ -958,6 +967,13 @@ void updateSingleUIElemPosition(drawing_state *restrict ds, const uint8_t uiElem
 			ds->uiElemHeight[uiElemInd] = (uint16_t)((float)NUCL_INFOBOX_MIN_HEIGHT + ds->infoBoxTableHeight);
 			ds->uiElemPosY[uiElemInd] = (uint16_t)(ds->windowYRes - ds->uiElemHeight[uiElemInd] - UI_PADDING_SIZE - (int32_t)CHART_AXIS_DEPTH);
 			ds->uiElemWidth[uiElemInd] = (uint16_t)(NUCL_INFOBOX_WIDTH);
+			break;
+		case UIELEM_NUCL_INFOBOX_CLOSEBUTTON:
+			ds->uiElemWidth[uiElemInd] = UI_TILE_SIZE;
+			ds->uiElemHeight[uiElemInd] = ds->uiElemWidth[uiElemInd];
+			ds->uiElemPosX[uiElemInd] = (uint16_t)(ds->uiElemPosX[UIELEM_NUCL_INFOBOX] + ds->uiElemWidth[UIELEM_NUCL_INFOBOX] - ds->uiElemWidth[uiElemInd] - 4*UI_PADDING_SIZE);
+			ds->uiElemPosY[uiElemInd] = ds->uiElemPosY[UIELEM_NUCL_INFOBOX] + 4*UI_PADDING_SIZE;
+			break;
 		default:
 			break;
 	}

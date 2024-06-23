@@ -265,12 +265,26 @@ void drawTextButton(const ui_theme_rules *restrict uirules, resource_data *restr
   drawTextAlignedSized(rdat,textX,textY,rdat->font,uirules->textColNormal,255,text,ALIGN_CENTER,(Uint16)w);
 }
 
-void drawIconButton(const ui_theme_rules *restrict uirules, resource_data *restrict rdat, const uint16_t x, const uint16_t y, const uint16_t w, const uint8_t highlightState, const uint8_t alpha, const uint8_t iconInd){
+void drawIcon(const ui_theme_rules *restrict uirules, resource_data *restrict rdat, const uint16_t x, const uint16_t y, const uint16_t w, const uint8_t highlightState, const uint8_t alpha, const uint8_t iconInd){
+  
   if(iconInd >= NUM_THEME_ICONS){
     printf("WARNING: drawIconButton - invalid icon index (%u).\n",iconInd);
     return;
   }
-  drawButton(uirules,rdat,x,y,w,highlightState,alpha);
+
+  switch(highlightState){
+    case HIGHLIGHT_NORMAL:
+    default:
+      setUITexColAlpha(rdat,uirules->modNormalCol.r,uirules->modNormalCol.g,uirules->modNormalCol.b,alpha);
+      break;
+    case HIGHLIGHT_MOUSEOVER:
+      setUITexColAlpha(rdat,uirules->modMouseOverCol.r,uirules->modMouseOverCol.g,uirules->modMouseOverCol.b,alpha);
+      break;
+    case HIGHLIGHT_SELECTED:
+      setUITexColAlpha(rdat,uirules->modSelectedCol.r,uirules->modSelectedCol.g,uirules->modSelectedCol.b,alpha);
+      break;
+  }
+
   SDL_FRect drawPos,srcRect;
   srcRect.x = UITHEME_ICON_TILE_X[iconInd]*UI_TILE_SIZE*rdat->uiScale;
   srcRect.y = UITHEME_ICON_TILE_Y[iconInd]*UI_TILE_SIZE*rdat->uiScale;
@@ -282,10 +296,19 @@ void drawIconButton(const ui_theme_rules *restrict uirules, resource_data *restr
   drawPos.y = (float)(y*rdat->uiScale) + (float)(UI_TILE_SIZE*rdat->uiScale)/2.0f - drawPos.h/2.0f;
   //printf("drawPos: %i %i %i %i\n",drawPos.x,drawPos.y,drawPos.w,drawPos.h);
   if(SDL_SetTextureAlphaMod(rdat->uiThemeTex,alpha)<0){
-    printf("WARNING: drawIconButton - cannot set texture alpha - %s\n",SDL_GetError());
+    printf("WARNING: drawIcon - cannot set texture alpha - %s\n",SDL_GetError());
   }
   SDL_RenderTexture(rdat->renderer,rdat->uiThemeTex,&srcRect,&drawPos);
   SDL_SetTextureAlphaMod(rdat->uiThemeTex,255);
+
+  //reset the color modulation
+  setUITexColAlpha(rdat,1.0f,1.0f,1.0f,1.0f);
+
+}
+
+void drawIconButton(const ui_theme_rules *restrict uirules, resource_data *restrict rdat, const uint16_t x, const uint16_t y, const uint16_t w, const uint8_t highlightState, const uint8_t alpha, const uint8_t iconInd){
+  drawButton(uirules,rdat,x,y,w,highlightState,alpha);
+  drawIcon(uirules,rdat,x,y,w,HIGHLIGHT_NORMAL,alpha,iconInd);
 }
 
 //draws a selection indicator with the position and size specified by the input SDL_Rect
