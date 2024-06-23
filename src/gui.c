@@ -486,9 +486,15 @@ void drawNuclInfoBox(const app_data *restrict dat, const app_state *restrict sta
   //header
   drawXPos = (float)(infoBoxPanelRect.x + 4*UI_PADDING_SIZE);
   drawYPos = (float)(infoBoxPanelRect.y + 4*UI_PADDING_SIZE);
-  snprintf(tmpStr,32,"%u",(uint16_t)(dat->ndat.nuclData[nuclInd].Z + dat->ndat.nuclData[nuclInd].N));
+  uint16_t nucA = (uint16_t)(dat->ndat.nuclData[nuclInd].Z + dat->ndat.nuclData[nuclInd].N);
+  snprintf(tmpStr,32,"%u",nucA);
   drawXPos += drawTextAlignedSized(rdat,drawXPos,drawYPos,rdat->smallFont,blackCol8Bit,alpha,tmpStr,ALIGN_LEFT,16384); //draw number label
-  drawTextAlignedSized(rdat,drawXPos,drawYPos+10.0f,rdat->bigFont,blackCol8Bit,alpha,getElemStr((uint8_t)dat->ndat.nuclData[nuclInd].Z),ALIGN_LEFT,16384); //draw element label
+  if((uint16_t)(dat->ndat.nuclData[nuclInd].Z <= 1)&&(dat->ndat.nuclData[nuclInd].N <= 2)){
+    snprintf(tmpStr,32,"%s (%s)",getElemStr((uint8_t)dat->ndat.nuclData[nuclInd].Z),getFullElemStr((uint8_t)dat->ndat.nuclData[nuclInd].Z,(uint8_t)dat->ndat.nuclData[nuclInd].N));
+  }else{
+    snprintf(tmpStr,32,"%s (%s-%u)",getElemStr((uint8_t)dat->ndat.nuclData[nuclInd].Z),getFullElemStr((uint8_t)dat->ndat.nuclData[nuclInd].Z,(uint8_t)dat->ndat.nuclData[nuclInd].N),nucA);
+  }
+  drawTextAlignedSized(rdat,drawXPos,drawYPos+10.0f,rdat->bigFont,blackCol8Bit,alpha,tmpStr,ALIGN_LEFT,16384); //draw element label
 
   //close button/icon
   drawIcon(&dat->rules.themeRules,rdat,state->ds.uiElemPosX[UIELEM_NUCL_INFOBOX_CLOSEBUTTON],state->ds.uiElemPosY[UIELEM_NUCL_INFOBOX_CLOSEBUTTON] + yOffset,state->ds.uiElemWidth[UIELEM_NUCL_INFOBOX_CLOSEBUTTON],getHighlightState(state,UIELEM_NUCL_INFOBOX_CLOSEBUTTON),255,UIICON_CLOSE);
