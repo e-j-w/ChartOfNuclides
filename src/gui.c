@@ -214,7 +214,7 @@ void drawChartOfNuclides(const app_data *restrict dat, const app_state *restrict
               const double hl = getNuclGSHalfLifeSeconds(&dat->ndat,(uint16_t)i);
               drawFlatRect(rdat,rect,getHalfLifeCol(hl));
               if(state->ds.chartZoomScale >= 4.0f){
-                drawNuclBoxLabel(dat,&state->ds,rdat,rect.x/rdat->uiScale,rect.y/rdat->uiScale,rect.w/rdat->uiScale,(hl > 1.0E4) ? whiteCol8Bit : blackCol8Bit,(uint16_t)i);
+                drawNuclBoxLabel(dat,&state->ds,rdat,rect.x/rdat->uiScale,rect.y/rdat->uiScale,rect.w/rdat->uiScale,(hl > 1.0E3) ? whiteCol8Bit : blackCol8Bit,(uint16_t)i);
               }
             }
           }

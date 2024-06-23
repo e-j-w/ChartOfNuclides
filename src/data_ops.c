@@ -999,12 +999,14 @@ void updateSingleUIElemPosition(drawing_state *restrict ds, const uint8_t uiElem
 			ds->uiElemHeight[uiElemInd] = (uint16_t)((float)NUCL_INFOBOX_MIN_HEIGHT + ds->infoBoxTableHeight);
 			ds->uiElemPosY[uiElemInd] = (uint16_t)(ds->windowYRes - ds->uiElemHeight[uiElemInd] - UI_PADDING_SIZE - (int32_t)CHART_AXIS_DEPTH);
 			ds->uiElemWidth[uiElemInd] = (uint16_t)(NUCL_INFOBOX_WIDTH);
+			//update child/depedant UI elements
+			updateSingleUIElemPosition(ds,UIELEM_NUCL_INFOBOX_CLOSEBUTTON);
 			break;
 		case UIELEM_NUCL_INFOBOX_CLOSEBUTTON:
-			ds->uiElemWidth[uiElemInd] = UI_TILE_SIZE;
-			ds->uiElemHeight[uiElemInd] = ds->uiElemWidth[uiElemInd];
-			ds->uiElemPosX[uiElemInd] = (uint16_t)(ds->uiElemPosX[UIELEM_NUCL_INFOBOX] + ds->uiElemWidth[UIELEM_NUCL_INFOBOX] - ds->uiElemWidth[uiElemInd] - 4*UI_PADDING_SIZE);
-			ds->uiElemPosY[uiElemInd] = ds->uiElemPosY[UIELEM_NUCL_INFOBOX] + 4*UI_PADDING_SIZE;
+			ds->uiElemWidth[UIELEM_NUCL_INFOBOX_CLOSEBUTTON] = UI_TILE_SIZE;
+			ds->uiElemHeight[UIELEM_NUCL_INFOBOX_CLOSEBUTTON] = ds->uiElemWidth[UIELEM_NUCL_INFOBOX_CLOSEBUTTON];
+			ds->uiElemPosX[UIELEM_NUCL_INFOBOX_CLOSEBUTTON] = (uint16_t)(ds->uiElemPosX[UIELEM_NUCL_INFOBOX] + ds->uiElemWidth[UIELEM_NUCL_INFOBOX] - ds->uiElemWidth[UIELEM_NUCL_INFOBOX_CLOSEBUTTON] - 4*UI_PADDING_SIZE);
+			ds->uiElemPosY[UIELEM_NUCL_INFOBOX_CLOSEBUTTON] = ds->uiElemPosY[UIELEM_NUCL_INFOBOX] + 4*UI_PADDING_SIZE;
 			break;
 		default:
 			break;
