@@ -7,3 +7,4 @@ energy_kev|Energy (keV)
 jpi|Jπ
 halflife|t1/2
 decay_mode|Decay Mode
+all_levels|All levels and gammas

@@ -234,7 +234,7 @@ void drawButton(const ui_theme_rules *restrict uirules, resource_data *restrict 
       }
       srcRect.w = (float)(tileWidth)*rdat->uiScale;
       destRect.x += destRect.w;
-      destRect.w = (float)(tileWidth)*rdat->uiScale;
+      destRect.w = srcRect.w;
       SDL_RenderTexture(rdat->renderer,rdat->uiThemeTex,&srcRect,&destRect);
       remainingWidth -= tileWidth;
     }
@@ -242,7 +242,7 @@ void drawButton(const ui_theme_rules *restrict uirules, resource_data *restrict 
     srcRect.x += (float)(UI_TILE_SIZE*rdat->uiScale);
     srcRect.w = (float)(UI_TILE_SIZE*rdat->uiScale);
     destRect.x += destRect.w;
-    destRect.w = (float)(UI_TILE_SIZE*rdat->uiScale);
+    destRect.w = srcRect.w;
     SDL_RenderTexture(rdat->renderer,rdat->uiThemeTex,&srcRect,&destRect);
   }
   
@@ -258,17 +258,15 @@ void drawTextButton(const ui_theme_rules *restrict uirules, resource_data *restr
   //get the text width and height
   //these should already fit a 1 tile height button well, with the default font size
   //(remember that the font size is scaled by the UI scale, during font import)
-  float textW = (float)FC_GetWidth(rdat->font,text);
-  float textH = (float)FC_GetHeight(rdat->font,text);
-  float textX = (float)(x*rdat->uiScale) + (float)(w*rdat->uiScale)/2.0f - textW/2.0f;
-  float textY = (float)(y*rdat->uiScale) + (float)(UI_TILE_SIZE*rdat->uiScale)/2.0f - textH/2.0f;
+  float textX = (float)x + (float)(w)/2.0f;
+  float textY = (float)y + (float)(UI_TILE_SIZE)/2.0f;
   drawTextAlignedSized(rdat,textX,textY,rdat->font,uirules->textColNormal,255,text,ALIGN_CENTER,(Uint16)w);
 }
 
 void drawIcon(const ui_theme_rules *restrict uirules, resource_data *restrict rdat, const uint16_t x, const uint16_t y, const uint16_t w, const uint8_t highlightState, const uint8_t alpha, const uint8_t iconInd){
   
   if(iconInd >= NUM_THEME_ICONS){
-    printf("WARNING: drawIconButton - invalid icon index (%u).\n",iconInd);
+    printf("WARNING: drawIcon - invalid icon index (%u).\n",iconInd);
     return;
   }
 
@@ -309,6 +307,19 @@ void drawIcon(const ui_theme_rules *restrict uirules, resource_data *restrict rd
 void drawIconButton(const ui_theme_rules *restrict uirules, resource_data *restrict rdat, const uint16_t x, const uint16_t y, const uint16_t w, const uint8_t highlightState, const uint8_t alpha, const uint8_t iconInd){
   drawButton(uirules,rdat,x,y,w,highlightState,alpha);
   drawIcon(uirules,rdat,x,y,w,HIGHLIGHT_NORMAL,alpha,iconInd);
+}
+
+void drawIconAndTextButton(const ui_theme_rules *restrict uirules, resource_data *restrict rdat, const uint16_t x, const uint16_t y, const uint16_t w, const uint8_t highlightState, const uint8_t alpha, const uint8_t iconInd, const char *text){
+  drawButton(uirules,rdat,x,y,w,highlightState,alpha);
+  drawIcon(uirules,rdat,x+UI_PADDING_SIZE,y,UI_TILE_SIZE,HIGHLIGHT_NORMAL,alpha,iconInd);
+  //get the text width and height
+  //these should already fit a 1 tile height button well, with the default font size
+  //(remember that the font size is scaled by the UI scale, during font import)
+  float textX = (float)x + (float)(w + UI_TILE_SIZE)/2.0f;
+  float textY = (float)y + (float)(UI_TILE_SIZE)/2.0f;
+  //printf("text x: %f, y: %f\n",(double)textX,(double)textY);
+  drawTextAlignedSized(rdat,textX,textY,rdat->font,uirules->textColNormal,255,text,ALIGN_CENTER,(Uint16)(w*rdat->uiScale));
+  
 }
 
 //draws a selection indicator with the position and size specified by the input SDL_Rect

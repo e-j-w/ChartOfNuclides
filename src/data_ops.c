@@ -1104,6 +1104,7 @@ void changeUIState(app_state *restrict state, const uint8_t newState){
       state->interactableElement |= (uint32_t)(1U << UIELEM_MENU_BUTTON);
 			if(state->ds.shownElements & (1U << UIELEM_NUCL_INFOBOX)){
 				state->interactableElement |= (uint32_t)(1U << UIELEM_NUCL_INFOBOX);
+				state->interactableElement |= (uint32_t)(1U << UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON);
 				state->interactableElement |= (uint32_t)(1U << UIELEM_NUCL_INFOBOX_CLOSEBUTTON);
 			}
       break;
@@ -1265,12 +1266,20 @@ void updateSingleUIElemPosition(drawing_state *restrict ds, const uint8_t uiElem
 			ds->uiElemWidth[uiElemInd] = (uint16_t)(NUCL_INFOBOX_WIDTH);
 			//update child/depedant UI elements
 			updateSingleUIElemPosition(ds,UIELEM_NUCL_INFOBOX_CLOSEBUTTON);
+			updateSingleUIElemPosition(ds,UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON);
 			break;
 		case UIELEM_NUCL_INFOBOX_CLOSEBUTTON:
 			ds->uiElemWidth[UIELEM_NUCL_INFOBOX_CLOSEBUTTON] = UI_TILE_SIZE;
 			ds->uiElemHeight[UIELEM_NUCL_INFOBOX_CLOSEBUTTON] = ds->uiElemWidth[UIELEM_NUCL_INFOBOX_CLOSEBUTTON];
 			ds->uiElemPosX[UIELEM_NUCL_INFOBOX_CLOSEBUTTON] = (uint16_t)(ds->uiElemPosX[UIELEM_NUCL_INFOBOX] + ds->uiElemWidth[UIELEM_NUCL_INFOBOX] - ds->uiElemWidth[UIELEM_NUCL_INFOBOX_CLOSEBUTTON] - 4*UI_PADDING_SIZE);
 			ds->uiElemPosY[UIELEM_NUCL_INFOBOX_CLOSEBUTTON] = ds->uiElemPosY[UIELEM_NUCL_INFOBOX] + 4*UI_PADDING_SIZE;
+			break;
+		case UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON:
+			ds->uiElemWidth[UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON] = NUCL_INFOBOX_ALLLEVELS_BUTTON_WIDTH;
+			ds->uiElemHeight[UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON] = UI_TILE_SIZE;
+			ds->uiElemPosX[UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON] = (uint16_t)(ds->uiElemPosX[UIELEM_NUCL_INFOBOX] + ds->uiElemWidth[UIELEM_NUCL_INFOBOX] - ds->uiElemWidth[UIELEM_NUCL_INFOBOX_CLOSEBUTTON] - ds->uiElemWidth[UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON] - 7*UI_PADDING_SIZE);
+			ds->uiElemPosY[UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON] = ds->uiElemPosY[UIELEM_NUCL_INFOBOX] + 4*UI_PADDING_SIZE;
+			//printf("x: %u, y: %u, w: %u, h: %u\n",ds->uiElemPosX[UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON],ds->uiElemPosY[UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON],ds->uiElemWidth[UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON],ds->uiElemHeight[UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON]);
 			break;
 		default:
 			break;
@@ -1292,6 +1301,7 @@ void updateWindowRes(app_data *restrict dat, drawing_state *restrict ds, resourc
     ds->forceRedraw = 1;
   }
 	float newScale = (float)rwidth/((float)wwidth);
+	//float newScale = 1.0f; //for testing UI scales
 	if(fabsf(rdat->uiScale - newScale) > 0.001f){
 		printf("Re-scaling UI from %0.9f to %0.9f.\n",(double)rdat->uiScale,(double)newScale);
 		rdat->uiScale = newScale; //set UI scale properly for HI-DPI

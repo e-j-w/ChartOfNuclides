@@ -41,8 +41,8 @@ which can be referenced by both the GUI draw code as well as the interaction cod
 
 //UI theme icons
 #define NUM_THEME_ICONS  UIICON_ENUM_LENGTH
-static const uint8_t UITHEME_ICON_TILE_X[NUM_THEME_ICONS] = {0,1,2};
-static const uint8_t UITHEME_ICON_TILE_Y[NUM_THEME_ICONS] = {10,10,10};
+static const uint8_t UITHEME_ICON_TILE_X[NUM_THEME_ICONS] = {0,1,2,2};
+static const uint8_t UITHEME_ICON_TILE_Y[NUM_THEME_ICONS] = {10,10,10,9};
 
 #define SMALL_FONT_SIZE      13
 #define DEFAULT_FONT_SIZE    15
@@ -84,15 +84,16 @@ static const uint8_t UITHEME_ICON_TILE_Y[NUM_THEME_ICONS] = {10,10,10};
 #define CHART_AXIS_DEPTH                   40.0f //in scaled pixels
 #define CHART_SHELLCLOSURELINE_THICKNESS   3.0f
 
-#define NUCL_INFOBOX_X_PADDING             (UI_PADDING_SIZE+CHART_AXIS_DEPTH) //in unscaled pixels
-#define NUCL_INFOBOX_WIDTH                 (MIN_RENDER_WIDTH-2*NUCL_INFOBOX_X_PADDING) //in unscaled pixels
-#define NUCL_INFOBOX_MIN_HEIGHT            120 //in unscaled pixels
-#define NUCL_INFOBOX_BIGLINE_HEIGHT        30.0f //in unscaled pixels
-#define NUCL_INFOBOX_SMALLLINE_HEIGHT      20.0f //in unscaled pixels
-#define NUCL_INFOBOX_ENERGY_COL_OFFSET     0.0f //in unscaled pixels
-#define NUCL_INFOBOX_JPI_COL_OFFSET        140.0f //in unscaled pixels
-#define NUCL_INFOBOX_HALFLIFE_COL_OFFSET   220.0f //in unscaled pixels
-#define NUCL_INFOBOX_DECAYMODE_COL_OFFSET  350.0f //in unscaled pixels
+#define NUCL_INFOBOX_X_PADDING              (UI_PADDING_SIZE+CHART_AXIS_DEPTH) //in unscaled pixels
+#define NUCL_INFOBOX_WIDTH                  (MIN_RENDER_WIDTH-2*NUCL_INFOBOX_X_PADDING) //in unscaled pixels
+#define NUCL_INFOBOX_MIN_HEIGHT             120 //in unscaled pixels
+#define NUCL_INFOBOX_BIGLINE_HEIGHT         30.0f //in unscaled pixels
+#define NUCL_INFOBOX_SMALLLINE_HEIGHT       20.0f //in unscaled pixels
+#define NUCL_INFOBOX_ENERGY_COL_OFFSET      0.0f //in unscaled pixels
+#define NUCL_INFOBOX_JPI_COL_OFFSET         140.0f //in unscaled pixels
+#define NUCL_INFOBOX_HALFLIFE_COL_OFFSET    220.0f //in unscaled pixels
+#define NUCL_INFOBOX_DECAYMODE_COL_OFFSET   350.0f //in unscaled pixels
+#define NUCL_INFOBOX_ALLLEVELS_BUTTON_WIDTH 200 //in unscaled pixels
 
 //performance overlay
 #define PERF_OVERLAY_BUTTON_X_ANCHOR  16

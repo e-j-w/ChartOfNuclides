@@ -21,7 +21,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include "data_ops.h"
 #include "gui_constants.h" //to compute mouse/pointer interactions
 
-void processInputFlags(const app_data *restrict dat, app_state *restrict state){
+void processInputFlags(app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat){
   
   /* Handle directional input */
   
@@ -101,6 +101,10 @@ void processInputFlags(const app_data *restrict dat, app_state *restrict state){
     if((state->ds.shownElements & (1U << UIELEM_NUCL_INFOBOX))&&(state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_HIDE]==0.0f)){
       startUIAnimation(&state->ds,UIANIM_NUCLINFOBOX_HIDE); //hide the info box, see stopUIAnimation() for info box hiding action
       startUIAnimation(&state->ds,UIANIM_NUCLHIGHLIGHT_HIDE);
+    }else if(state->ds.windowFullscreenMode){
+      //exit fullscreen
+      state->ds.windowFullscreenMode = 0;
+      handleScreenGraphicsMode(dat,&state->ds,rdat); 
     }
   }
 
@@ -494,7 +498,7 @@ void processFrameEvents(app_data *restrict dat, app_state *restrict state, resou
     }
 
     //process the results of input state
-    processInputFlags(dat,state);
+    processInputFlags(dat,state,rdat);
 
 }
 

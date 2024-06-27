@@ -7,7 +7,7 @@
    viewBox="0 0 25.399997 93.133336"
    version="1.1"
    id="svg1"
-   inkscape:version="1.3.2 (091e20ef0f, 2023-11-25)"
+   inkscape:version="1.3.2 (091e20ef0f, 2023-11-25, custom)"
    sodipodi:docname="theme.svg"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
@@ -25,14 +25,14 @@
      inkscape:deskcolor="#d1d1d1"
      inkscape:document-units="mm"
      showgrid="true"
-     inkscape:zoom="4"
-     inkscape:cx="50.5"
-     inkscape:cy="342.25"
-     inkscape:window-width="1465"
-     inkscape:window-height="991"
-     inkscape:window-x="26"
-     inkscape:window-y="23"
-     inkscape:window-maximized="0"
+     inkscape:zoom="6.8406002"
+     inkscape:cx="58.912959"
+     inkscape:cy="8.4056951"
+     inkscape:window-width="1503"
+     inkscape:window-height="965"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
+     inkscape:window-maximized="1"
      inkscape:current-layer="layer1">
     <inkscape:grid
        id="grid1"
@@ -460,13 +460,13 @@
        ry="0"
        transform="scale(-1)" />
     <rect
-       style="opacity:0.99;fill:#ffffff;fill-opacity:1;stroke:#cbcbcb;stroke-width:0.3;stroke-linecap:round;stroke-dasharray:none;stroke-opacity:1"
+       style="opacity:0.99;fill:#ffffff;fill-opacity:1;stroke:#cbcbcb;stroke-width:0.35;stroke-linecap:round;stroke-dasharray:none;stroke-opacity:1"
        id="rect1"
-       width="24.870834"
-       height="7.9375005"
-       x="0.26458335"
-       y="0.26458335"
-       ry="0.5291667" />
+       width="24.341667"
+       height="7.4083338"
+       x="0.5291667"
+       y="0.5291667"
+       ry="1.3229167" />
     <rect
        style="opacity:0.99;fill:#ffffff;fill-opacity:1;stroke:#cbcbcb;stroke-width:0.3;stroke-linecap:round;stroke-dasharray:none;stroke-opacity:1"
        id="rect1-53"
@@ -478,10 +478,10 @@
     <rect
        style="opacity:0.99;fill:#cbcbcb;fill-opacity:1;stroke:none;stroke-width:0.3;stroke-linecap:round;stroke-dasharray:none;stroke-opacity:1"
        id="rect1-6"
-       width="24.870834"
-       height="7.9375005"
-       x="0.26458335"
-       y="17.197918"
+       width="24.341667"
+       height="7.4083338"
+       x="0.5291667"
+       y="17.4625"
        ry="0.5291667" />
     <rect
        style="opacity:0.99;fill:#cbcbcb;fill-opacity:1;stroke:none;stroke-width:0.3;stroke-linecap:round;stroke-dasharray:none;stroke-opacity:1"
@@ -494,18 +494,18 @@
     <rect
        style="opacity:0.99;fill:#cbcbcb;fill-opacity:1;stroke:#00a8bf;stroke-width:0.2;stroke-linecap:round;stroke-dasharray:none;stroke-opacity:1"
        id="rect1-6-6"
-       width="24.870834"
-       height="7.9375005"
-       x="0.26458335"
-       y="25.664585"
+       width="24.341669"
+       height="7.4083343"
+       x="0.5291667"
+       y="25.929167"
        ry="0.5291667" />
     <rect
        style="opacity:0.99;fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:0.3;stroke-linecap:round;stroke-dasharray:none;stroke-opacity:1"
        id="rect1-2"
-       width="24.870834"
-       height="7.9375005"
-       x="0.26458269"
-       y="8.7312508"
+       width="24.341669"
+       height="6.8791671"
+       x="0.5291667"
+       y="9.260417"
        ry="2.9104166" />
     <path
        style="fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:0.317499px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
@@ -645,5 +645,13 @@
        style="fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:0.580233;stroke-dasharray:none;stroke-opacity:1"
        d="m 12.750586,88.796578 1.333493,1.311401"
        id="path4" />
+    <path
+       style="fill:none;stroke:#000000;stroke-width:0.4;stroke-linecap:round;stroke-dasharray:none;stroke-opacity:1"
+       d="m 20.108335,81.726602 1.058333,-1.322916 1.058334,1.322916"
+       id="path5" />
+    <path
+       style="fill:none;stroke:#000000;stroke-width:0.4;stroke-linecap:round;stroke-dasharray:none;stroke-opacity:1"
+       d="m 20.108335,80.433335 1.058333,-1.322916 1.058334,1.322916"
+       id="path5-2" />
   </g>
 </svg>
