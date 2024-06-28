@@ -54,6 +54,7 @@ void uiElemClickAction(const app_data *restrict dat, app_state *restrict state, 
 
 void updateSingleUIElemPosition(drawing_state *restrict ds, const uint8_t uiElemInd);
 
+float getUIthemeScale(const float uiScale);
 void updateWindowRes(app_data *restrict dat, drawing_state *restrict ds, resource_data *restrict rdat);
 void handleScreenGraphicsMode(app_data *restrict dat, drawing_state *restrict ds, resource_data *restrict rdat);
 

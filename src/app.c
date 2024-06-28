@@ -122,7 +122,7 @@ int main(int argc, char *argv[]){
   SDL_GetWindowSize(gdat->rdat.window, &wwidth, &wheight);
   SDL_GetWindowSizeInPixels(gdat->rdat.window, &rwidth, &rheight);
 	gdat->rdat.uiScale = (float)rwidth/((float)wwidth);
-  gdat->rdat.uiThemeScale = roundf(2.0f*gdat->rdat.uiScale); //super-sample UI elements, hack to prevent scaling artifacts
+  gdat->rdat.uiThemeScale = getUIthemeScale(gdat->rdat.uiScale);
   handleScreenGraphicsMode(&gdat->dat,&gdat->state.ds,&gdat->rdat); //handle fullscreen
   gdat->state.ds.forceRedraw = 1; //force draw the first frame
   

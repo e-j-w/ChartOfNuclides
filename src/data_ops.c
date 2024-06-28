@@ -1296,6 +1296,13 @@ void updateUIElemPositions(drawing_state *restrict ds){
   }
 }
 
+float getUIthemeScale(const float uiScale){
+	if(fabsf(uiScale - 1.0f) < 0.001f){
+		return uiScale;
+	}else{
+		return roundf(2.0f*uiScale); //super-sample UI elements, hack to prevent scaling artifacts
+	}
+}
 
 void updateWindowRes(app_data *restrict dat, drawing_state *restrict ds, resource_data *restrict rdat){
   int wwidth, wheight;
@@ -1310,7 +1317,7 @@ void updateWindowRes(app_data *restrict dat, drawing_state *restrict ds, resourc
 	if(fabsf(rdat->uiScale - newScale) > 0.001f){
 		printf("Re-scaling UI from %0.9f to %0.9f.\n",(double)rdat->uiScale,(double)newScale);
 		rdat->uiScale = newScale; //set UI scale properly for HI-DPI
-		rdat->uiThemeScale = roundf(2.0f*rdat->uiScale); //super-sample UI elements, hack to prevent scaling artifacts
+		rdat->uiThemeScale = getUIthemeScale(rdat->uiScale);
 		if(rdat->font){
 			//rescale font and UI theme as well, this requires loading them from the app data file
 			regenerateThemeAndFontCache(dat,rdat); //load_data.c

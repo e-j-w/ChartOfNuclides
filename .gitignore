@@ -23,3 +23,4 @@ list
 .vscode
 *.code-workspace
 sample_parameters
+octave-workspace
