@@ -210,8 +210,9 @@ typedef struct
 
 typedef struct
 {
-  size_t fontOffset; //data file offset for the embedded font
-  float uiScale; //scaling factor for UI, in units of 32px
+  size_t themeOffset; //data file offset for the embedded theme
+  float uiScale; //scaling factor for UI, for HI-DPI
+  float uiThemeScale; //scale of the UI theme texture in GPU memory
   SDL_Surface *iconSurface; //surface for the application icon
   SDL_Texture *uiThemeTex; //the main texture atlas
   SDL_Texture *tempTex; //used to store temporary texture data during draw operations

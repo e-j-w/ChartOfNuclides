@@ -57,9 +57,9 @@ void drawPanelBG(resource_data *restrict rdat, const SDL_FRect panelRect, const 
     destRect.w = (float)(UI_TILE_SIZE*rdat->uiScale);
     destRect.h = destRect.w;
     //draw the top left side of the panel
-    srcRect.x = UITHEME_PANELBG_TILE_X*UI_TILE_SIZE*rdat->uiScale;
-    srcRect.y = UITHEME_PANELBG_TILE_Y*UI_TILE_SIZE*rdat->uiScale;
-    srcRect.w = (float)(UI_TILE_SIZE*rdat->uiScale);
+    srcRect.x = UITHEME_PANELBG_TILE_X*UI_TILE_SIZE*rdat->uiThemeScale;
+    srcRect.y = UITHEME_PANELBG_TILE_Y*UI_TILE_SIZE*rdat->uiThemeScale;
+    srcRect.w = (float)(UI_TILE_SIZE*rdat->uiThemeScale);
     srcRect.h = srcRect.w;
     SDL_RenderTexture(rdat->renderer,rdat->uiThemeTex,&srcRect,&destRect);
     remainingWidth -= UI_TILE_SIZE;
@@ -72,15 +72,15 @@ void drawPanelBG(resource_data *restrict rdat, const SDL_FRect panelRect, const 
       }else{
         tileWidth = remainingWidth - UI_TILE_SIZE; //can only draw a partial UI tile
       }
-      srcRect.w = (float)(tileWidth)*rdat->uiScale;
+      srcRect.w = (float)(tileWidth)*rdat->uiThemeScale;
       destRect.x += destRect.w;
       destRect.w = (float)(tileWidth)*rdat->uiScale;
       SDL_RenderTexture(rdat->renderer,rdat->uiThemeTex,&srcRect,&destRect);
       remainingWidth -= tileWidth;
     }
     //draw the top right side of the panel
-    srcRect.x += (float)(UI_TILE_SIZE*rdat->uiScale);
-    srcRect.w = (float)(UI_TILE_SIZE*rdat->uiScale);
+    srcRect.x += (float)(UI_TILE_SIZE*rdat->uiThemeScale);
+    srcRect.w = (float)(UI_TILE_SIZE*rdat->uiThemeScale);
     destRect.x += destRect.w;
     destRect.w = (float)(UI_TILE_SIZE*rdat->uiScale);
     SDL_RenderTexture(rdat->renderer,rdat->uiThemeTex,&srcRect,&destRect);
@@ -94,15 +94,15 @@ void drawPanelBG(resource_data *restrict rdat, const SDL_FRect panelRect, const 
       }else{
         tileHeight = remainingHeight - UI_TILE_SIZE; //can only draw a partial UI tile
       }
-      srcRect.h = (float)(tileHeight)*rdat->uiScale;
+      srcRect.h = (float)(tileHeight)*rdat->uiThemeScale;
       destRect.x = rdat->uiScale*((float)panelRect.x);
       destRect.y += destRect.h;
       destRect.h = (float)(tileHeight)*rdat->uiScale;
       destRect.w = (float)(UI_TILE_SIZE*rdat->uiScale);
       //draw the middle left side of the panel
-      srcRect.x = UITHEME_PANELBG_TILE_X*UI_TILE_SIZE*rdat->uiScale;
-      srcRect.y = (UITHEME_PANELBG_TILE_Y+1)*UI_TILE_SIZE*rdat->uiScale;
-      srcRect.w = (float)(UI_TILE_SIZE*rdat->uiScale);
+      srcRect.x = UITHEME_PANELBG_TILE_X*UI_TILE_SIZE*rdat->uiThemeScale;
+      srcRect.y = (UITHEME_PANELBG_TILE_Y+1)*UI_TILE_SIZE*rdat->uiThemeScale;
+      srcRect.w = (float)(UI_TILE_SIZE*rdat->uiThemeScale);
       SDL_RenderTexture(rdat->renderer,rdat->uiThemeTex,&srcRect,&destRect);
       remainingWidth -= UI_TILE_SIZE;
       //draw the middle-middle of the panel
@@ -114,15 +114,15 @@ void drawPanelBG(resource_data *restrict rdat, const SDL_FRect panelRect, const 
         }else{
           tileWidth = remainingWidth - UI_TILE_SIZE; //can only draw a partial UI tile
         }
-        srcRect.w = (float)(tileWidth)*rdat->uiScale;
+        srcRect.w = (float)(tileWidth)*rdat->uiThemeScale;
         destRect.x += destRect.w;
         destRect.w = (float)(tileWidth)*rdat->uiScale;
         SDL_RenderTexture(rdat->renderer,rdat->uiThemeTex,&srcRect,&destRect);
         remainingWidth -= tileWidth;
       }
       //draw the middle right side of the panel
-      srcRect.x += (float)(UI_TILE_SIZE*rdat->uiScale);
-      srcRect.w = (float)(UI_TILE_SIZE*rdat->uiScale);
+      srcRect.x += (float)(UI_TILE_SIZE*rdat->uiThemeScale);
+      srcRect.w = (float)(UI_TILE_SIZE*rdat->uiThemeScale);
       destRect.x += destRect.w;
       destRect.w = (float)(UI_TILE_SIZE*rdat->uiScale);
       SDL_RenderTexture(rdat->renderer,rdat->uiThemeTex,&srcRect,&destRect);
@@ -130,15 +130,15 @@ void drawPanelBG(resource_data *restrict rdat, const SDL_FRect panelRect, const 
     }
     //draw the bottom row of the panel
     remainingWidth = (int32_t)panelRect.w;
-    srcRect.h = (float)(UI_TILE_SIZE*rdat->uiScale);
+    srcRect.h = (float)(UI_TILE_SIZE*rdat->uiThemeScale);
     destRect.x = rdat->uiScale*((float)panelRect.x);
     destRect.y += destRect.h;
     destRect.w = (float)(UI_TILE_SIZE*rdat->uiScale);
     destRect.h = destRect.w;
     //draw the bottom left side of the panel
-    srcRect.x = UITHEME_PANELBG_TILE_X*UI_TILE_SIZE*rdat->uiScale;
-    srcRect.y = (UITHEME_PANELBG_TILE_Y+2)*UI_TILE_SIZE*rdat->uiScale;
-    srcRect.w = (float)(UI_TILE_SIZE*rdat->uiScale);
+    srcRect.x = UITHEME_PANELBG_TILE_X*UI_TILE_SIZE*rdat->uiThemeScale;
+    srcRect.y = (UITHEME_PANELBG_TILE_Y+2)*UI_TILE_SIZE*rdat->uiThemeScale;
+    srcRect.w = (float)(UI_TILE_SIZE*rdat->uiThemeScale);
     SDL_RenderTexture(rdat->renderer,rdat->uiThemeTex,&srcRect,&destRect);
     remainingWidth -= UI_TILE_SIZE;
     //draw the bottom-middle of the panel
@@ -150,15 +150,15 @@ void drawPanelBG(resource_data *restrict rdat, const SDL_FRect panelRect, const 
       }else{
         tileWidth = remainingWidth - UI_TILE_SIZE; //can only draw a partial UI tile
       }
-      srcRect.w = (float)(tileWidth)*rdat->uiScale;
+      srcRect.w = (float)(tileWidth)*rdat->uiThemeScale;
       destRect.x += destRect.w;
       destRect.w = (float)(tileWidth)*rdat->uiScale;
       SDL_RenderTexture(rdat->renderer,rdat->uiThemeTex,&srcRect,&destRect);
       remainingWidth -= tileWidth;
     }
     //draw the bottom right side of the panel
-    srcRect.x += (float)(UI_TILE_SIZE*rdat->uiScale);
-    srcRect.w = (float)(UI_TILE_SIZE*rdat->uiScale);
+    srcRect.x += (float)(UI_TILE_SIZE*rdat->uiThemeScale);
+    srcRect.w = (float)(UI_TILE_SIZE*rdat->uiThemeScale);
     destRect.x += destRect.w;
     destRect.w = (float)(UI_TILE_SIZE*rdat->uiScale);
     SDL_RenderTexture(rdat->renderer,rdat->uiThemeTex,&srcRect,&destRect);
@@ -191,8 +191,8 @@ void drawButton(const ui_theme_rules *restrict uirules, resource_data *restrict 
   }
 
   SDL_FRect srcRect, destRect;
-  int32_t remainingWidth = (int32_t)w;
-  if(remainingWidth <= 2*UI_TILE_SIZE){
+  float remainingWidth = (float)w;
+  if(remainingWidth <= 2.0f*UI_TILE_SIZE){
     //draw a smaller button using only the left/right side tiles
     destRect.x = (float)(x*rdat->uiScale);
     destRect.y = (float)(y*rdat->uiScale);
@@ -200,16 +200,16 @@ void drawButton(const ui_theme_rules *restrict uirules, resource_data *restrict 
     destRect.h = (float)(UI_TILE_SIZE*rdat->uiScale);
     srcRect.x = 0.0f;
     srcRect.y = 0.0f;
-    srcRect.w = destRect.w;
-    srcRect.h = destRect.h;
+    srcRect.w = (float)((float)remainingWidth*rdat->uiThemeScale/2.0f);
+    srcRect.h = (float)(UI_TILE_SIZE*rdat->uiThemeScale);
     //draw the left side of the button
     SDL_RenderTexture(rdat->renderer,rdat->uiThemeTex,&srcRect,&destRect);
-    remainingWidth -= (remainingWidth/2);
+    remainingWidth -= (remainingWidth/2.0f);
     //draw the right side of the button
-    srcRect.x += (float)(3.0f*UI_TILE_SIZE*rdat->uiScale - (float)remainingWidth*rdat->uiScale);
-    srcRect.w = (float)((float)remainingWidth*rdat->uiScale);
+    srcRect.x += (float)(3.0f*UI_TILE_SIZE*rdat->uiThemeScale - (float)remainingWidth*rdat->uiThemeScale);
+    srcRect.w = (float)((float)remainingWidth*rdat->uiThemeScale);
     destRect.x += destRect.w;
-    destRect.w = srcRect.w;
+    destRect.w = (float)((float)remainingWidth*rdat->uiScale);
     SDL_RenderTexture(rdat->renderer,rdat->uiThemeTex,&srcRect,&destRect);
   }else{
     destRect.x = (float)(x*rdat->uiScale);
@@ -218,7 +218,7 @@ void drawButton(const ui_theme_rules *restrict uirules, resource_data *restrict 
     destRect.h = destRect.w;
     srcRect.x = 0.0f;
     srcRect.y = 0.0f;
-    srcRect.w = destRect.w;
+    srcRect.w = (float)(UI_TILE_SIZE*rdat->uiThemeScale);
     srcRect.h = srcRect.w;
     //draw the left side of the button
     SDL_RenderTexture(rdat->renderer,rdat->uiThemeTex,&srcRect,&destRect);
@@ -226,23 +226,23 @@ void drawButton(const ui_theme_rules *restrict uirules, resource_data *restrict 
     //draw the middle section of the button
     srcRect.x += srcRect.w;
     while(remainingWidth > UI_TILE_SIZE){
-      int32_t tileWidth;
+      float tileWidth;
       if((remainingWidth - UI_TILE_SIZE) >= UI_TILE_SIZE){
         tileWidth = UI_TILE_SIZE; //button wide enough to draw an entire middle tile
       }else{
         tileWidth = remainingWidth - UI_TILE_SIZE; //can only draw a partial UI tile
       }
-      srcRect.w = (float)(tileWidth)*rdat->uiScale;
+      srcRect.w = tileWidth*rdat->uiThemeScale;
       destRect.x += destRect.w;
-      destRect.w = srcRect.w;
+      destRect.w = tileWidth*rdat->uiScale;
       SDL_RenderTexture(rdat->renderer,rdat->uiThemeTex,&srcRect,&destRect);
       remainingWidth -= tileWidth;
     }
     //draw the right side of the button
-    srcRect.x += (float)(UI_TILE_SIZE*rdat->uiScale);
-    srcRect.w = (float)(UI_TILE_SIZE*rdat->uiScale);
+    srcRect.x += (float)(UI_TILE_SIZE*rdat->uiThemeScale);
+    srcRect.w = (float)(UI_TILE_SIZE*rdat->uiThemeScale);
     destRect.x += destRect.w;
-    destRect.w = srcRect.w;
+    destRect.w = (float)(UI_TILE_SIZE*rdat->uiScale);
     SDL_RenderTexture(rdat->renderer,rdat->uiThemeTex,&srcRect,&destRect);
   }
   
@@ -284,9 +284,9 @@ void drawIcon(const ui_theme_rules *restrict uirules, resource_data *restrict rd
   }
 
   SDL_FRect drawPos,srcRect;
-  srcRect.x = UITHEME_ICON_TILE_X[iconInd]*UI_TILE_SIZE*rdat->uiScale;
-  srcRect.y = UITHEME_ICON_TILE_Y[iconInd]*UI_TILE_SIZE*rdat->uiScale;
-  srcRect.w = UI_TILE_SIZE*rdat->uiScale;
+  srcRect.x = UITHEME_ICON_TILE_X[iconInd]*UI_TILE_SIZE*rdat->uiThemeScale;
+  srcRect.y = UITHEME_ICON_TILE_Y[iconInd]*UI_TILE_SIZE*rdat->uiThemeScale;
+  srcRect.w = UI_TILE_SIZE*rdat->uiThemeScale;
   srcRect.h = srcRect.w;
   drawPos.w = (float)(UI_TILE_SIZE*rdat->uiScale);
   drawPos.h = (float)(UI_TILE_SIZE*rdat->uiScale);
@@ -315,7 +315,7 @@ void drawIconAndTextButton(const ui_theme_rules *restrict uirules, resource_data
   //get the text width and height
   //these should already fit a 1 tile height button well, with the default font size
   //(remember that the font size is scaled by the UI scale, during font import)
-  float textX = (float)x + (float)(w + UI_TILE_SIZE)/2.0f;
+  float textX = (float)x + (float)(w + UI_TILE_SIZE - 2*UI_PADDING_SIZE)/2.0f;
   float textY = (float)y + (float)(UI_TILE_SIZE)/2.0f;
   //printf("text x: %f, y: %f\n",(double)textX,(double)textY);
   drawTextAlignedSized(rdat,textX,textY,rdat->font,uirules->textColNormal,255,text,ALIGN_CENTER,(Uint16)(w*rdat->uiScale));

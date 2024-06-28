@@ -16,6 +16,7 @@ The goal is to develop a performant and multiplatform tool that will be useful i
 
 - Runs locally, with no network connection needed.
 - Select individual nuclides to browse ground and isomeric state data.
+- Fast hardware accelerated rendering using `SDL_Renderer`, HI-DPI scaling support. 
 - More to come...
 
 ## Building and installing from source

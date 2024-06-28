@@ -23,7 +23,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include "formats.h"
 
 //function prototypes
-void drawPerformanceStats(const ui_theme_rules *restrict uirules, resource_data *restrict rdat, const float deltaTime);
+void drawPerformanceStats(const ui_theme_rules *restrict uirules, drawing_state *restrict ds, resource_data *restrict rdat, const float deltaTime);
 
 void drawUI(const app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat, const float deltaTime);
 

@@ -1205,12 +1205,28 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 												tok2 = strtok(NULL," ");
 											}
 											if(tok2!=NULL){
+												char value[16];
+												strncpy(value,tok2,15);
 												//printf("%s\n",tok2);
 												nd->dcyMode[nd->numDecModes].prob.val = (float)atof(tok2);
 												tok2 = strtok(NULL,""); //get the rest of the string
 												if(tok2 != NULL){
 													//printf("%s\n",tok2);
 													nd->dcyMode[nd->numDecModes].prob.err = (uint8_t)atoi(tok2);
+												}
+												nd->dcyMode[nd->numDecModes].prob.format = 0;
+												tok2 = strtok(value,".");
+												if(tok2!=NULL){
+													//printf("tok2: %s\n",tok2);
+													tok2 = strtok(NULL,"");
+													if(tok2!=NULL){
+														//printf("tok2: %s\n",tok2);
+														nd->dcyMode[nd->numDecModes].prob.format = (uint8_t)strlen(tok2);
+														if(nd->dcyMode[nd->numDecModes].prob.format > 15U){
+															nd->dcyMode[nd->numDecModes].prob.format = 15U; //only 4 bits available for precision
+														}
+													}
+													//printf("format: %u\n",nd->dcyMode[nd->numDecModes].prob.format);
 												}
 											}
 										}

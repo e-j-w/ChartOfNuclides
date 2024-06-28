@@ -122,6 +122,7 @@ int main(int argc, char *argv[]){
   SDL_GetWindowSize(gdat->rdat.window, &wwidth, &wheight);
   SDL_GetWindowSizeInPixels(gdat->rdat.window, &rwidth, &rheight);
 	gdat->rdat.uiScale = (float)rwidth/((float)wwidth);
+  gdat->rdat.uiThemeScale = roundf(2.0f*gdat->rdat.uiScale); //super-sample UI elements, hack to prevent scaling artifacts
   handleScreenGraphicsMode(&gdat->dat,&gdat->state.ds,&gdat->rdat); //handle fullscreen
   gdat->state.ds.forceRedraw = 1; //force draw the first frame
   
@@ -182,7 +183,7 @@ int main(int argc, char *argv[]){
     drawUI(&gdat->dat,&gdat->state,&gdat->rdat,deltaTime);
 
     if(gdat->state.ds.drawPerformanceStats == 1){
-      drawPerformanceStats(&gdat->dat.rules.themeRules,&gdat->rdat,deltaTime);
+      drawPerformanceStats(&gdat->dat.rules.themeRules,&gdat->state.ds,&gdat->rdat,deltaTime);
     }
 
     SDL_RenderPresent(gdat->rdat.renderer); //tell the renderer to actually show the image

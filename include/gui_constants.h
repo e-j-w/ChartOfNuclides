@@ -93,7 +93,7 @@ static const uint8_t UITHEME_ICON_TILE_Y[NUM_THEME_ICONS] = {10,10,10,9};
 #define NUCL_INFOBOX_JPI_COL_OFFSET         140.0f //in unscaled pixels
 #define NUCL_INFOBOX_HALFLIFE_COL_OFFSET    220.0f //in unscaled pixels
 #define NUCL_INFOBOX_DECAYMODE_COL_OFFSET   350.0f //in unscaled pixels
-#define NUCL_INFOBOX_ALLLEVELS_BUTTON_WIDTH 200 //in unscaled pixels
+#define NUCL_INFOBOX_ALLLEVELS_BUTTON_WIDTH 170 //in unscaled pixels
 
 //performance overlay
 #define PERF_OVERLAY_BUTTON_X_ANCHOR  16

@@ -356,12 +356,12 @@ void drawChartOfNuclides(const app_data *restrict dat, const app_state *restrict
 }
 
 //draw some stats, ie. FPS overlay and further diagnostic info
-void drawPerformanceStats(const ui_theme_rules *restrict uirules, resource_data *restrict rdat, const float deltaTime){
+void drawPerformanceStats(const ui_theme_rules *restrict uirules, drawing_state *restrict ds, resource_data *restrict rdat, const float deltaTime){
 
   //draw background
   SDL_FRect perfOvRect;
   perfOvRect.w = (628.0f*rdat->uiScale);
-  perfOvRect.h = (108.0f*rdat->uiScale);
+  perfOvRect.h = (132.0f*rdat->uiScale);
   perfOvRect.x = 0.0f;
   perfOvRect.y = 0.0f;
   
@@ -372,10 +372,12 @@ void drawPerformanceStats(const ui_theme_rules *restrict uirules, resource_data 
   char txtStr[256];
   SDL_snprintf(txtStr,256,"Performance stats (press <P> to toggle display)");
   drawDefaultText(uirules,rdat,PERF_OVERLAY_BUTTON_X_ANCHOR,PERF_OVERLAY_BUTTON_Y_ANCHOR,txtStr);
-  SDL_snprintf(txtStr,256,"FPS: %4.1f",1.0/((double)deltaTime));
+  SDL_snprintf(txtStr,256,"Scaling: %0.2f, Resolution: %u x %u (logical), %u x %u (actual)",(double)rdat->uiScale,ds->windowXRes,ds->windowYRes,ds->windowXRenderRes,ds->windowYRenderRes);
   drawDefaultText(uirules,rdat,PERF_OVERLAY_BUTTON_X_ANCHOR,PERF_OVERLAY_BUTTON_Y_ANCHOR+PERF_OVERLAY_Y_SPACING,txtStr);
-  SDL_snprintf(txtStr,256,"Frame time (ms): %4.3f",(double)(deltaTime*1000.0f));
+  SDL_snprintf(txtStr,256,"FPS: %4.1f",1.0/((double)deltaTime));
   drawDefaultText(uirules,rdat,PERF_OVERLAY_BUTTON_X_ANCHOR,PERF_OVERLAY_BUTTON_Y_ANCHOR+2*PERF_OVERLAY_Y_SPACING,txtStr);
+  SDL_snprintf(txtStr,256,"Frame time (ms): %4.3f",(double)(deltaTime*1000.0f));
+  drawDefaultText(uirules,rdat,PERF_OVERLAY_BUTTON_X_ANCHOR,PERF_OVERLAY_BUTTON_Y_ANCHOR+3*PERF_OVERLAY_Y_SPACING,txtStr);
 }
 
 uint8_t getHighlightState(const app_state *restrict state, const uint8_t uiElem){
@@ -494,7 +496,7 @@ void drawNuclInfoBox(const app_data *restrict dat, const app_state *restrict sta
   }else{
     snprintf(tmpStr,32,"%s (%s-%u)",getElemStr((uint8_t)dat->ndat.nuclData[nuclInd].Z),getFullElemStr((uint8_t)dat->ndat.nuclData[nuclInd].Z,(uint8_t)dat->ndat.nuclData[nuclInd].N),nucA);
   }
-  drawTextAlignedSized(rdat,drawXPos,drawYPos+10.0f,rdat->bigFont,blackCol8Bit,alpha,tmpStr,ALIGN_LEFT,16384); //draw element label
+  drawTextAlignedSized(rdat,drawXPos+2.0f,drawYPos+6.0f,rdat->bigFont,blackCol8Bit,alpha,tmpStr,ALIGN_LEFT,16384); //draw element label
 
   //all level info button
   drawIconAndTextButton(&dat->rules.themeRules,rdat,state->ds.uiElemPosX[UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON],state->ds.uiElemPosY[UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON] + yOffset,state->ds.uiElemWidth[UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON],getHighlightState(state,UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON),255,UIICON_UPARROWS,dat->strings[dat->locStringIDs[LOCSTR_ALLLEVELS]]);

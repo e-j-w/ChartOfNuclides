@@ -27,7 +27,7 @@ int importAppData(app_data *restrict dat, resource_data *restrict rdat){
   uint8_t version = 255;
   int64_t fileSize;
   size_t totalAlloc = 0;
-  rdat->fontOffset = 0;
+  rdat->themeOffset = 0;
   
   snprintf(filePath,270,"%scon.dat",rdat->appBasePath);
   SDL_IOStream *inp = SDL_IOFromFile(filePath, "rb");
@@ -98,6 +98,7 @@ int importAppData(app_data *restrict dat, resource_data *restrict rdat){
   }
   
   //load UI theme texture data
+  rdat->themeOffset = (size_t)SDL_TellIO(inp);
   fileSize=0;
   if((SDL_ReadIO(inp,&fileSize,sizeof(int64_t))!=sizeof(int64_t))||(fileSize<=0)){
     SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,"Error","App data file read error - invalid data size.",rdat->window);
@@ -116,7 +117,7 @@ int importAppData(app_data *restrict dat, resource_data *restrict rdat){
     printf("ERROR: importAppData - couldn't read UI theme texture data from file %s - %s.\n",filePath,SDL_GetError());
     return -1;
   }
-  SDL_Surface *surface = IMG_LoadSizedSVG_IO(SDL_IOFromConstMem(themeData,(size_t)fileSize),(int)(UI_TILE_SIZE*UI_THEME_TEX_TILES_X*rdat->uiScale),(int)(UI_TILE_SIZE*UI_THEME_TEX_TILES_Y*rdat->uiScale));
+  SDL_Surface *surface = IMG_LoadSizedSVG_IO(SDL_IOFromConstMem(themeData,(size_t)fileSize),(int)(UI_TILE_SIZE*UI_THEME_TEX_TILES_X*rdat->uiThemeScale),(int)(UI_TILE_SIZE*UI_THEME_TEX_TILES_Y*rdat->uiThemeScale));
   if(surface == NULL){
     SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,"Error","App data file I/O error.",rdat->window);
     printf("ERROR: importAppData - couldn't UI theme texture atlas data - %s.\n",SDL_GetError());
@@ -126,10 +127,10 @@ int importAppData(app_data *restrict dat, resource_data *restrict rdat){
   SDL_SetSurfaceRLE(surface, 1); //enable RLE acceleration
   //upload texture atlas into GPU memory
   rdat->uiThemeTex = SDL_CreateTextureFromSurface(rdat->renderer,surface);
+  SDL_SetTextureScaleMode(rdat->uiThemeTex,SDL_SCALEMODE_BEST);
   SDL_DestroySurface(surface);
   
   //load font
-  rdat->fontOffset = (size_t)SDL_TellIO(inp);
   int64_t fontFilesize=0;
   if((SDL_ReadIO(inp,&fontFilesize,sizeof(int64_t))!=sizeof(int64_t))||(fontFilesize<=0)){
     SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,"Error","App data file read error - invalid data size.",rdat->window);
@@ -203,9 +204,9 @@ int importAppData(app_data *restrict dat, resource_data *restrict rdat){
 }
 
 //similar to importAppData, but only handles loading and rescaling the font data
-int regenerateFontCache(app_data *restrict dat, resource_data *restrict rdat){
+int regenerateThemeAndFontCache(app_data *restrict dat, resource_data *restrict rdat){
   
-  if(rdat->fontOffset <= 0){
+  if(rdat->themeOffset <= 0){
     printf("WARNING: regenerateFontCache - attempting to regenerate cache when app data was not previously imported. Doing that now...\n");
     return importAppData(dat,rdat);
   }
@@ -219,13 +220,56 @@ int regenerateFontCache(app_data *restrict dat, resource_data *restrict rdat){
     printf("ERROR: regenerateFontCache - couldn't read data package file %s.\n",filePath);
     return -1;
   }
-  if(SDL_SeekIO(inp,(Sint64)rdat->fontOffset,SDL_IO_SEEK_SET)<0){
+  if(SDL_SeekIO(inp,(Sint64)rdat->themeOffset,SDL_IO_SEEK_SET)<0){
     SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,"Error","App data file I/O error.",rdat->window);
-    printf("ERROR: regenerateFontCache - couldn't seek to font data in file %s - %s.\n",filePath,SDL_GetError());
+    printf("ERROR: regenerateFontCache - couldn't seek to theme data in file %s - %s.\n",filePath,SDL_GetError());
     return -1;
   }
+
+  //free previously used resources
+  if(rdat->uiThemeTex){
+    SDL_DestroyTexture(rdat->uiThemeTex);
+  }
+  if(rdat->font){
+    FC_FreeFont(rdat->smallFont);
+    FC_FreeFont(rdat->font);
+    FC_FreeFont(rdat->bigFont);
+    FC_FreeFont(rdat->hugeFont);
+  }
+
+  //read theme data
+  rdat->themeOffset = (size_t)SDL_TellIO(inp);
+  int64_t fileSize=0;
+  if((SDL_ReadIO(inp,&fileSize,sizeof(int64_t))!=sizeof(int64_t))||(fileSize<=0)){
+    SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,"Error","App data file read error - invalid data size.",rdat->window);
+    printf("ERROR: importAppData - invalid texture atlas filesize (%li) from file %s.\n",(long int)fileSize,filePath);
+    return -1;
+  }
+  void *themeData=(void*)SDL_calloc(1,(size_t)fileSize);
+  if(themeData==NULL){
+    SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,"Error","App data file read error - could not allocate memory.",rdat->window);
+    printf("ERROR: importAppData - couldn't allocate memory for UI theme texture data.\n");
+    exit(-1);
+  }
+  if(SDL_ReadIO(inp,themeData,(size_t)fileSize)!=(size_t)fileSize){
+    SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,"Error","App data file I/O error.",rdat->window);
+    printf("ERROR: importAppData - couldn't read UI theme texture data from file %s - %s.\n",filePath,SDL_GetError());
+    return -1;
+  }
+  SDL_Surface *surface = IMG_LoadSizedSVG_IO(SDL_IOFromConstMem(themeData,(size_t)fileSize),(int)(UI_TILE_SIZE*UI_THEME_TEX_TILES_X*rdat->uiThemeScale),(int)(UI_TILE_SIZE*UI_THEME_TEX_TILES_Y*rdat->uiThemeScale));
+  if(surface == NULL){
+    SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,"Error","App data file I/O error.",rdat->window);
+    printf("ERROR: importAppData - couldn't UI theme texture atlas data - %s.\n",SDL_GetError());
+    return -1;
+  }
+  free(themeData);
+  SDL_SetSurfaceRLE(surface, 1); //enable RLE acceleration
+  //upload texture atlas into GPU memory
+  rdat->uiThemeTex = SDL_CreateTextureFromSurface(rdat->renderer,surface);
+  SDL_SetTextureScaleMode(rdat->uiThemeTex,SDL_SCALEMODE_BEST);
+  SDL_DestroySurface(surface);
+
   //load font
-  rdat->fontOffset = (size_t)SDL_TellIO(inp);
   int64_t fontFilesize=0;
   if((SDL_ReadIO(inp,&fontFilesize,sizeof(int64_t))!=sizeof(int64_t))||(fontFilesize<=0)){
     SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,"Error","App data file read error - invalid data size.",rdat->window);

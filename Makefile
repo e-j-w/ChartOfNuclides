@@ -11,8 +11,31 @@ CC = gcc
 run: con
 	./con
 
-install: con
-	echo "Installation from this Makefile is not supported."
+#install: con
+#	@echo "Will install to /usr/bin."
+#	@echo "Run 'make uninstall' to undo installation."
+#	@if ! [ "$(shell id -u)" = 0 ]; then \
+#		echo "This must be run with administrator privileges (eg. with 'sudo')."; \
+#	else \
+#		cp con /usr/bin ; \
+#		cp data/icon.svg /usr/share/icons/hicolor/scalable/apps/con-application-icon.svg ; \
+#		cp data/con.desktop /usr/share/applications ; \
+#		update-desktop-database /usr/share/applications ; \
+#		echo "Done!" ; \
+#	fi
+
+#uninstall:
+#	@echo "Will undo changes made from running 'make install'."
+#	@if ! [ "$(shell id -u)" = 0 ]; then \
+#		echo "This must be run with administrator privileges (eg. with 'sudo')."; \
+#	else \
+#		rm /usr/bin/con ; \
+#		rm /usr/share/icons/hicolor/scalable/apps/con-application-icon.svg ; \
+#		rm /usr/share/applications/con.desktop ; \
+#		rm /usr/share/mime/packages/specfitter-mime.xml ; \
+#		update-desktop-database /usr/share/applications ; \
+#		echo "Done!" ; \
+#	fi
 
 all: $(OBJ) proc_data con
 

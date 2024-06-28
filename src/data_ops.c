@@ -40,13 +40,13 @@ void initializeTempState(app_state *restrict state){
   state->quitAppFlag = 0;
   //ui state
   changeUIState(state,UISTATE_DEFAULT);
-  state->clickedUIElem = UIELEM_ENUM_LENGTH; //no selected ui element
-  state->ds.shownElements = 0; //no ui elements being shown
-  state->ds.uiAnimPlaying = 0; //no ui animations playing
+  state->clickedUIElem = UIELEM_ENUM_LENGTH; //no selected UI element
+  state->ds.shownElements = 0; //no UI elements being shown
+  state->ds.uiAnimPlaying = 0; //no UI animations playing
   state->ds.useZoomAnimations = 1;
-	state->ds.chartPosX = 90.0f;
-	state->ds.chartPosY = 55.0f;
-	state->ds.chartZoomScale = 1.0f;
+	state->ds.chartPosX = 62.0f;
+	state->ds.chartPosY = 33.0f;
+	state->ds.chartZoomScale = 0.5f;
 	state->ds.chartZoomToScale = state->ds.chartZoomScale;
 	state->ds.chartZoomStartScale = state->ds.chartZoomScale;
 	state->ds.totalPanTime = CHART_KEY_PAN_TIME;
@@ -886,12 +886,17 @@ void getDecayModeStr(char strOut[32], const ndata *restrict nd, const uint32_t d
 	if(dcyModeInd < nd->numDecModes){
 		uint8_t decValueType = nd->dcyMode[dcyModeInd].prob.unit;
 		uint8_t decType = nd->dcyMode[dcyModeInd].type;
+		uint8_t decPrecision = (uint8_t)(nd->dcyMode[dcyModeInd].prob.format & 15U);
 		if(decValueType == VALUETYPE_NUMBER){
-			snprintf(strOut,32,"%s = %.0f%%%%",getDecayTypeShortStr(decType),(double)nd->dcyMode[dcyModeInd].prob.val); //%%%% will be parsed to "%%" in tmpStr, which will then be parsed as a format string by SDL_FontCacahe, leaving "%"
+			if(nd->dcyMode[dcyModeInd].prob.err > 0){
+				snprintf(strOut,32,"%s = %.*f(%u)%%%%",getDecayTypeShortStr(decType),decPrecision,(double)nd->dcyMode[dcyModeInd].prob.val,nd->dcyMode[dcyModeInd].prob.err); //%%%% will be parsed to "%%" in tmpStr, which will then be parsed as a format string by SDL_FontCacahe, leaving "%"
+			}else{
+				snprintf(strOut,32,"%s = %.*f%%%%",getDecayTypeShortStr(decType),decPrecision,(double)nd->dcyMode[dcyModeInd].prob.val); //%%%% will be parsed to "%%" in tmpStr, which will then be parsed as a format string by SDL_FontCacahe, leaving "%"
+			}
 		}else if(decValueType == VALUETYPE_UNKNOWN){
 			snprintf(strOut,32,"%s%s",getDecayTypeShortStr(decType),getValueTypeShortStr(decValueType));
 		}else{
-			snprintf(strOut,32,"%s %s%.0f%%%%",getDecayTypeShortStr(decType),getValueTypeShortStr(decValueType),(double)nd->dcyMode[dcyModeInd].prob.val); //%%%% will be parsed to "%%" in tmpStr, which will then be parsed as a format string by SDL_FontCacahe, leaving "%"
+			snprintf(strOut,32,"%s %s%.*f%%%%",getDecayTypeShortStr(decType),getValueTypeShortStr(decValueType),decPrecision,(double)nd->dcyMode[dcyModeInd].prob.val); //%%%% will be parsed to "%%" in tmpStr, which will then be parsed as a format string by SDL_FontCacahe, leaving "%"
 		}
 	}else{
 		snprintf(strOut,32," ");
@@ -1305,9 +1310,10 @@ void updateWindowRes(app_data *restrict dat, drawing_state *restrict ds, resourc
 	if(fabsf(rdat->uiScale - newScale) > 0.001f){
 		printf("Re-scaling UI from %0.9f to %0.9f.\n",(double)rdat->uiScale,(double)newScale);
 		rdat->uiScale = newScale; //set UI scale properly for HI-DPI
+		rdat->uiThemeScale = roundf(2.0f*rdat->uiScale); //super-sample UI elements, hack to prevent scaling artifacts
 		if(rdat->font){
-			//rescale fonts as well, this requires loading them from the app data file
-			regenerateFontCache(dat,rdat); //load_data.c
+			//rescale font and UI theme as well, this requires loading them from the app data file
+			regenerateThemeAndFontCache(dat,rdat); //load_data.c
 		}
 	}
   ds->windowXRes = (uint16_t)wwidth;
