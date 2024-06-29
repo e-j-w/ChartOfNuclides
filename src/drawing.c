@@ -356,8 +356,8 @@ void drawScreenDimmer(const drawing_state *restrict ds, resource_data *restrict 
 
 }
 
-//returns the width of the drawn text (can be used for alignment purposes)
-float drawTextAlignedSized(resource_data *restrict rdat, const float xPos, const float yPos, FC_Font *font, const SDL_Color textColor, const Uint8 alpha, const char *txt, const uint8_t alignment, const Uint16 maxWidth){
+//returns a rect containing dimensions of the drawn text (can be used for alignment purposes)
+SDL_FRect drawTextAlignedSized(resource_data *restrict rdat, const float xPos, const float yPos, FC_Font *font, const SDL_Color textColor, const Uint8 alpha, const char *txt, const uint8_t alignment, const Uint16 maxWidth){
   float drawX = xPos*rdat->uiScale;
   float drawY = yPos*rdat->uiScale;
   float drawW = (float)FC_GetWidth(font,txt);
@@ -371,11 +371,10 @@ float drawTextAlignedSized(resource_data *restrict rdat, const float xPos, const
   if(alpha != textColor.a){
     SDL_Color drawCol = textColor;
     drawCol.a = alpha;
-    FC_DrawColumnColor(font,rdat->renderer,drawX,drawY,maxWidth,drawCol,txt);
+    return FC_DrawColumnColor(font,rdat->renderer,drawX,drawY,maxWidth,drawCol,txt);
   }else{
-    FC_DrawColumnColor(font,rdat->renderer,drawX,drawY,maxWidth,textColor,txt);
+    return FC_DrawColumnColor(font,rdat->renderer,drawX,drawY,maxWidth,textColor,txt);
   }
-  return drawW/rdat->uiScale;
 }
 void drawTextAligned(resource_data *restrict rdat, const float xPos, const float yPos, FC_Font *font, const SDL_Color textColor, const char *txt, const uint8_t alignment){
   drawTextAlignedSized(rdat,xPos,yPos,font,textColor,255,txt,alignment,16384);

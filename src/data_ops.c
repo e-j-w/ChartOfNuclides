@@ -187,7 +187,18 @@ void setupMessageBox(app_state *restrict state, const char *headerTxt, const cha
 const char* getFullElemStr(const uint8_t Z, const uint8_t N){
 	switch(Z){
 		case 0:
-			return "Neutron";
+			//different names depending on N
+			if(N==2){
+				return "Dineutron";
+			}else if(N==3){
+				return "Trineutron";
+			}else if(N==4){
+				return "Tetraneutron";
+			}else if(N==5){
+				return "Pentaneutron";
+			}else{
+				return "Neutron";
+			}
 		case 1:
 			//different names depending on N
 			if(N==1){

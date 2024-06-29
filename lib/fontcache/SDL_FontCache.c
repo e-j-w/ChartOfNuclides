@@ -1907,7 +1907,12 @@ FC_Rect FC_DrawColumnScale(FC_Font* font, FC_Target* dest, float x, float y, Uin
 FC_Rect FC_DrawColumnColor(FC_Font* font, FC_Target* dest, float x, float y, Uint16 width, SDL_Color color, const char* formatted_text, ...)
 {
     FC_Rect box = {x, y, (float)width, 0.0f};
-    int total_height;
+    int total_height = 0;
+
+    float drawWidth = FC_GetWidth(font,formatted_text) - 6.0f;
+    if(drawWidth > width){
+        drawWidth = (float)width; 
+    }
 
     if(formatted_text == NULL || font == NULL)
         return FC_MakeRect(x, y, 0, 0);
@@ -1918,7 +1923,7 @@ FC_Rect FC_DrawColumnColor(FC_Font* font, FC_Target* dest, float x, float y, Uin
 
     FC_DrawColumnFromBuffer(font, dest, box, &total_height, FC_MakeScale(1,1), FC_ALIGN_LEFT);
 
-    return FC_MakeRect((float)box.x, (float)box.y, width, (float)total_height);
+    return FC_MakeRect((float)box.x, (float)box.y, drawWidth, (float)total_height);
 }
 
 FC_Rect FC_DrawColumnEffect(FC_Font* font, FC_Target* dest, float x, float y, Uint16 width, FC_Effect effect, const char* formatted_text, ...)
