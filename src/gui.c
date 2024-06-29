@@ -127,6 +127,7 @@ SDL_FColor getHalfLifeCol(const double halflifeSeconds){
 void drawNuclBoxLabel(const app_data *restrict dat, const drawing_state *restrict ds, resource_data *restrict rdat, const float xPos, const float yPos, const float boxWidth, SDL_Color col, const uint16_t nuclInd){
   char tmpStr[32];
   float drawXPos, drawYPos;
+  float labelMargin = NUCLBOX_LABEL_MARGIN*ds->chartZoomScale;
   uint16_t Z = (uint16_t)dat->ndat.nuclData[nuclInd].Z;
   if(ds->chartZoomScale >= 8.0f){
     uint16_t N = (uint16_t)dat->ndat.nuclData[nuclInd].N;
@@ -134,7 +135,7 @@ void drawNuclBoxLabel(const app_data *restrict dat, const drawing_state *restric
     float totalLblWidth = ((float)(FC_GetWidth(rdat->smallFont,tmpStr) + FC_GetWidth(rdat->bigFont,getElemStr((uint8_t)Z))))/rdat->uiScale;
     drawXPos = xPos+boxWidth*0.5f - totalLblWidth*0.5f;
     if(ds->chartZoomScale >= 12.0f){
-      drawYPos = yPos + NUCLBOX_LABEL_MARGIN*ds->chartZoomScale;
+      drawYPos = yPos + labelMargin;
     }else{
       float totalLblHeight = ((float)(FC_GetHeight(rdat->smallFont,tmpStr) + FC_GetHeight(rdat->bigFont,getElemStr((uint8_t)Z))))/rdat->uiScale;
       drawYPos = yPos+boxWidth*0.5f - totalLblHeight*0.5f;
@@ -142,8 +143,8 @@ void drawNuclBoxLabel(const app_data *restrict dat, const drawing_state *restric
     drawXPos += (drawTextAlignedSized(rdat,drawXPos,drawYPos,rdat->smallFont,col,255,tmpStr,ALIGN_LEFT,16384)).w; //draw number label
     drawTextAlignedSized(rdat,drawXPos,drawYPos+10.0f,rdat->bigFont,col,255,getElemStr((uint8_t)Z),ALIGN_LEFT,16384); //draw element label
     if(ds->chartZoomScale >= 12.0f){
-      drawXPos = xPos + NUCLBOX_LABEL_MARGIN*ds->chartZoomScale;
-      drawYPos = yPos + NUCLBOX_LABEL_MARGIN*ds->chartZoomScale;
+      drawXPos = xPos + labelMargin;
+      drawYPos = yPos + labelMargin;
       getGSHalfLifeStr(tmpStr,&dat->ndat,nuclInd);
       drawTextAlignedSized(rdat,drawXPos,drawYPos+36.0f,rdat->font,col,255,tmpStr,ALIGN_LEFT,16384); //draw GS half-life label
       if((ds->chartZoomScale >= 15.0f)&&(dat->ndat.nuclData[nuclInd].numLevels > 0)){
@@ -162,27 +163,27 @@ void drawNuclBoxLabel(const app_data *restrict dat, const drawing_state *restric
         }
         if(dat->ndat.nuclData[nuclInd].abundance.unit == VALUE_UNIT_PERCENT){
           getAbundanceStr(tmpStr,&dat->ndat,nuclInd);
-          Uint16 drawHeight = FC_GetColumnHeight(rdat->font,(Uint16)boxWidth,tmpStr);
+          Uint16 drawHeight = FC_GetColumnHeight(rdat->font,(Uint16)(boxWidth - labelMargin),tmpStr);
           uint8_t drawYOffsets =  (uint8_t)(1.0f + drawHeight/30.0f);
-          if((yOffsets+drawYOffsets) < yOffsetLimit){
-            drawTextAlignedSized(rdat,drawXPos,drawYPos+(yOffsets*20.0f),rdat->font,col,255,tmpStr,ALIGN_LEFT,(Uint16)boxWidth); //draw abundance label
-            yOffsets += 1;
+          if((yOffsets+drawYOffsets) <= yOffsetLimit){
+            drawTextAlignedSized(rdat,drawXPos,drawYPos+(yOffsets*20.0f),rdat->font,col,255,tmpStr,ALIGN_LEFT,(Uint16)(boxWidth - labelMargin)); //draw abundance label
+            yOffsets += drawYOffsets;
           }else{
-            drawTextAlignedSized(rdat,drawXPos,drawYPos+(yOffsets*20.0f),rdat->font,col,255,"(...)",ALIGN_LEFT,(Uint16)boxWidth);
+            drawTextAlignedSized(rdat,drawXPos,drawYPos+(yOffsets*20.0f),rdat->font,col,255,"(...)",ALIGN_LEFT,(Uint16)(boxWidth - labelMargin));
           }
         }
         uint32_t gsLevInd = (uint32_t)(dat->ndat.nuclData[nuclInd].firstLevel + dat->ndat.nuclData[nuclInd].gsLevel);
         for(int8_t i=0; i<dat->ndat.levels[gsLevInd].numDecModes; i++){
           getDecayModeStr(tmpStr,&dat->ndat,dat->ndat.levels[gsLevInd].firstDecMode + (uint32_t)i);
           //printf("%s\n",tmpStr);
-          Uint16 drawHeight = FC_GetColumnHeight(rdat->font,(Uint16)boxWidth,tmpStr);
+          Uint16 drawHeight = FC_GetColumnHeight(rdat->font,(Uint16)(boxWidth - labelMargin),tmpStr);
           uint8_t drawYOffsets =  (uint8_t)(1.0f + drawHeight/30.0f);
           if(((yOffsets+drawYOffsets) <= yOffsetLimit)||((drawYOffsets == 1)&&(i==(dat->ndat.levels[gsLevInd].numDecModes-1)))){
-            drawTextAlignedSized(rdat,drawXPos,drawYPos+(yOffsets*20.0f),rdat->font,col,255,tmpStr,ALIGN_LEFT,(Uint16)boxWidth); //draw decay mode label
+            drawTextAlignedSized(rdat,drawXPos,drawYPos+(yOffsets*20.0f),rdat->font,col,255,tmpStr,ALIGN_LEFT,(Uint16)(boxWidth - labelMargin)); //draw decay mode label
             //printf("height: %f\n",(double)height);
             yOffsets += drawYOffsets;
           }else{
-            drawTextAlignedSized(rdat,drawXPos,drawYPos+(yOffsets*20.0f),rdat->font,col,255,"(...)",ALIGN_LEFT,(Uint16)boxWidth);
+            drawTextAlignedSized(rdat,drawXPos,drawYPos+(yOffsets*20.0f),rdat->font,col,255,"(...)",ALIGN_LEFT,(Uint16)(boxWidth - labelMargin));
             break;
           }
         }

@@ -368,13 +368,17 @@ SDL_FRect drawTextAlignedSized(resource_data *restrict rdat, const float xPos, c
     drawX = drawX - drawW/2.0f;
     drawY = drawY - drawH/2.0f;
   }
+  SDL_FRect drawRect;
   if(alpha != textColor.a){
     SDL_Color drawCol = textColor;
     drawCol.a = alpha;
-    return FC_DrawColumnColor(font,rdat->renderer,drawX,drawY,maxWidth,drawCol,txt);
+    drawRect = FC_DrawColumnColor(font,rdat->renderer,drawX,drawY,maxWidth,drawCol,txt);
   }else{
-    return FC_DrawColumnColor(font,rdat->renderer,drawX,drawY,maxWidth,textColor,txt);
+    drawRect = FC_DrawColumnColor(font,rdat->renderer,drawX,drawY,maxWidth,textColor,txt);
   }
+  drawRect.w /= rdat->uiScale;
+  drawRect.h /= rdat->uiScale;
+  return drawRect;
 }
 void drawTextAligned(resource_data *restrict rdat, const float xPos, const float yPos, FC_Font *font, const SDL_Color textColor, const char *txt, const uint8_t alignment){
   drawTextAlignedSized(rdat,xPos,yPos,font,textColor,255,txt,alignment,16384);

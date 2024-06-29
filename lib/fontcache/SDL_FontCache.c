@@ -1909,9 +1909,9 @@ FC_Rect FC_DrawColumnColor(FC_Font* font, FC_Target* dest, float x, float y, Uin
     FC_Rect box = {x, y, (float)width, 0.0f};
     int total_height = 0;
 
-    float drawWidth = FC_GetWidth(font,formatted_text) - 6.0f;
+    float drawWidth = FC_GetWidth(font,formatted_text);
     if(drawWidth > width){
-        drawWidth = (float)width; 
+        drawWidth = (float)width;
     }
 
     if(formatted_text == NULL || font == NULL)
