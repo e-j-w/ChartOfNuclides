@@ -42,6 +42,7 @@ void initializeTempState(app_state *restrict state){
   changeUIState(state,UISTATE_DEFAULT);
   state->clickedUIElem = UIELEM_ENUM_LENGTH; //no selected UI element
   state->ds.shownElements = 0; //no UI elements being shown
+	state->ds.shownElements |= (1U << UIELEM_CHARTOFNUCLIDES);
   state->ds.uiAnimPlaying = 0; //no UI animations playing
   state->ds.useZoomAnimations = 1;
 	state->ds.chartPosX = 62.0f;
@@ -92,6 +93,12 @@ void stopUIAnimation(app_state *restrict state, const uint8_t uiAnim){
 			state->ds.shownElements &= (uint32_t)(~(1U << UIELEM_NUCL_INFOBOX)); //close the info box
 			changeUIState(state,UISTATE_DEFAULT); //make info box un-interactable
 			state->chartSelectedNucl = MAXNUMNUCL;
+			break;
+		case UIANIM_NUCLINFOBOX_EXPAND:
+			state->ds.shownElements &= (uint32_t)(~(1U << UIELEM_NUCL_INFOBOX)); //close the info box
+			state->ds.shownElements &= (uint32_t)(~(1U << UIELEM_CHARTOFNUCLIDES)); //don't show the chart
+			state->ds.shownElements |= (1U << UIELEM_NUCL_FULLINFOBOX); //show the full info box
+			break;
     default:
       break;
   }
@@ -1177,11 +1184,15 @@ void uiElemClickAction(const app_data *restrict dat, app_state *restrict state, 
 				startUIAnimation(&state->ds,UIANIM_NUCLHIGHLIGHT_HIDE);
 			}
 			break;
+		case UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON:
+				startUIAnimation(&state->ds,UIANIM_NUCLINFOBOX_EXPAND);
+			break;
 		case UIELEM_ENUM_LENGTH:
     default:
 			//clicked outside of a button or UI element
       if(state->uiState == UISTATE_DEFAULT){
-				if((state->ds.shownElements == 0)||(state->ds.shownElements == (1U << UIELEM_NUCL_INFOBOX))){
+				if(((state->ds.shownElements) == (uint32_t)(1U << UIELEM_CHARTOFNUCLIDES))||((state->ds.shownElements >> (UIELEM_CHARTOFNUCLIDES+1)) == (1U << (UIELEM_NUCL_INFOBOX-1)))){
+					//only the chart of nuclides and/or info box are open
 					//clicked on the chart view
 					float mouseX = mouseXPxToN(&state->ds,state->mouseXPx);
     			float mouseY = mouseYPxToZ(&state->ds,state->mouseYPx);
@@ -1237,6 +1248,7 @@ void uiElemClickAction(const app_data *restrict dat, app_state *restrict state, 
 				}else{
 					//clicked out of a menu
 					state->ds.shownElements = 0; //close any menu being shown
+					state->ds.shownElements |= (1U << UIELEM_CHARTOFNUCLIDES);
 				}
       }
       break;

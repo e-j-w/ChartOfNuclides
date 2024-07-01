@@ -401,6 +401,10 @@ uint8_t getHighlightState(const app_state *restrict state, const uint8_t uiElem)
   }
 }
 
+void drawNuclFullInfoBox(const app_data *restrict dat, const app_state *restrict state, resource_data *restrict rdat, const uint16_t nuclInd){
+
+}
+
 void drawNuclInfoBox(const app_data *restrict dat, const app_state *restrict state, resource_data *restrict rdat, const uint16_t nuclInd){
   
   uint16_t yOffset = 0;
@@ -413,13 +417,30 @@ void drawNuclInfoBox(const app_data *restrict dat, const app_state *restrict sta
   if(state->ds.uiAnimPlaying & (1U << UIANIM_NUCLHIGHLIGHT_SHOW)){
     alpha = (uint8_t)(255.0f*juice_smoothStop2(1.0f - state->ds.timeLeftInUIAnimation[UIANIM_NUCLHIGHLIGHT_SHOW]/UI_ANIM_LENGTH));
   }
-  
+
   //draw panel background
   SDL_FRect infoBoxPanelRect;
-  infoBoxPanelRect.x = state->ds.uiElemPosX[UIELEM_NUCL_INFOBOX];
-  infoBoxPanelRect.y = state->ds.uiElemPosY[UIELEM_NUCL_INFOBOX] + yOffset;
-  infoBoxPanelRect.w = state->ds.uiElemWidth[UIELEM_NUCL_INFOBOX];
-  infoBoxPanelRect.h = state->ds.uiElemHeight[UIELEM_NUCL_INFOBOX];
+  if(state->ds.uiAnimPlaying & (1U << UIANIM_NUCLINFOBOX_EXPAND)){
+    //expand from normal size to full screen
+    float animFrac = 1.0f - state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_EXPAND]/UI_ANIM_LENGTH;
+    infoBoxPanelRect.x = state->ds.uiElemPosX[UIELEM_NUCL_INFOBOX]*(1.0f - animFrac);
+    infoBoxPanelRect.y = (state->ds.uiElemPosY[UIELEM_NUCL_INFOBOX] + yOffset)*(1.0f - animFrac);
+    infoBoxPanelRect.w = state->ds.uiElemWidth[UIELEM_NUCL_INFOBOX] + animFrac*(state->ds.windowXRes - state->ds.uiElemWidth[UIELEM_NUCL_INFOBOX]);
+    infoBoxPanelRect.h = state->ds.uiElemHeight[UIELEM_NUCL_INFOBOX] + animFrac*(state->ds.windowYRes - state->ds.uiElemHeight[UIELEM_NUCL_INFOBOX]);
+  }else if(state->ds.uiAnimPlaying & (1U << UIANIM_NUCLINFOBOX_CONTRACT)){
+    //contract from full screen to normal size
+    float animFrac = 1.0f - state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_CONTRACT]/UI_ANIM_LENGTH;
+    infoBoxPanelRect.x = 0.0f + animFrac*(state->ds.uiElemPosX[UIELEM_NUCL_INFOBOX]);
+    infoBoxPanelRect.y = 0.0f + animFrac*(state->ds.uiElemPosY[UIELEM_NUCL_INFOBOX] + yOffset);
+    infoBoxPanelRect.w = state->ds.windowXRes + animFrac*(state->ds.uiElemWidth[UIELEM_NUCL_INFOBOX] - state->ds.windowXRes);
+    infoBoxPanelRect.h = state->ds.windowYRes + animFrac*(state->ds.uiElemHeight[UIELEM_NUCL_INFOBOX] - state->ds.windowYRes);
+  }else{
+    //normal sized info box
+    infoBoxPanelRect.x = state->ds.uiElemPosX[UIELEM_NUCL_INFOBOX];
+    infoBoxPanelRect.y = state->ds.uiElemPosY[UIELEM_NUCL_INFOBOX] + yOffset;
+    infoBoxPanelRect.w = state->ds.uiElemWidth[UIELEM_NUCL_INFOBOX];
+    infoBoxPanelRect.h = state->ds.uiElemHeight[UIELEM_NUCL_INFOBOX];
+  }
   drawPanelBG(rdat,infoBoxPanelRect,1.0f);
 
   //draw strings
@@ -551,7 +572,9 @@ void drawUI(const app_data *restrict dat, app_state *restrict state, resource_da
   (void)deltaTime; //unused for now
 
   //draw chart of nuclides below everything else
-  drawChartOfNuclides(dat,state,rdat);
+  if(state->ds.shownElements & (1U << UIELEM_CHARTOFNUCLIDES)){
+    drawChartOfNuclides(dat,state,rdat);
+  }
 
   //draw button(s)
   drawIconButton(&dat->rules.themeRules,rdat,state->ds.uiElemPosX[UIELEM_MENU_BUTTON],state->ds.uiElemPosY[UIELEM_MENU_BUTTON],state->ds.uiElemWidth[UIELEM_MENU_BUTTON],getHighlightState(state,UIELEM_MENU_BUTTON),255,UIICON_MENU);
@@ -570,6 +593,8 @@ void drawUI(const app_data *restrict dat, app_state *restrict state, resource_da
   }
   if(state->ds.shownElements & (1U << UIELEM_NUCL_INFOBOX)){
     drawNuclInfoBox(dat,state,rdat,state->chartSelectedNucl);
+  }else if(state->ds.shownElements & (1U << UIELEM_NUCL_FULLINFOBOX)){
+    drawNuclFullInfoBox(dat,state,rdat,state->chartSelectedNucl);
   }
 
   if(state->ds.uiAnimPlaying & (1U << UIANIM_CHART_FADEIN)){
