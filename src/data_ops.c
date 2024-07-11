@@ -98,6 +98,7 @@ void stopUIAnimation(app_state *restrict state, const uint8_t uiAnim){
 			state->ds.shownElements &= (uint32_t)(~(1U << UIELEM_NUCL_INFOBOX)); //close the info box
 			state->ds.shownElements &= (uint32_t)(~(1U << UIELEM_CHARTOFNUCLIDES)); //don't show the chart
 			state->ds.shownElements |= (1U << UIELEM_NUCL_FULLINFOBOX); //show the full info box
+			changeUIState(state,UISTATE_DEFAULT); //update UI state now that the full info box is visible
 			break;
     default:
       break;
@@ -862,12 +863,16 @@ void getLvlEnergyStr(char strOut[32], const ndata *restrict nd, const uint32_t l
 	
 }
 
-void getHalfLifeStr(char strOut[32], const ndata *restrict nd, const uint32_t lvlInd, const uint8_t showErr){
+void getHalfLifeStr(char strOut[32], const ndata *restrict nd, const uint32_t lvlInd, const uint8_t showErr, const uint8_t showUnknown){
 	if(lvlInd < nd->numLvls){
 		if(nd->levels[lvlInd].halfLife.unit == VALUE_UNIT_STABLE){
 			snprintf(strOut,32,"STABLE");
 		}else if(nd->levels[lvlInd].halfLife.unit == VALUE_UNIT_NOVAL){
-			snprintf(strOut,32,"Unknown");
+			if(showUnknown){
+				snprintf(strOut,32,"Unknown");
+			}else{
+				snprintf(strOut,32," ");
+			}
 		}else if(nd->levels[lvlInd].halfLife.val > 0.0f){
 			uint8_t hlPrecision = (uint8_t)(nd->levels[lvlInd].halfLife.format & 15U);
 			uint8_t hlExponent = (uint8_t)((nd->levels[lvlInd].halfLife.format >> 4U) & 1U);
@@ -889,12 +894,16 @@ void getHalfLifeStr(char strOut[32], const ndata *restrict nd, const uint32_t lv
 			snprintf(strOut,32," ");
 		}
 	}else{
-		snprintf(strOut,32,"Unknown");
+		if(showUnknown){
+			snprintf(strOut,32,"Unknown");
+		}else{
+			snprintf(strOut,32," ");
+		}
 	}
 }
 void getGSHalfLifeStr(char strOut[32], const ndata *restrict nd, const uint16_t nuclInd){
 	if(nd->nuclData[nuclInd].numLevels > 0){
-		getHalfLifeStr(strOut,nd,nd->nuclData[nuclInd].firstLevel + nd->nuclData[nuclInd].gsLevel,1);
+		getHalfLifeStr(strOut,nd,nd->nuclData[nuclInd].firstLevel + nd->nuclData[nuclInd].gsLevel,1,1);
 	}else{
 		snprintf(strOut,32,"Unknown");
 	}
@@ -1129,6 +1138,9 @@ void changeUIState(app_state *restrict state, const uint8_t newState){
 				state->interactableElement |= (uint32_t)(1U << UIELEM_NUCL_INFOBOX);
 				state->interactableElement |= (uint32_t)(1U << UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON);
 				state->interactableElement |= (uint32_t)(1U << UIELEM_NUCL_INFOBOX_CLOSEBUTTON);
+			}else if(state->ds.shownElements & (1U << UIELEM_NUCL_FULLINFOBOX)){
+				state->interactableElement |= (uint32_t)(1U << UIELEM_NUCL_FULLINFOBOX);
+				state->interactableElement |= (uint32_t)(1U << UIELEM_NUCL_FULLINFOBOX_BACKBUTTON);
 			}
       break;
   }
@@ -1186,6 +1198,13 @@ void uiElemClickAction(const app_data *restrict dat, app_state *restrict state, 
 			break;
 		case UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON:
 				startUIAnimation(&state->ds,UIANIM_NUCLINFOBOX_EXPAND);
+			break;
+		case UIELEM_NUCL_FULLINFOBOX_BACKBUTTON:
+			state->ds.shownElements &= (uint32_t)(~(1U << UIELEM_NUCL_FULLINFOBOX)); //close the full info box
+			state->ds.shownElements |= (1U << UIELEM_NUCL_INFOBOX); //show the info box
+			state->ds.shownElements |= (1U << UIELEM_CHARTOFNUCLIDES); //show the chart
+			startUIAnimation(&state->ds,UIANIM_NUCLINFOBOX_CONTRACT);
+			changeUIState(state,UISTATE_DEFAULT); //update UI state now that the regular info box is visible
 			break;
 		case UIELEM_ENUM_LENGTH:
     default:
@@ -1245,6 +1264,8 @@ void uiElemClickAction(const app_data *restrict dat, app_state *restrict state, 
 							state->chartSelectedNucl = selNucl;
 						}
 					}
+				}else if(state->ds.shownElements & (1U << UIELEM_NUCL_FULLINFOBOX)){
+					//full info box, do nothing for now
 				}else{
 					//clicked out of a menu
 					state->ds.shownElements = 0; //close any menu being shown
@@ -1308,6 +1329,12 @@ void updateSingleUIElemPosition(drawing_state *restrict ds, const uint8_t uiElem
 			ds->uiElemPosX[UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON] = (uint16_t)(ds->uiElemPosX[UIELEM_NUCL_INFOBOX] + ds->uiElemWidth[UIELEM_NUCL_INFOBOX] - ds->uiElemWidth[UIELEM_NUCL_INFOBOX_CLOSEBUTTON] - ds->uiElemWidth[UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON] - 7*UI_PADDING_SIZE);
 			ds->uiElemPosY[UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON] = ds->uiElemPosY[UIELEM_NUCL_INFOBOX] + 4*UI_PADDING_SIZE;
 			//printf("x: %u, y: %u, w: %u, h: %u\n",ds->uiElemPosX[UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON],ds->uiElemPosY[UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON],ds->uiElemWidth[UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON],ds->uiElemHeight[UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON]);
+			break;
+		case UIELEM_NUCL_FULLINFOBOX_BACKBUTTON:
+			ds->uiElemPosX[UIELEM_NUCL_FULLINFOBOX_BACKBUTTON] = (uint16_t)(ds->windowXRes-NUCL_FULLINFOBOX_BACKBUTTON_WIDTH-NUCL_FULLINFOBOX_BACKBUTTON_POS_XR);
+			ds->uiElemPosY[UIELEM_NUCL_FULLINFOBOX_BACKBUTTON] = NUCL_FULLINFOBOX_BACKBUTTON_POS_Y;
+			ds->uiElemWidth[UIELEM_NUCL_FULLINFOBOX_BACKBUTTON] = NUCL_FULLINFOBOX_BACKBUTTON_WIDTH;
+			ds->uiElemHeight[UIELEM_NUCL_FULLINFOBOX_BACKBUTTON] = UI_TILE_SIZE;
 			break;
 		default:
 			break;

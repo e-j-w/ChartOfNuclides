@@ -40,9 +40,8 @@ which can be referenced by both the GUI draw code as well as the interaction cod
 #define UITHEME_PANELBG_TILE_Y 5
 
 //UI theme icons
-#define NUM_THEME_ICONS  UIICON_ENUM_LENGTH
-static const uint8_t UITHEME_ICON_TILE_X[NUM_THEME_ICONS] = {0,1,2,2};
-static const uint8_t UITHEME_ICON_TILE_Y[NUM_THEME_ICONS] = {10,10,10,9};
+static const uint8_t UITHEME_ICON_TILE_X[UIICON_ENUM_LENGTH] = {0,1,2,1,2};
+static const uint8_t UITHEME_ICON_TILE_Y[UIICON_ENUM_LENGTH] = {10,10,10,9,9};
 
 #define SMALL_FONT_SIZE      13
 #define DEFAULT_FONT_SIZE    15
@@ -94,6 +93,14 @@ static const uint8_t UITHEME_ICON_TILE_Y[NUM_THEME_ICONS] = {10,10,10,9};
 #define NUCL_INFOBOX_HALFLIFE_COL_OFFSET    220.0f //in unscaled pixels
 #define NUCL_INFOBOX_DECAYMODE_COL_OFFSET   350.0f //in unscaled pixels
 #define NUCL_INFOBOX_ALLLEVELS_BUTTON_WIDTH 170 //in unscaled pixels
+
+#define NUCL_FULLINFOBOX_BACKBUTTON_POS_XR (2*MENU_BUTTON_POS_XR + MENU_BUTTON_WIDTH)
+#define NUCL_FULLINFOBOX_BACKBUTTON_POS_Y  MENU_BUTTON_POS_Y
+#define NUCL_FULLINFOBOX_BACKBUTTON_WIDTH  NUCL_INFOBOX_ALLLEVELS_BUTTON_WIDTH
+#define NUCL_FULLINFOBOX_ENERGY_COL_OFFSET      0.0f //in unscaled pixels
+#define NUCL_FULLINFOBOX_JPI_COL_OFFSET         180.0f //in unscaled pixels
+#define NUCL_FULLINFOBOX_HALFLIFE_COL_OFFSET    300.0f //in unscaled pixels
+#define NUCL_FULLINFOBOX_DECAYMODE_COL_OFFSET   470.0f //in unscaled pixels
 
 //performance overlay
 #define PERF_OVERLAY_BUTTON_X_ANCHOR  16

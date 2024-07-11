@@ -265,7 +265,7 @@ void drawTextButton(const ui_theme_rules *restrict uirules, resource_data *restr
 
 void drawIcon(const ui_theme_rules *restrict uirules, resource_data *restrict rdat, const uint16_t x, const uint16_t y, const uint16_t w, const uint8_t highlightState, const uint8_t alpha, const uint8_t iconInd){
   
-  if(iconInd >= NUM_THEME_ICONS){
+  if(iconInd >= UIICON_ENUM_LENGTH){
     printf("WARNING: drawIcon - invalid icon index (%u).\n",iconInd);
     return;
   }
