@@ -24,7 +24,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include "gui_constants.h"
 
 //Initializes the temporary (unsaved) portion of the app state.
-void initializeTempState(app_state *restrict state){
+void initializeTempState(const app_data *restrict dat, app_state *restrict state){
   //input
   state->mouseXPx = -1;
   state->mouseYPx = -1;
@@ -34,12 +34,13 @@ void initializeTempState(app_state *restrict state){
   state->lastAxisValY = 0;
   state->activeAxis = 0; //the last used axis
   state->lastInputType = INPUT_TYPE_KEYBOARD; //default input type
+	state->scrollSpeedMultiplier = 8.0f;
 	state->inputFlags = 0;
   //app state
 	state->chartSelectedNucl = MAXNUMNUCL;
   state->quitAppFlag = 0;
   //ui state
-  changeUIState(state,UISTATE_DEFAULT);
+  changeUIState(dat,state,UISTATE_DEFAULT);
   state->clickedUIElem = UIELEM_ENUM_LENGTH; //no selected UI element
   state->ds.shownElements = 0; //no UI elements being shown
 	state->ds.shownElements |= (1U << UIELEM_CHARTOFNUCLIDES);
@@ -76,7 +77,7 @@ void startUIAnimation(drawing_state *restrict ds, const uint8_t uiAnim){
   ds->timeLeftInUIAnimation[uiAnim] = UI_ANIM_LENGTH;
   ds->uiAnimPlaying |= (1U << uiAnim);
 }
-void stopUIAnimation(app_state *restrict state, const uint8_t uiAnim){
+void stopUIAnimation(const app_data *restrict dat, app_state *restrict state, const uint8_t uiAnim){
   if(uiAnim >= UIANIM_ENUM_LENGTH){
     printf("WARNING: stopUIAnimation - invalid animation ID (%u, max %u).\n",uiAnim,UIANIM_ENUM_LENGTH-1);
     return;
@@ -91,14 +92,14 @@ void stopUIAnimation(app_state *restrict state, const uint8_t uiAnim){
       break;
 		case UIANIM_NUCLINFOBOX_HIDE:
 			state->ds.shownElements &= (uint32_t)(~(1U << UIELEM_NUCL_INFOBOX)); //close the info box
-			changeUIState(state,UISTATE_DEFAULT); //make info box un-interactable
+			changeUIState(dat,state,UISTATE_DEFAULT); //make info box un-interactable
 			state->chartSelectedNucl = MAXNUMNUCL;
 			break;
 		case UIANIM_NUCLINFOBOX_EXPAND:
 			state->ds.shownElements &= (uint32_t)(~(1U << UIELEM_NUCL_INFOBOX)); //close the info box
 			state->ds.shownElements &= (uint32_t)(~(1U << UIELEM_CHARTOFNUCLIDES)); //don't show the chart
 			state->ds.shownElements |= (1U << UIELEM_NUCL_FULLINFOBOX); //show the full info box
-			changeUIState(state,UISTATE_DEFAULT); //update UI state now that the full info box is visible
+			changeUIState(dat,state,UISTATE_FULLLEVELINFO); //update UI state now that the full info box is visible
 			break;
     default:
       break;
@@ -107,14 +108,14 @@ void stopUIAnimation(app_state *restrict state, const uint8_t uiAnim){
 
   //printf("Stopped anim %u.\n",uiAnim);
 }
-void updateUIAnimationTimes(app_state *restrict state, const float deltaTime){
+void updateUIAnimationTimes(const app_data *restrict dat, app_state *restrict state, const float deltaTime){
   for(uint8_t i=0;i<UIANIM_ENUM_LENGTH;i++){
     if(state->ds.uiAnimPlaying & (uint32_t)(1U << i)){
       state->ds.timeLeftInUIAnimation[i] -= deltaTime;
       //printf("anim %u dt %.3f timeleft %.3f\n",i,(double)deltaTime,(double)state->ds.timeLeftInUIAnimation[i]);
       if(state->ds.timeLeftInUIAnimation[i] <= 0.0f){
         state->ds.timeLeftInUIAnimation[i] = 0.0f;
-        stopUIAnimation(state,i);
+        stopUIAnimation(dat,state,i);
       }
     }
   }
@@ -183,12 +184,12 @@ void updateDrawingState(const app_data *restrict dat, app_state *restrict state,
 }
 
 //sets everything needed to show a message box
-void setupMessageBox(app_state *restrict state, const char *headerTxt, const char *msgTxt){
+void setupMessageBox(const app_data *restrict dat, app_state *restrict state, const char *headerTxt, const char *msgTxt){
   strncpy(state->msgBoxHeaderTxt,headerTxt,31);
   strncpy(state->msgBoxTxt,msgTxt,255);
   state->ds.shownElements |= (uint32_t)(1U << UIELEM_MSG_BOX);
   startUIAnimation(&state->ds,UIANIM_MSG_BOX_SHOW);
-  changeUIState(state,UISTATE_MSG_BOX);
+  changeUIState(dat,state,UISTATE_MSG_BOX);
 }
 
 //returns a string with element names corresponding to Z values
@@ -843,11 +844,54 @@ const char* getDecayTypeShortStr(const uint8_t type){
 	}
 }
 
+void getGammaEnergyStr(char strOut[32], const ndata *restrict nd, const uint32_t tranInd, const uint8_t showErr){
+
+	uint8_t ePrecision = (uint8_t)(nd->tran[tranInd].energy.format & 15U);
+	uint8_t eExponent = (uint8_t)((nd->tran[tranInd].energy.format >> 4U) & 1U);
+	if((showErr == 0)||(nd->tran[tranInd].energy.err == 0)){
+		if(eExponent == 0){
+			snprintf(strOut,32,"%.*f",ePrecision,(double)(nd->tran[tranInd].energy.val));
+		}else{
+			snprintf(strOut,32,"%.*fE%i",ePrecision,(double)(nd->tran[tranInd].energy.val),nd->tran[tranInd].energy.exponent);
+		}
+	}else{
+		if(eExponent == 0){
+			snprintf(strOut,32,"%.*f(%u)",ePrecision,(double)(nd->tran[tranInd].energy.val),nd->tran[tranInd].energy.err);
+		}else{
+			snprintf(strOut,32,"%.*f(%u)E%i",ePrecision,(double)(nd->tran[tranInd].energy.val),nd->tran[tranInd].energy.exponent,nd->tran[tranInd].energy.err);
+		}
+	}
+	
+}
+
+void getGammaIntensityStr(char strOut[32], const ndata *restrict nd, const uint32_t tranInd, const uint8_t showErr){
+
+	uint8_t iPrecision = (uint8_t)(nd->tran[tranInd].intensity.format & 15U);
+	uint8_t iExponent = (uint8_t)((nd->tran[tranInd].intensity.format >> 4U) & 1U);
+	uint8_t iValueType = (uint8_t)((nd->tran[tranInd].intensity.format >> 5U) & 7U);
+	if(nd->tran[tranInd].intensity.val <= 0.0f){
+		snprintf(strOut,32," ");
+	}else if((showErr == 0)||(nd->tran[tranInd].intensity.err == 0)){
+		if(iExponent == 0){
+			snprintf(strOut,32,"%s%.*f",getValueTypeShortStr(iValueType),iPrecision,(double)(nd->tran[tranInd].intensity.val));
+		}else{
+			snprintf(strOut,32,"%s%.*fE%i",getValueTypeShortStr(iValueType),iPrecision,(double)(nd->tran[tranInd].intensity.val),nd->tran[tranInd].intensity.exponent);
+		}
+	}else{
+		if(iExponent == 0){
+			snprintf(strOut,32,"%s%.*f(%u)",getValueTypeShortStr(iValueType),iPrecision,(double)(nd->tran[tranInd].intensity.val),nd->tran[tranInd].intensity.err);
+		}else{
+			snprintf(strOut,32,"%s%.*f(%u)E%i",getValueTypeShortStr(iValueType),iPrecision,(double)(nd->tran[tranInd].intensity.val),nd->tran[tranInd].intensity.err,nd->tran[tranInd].intensity.exponent);
+		}
+	}
+	
+}
+
 void getLvlEnergyStr(char strOut[32], const ndata *restrict nd, const uint32_t lvlInd, const uint8_t showErr){
 
 	uint8_t ePrecision = (uint8_t)(nd->levels[lvlInd].energy.format & 15U);
 	uint8_t eExponent = (uint8_t)((nd->levels[lvlInd].energy.format >> 4U) & 1U);
-	if(showErr == 0){
+	if((showErr == 0)||(nd->levels[lvlInd].energy.err == 0)){
 		if(eExponent == 0){
 			snprintf(strOut,32,"%.*f",ePrecision,(double)(nd->levels[lvlInd].energy.val));
 		}else{
@@ -953,30 +997,54 @@ void getSpinParStr(char strOut[32], const ndata *restrict nd, const uint32_t lvl
 		
 		//printf("Spin: %i, parity: %i, tentative: %u\n\n",nd->levels[lvlInd].spval[i].spinVal,nd->levels[lvlInd].spval[i].parVal,nd->levels[lvlInd].spval[i].tentative);
 		
-		if((nd->levels[lvlInd].spval[i].tentative == 1)||(nd->levels[lvlInd].spval[i].tentative == TENTATIVE_SPINONLY)){
-			if((i==0)||((i>0)&&((nd->levels[lvlInd].spval[i-1].tentative != TENTATIVE_SPINANDPARITY)&&(nd->levels[lvlInd].spval[i-1].tentative != TENTATIVE_SPINONLY)))){
-				strcat(strOut,"(");
-			}
-		}
-		if(nd->levels[lvlInd].halfInt == 1){
-			sprintf(val,"%i/2",nd->levels[lvlInd].spval[i].spinVal);
+		if(nd->levels[lvlInd].spval[i].tentative == TENTATIVE_RANGE){
+			strcat(strOut,"to");
 		}else{
-			sprintf(val,"%i",nd->levels[lvlInd].spval[i].spinVal);
-		}
-		strcat(strOut,val);
-		if(nd->levels[lvlInd].spval[i].parVal == -1){
-			strcat(strOut,"-");
-		}else if(nd->levels[lvlInd].spval[i].parVal == 1){
-			strcat(strOut,"+");
-		}
-		if((nd->levels[lvlInd].spval[i].tentative == 1)||(nd->levels[lvlInd].spval[i].tentative == TENTATIVE_SPINONLY)){
-			if((i==nd->levels[lvlInd].numSpinParVals-1)||((i<nd->levels[lvlInd].numSpinParVals-1)&&((nd->levels[lvlInd].spval[i+1].tentative != TENTATIVE_SPINANDPARITY)&&(nd->levels[lvlInd].spval[i+1].tentative != TENTATIVE_SPINONLY)))){
-				strcat(strOut,")");
+			if((nd->levels[lvlInd].spval[i].tentative == TENTATIVE_SPINANDPARITY)||(nd->levels[lvlInd].spval[i].tentative == TENTATIVE_SPINONLY)){
+				if((i==0)||((i>0)&&((nd->levels[lvlInd].spval[i-1].tentative != TENTATIVE_SPINANDPARITY)&&(nd->levels[lvlInd].spval[i-1].tentative != TENTATIVE_SPINONLY)))){
+					if((i>0)&&(nd->levels[lvlInd].spval[i-1].tentative == TENTATIVE_RANGE)){
+						//previous spin parity value specified a range
+						strcat(strOut," ");
+					}else{
+						strcat(strOut,"(");
+					}
+					
+				}
+			}
+			if(nd->levels[lvlInd].halfInt == 1){
+				sprintf(val,"%i/2",nd->levels[lvlInd].spval[i].spinVal);
+			}else{
+				sprintf(val,"%i",nd->levels[lvlInd].spval[i].spinVal);
+			}
+			strcat(strOut,val);
+			if(nd->levels[lvlInd].spval[i].parVal == -1){
+				strcat(strOut,"-");
+			}else if(nd->levels[lvlInd].spval[i].parVal == 1){
+				strcat(strOut,"+");
+			}
+			if((nd->levels[lvlInd].spval[i].tentative == TENTATIVE_SPINANDPARITY)||(nd->levels[lvlInd].spval[i].tentative == TENTATIVE_SPINONLY)){
+				if(i==nd->levels[lvlInd].numSpinParVals-1){
+					strcat(strOut,")");
+				}else if(i<nd->levels[lvlInd].numSpinParVals-1){
+					if(nd->levels[lvlInd].spval[i+1].tentative != TENTATIVE_RANGE){
+						if(nd->levels[lvlInd].spval[i+1].tentative != TENTATIVE_SPINANDPARITY){
+							if(nd->levels[lvlInd].spval[i+1].tentative != TENTATIVE_SPINONLY){
+								strcat(strOut,")");
+							}
+						}
+					}
+				}
+			}
+			if(i!=nd->levels[lvlInd].numSpinParVals-1){
+				if(nd->levels[lvlInd].spval[i+1].tentative == TENTATIVE_RANGE){
+					//next spin parity value specifies a range
+					strcat(strOut," ");
+				}else{
+					strcat(strOut,",");
+				}
 			}
 		}
-		if(i!=nd->levels[lvlInd].numSpinParVals-1){
-			strcat(strOut,",");
-		}
+		
 	}
 }
 
@@ -1079,6 +1147,32 @@ uint16_t getNuclInd(const ndata *restrict nd, const int16_t N, const int16_t Z){
 	return MAXNUMNUCL;
 }
 
+uint16_t getNumDispLinesForLvl(const ndata *restrict nd, const uint32_t lvlInd){
+  uint16_t levelNumLines = 1;
+  if(nd->levels[lvlInd].numDecModes > 0){
+    levelNumLines += (uint16_t)(nd->levels[lvlInd].numDecModes);
+  }
+  if(nd->levels[lvlInd].numTran > levelNumLines){
+    levelNumLines = (uint16_t)(nd->levels[lvlInd].numTran);
+  }
+  return levelNumLines;
+}
+
+uint16_t getMaxNumLvlDispLines(const ndata *restrict nd, const app_state *restrict state){
+	//find total number of lines displayable
+	uint16_t numLines = 0;
+	for(uint32_t lvlInd = nd->nuclData[state->chartSelectedNucl].firstLevel; lvlInd<(nd->nuclData[state->chartSelectedNucl].firstLevel + nd->nuclData[state->chartSelectedNucl].numLevels); lvlInd++){
+		numLines += getNumDispLinesForLvl(nd,lvlInd);
+	}
+	uint16_t numScreenLines = (uint16_t)(floorf((state->ds.windowYRes - NUCL_FULLINFOBOX_LEVELLIST_POS_Y)/NUCL_INFOBOX_SMALLLINE_HEIGHT));
+	if(numLines > numScreenLines){
+		numLines -= numScreenLines;
+	}else{
+		numLines = 0;
+	}
+	return numLines;
+}
+
 float mouseXPxToN(const drawing_state *restrict ds, const float mouseX){
 	return ds->chartPosX + ((mouseX - ds->windowXRes/2.0f)/(DEFAULT_NUCLBOX_DIM*ds->chartZoomScale));
 }
@@ -1117,7 +1211,7 @@ float getChartHeightZAfterZoom(const drawing_state *restrict ds){
 }
 
 //change the modal state of the UI, and update which UI elements are interactable
-void changeUIState(app_state *restrict state, const uint8_t newState){
+void changeUIState(const app_data *restrict dat, app_state *restrict state, const uint8_t newState){
   
   state->interactableElement = 0;
   state->mouseoverElement = UIELEM_ENUM_LENGTH; //by default, no element is moused over
@@ -1131,6 +1225,12 @@ void changeUIState(app_state *restrict state, const uint8_t newState){
     case UISTATE_MSG_BOX:
       state->interactableElement |= (uint32_t)(1U << UIELEM_MSG_BOX_OK_BUTTON);
       break;
+		case UISTATE_FULLLEVELINFO:
+			state->ds.nuclFullInfoMaxScrollY = getMaxNumLvlDispLines(&dat->ndat,state); //find total number of lines displayable
+			state->interactableElement |= (uint32_t)(1U << UIELEM_MENU_BUTTON);
+			state->interactableElement |= (uint32_t)(1U << UIELEM_NUCL_FULLINFOBOX);
+			state->interactableElement |= (uint32_t)(1U << UIELEM_NUCL_FULLINFOBOX_BACKBUTTON);
+			break;
     case UISTATE_DEFAULT:
     default:
       state->interactableElement |= (uint32_t)(1U << UIELEM_MENU_BUTTON);
@@ -1138,9 +1238,6 @@ void changeUIState(app_state *restrict state, const uint8_t newState){
 				state->interactableElement |= (uint32_t)(1U << UIELEM_NUCL_INFOBOX);
 				state->interactableElement |= (uint32_t)(1U << UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON);
 				state->interactableElement |= (uint32_t)(1U << UIELEM_NUCL_INFOBOX_CLOSEBUTTON);
-			}else if(state->ds.shownElements & (1U << UIELEM_NUCL_FULLINFOBOX)){
-				state->interactableElement |= (uint32_t)(1U << UIELEM_NUCL_FULLINFOBOX);
-				state->interactableElement |= (uint32_t)(1U << UIELEM_NUCL_FULLINFOBOX_BACKBUTTON);
 			}
       break;
   }
@@ -1184,7 +1281,7 @@ void uiElemClickAction(const app_data *restrict dat, app_state *restrict state, 
       }
       break;
     case UIELEM_MSG_BOX_OK_BUTTON:
-      changeUIState(state,UISTATE_DEFAULT);
+      changeUIState(dat,state,UISTATE_DEFAULT);
       startUIAnimation(&state->ds,UIANIM_MSG_BOX_HIDE); //message box will be closed after animation finishes
       break;
 		case UIELEM_NUCL_INFOBOX:
@@ -1197,6 +1294,7 @@ void uiElemClickAction(const app_data *restrict dat, app_state *restrict state, 
 			}
 			break;
 		case UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON:
+				state->ds.nuclFullInfoScrollY = 0.0f;
 				startUIAnimation(&state->ds,UIANIM_NUCLINFOBOX_EXPAND);
 			break;
 		case UIELEM_NUCL_FULLINFOBOX_BACKBUTTON:
@@ -1204,7 +1302,7 @@ void uiElemClickAction(const app_data *restrict dat, app_state *restrict state, 
 			state->ds.shownElements |= (1U << UIELEM_NUCL_INFOBOX); //show the info box
 			state->ds.shownElements |= (1U << UIELEM_CHARTOFNUCLIDES); //show the chart
 			startUIAnimation(&state->ds,UIANIM_NUCLINFOBOX_CONTRACT);
-			changeUIState(state,UISTATE_DEFAULT); //update UI state now that the regular info box is visible
+			changeUIState(dat,state,UISTATE_DEFAULT); //update UI state now that the regular info box is visible
 			break;
 		case UIELEM_ENUM_LENGTH:
     default:
@@ -1237,7 +1335,7 @@ void uiElemClickAction(const app_data *restrict dat, app_state *restrict state, 
 						updateSingleUIElemPosition(&state->ds,UIELEM_NUCL_INFOBOX_CLOSEBUTTON);
 						if(!(state->ds.shownElements & (1U << UIELEM_NUCL_INFOBOX))){
 							state->ds.shownElements |= (1U << UIELEM_NUCL_INFOBOX);
-							changeUIState(state,UISTATE_DEFAULT); //make info box interactable
+							changeUIState(dat,state,UISTATE_DEFAULT); //make info box interactable
 							startUIAnimation(&state->ds,UIANIM_NUCLINFOBOX_SHOW);
 						}
 						startUIAnimation(&state->ds,UIANIM_NUCLHIGHLIGHT_SHOW);
@@ -1354,13 +1452,13 @@ float getUIthemeScale(const float uiScale){
 	}
 }
 
-void updateWindowRes(app_data *restrict dat, drawing_state *restrict ds, resource_data *restrict rdat){
+void updateWindowRes(app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat){
   int wwidth, wheight;
   int rwidth, rheight;
   SDL_GetWindowSize(rdat->window, &wwidth, &wheight);
   SDL_GetWindowSizeInPixels(rdat->window, &rwidth, &rheight);
-  if((rwidth != ds->windowXRenderRes)||(rheight != ds->windowYRenderRes)){
-    ds->forceRedraw = 1;
+  if((rwidth != state->ds.windowXRenderRes)||(rheight != state->ds.windowYRenderRes)){
+    state->ds.forceRedraw = 1;
   }
 	float newScale = (float)rwidth/((float)wwidth);
 	//float newScale = 1.0f; //for testing UI scales
@@ -1373,31 +1471,32 @@ void updateWindowRes(app_data *restrict dat, drawing_state *restrict ds, resourc
 			regenerateThemeAndFontCache(dat,rdat); //load_data.c
 		}
 	}
-  ds->windowXRes = (uint16_t)wwidth;
-  ds->windowYRes = (uint16_t)wheight;
-  ds->windowXRenderRes = (uint16_t)rwidth;
-  ds->windowYRenderRes = (uint16_t)rheight;
+  state->ds.windowXRes = (uint16_t)wwidth;
+  state->ds.windowYRes = (uint16_t)wheight;
+  state->ds.windowXRenderRes = (uint16_t)rwidth;
+  state->ds.windowYRenderRes = (uint16_t)rheight;
 
   //update things that depend on the window res
-  updateUIElemPositions(ds); //UI element positions
+  updateUIElemPositions(&state->ds); //UI element positions
+	changeUIState(dat,state,state->uiState);
 }
 
-void handleScreenGraphicsMode(app_data *restrict dat, drawing_state *restrict ds, resource_data *restrict rdat){
+void handleScreenGraphicsMode(app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat){
 
   //handle vsync and frame cap
   SDL_SetRenderVSync(rdat->renderer,1); //vsync always enabled
 
-  if(ds->windowFullscreenMode){
+  if(state->ds.windowFullscreenMode){
     if(SDL_SetWindowFullscreen(rdat->window,SDL_TRUE) != 0){
       printf("WARNING: cannot set fullscreen mode - %s\n",SDL_GetError());
     }
-    updateWindowRes(dat,ds,rdat);
-    //printf("Full screen display mode.  Window resolution: %u x %u.\n",ds->windowXRes,ds->windowYRes);
+    updateWindowRes(dat,state,rdat);
+    //printf("Full screen display mode.  Window resolution: %u x %u.\n",state->ds.windowXRes,state->ds.windowYRes);
   }else{
     if(SDL_SetWindowFullscreen(rdat->window,0) != 0){
       printf("WARNING: cannot set windowed mode - %s\n",SDL_GetError());
     }
-    updateWindowRes(dat,ds,rdat);
-    //printf("Windowed display mode.  Window resolution: %u x %u.\n",ds->windowXRes,ds->windowYRes);
+    updateWindowRes(dat,state,rdat);
+    //printf("Windowed display mode.  Window resolution: %u x %u.\n",state->ds.windowXRes,state->ds.windowYRes);
   }
 }

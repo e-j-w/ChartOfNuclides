@@ -419,49 +419,74 @@ void drawInfoBoxHeader(const app_data *restrict dat, resource_data *restrict rda
 }
 
 void drawNuclFullInfoBox(const app_data *restrict dat, const app_state *restrict state, resource_data *restrict rdat, const uint16_t nuclInd){
-  
+
+  //level and gamma data
+  char tmpStr[32];
+  float drawXPos = (float)(4*UI_PADDING_SIZE);
+  float drawYPos = NUCL_FULLINFOBOX_LEVELLIST_POS_Y - NUCL_INFOBOX_SMALLLINE_HEIGHT*(state->ds.nuclFullInfoScrollY);
+  //printf("drawYPos: %f\n",(double)drawYPos);
+  float levelStartDrawPos;
+  for(uint32_t lvlInd = dat->ndat.nuclData[nuclInd].firstLevel; lvlInd<(dat->ndat.nuclData[nuclInd].firstLevel +dat->ndat.nuclData[nuclInd].numLevels); lvlInd++){
+    uint16_t numLines = getNumDispLinesForLvl(&dat->ndat,lvlInd);
+    if(((drawYPos + NUCL_INFOBOX_SMALLLINE_HEIGHT*numLines) >= NUCL_FULLINFOBOX_LEVELLIST_POS_Y)&&(drawYPos <= state->ds.windowYRes)){
+      levelStartDrawPos = drawYPos;
+      if(lvlInd == (dat->ndat.nuclData[nuclInd].firstLevel + dat->ndat.nuclData[nuclInd].gsLevel)){
+        getLvlEnergyStr(tmpStr,&dat->ndat,lvlInd,0);
+      }else{
+        getLvlEnergyStr(tmpStr,&dat->ndat,lvlInd,1);
+      }
+      drawTextAlignedSized(rdat,drawXPos+NUCL_FULLINFOBOX_ENERGY_COL_OFFSET,drawYPos,rdat->font,blackCol8Bit,255,tmpStr,ALIGN_LEFT,16384);
+      getSpinParStr(tmpStr,&dat->ndat,lvlInd);
+      drawTextAlignedSized(rdat,drawXPos+NUCL_FULLINFOBOX_JPI_COL_OFFSET,drawYPos,rdat->font,blackCol8Bit,255,tmpStr,ALIGN_LEFT,16384);
+      getHalfLifeStr(tmpStr,&dat->ndat,lvlInd,1,0);
+      drawTextAlignedSized(rdat,drawXPos+NUCL_FULLINFOBOX_HALFLIFE_COL_OFFSET,drawYPos,rdat->font,blackCol8Bit,255,tmpStr,ALIGN_LEFT,16384);
+      if(dat->ndat.levels[lvlInd].numDecModes > 0){
+        for(int8_t i=0; i<dat->ndat.levels[lvlInd].numDecModes; i++){
+          drawYPos += NUCL_INFOBOX_SMALLLINE_HEIGHT;
+          getDecayModeStr(tmpStr,&dat->ndat,dat->ndat.levels[lvlInd].firstDecMode + (uint32_t)i);
+          //printf("%s\n",tmpStr);
+          drawTextAlignedSized(rdat,drawXPos+NUCL_FULLINFOBOX_HALFLIFE_COL_OFFSET+2*UI_PADDING_SIZE,drawYPos,rdat->font,blackCol8Bit,255,tmpStr,ALIGN_LEFT,16384); //draw decay mode label
+        }
+      }
+      if(dat->ndat.levels[lvlInd].numTran > 0){
+        drawYPos = levelStartDrawPos;
+        for(uint16_t i=0; i<dat->ndat.levels[lvlInd].numTran; i++){
+          getGammaEnergyStr(tmpStr,&dat->ndat,(uint32_t)(dat->ndat.levels[lvlInd].firstTran + i),1);
+          drawTextAlignedSized(rdat,drawXPos+NUCL_FULLINFOBOX_EGAMMA_COL_OFFSET,drawYPos,rdat->font,blackCol8Bit,255,tmpStr,ALIGN_LEFT,16384); //draw decay mode label
+          getGammaIntensityStr(tmpStr,&dat->ndat,(uint32_t)(dat->ndat.levels[lvlInd].firstTran + i),1);
+          drawTextAlignedSized(rdat,drawXPos+NUCL_FULLINFOBOX_IGAMMA_COL_OFFSET,drawYPos,rdat->font,blackCol8Bit,255,tmpStr,ALIGN_LEFT,16384); //draw decay mode label
+          drawYPos += NUCL_INFOBOX_SMALLLINE_HEIGHT;
+        }
+      }
+      drawYPos = levelStartDrawPos + numLines*NUCL_INFOBOX_SMALLLINE_HEIGHT;
+    }else{
+      if(drawYPos > state->ds.windowYRes){
+        break;
+      }
+      drawYPos += numLines*NUCL_INFOBOX_SMALLLINE_HEIGHT;
+    }
+  }
+
+  //rect to hide over-scrolled level info
+  SDL_FRect rect;
+  rect.x = 0.0f;
+  rect.y = 0.0f;
+  rect.w = state->ds.windowXRenderRes;
+  rect.h = NUCL_FULLINFOBOX_LEVELLIST_POS_Y*rdat->uiScale;
+  drawFlatRect(rdat,rect,dat->rules.themeRules.bgCol);
+
+  //header
   drawInfoBoxHeader(dat,rdat,0.0f,0.0f,255,nuclInd);
 
   //draw column title strings
-  float drawXPos = (float)(4*UI_PADDING_SIZE);
-  float drawYPos = (float)(4*UI_PADDING_SIZE) + 40.0f;
+  drawYPos = (float)(4*UI_PADDING_SIZE) + 40.0f;
   drawTextAlignedSized(rdat,drawXPos,drawYPos,rdat->font,blackCol8Bit,255,dat->strings[LOCSTR_LEVELINFO_HEADER],ALIGN_LEFT,16384);
   drawYPos += NUCL_INFOBOX_BIGLINE_HEIGHT;
   drawTextAlignedSized(rdat,drawXPos+NUCL_FULLINFOBOX_ENERGY_COL_OFFSET,drawYPos,rdat->font,blackCol8Bit,255,dat->strings[LOCSTR_ENERGY_KEV],ALIGN_LEFT,16384);
   drawTextAlignedSized(rdat,drawXPos+NUCL_FULLINFOBOX_JPI_COL_OFFSET,drawYPos,rdat->font,blackCol8Bit,255,dat->strings[LOCSTR_JPI],ALIGN_LEFT,16384);
   drawTextAlignedSized(rdat,drawXPos+NUCL_FULLINFOBOX_HALFLIFE_COL_OFFSET,drawYPos,rdat->font,blackCol8Bit,255,dat->strings[LOCSTR_HALFLIFE],ALIGN_LEFT,16384);
-  drawTextAlignedSized(rdat,drawXPos+NUCL_FULLINFOBOX_DECAYMODE_COL_OFFSET,drawYPos,rdat->font,blackCol8Bit,255,dat->strings[LOCSTR_DECAYMODE],ALIGN_LEFT,16384);
-
-  //level data
-  char tmpStr[32];
-  drawYPos += NUCL_INFOBOX_BIGLINE_HEIGHT;
-  for(uint32_t lvlInd = dat->ndat.nuclData[nuclInd].firstLevel; lvlInd<(dat->ndat.nuclData[nuclInd].firstLevel +dat->ndat.nuclData[nuclInd].numLevels); lvlInd++){
-    if(drawYPos < state->ds.windowYRes){
-      getLvlEnergyStr(tmpStr,&dat->ndat,lvlInd,0);
-      drawTextAlignedSized(rdat,drawXPos+NUCL_FULLINFOBOX_ENERGY_COL_OFFSET,drawYPos,rdat->font,blackCol8Bit,255,tmpStr,ALIGN_LEFT,state->ds.uiElemWidth[UIELEM_NUCL_INFOBOX]);
-      getSpinParStr(tmpStr,&dat->ndat,lvlInd);
-      drawTextAlignedSized(rdat,drawXPos+NUCL_FULLINFOBOX_JPI_COL_OFFSET,drawYPos,rdat->font,blackCol8Bit,255,tmpStr,ALIGN_LEFT,state->ds.uiElemWidth[UIELEM_NUCL_INFOBOX]);
-      getHalfLifeStr(tmpStr,&dat->ndat,lvlInd,1,0);
-      drawTextAlignedSized(rdat,drawXPos+NUCL_FULLINFOBOX_HALFLIFE_COL_OFFSET,drawYPos,rdat->font,blackCol8Bit,255,tmpStr,ALIGN_LEFT,state->ds.uiElemWidth[UIELEM_NUCL_INFOBOX]);
-      if(dat->ndat.levels[lvlInd].halfLife.unit == VALUE_UNIT_STABLE){
-        drawTextAlignedSized(rdat,drawXPos+NUCL_FULLINFOBOX_DECAYMODE_COL_OFFSET,drawYPos,rdat->font,blackCol8Bit,255,"N/A",ALIGN_LEFT,state->ds.uiElemWidth[UIELEM_NUCL_INFOBOX]); //draw no decay mode label
-        drawYPos += NUCL_INFOBOX_SMALLLINE_HEIGHT;
-      }else{
-        if(dat->ndat.levels[lvlInd].numDecModes > 0){
-          for(int8_t i=0; i<dat->ndat.levels[lvlInd].numDecModes; i++){
-            getDecayModeStr(tmpStr,&dat->ndat,dat->ndat.levels[lvlInd].firstDecMode + (uint32_t)i);
-            //printf("%s\n",tmpStr);
-            drawTextAlignedSized(rdat,drawXPos+NUCL_FULLINFOBOX_DECAYMODE_COL_OFFSET,drawYPos,rdat->font,blackCol8Bit,255,tmpStr,ALIGN_LEFT,state->ds.uiElemWidth[UIELEM_NUCL_INFOBOX]); //draw decay mode label
-            drawYPos += NUCL_INFOBOX_SMALLLINE_HEIGHT;
-          }
-        }else{
-          drawYPos += NUCL_INFOBOX_SMALLLINE_HEIGHT;
-        }
-      }
-    }
-    
-  }
-  
+  drawTextAlignedSized(rdat,drawXPos+NUCL_FULLINFOBOX_EGAMMA_COL_OFFSET,drawYPos,rdat->font,blackCol8Bit,255,dat->strings[LOCSTR_ENERGY_GAMMA],ALIGN_LEFT,16384);
+  drawTextAlignedSized(rdat,drawXPos+NUCL_FULLINFOBOX_IGAMMA_COL_OFFSET,drawYPos,rdat->font,blackCol8Bit,255,dat->strings[LOCSTR_INTENSITY_GAMMA],ALIGN_LEFT,16384);
 
   //back button
   drawIconAndTextButton(&dat->rules.themeRules,rdat,state->ds.uiElemPosX[UIELEM_NUCL_FULLINFOBOX_BACKBUTTON],state->ds.uiElemPosY[UIELEM_NUCL_FULLINFOBOX_BACKBUTTON],state->ds.uiElemWidth[UIELEM_NUCL_FULLINFOBOX_BACKBUTTON],getHighlightState(state,UIELEM_NUCL_FULLINFOBOX_BACKBUTTON),255,UIICON_DOWNARROWS,dat->strings[dat->locStringIDs[LOCSTR_BACKTOSUMMARY]]);
@@ -628,19 +653,22 @@ void drawMessageBox(const app_data *restrict dat, const app_state *restrict stat
 }
 
 //meta-function which draws any UI menus, if applicable
-void drawUI(const app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat, const float deltaTime){
-  
-  (void)deltaTime; //unused for now
+void drawUI(const app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat){
+
+  //draw background
+  drawFlatBG(&state->ds,rdat,dat->rules.themeRules.bgCol);
 
   //draw chart of nuclides below everything else
   if(state->ds.shownElements & (1U << UIELEM_CHARTOFNUCLIDES)){
     drawChartOfNuclides(dat,state,rdat);
   }
-
-  //draw button(s)
-  drawIconButton(&dat->rules.themeRules,rdat,state->ds.uiElemPosX[UIELEM_MENU_BUTTON],state->ds.uiElemPosY[UIELEM_MENU_BUTTON],state->ds.uiElemWidth[UIELEM_MENU_BUTTON],getHighlightState(state,UIELEM_MENU_BUTTON),255,UIICON_MENU);
   
   //draw menus/panels etc.
+  if(state->ds.shownElements & (1U << UIELEM_NUCL_INFOBOX)){
+    drawNuclInfoBox(dat,state,rdat,state->chartSelectedNucl);
+  }else if(state->ds.shownElements & (1U << UIELEM_NUCL_FULLINFOBOX)){
+    drawNuclFullInfoBox(dat,state,rdat,state->chartSelectedNucl);
+  }
   if(state->ds.shownElements & (1U << UIELEM_PRIMARY_MENU)){
     SDL_FRect menuRect;
     menuRect.x = state->ds.uiElemPosX[UIELEM_PRIMARY_MENU];
@@ -652,11 +680,9 @@ void drawUI(const app_data *restrict dat, app_state *restrict state, resource_da
   if(state->ds.shownElements & (1U << UIELEM_MSG_BOX)){
     drawMessageBox(dat,state,rdat);
   }
-  if(state->ds.shownElements & (1U << UIELEM_NUCL_INFOBOX)){
-    drawNuclInfoBox(dat,state,rdat,state->chartSelectedNucl);
-  }else if(state->ds.shownElements & (1U << UIELEM_NUCL_FULLINFOBOX)){
-    drawNuclFullInfoBox(dat,state,rdat,state->chartSelectedNucl);
-  }
+
+  //draw persistent button(s)
+  drawIconButton(&dat->rules.themeRules,rdat,state->ds.uiElemPosX[UIELEM_MENU_BUTTON],state->ds.uiElemPosY[UIELEM_MENU_BUTTON],state->ds.uiElemWidth[UIELEM_MENU_BUTTON],getHighlightState(state,UIELEM_MENU_BUTTON),255,UIICON_MENU);
 
   if(state->ds.uiAnimPlaying & (1U << UIANIM_CHART_FADEIN)){
     

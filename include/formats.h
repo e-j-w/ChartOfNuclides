@@ -79,14 +79,14 @@ typedef struct
 {
   int16_t spinVal; //the spin value (-1 if unknown)
   int8_t parVal;  //the parity value (1 if positive, -1 if negative, 0 if unknown)
-  uint8_t tentative; //0 if not tentative, 1 if all tentative, 2 if only spin tentative, 3 if GE
+  uint8_t tentative; //values from tentative_enum
 }spinparval; //spin parity value
 
 typedef struct
 {
   uint8_t type; //0=gamma, other values for beta, alpha, etc.
-  float energy; //transition energy, in keV
-  float intensity; //relative intensity
+  valWithErr energy; //transition energy, in keV
+  valWithErr intensity; //relative intensity
 }transition; //a transition between levels
 
 typedef struct
@@ -163,6 +163,8 @@ typedef struct
   float chartDragStartMouseX, chartDragStartMouseY; //in scaled pixels
   float timeSinceZoomStart, timeSincePanStart, totalPanTime;
   float infoBoxTableHeight; //the height in unscaled pixels needed to show the info box ground and isomeric state info
+  float nuclFullInfoScrollY; //full level info view: number of lines scrolled in the y-direction
+  uint16_t nuclFullInfoMaxScrollY; //maximum scroll position, in lines
   uint32_t shownElements; //bit pattern describing which UI elements are being shown, values from ui_element_enum
   uint32_t uiAnimPlaying; //bit pattern describing which UI animations are playing
   float timeLeftInUIAnimation[UIANIM_ENUM_LENGTH]; //time left in each UI animation
@@ -191,6 +193,7 @@ typedef struct
   float mouseHoldStartPosXPx, mouseHoldStartPosYPx; //mouse position at the start of the last mouse button down event, in pixels
   float mouseClickPosXPx, mouseClickPosYPx; //mouse position at the start of a mouse (left) button up event, in pixels
   float zoomDeltaVal; //amount to zoom by, equivalent to mouse wheel or touchpad scroll delta, can be very small for subtle touchpad events
+  float scrollSpeedMultiplier;
   uint32_t inputFlags;
   uint16_t gamepadDeadzone,tmpGamepadDeadzone;
   int16_t lastAxisValX, lastAxisValY; //used to mask out spurious events in the gamepad axis deadzone

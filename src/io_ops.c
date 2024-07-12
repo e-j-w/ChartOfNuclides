@@ -76,6 +76,14 @@ static int readConfigFile(FILE *file, app_state *restrict state){
           printf("WARNING: invalid window y-resolution (%i) in config file, setting to default.\n",res);
           state->ds.windowYRes = MIN_RENDER_HEIGHT;
         }
+      }else if(strcmp(par,"scroll_speed") == 0){
+        float ss = (float)atof(val);
+        if(fabsf(ss)<=30.0f){
+          state->scrollSpeedMultiplier = ss;
+        }else{
+          printf("WARNING: invalid scroll speed (%f) in config file, setting to default.\n",(double)ss);
+          state->scrollSpeedMultiplier = 8.0f;
+        }
       }else if(strcmp(par,"chart_pos_x") == 0){
         float posx = (float)atof(val);
         if((posx>=0.0f)&&(posx<=MAX_NEUTRON_NUM)){
@@ -132,6 +140,9 @@ static int writeConfigFile(FILE *file, const app_rules *restrict rules, const ap
   //fprintf(file,"# Windowed resolution: 0 = 1280 x 720, 1 = 1920 x 1080\n");
   fprintf(file,"window_res_x=%i\n",state->ds.windowXRes);
   fprintf(file,"window_res_y=%i\n",state->ds.windowYRes);
+
+  fprintf(file,"\n### Input Settings ###\n");
+  fprintf(file,"scroll_speed=%0.3f\n",(double)state->scrollSpeedMultiplier);
 
   fprintf(file,"\n### Display Settings ###\n");
   fprintf(file,"chart_pos_x=%0.3f\n",(double)state->ds.chartPosX);

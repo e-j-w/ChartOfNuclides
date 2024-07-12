@@ -94,7 +94,7 @@ int main(int argc, char *argv[]){
   gdat->state.mouseoverElement = UIELEM_ENUM_LENGTH;
   gdat->state.ds.drawPerformanceStats = 0;
 
-  initializeTempState(&gdat->state);
+  initializeTempState(&gdat->dat,&gdat->state);
   updatePrefsFromConfigFile(gdat->rdat.appBasePath,&gdat->dat.rules,&gdat->state); //read settings from .ini file
 
   //setup the application window
@@ -123,7 +123,7 @@ int main(int argc, char *argv[]){
   SDL_GetWindowSizeInPixels(gdat->rdat.window, &rwidth, &rheight);
 	gdat->rdat.uiScale = (float)rwidth/((float)wwidth);
   gdat->rdat.uiThemeScale = getUIthemeScale(gdat->rdat.uiScale);
-  handleScreenGraphicsMode(&gdat->dat,&gdat->state.ds,&gdat->rdat); //handle fullscreen
+  handleScreenGraphicsMode(&gdat->dat,&gdat->state,&gdat->rdat); //handle fullscreen
   gdat->state.ds.forceRedraw = 1; //force draw the first frame
   
   //setup splash screen
@@ -170,7 +170,7 @@ int main(int argc, char *argv[]){
       deltaTime = 0.033f; //because of main thread blocking, set maximum delta to prevent weird timing bugs
     }
 
-    updateUIAnimationTimes(&gdat->state,deltaTime);
+    updateUIAnimationTimes(&gdat->dat,&gdat->state,deltaTime);
 
     updateDrawingState(&gdat->dat,&gdat->state,deltaTime);
 
@@ -178,9 +178,7 @@ int main(int argc, char *argv[]){
     
     //SDL_RenderClear(gdat->rdat.renderer); //clear the window, disabled for optimization purposes
 
-    //draw to the screen
-    drawFlatBG(&gdat->state.ds,&gdat->rdat,gdat->dat.rules.themeRules.bgCol);
-    drawUI(&gdat->dat,&gdat->state,&gdat->rdat,deltaTime);
+    drawUI(&gdat->dat,&gdat->state,&gdat->rdat); //gui.c
 
     if(gdat->state.ds.drawPerformanceStats == 1){
       drawPerformanceStats(&gdat->dat.rules.themeRules,&gdat->state.ds,&gdat->rdat,deltaTime);

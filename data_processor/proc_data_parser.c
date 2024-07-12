@@ -198,6 +198,8 @@ static int parseAppRules(app_data *restrict dat, asset_mapping *restrict stringI
 	dat->locStringIDs[LOCSTR_JPI] = (uint16_t)nameToAssetID("jpi",stringIDmap);
 	dat->locStringIDs[LOCSTR_HALFLIFE] = (uint16_t)nameToAssetID("halflife",stringIDmap);
 	dat->locStringIDs[LOCSTR_DECAYMODE] = (uint16_t)nameToAssetID("decay_mode",stringIDmap);
+	dat->locStringIDs[LOCSTR_ENERGY_GAMMA] = (uint16_t)nameToAssetID("energy_gamma",stringIDmap);
+	dat->locStringIDs[LOCSTR_INTENSITY_GAMMA] = (uint16_t)nameToAssetID("intensity_gamma",stringIDmap);
 	dat->locStringIDs[LOCSTR_ALLLEVELS] = (uint16_t)nameToAssetID("all_levels",stringIDmap);
 	dat->locStringIDs[LOCSTR_BACKTOSUMMARY] = (uint16_t)nameToAssetID("back_to_summary",stringIDmap);
 
@@ -469,6 +471,19 @@ void parseSpinPar(level * lev, char * spstring){
 	}else{
 		for(i=0;i<numTok;i++){
 			if(i<MAXSPPERLEVEL){
+
+				//special cases
+				if(strcmp(val[i],"TO")==0){
+					//specifies a range between the prior and next spin values
+					//eg. '3/2 TO 7/2'
+					lev->spval[lev->numSpinParVals].tentative = TENTATIVE_RANGE;
+					lev->spval[lev->numSpinParVals].spinVal = -1;
+					lev->numSpinParVals++;
+					continue;
+				}else if(strcmp(val[i],"&")==0){
+					//equivalent to a comma 
+					continue;
+				}
 
 				//check for brackets
 				uint8_t lsBrak = 0;
@@ -1041,7 +1056,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 											//printf("energy in exponent form: %s\n",ebuff);
 											//value was in exponent format
 											nd->levels[nd->numLvls-1].energy.exponent = (int8_t)atoi(tok);
-											nd->levels[nd->numLvls-1].energy.val = nd->levels[nd->numLvls-1].energy.val / powf(10.0f,(float)(nd->levels[nd->numLvls-1].energy.exponent));
+											levelE = levelE / powf(10.0f,(float)(nd->levels[nd->numLvls-1].energy.exponent));
 											nd->levels[nd->numLvls-1].energy.format |= (uint8_t)(1U << 4); //exponent flag
 										}
 									}
@@ -1266,16 +1281,121 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 					if(subSec==0){ //adopted levels subsection
 						if(nd->levels[nd->numLvls-1].numTran<MAXGAMMASPERLEVEL){
 							if(strcmp(typebuff,"  G")==0){
-								//parse the gamma intensity
-								char iBuff[8];
-								memcpy(iBuff, &line[21], 7);
-								iBuff[7] = '\0';
+
 								if(nd->levels[nd->numLvls-1].numTran == 0){
 									nd->levels[nd->numLvls-1].firstTran = nd->numTran;
 								}
-								nd->tran[(int)(nd->levels[nd->numLvls-1].firstTran) + nd->levels[nd->numLvls-1].numTran].energy=(float)atof(ebuff);
-								//printf("-> Found gamma ray with energy %f keV.\n",atof(ebuff));
-								nd->tran[(int)(nd->levels[nd->numLvls-1].firstTran) + nd->levels[nd->numLvls-1].numTran].intensity=(float)atof(iBuff);
+
+								//parse the gamma intensity
+								char iBuff[9];
+								memcpy(iBuff, &line[21], 8);
+								iBuff[8] = '\0';
+								//parse the gamma intensity error
+								char ieBuff[3];
+								memcpy(ieBuff, &line[29], 2);
+								ieBuff[2] = '\0';
+								//parse the energy error
+								char eeBuff[3];
+								memcpy(eeBuff, &line[19], 2);
+								eeBuff[2] = '\0';
+								uint8_t gammaEerr = (uint8_t)atoi(eeBuff);
+
+								//process gamma energy
+								float gammaE = (float)atof(ebuff);
+								//get the number of sig figs
+								nd->tran[(int)(nd->levels[nd->numLvls-1].firstTran) + nd->levels[nd->numLvls-1].numTran].energy.format = 0; //default
+								//printf("ebuff: %s\n",ebuff);
+								tok = strtok(ebuff,".");
+								if(tok!=NULL){
+									//printf("%s\n",tok);
+									tok = strtok(NULL,"E"); //some gamma energies are specified with exponents
+									if(tok!=NULL){
+										//printf("%s\n",tok);
+										nd->tran[(int)(nd->levels[nd->numLvls-1].firstTran) + nd->levels[nd->numLvls-1].numTran].energy.format = (uint8_t)strlen(tok);
+										//check for trailing empty spaces
+										for(uint8_t i=0;i<nd->tran[(int)(nd->levels[nd->numLvls-1].firstTran) + nd->levels[nd->numLvls-1].numTran].energy.format;i++){
+											if(isspace(tok[i])){
+												nd->tran[(int)(nd->levels[nd->numLvls-1].firstTran) + nd->levels[nd->numLvls-1].numTran].energy.format = i;
+												break;
+											}
+										}
+										if(nd->tran[(int)(nd->levels[nd->numLvls-1].firstTran) + nd->levels[nd->numLvls-1].numTran].energy.format > 15U){
+											nd->tran[(int)(nd->levels[nd->numLvls-1].firstTran) + nd->levels[nd->numLvls-1].numTran].energy.format = 15U; //only 4 bits available for precision
+										}
+										//printf("format: %u\n",nd->tran[(int)(nd->levels[nd->numLvls-1].firstTran) + nd->levels[nd->numLvls-1].numTran].energy.format);
+										tok = strtok(NULL,""); //get the remaining part of the string (only get past here if the value was expressed in exponent form)
+										if(tok!=NULL){
+											//printf("energy in exponent form: %s\n",ebuff);
+											//value was in exponent format
+											nd->tran[(int)(nd->levels[nd->numLvls-1].firstTran) + nd->levels[nd->numLvls-1].numTran].energy.exponent = (int8_t)atoi(tok);
+											gammaE = gammaE / powf(10.0f,(float)(nd->tran[(int)(nd->levels[nd->numLvls-1].firstTran) + nd->levels[nd->numLvls-1].numTran].energy.exponent));
+											nd->tran[(int)(nd->levels[nd->numLvls-1].firstTran) + nd->levels[nd->numLvls-1].numTran].energy.format |= (uint8_t)(1U << 4); //exponent flag
+										}
+									}
+								}
+
+								nd->tran[(int)(nd->levels[nd->numLvls-1].firstTran) + nd->levels[nd->numLvls-1].numTran].energy.val=gammaE;
+								nd->tran[(int)(nd->levels[nd->numLvls-1].firstTran) + nd->levels[nd->numLvls-1].numTran].energy.err=gammaEerr;
+								nd->tran[(int)(nd->levels[nd->numLvls-1].firstTran) + nd->levels[nd->numLvls-1].numTran].energy.unit=VALUE_UNIT_KEV;
+								
+								//gamma intensity
+								float gammaI = (float)atof(iBuff);
+								//get the number of sig figs
+								nd->tran[(int)(nd->levels[nd->numLvls-1].firstTran) + nd->levels[nd->numLvls-1].numTran].intensity.format = 0; //default
+								//printf("ebuff: %s\n",ebuff);
+								tok = strtok(iBuff,".");
+								if(tok!=NULL){
+									//printf("%s\n",tok);
+									tok = strtok(NULL,"E"); //some gamma energies are specified with exponents
+									if(tok!=NULL){
+										//printf("%s\n",tok);
+										nd->tran[(int)(nd->levels[nd->numLvls-1].firstTran) + nd->levels[nd->numLvls-1].numTran].intensity.format = (uint8_t)strlen(tok);
+										//check for trailing empty spaces
+										for(uint8_t i=0;i<nd->tran[(int)(nd->levels[nd->numLvls-1].firstTran) + nd->levels[nd->numLvls-1].numTran].intensity.format;i++){
+											if(isspace(tok[i])){
+												nd->tran[(int)(nd->levels[nd->numLvls-1].firstTran) + nd->levels[nd->numLvls-1].numTran].intensity.format = i;
+												break;
+											}
+										}
+										if(nd->tran[(int)(nd->levels[nd->numLvls-1].firstTran) + nd->levels[nd->numLvls-1].numTran].intensity.format > 15U){
+											nd->tran[(int)(nd->levels[nd->numLvls-1].firstTran) + nd->levels[nd->numLvls-1].numTran].intensity.format = 15U; //only 4 bits available for precision
+										}
+										//printf("format: %u\n",nd->tran[(int)(nd->levels[nd->numLvls-1].firstTran) + nd->levels[nd->numLvls-1].numTran].intensity.format);
+										tok = strtok(NULL,""); //get the remaining part of the string (only get past here if the value was expressed in exponent form)
+										if(tok!=NULL){
+											//printf("energy in exponent form: %s\n",ebuff);
+											//value was in exponent format
+											nd->tran[(int)(nd->levels[nd->numLvls-1].firstTran) + nd->levels[nd->numLvls-1].numTran].intensity.exponent = (int8_t)atoi(tok);
+											gammaI = gammaI / powf(10.0f,(float)(nd->tran[(int)(nd->levels[nd->numLvls-1].firstTran) + nd->levels[nd->numLvls-1].numTran].intensity.exponent));
+											nd->tran[(int)(nd->levels[nd->numLvls-1].firstTran) + nd->levels[nd->numLvls-1].numTran].intensity.format |= (uint8_t)(1U << 4); //exponent flag
+										}
+									}
+								}
+
+								//gamma intensity: check for special value type
+								nd->tran[(int)(nd->levels[nd->numLvls-1].firstTran) + nd->levels[nd->numLvls-1].numTran].intensity.err=0;
+								tok = strtok(ieBuff, " ");
+								if(tok!=NULL){
+									if(strcmp(tok,"GT")==0){
+										nd->tran[(int)(nd->levels[nd->numLvls-1].firstTran) + nd->levels[nd->numLvls-1].numTran].intensity.format |= (uint8_t)(VALUETYPE_GREATERTHAN << 5);
+									}else if(strcmp(tok,"GT")==0){
+										nd->tran[(int)(nd->levels[nd->numLvls-1].firstTran) + nd->levels[nd->numLvls-1].numTran].intensity.format |= (uint8_t)(VALUETYPE_GREATERTHAN << 5);
+									}else if(strcmp(tok,"GE")==0){
+										nd->tran[(int)(nd->levels[nd->numLvls-1].firstTran) + nd->levels[nd->numLvls-1].numTran].intensity.format |= (uint8_t)(VALUETYPE_GREATEROREQUALTHAN << 5);
+									}else if(strcmp(tok,"LT")==0){
+										nd->tran[(int)(nd->levels[nd->numLvls-1].firstTran) + nd->levels[nd->numLvls-1].numTran].intensity.format |= (uint8_t)(VALUETYPE_LESSTHAN << 5);
+									}else if(strcmp(tok,"LE")==0){
+										nd->tran[(int)(nd->levels[nd->numLvls-1].firstTran) + nd->levels[nd->numLvls-1].numTran].intensity.format |= (uint8_t)(VALUETYPE_LESSOREQUALTHAN << 5);
+									}else if(strcmp(tok,"AP")==0){
+										nd->tran[(int)(nd->levels[nd->numLvls-1].firstTran) + nd->levels[nd->numLvls-1].numTran].intensity.format |= (uint8_t)(VALUETYPE_APPROX << 5);
+									}else if(strcmp(tok,"?")==0){
+										nd->tran[(int)(nd->levels[nd->numLvls-1].firstTran) + nd->levels[nd->numLvls-1].numTran].intensity.format |= (uint8_t)(VALUETYPE_UNKNOWN << 5);
+									}else{
+										nd->tran[(int)(nd->levels[nd->numLvls-1].firstTran) + nd->levels[nd->numLvls-1].numTran].intensity.err=(uint8_t)atoi(ieBuff);
+									}
+								}
+
+								nd->tran[(int)(nd->levels[nd->numLvls-1].firstTran) + nd->levels[nd->numLvls-1].numTran].intensity.val=gammaI;
 								nd->levels[nd->numLvls-1].numTran++;
 								nd->numTran++;
 									

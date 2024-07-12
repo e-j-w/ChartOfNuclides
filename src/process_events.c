@@ -104,7 +104,7 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
     }else if(state->ds.windowFullscreenMode){
       //exit fullscreen
       state->ds.windowFullscreenMode = 0;
-      handleScreenGraphicsMode(dat,&state->ds,rdat); 
+      handleScreenGraphicsMode(dat,state,rdat); 
     }
   }
 
@@ -223,8 +223,17 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
         state->ds.zoomInProgress = 1;
         state->ds.zoomFinished = 0;
       }
+      //printf("scale: %0.2f\n",(double)state->ds.chartZoomScale);
+    }else if(state->uiState == UISTATE_FULLLEVELINFO){
+      state->ds.nuclFullInfoScrollY += -1.0f*state->scrollSpeedMultiplier*state->zoomDeltaVal;
+      if(state->ds.nuclFullInfoScrollY < 0.0f){
+        state->ds.nuclFullInfoScrollY = 0.0f;
+      }else if(state->ds.nuclFullInfoScrollY > state->ds.nuclFullInfoMaxScrollY){
+        state->ds.nuclFullInfoScrollY = (float)state->ds.nuclFullInfoMaxScrollY;
+      }
+      //printf("scroll pos: %0.2f\n",(double)state->ds.nuclFullInfoScrollY);
     }
-    //printf("scale: %0.2f\n",(double)state->ds.chartZoomScale);
+    
   }
 
 }
@@ -236,7 +245,7 @@ void processSingleEvent(app_data *restrict dat, app_state *restrict state, resou
       break;
     case SDL_EVENT_WINDOW_RESIZED:
     case SDL_EVENT_WINDOW_DISPLAY_SCALE_CHANGED:
-      updateWindowRes(dat,&state->ds,rdat);
+      updateWindowRes(dat,state,rdat);
       break;
     case SDL_EVENT_GAMEPAD_ADDED:
       //setup the gamepad
@@ -371,7 +380,7 @@ void processSingleEvent(app_data *restrict dat, app_state *restrict state, resou
           break;
         case SDL_SCANCODE_F11:
           state->ds.windowFullscreenMode = !state->ds.windowFullscreenMode;
-          handleScreenGraphicsMode(dat,&state->ds,rdat);
+          handleScreenGraphicsMode(dat,state,rdat);
         default:
           break;
       }

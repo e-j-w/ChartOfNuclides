@@ -8,5 +8,7 @@ energy_kev|Energy (keV)
 jpi|Jπ
 halflife|t1/2
 decay_mode|Decay Mode
+energy_gamma|E(γ) (keV)
+intensity_gamma|I(γ)
 all_levels|All levels/gammas
 back_to_summary|Back to summary

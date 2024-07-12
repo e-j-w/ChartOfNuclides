@@ -98,9 +98,11 @@ static const uint8_t UITHEME_ICON_TILE_Y[UIICON_ENUM_LENGTH] = {10,10,10,9,9};
 #define NUCL_FULLINFOBOX_BACKBUTTON_POS_Y  MENU_BUTTON_POS_Y
 #define NUCL_FULLINFOBOX_BACKBUTTON_WIDTH  NUCL_INFOBOX_ALLLEVELS_BUTTON_WIDTH
 #define NUCL_FULLINFOBOX_ENERGY_COL_OFFSET      0.0f //in unscaled pixels
-#define NUCL_FULLINFOBOX_JPI_COL_OFFSET         180.0f //in unscaled pixels
-#define NUCL_FULLINFOBOX_HALFLIFE_COL_OFFSET    300.0f //in unscaled pixels
-#define NUCL_FULLINFOBOX_DECAYMODE_COL_OFFSET   470.0f //in unscaled pixels
+#define NUCL_FULLINFOBOX_JPI_COL_OFFSET         140.0f //in unscaled pixels
+#define NUCL_FULLINFOBOX_HALFLIFE_COL_OFFSET    280.0f //in unscaled pixels
+#define NUCL_FULLINFOBOX_EGAMMA_COL_OFFSET      410.0f //in unscaled pixels
+#define NUCL_FULLINFOBOX_IGAMMA_COL_OFFSET      530.0f //in unscaled pixels
+#define NUCL_FULLINFOBOX_LEVELLIST_POS_Y        120.0f //in unscaled pixels
 
 //performance overlay
 #define PERF_OVERLAY_BUTTON_X_ANCHOR  16
