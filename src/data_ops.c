@@ -868,7 +868,7 @@ void getGammaIntensityStr(char strOut[32], const ndata *restrict nd, const uint3
 
 	uint8_t iPrecision = (uint8_t)(nd->tran[tranInd].intensity.format & 15U);
 	uint8_t iExponent = (uint8_t)((nd->tran[tranInd].intensity.format >> 4U) & 1U);
-	uint8_t iValueType = (uint8_t)((nd->tran[tranInd].intensity.format >> 5U) & 7U);
+	uint8_t iValueType = (uint8_t)((nd->tran[tranInd].intensity.format >> 5U) & 15U);
 	if(nd->tran[tranInd].intensity.val <= 0.0f){
 		snprintf(strOut,32," ");
 	}else if((showErr == 0)||(nd->tran[tranInd].intensity.err == 0)){
@@ -901,7 +901,7 @@ void getLvlEnergyStr(char strOut[32], const ndata *restrict nd, const uint32_t l
 		if(eExponent == 0){
 			snprintf(strOut,32,"%.*f(%u)",ePrecision,(double)(nd->levels[lvlInd].energy.val),nd->levels[lvlInd].energy.err);
 		}else{
-			snprintf(strOut,32,"%.*f(%u)E%i",ePrecision,(double)(nd->levels[lvlInd].energy.val),nd->levels[lvlInd].energy.exponent,nd->levels[lvlInd].energy.err);
+			snprintf(strOut,32,"%.*f(%u)E%i",ePrecision,(double)(nd->levels[lvlInd].energy.val),nd->levels[lvlInd].energy.err,nd->levels[lvlInd].energy.exponent);
 		}
 	}
 	
@@ -920,18 +920,27 @@ void getHalfLifeStr(char strOut[32], const ndata *restrict nd, const uint32_t lv
 		}else if(nd->levels[lvlInd].halfLife.val > 0.0f){
 			uint8_t hlPrecision = (uint8_t)(nd->levels[lvlInd].halfLife.format & 15U);
 			uint8_t hlExponent = (uint8_t)((nd->levels[lvlInd].halfLife.format >> 4U) & 1U);
-			uint8_t hlValueType = (uint8_t)((nd->levels[lvlInd].halfLife.format >> 5U) & 7U);
-			if((showErr == 0)||(nd->levels[lvlInd].halfLife.err == 0)){
+			uint8_t hlValueType = (uint8_t)((nd->levels[lvlInd].halfLife.format >> 5U) & 15U);
+			if(hlValueType == VALUETYPE_ASYMERROR){
+				uint8_t negErr = (uint8_t)((nd->levels[lvlInd].halfLife.format >> 9U) & 127U);
 				if(hlExponent == 0){
-					snprintf(strOut,32,"%s%.*f %s",getValueTypeShortStr(hlValueType),hlPrecision,(double)(nd->levels[lvlInd].halfLife.val),getHalfLifeUnitShortStr(nd->levels[lvlInd].halfLife.unit));
+					snprintf(strOut,32,"%.*f(+%u-%u) %s",hlPrecision,(double)(nd->levels[lvlInd].halfLife.val),nd->levels[lvlInd].halfLife.err,negErr,getHalfLifeUnitShortStr(nd->levels[lvlInd].halfLife.unit));
 				}else{
-					snprintf(strOut,32,"%s%.*fE%i %s",getValueTypeShortStr(hlValueType),hlPrecision,(double)(nd->levels[lvlInd].halfLife.val),nd->levels[lvlInd].halfLife.exponent,getHalfLifeUnitShortStr(nd->levels[lvlInd].halfLife.unit));
+					snprintf(strOut,32,"%.*f(+%u-%u)E%i %s",hlPrecision,(double)(nd->levels[lvlInd].halfLife.val),nd->levels[lvlInd].halfLife.err,negErr,nd->levels[lvlInd].halfLife.exponent,getHalfLifeUnitShortStr(nd->levels[lvlInd].halfLife.unit));
 				}
 			}else{
-				if(hlExponent == 0){
-					snprintf(strOut,32,"%s%.*f(%u) %s",getValueTypeShortStr(hlValueType),hlPrecision,(double)(nd->levels[lvlInd].halfLife.val),nd->levels[lvlInd].halfLife.err,getHalfLifeUnitShortStr(nd->levels[lvlInd].halfLife.unit));
+				if((showErr == 0)||(nd->levels[lvlInd].halfLife.err == 0)){
+					if(hlExponent == 0){
+						snprintf(strOut,32,"%s%.*f %s",getValueTypeShortStr(hlValueType),hlPrecision,(double)(nd->levels[lvlInd].halfLife.val),getHalfLifeUnitShortStr(nd->levels[lvlInd].halfLife.unit));
+					}else{
+						snprintf(strOut,32,"%s%.*fE%i %s",getValueTypeShortStr(hlValueType),hlPrecision,(double)(nd->levels[lvlInd].halfLife.val),nd->levels[lvlInd].halfLife.exponent,getHalfLifeUnitShortStr(nd->levels[lvlInd].halfLife.unit));
+					}
 				}else{
-					snprintf(strOut,32,"%s%.*f(%u)E%i %s",getValueTypeShortStr(hlValueType),hlPrecision,(double)(nd->levels[lvlInd].halfLife.val),nd->levels[lvlInd].halfLife.err,nd->levels[lvlInd].halfLife.exponent,getHalfLifeUnitShortStr(nd->levels[lvlInd].halfLife.unit));
+					if(hlExponent == 0){
+						snprintf(strOut,32,"%s%.*f(%u) %s",getValueTypeShortStr(hlValueType),hlPrecision,(double)(nd->levels[lvlInd].halfLife.val),nd->levels[lvlInd].halfLife.err,getHalfLifeUnitShortStr(nd->levels[lvlInd].halfLife.unit));
+					}else{
+						snprintf(strOut,32,"%s%.*f(%u)E%i %s",getValueTypeShortStr(hlValueType),hlPrecision,(double)(nd->levels[lvlInd].halfLife.val),nd->levels[lvlInd].halfLife.err,nd->levels[lvlInd].halfLife.exponent,getHalfLifeUnitShortStr(nd->levels[lvlInd].halfLife.unit));
+					}
 				}
 			}
 		}else{

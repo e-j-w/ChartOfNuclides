@@ -275,6 +275,9 @@ void parseHalfLife(level * lev, char * hlstring){
         if(isspace(hlUnitVal[i])){
           hlUnitVal[i] = '\0'; //terminate string at first space
         }
+				if(i==2){
+					hlUnitVal[3] = '\0'; //terminate string at end
+				}
       }
     }
   }
@@ -305,7 +308,7 @@ void parseHalfLife(level * lev, char * hlstring){
       tok = strtok(NULL,"E+");
       if(tok!=NULL){
         //printf("%s\n",tok);
-        lev->halfLife.format = (uint8_t)strlen(tok);
+        lev->halfLife.format = (uint16_t)strlen(tok);
         if(lev->halfLife.format > 15U){
           lev->halfLife.format = 15U; //only 4 bits available for precision
         }
@@ -315,7 +318,7 @@ void parseHalfLife(level * lev, char * hlstring){
 					lev->halfLife.exponent = (int8_t)atoi(tok);
 					//printf("%s, parsed to %i\n",tok,lev->halfLife.exponent);
 					lev->halfLife.val = lev->halfLife.val / powf(10.0f,(float)(lev->halfLife.exponent));
-          lev->halfLife.format |= (uint8_t)(1U << 4); //exponent flag
+          lev->halfLife.format |= (uint16_t)(1U << 4); //exponent flag
         }
       }else{
         tok = strtok(hlVal,"E");
@@ -326,7 +329,7 @@ void parseHalfLife(level * lev, char * hlstring){
             lev->halfLife.exponent = (int8_t)atoi(tok);
 						//printf("%s, parsed to %i\n",tok,lev->halfLife.exponent);
 						lev->halfLife.val = lev->halfLife.val / powf(10.0f,(float)(lev->halfLife.exponent));
-						lev->halfLife.format |= (uint8_t)(1U << 4); //exponent flag
+						lev->halfLife.format |= (uint16_t)(1U << 4); //exponent flag
           }
         }
       }
@@ -367,25 +370,43 @@ void parseHalfLife(level * lev, char * hlstring){
       printf("Unknown half-life unit: %s (full string: %s)\n",hlUnitVal,hlstring);
     }
 
-    //check for special value type
-    tok = strtok(hlErrVal, " ");
-    if(tok!=NULL){
-      if(strcmp(tok,"GT")==0){
-        lev->halfLife.format |= (uint8_t)(VALUETYPE_GREATERTHAN << 5);
-      }else if(strcmp(tok,"GT")==0){
-        lev->halfLife.format |= (uint8_t)(VALUETYPE_GREATERTHAN << 5);
-      }else if(strcmp(tok,"GE")==0){
-        lev->halfLife.format |= (uint8_t)(VALUETYPE_GREATEROREQUALTHAN << 5);
-      }else if(strcmp(tok,"LT")==0){
-        lev->halfLife.format |= (uint8_t)(VALUETYPE_LESSTHAN << 5);
-      }else if(strcmp(tok,"LE")==0){
-        lev->halfLife.format |= (uint8_t)(VALUETYPE_LESSOREQUALTHAN << 5);
-      }else if(strcmp(tok,"AP")==0){
-        lev->halfLife.format |= (uint8_t)(VALUETYPE_APPROX << 5);
-      }else if(strcmp(tok,"?")==0){
-        lev->halfLife.format |= (uint8_t)(VALUETYPE_UNKNOWN << 5);
-      }
-    }
+    
+		if(hlErrVal[0]=='+'){
+			//asymmetric errors
+			//printf("err: %s\n",hlErrVal);
+			tok = strtok(hlErrVal, "-");
+			if(tok != NULL){
+				lev->halfLife.err = (uint8_t)atoi(tok); //positive error
+				tok = strtok(NULL, ""); //get rest of the string
+				if(tok!=NULL){
+					uint16_t negErr = ((uint16_t)atoi(tok) & 127U); //negative error
+					//printf("neg err: %u\n",negErr);
+					lev->halfLife.format |= (uint16_t)(VALUETYPE_ASYMERROR << 5);
+					lev->halfLife.format |= (uint16_t)(negErr << 9);
+				}
+			}
+		}else{
+			//check for special value type
+			tok = strtok(hlErrVal, " ");
+			if(tok!=NULL){
+				if(strcmp(tok,"GT")==0){
+					lev->halfLife.format |= (uint16_t)(VALUETYPE_GREATERTHAN << 5);
+				}else if(strcmp(tok,"GT")==0){
+					lev->halfLife.format |= (uint16_t)(VALUETYPE_GREATERTHAN << 5);
+				}else if(strcmp(tok,"GE")==0){
+					lev->halfLife.format |= (uint16_t)(VALUETYPE_GREATEROREQUALTHAN << 5);
+				}else if(strcmp(tok,"LT")==0){
+					lev->halfLife.format |= (uint16_t)(VALUETYPE_LESSTHAN << 5);
+				}else if(strcmp(tok,"LE")==0){
+					lev->halfLife.format |= (uint16_t)(VALUETYPE_LESSOREQUALTHAN << 5);
+				}else if(strcmp(tok,"AP")==0){
+					lev->halfLife.format |= (uint16_t)(VALUETYPE_APPROX << 5);
+				}else if(strcmp(tok,"?")==0){
+					lev->halfLife.format |= (uint16_t)(VALUETYPE_UNKNOWN << 5);
+				}
+			}
+		}
+		
     
 	}
 
@@ -1010,26 +1031,71 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 					if(nd->numLvls<MAXNUMLVLS){
 						if(strcmp(typebuff,"  L")==0){
 
-							float levelE = (float)atof(ebuff);
-							//printf("Found level at %f keV from string: %s.\n",atof(ebuff),ebuff);
-							
-							//parse the energy error
-							char eeBuff[3];
-							memcpy(eeBuff, &line[19], 2);
-							eeBuff[2] = '\0';
-							uint8_t levelEerr = (uint8_t)atoi(eeBuff);
-							uint8_t halfInt = 0;
-							if(((nd->nuclData[nd->numNucl].N + nd->nuclData[nd->numNucl].Z) % 2) != 0){
-								halfInt = 1; //odd mass nucleus, half-integer spins
+							float levelE = -1.0f;
+
+							//get length without spaces
+							uint8_t levEStrLen = 0;
+							tok = strtok(ebuff," ");
+							if(tok != NULL){
+								levEStrLen = (uint8_t)strlen(tok);
 							}
-							if((nd->nuclData[nd->numNucl].numLevels==0)||(levelE>(nd->levels[nd->numLvls-1].energy.val))){
-								//the level energy represents a new level
+							memcpy(ebuff, &line[9], 10); //re-constitute original buffer
+							ebuff[10] = '\0';
+
+							//check for variables in level energy
+							if(isalpha(ebuff[0])&&(ebuff[1]==' ')){
+								
 								nd->nuclData[nd->numNucl].numLevels++;
 								nd->numLvls++;
-
-								if(nd->nuclData[nd->numNucl].numLevels == 1){
-									nd->nuclData[nd->numNucl].firstLevel = nd->numLvls-1;
+								
+								nd->levels[nd->numLvls-1].energy.val=0;
+								nd->levels[nd->numLvls-1].energy.err=0;
+								nd->levels[nd->numLvls-1].energy.unit=VALUE_UNIT_NOVAL;
+								nd->levels[nd->numLvls-1].energy.format |= (uint16_t)(VALUETYPE_X << 5);
+								//record variable index (stored value = variable ASCII code)
+								nd->levels[nd->numLvls-1].energy.format |= (uint16_t)(ebuff[0] << 9);
+								
+							}else if((levEStrLen > 1)&&(ebuff[1]=='+')){
+								//level energy in X+number format
+								tok = strtok(ebuff,"+");
+								if(tok != NULL){
+									tok = strtok(NULL,""); //get the rest of the string
+									if(tok != NULL){
+										levelE = (float)atof(tok);
+										nd->nuclData[nd->numNucl].numLevels++;
+										nd->numLvls++;
+										nd->levels[nd->numLvls-1].energy.format |= (uint16_t)(VALUETYPE_PLUSX << 5);
+									}
 								}
+								memcpy(ebuff, &line[9], 10); //re-constitute original buffer
+								ebuff[10] = '\0';
+							}else if((levEStrLen > 1)&&(ebuff[levEStrLen-2]=='+')&&(isalpha(ebuff[levEStrLen-1]))){
+								//level energy in number+X format
+								tok = strtok(ebuff,"+");
+								if(tok != NULL){
+									levelE = (float)atof(tok);
+									nd->nuclData[nd->numNucl].numLevels++;
+									nd->numLvls++;
+									nd->levels[nd->numLvls-1].energy.format |= (uint16_t)(VALUETYPE_PLUSX << 5);
+								}
+								memcpy(ebuff, &line[9], 10); //re-constitute original buffer
+								ebuff[10] = '\0';
+							}else{
+								//normal level energy
+								levelE = (float)atof(ebuff);
+								nd->nuclData[nd->numNucl].numLevels++;
+								nd->numLvls++;
+								//printf("Found level at %f keV from string: %s.\n",atof(ebuff),ebuff);
+							}
+
+							if(nd->nuclData[nd->numNucl].numLevels == 1){
+								nd->nuclData[nd->numNucl].firstLevel = nd->numLvls-1;
+							}
+
+							if((levelE >= 0.0f)&&((nd->nuclData[nd->numNucl].numLevels==0)||(levelE>(nd->levels[nd->numLvls-1].energy.val)))){
+								//parse the level energy value
+
+								
 								//get the number of sig figs
 								nd->levels[nd->numLvls-1].energy.format = 0; //default
 								//printf("ebuff: %s\n",ebuff);
@@ -1039,7 +1105,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 									tok = strtok(NULL,"E"); //some level energies are specified with exponents
 									if(tok!=NULL){
 										//printf("%s\n",tok);
-										nd->levels[nd->numLvls-1].energy.format = (uint8_t)strlen(tok);
+										nd->levels[nd->numLvls-1].energy.format = (uint16_t)strlen(tok);
 										//check for trailing empty spaces
 										for(uint8_t i=0;i<nd->levels[nd->numLvls-1].energy.format;i++){
 											if(isspace(tok[i])){
@@ -1057,55 +1123,90 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 											//value was in exponent format
 											nd->levels[nd->numLvls-1].energy.exponent = (int8_t)atoi(tok);
 											levelE = levelE / powf(10.0f,(float)(nd->levels[nd->numLvls-1].energy.exponent));
-											nd->levels[nd->numLvls-1].energy.format |= (uint8_t)(1U << 4); //exponent flag
+											nd->levels[nd->numLvls-1].energy.format |= (uint16_t)(1U << 4); //exponent flag
+										}
+									}else{
+										//potentially an exponent form value with no decimal place
+										memcpy(ebuff, &line[9], 10); //re-copy buffer
+										ebuff[10] = '\0';
+										tok = strtok(ebuff,"E");
+										//printf("ebuff: %s\n",ebuff);
+										if(tok!=NULL){
+											tok = strtok(NULL,""); //get the remaining part of the string (only get past here if the value was expressed in exponent form)
+											if(tok!=NULL){
+												//printf("%s\n",tok);
+												//value was in exponent format
+												nd->levels[nd->numLvls-1].energy.exponent = (int8_t)atoi(tok);
+												levelE = levelE / powf(10.0f,(float)(nd->levels[nd->numLvls-1].energy.exponent));
+												nd->levels[nd->numLvls-1].energy.format |= (uint16_t)(1U << 4); //exponent flag
+											}
 										}
 									}
 								}
 								if((levelE==0.0f)&&(nd->levels[nd->numLvls-1].energy.format == 0)){
 									nd->levels[nd->numLvls-1].energy.format = 1; //always include at least one decimal place for ground states, for aesthetic purposes
 								}
+
+								//parse the energy error
+								char eeBuff[3];
+								memcpy(eeBuff, &line[19], 2);
+								eeBuff[2] = '\0';
+								uint8_t levelEerr = (uint8_t)atoi(eeBuff);
+
+								//assign level energy values
 								nd->levels[nd->numLvls-1].energy.val=levelE;
 								nd->levels[nd->numLvls-1].energy.err=levelEerr;
 								nd->levels[nd->numLvls-1].energy.unit=VALUE_UNIT_KEV;
-								nd->levels[nd->numLvls-1].halfInt = halfInt;
-								nd->levels[nd->numLvls-1].numDecModes = 0;
-								nd->levels[nd->numLvls-1].firstDecMode = nd->numDecModes;
-								//parse the level spin and parity
-								char spbuff[16];
-								memcpy(spbuff, &line[21], 15);
-								spbuff[15] = '\0';
-								//printf("%s\n",spbuff);
-								parseSpinPar(&nd->levels[nd->numLvls-1],spbuff);
-								//parse the half-life imformation
-								char hlBuff[18];
-								memcpy(hlBuff, &line[39], 17);
-								hlBuff[17] = '\0';
-								//printf("%s\n",hlBuff);
-								parseHalfLife(&nd->levels[nd->numLvls-1],hlBuff);
-								//check isomerism
-								double en = getLevelEnergykeV(nd,nd->numLvls-1);
-								if(en > 0.0){
-									uint8_t hlValueType = (uint8_t)((nd->levels[nd->numLvls-1].halfLife.format >> 5U) & 7U);
-									if(!((hlValueType == VALUETYPE_LESSTHAN)||(hlValueType == VALUETYPE_LESSOREQUALTHAN))){
-										double hl = getLevelHalfLifeSeconds(nd,nd->numLvls-1);
-										//printf("hl: %f\n",hl);
-										if(hl >= 10.0E-9){
-											if(hl > longestIsomerHl){
-												longestIsomerHl = hl;
-												nd->nuclData[nd->numNucl].longestIsomerLevel = nd->numLvls-1;
-											}
-										}else if(en < 0.02){
-											//low energy levels are generally isomers (even if their half-life is unknown)
-											//229Th is a famous case
-											//only include these if no other long-lived isomers are found
-											if(!(longestIsomerHl > 0.0)&&(hl <= longestIsomerHl)){
-												longestIsomerHl = hl;
-												nd->nuclData[nd->numNucl].longestIsomerLevel = nd->numLvls-1;
-											}
+								
+							}
+
+							//parse and handle level properties not related to energy
+							
+							uint8_t halfInt = 0;
+							if(((nd->nuclData[nd->numNucl].N + nd->nuclData[nd->numNucl].Z) % 2) != 0){
+								halfInt = 1; //odd mass nucleus, half-integer spins
+							}
+
+							nd->levels[nd->numLvls-1].halfInt = halfInt;
+							nd->levels[nd->numLvls-1].numDecModes = 0;
+							nd->levels[nd->numLvls-1].firstDecMode = nd->numDecModes;
+							//parse the level spin and parity
+							char spbuff[16];
+							memcpy(spbuff, &line[21], 15);
+							spbuff[15] = '\0';
+							//printf("%s\n",spbuff);
+							parseSpinPar(&nd->levels[nd->numLvls-1],spbuff);
+							//parse the half-life information
+							char hlBuff[18];
+							memcpy(hlBuff, &line[39], 17);
+							hlBuff[17] = '\0';
+							//printf("%s\n",hlBuff);
+							parseHalfLife(&nd->levels[nd->numLvls-1],hlBuff);
+							//check isomerism
+							double en = getLevelEnergykeV(nd,nd->numLvls-1);
+							if(en > 0.0){
+								uint8_t hlValueType = (uint8_t)((nd->levels[nd->numLvls-1].halfLife.format >> 5U) & 15U);
+								if(!((hlValueType == VALUETYPE_LESSTHAN)||(hlValueType == VALUETYPE_LESSOREQUALTHAN))){
+									double hl = getLevelHalfLifeSeconds(nd,nd->numLvls-1);
+									//printf("hl: %f\n",hl);
+									if(hl >= 10.0E-9){
+										if(hl > longestIsomerHl){
+											longestIsomerHl = hl;
+											nd->nuclData[nd->numNucl].longestIsomerLevel = nd->numLvls-1;
+										}
+									}else if(en < 0.02){
+										//low energy levels are generally isomers (even if their half-life is unknown)
+										//229Th is a famous case
+										//only include these if no other long-lived isomers are found
+										if(!(longestIsomerHl > 0.0)&&(hl <= longestIsomerHl)){
+											longestIsomerHl = hl;
+											nd->nuclData[nd->numNucl].longestIsomerLevel = nd->numLvls-1;
 										}
 									}
 								}
 							}
+							
+							
 						}
 					}
 				}
@@ -1238,7 +1339,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 													tok2 = strtok(NULL,"");
 													if(tok2!=NULL){
 														//printf("tok2: %s\n",tok2);
-														nd->dcyMode[nd->numDecModes].prob.format = (uint8_t)strlen(tok2);
+														nd->dcyMode[nd->numDecModes].prob.format = (uint16_t)strlen(tok2);
 														if(nd->dcyMode[nd->numDecModes].prob.format > 15U){
 															nd->dcyMode[nd->numDecModes].prob.format = 15U; //only 4 bits available for precision
 														}
@@ -1311,7 +1412,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 									tok = strtok(NULL,"E"); //some gamma energies are specified with exponents
 									if(tok!=NULL){
 										//printf("%s\n",tok);
-										nd->tran[(int)(nd->levels[nd->numLvls-1].firstTran) + nd->levels[nd->numLvls-1].numTran].energy.format = (uint8_t)strlen(tok);
+										nd->tran[(int)(nd->levels[nd->numLvls-1].firstTran) + nd->levels[nd->numLvls-1].numTran].energy.format = (uint16_t)strlen(tok);
 										//check for trailing empty spaces
 										for(uint8_t i=0;i<nd->tran[(int)(nd->levels[nd->numLvls-1].firstTran) + nd->levels[nd->numLvls-1].numTran].energy.format;i++){
 											if(isspace(tok[i])){
@@ -1329,7 +1430,23 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 											//value was in exponent format
 											nd->tran[(int)(nd->levels[nd->numLvls-1].firstTran) + nd->levels[nd->numLvls-1].numTran].energy.exponent = (int8_t)atoi(tok);
 											gammaE = gammaE / powf(10.0f,(float)(nd->tran[(int)(nd->levels[nd->numLvls-1].firstTran) + nd->levels[nd->numLvls-1].numTran].energy.exponent));
-											nd->tran[(int)(nd->levels[nd->numLvls-1].firstTran) + nd->levels[nd->numLvls-1].numTran].energy.format |= (uint8_t)(1U << 4); //exponent flag
+											nd->tran[(int)(nd->levels[nd->numLvls-1].firstTran) + nd->levels[nd->numLvls-1].numTran].energy.format |= (uint16_t)(1U << 4); //exponent flag
+										}
+									}
+								}else{
+									//potentially an exponent form value with no decimal place
+									memcpy(ebuff, &line[9], 10); //re-copy buffer
+									ebuff[10] = '\0';
+									tok = strtok(ebuff,"E");
+									//printf("ebuff: %s\n",ebuff);
+									if(tok!=NULL){
+										tok = strtok(NULL,""); //get the remaining part of the string (only get past here if the value was expressed in exponent form)
+										if(tok!=NULL){
+											//printf("%s\n",tok);
+											//value was in exponent format
+											nd->tran[(int)(nd->levels[nd->numLvls-1].firstTran) + nd->levels[nd->numLvls-1].numTran].energy.exponent = (int8_t)atoi(tok);
+											gammaE = gammaE / powf(10.0f,(float)(nd->tran[(int)(nd->levels[nd->numLvls-1].firstTran) + nd->levels[nd->numLvls-1].numTran].energy.exponent));
+											nd->tran[(int)(nd->levels[nd->numLvls-1].firstTran) + nd->levels[nd->numLvls-1].numTran].energy.format |= (uint16_t)(1U << 4); //exponent flag
 										}
 									}
 								}
@@ -1349,7 +1466,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 									tok = strtok(NULL,"E"); //some gamma energies are specified with exponents
 									if(tok!=NULL){
 										//printf("%s\n",tok);
-										nd->tran[(int)(nd->levels[nd->numLvls-1].firstTran) + nd->levels[nd->numLvls-1].numTran].intensity.format = (uint8_t)strlen(tok);
+										nd->tran[(int)(nd->levels[nd->numLvls-1].firstTran) + nd->levels[nd->numLvls-1].numTran].intensity.format = (uint16_t)strlen(tok);
 										//check for trailing empty spaces
 										for(uint8_t i=0;i<nd->tran[(int)(nd->levels[nd->numLvls-1].firstTran) + nd->levels[nd->numLvls-1].numTran].intensity.format;i++){
 											if(isspace(tok[i])){
@@ -1367,7 +1484,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 											//value was in exponent format
 											nd->tran[(int)(nd->levels[nd->numLvls-1].firstTran) + nd->levels[nd->numLvls-1].numTran].intensity.exponent = (int8_t)atoi(tok);
 											gammaI = gammaI / powf(10.0f,(float)(nd->tran[(int)(nd->levels[nd->numLvls-1].firstTran) + nd->levels[nd->numLvls-1].numTran].intensity.exponent));
-											nd->tran[(int)(nd->levels[nd->numLvls-1].firstTran) + nd->levels[nd->numLvls-1].numTran].intensity.format |= (uint8_t)(1U << 4); //exponent flag
+											nd->tran[(int)(nd->levels[nd->numLvls-1].firstTran) + nd->levels[nd->numLvls-1].numTran].intensity.format |= (uint16_t)(1U << 4); //exponent flag
 										}
 									}
 								}
@@ -1377,19 +1494,19 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 								tok = strtok(ieBuff, " ");
 								if(tok!=NULL){
 									if(strcmp(tok,"GT")==0){
-										nd->tran[(int)(nd->levels[nd->numLvls-1].firstTran) + nd->levels[nd->numLvls-1].numTran].intensity.format |= (uint8_t)(VALUETYPE_GREATERTHAN << 5);
+										nd->tran[(int)(nd->levels[nd->numLvls-1].firstTran) + nd->levels[nd->numLvls-1].numTran].intensity.format |= (uint16_t)(VALUETYPE_GREATERTHAN << 5);
 									}else if(strcmp(tok,"GT")==0){
-										nd->tran[(int)(nd->levels[nd->numLvls-1].firstTran) + nd->levels[nd->numLvls-1].numTran].intensity.format |= (uint8_t)(VALUETYPE_GREATERTHAN << 5);
+										nd->tran[(int)(nd->levels[nd->numLvls-1].firstTran) + nd->levels[nd->numLvls-1].numTran].intensity.format |= (uint16_t)(VALUETYPE_GREATERTHAN << 5);
 									}else if(strcmp(tok,"GE")==0){
-										nd->tran[(int)(nd->levels[nd->numLvls-1].firstTran) + nd->levels[nd->numLvls-1].numTran].intensity.format |= (uint8_t)(VALUETYPE_GREATEROREQUALTHAN << 5);
+										nd->tran[(int)(nd->levels[nd->numLvls-1].firstTran) + nd->levels[nd->numLvls-1].numTran].intensity.format |= (uint16_t)(VALUETYPE_GREATEROREQUALTHAN << 5);
 									}else if(strcmp(tok,"LT")==0){
-										nd->tran[(int)(nd->levels[nd->numLvls-1].firstTran) + nd->levels[nd->numLvls-1].numTran].intensity.format |= (uint8_t)(VALUETYPE_LESSTHAN << 5);
+										nd->tran[(int)(nd->levels[nd->numLvls-1].firstTran) + nd->levels[nd->numLvls-1].numTran].intensity.format |= (uint16_t)(VALUETYPE_LESSTHAN << 5);
 									}else if(strcmp(tok,"LE")==0){
-										nd->tran[(int)(nd->levels[nd->numLvls-1].firstTran) + nd->levels[nd->numLvls-1].numTran].intensity.format |= (uint8_t)(VALUETYPE_LESSOREQUALTHAN << 5);
+										nd->tran[(int)(nd->levels[nd->numLvls-1].firstTran) + nd->levels[nd->numLvls-1].numTran].intensity.format |= (uint16_t)(VALUETYPE_LESSOREQUALTHAN << 5);
 									}else if(strcmp(tok,"AP")==0){
-										nd->tran[(int)(nd->levels[nd->numLvls-1].firstTran) + nd->levels[nd->numLvls-1].numTran].intensity.format |= (uint8_t)(VALUETYPE_APPROX << 5);
+										nd->tran[(int)(nd->levels[nd->numLvls-1].firstTran) + nd->levels[nd->numLvls-1].numTran].intensity.format |= (uint16_t)(VALUETYPE_APPROX << 5);
 									}else if(strcmp(tok,"?")==0){
-										nd->tran[(int)(nd->levels[nd->numLvls-1].firstTran) + nd->levels[nd->numLvls-1].numTran].intensity.format |= (uint8_t)(VALUETYPE_UNKNOWN << 5);
+										nd->tran[(int)(nd->levels[nd->numLvls-1].firstTran) + nd->levels[nd->numLvls-1].numTran].intensity.format |= (uint16_t)(VALUETYPE_UNKNOWN << 5);
 									}else{
 										nd->tran[(int)(nd->levels[nd->numLvls-1].firstTran) + nd->levels[nd->numLvls-1].numTran].intensity.err=(uint8_t)atoi(ieBuff);
 									}
@@ -1509,7 +1626,7 @@ int parseAbundanceData(const char * filePath, ndata * nd){
 						tok=strtok(tmpVal,"(");
 						if(tok!=NULL){
 							nd->nuclData[nuclInd].abundance.val = (float)(atof(tok)*100.0);
-							nd->nuclData[nuclInd].abundance.format = (uint8_t)(strlen(tok)-5);
+							nd->nuclData[nuclInd].abundance.format = (uint16_t)(strlen(tok)-5);
 							if(nd->nuclData[nuclInd].abundance.format > 15U){
 								nd->nuclData[nuclInd].abundance.format = 15U; //only 4 bits available for precision
 							}
@@ -1605,8 +1722,8 @@ int buildDatabase(const char *appBasePath, ndata *nd){
 int parseAppData(app_data *restrict dat, const char *appBasePath){
 
   //check validity of data format
-  if(VALUETYPE_ENUM_LENGTH > /* DISABLES CODE */ (8)){
-    printf("ERROR: VALUETYPE_ENUM_LENGTH is too long, can't store as 3 bits in a bit pattern (eg. level->halfLife.format).\n");
+  if(VALUETYPE_ENUM_LENGTH > /* DISABLES CODE */ (16)){
+    printf("ERROR: VALUETYPE_ENUM_LENGTH is too long, can't store as 4 bits in a bit pattern (eg. level->halfLife.format).\n");
     return -1;
   }
 
