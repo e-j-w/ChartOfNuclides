@@ -165,9 +165,9 @@ typedef struct
   float chartPanStartX, chartPanStartY;
   float chartDragStartX, chartDragStartY;
   float chartDragStartMouseX, chartDragStartMouseY; //in scaled pixels
-  float timeSinceZoomStart, timeSincePanStart, totalPanTime;
+  float timeSinceZoomStart, timeSincePanStart, totalPanTime, timeSinceFCScollStart;
   float infoBoxTableHeight; //the height in unscaled pixels needed to show the info box ground and isomeric state info
-  float nuclFullInfoScrollY; //full level info view: number of lines scrolled in the y-direction
+  float nuclFullInfoScrollStartY, nuclFullInfoScrollToY, nuclFullInfoScrollY; //full level info view: number of lines scrolled in the y-direction
   uint16_t nuclFullInfoMaxScrollY; //maximum scroll position, in lines
   uint32_t shownElements; //bit pattern describing which UI elements are being shown, values from ui_element_enum
   uint32_t uiAnimPlaying; //bit pattern describing which UI animations are playing
@@ -176,6 +176,8 @@ typedef struct
   uint16_t windowXRenderRes, windowYRenderRes; //render resolution (in pixels) taking HI-DPI into account
   uint16_t uiElemPosX[UIELEM_ENUM_LENGTH], uiElemPosY[UIELEM_ENUM_LENGTH], uiElemWidth[UIELEM_ENUM_LENGTH], uiElemHeight[UIELEM_ENUM_LENGTH];
   uint8_t texModR, texModG, texModB, texModA; //texture color and alpha modulation values
+  unsigned int fcScrollInProgress : 1;
+  unsigned int fcScrollFinished : 1;
   unsigned int panInProgress : 1;
   unsigned int panFinished : 1;
   unsigned int dragInProgress : 1;

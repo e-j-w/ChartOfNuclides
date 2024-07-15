@@ -21,6 +21,21 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include "data_ops.h"
 #include "gui_constants.h" //to compute mouse/pointer interactions
 
+void fcScrollAction(app_state *restrict state, const float deltaVal){
+  //printf("scroll delta: %f\n",(double)deltaVal);
+  state->ds.nuclFullInfoScrollStartY = state->ds.nuclFullInfoScrollY;
+  state->ds.nuclFullInfoScrollToY = state->ds.nuclFullInfoScrollY - 1.0f*state->scrollSpeedMultiplier*deltaVal;
+  if(state->ds.nuclFullInfoScrollToY < 0.0f){
+    state->ds.nuclFullInfoScrollToY = 0.0f;
+  }else if(state->ds.nuclFullInfoScrollToY > state->ds.nuclFullInfoMaxScrollY){
+    state->ds.nuclFullInfoScrollToY = (float)state->ds.nuclFullInfoMaxScrollY;
+  }
+  state->ds.timeSinceFCScollStart = 0.0f;
+  state->ds.fcScrollInProgress = 1;
+  state->ds.fcScrollFinished = 0;
+  //printf("scroll pos: %f, scroll to: %f\n",(double)state->ds.nuclFullInfoScrollY,(double)state->ds.nuclFullInfoScrollToY);
+}
+
 void processInputFlags(app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat){
   
   /* Handle directional input */
@@ -95,12 +110,24 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
         state->ds.panFinished = 0;
       }
     }
+  }else if(state->uiState == UISTATE_FULLLEVELINFO){
+    uint32_t up = (state->inputFlags & (1U << INPUT_UP));
+    uint32_t down = (state->inputFlags & (1U << INPUT_DOWN));
+
+    if(up && !down){
+      fcScrollAction(state,1.0f);
+    }else if(down && !up){
+      fcScrollAction(state,-1.0f);
+    }
+
   }
   if(state->inputFlags & (1U << INPUT_BACK)){
     //escape open menus
     if((state->ds.shownElements & (1U << UIELEM_NUCL_INFOBOX))&&(state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_HIDE]==0.0f)){
       startUIAnimation(&state->ds,UIANIM_NUCLINFOBOX_HIDE); //hide the info box, see stopUIAnimation() for info box hiding action
       startUIAnimation(&state->ds,UIANIM_NUCLHIGHLIGHT_HIDE);
+    }else if((state->uiState == UISTATE_FULLLEVELINFO)&&(state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_EXPAND]==0.0f)){
+      uiElemClickAction(dat,state,0,UIELEM_NUCL_FULLINFOBOX_BACKBUTTON); //go back to the main chart
     }else if(state->ds.windowFullscreenMode){
       //exit fullscreen
       state->ds.windowFullscreenMode = 0;
@@ -225,13 +252,7 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
       }
       //printf("scale: %0.2f\n",(double)state->ds.chartZoomScale);
     }else if(state->uiState == UISTATE_FULLLEVELINFO){
-      state->ds.nuclFullInfoScrollY += -1.0f*state->scrollSpeedMultiplier*state->zoomDeltaVal;
-      if(state->ds.nuclFullInfoScrollY < 0.0f){
-        state->ds.nuclFullInfoScrollY = 0.0f;
-      }else if(state->ds.nuclFullInfoScrollY > state->ds.nuclFullInfoMaxScrollY){
-        state->ds.nuclFullInfoScrollY = (float)state->ds.nuclFullInfoMaxScrollY;
-      }
-      //printf("scroll pos: %0.2f\n",(double)state->ds.nuclFullInfoScrollY);
+      fcScrollAction(state,state->zoomDeltaVal);
     }
     
   }
@@ -375,6 +396,11 @@ void processSingleEvent(app_data *restrict dat, app_state *restrict state, resou
           state->zoomDeltaVal = -1.0f;
           state->inputFlags |= (1U << INPUT_ZOOM);
           break;
+        case SDL_SCANCODE_F:
+          if((state->ds.shownElements & (1U << UIELEM_NUCL_INFOBOX))&&(state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_SHOW]==0.0f)){
+            uiElemClickAction(dat,state,0,UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON);
+          }
+          break;
         case SDL_SCANCODE_P:
           state->ds.drawPerformanceStats = !state->ds.drawPerformanceStats;
           break;
@@ -481,7 +507,7 @@ void processFrameEvents(app_data *restrict dat, app_state *restrict state, resou
       state->inputFlags &= ~(1U << INPUT_DOUBLECLICK);
     }
 
-    if((state->ds.uiAnimPlaying != 0)||(state->ds.zoomInProgress)||(state->ds.dragInProgress)||(state->ds.panInProgress)){
+    if((state->ds.uiAnimPlaying != 0)||(state->ds.zoomInProgress)||(state->ds.dragInProgress)||(state->ds.panInProgress)||(state->ds.fcScrollInProgress)){
       //a UI animation is playing, don't block the main thread
       state->ds.forceRedraw = 1;
     }

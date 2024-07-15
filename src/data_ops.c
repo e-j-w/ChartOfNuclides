@@ -56,6 +56,8 @@ void initializeTempState(const app_data *restrict dat, app_state *restrict state
 	state->ds.zoomInProgress = 0;
 	state->ds.dragFinished = 0;
 	state->ds.dragInProgress = 0;
+	state->ds.fcScrollFinished = 0;
+	state->ds.fcScrollInProgress = 0;
 
   //check that constants are valid
   if(UIELEM_ENUM_LENGTH > /* DISABLES CODE */ (32)){
@@ -138,6 +140,10 @@ void updateDrawingState(const app_data *restrict dat, app_state *restrict state,
 		state->ds.panInProgress = 0;
 		state->ds.panFinished = 0; //reset flag
 	}
+	if(state->ds.fcScrollFinished){
+		state->ds.fcScrollInProgress = 0;
+		state->ds.fcScrollFinished = 0; //reset flag
+	}
 	if(state->ds.zoomInProgress){
 		state->ds.timeSinceZoomStart += deltaTime;
 		state->ds.chartZoomScale = state->ds.chartZoomStartScale + ((state->ds.chartZoomToScale - state->ds.chartZoomStartScale)*juice_smoothStop2(state->ds.timeSinceZoomStart/CHART_ZOOM_TIME));
@@ -169,6 +175,15 @@ void updateDrawingState(const app_data *restrict dat, app_state *restrict state,
 			state->ds.panFinished = 1;
 		}
 		//printf("pan t: %0.3f\n",(double)state->ds.timeSincePanStart);
+	}
+	if(state->ds.fcScrollInProgress){
+		state->ds.timeSinceFCScollStart += deltaTime;
+		state->ds.nuclFullInfoScrollY = state->ds.nuclFullInfoScrollStartY + (state->ds.nuclFullInfoScrollToY - state->ds.nuclFullInfoScrollStartY)*juice_smoothStop2(state->ds.timeSinceFCScollStart/NUCL_FULLINFOBOX_SCROLL_TIME);
+		if(state->ds.timeSinceFCScollStart >= NUCL_FULLINFOBOX_SCROLL_TIME){
+			state->ds.nuclFullInfoScrollY = state->ds.nuclFullInfoScrollToY;
+			state->ds.fcScrollFinished = 1;
+		}
+		//printf("scroll t: %0.3f, pos: %f\n",(double)state->ds.timeSinceFCScollStart,(double)state->ds.nuclFullInfoScrollY);
 	}
 	//clamp chart display range
 	if(state->ds.chartPosX < 0.0f){

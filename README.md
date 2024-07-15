@@ -73,6 +73,7 @@ Zoom and pan with the mouse, the controls are basically identical to something l
 | :----------------- | :----- |
 | Arrow keys / WASD  | Pan chart view |
 | +/-                | Zoom in/out on chart |
+| F                  | Show full list of levels/gammas for selected nuclide |
 | Escape / backspace | Exit out of open menus, cancel selection, etc. |
 | F11                | Toggle fullscreen mode |
 | P                  | Toggle performance stats debug overlay |
