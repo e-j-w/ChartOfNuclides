@@ -1033,14 +1033,15 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 
 							float levelE = -1.0f;
 
-							//get length without spaces
-							uint8_t levEStrLen = 0;
-							tok = strtok(ebuff," ");
-							if(tok != NULL){
-								levEStrLen = (uint8_t)strlen(tok);
+							//get length without trailing spaces
+							uint8_t levEStrLen = 10;
+							for(int i=10;i>=0;i--){
+								if(ebuff[i]==' '){
+									levEStrLen=(uint8_t)i;
+								}else{
+									break;
+								}
 							}
-							memcpy(ebuff, &line[9], 10); //re-constitute original buffer
-							ebuff[10] = '\0';
 
 							//check for variables in level energy
 							if(isalpha(ebuff[0])&&(ebuff[1]==' ')){
@@ -1051,6 +1052,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 								nd->levels[nd->numLvls-1].energy.val=0;
 								nd->levels[nd->numLvls-1].energy.err=0;
 								nd->levels[nd->numLvls-1].energy.unit=VALUE_UNIT_NOVAL;
+								nd->levels[nd->numLvls-1].energy.format = 0; //default
 								nd->levels[nd->numLvls-1].energy.format |= (uint16_t)(VALUETYPE_X << 5);
 								//record variable index (stored value = variable ASCII code)
 								nd->levels[nd->numLvls-1].energy.format |= (uint16_t)(ebuff[0] << 9);
@@ -1064,19 +1066,28 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 										levelE = (float)atof(tok);
 										nd->nuclData[nd->numNucl].numLevels++;
 										nd->numLvls++;
+										nd->levels[nd->numLvls-1].energy.format = 0; //default
 										nd->levels[nd->numLvls-1].energy.format |= (uint16_t)(VALUETYPE_PLUSX << 5);
 									}
 								}
 								memcpy(ebuff, &line[9], 10); //re-constitute original buffer
 								ebuff[10] = '\0';
+								nd->levels[nd->numLvls-1].energy.format |= (uint16_t)(ebuff[0] << 9);
 							}else if((levEStrLen > 1)&&(ebuff[levEStrLen-2]=='+')&&(isalpha(ebuff[levEStrLen-1]))){
 								//level energy in number+X format
+								//printf("ebuff: %s\n",ebuff);
 								tok = strtok(ebuff,"+");
 								if(tok != NULL){
 									levelE = (float)atof(tok);
 									nd->nuclData[nd->numNucl].numLevels++;
 									nd->numLvls++;
-									nd->levels[nd->numLvls-1].energy.format |= (uint16_t)(VALUETYPE_PLUSX << 5);
+									tok = strtok(NULL,""); //get the rest of the string
+									if(tok != NULL){
+										nd->levels[nd->numLvls-1].energy.format = 0; //default
+										nd->levels[nd->numLvls-1].energy.format |= (uint16_t)(VALUETYPE_PLUSX << 5);
+										nd->levels[nd->numLvls-1].energy.format |= (uint16_t)(tok[0] << 9);
+										//printf("variable: %c\n",tok[0]);
+									}
 								}
 								memcpy(ebuff, &line[9], 10); //re-constitute original buffer
 								ebuff[10] = '\0';
@@ -1085,46 +1096,47 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 								levelE = (float)atof(ebuff);
 								nd->nuclData[nd->numNucl].numLevels++;
 								nd->numLvls++;
-								//printf("Found level at %f keV from string: %s.\n",atof(ebuff),ebuff);
+								nd->levels[nd->numLvls-1].energy.format = 0; //default
+								//printf("Found level at %f keV from string: %s\n",(double)levelE,ebuff);
 							}
 
 							if(nd->nuclData[nd->numNucl].numLevels == 1){
 								nd->nuclData[nd->numNucl].firstLevel = nd->numLvls-1;
 							}
 
-							if((levelE >= 0.0f)&&((nd->nuclData[nd->numNucl].numLevels==0)||(levelE>(nd->levels[nd->numLvls-1].energy.val)))){
+							if(levelE >= 0.0f){
 								//parse the level energy value
 
 								
 								//get the number of sig figs
-								nd->levels[nd->numLvls-1].energy.format = 0; //default
 								//printf("ebuff: %s\n",ebuff);
 								tok = strtok(ebuff,".");
 								if(tok!=NULL){
 									//printf("%s\n",tok);
-									tok = strtok(NULL,"E"); //some level energies are specified with exponents
+									tok = strtok(NULL,"E+"); //some level energies are specified with exponents, or relative to a variable (eg. 73.0+X)
 									if(tok!=NULL){
-										//printf("%s\n",tok);
-										nd->levels[nd->numLvls-1].energy.format = (uint16_t)strlen(tok);
-										//check for trailing empty spaces
-										for(uint8_t i=0;i<nd->levels[nd->numLvls-1].energy.format;i++){
-											if(isspace(tok[i])){
-												nd->levels[nd->numLvls-1].energy.format = i;
-												break;
+										
+											//printf("%s\n",tok);
+											uint16_t len = (uint16_t)strlen(tok);
+											//check for trailing empty spaces
+											for(uint16_t i=0;i<len;i++){
+												if(isspace(tok[i])){
+													len = i;
+													break;
+												}
 											}
-										}
-										if(nd->levels[nd->numLvls-1].energy.format > 15U){
-											nd->levels[nd->numLvls-1].energy.format = 15U; //only 4 bits available for precision
-										}
-										//printf("format: %u\n",nd->levels[nd->numLvls-1].energy.format);
-										tok = strtok(NULL,""); //get the remaining part of the string (only get past here if the value was expressed in exponent form)
-										if(tok!=NULL){
-											//printf("energy in exponent form: %s\n",ebuff);
-											//value was in exponent format
-											nd->levels[nd->numLvls-1].energy.exponent = (int8_t)atoi(tok);
-											levelE = levelE / powf(10.0f,(float)(nd->levels[nd->numLvls-1].energy.exponent));
-											nd->levels[nd->numLvls-1].energy.format |= (uint16_t)(1U << 4); //exponent flag
-										}
+											nd->levels[nd->numLvls-1].energy.format |= (uint16_t)(len & 15U);
+											//printf("format: %u\n",nd->levels[nd->numLvls-1].energy.format);
+											if(((nd->levels[nd->numLvls-1].energy.format >> 5U) & 15U) != VALUETYPE_PLUSX){
+												tok = strtok(NULL,""); //get the remaining part of the string (only get past here if the value was expressed in exponent form)
+												if(tok!=NULL){
+													//printf("energy in exponent form: %s\n",ebuff);
+													//value was in exponent format
+													nd->levels[nd->numLvls-1].energy.exponent = (int8_t)atoi(tok);
+													levelE = levelE / powf(10.0f,(float)(nd->levels[nd->numLvls-1].energy.exponent));
+													nd->levels[nd->numLvls-1].energy.format |= (uint16_t)(1U << 4); //exponent flag
+												}
+											}
 									}else{
 										//potentially an exponent form value with no decimal place
 										memcpy(ebuff, &line[9], 10); //re-copy buffer

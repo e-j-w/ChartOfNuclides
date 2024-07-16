@@ -107,19 +107,23 @@ SDL_FColor getHalfLifeCol(const double halflifeSeconds){
   }else if(halflifeSeconds > 1.0E-6){
     col.r = 1.0f;
     col.g = 0.6f;
-    col.b = 0.7f;
+    col.b = 0.6f;
   }else if(halflifeSeconds > 1.0E-7){
     col.r = 1.0f;
     col.g = 0.6f;
     col.b = 0.7f;
-  }else if(halflifeSeconds > 1.0E-15){
+  }else if(halflifeSeconds > 1.0E-9){
     col.r = 1.0f;
-    col.g = 0.6f;
+    col.g = 0.7f;
     col.b = 0.8f;
+  }else if(halflifeSeconds > 1.0E-12){
+    col.r = 1.0f;
+    col.g = 0.8f;
+    col.b = 0.9f;
   }else{
     col.r = 1.0f;
-    col.g = 0.6f;
-    col.b = 1.0f;
+    col.g = 0.8f;
+    col.b = 0.9f;
   }
   return col;
 }
@@ -422,39 +426,55 @@ void drawNuclFullInfoBox(const app_data *restrict dat, const app_state *restrict
 
   //level and gamma data
   char tmpStr[32];
+  SDL_FRect rect;
+  rect.x = 0.0f;
+  rect.w = state->ds.windowXRenderRes;
   float drawXPos = (float)(4*UI_PADDING_SIZE);
   float drawYPos = NUCL_FULLINFOBOX_LEVELLIST_POS_Y - NUCL_INFOBOX_SMALLLINE_HEIGHT*(state->ds.nuclFullInfoScrollY);
   //printf("drawYPos: %f\n",(double)drawYPos);
   float levelStartDrawPos;
-  for(uint32_t lvlInd = dat->ndat.nuclData[nuclInd].firstLevel; lvlInd<(dat->ndat.nuclData[nuclInd].firstLevel +dat->ndat.nuclData[nuclInd].numLevels); lvlInd++){
+  for(uint32_t lvlInd = dat->ndat.nuclData[nuclInd].firstLevel; lvlInd<(dat->ndat.nuclData[nuclInd].firstLevel+dat->ndat.nuclData[nuclInd].numLevels); lvlInd++){
     uint16_t numLines = getNumDispLinesForLvl(&dat->ndat,lvlInd);
     if(((drawYPos + NUCL_INFOBOX_SMALLLINE_HEIGHT*numLines) >= NUCL_FULLINFOBOX_LEVELLIST_POS_Y)&&(drawYPos <= state->ds.windowYRes)){
+      
+      const double hl = getLevelHalfLifeSeconds(&dat->ndat,lvlInd);
+      if(hl > 1.0E-9){
+        //highlight isomers and stable states
+        //first check that the lifetime is not an upper limit
+        if((((dat->ndat.levels[lvlInd].halfLife.format >> 5U) & 15U) != VALUETYPE_LESSTHAN)&&(((dat->ndat.levels[lvlInd].halfLife.format >> 5U) & 15U) != VALUETYPE_LESSOREQUALTHAN)){
+          rect.h = NUCL_INFOBOX_SMALLLINE_HEIGHT*numLines*rdat->uiScale;
+          rect.y = drawYPos*rdat->uiScale;
+          drawFlatRect(rdat,rect,getHalfLifeCol(hl));
+        }
+        
+      }
+      
       levelStartDrawPos = drawYPos;
       if(lvlInd == (dat->ndat.nuclData[nuclInd].firstLevel + dat->ndat.nuclData[nuclInd].gsLevel)){
         getLvlEnergyStr(tmpStr,&dat->ndat,lvlInd,0);
       }else{
         getLvlEnergyStr(tmpStr,&dat->ndat,lvlInd,1);
       }
-      drawTextAlignedSized(rdat,drawXPos+NUCL_FULLINFOBOX_ENERGY_COL_OFFSET,drawYPos,rdat->font,blackCol8Bit,255,tmpStr,ALIGN_LEFT,16384);
+      drawTextAlignedSized(rdat,drawXPos+NUCL_FULLINFOBOX_ENERGY_COL_OFFSET,drawYPos,rdat->font,(hl > 1.0E3) ? whiteCol8Bit : blackCol8Bit,255,tmpStr,ALIGN_LEFT,16384);
       getSpinParStr(tmpStr,&dat->ndat,lvlInd);
-      drawTextAlignedSized(rdat,drawXPos+NUCL_FULLINFOBOX_JPI_COL_OFFSET,drawYPos,rdat->font,blackCol8Bit,255,tmpStr,ALIGN_LEFT,16384);
+      drawTextAlignedSized(rdat,drawXPos+NUCL_FULLINFOBOX_JPI_COL_OFFSET,drawYPos,rdat->font,(hl > 1.0E3) ? whiteCol8Bit : blackCol8Bit,255,tmpStr,ALIGN_LEFT,16384);
       getHalfLifeStr(tmpStr,&dat->ndat,lvlInd,1,0);
-      drawTextAlignedSized(rdat,drawXPos+NUCL_FULLINFOBOX_HALFLIFE_COL_OFFSET,drawYPos,rdat->font,blackCol8Bit,255,tmpStr,ALIGN_LEFT,16384);
+      drawTextAlignedSized(rdat,drawXPos+NUCL_FULLINFOBOX_HALFLIFE_COL_OFFSET,drawYPos,rdat->font,(hl > 1.0E3) ? whiteCol8Bit : blackCol8Bit,255,tmpStr,ALIGN_LEFT,16384);
       if(dat->ndat.levels[lvlInd].numDecModes > 0){
         for(int8_t i=0; i<dat->ndat.levels[lvlInd].numDecModes; i++){
           drawYPos += NUCL_INFOBOX_SMALLLINE_HEIGHT;
           getDecayModeStr(tmpStr,&dat->ndat,dat->ndat.levels[lvlInd].firstDecMode + (uint32_t)i);
           //printf("%s\n",tmpStr);
-          drawTextAlignedSized(rdat,drawXPos+NUCL_FULLINFOBOX_HALFLIFE_COL_OFFSET+2*UI_PADDING_SIZE,drawYPos,rdat->font,blackCol8Bit,255,tmpStr,ALIGN_LEFT,16384); //draw decay mode label
+          drawTextAlignedSized(rdat,drawXPos+NUCL_FULLINFOBOX_HALFLIFE_COL_OFFSET+2*UI_PADDING_SIZE,drawYPos,rdat->font,(hl > 1.0E3) ? whiteCol8Bit : blackCol8Bit,255,tmpStr,ALIGN_LEFT,16384); //draw decay mode label
         }
       }
       if(dat->ndat.levels[lvlInd].numTran > 0){
         drawYPos = levelStartDrawPos;
         for(uint16_t i=0; i<dat->ndat.levels[lvlInd].numTran; i++){
           getGammaEnergyStr(tmpStr,&dat->ndat,(uint32_t)(dat->ndat.levels[lvlInd].firstTran + i),1);
-          drawTextAlignedSized(rdat,drawXPos+NUCL_FULLINFOBOX_EGAMMA_COL_OFFSET,drawYPos,rdat->font,blackCol8Bit,255,tmpStr,ALIGN_LEFT,16384); //draw decay mode label
+          drawTextAlignedSized(rdat,drawXPos+NUCL_FULLINFOBOX_EGAMMA_COL_OFFSET,drawYPos,rdat->font,(hl > 1.0E3) ? whiteCol8Bit : blackCol8Bit,255,tmpStr,ALIGN_LEFT,16384); //draw decay mode label
           getGammaIntensityStr(tmpStr,&dat->ndat,(uint32_t)(dat->ndat.levels[lvlInd].firstTran + i),1);
-          drawTextAlignedSized(rdat,drawXPos+NUCL_FULLINFOBOX_IGAMMA_COL_OFFSET,drawYPos,rdat->font,blackCol8Bit,255,tmpStr,ALIGN_LEFT,16384); //draw decay mode label
+          drawTextAlignedSized(rdat,drawXPos+NUCL_FULLINFOBOX_IGAMMA_COL_OFFSET,drawYPos,rdat->font,(hl > 1.0E3) ? whiteCol8Bit : blackCol8Bit,255,tmpStr,ALIGN_LEFT,16384); //draw decay mode label
           drawYPos += NUCL_INFOBOX_SMALLLINE_HEIGHT;
         }
       }
@@ -468,7 +488,6 @@ void drawNuclFullInfoBox(const app_data *restrict dat, const app_state *restrict
   }
 
   //rect to hide over-scrolled level info
-  SDL_FRect rect;
   rect.x = 0.0f;
   rect.y = 0.0f;
   rect.w = state->ds.windowXRenderRes;
@@ -492,7 +511,7 @@ void drawNuclFullInfoBox(const app_data *restrict dat, const app_state *restrict
   drawIconAndTextButton(&dat->rules.themeRules,rdat,state->ds.uiElemPosX[UIELEM_NUCL_FULLINFOBOX_BACKBUTTON],state->ds.uiElemPosY[UIELEM_NUCL_FULLINFOBOX_BACKBUTTON],state->ds.uiElemWidth[UIELEM_NUCL_FULLINFOBOX_BACKBUTTON],getHighlightState(state,UIELEM_NUCL_FULLINFOBOX_BACKBUTTON),255,UIICON_DOWNARROWS,dat->strings[dat->locStringIDs[LOCSTR_BACKTOSUMMARY]]);
 }
 
-void drawNuclInfoBox(const app_data *restrict dat, const app_state *restrict state, resource_data *restrict rdat, const uint16_t nuclInd){
+void drawNuclInfoBox(const app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat, const uint16_t nuclInd){
   
   uint16_t yOffset = 0;
   if(state->ds.uiAnimPlaying & (1U << UIANIM_NUCLINFOBOX_HIDE)){
@@ -603,9 +622,15 @@ void drawNuclInfoBox(const app_data *restrict dat, const app_state *restrict sta
   drawInfoBoxHeader(dat,rdat,infoBoxPanelRect.x,infoBoxPanelRect.y,alpha,nuclInd);
 
   //all level info button
-  drawXPos = state->ds.uiElemPosX[UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON] + 0.5f*(infoBoxPanelRect.w - state->ds.uiElemWidth[UIELEM_NUCL_INFOBOX]);
-  drawYPos = state->ds.uiElemPosY[UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON] + infoBoxPanelRect.y - state->ds.uiElemPosY[UIELEM_NUCL_INFOBOX];
-  drawIconAndTextButton(&dat->rules.themeRules,rdat,(uint16_t)drawXPos,(uint16_t)drawYPos,state->ds.uiElemWidth[UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON],getHighlightState(state,UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON),255,UIICON_UPARROWS,dat->strings[dat->locStringIDs[LOCSTR_ALLLEVELS]]);
+  updateSingleUIElemPosition(&state->ds,UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON);
+  if((state->ds.uiAnimPlaying & (1U << UIANIM_NUCLINFOBOX_EXPAND))||(state->ds.uiAnimPlaying & (1U << UIANIM_NUCLINFOBOX_CONTRACT))){ 
+    drawIconAndTextButton(&dat->rules.themeRules,rdat,state->ds.uiElemPosX[UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON],state->ds.uiElemPosY[UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON],state->ds.uiElemWidth[UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON],getHighlightState(state,UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON),255,UIICON_UPARROWS,dat->strings[dat->locStringIDs[LOCSTR_ALLLEVELS]]);
+  }else{
+    drawXPos = state->ds.uiElemPosX[UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON] + 0.5f*(infoBoxPanelRect.w - state->ds.uiElemWidth[UIELEM_NUCL_INFOBOX]);
+    drawYPos = state->ds.uiElemPosY[UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON] + infoBoxPanelRect.y - state->ds.uiElemPosY[UIELEM_NUCL_INFOBOX];
+    drawIconAndTextButton(&dat->rules.themeRules,rdat,(uint16_t)drawXPos,(uint16_t)drawYPos,state->ds.uiElemWidth[UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON],getHighlightState(state,UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON),255,UIICON_UPARROWS,dat->strings[dat->locStringIDs[LOCSTR_ALLLEVELS]]);
+  }
+  
   //close button/icon
   alpha = 255;
   if(state->ds.uiAnimPlaying & (1U << UIANIM_NUCLINFOBOX_EXPAND)){

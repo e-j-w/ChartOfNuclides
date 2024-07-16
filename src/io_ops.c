@@ -78,11 +78,11 @@ static int readConfigFile(FILE *file, app_state *restrict state){
         }
       }else if(strcmp(par,"scroll_speed") == 0){
         float ss = (float)atof(val);
-        if(fabsf(ss)<=30.0f){
+        if(fabsf(ss)<=32.0f){
           state->scrollSpeedMultiplier = ss;
         }else{
           printf("WARNING: invalid scroll speed (%f) in config file, setting to default.\n",(double)ss);
-          state->scrollSpeedMultiplier = 8.0f;
+          state->scrollSpeedMultiplier = 16.0f;
         }
       }else if(strcmp(par,"chart_pos_x") == 0){
         float posx = (float)atof(val);

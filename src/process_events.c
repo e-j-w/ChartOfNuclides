@@ -115,9 +115,9 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
     uint32_t down = (state->inputFlags & (1U << INPUT_DOWN));
 
     if(up && !down){
-      fcScrollAction(state,1.0f);
+      fcScrollAction(state,0.5f);
     }else if(down && !up){
-      fcScrollAction(state,-1.0f);
+      fcScrollAction(state,-0.5f);
     }
 
   }
@@ -196,7 +196,7 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
         state->ds.chartZoomStartScale = state->ds.chartZoomScale;
         if(state->zoomDeltaVal > 0){
           //zoom in
-          state->ds.chartZoomToScale += state->zoomDeltaVal*state->ds.chartZoomToScale;
+          state->ds.chartZoomToScale += state->zoomDeltaVal*state->ds.chartZoomToScale*0.5f;
           if(state->ds.chartZoomToScale > MAX_CHART_ZOOM_SCALE){
             state->ds.chartZoomToScale = MAX_CHART_ZOOM_SCALE;
           }
@@ -252,7 +252,7 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
       }
       //printf("scale: %0.2f\n",(double)state->ds.chartZoomScale);
     }else if(state->uiState == UISTATE_FULLLEVELINFO){
-      fcScrollAction(state,state->zoomDeltaVal);
+      fcScrollAction(state,state->zoomDeltaVal*2.0f);
     }
     
   }

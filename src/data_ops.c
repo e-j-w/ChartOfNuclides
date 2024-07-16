@@ -34,7 +34,7 @@ void initializeTempState(const app_data *restrict dat, app_state *restrict state
   state->lastAxisValY = 0;
   state->activeAxis = 0; //the last used axis
   state->lastInputType = INPUT_TYPE_KEYBOARD; //default input type
-	state->scrollSpeedMultiplier = 8.0f;
+	state->scrollSpeedMultiplier = 16.0f;
 	state->inputFlags = 0;
   //app state
 	state->chartSelectedNucl = MAXNUMNUCL;
@@ -906,7 +906,18 @@ void getLvlEnergyStr(char strOut[32], const ndata *restrict nd, const uint32_t l
 
 	uint8_t ePrecision = (uint8_t)(nd->levels[lvlInd].energy.format & 15U);
 	uint8_t eExponent = (uint8_t)((nd->levels[lvlInd].energy.format >> 4U) & 1U);
-	if((showErr == 0)||(nd->levels[lvlInd].energy.err == 0)){
+	uint8_t eValueType = (uint8_t)((nd->levels[lvlInd].energy.format >> 5U) & 15U);
+	if(eValueType == VALUETYPE_X){
+		uint8_t variable = (uint8_t)((nd->levels[lvlInd].energy.format >> 9U) & 127U);
+		snprintf(strOut,32,"%c",variable);
+	}else if(eValueType == VALUETYPE_PLUSX){
+		uint8_t variable = (uint8_t)((nd->levels[lvlInd].energy.format >> 9U) & 127U);
+		if(eExponent == 0){
+			snprintf(strOut,32,"%.*f+%c",ePrecision,(double)(nd->levels[lvlInd].energy.val),variable);
+		}else{
+			snprintf(strOut,32,"%.*fE%i+%c",ePrecision,(double)(nd->levels[lvlInd].energy.val),nd->levels[lvlInd].energy.exponent,variable);
+		}
+	}else if((showErr == 0)||(nd->levels[lvlInd].energy.err == 0)){
 		if(eExponent == 0){
 			snprintf(strOut,32,"%.*f",ePrecision,(double)(nd->levels[lvlInd].energy.val));
 		}else{
@@ -1035,12 +1046,14 @@ void getSpinParStr(char strOut[32], const ndata *restrict nd, const uint32_t lvl
 					
 				}
 			}
-			if(nd->levels[lvlInd].halfInt == 1){
-				sprintf(val,"%i/2",nd->levels[lvlInd].spval[i].spinVal);
-			}else{
-				sprintf(val,"%i",nd->levels[lvlInd].spval[i].spinVal);
+			if(nd->levels[lvlInd].spval[i].spinVal >= 0){
+				if(nd->levels[lvlInd].halfInt == 1){
+					sprintf(val,"%i/2",nd->levels[lvlInd].spval[i].spinVal);
+				}else{
+					sprintf(val,"%i",nd->levels[lvlInd].spval[i].spinVal);
+				}
+				strcat(strOut,val);
 			}
-			strcat(strOut,val);
 			if(nd->levels[lvlInd].spval[i].parVal == -1){
 				strcat(strOut,"-");
 			}else if(nd->levels[lvlInd].spval[i].parVal == 1){
@@ -1137,6 +1150,7 @@ double getLevelHalfLifeSeconds(const ndata *restrict nd, const uint32_t levelInd
 				return hl*0.000000000000001;
 			case VALUE_UNIT_ATTOSECONDS:
 				return hl*0.000000000000000001;
+			case VALUE_UNIT_NOVAL:
 			default:
 				return -2.0; //couldn't find half-life
 		}
@@ -1435,7 +1449,7 @@ void updateSingleUIElemPosition(drawing_state *restrict ds, const uint8_t uiElem
 			ds->uiElemHeight[uiElemInd] = (uint16_t)((float)NUCL_INFOBOX_MIN_HEIGHT + ds->infoBoxTableHeight);
 			ds->uiElemPosY[uiElemInd] = (uint16_t)(ds->windowYRes - ds->uiElemHeight[uiElemInd] - UI_PADDING_SIZE - (int32_t)CHART_AXIS_DEPTH);
 			ds->uiElemWidth[uiElemInd] = (uint16_t)(NUCL_INFOBOX_WIDTH);
-			//update child/depedant UI elements
+			//update child/dependant UI elements
 			updateSingleUIElemPosition(ds,UIELEM_NUCL_INFOBOX_CLOSEBUTTON);
 			updateSingleUIElemPosition(ds,UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON);
 			break;
@@ -1448,8 +1462,26 @@ void updateSingleUIElemPosition(drawing_state *restrict ds, const uint8_t uiElem
 		case UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON:
 			ds->uiElemWidth[UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON] = NUCL_INFOBOX_ALLLEVELS_BUTTON_WIDTH;
 			ds->uiElemHeight[UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON] = UI_TILE_SIZE;
-			ds->uiElemPosX[UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON] = (uint16_t)(ds->uiElemPosX[UIELEM_NUCL_INFOBOX] + ds->uiElemWidth[UIELEM_NUCL_INFOBOX] - ds->uiElemWidth[UIELEM_NUCL_INFOBOX_CLOSEBUTTON] - ds->uiElemWidth[UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON] - 7*UI_PADDING_SIZE);
-			ds->uiElemPosY[UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON] = ds->uiElemPosY[UIELEM_NUCL_INFOBOX] + 4*UI_PADDING_SIZE;
+			if(ds->uiAnimPlaying & (1U << UIANIM_NUCLINFOBOX_EXPAND)){
+				float animFrac = juice_smoothStop3(1.0f - ds->timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_EXPAND]/UI_ANIM_LENGTH);
+				uint16_t defaultPosX = (uint16_t)((ds->windowXRes - NUCL_INFOBOX_WIDTH)/2 + NUCL_INFOBOX_WIDTH - UI_TILE_SIZE - ds->uiElemWidth[UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON] - 7*UI_PADDING_SIZE);
+				uint16_t defaultPosY = (uint16_t)(ds->windowYRes - (uint16_t)((float)NUCL_INFOBOX_MIN_HEIGHT + ds->infoBoxTableHeight) - UI_PADDING_SIZE - (int32_t)CHART_AXIS_DEPTH + 4*UI_PADDING_SIZE);
+				uint16_t fullPosX = (uint16_t)(ds->windowXRes-NUCL_FULLINFOBOX_BACKBUTTON_WIDTH-NUCL_FULLINFOBOX_BACKBUTTON_POS_XR);
+				uint16_t fullPosY = NUCL_FULLINFOBOX_BACKBUTTON_POS_Y;
+				ds->uiElemPosX[UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON] = (uint16_t)(defaultPosX + animFrac*(fullPosX - defaultPosX));
+				ds->uiElemPosY[UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON] = (uint16_t)(defaultPosY + animFrac*(fullPosY - defaultPosY));
+			}else if(ds->uiAnimPlaying & (1U << UIANIM_NUCLINFOBOX_CONTRACT)){
+				float animFrac = juice_smoothStart3(1.0f - ds->timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_CONTRACT]/UI_ANIM_LENGTH);
+				uint16_t defaultPosX = (uint16_t)((ds->windowXRes - NUCL_INFOBOX_WIDTH)/2 + NUCL_INFOBOX_WIDTH - UI_TILE_SIZE - ds->uiElemWidth[UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON] - 7*UI_PADDING_SIZE);
+				uint16_t defaultPosY = (uint16_t)(ds->windowYRes - (uint16_t)((float)NUCL_INFOBOX_MIN_HEIGHT + ds->infoBoxTableHeight) - UI_PADDING_SIZE - (int32_t)CHART_AXIS_DEPTH + 4*UI_PADDING_SIZE);
+				uint16_t fullPosX = (uint16_t)(ds->windowXRes-NUCL_FULLINFOBOX_BACKBUTTON_WIDTH-NUCL_FULLINFOBOX_BACKBUTTON_POS_XR);
+				uint16_t fullPosY = NUCL_FULLINFOBOX_BACKBUTTON_POS_Y;
+				ds->uiElemPosX[UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON] = (uint16_t)(fullPosX + animFrac*(defaultPosX - fullPosX));
+				ds->uiElemPosY[UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON] = (uint16_t)(fullPosY + animFrac*(defaultPosY - fullPosY));
+			}else{
+				ds->uiElemPosX[UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON] = (uint16_t)(ds->uiElemPosX[UIELEM_NUCL_INFOBOX] + ds->uiElemWidth[UIELEM_NUCL_INFOBOX] - ds->uiElemWidth[UIELEM_NUCL_INFOBOX_CLOSEBUTTON] - ds->uiElemWidth[UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON] - 7*UI_PADDING_SIZE);
+				ds->uiElemPosY[UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON] = ds->uiElemPosY[UIELEM_NUCL_INFOBOX] + 4*UI_PADDING_SIZE;
+			}
 			//printf("x: %u, y: %u, w: %u, h: %u\n",ds->uiElemPosX[UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON],ds->uiElemPosY[UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON],ds->uiElemWidth[UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON],ds->uiElemHeight[UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON]);
 			break;
 		case UIELEM_NUCL_FULLINFOBOX_BACKBUTTON:
