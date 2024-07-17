@@ -29,11 +29,16 @@ void getDecayModeStr(char strOut[32], const ndata *restrict nd, const uint32_t d
 void getAbundanceStr(char strOut[32], const ndata *restrict nd, const uint16_t nuclInd);
 void getSpinParStr(char strOut[32], const ndata *restrict nd, const uint32_t lvlInd);
 
+double getRawValFromDB(const valWithErr *restrict valStruct);
+double getRawErrFromDB(const valWithErr *restrict valStruct);
+
 double getLevelEnergykeV(const ndata *restrict nd, const uint32_t levelInd);
 
 double getLevelHalfLifeSeconds(const ndata *restrict nd, const uint32_t levelInd);
 double getNuclLevelHalfLifeSeconds(const ndata *restrict nd, const uint16_t nuclInd, const uint16_t nuclLevel);
 double getNuclGSHalfLifeSeconds(const ndata *restrict nd, const uint16_t nuclInd);
+
+uint32_t getFinalLvlInd(const ndata *restrict nd, const uint32_t initialLevel, const uint32_t tran);
 
 uint16_t getNuclInd(const ndata *restrict nd, const int16_t N, const int16_t Z);
 

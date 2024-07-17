@@ -200,6 +200,8 @@ static int parseAppRules(app_data *restrict dat, asset_mapping *restrict stringI
 	dat->locStringIDs[LOCSTR_DECAYMODE] = (uint16_t)nameToAssetID("decay_mode",stringIDmap);
 	dat->locStringIDs[LOCSTR_ENERGY_GAMMA] = (uint16_t)nameToAssetID("energy_gamma",stringIDmap);
 	dat->locStringIDs[LOCSTR_INTENSITY_GAMMA] = (uint16_t)nameToAssetID("intensity_gamma",stringIDmap);
+	dat->locStringIDs[LOCSTR_MULTIPLICITY_GAMMA] = (uint16_t)nameToAssetID("multiplicity_gamma",stringIDmap);
+	dat->locStringIDs[LOCSTR_FINALLEVEL] = (uint16_t)nameToAssetID("final_level",stringIDmap);
 	dat->locStringIDs[LOCSTR_ALLLEVELS] = (uint16_t)nameToAssetID("all_levels",stringIDmap);
 	dat->locStringIDs[LOCSTR_BACKTOSUMMARY] = (uint16_t)nameToAssetID("back_to_summary",stringIDmap);
 
@@ -1035,8 +1037,8 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 
 							//get length without trailing spaces
 							uint8_t levEStrLen = 10;
-							for(int i=10;i>=0;i--){
-								if(ebuff[i]==' '){
+							for(int i=9;i>=0;i--){
+								if(isspace(ebuff[i])){
 									levEStrLen=(uint8_t)i;
 								}else{
 									break;
@@ -1059,6 +1061,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 								
 							}else if((levEStrLen > 1)&&(ebuff[1]=='+')){
 								//level energy in X+number format
+								//printf("X+number ebuff: %s\n",ebuff);
 								tok = strtok(ebuff,"+");
 								if(tok != NULL){
 									tok = strtok(NULL,""); //get the rest of the string
@@ -1075,7 +1078,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 								nd->levels[nd->numLvls-1].energy.format |= (uint16_t)(ebuff[0] << 9);
 							}else if((levEStrLen > 1)&&(ebuff[levEStrLen-2]=='+')&&(isalpha(ebuff[levEStrLen-1]))){
 								//level energy in number+X format
-								//printf("ebuff: %s\n",ebuff);
+								//printf("number+X ebuff: %s\n",ebuff);
 								tok = strtok(ebuff,"+");
 								if(tok != NULL){
 									levelE = (float)atof(tok);
@@ -1093,6 +1096,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 								ebuff[10] = '\0';
 							}else{
 								//normal level energy
+								//printf("normal ebuff: %s (length %u)\n",ebuff,levEStrLen);
 								levelE = (float)atof(ebuff);
 								nd->nuclData[nd->numNucl].numLevels++;
 								nd->numLvls++;
@@ -1105,10 +1109,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 							}
 
 							if(levelE >= 0.0f){
-								//parse the level energy value
-
-								
-								//get the number of sig figs
+								//get the number of sig figs in the level energy
 								//printf("ebuff: %s\n",ebuff);
 								tok = strtok(ebuff,".");
 								if(tok!=NULL){
@@ -1467,6 +1468,42 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 								nd->tran[(int)(nd->levels[nd->numLvls-1].firstTran) + nd->levels[nd->numLvls-1].numTran].energy.err=gammaEerr;
 								nd->tran[(int)(nd->levels[nd->numLvls-1].firstTran) + nd->levels[nd->numLvls-1].numTran].energy.unit=VALUE_UNIT_KEV;
 								
+								//check for final level of transition
+								nd->tran[(int)(nd->levels[nd->numLvls-1].firstTran) + nd->levels[nd->numLvls-1].numTran].finalLvlOffset = 0;
+								uint8_t lvlValType = ((nd->levels[nd->numLvls-1].energy.format >> 5U) & 15U);
+								for(uint32_t lvlInd = (nd->numLvls-2); lvlInd >= nd->nuclData[nd->numNucl].firstLevel; lvlInd--){
+									
+									//handle variable level energies (ie. number+X, Y+number...)
+									//transitions cannot link between levels defined by different variables
+									uint8_t prevLvlValType = ((nd->levels[lvlInd].energy.format >> 5U) & 15U);
+									if((lvlValType == VALUETYPE_X)||(lvlValType == VALUETYPE_PLUSX)){
+										if((prevLvlValType != VALUETYPE_X)&&(prevLvlValType != VALUETYPE_PLUSX)){
+											continue; //skip
+										}else{
+											//check that the variables are the same
+											uint8_t var = (uint8_t)((nd->levels[nd->numLvls-1].energy.format >> 9U) & 127U);
+											uint8_t prevVar = (uint8_t)((nd->levels[lvlInd].energy.format >> 9U) & 127U);
+											if(var != prevVar){
+												continue; //variables don't match, skip
+											}
+										}
+									}else{
+										if((prevLvlValType == VALUETYPE_X)||(prevLvlValType == VALUETYPE_PLUSX)){
+											continue; //skip
+										}
+									}
+									
+									float fudgeFactor = (float)getRawErrFromDB(&nd->tran[(int)(nd->levels[nd->numLvls-1].firstTran) + nd->levels[nd->numLvls-1].numTran].energy);
+									if(fudgeFactor < 0.01f){
+										fudgeFactor = 1.0f; //default assumed energy resolution, when no erro is reported 
+									}
+									if(fabsf((nd->levels[nd->numLvls-1].energy.val - gammaE) - nd->levels[lvlInd].energy.val) <= fudgeFactor){
+										nd->tran[(int)(nd->levels[nd->numLvls-1].firstTran) + nd->levels[nd->numLvls-1].numTran].finalLvlOffset = (uint8_t)((nd->numLvls-1) - lvlInd);
+										//printf("finalLvlOffset: %u\n",nd->tran[(int)(nd->levels[nd->numLvls-1].firstTran) + nd->levels[nd->numLvls-1].numTran].finalLvlOffset);
+										break;
+									}
+								}
+
 								//gamma intensity
 								float gammaI = (float)atof(iBuff);
 								//get the number of sig figs

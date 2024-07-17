@@ -88,9 +88,10 @@ typedef struct
 
 typedef struct
 {
-  uint8_t type; //0=gamma, other values for beta, alpha, etc.
   valWithErr energy; //transition energy, in keV
   valWithErr intensity; //relative intensity
+  uint8_t multiplicity; //bits 0-5: from multiplicity_enum, bits 6-7: from tentative_enum
+  uint8_t finalLvlOffset; //offset of the index of the final level from the initial level
 }transition; //a transition between levels
 
 typedef struct

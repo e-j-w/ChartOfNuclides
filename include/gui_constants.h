@@ -94,16 +94,18 @@ static const uint8_t UITHEME_ICON_TILE_Y[UIICON_ENUM_LENGTH] = {10,10,10,9,9};
 #define NUCL_INFOBOX_DECAYMODE_COL_OFFSET   350.0f //in unscaled pixels
 #define NUCL_INFOBOX_ALLLEVELS_BUTTON_WIDTH 170 //in unscaled pixels
 
-#define NUCL_FULLINFOBOX_SCROLL_TIME            0.1f //time (in seconds) for the list scroll animation to finish
-#define NUCL_FULLINFOBOX_BACKBUTTON_POS_XR      (2*MENU_BUTTON_POS_XR + MENU_BUTTON_WIDTH)
-#define NUCL_FULLINFOBOX_BACKBUTTON_POS_Y       MENU_BUTTON_POS_Y
-#define NUCL_FULLINFOBOX_BACKBUTTON_WIDTH       NUCL_INFOBOX_ALLLEVELS_BUTTON_WIDTH
-#define NUCL_FULLINFOBOX_ENERGY_COL_OFFSET      0.0f //in unscaled pixels
-#define NUCL_FULLINFOBOX_JPI_COL_OFFSET         140.0f //in unscaled pixels
-#define NUCL_FULLINFOBOX_HALFLIFE_COL_OFFSET    280.0f //in unscaled pixels
-#define NUCL_FULLINFOBOX_EGAMMA_COL_OFFSET      410.0f //in unscaled pixels
-#define NUCL_FULLINFOBOX_IGAMMA_COL_OFFSET      530.0f //in unscaled pixels
-#define NUCL_FULLINFOBOX_LEVELLIST_POS_Y        120.0f //in unscaled pixels
+#define NUCL_FULLINFOBOX_SCROLL_TIME                0.1f //time (in seconds) for the list scroll animation to finish
+#define NUCL_FULLINFOBOX_BACKBUTTON_POS_XR          (2*MENU_BUTTON_POS_XR + MENU_BUTTON_WIDTH)
+#define NUCL_FULLINFOBOX_BACKBUTTON_POS_Y           MENU_BUTTON_POS_Y
+#define NUCL_FULLINFOBOX_BACKBUTTON_WIDTH           NUCL_INFOBOX_ALLLEVELS_BUTTON_WIDTH
+#define NUCL_FULLINFOBOX_ENERGY_COL_OFFSET          0.0f //in unscaled pixels
+#define NUCL_FULLINFOBOX_JPI_COL_OFFSET             140.0f //in unscaled pixels
+#define NUCL_FULLINFOBOX_HALFLIFE_COL_OFFSET        280.0f //in unscaled pixels
+#define NUCL_FULLINFOBOX_EGAMMA_COL_OFFSET          410.0f //in unscaled pixels
+#define NUCL_FULLINFOBOX_IGAMMA_COL_OFFSET          530.0f //in unscaled pixels
+#define NUCL_FULLINFOBOX_FINALLEVEL_E_COL_OFFSET    630.0f //in unscaled pixels
+#define NUCL_FULLINFOBOX_FINALLEVEL_JPI_COL_OFFSET  730.0f //in unscaled pixels
+#define NUCL_FULLINFOBOX_LEVELLIST_POS_Y            120.0f //in unscaled pixels
 
 //performance overlay
 #define PERF_OVERLAY_BUTTON_X_ANCHOR  16

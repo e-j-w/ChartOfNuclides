@@ -10,5 +10,7 @@ halflife|t1/2
 decay_mode|Decay Mode
 energy_gamma|E(γ) (keV)
 intensity_gamma|I(γ)
+multiplicity_gamma|M(γ)
+final_level|Final Level
 all_levels|All levels/gammas
 back_to_summary|Back to summary
