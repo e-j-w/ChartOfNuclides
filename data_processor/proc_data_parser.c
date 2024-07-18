@@ -419,7 +419,6 @@ void parseSpinPar(level * lev, char * spstring){
 
 	char *tok;
 	char str[256], tmpstr[256], tmpstr2[256], val[MAXNUMPARSERVALS][256];
-	int i,j;
 	int numTok=0;
 
 	lev->numSpinParVals=0;
@@ -427,7 +426,7 @@ void parseSpinPar(level * lev, char * spstring){
 
 	//check for invalid strings
 	strcpy(str,spstring);
-	tok = strtok (str, " ");
+	tok = strtok(str, " ");
 	if(tok == NULL){
 		//printf("energy %f, strings: %s,%s\n",lev->energy,spstring,tok);
 		//printf("Not a valid spin-parity value.\n");
@@ -446,22 +445,21 @@ void parseSpinPar(level * lev, char * spstring){
 	strcpy(str,spstring);
 	tok = strtok (str, " ,");
 	strcpy(val[numTok],tok);
-	while (tok != NULL)
-	{
+	while(tok != NULL){
 		tok = strtok (NULL, " ,");
-		if(tok!=NULL)
-			{
-				numTok++;
-				if(numTok<MAXNUMPARSERVALS){
-					strcpy(val[numTok],tok);
-				}else{
-					numTok--;
-					break;
-				}
-					
+		if(tok!=NULL){
+			numTok++;
+			if(numTok<MAXNUMPARSERVALS){
+				strcpy(val[numTok],tok);
+			}else{
+				numTok--;
+				break;
 			}
+		}
 	}
 	numTok++;
+
+	
 
 	/*printf("string: %s, number of tokens: %i\n",spstring,numTok);
 	for(i=0;i<numTok;i++){
@@ -475,32 +473,39 @@ void parseSpinPar(level * lev, char * spstring){
 	if(numTok<=0){
 		return;
 	}else if(strcmp(val[0],"GE")==0){
+		lev->spval[lev->numSpinParVals].format = 0;
 		lev->spval[lev->numSpinParVals].tentative = TENTATIVE_GE;
-		lev->spval[lev->numSpinParVals].spinVal = (int16_t)atoi(val[1]);
+		lev->spval[lev->numSpinParVals].spinVal = (uint8_t)atoi(val[1]);
 		lev->numSpinParVals=1;
 		return;
 	}else if((strcmp(val[0],"+")==0)&&(numTok==1)){
+		lev->spval[lev->numSpinParVals].format = 0;
 		lev->spval[lev->numSpinParVals].parVal = 1;
-		lev->spval[lev->numSpinParVals].spinVal = -1;
+		lev->spval[lev->numSpinParVals].spinVal = 255;
 		lev->spval[lev->numSpinParVals].tentative = TENTATIVE_NOSPIN;
 		lev->numSpinParVals=1;
 		return;
 	}else if((strcmp(val[0],"-")==0)&&(numTok==1)){
+		lev->spval[lev->numSpinParVals].format = 0;
 		lev->spval[lev->numSpinParVals].parVal = -1;
-		lev->spval[lev->numSpinParVals].spinVal = -1;
+		lev->spval[lev->numSpinParVals].spinVal = 255;
 		lev->spval[lev->numSpinParVals].tentative = TENTATIVE_NOSPIN;
 		lev->numSpinParVals=1;
 		return;
 	}else{
-		for(i=0;i<numTok;i++){
+		for(int i=0;i<numTok;i++){
 			if(i<MAXSPPERLEVEL){
+
+				lev->spval[lev->numSpinParVals].format = 0;
+				uint8_t lsBrak = 0; //temp var for bracket checking
+				uint8_t rsBrak = 0; //temp var for bracket checking
 
 				//special cases
 				if(strcmp(val[i],"TO")==0){
 					//specifies a range between the prior and next spin values
 					//eg. '3/2 TO 7/2'
 					lev->spval[lev->numSpinParVals].tentative = TENTATIVE_RANGE;
-					lev->spval[lev->numSpinParVals].spinVal = -1;
+					lev->spval[lev->numSpinParVals].spinVal = 255;
 					lev->numSpinParVals++;
 					continue;
 				}else if(strcmp(val[i],"&")==0){
@@ -508,9 +513,49 @@ void parseSpinPar(level * lev, char * spstring){
 					continue;
 				}
 
+				//check for J+number variable spin case
+				/*uint8_t varSpin=0;
+				uint8_t varSpinPos=0;
+				for(int j=((int)strlen(val[i])-1); j>=1; j--){
+					if(j<((int)strlen(val[i])-1)){
+						if(val[i][j]=='+'){
+							if(isdigit(val[i][j+1])){
+								varSpin=1;
+								varSpinPos=(uint8_t)i;
+								break;
+							}
+						}
+					}
+					if(isalpha(val[i][j])){
+						varSpin=1;
+					}
+				}
+				if(varSpin){
+					//J or J+number variable spin value
+					lev->halfInt = 0;
+					printf("%s\n",val[i]);
+					if(val[i][0] == '('){
+						lsBrak = 1;
+					}
+					int len = (int)strlen(val[i]);
+					if(val[i][len-1]==')'){
+						rsBrak = 1;
+					}
+					lev->spval[lev->numSpinParVals].format = 1;
+					tok = strtok(val[i],"+");
+					if(tok!=NULL){
+						tok = strtok(NULL,")");
+						if(tok!=NULL){
+							strcpy(val[i],tok); //for further parsing, only give spin value after + sign
+						}else{
+							//non-offset variable spin value
+							printf("non offset: %s\n",val[i]);
+						}
+					}
+					printf("%s\n",val[i]);
+				}*/
+
 				//check for brackets
-				uint8_t lsBrak = 0;
-				uint8_t rsBrak = 0;
 				strcpy(tmpstr,val[i]);
 				tok=strtok(tmpstr,"(");
 				if(tok!=NULL){
@@ -560,13 +605,13 @@ void parseSpinPar(level * lev, char * spstring){
 							lev->spval[lev->numSpinParVals].parVal = -1;
 						}else if(strcmp(tok,")-")==0){
 							//all spin values negative parity
-							for(j=0;j<=lev->numSpinParVals;j++){
+							for(int j=0;j<=lev->numSpinParVals;j++){
 								lev->spval[j].parVal = -1;
 								tentative = TENTATIVE_SPINONLY;
 							}
 						}else if(strcmp(tok,")+")==0){
 							//all spin values positive parity
-							for(j=0;j<=lev->numSpinParVals;j++){
+							for(int j=0;j<=lev->numSpinParVals;j++){
 								lev->spval[j].parVal = 1;
 								tentative = TENTATIVE_SPINONLY;
 							}
@@ -575,7 +620,7 @@ void parseSpinPar(level * lev, char * spstring){
 				}
 
 				//extract spin
-				lev->spval[lev->numSpinParVals].spinVal = -1; //default to unknown spin
+				lev->spval[lev->numSpinParVals].spinVal = 255; //default to unknown spin
 				strcpy(tmpstr,val[i]);
 				tok=strtok(tmpstr,"()+-, ");
 				if(tok!=NULL){
@@ -583,9 +628,15 @@ void parseSpinPar(level * lev, char * spstring){
 					tok=strtok(tok,"/");
 					if(strcmp(tok,tmpstr2)!=0){
 						//printf("Detected half-integer spin.\n");
-						lev->spval[lev->numSpinParVals].spinVal=(int16_t)atoi(tok);
+						if(atoi(tok) >= 255){
+							printf("WARNING: high spin value: %i/2\n",atoi(tok));
+						}
+						lev->spval[lev->numSpinParVals].spinVal=(uint8_t)atoi(tok);
 					}else{
-						lev->spval[lev->numSpinParVals].spinVal=(int16_t)atoi(tmpstr2);
+						if(atoi(tmpstr2) >= 255){
+							printf("WARNING: high spin value: %i\n",atoi(tmpstr2));
+						}
+						lev->spval[lev->numSpinParVals].spinVal=(uint8_t)atoi(tmpstr2);
 					}
 				}
 
@@ -1044,10 +1095,18 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 									break;
 								}
 							}
+							//get the position of the first non-space character
+							uint8_t levEStartPos = 10;
+							for(uint8_t i=0;i<10;i++){
+								if(!(isspace(ebuff[i]))){
+									levEStartPos = i;
+									break;
+								}
+							}
 
 							//check for variables in level energy
-							if(isalpha(ebuff[0])&&(ebuff[1]==' ')){
-								
+							if(isalpha(ebuff[levEStrLen-1])&&((levEStrLen==1) || ebuff[levEStrLen-2]==' ')){
+								//printf("X ebuff: %s\n",ebuff);
 								nd->nuclData[nd->numNucl].numLevels++;
 								nd->numLvls++;
 								
@@ -1057,9 +1116,9 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 								nd->levels[nd->numLvls-1].energy.format = 0; //default
 								nd->levels[nd->numLvls-1].energy.format |= (uint16_t)(VALUETYPE_X << 5);
 								//record variable index (stored value = variable ASCII code)
-								nd->levels[nd->numLvls-1].energy.format |= (uint16_t)(ebuff[0] << 9);
+								nd->levels[nd->numLvls-1].energy.format |= (uint16_t)(ebuff[levEStrLen-1] << 9);
 								
-							}else if((levEStrLen > 1)&&(ebuff[1]=='+')){
+							}else if((levEStartPos < 10)&&(isalpha(ebuff[levEStartPos]))&&(ebuff[levEStartPos+1]=='+')){
 								//level energy in X+number format
 								//printf("X+number ebuff: %s\n",ebuff);
 								tok = strtok(ebuff,"+");
@@ -1075,7 +1134,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 								}
 								memcpy(ebuff, &line[9], 10); //re-constitute original buffer
 								ebuff[10] = '\0';
-								nd->levels[nd->numLvls-1].energy.format |= (uint16_t)(ebuff[0] << 9);
+								nd->levels[nd->numLvls-1].energy.format |= (uint16_t)(ebuff[levEStartPos] << 9);
 							}else if((levEStrLen > 1)&&(ebuff[levEStrLen-2]=='+')&&(isalpha(ebuff[levEStrLen-1]))){
 								//level energy in number+X format
 								//printf("number+X ebuff: %s\n",ebuff);
@@ -1156,8 +1215,8 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 										}
 									}
 								}
-								if((levelE==0.0f)&&(nd->levels[nd->numLvls-1].energy.format == 0)){
-									nd->levels[nd->numLvls-1].energy.format = 1; //always include at least one decimal place for ground states, for aesthetic purposes
+								if((levelE==0.0f)&&((nd->levels[nd->numLvls-1].energy.format & 15U) == 0)){
+									nd->levels[nd->numLvls-1].energy.format |= 1U; //always include at least one decimal place for ground states, for aesthetic purposes
 								}
 
 								//parse the energy error
@@ -1469,6 +1528,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 								nd->tran[(int)(nd->levels[nd->numLvls-1].firstTran) + nd->levels[nd->numLvls-1].numTran].energy.unit=VALUE_UNIT_KEV;
 								
 								//check for final level of transition
+								float minEDiff = 1000.0f;
 								nd->tran[(int)(nd->levels[nd->numLvls-1].firstTran) + nd->levels[nd->numLvls-1].numTran].finalLvlOffset = 0;
 								uint8_t lvlValType = ((nd->levels[nd->numLvls-1].energy.format >> 5U) & 15U);
 								for(uint32_t lvlInd = (nd->numLvls-2); lvlInd >= nd->nuclData[nd->numNucl].firstLevel; lvlInd--){
@@ -1493,14 +1553,18 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 										}
 									}
 									
+									
 									float fudgeFactor = (float)getRawErrFromDB(&nd->tran[(int)(nd->levels[nd->numLvls-1].firstTran) + nd->levels[nd->numLvls-1].numTran].energy);
 									if(fudgeFactor < 0.01f){
-										fudgeFactor = 1.0f; //default assumed energy resolution, when no erro is reported 
+										fudgeFactor = 1.0f; //default assumed energy resolution, when no error is reported 
 									}
-									if(fabsf((nd->levels[nd->numLvls-1].energy.val - gammaE) - nd->levels[lvlInd].energy.val) <= fudgeFactor){
-										nd->tran[(int)(nd->levels[nd->numLvls-1].firstTran) + nd->levels[nd->numLvls-1].numTran].finalLvlOffset = (uint8_t)((nd->numLvls-1) - lvlInd);
+									float eDiff = fabsf((nd->levels[nd->numLvls-1].energy.val - gammaE) - nd->levels[lvlInd].energy.val);
+									if(eDiff <= fudgeFactor){
+										if(eDiff < minEDiff){
+											minEDiff = eDiff;
+											nd->tran[(int)(nd->levels[nd->numLvls-1].firstTran) + nd->levels[nd->numLvls-1].numTran].finalLvlOffset = (uint8_t)((nd->numLvls-1) - lvlInd);
+										}
 										//printf("finalLvlOffset: %u\n",nd->tran[(int)(nd->levels[nd->numLvls-1].firstTran) + nd->levels[nd->numLvls-1].numTran].finalLvlOffset);
-										break;
 									}
 								}
 

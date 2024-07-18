@@ -81,9 +81,10 @@ typedef struct
 
 typedef struct
 {
-  int16_t spinVal; //the spin value (-1 if unknown)
+  uint8_t spinVal; //the spin value (255 if unknown)
   int8_t parVal;  //the parity value (1 if positive, -1 if negative, 0 if unknown)
   uint8_t tentative; //values from tentative_enum
+  uint8_t format; //bit 0: whether or not spin is variable, bits 1-7: variable index if bit 0 is set
 }spinparval; //spin parity value
 
 typedef struct

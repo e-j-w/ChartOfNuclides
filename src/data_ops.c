@@ -1046,7 +1046,7 @@ void getSpinParStr(char strOut[32], const ndata *restrict nd, const uint32_t lvl
 					
 				}
 			}
-			if(nd->levels[lvlInd].spval[i].spinVal >= 0){
+			if(nd->levels[lvlInd].spval[i].spinVal < 255){
 				if(nd->levels[lvlInd].halfInt == 1){
 					sprintf(val,"%i/2",nd->levels[lvlInd].spval[i].spinVal);
 				}else{
