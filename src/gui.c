@@ -25,7 +25,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include "data_ops.h"
 
 float getAxisTickSpacing(float range){
-  //printf("range: %f\n",(double)range);
+  //SDL_Log("range: %f\n",(double)range);
   if(range < 12.0f){
     return 1.0f;
   }else if(range < 30.0f){
@@ -42,7 +42,7 @@ float getAxisTickSpacing(float range){
 }
 
 SDL_FColor getHalfLifeCol(const double halflifeSeconds){
-  //printf("half-life: %0.6f\n",halflifeSeconds);
+  //SDL_Log("half-life: %0.6f\n",halflifeSeconds);
   SDL_FColor col;
   col.r = 1.0f;
   col.g = 1.0f;
@@ -179,12 +179,12 @@ void drawNuclBoxLabel(const app_data *restrict dat, const drawing_state *restric
         uint32_t gsLevInd = (uint32_t)(dat->ndat.nuclData[nuclInd].firstLevel + dat->ndat.nuclData[nuclInd].gsLevel);
         for(int8_t i=0; i<dat->ndat.levels[gsLevInd].numDecModes; i++){
           getDecayModeStr(tmpStr,&dat->ndat,dat->ndat.levels[gsLevInd].firstDecMode + (uint32_t)i);
-          //printf("%s\n",tmpStr);
+          //SDL_Log("%s\n",tmpStr);
           Uint16 drawHeight = FC_GetColumnHeight(rdat->font,(Uint16)(boxWidth - labelMargin),tmpStr);
           uint8_t drawYOffsets =  (uint8_t)(1.0f + drawHeight/30.0f);
           if(((yOffsets+drawYOffsets) <= yOffsetLimit)||((drawYOffsets == 1)&&(i==(dat->ndat.levels[gsLevInd].numDecModes-1)))){
             drawTextAlignedSized(rdat,drawXPos,drawYPos+(yOffsets*20.0f),rdat->font,col,255,tmpStr,ALIGN_LEFT,(Uint16)(boxWidth - labelMargin)); //draw decay mode label
-            //printf("height: %f\n",(double)height);
+            //SDL_Log("height: %f\n",(double)height);
             yOffsets += drawYOffsets;
           }else{
             drawTextAlignedSized(rdat,drawXPos,drawYPos+(yOffsets*20.0f),rdat->font,col,255,"(...)",ALIGN_LEFT,(Uint16)(boxWidth - labelMargin));
@@ -205,7 +205,7 @@ void drawChartOfNuclides(const app_data *restrict dat, const app_state *restrict
   float minY = getMinChartZ(&state->ds);
   float maxY = getMaxChartZ(&state->ds);
   
-  //printf("N range: [%0.2f %0.2f], Z range: [%0.2f %0.2f]\n",(double)minX,(double)maxX,(double)minY,(double)maxY);
+  //SDL_Log("N range: [%0.2f %0.2f], Z range: [%0.2f %0.2f]\n",(double)minX,(double)maxX,(double)minY,(double)maxY);
 
   SDL_FRect rect;
   rect.w = DEFAULT_NUCLBOX_DIM*state->ds.chartZoomScale*rdat->uiScale;
@@ -220,7 +220,7 @@ void drawChartOfNuclides(const app_data *restrict dat, const app_state *restrict
               //draw nuclide on chart
               rect.x = ((float)dat->ndat.nuclData[i].N - minX)*rect.w;
               rect.y = (maxY - (float)dat->ndat.nuclData[i].Z)*rect.h;
-              //printf("N: %i, Z: %i, i: %i, pos: [%0.2f %0.2f %0.2f %0.2f]\n",dat->ndat.nuclData[i].N,dat->ndat.nuclData[i].Z,i,(double)rect.x,(double)rect.y,(double)rect.w,(double)rect.h);
+              //SDL_Log("N: %i, Z: %i, i: %i, pos: [%0.2f %0.2f %0.2f %0.2f]\n",dat->ndat.nuclData[i].N,dat->ndat.nuclData[i].Z,i,(double)rect.x,(double)rect.y,(double)rect.w,(double)rect.h);
               const double hl = getNuclGSHalfLifeSeconds(&dat->ndat,(uint16_t)i);
               drawFlatRect(rdat,rect,getHalfLifeCol(hl));
               if(state->ds.chartZoomScale >= 4.0f){
@@ -431,7 +431,7 @@ void drawNuclFullInfoBox(const app_data *restrict dat, const app_state *restrict
   rect.w = state->ds.windowXRenderRes;
   float drawXPos = (float)(4*UI_PADDING_SIZE);
   float drawYPos = NUCL_FULLINFOBOX_LEVELLIST_POS_Y - NUCL_INFOBOX_SMALLLINE_HEIGHT*(state->ds.nuclFullInfoScrollY);
-  //printf("drawYPos: %f\n",(double)drawYPos);
+  //SDL_Log("drawYPos: %f\n",(double)drawYPos);
   float levelStartDrawPos;
   for(uint32_t lvlInd = dat->ndat.nuclData[nuclInd].firstLevel; lvlInd<(dat->ndat.nuclData[nuclInd].firstLevel+dat->ndat.nuclData[nuclInd].numLevels); lvlInd++){
     uint16_t numLines = getNumDispLinesForLvl(&dat->ndat,lvlInd);
@@ -464,7 +464,7 @@ void drawNuclFullInfoBox(const app_data *restrict dat, const app_state *restrict
         for(int8_t i=0; i<dat->ndat.levels[lvlInd].numDecModes; i++){
           drawYPos += NUCL_INFOBOX_SMALLLINE_HEIGHT;
           getDecayModeStr(tmpStr,&dat->ndat,dat->ndat.levels[lvlInd].firstDecMode + (uint32_t)i);
-          //printf("%s\n",tmpStr);
+          //SDL_Log("%s\n",tmpStr);
           drawTextAlignedSized(rdat,drawXPos+NUCL_FULLINFOBOX_HALFLIFE_COL_OFFSET+2*UI_PADDING_SIZE,drawYPos,rdat->font,(hl > 1.0E3) ? whiteCol8Bit : blackCol8Bit,255,tmpStr,ALIGN_LEFT,16384); //draw decay mode label
         }
       }
@@ -585,7 +585,7 @@ void drawNuclInfoBox(const app_data *restrict dat, app_state *restrict state, re
     if(dat->ndat.levels[lvlInd].numDecModes > 0){
       for(int8_t i=0; i<dat->ndat.levels[lvlInd].numDecModes; i++){
         getDecayModeStr(tmpStr,&dat->ndat,dat->ndat.levels[lvlInd].firstDecMode + (uint32_t)i);
-        //printf("%s\n",tmpStr);
+        //SDL_Log("%s\n",tmpStr);
         if(drawYPos < (float)(state->ds.uiElemPosY[UIELEM_NUCL_INFOBOX] + state->ds.uiElemHeight[UIELEM_NUCL_INFOBOX])){
           drawTextAlignedSized(rdat,drawXPos+NUCL_INFOBOX_DECAYMODE_COL_OFFSET,drawYPos,rdat->font,blackCol8Bit,alpha,tmpStr,ALIGN_LEFT,state->ds.uiElemWidth[UIELEM_NUCL_INFOBOX]); //draw decay mode label
           drawYPos += NUCL_INFOBOX_SMALLLINE_HEIGHT;
@@ -601,7 +601,7 @@ void drawNuclInfoBox(const app_data *restrict dat, app_state *restrict state, re
   }
 
   //longest isomer
-  //printf("Isomer index: %u\n",dat->ndat.nuclData[nuclInd].longestIsomerLevel);
+  //SDL_Log("Isomer index: %u\n",dat->ndat.nuclData[nuclInd].longestIsomerLevel);
   lvlInd = dat->ndat.nuclData[nuclInd].longestIsomerLevel;
   if((lvlInd != MAXNUMLVLS)&&(lvlInd != (dat->ndat.nuclData[nuclInd].firstLevel + dat->ndat.nuclData[nuclInd].gsLevel))){
     drawYPos += (NUCL_INFOBOX_BIGLINE_HEIGHT - NUCL_INFOBOX_SMALLLINE_HEIGHT);
@@ -616,7 +616,7 @@ void drawNuclInfoBox(const app_data *restrict dat, app_state *restrict state, re
     }else{
       for(int8_t i=0; i<dat->ndat.levels[lvlInd].numDecModes; i++){
         getDecayModeStr(tmpStr,&dat->ndat,dat->ndat.levels[lvlInd].firstDecMode + (uint32_t)i);
-        //printf("%s\n",tmpStr);
+        //SDL_Log("%s\n",tmpStr);
         if(drawYPos < (float)(state->ds.uiElemPosY[UIELEM_NUCL_INFOBOX] + state->ds.uiElemHeight[UIELEM_NUCL_INFOBOX])){
           drawTextAlignedSized(rdat,drawXPos+NUCL_INFOBOX_DECAYMODE_COL_OFFSET,drawYPos,rdat->font,blackCol8Bit,alpha,tmpStr,ALIGN_LEFT,state->ds.uiElemWidth[UIELEM_NUCL_INFOBOX]); //draw decay mode label
           drawYPos += NUCL_INFOBOX_SMALLLINE_HEIGHT;
@@ -652,7 +652,7 @@ void drawNuclInfoBox(const app_data *restrict dat, app_state *restrict state, re
   drawYPos = state->ds.uiElemPosY[UIELEM_NUCL_INFOBOX_CLOSEBUTTON] + infoBoxPanelRect.y - state->ds.uiElemPosY[UIELEM_NUCL_INFOBOX];
   drawIcon(&dat->rules.themeRules,rdat,(uint16_t)drawXPos,(uint16_t)drawYPos,state->ds.uiElemWidth[UIELEM_NUCL_INFOBOX_CLOSEBUTTON],getHighlightState(state,UIELEM_NUCL_INFOBOX_CLOSEBUTTON),alpha,UIICON_CLOSE);
 
-  //printf("%.3f %.3f alpha %u\n",(double)state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_SHOW],(double)state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_HIDE],alpha);
+  //SDL_Log("%.3f %.3f alpha %u\n",(double)state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_SHOW],(double)state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_HIDE],alpha);
 }
 
 void drawMessageBox(const app_data *restrict dat, const app_state *restrict state, resource_data *restrict rdat){
@@ -683,7 +683,7 @@ void drawMessageBox(const app_data *restrict dat, const app_state *restrict stat
   drawTextAlignedSized(rdat,msgBoxPanelRect.x+(msgBoxPanelRect.w/2),msgBoxPanelRect.y+MESSAGE_BOX_HEADERTXT_Y,rdat->bigFont,dat->rules.themeRules.textColNormal,(uint8_t)floorf(alpha*255.0f),state->msgBoxHeaderTxt,ALIGN_CENTER,(Uint16)(msgBoxPanelRect.w - 2*UI_PADDING_SIZE));
   drawTextAlignedSized(rdat,msgBoxPanelRect.x+(msgBoxPanelRect.w/2),msgBoxPanelRect.y+(msgBoxPanelRect.h/2),rdat->font,dat->rules.themeRules.textColNormal,(uint8_t)floorf(alpha*255.0f),state->msgBoxTxt,ALIGN_CENTER,(Uint16)(msgBoxPanelRect.w - 2*UI_PADDING_SIZE));
   drawTextButton(&dat->rules.themeRules,rdat,state->ds.uiElemPosX[UIELEM_MSG_BOX_OK_BUTTON],state->ds.uiElemPosY[UIELEM_MSG_BOX_OK_BUTTON]+yOffset,state->ds.uiElemWidth[UIELEM_MSG_BOX_OK_BUTTON],getHighlightState(state,UIELEM_MSG_BOX_OK_BUTTON),(uint8_t)floorf(alpha*255.0f),dat->strings[dat->locStringIDs[LOCSTR_OK]]);
-  //printf("%.3f %.3f alpha %u\n",(double)state->ds.timeLeftInUIAnimation[UIANIM_MSG_BOX_SHOW],(double)state->ds.timeLeftInUIAnimation[UIANIM_MSG_BOX_HIDE],alpha);
+  //SDL_Log("%.3f %.3f alpha %u\n",(double)state->ds.timeLeftInUIAnimation[UIANIM_MSG_BOX_SHOW],(double)state->ds.timeLeftInUIAnimation[UIANIM_MSG_BOX_HIDE],alpha);
 }
 
 //meta-function which draws any UI menus, if applicable

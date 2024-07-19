@@ -45,7 +45,7 @@ static int readConfigFile(FILE *file, app_state *restrict state){
         
       }
 
-      //printf("par: %s, val: %s\n",par,val);
+      //SDL_Log("par: %s, val: %s\n",par,val);
 
       //read in parameter values
       if(strcmp(par,"performance_overlay") == 0){
@@ -65,7 +65,7 @@ static int readConfigFile(FILE *file, app_state *restrict state){
         if(res>=MIN_RENDER_WIDTH){
           state->ds.windowXRes = (uint16_t)res;
         }else{
-          printf("WARNING: invalid window x-resolution (%i) in config file, setting to default.\n",res);
+          SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,"invalid window x-resolution (%i) in config file, setting to default.\n",res);
           state->ds.windowXRes = MIN_RENDER_WIDTH;
         }
       }else if(strcmp(par,"window_res_y") == 0){
@@ -73,7 +73,7 @@ static int readConfigFile(FILE *file, app_state *restrict state){
         if(res>=MIN_RENDER_HEIGHT){
           state->ds.windowYRes = (uint16_t)res;
         }else{
-          printf("WARNING: invalid window y-resolution (%i) in config file, setting to default.\n",res);
+          SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,"invalid window y-resolution (%i) in config file, setting to default.\n",res);
           state->ds.windowYRes = MIN_RENDER_HEIGHT;
         }
       }else if(strcmp(par,"scroll_speed") == 0){
@@ -81,7 +81,7 @@ static int readConfigFile(FILE *file, app_state *restrict state){
         if(fabsf(ss)<=32.0f){
           state->scrollSpeedMultiplier = ss;
         }else{
-          printf("WARNING: invalid scroll speed (%f) in config file, setting to default.\n",(double)ss);
+          SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,"invalid scroll speed (%f) in config file, setting to default.\n",(double)ss);
           state->scrollSpeedMultiplier = 16.0f;
         }
       }else if(strcmp(par,"chart_pos_x") == 0){
@@ -89,7 +89,7 @@ static int readConfigFile(FILE *file, app_state *restrict state){
         if((posx>=0.0f)&&(posx<=MAX_NEUTRON_NUM)){
           state->ds.chartPosX = posx;
         }else{
-          printf("WARNING: invalid chart x-position (%f) in config file, setting to default.\n",(double)posx);
+          SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,"invalid chart x-position (%f) in config file, setting to default.\n",(double)posx);
           state->ds.chartPosX = 90.0f;
         }
       }else if(strcmp(par,"chart_pos_y") == 0){
@@ -97,7 +97,7 @@ static int readConfigFile(FILE *file, app_state *restrict state){
         if((posy>=0.0f)&&(posy<=MAX_PROTON_NUM)){
           state->ds.chartPosY = posy;
         }else{
-          printf("WARNING: invalid chart y-position (%f) in config file, setting to default.\n",(double)posy);
+          SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,"invalid chart y-position (%f) in config file, setting to default.\n",(double)posy);
           state->ds.chartPosY = 55.0f;
         }
       }else if(strcmp(par,"zoom_scale") == 0){
@@ -105,7 +105,7 @@ static int readConfigFile(FILE *file, app_state *restrict state){
         if((zs>=MIN_CHART_ZOOM_SCALE)&&(zs<=MAX_CHART_ZOOM_SCALE)){
           state->ds.chartZoomScale = zs;
         }else{
-          printf("WARNING: invalid chart zoom scale (%f) in config file, setting to default.\n",(double)zs);
+          SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,"invalid chart zoom scale (%f) in config file, setting to default.\n",(double)zs);
           state->ds.chartZoomScale = 1.0f;
         }
         state->ds.chartZoomToScale = state->ds.chartZoomScale;
@@ -115,7 +115,7 @@ static int readConfigFile(FILE *file, app_state *restrict state){
         if((dz > 1000)&&(dz < 32768)){
           state->gamepadDeadzone = (uint16_t)dz;
         }else{
-          printf("WARNING: invalid gamepad deadzone (%i) in config file, setting to default.\n",dz);
+          SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,"invalid gamepad deadzone (%i) in config file, setting to default.\n",dz);
           state->gamepadDeadzone = 16000;
         }
       }
@@ -166,30 +166,30 @@ static int writeConfigFile(FILE *file, const app_rules *restrict rules, const ap
 void updateConfigFile(const char *configPath, const app_rules *restrict rules, const app_state *restrict state){
 
   char configFilePath[512];
-  snprintf(configFilePath,512,"%scon.ini",configPath);
+  SDL_snprintf(configFilePath,512,"%scon.ini",configPath);
   FILE *configFile = fopen(configFilePath, "w");
 
   if(configFile != NULL){
     writeConfigFile(configFile,rules,state); //write the default configuration values
     fclose(configFile);
-    printf("Wrote preferences to configuration file (%s).\n",configFilePath);
+    SDL_Log("Wrote preferences to configuration file (%s).\n",configFilePath);
   }else{
-    printf("WARNING: Unable to write preferences to configuration file (%s)/.\n",configFilePath);
+    SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,"Unable to write preferences to configuration file (%s)/.\n",configFilePath);
   }
 }
 
 void updatePrefsFromConfigFile(const char *configPath, const app_rules *restrict rules, app_state *restrict state){
 
   char configFilePath[512];
-  snprintf(configFilePath,512,"%scon.ini",configPath);
+  SDL_snprintf(configFilePath,512,"%scon.ini",configPath);
   FILE *configFile = fopen(configFilePath, "r");
 
   if(configFile != NULL){
     readConfigFile(configFile,state); //read the configuration values
     fclose(configFile);
-    printf("Preferences read from configuration file (%s).\n",configFilePath);
+    SDL_Log("Preferences read from configuration file (%s).\n",configFilePath);
   }else{
-    printf("No configuration file present, making a new one.\n");
+    SDL_Log("No configuration file present, making a new one.\n");
     updateConfigFile(configPath,rules,state);
   }
 }

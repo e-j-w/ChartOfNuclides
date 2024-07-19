@@ -28,7 +28,7 @@ static unsigned int nameToAssetID(const char *name, const asset_mapping *restric
       return i;
     }
   }
-  printf("ERROR: could not find asset with name: %s\n",name);
+  SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"could not find asset with name: %s\n",name);
   exit(-1);
   return 0;
 }
@@ -63,15 +63,15 @@ static int parseAppRules(app_data *restrict dat, asset_mapping *restrict stringI
                   dat->rules.themeRules.bgCol.b = (float)atof(tok);
                   dat->rules.themeRules.bgCol.a = 1.0f;
                 }else{
-                  printf("ERROR: could not white_bg_col color string in file: %s.\n",filePath);
+                  SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"could not white_bg_col color string in file: %s.\n",filePath);
                   return -1;
                 }
               }else{
-                printf("ERROR: could not white_bg_col color string in file: %s.\n",filePath);
+                SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"could not white_bg_col color string in file: %s.\n",filePath);
                 return -1;
               }
             }else{
-              printf("ERROR: could not white_bg_col color string in file: %s.\n",filePath);
+              SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"could not white_bg_col color string in file: %s.\n",filePath);
               return -1;
             }
           }else if(SDL_strcmp(tok,"text_col") == 0){
@@ -88,15 +88,15 @@ static int parseAppRules(app_data *restrict dat, asset_mapping *restrict stringI
                   dat->rules.themeRules.textColNormal.b = (Uint8)floor(atof(tok)*255.0);
                   dat->rules.themeRules.textColNormal.a = 255;
                 }else{
-                  printf("ERROR: could not text_col color string in file: %s.\n",filePath);
+                  SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"could not text_col color string in file: %s.\n",filePath);
                   return -1;
                 }
               }else{
-                printf("ERROR: could not text_col color string in file: %s.\n",filePath);
+                SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"could not text_col color string in file: %s.\n",filePath);
                 return -1;
               }
             }else{
-              printf("ERROR: could not text_col color string in file: %s.\n",filePath);
+              SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"could not text_col color string in file: %s.\n",filePath);
               return -1;
             }
           }else if(SDL_strcmp(tok,"mod_col_normal") == 0){
@@ -113,15 +113,15 @@ static int parseAppRules(app_data *restrict dat, asset_mapping *restrict stringI
                   dat->rules.themeRules.modNormalCol.b = (float)atof(tok);
                   dat->rules.themeRules.modNormalCol.a = 1.0f;
                 }else{
-                  printf("ERROR: could not mod_col_normal color string in file: %s.\n",filePath);
+                  SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"could not mod_col_normal color string in file: %s.\n",filePath);
                   return -1;
                 }
               }else{
-                printf("ERROR: could not mod_col_normal color string in file: %s.\n",filePath);
+                SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"could not mod_col_normal color string in file: %s.\n",filePath);
                 return -1;
               }
             }else{
-              printf("ERROR: could not mod_col_normal color string in file: %s.\n",filePath);
+              SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"could not mod_col_normal color string in file: %s.\n",filePath);
               return -1;
             }
           }else if(SDL_strcmp(tok,"mod_col_mouseover") == 0){
@@ -138,15 +138,15 @@ static int parseAppRules(app_data *restrict dat, asset_mapping *restrict stringI
                   dat->rules.themeRules.modMouseOverCol.b = (float)atof(tok);
                   dat->rules.themeRules.modMouseOverCol.a = 1.0f;
                 }else{
-                  printf("ERROR: could not mod_col_mouseover color string in file: %s.\n",filePath);
+                  SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"could not mod_col_mouseover color string in file: %s.\n",filePath);
                   return -1;
                 }
               }else{
-                printf("ERROR: could not mod_col_mouseover color string in file: %s.\n",filePath);
+                SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"could not mod_col_mouseover color string in file: %s.\n",filePath);
                 return -1;
               }
             }else{
-              printf("ERROR: could not mod_col_mouseover color string in file: %s.\n",filePath);
+              SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"could not mod_col_mouseover color string in file: %s.\n",filePath);
               return -1;
             }
           }else if(SDL_strcmp(tok,"mod_col_selected") == 0){
@@ -163,26 +163,26 @@ static int parseAppRules(app_data *restrict dat, asset_mapping *restrict stringI
                   dat->rules.themeRules.modSelectedCol.b = (float)atof(tok);
                   dat->rules.themeRules.modSelectedCol.a = 1.0f;
                 }else{
-                  printf("ERROR: could not mod_col_selected color string in file: %s.\n",filePath);
+                  SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"could not mod_col_selected color string in file: %s.\n",filePath);
                   return -1;
                 }
               }else{
-                printf("ERROR: could not mod_col_selected color string in file: %s.\n",filePath);
+                SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"could not mod_col_selected color string in file: %s.\n",filePath);
                 return -1;
               }
             }else{
-              printf("ERROR: could not mod_col_selected color string in file: %s.\n",filePath);
+              SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"could not mod_col_selected color string in file: %s.\n",filePath);
               return -1;
             }
           }else{
-						printf("ERROR: unknown app rule (%s).\n",tok);
+						SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"unknown app rule (%s).\n",tok);
 						return -1;
 					}
         }
       }
     }
   }else{
-    printf("ERROR: cannot open file %s\n",filePath);
+    SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"cannot open file %s\n",filePath);
     return -1;
   }
   fclose(inp);
@@ -220,7 +220,7 @@ static int parseStrings(app_data *restrict dat, asset_mapping *restrict stringID
   SDL_snprintf(filePath,536,"%sdata/strings.txt",appBasePath); //open the string file
   inp = fopen(filePath, "r");
   if(inp!=NULL){
-    //printf("Opened file: %s\n",filePath);
+    //SDL_Log("Opened file: %s\n",filePath);
     while(!(feof(inp))){ //go until the end of file is reached
       if(fgets(str,256,inp)!=NULL){
         str[strcspn(str,"\r\n")] = 0; //strips newline characters from the string read by fgets
@@ -228,7 +228,7 @@ static int parseStrings(app_data *restrict dat, asset_mapping *restrict stringID
           tok = strtok(str,"|");
           if(tok!=NULL){
             if(dat->numStrings >= MAX_NUM_STRINGS){
-              printf("ERROR: maximum number of text strings reached, cannot parse file %s\n",filePath);
+              SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"maximum number of text strings reached, cannot parse file %s\n",filePath);
               return -1;
             }
             strncpy(stringIDmap->assetID[dat->numStrings],str,256);
@@ -236,14 +236,14 @@ static int parseStrings(app_data *restrict dat, asset_mapping *restrict stringID
             strncpy(dat->strings[dat->numStrings],tok,255);
             dat->numStrings++;
           }else{
-            printf("ERROR: improperly formatted string in file %s\n",filePath);
+            SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"improperly formatted string in file %s\n",filePath);
             return -1;
           }
         }
       }
     }
   }else{
-    printf("ERROR: cannot open file %s\n",filePath);
+    SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"cannot open file %s\n",filePath);
     return -1;
   }
   fclose(inp);
@@ -267,11 +267,11 @@ void parseHalfLife(level * lev, char * hlstring){
   hlAndUnitVal[10] = '\0'; //terminate string
   tok = strtok(hlAndUnitVal, " ");
   if(tok!=NULL){
-    //printf("%s\n",tok);
+    //SDL_Log("%s\n",tok);
     strcpy(hlVal,tok);
     tok = strtok(NULL, "");
     if(tok!=NULL){
-      //printf("%s\n",tok);
+      //SDL_Log("%s\n",tok);
       memcpy(hlUnitVal,tok,3);
       for(uint8_t i=0;i<3;i++){
         if(isspace(hlUnitVal[i])){
@@ -291,11 +291,11 @@ void parseHalfLife(level * lev, char * hlstring){
   lev->halfLife.format = 0;
   lev->halfLife.unit=VALUE_UNIT_NOVAL;
 
-  //printf("%s\n",hlstring);
-  //printf("hlVal = %s, hlUnitVal = %s, hlErrVal = %s\n",hlVal,hlUnitVal,hlErrVal);
+  //SDL_Log("%s\n",hlstring);
+  //SDL_Log("hlVal = %s, hlUnitVal = %s, hlErrVal = %s\n",hlVal,hlUnitVal,hlErrVal);
 
 	if(strcmp(hlVal,"")==0){
-    //printf("Couldn't parse half-life info from string: %s\n",hlstring);
+    //SDL_Log("Couldn't parse half-life info from string: %s\n",hlstring);
     return;
   }else if(strcmp(hlVal,"?")==0){
 		return; //no measured value
@@ -306,10 +306,10 @@ void parseHalfLife(level * lev, char * hlstring){
 		lev->halfLife.val = (float)atof(hlVal);
     tok = strtok(hlVal,".");
     if(tok!=NULL){
-      //printf("%s\n",tok);
+      //SDL_Log("%s\n",tok);
       tok = strtok(NULL,"E+");
       if(tok!=NULL){
-        //printf("%s\n",tok);
+        //SDL_Log("%s\n",tok);
         lev->halfLife.format = (uint16_t)strlen(tok);
         if(lev->halfLife.format > 15U){
           lev->halfLife.format = 15U; //only 4 bits available for precision
@@ -318,7 +318,7 @@ void parseHalfLife(level * lev, char * hlstring){
         if(tok!=NULL){
           //value was in exponent format
 					lev->halfLife.exponent = (int8_t)atoi(tok);
-					//printf("%s, parsed to %i\n",tok,lev->halfLife.exponent);
+					//SDL_Log("%s, parsed to %i\n",tok,lev->halfLife.exponent);
 					lev->halfLife.val = lev->halfLife.val / powf(10.0f,(float)(lev->halfLife.exponent));
           lev->halfLife.format |= (uint16_t)(1U << 4); //exponent flag
         }
@@ -329,7 +329,7 @@ void parseHalfLife(level * lev, char * hlstring){
           if(tok!=NULL){
             //value was in exponent format
             lev->halfLife.exponent = (int8_t)atoi(tok);
-						//printf("%s, parsed to %i\n",tok,lev->halfLife.exponent);
+						//SDL_Log("%s, parsed to %i\n",tok,lev->halfLife.exponent);
 						lev->halfLife.val = lev->halfLife.val / powf(10.0f,(float)(lev->halfLife.exponent));
 						lev->halfLife.format |= (uint16_t)(1U << 4); //exponent flag
           }
@@ -369,20 +369,20 @@ void parseHalfLife(level * lev, char * hlstring){
     }else if(strcmp(hlUnitVal,"MEV")==0){
       lev->halfLife.unit = VALUE_UNIT_MEV;
     }else{
-      printf("Unknown half-life unit: %s (full string: %s)\n",hlUnitVal,hlstring);
+      SDL_Log("Unknown half-life unit: %s (full string: %s)\n",hlUnitVal,hlstring);
     }
 
     
 		if(hlErrVal[0]=='+'){
 			//asymmetric errors
-			//printf("err: %s\n",hlErrVal);
+			//SDL_Log("err: %s\n",hlErrVal);
 			tok = strtok(hlErrVal, "-");
 			if(tok != NULL){
 				lev->halfLife.err = (uint8_t)atoi(tok); //positive error
 				tok = strtok(NULL, ""); //get rest of the string
 				if(tok!=NULL){
 					uint16_t negErr = ((uint16_t)atoi(tok) & 127U); //negative error
-					//printf("neg err: %u\n",negErr);
+					//SDL_Log("neg err: %u\n",negErr);
 					lev->halfLife.format |= (uint16_t)(VALUETYPE_ASYMERROR << 5);
 					lev->halfLife.format |= (uint16_t)(negErr << 9);
 				}
@@ -415,29 +415,30 @@ void parseHalfLife(level * lev, char * hlstring){
 }
 
 //parse spin parity values for a given level
-void parseSpinPar(level * lev, char * spstring){
+//varDat: contains spin variable data which is common to the entire nuclide
+void parseSpinPar(level * lev, sp_var_data * varDat, char * spstring){
 
 	char *tok;
 	char str[256], tmpstr[256], tmpstr2[256], val[MAXNUMPARSERVALS][256];
 	int numTok=0;
 
 	lev->numSpinParVals=0;
-	//printf("--------\nstring: %s\n",spstring);
+	//SDL_Log("--------\nstring: %s\n",spstring);
 
 	//check for invalid strings
 	strcpy(str,spstring);
 	tok = strtok(str, " ");
 	if(tok == NULL){
-		//printf("energy %f, strings: %s,%s\n",lev->energy,spstring,tok);
-		//printf("Not a valid spin-parity value.\n");
+		//SDL_Log("energy %f, strings: %s,%s\n",lev->energy,spstring,tok);
+		//SDL_Log("Not a valid spin-parity value.\n");
 		//getc(stdin);
 		return;
 	}
 	/*strcpy(str,spstring);
 	tok = strtok (str, ".");
 	if((tok == NULL)||(strcmp(tok,spstring)!=0)){
-		//printf("%s\n",tok);
-		//printf("Not a valid spin-parity value.\n");
+		//SDL_Log("%s\n",tok);
+		//SDL_Log("Not a valid spin-parity value.\n");
 		//getc(stdin);
 		return;
 	}*/
@@ -461,35 +462,29 @@ void parseSpinPar(level * lev, char * spstring){
 
 	
 
-	/*printf("string: %s, number of tokens: %i\n",spstring,numTok);
+	/*SDL_Log("string: %s, number of tokens: %i\n",spstring,numTok);
 	for(i=0;i<numTok;i++){
-		printf("| %s ",val[i]);
+		SDL_Log("| %s ",val[i]);
 	}
-	printf("\n");*/
+	SDL_Log("\n");*/
 
 	uint8_t tentative = TENTATIVE_NONE;
 	uint8_t flipTentAfter = 0;
 
 	if(numTok<=0){
 		return;
-	}else if(strcmp(val[0],"GE")==0){
-		lev->spval[lev->numSpinParVals].format = 0;
-		lev->spval[lev->numSpinParVals].tentative = TENTATIVE_GE;
-		lev->spval[lev->numSpinParVals].spinVal = (uint8_t)atoi(val[1]);
-		lev->numSpinParVals=1;
-		return;
 	}else if((strcmp(val[0],"+")==0)&&(numTok==1)){
 		lev->spval[lev->numSpinParVals].format = 0;
 		lev->spval[lev->numSpinParVals].parVal = 1;
 		lev->spval[lev->numSpinParVals].spinVal = 255;
-		lev->spval[lev->numSpinParVals].tentative = TENTATIVE_NOSPIN;
+		lev->spval[lev->numSpinParVals].format |= ((TENTATIVE_NOSPIN & 7U) << 9U);
 		lev->numSpinParVals=1;
 		return;
 	}else if((strcmp(val[0],"-")==0)&&(numTok==1)){
 		lev->spval[lev->numSpinParVals].format = 0;
 		lev->spval[lev->numSpinParVals].parVal = -1;
 		lev->spval[lev->numSpinParVals].spinVal = 255;
-		lev->spval[lev->numSpinParVals].tentative = TENTATIVE_NOSPIN;
+		lev->spval[lev->numSpinParVals].format |= ((TENTATIVE_NOSPIN & 7U) << 9U);
 		lev->numSpinParVals=1;
 		return;
 	}else{
@@ -499,30 +494,34 @@ void parseSpinPar(level * lev, char * spstring){
 				lev->spval[lev->numSpinParVals].format = 0;
 				uint8_t lsBrak = 0; //temp var for bracket checking
 				uint8_t rsBrak = 0; //temp var for bracket checking
+				uint8_t spVarNum = 255; //temp var for spin variable assignment
 
 				//special cases
 				if(strcmp(val[i],"TO")==0){
 					//specifies a range between the prior and next spin values
 					//eg. '3/2 TO 7/2'
-					lev->spval[lev->numSpinParVals].tentative = TENTATIVE_RANGE;
+					lev->spval[lev->numSpinParVals].format |= ((TENTATIVE_RANGE & 7U) << 9U);
 					lev->spval[lev->numSpinParVals].spinVal = 255;
 					lev->numSpinParVals++;
 					continue;
 				}else if(strcmp(val[i],"&")==0){
 					//equivalent to a comma 
 					continue;
+				}else if(strcmp(val[i],"AND")==0){
+					//equivalent to a comma 
+					continue;
 				}
 
 				//check for J+number variable spin case
-				/*uint8_t varSpin=0;
-				uint8_t varSpinPos=0;
-				for(int j=((int)strlen(val[i])-1); j>=1; j--){
+				uint8_t varSpin=0;
+				for(int j=((int)strlen(val[i])-1); j>=0; j--){
 					if(j<((int)strlen(val[i])-1)){
-						if(val[i][j]=='+'){
-							if(isdigit(val[i][j+1])){
-								varSpin=1;
-								varSpinPos=(uint8_t)i;
-								break;
+						if(j>0){
+							if(val[i][j]=='+'){
+								if(isdigit(val[i][j+1])){
+									varSpin=1;
+									break;
+								}
 							}
 						}
 					}
@@ -533,7 +532,7 @@ void parseSpinPar(level * lev, char * spstring){
 				if(varSpin){
 					//J or J+number variable spin value
 					lev->halfInt = 0;
-					printf("%s\n",val[i]);
+					//SDL_Log("%s\n",val[i]);
 					if(val[i][0] == '('){
 						lsBrak = 1;
 					}
@@ -542,18 +541,126 @@ void parseSpinPar(level * lev, char * spstring){
 						rsBrak = 1;
 					}
 					lev->spval[lev->numSpinParVals].format = 1;
-					tok = strtok(val[i],"+");
+					strcpy(tmpstr,val[i]);
+					tok = strtok(tmpstr,"(+");
 					if(tok!=NULL){
+						strcpy(tmpstr2,tok);
 						tok = strtok(NULL,")");
 						if(tok!=NULL){
+							//SDL_Log("variable name (with offset): %s\n",tmpstr2);
+							//check variable name
+							for(int j=0;j<(varDat->numSpVars);j++){
+								//SDL_Log("%i %s %s\n",j,tmpstr2,varDat->spVars[j]);
+								if(strcmp(tmpstr2,varDat->spVars[j])==0){
+									spVarNum = (uint8_t)j;
+									lev->spval[lev->numSpinParVals].format |= (VALUETYPE_NUMBER << 1U);
+									lev->spval[lev->numSpinParVals].format |= (spVarNum << 5U); //set variable index
+									//SDL_Log("variable index %u\n",spVarNum);
+								}
+							}
+							if(spVarNum == 255){
+								//SDL_Log("new variable found, index %u\n",varDat->numSpVars);
+								//couldn't match to a previous spin variable, make a new one
+								if(varDat->numSpVars < MAX_SPIN_VARS){
+									lev->spval[lev->numSpinParVals].format |= (VALUETYPE_NUMBER << 1U);
+									lev->spval[lev->numSpinParVals].format |= (varDat->numSpVars << 5U); //set variable index
+									strcpy(varDat->spVars[varDat->numSpVars],tmpstr2);
+									varDat->numSpVars++;
+								}else{
+									SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"parseSpinPar - too many spin variables could not parse value %s, need to increase MAX_SPIN_VARS!\n",val[i]);
+									exit(-1);
+								}
+							}
 							strcpy(val[i],tok); //for further parsing, only give spin value after + sign
 						}else{
 							//non-offset variable spin value
-							printf("non offset: %s\n",val[i]);
+							//SDL_Log("non offset: %s\n",tmpstr2);
+							//check for variable value types
+							char varValType[3];
+							uint8_t varValTypePos = 255;
+							for(int j=2;j<=((int)strlen(tmpstr2));j++){
+								memcpy(varValType, &tmpstr2[j-2], 2);
+								tmpstr2[2] = '\0';
+								if(strcmp(varValType,"GT")==0){
+									lev->spval[lev->numSpinParVals].format |= (VALUETYPE_GREATERTHAN << 1U);
+									varValTypePos = (uint8_t)(j-2);
+									break;
+								}else if(strcmp(varValType,"GE")==0){
+									lev->spval[lev->numSpinParVals].format |= (VALUETYPE_GREATEROREQUALTHAN << 1U);
+									varValTypePos = (uint8_t)(j-2);
+									break;
+								}else if(strcmp(varValType,"LT")==0){
+									lev->spval[lev->numSpinParVals].format |= (VALUETYPE_LESSTHAN << 1U);
+									varValTypePos = (uint8_t)(j-2);
+									break;
+								}else if(strcmp(varValType,"LE")==0){
+									lev->spval[lev->numSpinParVals].format |= (VALUETYPE_LESSOREQUALTHAN << 1U);
+									varValTypePos = (uint8_t)(j-2);
+									break;
+								}else if(strcmp(varValType,"AP")==0){
+									lev->spval[lev->numSpinParVals].format |= (VALUETYPE_APPROX << 1U);
+									varValTypePos = (uint8_t)(j-2);
+									break;
+								}
+							}
+							if(varValTypePos == 255){
+								//just a variable name
+								//SDL_Log("variable name (no offset, default value type): %s\n",tmpstr2);
+								lev->spval[lev->numSpinParVals].format |= (VALUETYPE_NUMBER << 1U);
+								for(int j=0;j<(varDat->numSpVars);j++){
+									if(strcmp(tmpstr2,varDat->spVars[j])==0){
+										spVarNum = (uint8_t)j;
+										lev->spval[lev->numSpinParVals].format |= (spVarNum << 5U); //set variable index
+										//SDL_Log("variable index %u\n",spVarNum);
+									}
+								}
+								if(spVarNum == 255){
+									//SDL_Log("new variable found, index %u\n",varDat->numSpVars);
+									//couldn't match to a previous spin variable, make a new one
+									if(varDat->numSpVars < MAX_SPIN_VARS){
+										lev->spval[lev->numSpinParVals].format |= (varDat->numSpVars << 5U); //set variable index
+										strcpy(varDat->spVars[varDat->numSpVars],tmpstr2);
+										varDat->numSpVars++;
+									}else{
+										SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"parseSpinPar - too many spin variables could not parse value %s, need to increase MAX_SPIN_VARS!\n",val[i]);
+										exit(-1);
+									}
+								}
+							}else if(varValTypePos >= 1){
+								//variable name specified before value type
+								if(varValTypePos<=16){
+									//get substring corresponding to variable name
+									char varName[16];
+									memcpy(varName,&tmpstr2,varValTypePos);
+									//SDL_Log("variable name (no offset, special value type): %s\n",varName);
+									//check variable name
+									for(int j=0;j<(varDat->numSpVars);j++){
+										if(strcmp(varName,varDat->spVars[j])==0){
+											spVarNum = (uint8_t)j;
+											lev->spval[lev->numSpinParVals].format |= (spVarNum << 5U); //set variable index
+										}
+									}
+									if(spVarNum == 255){
+										//SDL_Log("new variable found, index %u\n",varDat->numSpVars);
+										//couldn't match to a previous spin variable, make a new one
+										if(varDat->numSpVars < MAX_SPIN_VARS){
+											lev->spval[lev->numSpinParVals].format |= (varDat->numSpVars << 5U); //set variable index
+											strcpy(varDat->spVars[varDat->numSpVars],varName);
+											varDat->numSpVars++;
+										}else{
+											SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"parseSpinPar - too many spin variables could not parse value %s, need to increase MAX_SPIN_VARS!\n",val[i]);
+											exit(-1);
+										}
+									}
+								}
+							}
 						}
 					}
-					printf("%s\n",val[i]);
-				}*/
+					//SDL_Log("%s\n",val[i]);
+				}else{
+					//not a variable spin value
+					lev->spval[lev->numSpinParVals].format |= (VALUETYPE_NUMBER << 1U);
+				}
 
 				//check for brackets
 				strcpy(tmpstr,val[i]);
@@ -574,7 +681,7 @@ void parseSpinPar(level * lev, char * spstring){
 				}
 
 				if(flipTentAfter){
-					//printf("setting tentative marker...\n");
+					//SDL_Log("setting tentative marker...\n");
 					//tentative marker
 					if(tentative == TENTATIVE_NONE)
 						tentative = TENTATIVE_SPINANDPARITY;
@@ -596,7 +703,7 @@ void parseSpinPar(level * lev, char * spstring){
 				tok=strtok(tmpstr,"+-");
 				if(tok!=NULL){
 					if(strcmp(tok,val[i])!=0){
-						//printf("setting parity marker...\n");
+						//SDL_Log("setting parity marker...\n");
 						//contains parity info
 						tok=strtok(val[i],"/(0123456789, ");
 						if((strcmp(tok,"+")==0)||(strcmp(tok,"+)")==0)){
@@ -627,26 +734,26 @@ void parseSpinPar(level * lev, char * spstring){
 					strcpy(tmpstr2,tok);
 					tok=strtok(tok,"/");
 					if(strcmp(tok,tmpstr2)!=0){
-						//printf("Detected half-integer spin.\n");
+						//SDL_Log("Detected half-integer spin.\n");
 						if(atoi(tok) >= 255){
-							printf("WARNING: high spin value: %i/2\n",atoi(tok));
+							SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,"high spin value: %i/2\n",atoi(tok));
 						}
 						lev->spval[lev->numSpinParVals].spinVal=(uint8_t)atoi(tok);
 					}else{
 						if(atoi(tmpstr2) >= 255){
-							printf("WARNING: high spin value: %i\n",atoi(tmpstr2));
+							SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,"high spin value: %i\n",atoi(tmpstr2));
 						}
 						lev->spval[lev->numSpinParVals].spinVal=(uint8_t)atoi(tmpstr2);
 					}
 				}
 
-				lev->spval[lev->numSpinParVals].tentative = tentative;
+				lev->spval[lev->numSpinParVals].format |= ((tentative & 7U) << 9U);
 				lev->numSpinParVals++;
 
-				//printf("%f keV Entry %i: spin %i (half-int %i), parity %i, tentative %i\n",lev->energy,lev->numSpinParVals,lev->spval[lev->numSpinParVals-1].spinVal,lev->spval[lev->numSpinParVals-1].halfInt,lev->spval[lev->numSpinParVals-1].parVal,lev->spval[lev->numSpinParVals-1].tentative);
+				//SDL_Log("%f keV Entry %i: spin %i (half-int %i), parity %i, tentative %i\n",lev->energy,lev->numSpinParVals,lev->spval[lev->numSpinParVals-1].spinVal,lev->spval[lev->numSpinParVals-1].halfInt,lev->spval[lev->numSpinParVals-1].parVal,lev->spval[lev->numSpinParVals-1].tentative);
 			}
 		}
-		//printf("number of spin vals: %i\n",lev->numSpinParVals);
+		//SDL_Log("number of spin vals: %i\n",lev->numSpinParVals);
 		
 	}
 
@@ -968,6 +1075,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
   int tokPos;//position when tokenizing
   int firstQLine = 1; //flag to specify whether Q values have been read in for a specific nucleus
 	double longestIsomerHl = 0.0; //longest isomeric state half-life for a given nucleus
+	sp_var_data varDat;
   
   //subsection of the entry for a particular nucleus that the parser is at
   //each nucleus has multiple entries, including adopted gammas, and gammas 
@@ -977,7 +1085,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
   //open the file and read all parameters
   if((efile=fopen(filePath,"r"))==NULL){
     //file doesn't exist, and will be omitted from the database
-		//printf("WARNING: Cannot open the ENSDF file %s\n",filePath);
+		//SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,"Cannot open the ENSDF file %s\n",filePath);
 		return 0;
 	}
   while(!(feof(efile))){ //go until the end of file is reached
@@ -985,7 +1093,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 		if(fgets(str,256,efile)!=NULL){ //get an entire line
 
 			strcpy(line,str); //store the entire line
-			//printf("%s\n",line);
+			//SDL_Log("%s\n",line);
 			if(isEmpty(str)){
 				subSec++; //empty line, increment which subsection we're on
 				firstQLine = 1;
@@ -1016,12 +1124,13 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 					longestIsomerHl = 0.0;
 					nd->nuclData[nd->numNucl].longestIsomerLevel = MAXNUMLVLS;
 					nd->nuclData[nd->numNucl].abundance.unit = VALUE_UNIT_NOVAL; //default
-					//printf("Adding gamma data for nucleus %s\n",val[0]);
+					memset(&varDat,0,sizeof(sp_var_data));
+					//SDL_Log("Adding gamma data for nucleus %s\n",val[0]);
 					memcpy(nuclNameStr,val[0],10);
 					nuclNameStr[9] = '\0'; //terminate string
 					getNuclNZ(&nd->nuclData[nd->numNucl],nuclNameStr); //get N and Z
 					if((nd->nuclData[nd->numNucl].N > MAX_NEUTRON_NUM)||(nd->nuclData[nd->numNucl].Z > MAX_PROTON_NUM)){
-						printf("ERROR: parseENSDFFile - invalid proton (%i) or neutron (%i) number.\n",nd->nuclData[nd->numNucl].Z,nd->nuclData[nd->numNucl].N);
+						SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"parseENSDFFile - invalid proton (%i) or neutron (%i) number.\n",nd->nuclData[nd->numNucl].Z,nd->nuclData[nd->numNucl].N);
 						return -1;
 					}
 					//check for unobserved/inferred/tentative nuclei
@@ -1106,7 +1215,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 
 							//check for variables in level energy
 							if(isalpha(ebuff[levEStrLen-1])&&((levEStrLen==1) || ebuff[levEStrLen-2]==' ')){
-								//printf("X ebuff: %s\n",ebuff);
+								//SDL_Log("X ebuff: %s\n",ebuff);
 								nd->nuclData[nd->numNucl].numLevels++;
 								nd->numLvls++;
 								
@@ -1120,7 +1229,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 								
 							}else if((levEStartPos < 10)&&(isalpha(ebuff[levEStartPos]))&&(ebuff[levEStartPos+1]=='+')){
 								//level energy in X+number format
-								//printf("X+number ebuff: %s\n",ebuff);
+								//SDL_Log("X+number ebuff: %s\n",ebuff);
 								tok = strtok(ebuff,"+");
 								if(tok != NULL){
 									tok = strtok(NULL,""); //get the rest of the string
@@ -1137,7 +1246,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 								nd->levels[nd->numLvls-1].energy.format |= (uint16_t)(ebuff[levEStartPos] << 9);
 							}else if((levEStrLen > 1)&&(ebuff[levEStrLen-2]=='+')&&(isalpha(ebuff[levEStrLen-1]))){
 								//level energy in number+X format
-								//printf("number+X ebuff: %s\n",ebuff);
+								//SDL_Log("number+X ebuff: %s\n",ebuff);
 								tok = strtok(ebuff,"+");
 								if(tok != NULL){
 									levelE = (float)atof(tok);
@@ -1148,19 +1257,19 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 										nd->levels[nd->numLvls-1].energy.format = 0; //default
 										nd->levels[nd->numLvls-1].energy.format |= (uint16_t)(VALUETYPE_PLUSX << 5);
 										nd->levels[nd->numLvls-1].energy.format |= (uint16_t)(tok[0] << 9);
-										//printf("variable: %c\n",tok[0]);
+										//SDL_Log("variable: %c\n",tok[0]);
 									}
 								}
 								memcpy(ebuff, &line[9], 10); //re-constitute original buffer
 								ebuff[10] = '\0';
 							}else{
 								//normal level energy
-								//printf("normal ebuff: %s (length %u)\n",ebuff,levEStrLen);
+								//SDL_Log("normal ebuff: %s (length %u)\n",ebuff,levEStrLen);
 								levelE = (float)atof(ebuff);
 								nd->nuclData[nd->numNucl].numLevels++;
 								nd->numLvls++;
 								nd->levels[nd->numLvls-1].energy.format = 0; //default
-								//printf("Found level at %f keV from string: %s\n",(double)levelE,ebuff);
+								//SDL_Log("Found level at %f keV from string: %s\n",(double)levelE,ebuff);
 							}
 
 							if(nd->nuclData[nd->numNucl].numLevels == 1){
@@ -1169,14 +1278,14 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 
 							if(levelE >= 0.0f){
 								//get the number of sig figs in the level energy
-								//printf("ebuff: %s\n",ebuff);
+								//SDL_Log("ebuff: %s\n",ebuff);
 								tok = strtok(ebuff,".");
 								if(tok!=NULL){
-									//printf("%s\n",tok);
+									//SDL_Log("%s\n",tok);
 									tok = strtok(NULL,"E+"); //some level energies are specified with exponents, or relative to a variable (eg. 73.0+X)
 									if(tok!=NULL){
 										
-											//printf("%s\n",tok);
+											//SDL_Log("%s\n",tok);
 											uint16_t len = (uint16_t)strlen(tok);
 											//check for trailing empty spaces
 											for(uint16_t i=0;i<len;i++){
@@ -1186,11 +1295,11 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 												}
 											}
 											nd->levels[nd->numLvls-1].energy.format |= (uint16_t)(len & 15U);
-											//printf("format: %u\n",nd->levels[nd->numLvls-1].energy.format);
+											//SDL_Log("format: %u\n",nd->levels[nd->numLvls-1].energy.format);
 											if(((nd->levels[nd->numLvls-1].energy.format >> 5U) & 15U) != VALUETYPE_PLUSX){
 												tok = strtok(NULL,""); //get the remaining part of the string (only get past here if the value was expressed in exponent form)
 												if(tok!=NULL){
-													//printf("energy in exponent form: %s\n",ebuff);
+													//SDL_Log("energy in exponent form: %s\n",ebuff);
 													//value was in exponent format
 													nd->levels[nd->numLvls-1].energy.exponent = (int8_t)atoi(tok);
 													levelE = levelE / powf(10.0f,(float)(nd->levels[nd->numLvls-1].energy.exponent));
@@ -1202,11 +1311,11 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 										memcpy(ebuff, &line[9], 10); //re-copy buffer
 										ebuff[10] = '\0';
 										tok = strtok(ebuff,"E");
-										//printf("ebuff: %s\n",ebuff);
+										//SDL_Log("ebuff: %s\n",ebuff);
 										if(tok!=NULL){
 											tok = strtok(NULL,""); //get the remaining part of the string (only get past here if the value was expressed in exponent form)
 											if(tok!=NULL){
-												//printf("%s\n",tok);
+												//SDL_Log("%s\n",tok);
 												//value was in exponent format
 												nd->levels[nd->numLvls-1].energy.exponent = (int8_t)atoi(tok);
 												levelE = levelE / powf(10.0f,(float)(nd->levels[nd->numLvls-1].energy.exponent));
@@ -1246,13 +1355,13 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 							char spbuff[16];
 							memcpy(spbuff, &line[21], 15);
 							spbuff[15] = '\0';
-							//printf("%s\n",spbuff);
-							parseSpinPar(&nd->levels[nd->numLvls-1],spbuff);
+							//SDL_Log("%s\n",spbuff);
+							parseSpinPar(&nd->levels[nd->numLvls-1],&varDat,spbuff);
 							//parse the half-life information
 							char hlBuff[18];
 							memcpy(hlBuff, &line[39], 17);
 							hlBuff[17] = '\0';
-							//printf("%s\n",hlBuff);
+							//SDL_Log("%s\n",hlBuff);
 							parseHalfLife(&nd->levels[nd->numLvls-1],hlBuff);
 							//check isomerism
 							double en = getLevelEnergykeV(nd,nd->numLvls-1);
@@ -1260,7 +1369,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 								uint8_t hlValueType = (uint8_t)((nd->levels[nd->numLvls-1].halfLife.format >> 5U) & 15U);
 								if(!((hlValueType == VALUETYPE_LESSTHAN)||(hlValueType == VALUETYPE_LESSOREQUALTHAN))){
 									double hl = getLevelHalfLifeSeconds(nd,nd->numLvls-1);
-									//printf("hl: %f\n",hl);
+									//SDL_Log("hl: %f\n",hl);
 									if(hl >= 10.0E-9){
 										if(hl > longestIsomerHl){
 											longestIsomerHl = hl;
@@ -1290,7 +1399,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 						if(strcmp(typebuff+1," L")==0){
 							//parse decay mode info
 							//search for first decay string
-							//printf("%s\n",line);
+							//SDL_Log("%s\n",line);
 							uint8_t decStrStart = 9;
 							for(uint8_t i=9;i<70;i++){
 								if(line[i]=='%'){
@@ -1300,14 +1409,14 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 							}
 							if(line[decStrStart]=='%'){
 								//line contains decay mode info
-								//printf("dec mode found: %s\n",line);
+								//SDL_Log("dec mode found: %s\n",line);
 								uint8_t decModCtr = 0;
 								char dmBuff[128], valBuff[16];
 								memcpy(dmBuff, &line[decStrStart], 127-decStrStart);
 								dmBuff[127-decStrStart] = '\0';
 								tok = strtok(dmBuff," =");
 								while(tok!=NULL){
-									//printf("tok at start: %s\n",tok);
+									//SDL_Log("tok at start: %s\n",tok);
 									if(strcmp(tok,"%IT")==0){
 										nd->dcyMode[nd->numDecModes].type = DECAYMODE_IT;
 									}else if(strcmp(tok,"%B-")==0){
@@ -1367,15 +1476,12 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 									}
 									tok = strtok(NULL,"$");
 									if(tok!=NULL){
-										//printf("tok: %s\n",tok);
+										//SDL_Log("tok: %s\n",tok);
 										strncpy(valBuff,tok,15);
 										tok2 = strtok(valBuff," ");
 										if(tok2 != NULL){
-											//printf("tok2: %s\n",tok2);
+											//SDL_Log("tok2: %s\n",tok2);
 											if(strcmp(tok2,"GT")==0){
-												nd->dcyMode[nd->numDecModes].prob.unit = VALUETYPE_GREATERTHAN;
-												tok2 = strtok(NULL," ");
-											}else if(strcmp(tok2,"GT")==0){
 												nd->dcyMode[nd->numDecModes].prob.unit = VALUETYPE_GREATERTHAN;
 												tok2 = strtok(NULL," ");
 											}else if(strcmp(tok2,"GE")==0){
@@ -1397,31 +1503,31 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 											if(tok2!=NULL){
 												char value[16];
 												strncpy(value,tok2,15);
-												//printf("%s\n",tok2);
+												//SDL_Log("%s\n",tok2);
 												nd->dcyMode[nd->numDecModes].prob.val = (float)atof(tok2);
 												tok2 = strtok(NULL,""); //get the rest of the string
 												if(tok2 != NULL){
-													//printf("%s\n",tok2);
+													//SDL_Log("%s\n",tok2);
 													nd->dcyMode[nd->numDecModes].prob.err = (uint8_t)atoi(tok2);
 												}
 												nd->dcyMode[nd->numDecModes].prob.format = 0;
 												tok2 = strtok(value,".");
 												if(tok2!=NULL){
-													//printf("tok2: %s\n",tok2);
+													//SDL_Log("tok2: %s\n",tok2);
 													tok2 = strtok(NULL,"");
 													if(tok2!=NULL){
-														//printf("tok2: %s\n",tok2);
+														//SDL_Log("tok2: %s\n",tok2);
 														nd->dcyMode[nd->numDecModes].prob.format = (uint16_t)strlen(tok2);
 														if(nd->dcyMode[nd->numDecModes].prob.format > 15U){
 															nd->dcyMode[nd->numDecModes].prob.format = 15U; //only 4 bits available for precision
 														}
 													}
-													//printf("format: %u\n",nd->dcyMode[nd->numDecModes].prob.format);
+													//SDL_Log("format: %u\n",nd->dcyMode[nd->numDecModes].prob.format);
 												}
 											}
 										}
 										
-										//printf("Found decay with type %u and probability: %f %u (type %u)\n",nd->dcyMode[nd->numDecModes].type,(double)nd->dcyMode[nd->numDecModes].prob,nd->dcyMode[nd->numDecModes].prob.err,nd->dcyMode[nd->numDecModes].prob.unit);
+										//SDL_Log("Found decay with type %u and probability: %f %u (type %u)\n",nd->dcyMode[nd->numDecModes].type,(double)nd->dcyMode[nd->numDecModes].prob,nd->dcyMode[nd->numDecModes].prob.err,nd->dcyMode[nd->numDecModes].prob.unit);
 										nd->levels[nd->numLvls-1].numDecModes++;
 										nd->numDecModes++;
 										decModCtr++;
@@ -1431,12 +1537,12 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 										tok = strtok(dmBuff,"$");
 										for(uint8_t i=0;i<(decModCtr-1);i++){
 											if(tok!=NULL){
-												//printf("tok %u: %s\n",i,tok);
+												//SDL_Log("tok %u: %s\n",i,tok);
 												tok = strtok(NULL,"$");
 											}
 										}
 										if(tok!=NULL){
-											//printf("tok: %s\n",tok);
+											//SDL_Log("tok: %s\n",tok);
 											tok = strtok(NULL," =");
 										}
 									}
@@ -1477,13 +1583,13 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 								float gammaE = (float)atof(ebuff);
 								//get the number of sig figs
 								nd->tran[(int)(nd->levels[nd->numLvls-1].firstTran) + nd->levels[nd->numLvls-1].numTran].energy.format = 0; //default
-								//printf("ebuff: %s\n",ebuff);
+								//SDL_Log("ebuff: %s\n",ebuff);
 								tok = strtok(ebuff,".");
 								if(tok!=NULL){
-									//printf("%s\n",tok);
+									//SDL_Log("%s\n",tok);
 									tok = strtok(NULL,"E"); //some gamma energies are specified with exponents
 									if(tok!=NULL){
-										//printf("%s\n",tok);
+										//SDL_Log("%s\n",tok);
 										nd->tran[(int)(nd->levels[nd->numLvls-1].firstTran) + nd->levels[nd->numLvls-1].numTran].energy.format = (uint16_t)strlen(tok);
 										//check for trailing empty spaces
 										for(uint8_t i=0;i<nd->tran[(int)(nd->levels[nd->numLvls-1].firstTran) + nd->levels[nd->numLvls-1].numTran].energy.format;i++){
@@ -1495,10 +1601,10 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 										if(nd->tran[(int)(nd->levels[nd->numLvls-1].firstTran) + nd->levels[nd->numLvls-1].numTran].energy.format > 15U){
 											nd->tran[(int)(nd->levels[nd->numLvls-1].firstTran) + nd->levels[nd->numLvls-1].numTran].energy.format = 15U; //only 4 bits available for precision
 										}
-										//printf("format: %u\n",nd->tran[(int)(nd->levels[nd->numLvls-1].firstTran) + nd->levels[nd->numLvls-1].numTran].energy.format);
+										//SDL_Log("format: %u\n",nd->tran[(int)(nd->levels[nd->numLvls-1].firstTran) + nd->levels[nd->numLvls-1].numTran].energy.format);
 										tok = strtok(NULL,""); //get the remaining part of the string (only get past here if the value was expressed in exponent form)
 										if(tok!=NULL){
-											//printf("energy in exponent form: %s\n",ebuff);
+											//SDL_Log("energy in exponent form: %s\n",ebuff);
 											//value was in exponent format
 											nd->tran[(int)(nd->levels[nd->numLvls-1].firstTran) + nd->levels[nd->numLvls-1].numTran].energy.exponent = (int8_t)atoi(tok);
 											gammaE = gammaE / powf(10.0f,(float)(nd->tran[(int)(nd->levels[nd->numLvls-1].firstTran) + nd->levels[nd->numLvls-1].numTran].energy.exponent));
@@ -1510,11 +1616,11 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 									memcpy(ebuff, &line[9], 10); //re-copy buffer
 									ebuff[10] = '\0';
 									tok = strtok(ebuff,"E");
-									//printf("ebuff: %s\n",ebuff);
+									//SDL_Log("ebuff: %s\n",ebuff);
 									if(tok!=NULL){
 										tok = strtok(NULL,""); //get the remaining part of the string (only get past here if the value was expressed in exponent form)
 										if(tok!=NULL){
-											//printf("%s\n",tok);
+											//SDL_Log("%s\n",tok);
 											//value was in exponent format
 											nd->tran[(int)(nd->levels[nd->numLvls-1].firstTran) + nd->levels[nd->numLvls-1].numTran].energy.exponent = (int8_t)atoi(tok);
 											gammaE = gammaE / powf(10.0f,(float)(nd->tran[(int)(nd->levels[nd->numLvls-1].firstTran) + nd->levels[nd->numLvls-1].numTran].energy.exponent));
@@ -1564,7 +1670,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 											minEDiff = eDiff;
 											nd->tran[(int)(nd->levels[nd->numLvls-1].firstTran) + nd->levels[nd->numLvls-1].numTran].finalLvlOffset = (uint8_t)((nd->numLvls-1) - lvlInd);
 										}
-										//printf("finalLvlOffset: %u\n",nd->tran[(int)(nd->levels[nd->numLvls-1].firstTran) + nd->levels[nd->numLvls-1].numTran].finalLvlOffset);
+										//SDL_Log("finalLvlOffset: %u\n",nd->tran[(int)(nd->levels[nd->numLvls-1].firstTran) + nd->levels[nd->numLvls-1].numTran].finalLvlOffset);
 									}
 								}
 
@@ -1572,13 +1678,13 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 								float gammaI = (float)atof(iBuff);
 								//get the number of sig figs
 								nd->tran[(int)(nd->levels[nd->numLvls-1].firstTran) + nd->levels[nd->numLvls-1].numTran].intensity.format = 0; //default
-								//printf("ebuff: %s\n",ebuff);
+								//SDL_Log("ebuff: %s\n",ebuff);
 								tok = strtok(iBuff,".");
 								if(tok!=NULL){
-									//printf("%s\n",tok);
+									//SDL_Log("%s\n",tok);
 									tok = strtok(NULL,"E"); //some gamma energies are specified with exponents
 									if(tok!=NULL){
-										//printf("%s\n",tok);
+										//SDL_Log("%s\n",tok);
 										nd->tran[(int)(nd->levels[nd->numLvls-1].firstTran) + nd->levels[nd->numLvls-1].numTran].intensity.format = (uint16_t)strlen(tok);
 										//check for trailing empty spaces
 										for(uint8_t i=0;i<nd->tran[(int)(nd->levels[nd->numLvls-1].firstTran) + nd->levels[nd->numLvls-1].numTran].intensity.format;i++){
@@ -1590,10 +1696,10 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 										if(nd->tran[(int)(nd->levels[nd->numLvls-1].firstTran) + nd->levels[nd->numLvls-1].numTran].intensity.format > 15U){
 											nd->tran[(int)(nd->levels[nd->numLvls-1].firstTran) + nd->levels[nd->numLvls-1].numTran].intensity.format = 15U; //only 4 bits available for precision
 										}
-										//printf("format: %u\n",nd->tran[(int)(nd->levels[nd->numLvls-1].firstTran) + nd->levels[nd->numLvls-1].numTran].intensity.format);
+										//SDL_Log("format: %u\n",nd->tran[(int)(nd->levels[nd->numLvls-1].firstTran) + nd->levels[nd->numLvls-1].numTran].intensity.format);
 										tok = strtok(NULL,""); //get the remaining part of the string (only get past here if the value was expressed in exponent form)
 										if(tok!=NULL){
-											//printf("energy in exponent form: %s\n",ebuff);
+											//SDL_Log("energy in exponent form: %s\n",ebuff);
 											//value was in exponent format
 											nd->tran[(int)(nd->levels[nd->numLvls-1].firstTran) + nd->levels[nd->numLvls-1].numTran].intensity.exponent = (int8_t)atoi(tok);
 											gammaI = gammaI / powf(10.0f,(float)(nd->tran[(int)(nd->levels[nd->numLvls-1].firstTran) + nd->levels[nd->numLvls-1].numTran].intensity.exponent));
@@ -1677,11 +1783,11 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 	fclose(efile);
 	
 	if(nd->numNucl>=MAXNUMNUCL){
-		printf("ERROR: Attempted to import data for too many nuclei.  Increase the value of MAXNUMNUCL in levelup.h\n");
+		SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"Attempted to import data for too many nuclei.  Increase the value of MAXNUMNUCL in levelup.h\n");
 		return -1;
 	}
 	
-	printf("Finished reading ENSDF file: %s\n",filePath);
+	SDL_Log("Finished reading ENSDF file: %s\n",filePath);
   return 0;
 }
 
@@ -1701,7 +1807,7 @@ int parseAbundanceData(const char * filePath, ndata * nd){
   
   //open the file and read all parameters
   if((afile=fopen(filePath,"r"))==NULL){
-		printf("ERROR: Cannot open the abundance data file %s\n",filePath);
+		SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"Cannot open the abundance data file %s\n",filePath);
 		return -1;
 	}
   while(!(feof(afile))){ //go until the end of file is reached
@@ -1709,7 +1815,7 @@ int parseAbundanceData(const char * filePath, ndata * nd){
 		if(fgets(str,256,afile)!=NULL){ //get an entire line
 
 			strcpy(line,str); //store the entire line
-			//printf("%s\n",line);
+			//SDL_Log("%s\n",line);
 
 			//tokenize
 			tok=strtok(str,"=");
@@ -1747,7 +1853,7 @@ int parseAbundanceData(const char * filePath, ndata * nd){
 							if(tok!=NULL){
 								nd->nuclData[nuclInd].abundance.err = (uint8_t)atoi(tok);
 								nd->nuclData[nuclInd].abundance.unit = VALUE_UNIT_PERCENT;
-								//printf("Abundance for N,Z = [%i %i]: %.*f %u\n",N,Z,nd->nuclData[nuclInd].abundance.format,(double)nd->nuclData[nuclInd].abundance.val,nd->nuclData[nuclInd].abundance.err);
+								//SDL_Log("Abundance for N,Z = [%i %i]: %.*f %u\n",N,Z,nd->nuclData[nuclInd].abundance.format,(double)nd->nuclData[nuclInd].abundance.val,nd->nuclData[nuclInd].abundance.err);
 							}else{
 								//check special cases
 								if(atoi(val[1])==1){
@@ -1767,7 +1873,7 @@ int parseAbundanceData(const char * filePath, ndata * nd){
 	}
 	fclose(afile);
 	
-	printf("Finished reading abundance data file: %s\n",filePath);
+	SDL_Log("Finished reading abundance data file: %s\n",filePath);
   return 0;
 }
 
@@ -1794,7 +1900,7 @@ int buildDatabase(const char *appBasePath, ndata *nd){
       return -1;
     }
 	}
-	printf("Data imported for %i nuclei, containing %u levels, %u transitions, and %u decay branches.\n",nd->numNucl,nd->numLvls,nd->numTran,nd->numDecModes);
+	SDL_Log("Data imported for %i nuclei, containing %u levels, %u transitions, and %u decay branches.\n",nd->numNucl,nd->numLvls,nd->numTran,nd->numDecModes);
 	
 	//parse abundance data file
 	strcpy(filePath,"");
@@ -1810,9 +1916,9 @@ int buildDatabase(const char *appBasePath, ndata *nd){
     for(uint16_t j=0; j<nd->nuclData[i].numLevels; j++){
       double hl = getNuclLevelHalfLifeSeconds(nd,i,j);
       if(hl >= -1.0){
-        //if(j!=0) printf("GS ind for nucleus %u: %u\n",i,j);
+        //if(j!=0) SDL_Log("GS ind for nucleus %u: %u\n",i,j);
         if(j>255){
-          printf("WARNING: GS level index for nuclide %u is too high (%u).\n",i,j);
+          SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,"GS level index for nuclide %u is too high (%u).\n",i,j);
           nd->nuclData[i].gsLevel = 0;
         }else{
           nd->nuclData[i].gsLevel = (uint8_t)j;
@@ -1824,10 +1930,10 @@ int buildDatabase(const char *appBasePath, ndata *nd){
 
 	//write the database to disk
 	if(nd->numNucl<=0){
-    printf("ERROR: no valid ENSDF data was found.\nPlease check that ENSDF files exist in the directory under the ENDSF environment variable.\n");
+    SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"no valid ENSDF data was found.\nPlease check that ENSDF files exist in the directory under the ENDSF environment variable.\n");
     return -1;
   }
-	printf("Database build finished.\n");
+	SDL_Log("Database build finished.\n");
 	return 0;
 }
 
@@ -1836,7 +1942,13 @@ int parseAppData(app_data *restrict dat, const char *appBasePath){
 
   //check validity of data format
   if(VALUETYPE_ENUM_LENGTH > /* DISABLES CODE */ (16)){
-    printf("ERROR: VALUETYPE_ENUM_LENGTH is too long, can't store as 4 bits in a bit pattern (eg. level->halfLife.format).\n");
+    SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"VALUETYPE_ENUM_LENGTH is too long, can't store as 4 bits in a bit pattern (eg. level->halfLife.format).\n");
+    return -1;
+  }else if(MAX_SPIN_VARS > /* DISABLES CODE */ (32)){
+    SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"MAX_SPIN_VARS is too large, can't store as 5 bits in a bit pattern (eg. spinparval->format).\n");
+    return -1;
+  }else if(TENTATIVE_ENUM_LENGTH > /* DISABLES CODE */ (8)){
+    SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"TENTATIVE_ENUM_LENGTH is too large, can't store as 3 bits in a bit pattern (eg. spinparval->format).\n");
     return -1;
   }
 
@@ -1853,8 +1965,8 @@ int parseAppData(app_data *restrict dat, const char *appBasePath){
   if(buildDatabase(appBasePath,&dat->ndat)==-1) return -1;
 
   //summarize
-  printf("Data parsing complete.\n");
-  printf("  Number of text strings parsed:               %4i (%4i max)\n",dat->numStrings,MAX_NUM_STRINGS);
+  SDL_Log("Data parsing complete.\n");
+  SDL_Log("  Number of text strings parsed:               %4i (%4i max)\n",dat->numStrings,MAX_NUM_STRINGS);
 
   return 0; //success
   

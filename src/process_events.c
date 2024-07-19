@@ -22,7 +22,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include "gui_constants.h" //to compute mouse/pointer interactions
 
 void fcScrollAction(app_state *restrict state, const float deltaVal){
-  //printf("scroll delta: %f\n",(double)deltaVal);
+  //SDL_Log("scroll delta: %f\n",(double)deltaVal);
   state->ds.nuclFullInfoScrollStartY = state->ds.nuclFullInfoScrollY;
   state->ds.nuclFullInfoScrollToY = state->ds.nuclFullInfoScrollY - 1.0f*state->scrollSpeedMultiplier*deltaVal;
   if(state->ds.nuclFullInfoScrollToY < 0.0f){
@@ -33,7 +33,7 @@ void fcScrollAction(app_state *restrict state, const float deltaVal){
   state->ds.timeSinceFCScollStart = 0.0f;
   state->ds.fcScrollInProgress = 1;
   state->ds.fcScrollFinished = 0;
-  //printf("scroll pos: %f, scroll to: %f\n",(double)state->ds.nuclFullInfoScrollY,(double)state->ds.nuclFullInfoScrollToY);
+  //SDL_Log("scroll pos: %f, scroll to: %f\n",(double)state->ds.nuclFullInfoScrollY,(double)state->ds.nuclFullInfoScrollToY);
 }
 
 void processInputFlags(app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat){
@@ -47,7 +47,7 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
     uint32_t down = (state->inputFlags & (1U << INPUT_DOWN));
     uint32_t left = (state->inputFlags & (1U << INPUT_LEFT));
     uint32_t right = (state->inputFlags & (1U << INPUT_RIGHT));
-    //printf("dir: [%u %u %u %u]\n",!(up==0),!(down==0),!(left==0),!(right==0));
+    //SDL_Log("dir: [%u %u %u %u]\n",!(up==0),!(down==0),!(left==0),!(right==0));
     
     if(left || right || up || down){
       if(left && !right){
@@ -93,7 +93,7 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
         state->ds.totalPanTime = CHART_KEY_PAN_TIME;
         state->ds.panInProgress = 1;
         state->ds.panFinished = 0;
-        //printf("pan start: [%0.2f %0.2f], pan to: [%0.2f %0.2f]\n",(double)state->ds.chartPanStartX,(double)state->ds.chartPanStartY,(double)state->ds.chartPanToX,(double)state->ds.chartPanToY);
+        //SDL_Log("pan start: [%0.2f %0.2f], pan to: [%0.2f %0.2f]\n",(double)state->ds.chartPanStartX,(double)state->ds.chartPanStartY,(double)state->ds.chartPanToX,(double)state->ds.chartPanToY);
       }else if(down && !up){
         state->ds.chartPanStartX = state->ds.chartPosX;
         state->ds.chartPanStartY = state->ds.chartPosY;
@@ -148,7 +148,7 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
         }
         if((state->mouseXPx >= state->ds.uiElemPosX[i])&&(state->mouseXPx < (state->ds.uiElemPosX[i]+state->ds.uiElemWidth[i]))&&(state->mouseYPx >= state->ds.uiElemPosY[i])&&(state->mouseYPx < (state->ds.uiElemPosY[i]+state->ds.uiElemHeight[i]))){
           state->mouseoverElement = i;
-          //printf("mouseover element: %u\n",i);
+          //SDL_Log("mouseover element: %u\n",i);
           if((state->mouseClickPosXPx >= state->ds.uiElemPosX[i])&&(state->mouseClickPosXPx < (state->ds.uiElemPosX[i]+state->ds.uiElemWidth[i]))&&(state->mouseClickPosYPx >= state->ds.uiElemPosY[i])&&(state->mouseClickPosYPx < (state->ds.uiElemPosY[i]+state->ds.uiElemHeight[i]))){
             //take action
             uiElemClickAction(dat,state,0,i);
@@ -166,7 +166,7 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
       state->ds.chartDragStartMouseX = state->mouseXPx;
       state->ds.chartDragStartMouseY = state->mouseYPx;
       state->ds.dragInProgress = 1;
-      //printf("start drag\n");
+      //SDL_Log("start drag\n");
     }
   }
 
@@ -179,7 +179,7 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
 
   //only get here if no button was clicked
   //check if a click was made outside of any button
-  //printf("click pos x: %f, drag start: [%f %f]\n",(double)state->mouseClickPosXPx,(double)state->ds.chartDragStartMouseX,(double)state->ds.chartDragStartMouseY);
+  //SDL_Log("click pos x: %f, drag start: [%f %f]\n",(double)state->mouseClickPosXPx,(double)state->ds.chartDragStartMouseX,(double)state->ds.chartDragStartMouseY);
   if((state->mouseClickPosXPx >= 0.0f) && (fabsf(state->ds.chartDragStartMouseX - state->mouseXPx) < 5.0f) && (fabsf(state->ds.chartDragStartMouseY - state->mouseYPx) < 5.0f) ){
     //unclick (or click on chart view)
     if(doubleClick){
@@ -244,13 +244,13 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
         }else if(state->ds.chartZoomToY < 0.0f){
           state->ds.chartZoomToY = 0.0f;
         }
-        //printf("xZoomFrac: %0.3f, afterZoomMinN: %0.3f\n",(double)state->ds.chartZoomStartMouseXFrac,(double)afterZoomMinN);
-        //printf("yZoomFrac: %0.3f, afterZoomMinZ: %0.3f\n",(double)state->ds.chartZoomStartMouseYFrac,(double)afterZoomMinZ);
+        //SDL_Log("xZoomFrac: %0.3f, afterZoomMinN: %0.3f\n",(double)state->ds.chartZoomStartMouseXFrac,(double)afterZoomMinN);
+        //SDL_Log("yZoomFrac: %0.3f, afterZoomMinZ: %0.3f\n",(double)state->ds.chartZoomStartMouseYFrac,(double)afterZoomMinZ);
         state->ds.timeSinceZoomStart = 0.0f;
         state->ds.zoomInProgress = 1;
         state->ds.zoomFinished = 0;
       }
-      //printf("scale: %0.2f\n",(double)state->ds.chartZoomScale);
+      //SDL_Log("scale: %0.2f\n",(double)state->ds.chartZoomScale);
     }else if(state->uiState == UISTATE_FULLLEVELINFO){
       fcScrollAction(state,state->zoomDeltaVal*2.0f);
     }
@@ -271,7 +271,7 @@ void processSingleEvent(app_data *restrict dat, app_state *restrict state, resou
     case SDL_EVENT_GAMEPAD_ADDED:
       //setup the gamepad
       if(state->gamepadDisabled == 0){
-        printf("Gamepad added.\n");
+        SDL_Log("Gamepad added.\n");
         rdat->gamepad = NULL;
         int num_joysticks;
         SDL_JoystickID *joysticks = SDL_GetJoysticks(&num_joysticks);
@@ -281,14 +281,14 @@ void processSingleEvent(app_data *restrict dat, app_state *restrict state, resou
             if(rdat->gamepad){
               break;
             }else{
-              printf("WARNING: Could not open game gamepad %i: %s\n", i, SDL_GetError());
+              SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,"Could not open game gamepad %i: %s\n", i, SDL_GetError());
             }
           }
         }
       }
       break;
     case SDL_EVENT_GAMEPAD_REMOVED:
-      printf("Gamepad removed.\n");
+      SDL_Log("Gamepad removed.\n");
       break;
     case SDL_EVENT_GAMEPAD_BUTTON_DOWN:
       state->lastInputType = INPUT_TYPE_GAMEPAD; //set gamepad input
@@ -298,13 +298,13 @@ void processSingleEvent(app_data *restrict dat, app_state *restrict state, resou
       if(state->lastInputType != INPUT_TYPE_MOUSE){
         state->lastInputType = INPUT_TYPE_MOUSE; //set mouse input
       }
-      //printf("Mouse position: %i %i\n",*mouseX,*mouseY);
+      //SDL_Log("Mouse position: %i %i\n",*mouseX,*mouseY);
       break;
     case SDL_EVENT_MOUSE_BUTTON_DOWN:
       state->lastInputType = INPUT_TYPE_MOUSE; //set mouse input
       switch(evt.button.button){
         case SDL_BUTTON_LEFT:
-          //printf("Left mouse button down.\n");
+          //SDL_Log("Left mouse button down.\n");
           SDL_GetMouseState(&state->mouseXPx,&state->mouseYPx); //update mouse position
           state->mouseHoldStartPosXPx = state->mouseXPx;
           state->mouseHoldStartPosYPx = state->mouseYPx;
@@ -322,13 +322,13 @@ void processSingleEvent(app_data *restrict dat, app_state *restrict state, resou
           state->mouseClickPosXPx = state->mouseXPx;
           state->mouseClickPosYPx = state->mouseYPx;
           if(evt.button.clicks > 1){
-            //printf("Double click.\n");
+            //SDL_Log("Double click.\n");
             state->inputFlags |= (1U << INPUT_DOUBLECLICK);
           }
-          //printf("Left mouse button up.\n");
+          //SDL_Log("Left mouse button up.\n");
           break;
         case SDL_BUTTON_RIGHT:
-          //printf("Right mouse button up.\n");
+          //SDL_Log("Right mouse button up.\n");
           break;
         default:
           break;
@@ -338,21 +338,21 @@ void processSingleEvent(app_data *restrict dat, app_state *restrict state, resou
       state->lastInputType = INPUT_TYPE_MOUSE; //set mouse input
       if(evt.wheel.direction == SDL_MOUSEWHEEL_NORMAL){
         if(evt.wheel.y > 0){
-          //printf("Mouse wheel up %0.3f.\n",(double)evt.wheel.y);
+          //SDL_Log("Mouse wheel up %0.3f.\n",(double)evt.wheel.y);
           state->zoomDeltaVal = evt.wheel.y;
           state->inputFlags |= (1U << INPUT_ZOOM);
         }else if(evt.wheel.y < 0){
-          //printf("Mouse wheel down %0.3f.\n",(double)evt.wheel.y);
+          //SDL_Log("Mouse wheel down %0.3f.\n",(double)evt.wheel.y);
           state->zoomDeltaVal = evt.wheel.y;
           state->inputFlags |= (1U << INPUT_ZOOM);
         }
       }else{
         if(evt.wheel.y > 0){
-          //printf("Mouse wheel down %0.3f.\n",(double)evt.wheel.y);
+          //SDL_Log("Mouse wheel down %0.3f.\n",(double)evt.wheel.y);
           state->zoomDeltaVal = evt.wheel.y;
           state->inputFlags |= (1U << INPUT_ZOOM);
         }else if(evt.wheel.y < 0){
-          //printf("Mouse wheel up %0.3f.\n",(double)evt.wheel.y);
+          //SDL_Log("Mouse wheel up %0.3f.\n",(double)evt.wheel.y);
           state->zoomDeltaVal = evt.wheel.y;
           state->inputFlags |= (1U << INPUT_ZOOM);
         }
@@ -437,24 +437,24 @@ void processSingleEvent(app_data *restrict dat, app_state *restrict state, resou
       break;
     //analog stick control
     case SDL_EVENT_GAMEPAD_AXIS_MOTION: //gamepad axis, use large values to account for deadzone
-      //printf("axis: %i, val: %i, dz: %i\n",evt.gaxis.axis,evt.gaxis.value,state->gamepadDeadzone);
+      //SDL_Log("axis: %i, val: %i, dz: %i\n",evt.gaxis.axis,evt.gaxis.value,state->gamepadDeadzone);
       //evtCnt++;
       switch(evt.gaxis.axis){
         case SDL_GAMEPAD_AXIS_LEFTX:
         case SDL_GAMEPAD_AXIS_RIGHTX:
           if(evt.gaxis.value > state->gamepadDeadzone){
             state->lastInputType = INPUT_TYPE_GAMEPAD; //set gamepad input
-            printf("Gamepad right.\n");
+            SDL_Log("Gamepad right.\n");
             if(state->lastAxisValX==0){
-              printf("Gamepad right once.\n");
+              SDL_Log("Gamepad right once.\n");
             }
             state->lastAxisValX = evt.gaxis.value;
             state->activeAxis = evt.gaxis.axis;
           }else if(evt.gaxis.value < -1*state->gamepadDeadzone){
             state->lastInputType = INPUT_TYPE_GAMEPAD; //set gamepad input
-            printf("Gamepad left.\n");
+            SDL_Log("Gamepad left.\n");
             if(state->lastAxisValX==0){
-              printf("Gamepad left once.\n");
+              SDL_Log("Gamepad left once.\n");
             }
             state->lastAxisValX = evt.gaxis.value;
             state->activeAxis = evt.gaxis.axis;
@@ -466,17 +466,17 @@ void processSingleEvent(app_data *restrict dat, app_state *restrict state, resou
         case SDL_GAMEPAD_AXIS_RIGHTY:
           if(evt.gaxis.value > state->gamepadDeadzone){
             state->lastInputType = INPUT_TYPE_GAMEPAD; //set gamepad input
-            printf("Gamepad down.\n");
+            SDL_Log("Gamepad down.\n");
             if(state->lastAxisValY==0){
-              printf("Gamepad down once.\n");
+              SDL_Log("Gamepad down once.\n");
             }
             state->lastAxisValY = evt.gaxis.value;
             state->activeAxis = evt.gaxis.axis;
           }else if(evt.gaxis.value < -1*state->gamepadDeadzone){
             state->lastInputType = INPUT_TYPE_GAMEPAD; //set gamepad input
-            printf("Gamepad up.\n");
+            SDL_Log("Gamepad up.\n");
             if(state->lastAxisValY==0){
-              printf("Gamepad up once.\n");
+              SDL_Log("Gamepad up once.\n");
             }
             state->lastAxisValY = evt.gaxis.value;
             state->activeAxis = evt.gaxis.axis;

@@ -61,11 +61,11 @@ void initializeTempState(const app_data *restrict dat, app_state *restrict state
 
   //check that constants are valid
   if(UIELEM_ENUM_LENGTH > /* DISABLES CODE */ (32)){
-    printf("ERROR: ui_element_enum is too long, cannot be indexed by a uint32_t bit pattern (ds->shownElements, state->interactableElement)!\n");
+    SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"ui_element_enum is too long, cannot be indexed by a uint32_t bit pattern (ds->shownElements, state->interactableElement)!\n");
     exit(-1);
   }
   if(UIANIM_ENUM_LENGTH > /* DISABLES CODE */ (32)){
-    printf("ERROR: ui_animation_enum is too long, cannot be indexed by a uint32_t bit pattern (ds->uiAnimPlaying)!\n");
+    SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"ui_animation_enum is too long, cannot be indexed by a uint32_t bit pattern (ds->uiAnimPlaying)!\n");
     exit(-1);
   }
 }
@@ -73,7 +73,7 @@ void initializeTempState(const app_data *restrict dat, app_state *restrict state
 
 void startUIAnimation(drawing_state *restrict ds, const uint8_t uiAnim){
   if(uiAnim >= UIANIM_ENUM_LENGTH){
-    printf("WARNING: startUIAnimation - invalid animation ID (%u, max %u).\n",uiAnim,UIANIM_ENUM_LENGTH-1);
+    SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,"startUIAnimation - invalid animation ID (%u, max %u).\n",uiAnim,UIANIM_ENUM_LENGTH-1);
     return;
   }
   ds->timeLeftInUIAnimation[uiAnim] = UI_ANIM_LENGTH;
@@ -81,7 +81,7 @@ void startUIAnimation(drawing_state *restrict ds, const uint8_t uiAnim){
 }
 void stopUIAnimation(const app_data *restrict dat, app_state *restrict state, const uint8_t uiAnim){
   if(uiAnim >= UIANIM_ENUM_LENGTH){
-    printf("WARNING: stopUIAnimation - invalid animation ID (%u, max %u).\n",uiAnim,UIANIM_ENUM_LENGTH-1);
+    SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,"stopUIAnimation - invalid animation ID (%u, max %u).\n",uiAnim,UIANIM_ENUM_LENGTH-1);
     return;
   }
   state->ds.timeLeftInUIAnimation[uiAnim] = 0.0f;
@@ -108,13 +108,13 @@ void stopUIAnimation(const app_data *restrict dat, app_state *restrict state, co
   }
   state->ds.forceRedraw = 1;
 
-  //printf("Stopped anim %u.\n",uiAnim);
+  //SDL_Log("Stopped anim %u.\n",uiAnim);
 }
 void updateUIAnimationTimes(const app_data *restrict dat, app_state *restrict state, const float deltaTime){
   for(uint8_t i=0;i<UIANIM_ENUM_LENGTH;i++){
     if(state->ds.uiAnimPlaying & (uint32_t)(1U << i)){
       state->ds.timeLeftInUIAnimation[i] -= deltaTime;
-      //printf("anim %u dt %.3f timeleft %.3f\n",i,(double)deltaTime,(double)state->ds.timeLeftInUIAnimation[i]);
+      //SDL_Log("anim %u dt %.3f timeleft %.3f\n",i,(double)deltaTime,(double)state->ds.timeLeftInUIAnimation[i]);
       if(state->ds.timeLeftInUIAnimation[i] <= 0.0f){
         state->ds.timeLeftInUIAnimation[i] = 0.0f;
         stopUIAnimation(dat,state,i);
@@ -128,7 +128,7 @@ void updateDrawingState(const app_data *restrict dat, app_state *restrict state,
 	if(state->ds.zoomFinished){
 		//we want the zooming flag to persist for 1 frame beyond the
 		//end of the zoom, to force the UI to redraw
-		//printf("Finished zoom.\n");
+		//SDL_Log("Finished zoom.\n");
 		state->ds.zoomInProgress = 0;
 		state->ds.zoomFinished = 0; //reset flag
 	}
@@ -159,7 +159,7 @@ void updateDrawingState(const app_data *restrict dat, app_state *restrict state,
 			state->ds.chartPosY = state->ds.chartZoomToY;
 			state->ds.zoomFinished = 1;
 		}
-		//printf("zoom scale: %0.4f\n",(double)state->ds.chartZoomScale);
+		//SDL_Log("zoom scale: %0.4f\n",(double)state->ds.chartZoomScale);
 	}
 	if(state->ds.dragInProgress){
 		state->ds.chartPosX = state->ds.chartDragStartX + ((state->ds.chartDragStartMouseX - state->mouseXPx)/(DEFAULT_NUCLBOX_DIM*state->ds.chartZoomScale));
@@ -174,7 +174,7 @@ void updateDrawingState(const app_data *restrict dat, app_state *restrict state,
 			state->ds.chartPosY = state->ds.chartPanToY;
 			state->ds.panFinished = 1;
 		}
-		//printf("pan t: %0.3f\n",(double)state->ds.timeSincePanStart);
+		//SDL_Log("pan t: %0.3f\n",(double)state->ds.timeSincePanStart);
 	}
 	if(state->ds.fcScrollInProgress){
 		state->ds.timeSinceFCScollStart += deltaTime;
@@ -183,7 +183,7 @@ void updateDrawingState(const app_data *restrict dat, app_state *restrict state,
 			state->ds.nuclFullInfoScrollY = state->ds.nuclFullInfoScrollToY;
 			state->ds.fcScrollFinished = 1;
 		}
-		//printf("scroll t: %0.3f, pos: %f\n",(double)state->ds.timeSinceFCScollStart,(double)state->ds.nuclFullInfoScrollY);
+		//SDL_Log("scroll t: %0.3f, pos: %f\n",(double)state->ds.timeSinceFCScollStart,(double)state->ds.nuclFullInfoScrollY);
 	}
 	//clamp chart display range
 	if(state->ds.chartPosX < 0.0f){
@@ -865,15 +865,15 @@ void getGammaEnergyStr(char strOut[32], const ndata *restrict nd, const uint32_t
 	uint8_t eExponent = (uint8_t)((nd->tran[tranInd].energy.format >> 4U) & 1U);
 	if((showErr == 0)||(nd->tran[tranInd].energy.err == 0)){
 		if(eExponent == 0){
-			snprintf(strOut,32,"%.*f",ePrecision,(double)(nd->tran[tranInd].energy.val));
+			SDL_snprintf(strOut,32,"%.*f",ePrecision,(double)(nd->tran[tranInd].energy.val));
 		}else{
-			snprintf(strOut,32,"%.*fE%i",ePrecision,(double)(nd->tran[tranInd].energy.val),nd->tran[tranInd].energy.exponent);
+			SDL_snprintf(strOut,32,"%.*fE%i",ePrecision,(double)(nd->tran[tranInd].energy.val),nd->tran[tranInd].energy.exponent);
 		}
 	}else{
 		if(eExponent == 0){
-			snprintf(strOut,32,"%.*f(%u)",ePrecision,(double)(nd->tran[tranInd].energy.val),nd->tran[tranInd].energy.err);
+			SDL_snprintf(strOut,32,"%.*f(%u)",ePrecision,(double)(nd->tran[tranInd].energy.val),nd->tran[tranInd].energy.err);
 		}else{
-			snprintf(strOut,32,"%.*f(%u)E%i",ePrecision,(double)(nd->tran[tranInd].energy.val),nd->tran[tranInd].energy.exponent,nd->tran[tranInd].energy.err);
+			SDL_snprintf(strOut,32,"%.*f(%u)E%i",ePrecision,(double)(nd->tran[tranInd].energy.val),nd->tran[tranInd].energy.exponent,nd->tran[tranInd].energy.err);
 		}
 	}
 	
@@ -885,18 +885,18 @@ void getGammaIntensityStr(char strOut[32], const ndata *restrict nd, const uint3
 	uint8_t iExponent = (uint8_t)((nd->tran[tranInd].intensity.format >> 4U) & 1U);
 	uint8_t iValueType = (uint8_t)((nd->tran[tranInd].intensity.format >> 5U) & 15U);
 	if(nd->tran[tranInd].intensity.val <= 0.0f){
-		snprintf(strOut,32," ");
+		SDL_snprintf(strOut,32," ");
 	}else if((showErr == 0)||(nd->tran[tranInd].intensity.err == 0)){
 		if(iExponent == 0){
-			snprintf(strOut,32,"%s%.*f",getValueTypeShortStr(iValueType),iPrecision,(double)(nd->tran[tranInd].intensity.val));
+			SDL_snprintf(strOut,32,"%s%.*f",getValueTypeShortStr(iValueType),iPrecision,(double)(nd->tran[tranInd].intensity.val));
 		}else{
-			snprintf(strOut,32,"%s%.*fE%i",getValueTypeShortStr(iValueType),iPrecision,(double)(nd->tran[tranInd].intensity.val),nd->tran[tranInd].intensity.exponent);
+			SDL_snprintf(strOut,32,"%s%.*fE%i",getValueTypeShortStr(iValueType),iPrecision,(double)(nd->tran[tranInd].intensity.val),nd->tran[tranInd].intensity.exponent);
 		}
 	}else{
 		if(iExponent == 0){
-			snprintf(strOut,32,"%s%.*f(%u)",getValueTypeShortStr(iValueType),iPrecision,(double)(nd->tran[tranInd].intensity.val),nd->tran[tranInd].intensity.err);
+			SDL_snprintf(strOut,32,"%s%.*f(%u)",getValueTypeShortStr(iValueType),iPrecision,(double)(nd->tran[tranInd].intensity.val),nd->tran[tranInd].intensity.err);
 		}else{
-			snprintf(strOut,32,"%s%.*f(%u)E%i",getValueTypeShortStr(iValueType),iPrecision,(double)(nd->tran[tranInd].intensity.val),nd->tran[tranInd].intensity.err,nd->tran[tranInd].intensity.exponent);
+			SDL_snprintf(strOut,32,"%s%.*f(%u)E%i",getValueTypeShortStr(iValueType),iPrecision,(double)(nd->tran[tranInd].intensity.val),nd->tran[tranInd].intensity.err,nd->tran[tranInd].intensity.exponent);
 		}
 	}
 	
@@ -909,25 +909,25 @@ void getLvlEnergyStr(char strOut[32], const ndata *restrict nd, const uint32_t l
 	uint8_t eValueType = (uint8_t)((nd->levels[lvlInd].energy.format >> 5U) & 15U);
 	if(eValueType == VALUETYPE_X){
 		uint8_t variable = (uint8_t)((nd->levels[lvlInd].energy.format >> 9U) & 127U);
-		snprintf(strOut,32,"%c",variable);
+		SDL_snprintf(strOut,32,"%c",variable);
 	}else if(eValueType == VALUETYPE_PLUSX){
 		uint8_t variable = (uint8_t)((nd->levels[lvlInd].energy.format >> 9U) & 127U);
 		if(eExponent == 0){
-			snprintf(strOut,32,"%.*f+%c",ePrecision,(double)(nd->levels[lvlInd].energy.val),variable);
+			SDL_snprintf(strOut,32,"%.*f+%c",ePrecision,(double)(nd->levels[lvlInd].energy.val),variable);
 		}else{
-			snprintf(strOut,32,"%.*fE%i+%c",ePrecision,(double)(nd->levels[lvlInd].energy.val),nd->levels[lvlInd].energy.exponent,variable);
+			SDL_snprintf(strOut,32,"%.*fE%i+%c",ePrecision,(double)(nd->levels[lvlInd].energy.val),nd->levels[lvlInd].energy.exponent,variable);
 		}
 	}else if((showErr == 0)||(nd->levels[lvlInd].energy.err == 0)){
 		if(eExponent == 0){
-			snprintf(strOut,32,"%.*f",ePrecision,(double)(nd->levels[lvlInd].energy.val));
+			SDL_snprintf(strOut,32,"%.*f",ePrecision,(double)(nd->levels[lvlInd].energy.val));
 		}else{
-			snprintf(strOut,32,"%.*fE%i",ePrecision,(double)(nd->levels[lvlInd].energy.val),nd->levels[lvlInd].energy.exponent);
+			SDL_snprintf(strOut,32,"%.*fE%i",ePrecision,(double)(nd->levels[lvlInd].energy.val),nd->levels[lvlInd].energy.exponent);
 		}
 	}else{
 		if(eExponent == 0){
-			snprintf(strOut,32,"%.*f(%u)",ePrecision,(double)(nd->levels[lvlInd].energy.val),nd->levels[lvlInd].energy.err);
+			SDL_snprintf(strOut,32,"%.*f(%u)",ePrecision,(double)(nd->levels[lvlInd].energy.val),nd->levels[lvlInd].energy.err);
 		}else{
-			snprintf(strOut,32,"%.*f(%u)E%i",ePrecision,(double)(nd->levels[lvlInd].energy.val),nd->levels[lvlInd].energy.err,nd->levels[lvlInd].energy.exponent);
+			SDL_snprintf(strOut,32,"%.*f(%u)E%i",ePrecision,(double)(nd->levels[lvlInd].energy.val),nd->levels[lvlInd].energy.err,nd->levels[lvlInd].energy.exponent);
 		}
 	}
 	
@@ -936,12 +936,12 @@ void getLvlEnergyStr(char strOut[32], const ndata *restrict nd, const uint32_t l
 void getHalfLifeStr(char strOut[32], const ndata *restrict nd, const uint32_t lvlInd, const uint8_t showErr, const uint8_t showUnknown){
 	if(lvlInd < nd->numLvls){
 		if(nd->levels[lvlInd].halfLife.unit == VALUE_UNIT_STABLE){
-			snprintf(strOut,32,"STABLE");
+			SDL_snprintf(strOut,32,"STABLE");
 		}else if(nd->levels[lvlInd].halfLife.unit == VALUE_UNIT_NOVAL){
 			if(showUnknown){
-				snprintf(strOut,32,"Unknown");
+				SDL_snprintf(strOut,32,"Unknown");
 			}else{
-				snprintf(strOut,32," ");
+				SDL_snprintf(strOut,32," ");
 			}
 		}else if(nd->levels[lvlInd].halfLife.val > 0.0f){
 			uint8_t hlPrecision = (uint8_t)(nd->levels[lvlInd].halfLife.format & 15U);
@@ -950,33 +950,33 @@ void getHalfLifeStr(char strOut[32], const ndata *restrict nd, const uint32_t lv
 			if(hlValueType == VALUETYPE_ASYMERROR){
 				uint8_t negErr = (uint8_t)((nd->levels[lvlInd].halfLife.format >> 9U) & 127U);
 				if(hlExponent == 0){
-					snprintf(strOut,32,"%.*f(+%u-%u) %s",hlPrecision,(double)(nd->levels[lvlInd].halfLife.val),nd->levels[lvlInd].halfLife.err,negErr,getHalfLifeUnitShortStr(nd->levels[lvlInd].halfLife.unit));
+					SDL_snprintf(strOut,32,"%.*f(+%u-%u) %s",hlPrecision,(double)(nd->levels[lvlInd].halfLife.val),nd->levels[lvlInd].halfLife.err,negErr,getHalfLifeUnitShortStr(nd->levels[lvlInd].halfLife.unit));
 				}else{
-					snprintf(strOut,32,"%.*f(+%u-%u)E%i %s",hlPrecision,(double)(nd->levels[lvlInd].halfLife.val),nd->levels[lvlInd].halfLife.err,negErr,nd->levels[lvlInd].halfLife.exponent,getHalfLifeUnitShortStr(nd->levels[lvlInd].halfLife.unit));
+					SDL_snprintf(strOut,32,"%.*f(+%u-%u)E%i %s",hlPrecision,(double)(nd->levels[lvlInd].halfLife.val),nd->levels[lvlInd].halfLife.err,negErr,nd->levels[lvlInd].halfLife.exponent,getHalfLifeUnitShortStr(nd->levels[lvlInd].halfLife.unit));
 				}
 			}else{
 				if((showErr == 0)||(nd->levels[lvlInd].halfLife.err == 0)){
 					if(hlExponent == 0){
-						snprintf(strOut,32,"%s%.*f %s",getValueTypeShortStr(hlValueType),hlPrecision,(double)(nd->levels[lvlInd].halfLife.val),getHalfLifeUnitShortStr(nd->levels[lvlInd].halfLife.unit));
+						SDL_snprintf(strOut,32,"%s%.*f %s",getValueTypeShortStr(hlValueType),hlPrecision,(double)(nd->levels[lvlInd].halfLife.val),getHalfLifeUnitShortStr(nd->levels[lvlInd].halfLife.unit));
 					}else{
-						snprintf(strOut,32,"%s%.*fE%i %s",getValueTypeShortStr(hlValueType),hlPrecision,(double)(nd->levels[lvlInd].halfLife.val),nd->levels[lvlInd].halfLife.exponent,getHalfLifeUnitShortStr(nd->levels[lvlInd].halfLife.unit));
+						SDL_snprintf(strOut,32,"%s%.*fE%i %s",getValueTypeShortStr(hlValueType),hlPrecision,(double)(nd->levels[lvlInd].halfLife.val),nd->levels[lvlInd].halfLife.exponent,getHalfLifeUnitShortStr(nd->levels[lvlInd].halfLife.unit));
 					}
 				}else{
 					if(hlExponent == 0){
-						snprintf(strOut,32,"%s%.*f(%u) %s",getValueTypeShortStr(hlValueType),hlPrecision,(double)(nd->levels[lvlInd].halfLife.val),nd->levels[lvlInd].halfLife.err,getHalfLifeUnitShortStr(nd->levels[lvlInd].halfLife.unit));
+						SDL_snprintf(strOut,32,"%s%.*f(%u) %s",getValueTypeShortStr(hlValueType),hlPrecision,(double)(nd->levels[lvlInd].halfLife.val),nd->levels[lvlInd].halfLife.err,getHalfLifeUnitShortStr(nd->levels[lvlInd].halfLife.unit));
 					}else{
-						snprintf(strOut,32,"%s%.*f(%u)E%i %s",getValueTypeShortStr(hlValueType),hlPrecision,(double)(nd->levels[lvlInd].halfLife.val),nd->levels[lvlInd].halfLife.err,nd->levels[lvlInd].halfLife.exponent,getHalfLifeUnitShortStr(nd->levels[lvlInd].halfLife.unit));
+						SDL_snprintf(strOut,32,"%s%.*f(%u)E%i %s",getValueTypeShortStr(hlValueType),hlPrecision,(double)(nd->levels[lvlInd].halfLife.val),nd->levels[lvlInd].halfLife.err,nd->levels[lvlInd].halfLife.exponent,getHalfLifeUnitShortStr(nd->levels[lvlInd].halfLife.unit));
 					}
 				}
 			}
 		}else{
-			snprintf(strOut,32," ");
+			SDL_snprintf(strOut,32," ");
 		}
 	}else{
 		if(showUnknown){
-			snprintf(strOut,32,"Unknown");
+			SDL_snprintf(strOut,32,"Unknown");
 		}else{
-			snprintf(strOut,32," ");
+			SDL_snprintf(strOut,32," ");
 		}
 	}
 }
@@ -984,7 +984,7 @@ void getGSHalfLifeStr(char strOut[32], const ndata *restrict nd, const uint16_t 
 	if(nd->nuclData[nuclInd].numLevels > 0){
 		getHalfLifeStr(strOut,nd,nd->nuclData[nuclInd].firstLevel + nd->nuclData[nuclInd].gsLevel,1,1);
 	}else{
-		snprintf(strOut,32,"Unknown");
+		SDL_snprintf(strOut,32,"Unknown");
 	}
 }
 
@@ -995,17 +995,17 @@ void getDecayModeStr(char strOut[32], const ndata *restrict nd, const uint32_t d
 		uint8_t decPrecision = (uint8_t)(nd->dcyMode[dcyModeInd].prob.format & 15U);
 		if(decValueType == VALUETYPE_NUMBER){
 			if(nd->dcyMode[dcyModeInd].prob.err > 0){
-				snprintf(strOut,32,"%s = %.*f(%u)%%%%",getDecayTypeShortStr(decType),decPrecision,(double)nd->dcyMode[dcyModeInd].prob.val,nd->dcyMode[dcyModeInd].prob.err); //%%%% will be parsed to "%%" in tmpStr, which will then be parsed as a format string by SDL_FontCacahe, leaving "%"
+				SDL_snprintf(strOut,32,"%s = %.*f(%u)%%%%",getDecayTypeShortStr(decType),decPrecision,(double)nd->dcyMode[dcyModeInd].prob.val,nd->dcyMode[dcyModeInd].prob.err); //%%%% will be parsed to "%%" in tmpStr, which will then be parsed as a format string by SDL_FontCacahe, leaving "%"
 			}else{
-				snprintf(strOut,32,"%s = %.*f%%%%",getDecayTypeShortStr(decType),decPrecision,(double)nd->dcyMode[dcyModeInd].prob.val); //%%%% will be parsed to "%%" in tmpStr, which will then be parsed as a format string by SDL_FontCacahe, leaving "%"
+				SDL_snprintf(strOut,32,"%s = %.*f%%%%",getDecayTypeShortStr(decType),decPrecision,(double)nd->dcyMode[dcyModeInd].prob.val); //%%%% will be parsed to "%%" in tmpStr, which will then be parsed as a format string by SDL_FontCacahe, leaving "%"
 			}
 		}else if(decValueType == VALUETYPE_UNKNOWN){
-			snprintf(strOut,32,"%s%s",getDecayTypeShortStr(decType),getValueTypeShortStr(decValueType));
+			SDL_snprintf(strOut,32,"%s%s",getDecayTypeShortStr(decType),getValueTypeShortStr(decValueType));
 		}else{
-			snprintf(strOut,32,"%s %s%.*f%%%%",getDecayTypeShortStr(decType),getValueTypeShortStr(decValueType),decPrecision,(double)nd->dcyMode[dcyModeInd].prob.val); //%%%% will be parsed to "%%" in tmpStr, which will then be parsed as a format string by SDL_FontCacahe, leaving "%"
+			SDL_snprintf(strOut,32,"%s %s%.*f%%%%",getDecayTypeShortStr(decType),getValueTypeShortStr(decValueType),decPrecision,(double)nd->dcyMode[dcyModeInd].prob.val); //%%%% will be parsed to "%%" in tmpStr, which will then be parsed as a format string by SDL_FontCacahe, leaving "%"
 		}
 	}else{
-		snprintf(strOut,32," ");
+		SDL_snprintf(strOut,32," ");
 	}
 }
 
@@ -1013,12 +1013,12 @@ void getAbundanceStr(char strOut[32], const ndata *restrict nd, const uint16_t n
 	if(nuclInd < nd->numNucl){
 		if(nd->nuclData[nuclInd].abundance.unit == VALUE_UNIT_PERCENT){
 			uint8_t abPrecision = (uint8_t)(nd->nuclData[nuclInd].abundance.format & 15U);
-			snprintf(strOut,32,"%.*f%%%%",abPrecision,(double)nd->nuclData[nuclInd].abundance.val); //%%%% will be parsed to "%%" in tmpStr, which will then be parsed as a format string by SDL_FontCacahe, leaving "%"
+			SDL_snprintf(strOut,32,"%.*f%%%%",abPrecision,(double)nd->nuclData[nuclInd].abundance.val); //%%%% will be parsed to "%%" in tmpStr, which will then be parsed as a format string by SDL_FontCacahe, leaving "%"
 		}else{
-			snprintf(strOut,32," ");
+			SDL_snprintf(strOut,32," ");
 		}
 	}else{
-		snprintf(strOut,32," ");
+		SDL_snprintf(strOut,32," ");
 	}
 }
 
@@ -1030,42 +1030,80 @@ void getSpinParStr(char strOut[32], const ndata *restrict nd, const uint32_t lvl
 
 	for(int i=0;i<nd->levels[lvlInd].numSpinParVals;i++){
 		
-		//printf("Spin: %i, parity: %i, tentative: %u\n\n",nd->levels[lvlInd].spval[i].spinVal,nd->levels[lvlInd].spval[i].parVal,nd->levels[lvlInd].spval[i].tentative);
+		//SDL_Log("Spin: %i, parity: %i, tentative: %u\n\n",nd->levels[lvlInd].spval[i].spinVal,nd->levels[lvlInd].spval[i].parVal,tentative);
 		
-		if(nd->levels[lvlInd].spval[i].tentative == TENTATIVE_RANGE){
+		uint8_t tentative = (uint8_t)((uint16_t)(nd->levels[lvlInd].spval[i].format >> 9U) & 7U);
+		uint8_t prevTentative = 0;
+		if(i>0){
+			prevTentative = (uint8_t)((uint16_t)(nd->levels[lvlInd].spval[i-1].format >> 9U) & 7U);
+		}
+		uint8_t nextTentative = 0;
+		if(i<nd->levels[lvlInd].numSpinParVals-1){
+			nextTentative = (uint8_t)((uint16_t)(nd->levels[lvlInd].spval[i+1].format >> 9U) & 7U);
+		}
+
+		if(tentative == TENTATIVE_RANGE){
 			strcat(strOut,"to");
 		}else{
-			if((nd->levels[lvlInd].spval[i].tentative == TENTATIVE_SPINANDPARITY)||(nd->levels[lvlInd].spval[i].tentative == TENTATIVE_SPINONLY)){
-				if((i==0)||((i>0)&&((nd->levels[lvlInd].spval[i-1].tentative != TENTATIVE_SPINANDPARITY)&&(nd->levels[lvlInd].spval[i-1].tentative != TENTATIVE_SPINONLY)))){
-					if((i>0)&&(nd->levels[lvlInd].spval[i-1].tentative == TENTATIVE_RANGE)){
+
+			uint8_t spinIsVar = (uint8_t)(nd->levels[lvlInd].spval[i].format & 1U);
+			uint8_t spinVarInd = (uint8_t)((nd->levels[lvlInd].spval[i].format >> 5U) & 31U);
+			uint8_t spinValType = (uint8_t)((nd->levels[lvlInd].spval[i].format >> 1U) & 15U);
+			
+			if((tentative == TENTATIVE_SPINANDPARITY)||(tentative == TENTATIVE_SPINONLY)){
+				if((i==0)||((i>0)&&((prevTentative != TENTATIVE_SPINANDPARITY)&&(prevTentative != TENTATIVE_SPINONLY)))){
+					if((i>0)&&(prevTentative == TENTATIVE_RANGE)){
 						//previous spin parity value specified a range
 						strcat(strOut," ");
 					}else{
 						strcat(strOut,"(");
 					}
-					
 				}
 			}
-			if(nd->levels[lvlInd].spval[i].spinVal < 255){
-				if(nd->levels[lvlInd].halfInt == 1){
-					sprintf(val,"%i/2",nd->levels[lvlInd].spval[i].spinVal);
+
+			if(spinIsVar){
+				strcat(strOut,getValueTypeShortStr(spinValType));
+				if(nd->levels[lvlInd].spval[i].spinVal == 0){
+					//variable only
+					if(spinVarInd == 0){
+						strcat(strOut,"J");
+					}else{
+						sprintf(val,"J%u",spinVarInd);
+						strcat(strOut,val);
+					}
 				}else{
-					sprintf(val,"%i",nd->levels[lvlInd].spval[i].spinVal);
+					//variable + offset
+					if(spinVarInd == 0){
+						strcat(strOut,"J+");
+					}else{
+						sprintf(val,"J%u+",spinVarInd);
+						strcat(strOut,val);
+					}
 				}
-				strcat(strOut,val);
+			}
+
+			if((!spinIsVar)||(nd->levels[lvlInd].spval[i].spinVal > 0)){
+				if(nd->levels[lvlInd].spval[i].spinVal < 255){
+					if(nd->levels[lvlInd].halfInt == 1){
+						sprintf(val,"%i/2",nd->levels[lvlInd].spval[i].spinVal);
+					}else{
+						sprintf(val,"%i",nd->levels[lvlInd].spval[i].spinVal);
+					}
+					strcat(strOut,val);
+				}
 			}
 			if(nd->levels[lvlInd].spval[i].parVal == -1){
 				strcat(strOut,"-");
 			}else if(nd->levels[lvlInd].spval[i].parVal == 1){
 				strcat(strOut,"+");
 			}
-			if((nd->levels[lvlInd].spval[i].tentative == TENTATIVE_SPINANDPARITY)||(nd->levels[lvlInd].spval[i].tentative == TENTATIVE_SPINONLY)){
+			if((tentative == TENTATIVE_SPINANDPARITY)||(tentative == TENTATIVE_SPINONLY)){
 				if(i==nd->levels[lvlInd].numSpinParVals-1){
 					strcat(strOut,")");
 				}else if(i<nd->levels[lvlInd].numSpinParVals-1){
-					if(nd->levels[lvlInd].spval[i+1].tentative != TENTATIVE_RANGE){
-						if(nd->levels[lvlInd].spval[i+1].tentative != TENTATIVE_SPINANDPARITY){
-							if(nd->levels[lvlInd].spval[i+1].tentative != TENTATIVE_SPINONLY){
+					if(nextTentative != TENTATIVE_RANGE){
+						if(nextTentative != TENTATIVE_SPINANDPARITY){
+							if(nextTentative != TENTATIVE_SPINONLY){
 								strcat(strOut,")");
 							}
 						}
@@ -1073,7 +1111,7 @@ void getSpinParStr(char strOut[32], const ndata *restrict nd, const uint32_t lvl
 				}
 			}
 			if(i!=nd->levels[lvlInd].numSpinParVals-1){
-				if(nd->levels[lvlInd].spval[i+1].tentative == TENTATIVE_RANGE){
+				if(nextTentative == TENTATIVE_RANGE){
 					//next spin parity value specifies a range
 					strcat(strOut," ");
 				}else{
@@ -1201,7 +1239,7 @@ uint16_t getNuclInd(const ndata *restrict nd, const int16_t N, const int16_t Z){
 			}
 		}
 	}
-	//printf("WARNING: getNuclInd - couldn't find nucleus with N,Z = [%i %i].\n",N,Z);
+	//SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,"getNuclInd - couldn't find nucleus with N,Z = [%i %i].\n",N,Z);
 	return MAXNUMNUCL;
 }
 
@@ -1306,7 +1344,7 @@ void panChartToPos(const app_data *restrict dat, drawing_state *restrict ds, con
 	ds->chartPanStartY = ds->chartPosY;
 	ds->chartPanToX = posN*1.0f + 0.5f;
 	ds->chartPanToY = posZ*1.0f + 0.5f - (16.0f/ds->chartZoomScale);
-	//printf("pos: %u %u, panning to: %f %f\n",posN,posZ,(double)ds->chartPanToX,(double)ds->chartPanToY);
+	//SDL_Log("pos: %u %u, panning to: %f %f\n",posN,posZ,(double)ds->chartPanToX,(double)ds->chartPanToY);
 	//clamp chart display range
 	if(ds->chartPanToX < 0.0f){
 		ds->chartPanToX = 0.0f;
@@ -1318,7 +1356,7 @@ void panChartToPos(const app_data *restrict dat, drawing_state *restrict ds, con
 	}else if(ds->chartPanToY > (dat->ndat.maxZ+1)){
 		ds->chartPanToY = (float)dat->ndat.maxZ+1.0f;
 	}
-	//printf("panning to: %f %f\n",(double)ds->chartPanToX,(double)ds->chartPanToY);
+	//SDL_Log("panning to: %f %f\n",(double)ds->chartPanToX,(double)ds->chartPanToY);
 	ds->timeSincePanStart = 0.0f;
 	ds->totalPanTime = CHART_DOUBLECLICK_PAN_TIME;
 	ds->panInProgress = 1;
@@ -1373,7 +1411,7 @@ void uiElemClickAction(const app_data *restrict dat, app_state *restrict state, 
     			float mouseY = mouseYPxToZ(&state->ds,state->mouseYPx);
 					//select nucleus
 					uint16_t selNucl = getNuclInd(&dat->ndat,(int16_t)floorf(mouseX),(int16_t)floorf(mouseY + 1.0f));
-					//printf("Selected nucleus: %u\n",state->chartSelectedNucl);
+					//SDL_Log("Selected nucleus: %u\n",state->chartSelectedNucl);
 					if((selNucl < MAXNUMNUCL)&&(selNucl != state->chartSelectedNucl)){
 						state->chartSelectedNucl = selNucl;
 						//calculate the number of unscaled pixels needed to show the ground and isomeric state info
@@ -1411,7 +1449,7 @@ void uiElemClickAction(const app_data *restrict dat, app_state *restrict state, 
 					}else{
 						if(doubleClick && (state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_HIDE]==0.0f)){
 							//pan chart to nuclide that is clicked
-							//printf("starting pan to: %f %f\n",(double)mouseX,(double)mouseY);
+							//SDL_Log("starting pan to: %f %f\n",(double)mouseX,(double)mouseY);
 							panChartToPos(dat,&state->ds,(uint16_t)floorf(fabsf(mouseX)),(uint16_t)floorf(fabsf(mouseY)));
 						}else if((state->ds.shownElements & (1U << UIELEM_NUCL_INFOBOX))&&(state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_HIDE]==0.0f)){
 							startUIAnimation(&state->ds,UIANIM_NUCLINFOBOX_HIDE); //hide the info box, see stopUIAnimation() for info box hiding action
@@ -1502,7 +1540,7 @@ void updateSingleUIElemPosition(drawing_state *restrict ds, const uint8_t uiElem
 				ds->uiElemPosX[UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON] = (uint16_t)(ds->uiElemPosX[UIELEM_NUCL_INFOBOX] + ds->uiElemWidth[UIELEM_NUCL_INFOBOX] - ds->uiElemWidth[UIELEM_NUCL_INFOBOX_CLOSEBUTTON] - ds->uiElemWidth[UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON] - 7*UI_PADDING_SIZE);
 				ds->uiElemPosY[UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON] = ds->uiElemPosY[UIELEM_NUCL_INFOBOX] + 4*UI_PADDING_SIZE;
 			}
-			//printf("x: %u, y: %u, w: %u, h: %u\n",ds->uiElemPosX[UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON],ds->uiElemPosY[UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON],ds->uiElemWidth[UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON],ds->uiElemHeight[UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON]);
+			//SDL_Log("x: %u, y: %u, w: %u, h: %u\n",ds->uiElemPosX[UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON],ds->uiElemPosY[UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON],ds->uiElemWidth[UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON],ds->uiElemHeight[UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON]);
 			break;
 		case UIELEM_NUCL_FULLINFOBOX_BACKBUTTON:
 			ds->uiElemPosX[UIELEM_NUCL_FULLINFOBOX_BACKBUTTON] = (uint16_t)(ds->windowXRes-NUCL_FULLINFOBOX_BACKBUTTON_WIDTH-NUCL_FULLINFOBOX_BACKBUTTON_POS_XR);
@@ -1539,7 +1577,7 @@ void updateWindowRes(app_data *restrict dat, app_state *restrict state, resource
 	float newScale = (float)rwidth/((float)wwidth);
 	//float newScale = 1.0f; //for testing UI scales
 	if(fabsf(rdat->uiScale - newScale) > 0.001f){
-		printf("Re-scaling UI from %0.9f to %0.9f.\n",(double)rdat->uiScale,(double)newScale);
+		SDL_Log("Re-scaling UI from %0.9f to %0.9f.\n",(double)rdat->uiScale,(double)newScale);
 		rdat->uiScale = newScale; //set UI scale properly for HI-DPI
 		rdat->uiThemeScale = getUIthemeScale(rdat->uiScale);
 		if(rdat->font){
@@ -1564,15 +1602,15 @@ void handleScreenGraphicsMode(app_data *restrict dat, app_state *restrict state,
 
   if(state->ds.windowFullscreenMode){
     if(SDL_SetWindowFullscreen(rdat->window,SDL_TRUE) != 0){
-      printf("WARNING: cannot set fullscreen mode - %s\n",SDL_GetError());
+      SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,"cannot set fullscreen mode - %s\n",SDL_GetError());
     }
     updateWindowRes(dat,state,rdat);
-    //printf("Full screen display mode.  Window resolution: %u x %u.\n",state->ds.windowXRes,state->ds.windowYRes);
+    //SDL_Log("Full screen display mode.  Window resolution: %u x %u.\n",state->ds.windowXRes,state->ds.windowYRes);
   }else{
     if(SDL_SetWindowFullscreen(rdat->window,0) != 0){
-      printf("WARNING: cannot set windowed mode - %s\n",SDL_GetError());
+      SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,"cannot set windowed mode - %s\n",SDL_GetError());
     }
     updateWindowRes(dat,state,rdat);
-    //printf("Windowed display mode.  Window resolution: %u x %u.\n",state->ds.windowXRes,state->ds.windowYRes);
+    //SDL_Log("Windowed display mode.  Window resolution: %u x %u.\n",state->ds.windowXRes,state->ds.windowYRes);
   }
 }

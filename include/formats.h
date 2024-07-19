@@ -56,6 +56,8 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #define MAX_PROTON_NUM           130
 #define MAX_MASS_NUM             350
 
+#define MAX_SPIN_VARS            32 //maximum spin variables (ie. J1, J2, J3...) per nuclide
+
 #define NUMSHELLCLOSURES 7
 static const uint16_t shellClosureValues[NUMSHELLCLOSURES] = {2,8,20,28,50,82,126};
 
@@ -83,8 +85,10 @@ typedef struct
 {
   uint8_t spinVal; //the spin value (255 if unknown)
   int8_t parVal;  //the parity value (1 if positive, -1 if negative, 0 if unknown)
-  uint8_t tentative; //values from tentative_enum
-  uint8_t format; //bit 0: whether or not spin is variable, bits 1-7: variable index if bit 0 is set
+  uint16_t format; //bit 0: whether or not spin is variable
+  //bits 1-4: value type (from value_type_enum)
+  //bits 5-9: variable index if bit 0 is set
+  //bits 9-11: whether value is tentative (values from tentative_enum)
 }spinparval; //spin parity value
 
 typedef struct

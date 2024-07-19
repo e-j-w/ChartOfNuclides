@@ -31,7 +31,7 @@ void shutdownApp(const global_data *gdat, const uint8_t skipDealloc){
   }
   TTF_Quit();
   //SDL_Quit(); //hangs on some systems?
-  printf("SDL shutdown.\n");
+  SDL_Log("SDL shutdown.\n");
   exit(0);
 }
 
@@ -52,7 +52,7 @@ int main(int argc, char *argv[]){
   }
 
   /*for(i=0;i<SDL_GetNumVideoDrivers();i++){
-    printf("Video driver available: %s\n",SDL_GetVideoDriver(i));
+    SDL_Log("Video driver available: %s\n",SDL_GetVideoDriver(i));
   }*/
 
   uint32_t sdlFlags = 0;
@@ -62,29 +62,31 @@ int main(int argc, char *argv[]){
     sdlFlags = SDL_INIT_VIDEO|SDL_INIT_TIMER|SDL_INIT_GAMEPAD;
   }
   if(SDL_Init(sdlFlags) != 0){
-    printf("Cannot initialize SDL: %s\n",SDL_GetError());
+    SDL_Log("Cannot initialize SDL: %s\n",SDL_GetError());
     return 0;
   }
   if(TTF_Init() != 0){
-    printf("Cannot initialize SDL_TTF: %s\n", TTF_GetError());
+    SDL_Log("Cannot initialize SDL_TTF: %s\n", TTF_GetError());
     return 0;
   }
-  printf("SDL startup.\n");
+  SDL_Log("SDL startup.\n");
 
   //allocate structures
   global_data *gdat=(global_data*)SDL_calloc(1,sizeof(global_data));
   if(gdat==NULL){
-    printf("ERROR: could not allocate application data structure.\n");
+    SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"could not allocate application data structure.\n");
     return 0;
   }else{
-    printf("Application data structure allocated.\n");
-    printf("app_state     - allocated: %10li bytes\n",(long int)sizeof(app_state));
-    printf("app_data      - allocated: %10li bytes\n",(long int)sizeof(app_data));
-    printf("resource_data - allocated: %10li bytes\n",(long int)sizeof(resource_data));
+    SDL_Log("Application data structure allocated.\n");
+    SDL_Log("app_state     - allocated: %10li bytes\n",(long int)sizeof(app_state));
+    SDL_Log("app_data      - allocated: %10li bytes\n",(long int)sizeof(app_data));
+    SDL_Log("resource_data - allocated: %10li bytes\n",(long int)sizeof(resource_data));
   }
 
   //setup paths
   gdat->rdat.appBasePath = SDL_GetBasePath();
+  //gdat->rdat.appPrefPath = SDL_GetPrefPath("con","con");
+  //SDL_Log("Base path: %s\nPref path: %s\n",gdat->rdat.appBasePath,gdat->rdat.appPrefPath);
 
   //load preferences (needed prior to window created)
   gdat->state.gamepadDeadzone = 16000;
@@ -100,7 +102,7 @@ int main(int argc, char *argv[]){
   //setup the application window
   gdat->rdat.window = SDL_CreateWindow("Loading...",gdat->state.ds.windowXRes,gdat->state.ds.windowYRes,SDL_WINDOW_RESIZABLE|SDL_WINDOW_HIGH_PIXEL_DENSITY);
   if(!gdat->rdat.window){
-    printf("ERROR: cannot create window - %s\n",SDL_GetError());
+    SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"cannot create window - %s\n",SDL_GetError());
     SDL_Quit();
     return 0;
   }
@@ -108,7 +110,7 @@ int main(int argc, char *argv[]){
   gdat->rdat.renderer = SDL_CreateRenderer(gdat->rdat.window, NULL, SDL_RENDERER_PRESENTVSYNC);
   if(!gdat->rdat.renderer){
     SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,"Error","Cannot initialize renderer.",gdat->rdat.window);
-    printf("ERROR: cannot create renderer - %s\n",SDL_GetError());
+    SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"cannot create renderer - %s\n",SDL_GetError());
     SDL_DestroyWindow(gdat->rdat.window);
     SDL_Quit();
     return 0;
@@ -151,7 +153,7 @@ int main(int argc, char *argv[]){
   //deal with effects of command line arguments
   gdat->state.gamepadDisabled = 0;
   if(cliArgs&(1U<<CLI_NOGAMEPAD)){
-    printf("Disabling gamepad/gamepad from command line option.\n");
+    SDL_Log("Disabling gamepad/gamepad from command line option.\n");
     gdat->state.gamepadDisabled = 1;
   }
 
@@ -164,7 +166,7 @@ int main(int argc, char *argv[]){
     timeLast = timeNow;
     timeNow = SDL_GetPerformanceCounter();
     deltaTime = (float)(timeNow - timeLast)*freqFac; //in milliseconds
-    //printf("deltaTime: %f\n",deltaTime);
+    //SDL_Log("deltaTime: %f\n",deltaTime);
     deltaTime = deltaTime/1000.0f; //convert to seconds
     if(deltaTime > 0.033f){
       deltaTime = 0.033f; //because of main thread blocking, set maximum delta to prevent weird timing bugs

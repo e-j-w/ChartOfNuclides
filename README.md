@@ -36,7 +36,7 @@ If you're building the database from scratch, you'll need various isotope and nu
 * GNU make
 * SDL3, SDL_image, SDL_ttf
 
-The current version has been tested under Arch Linux as of June 2024.  For now SDL3 and its libraries probably have to be compiled manually, as they aren't (yet) packaged for major Linux distros.
+The current version has been tested under Arch Linux as of July 2024.  For now you'll probably have to manually compile SDL3 and its libraries, as they aren't (yet) packaged for major Linux distros.
 
 ### Build the database and program
 

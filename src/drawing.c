@@ -31,10 +31,10 @@ void setUITexColAlpha(resource_data *restrict rdat, const float r, const float g
     printf("Color mod: %u %u %u\n",r,g,b);
   }*/
   if(SDL_SetTextureAlphaModFloat(rdat->uiThemeTex,alpha)<0){
-    printf("WARNING: setUITexColAlpha - cannot set UI texture alpha - %s\n",SDL_GetError());
+    SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,"setUITexColAlpha - cannot set UI texture alpha - %s\n",SDL_GetError());
   }
   if(SDL_SetTextureColorModFloat(rdat->uiThemeTex,r,g,b)<0){
-    printf("WARNING: setUITexColAlpha - cannot set UI texture color modulation - %s\n",SDL_GetError());
+    SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,"setUITexColAlpha - cannot set UI texture color modulation - %s\n",SDL_GetError());
   }
 }
 
@@ -44,7 +44,7 @@ void drawPanelBG(resource_data *restrict rdat, const SDL_FRect panelRect, const 
 
   if(alpha != 1.0f){
     if(SDL_SetTextureAlphaModFloat(rdat->uiThemeTex,alpha)<0){
-      printf("WARNING: drawPanelBG - cannot set UI texture alpha - %s\n",SDL_GetError());
+      SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,"drawPanelBG - cannot set UI texture alpha - %s\n",SDL_GetError());
     }
   }
   int32_t remainingWidth = (int32_t)panelRect.w;
@@ -163,12 +163,12 @@ void drawPanelBG(resource_data *restrict rdat, const SDL_FRect panelRect, const 
     destRect.w = (float)(UI_TILE_SIZE*rdat->uiScale);
     SDL_RenderTexture(rdat->renderer,rdat->uiThemeTex,&srcRect,&destRect);
   }else{
-    printf("WARNING: drawPanelBG - panel size too small.\n");
+    SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,"drawPanelBG - panel size too small.\n");
   }
   
   if(alpha != 1.0f){
     if(SDL_SetTextureAlphaModFloat(rdat->uiThemeTex,1.0f)<0){
-      printf("WARNING: drawPanelBG - cannot reset UI texture alpha - %s\n",SDL_GetError());
+      SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,"drawPanelBG - cannot reset UI texture alpha - %s\n",SDL_GetError());
     }
   }
 }
@@ -266,7 +266,7 @@ void drawTextButton(const ui_theme_rules *restrict uirules, resource_data *restr
 void drawIcon(const ui_theme_rules *restrict uirules, resource_data *restrict rdat, const uint16_t x, const uint16_t y, const uint16_t w, const uint8_t highlightState, const uint8_t alpha, const uint8_t iconInd){
   
   if(iconInd >= UIICON_ENUM_LENGTH){
-    printf("WARNING: drawIcon - invalid icon index (%u).\n",iconInd);
+    SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,"drawIcon - invalid icon index (%u).\n",iconInd);
     return;
   }
 
@@ -294,7 +294,7 @@ void drawIcon(const ui_theme_rules *restrict uirules, resource_data *restrict rd
   drawPos.y = (float)(y*rdat->uiScale) + (float)(UI_TILE_SIZE*rdat->uiScale)/2.0f - drawPos.h/2.0f;
   //printf("drawPos: %i %i %i %i\n",drawPos.x,drawPos.y,drawPos.w,drawPos.h);
   if(SDL_SetTextureAlphaMod(rdat->uiThemeTex,alpha)<0){
-    printf("WARNING: drawIcon - cannot set texture alpha - %s\n",SDL_GetError());
+    SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,"drawIcon - cannot set texture alpha - %s\n",SDL_GetError());
   }
   SDL_RenderTexture(rdat->renderer,rdat->uiThemeTex,&srcRect,&drawPos);
   SDL_SetTextureAlphaMod(rdat->uiThemeTex,255);

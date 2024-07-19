@@ -35,6 +35,12 @@ typedef struct
   uint16_t numAssets; //number of assets in the asset mapping
 }asset_mapping;
 
+typedef struct
+{
+  char spVars[MAX_SPIN_VARS][16];
+	uint8_t numSpVars; //number of variables (eg. J1, J2, J3...) parsed in spin parity values
+}sp_var_data; //spin-parity variable data
+
 //prototypes
 int parseAppData(app_data *restrict dat, const char *appBasePath);
 
