@@ -14,7 +14,9 @@ The goal is to develop a performant and multiplatform tool that will be useful i
 
 ## Features
 
-- Select individual nuclides to browse ground and excited state data.
+- Select individual nuclides to browse ground and excited state data, including:
+  - Level energies, half-lives, decay modes...
+  - Gamma energies, branching fractions, multipolarities...
 - Runs locally, with no network connection needed.
 - Fast hardware accelerated rendering using `SDL_Renderer`, HI-DPI scaling support. 
 - More to come...
@@ -55,7 +57,7 @@ Two executables will be built: `proc_data` (which generates the data package `co
 ./proc_data
 ```
 
-This will build the data package file `con.dat`. Then, the main application can be run:
+This will build the data package file `con.dat` in the user data directory (`~/.local/share/con/` on Linux). Then, the main application can be run:
 
 ```
 ./con
@@ -80,7 +82,7 @@ Zoom and pan with the mouse, the controls are basically identical to something l
 
 ## Disclaimer
 
-The author(s) make no guarantee of the accuracy or completeness of the information provided.  As stated in the [license](COPYING.md), this program is provided without any warranty.  Please file a bug report if you spot any inaccuracies (eg. the data reported by the program differs from the source ENSDF/NIST data).
+The author(s) make no guarantee of the accuracy or completeness of the information provided.  As stated in the [license](COPYING.md), this program is provided without any warranty.  Please file a bug report if you spot any inaccuracies (eg. the data reported by the program differs from the source ENSDF/NIST data).  Some inaccuracies are expected since the program remains in active development.
 
 ## Credits
 

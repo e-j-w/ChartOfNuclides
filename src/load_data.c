@@ -29,7 +29,7 @@ int importAppData(app_data *restrict dat, resource_data *restrict rdat){
   size_t totalAlloc = 0;
   rdat->themeOffset = 0;
   
-  SDL_snprintf(filePath,270,"%scon.dat",rdat->appBasePath);
+  SDL_snprintf(filePath,270,"%scon.dat",rdat->appPrefPath);
   SDL_IOStream *inp = SDL_IOFromFile(filePath, "rb");
   if(inp==NULL){
     SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,"Error","App data file (con.dat) doesn't exist or is unreadable.",rdat->window);
@@ -212,7 +212,7 @@ int regenerateThemeAndFontCache(app_data *restrict dat, resource_data *restrict 
   }
 
   char filePath[270];
-  SDL_snprintf(filePath,270,"%scon.dat",rdat->appBasePath);
+  SDL_snprintf(filePath,270,"%scon.dat",rdat->appPrefPath);
 
   SDL_IOStream *inp = SDL_IOFromFile(filePath, "rb");
   if(inp==NULL){

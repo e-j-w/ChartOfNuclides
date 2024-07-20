@@ -22,6 +22,7 @@ const char* getHalfLifeUnitShortStr(const uint8_t unit);
 const char* getValueTypeShortStr(const uint8_t type);
 void getGammaEnergyStr(char strOut[32], const ndata *restrict nd, const uint32_t tranInd, const uint8_t showErr);
 void getGammaIntensityStr(char strOut[32], const ndata *restrict nd, const uint32_t tranInd, const uint8_t showErr);
+void getGammaMultipolarityStr(char strOut[32], const ndata *restrict nd, const uint32_t tranInd);
 void getLvlEnergyStr(char strOut[32], const ndata *restrict nd, const uint32_t lvlInd, const uint8_t showErr);
 void getHalfLifeStr(char strOut[32], const ndata *restrict nd, const uint32_t lvlInd, const uint8_t showErr, const uint8_t showUnknown);
 void getGSHalfLifeStr(char strOut[32], const ndata *restrict nd, const uint16_t nuclInd);

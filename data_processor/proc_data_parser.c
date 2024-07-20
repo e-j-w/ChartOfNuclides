@@ -200,7 +200,7 @@ static int parseAppRules(app_data *restrict dat, asset_mapping *restrict stringI
 	dat->locStringIDs[LOCSTR_DECAYMODE] = (uint16_t)nameToAssetID("decay_mode",stringIDmap);
 	dat->locStringIDs[LOCSTR_ENERGY_GAMMA] = (uint16_t)nameToAssetID("energy_gamma",stringIDmap);
 	dat->locStringIDs[LOCSTR_INTENSITY_GAMMA] = (uint16_t)nameToAssetID("intensity_gamma",stringIDmap);
-	dat->locStringIDs[LOCSTR_MULTIPLICITY_GAMMA] = (uint16_t)nameToAssetID("multiplicity_gamma",stringIDmap);
+	dat->locStringIDs[LOCSTR_MULTIPOLARITY_GAMMA] = (uint16_t)nameToAssetID("multipolarity_gamma",stringIDmap);
 	dat->locStringIDs[LOCSTR_FINALLEVEL] = (uint16_t)nameToAssetID("final_level",stringIDmap);
 	dat->locStringIDs[LOCSTR_ALLLEVELS] = (uint16_t)nameToAssetID("all_levels",stringIDmap);
 	dat->locStringIDs[LOCSTR_BACKTOSUMMARY] = (uint16_t)nameToAssetID("back_to_summary",stringIDmap);
@@ -468,7 +468,7 @@ void parseSpinPar(level * lev, sp_var_data * varDat, char * spstring){
 	}
 	SDL_Log("\n");*/
 
-	uint8_t tentative = TENTATIVE_NONE;
+	uint8_t tentative = TENTATIVESP_NONE;
 	uint8_t flipTentAfter = 0;
 
 	if(numTok<=0){
@@ -477,14 +477,14 @@ void parseSpinPar(level * lev, sp_var_data * varDat, char * spstring){
 		lev->spval[lev->numSpinParVals].format = 0;
 		lev->spval[lev->numSpinParVals].parVal = 1;
 		lev->spval[lev->numSpinParVals].spinVal = 255;
-		lev->spval[lev->numSpinParVals].format |= ((TENTATIVE_NOSPIN & 7U) << 9U);
+		lev->spval[lev->numSpinParVals].format |= ((TENTATIVESP_NOSPIN & 7U) << 9U);
 		lev->numSpinParVals=1;
 		return;
 	}else if((strcmp(val[0],"-")==0)&&(numTok==1)){
 		lev->spval[lev->numSpinParVals].format = 0;
 		lev->spval[lev->numSpinParVals].parVal = -1;
 		lev->spval[lev->numSpinParVals].spinVal = 255;
-		lev->spval[lev->numSpinParVals].format |= ((TENTATIVE_NOSPIN & 7U) << 9U);
+		lev->spval[lev->numSpinParVals].format |= ((TENTATIVESP_NOSPIN & 7U) << 9U);
 		lev->numSpinParVals=1;
 		return;
 	}else{
@@ -500,7 +500,7 @@ void parseSpinPar(level * lev, sp_var_data * varDat, char * spstring){
 				if(strcmp(val[i],"TO")==0){
 					//specifies a range between the prior and next spin values
 					//eg. '3/2 TO 7/2'
-					lev->spval[lev->numSpinParVals].format |= ((TENTATIVE_RANGE & 7U) << 9U);
+					lev->spval[lev->numSpinParVals].format |= ((TENTATIVESP_RANGE & 7U) << 9U);
 					lev->spval[lev->numSpinParVals].spinVal = 255;
 					lev->numSpinParVals++;
 					continue;
@@ -683,19 +683,19 @@ void parseSpinPar(level * lev, sp_var_data * varDat, char * spstring){
 				if(flipTentAfter){
 					//SDL_Log("setting tentative marker...\n");
 					//tentative marker
-					if(tentative == TENTATIVE_NONE)
-						tentative = TENTATIVE_SPINANDPARITY;
-					else if(tentative == TENTATIVE_SPINANDPARITY)
-						tentative = TENTATIVE_NONE;
+					if(tentative == TENTATIVESP_NONE)
+						tentative = TENTATIVESP_SPINANDPARITY;
+					else if(tentative == TENTATIVESP_SPINANDPARITY)
+						tentative = TENTATIVESP_NONE;
 				}
 				if(!lsBrak && rsBrak){
 					//right bracket only, tentativeness is the same as the previous value
 					//but the next value is outside of the brackets
 					flipTentAfter = 1;
 				}else if(lsBrak && !rsBrak){
-					tentative = TENTATIVE_SPINANDPARITY;
+					tentative = TENTATIVESP_SPINANDPARITY;
 				}else if(lsBrak && rsBrak){
-					tentative = TENTATIVE_SPINANDPARITY;
+					tentative = TENTATIVESP_SPINANDPARITY;
 				}
 
 				//check for parity
@@ -714,13 +714,13 @@ void parseSpinPar(level * lev, sp_var_data * varDat, char * spstring){
 							//all spin values negative parity
 							for(int j=0;j<=lev->numSpinParVals;j++){
 								lev->spval[j].parVal = -1;
-								tentative = TENTATIVE_SPINONLY;
+								tentative = TENTATIVESP_SPINONLY; //only spin is tentative
 							}
 						}else if(strcmp(tok,")+")==0){
 							//all spin values positive parity
 							for(int j=0;j<=lev->numSpinParVals;j++){
 								lev->spval[j].parVal = 1;
-								tentative = TENTATIVE_SPINONLY;
+								tentative = TENTATIVESP_SPINONLY; //only spin is tentative
 							}
 						}
 					}
@@ -1573,16 +1573,22 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 								char ieBuff[3];
 								memcpy(ieBuff, &line[29], 2);
 								ieBuff[2] = '\0';
+								//parse the gamma multipolarity
+								char mBuff[11];
+								memcpy(mBuff, &line[31], 10);
+								mBuff[10] = '\0';
 								//parse the energy error
 								char eeBuff[3];
 								memcpy(eeBuff, &line[19], 2);
 								eeBuff[2] = '\0';
 								uint8_t gammaEerr = (uint8_t)atoi(eeBuff);
 
+								uint32_t tranInd = nd->levels[nd->numLvls-1].firstTran + (uint32_t)(nd->levels[nd->numLvls-1].numTran);
+
 								//process gamma energy
 								float gammaE = (float)atof(ebuff);
 								//get the number of sig figs
-								nd->tran[(int)(nd->levels[nd->numLvls-1].firstTran) + nd->levels[nd->numLvls-1].numTran].energy.format = 0; //default
+								nd->tran[tranInd].energy.format = 0; //default
 								//SDL_Log("ebuff: %s\n",ebuff);
 								tok = strtok(ebuff,".");
 								if(tok!=NULL){
@@ -1590,25 +1596,25 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 									tok = strtok(NULL,"E"); //some gamma energies are specified with exponents
 									if(tok!=NULL){
 										//SDL_Log("%s\n",tok);
-										nd->tran[(int)(nd->levels[nd->numLvls-1].firstTran) + nd->levels[nd->numLvls-1].numTran].energy.format = (uint16_t)strlen(tok);
+										nd->tran[tranInd].energy.format = (uint16_t)strlen(tok);
 										//check for trailing empty spaces
-										for(uint8_t i=0;i<nd->tran[(int)(nd->levels[nd->numLvls-1].firstTran) + nd->levels[nd->numLvls-1].numTran].energy.format;i++){
+										for(uint8_t i=0;i<nd->tran[tranInd].energy.format;i++){
 											if(isspace(tok[i])){
-												nd->tran[(int)(nd->levels[nd->numLvls-1].firstTran) + nd->levels[nd->numLvls-1].numTran].energy.format = i;
+												nd->tran[tranInd].energy.format = i;
 												break;
 											}
 										}
-										if(nd->tran[(int)(nd->levels[nd->numLvls-1].firstTran) + nd->levels[nd->numLvls-1].numTran].energy.format > 15U){
-											nd->tran[(int)(nd->levels[nd->numLvls-1].firstTran) + nd->levels[nd->numLvls-1].numTran].energy.format = 15U; //only 4 bits available for precision
+										if(nd->tran[tranInd].energy.format > 15U){
+											nd->tran[tranInd].energy.format = 15U; //only 4 bits available for precision
 										}
-										//SDL_Log("format: %u\n",nd->tran[(int)(nd->levels[nd->numLvls-1].firstTran) + nd->levels[nd->numLvls-1].numTran].energy.format);
+										//SDL_Log("format: %u\n",nd->tran[tranInd].energy.format);
 										tok = strtok(NULL,""); //get the remaining part of the string (only get past here if the value was expressed in exponent form)
 										if(tok!=NULL){
 											//SDL_Log("energy in exponent form: %s\n",ebuff);
 											//value was in exponent format
-											nd->tran[(int)(nd->levels[nd->numLvls-1].firstTran) + nd->levels[nd->numLvls-1].numTran].energy.exponent = (int8_t)atoi(tok);
-											gammaE = gammaE / powf(10.0f,(float)(nd->tran[(int)(nd->levels[nd->numLvls-1].firstTran) + nd->levels[nd->numLvls-1].numTran].energy.exponent));
-											nd->tran[(int)(nd->levels[nd->numLvls-1].firstTran) + nd->levels[nd->numLvls-1].numTran].energy.format |= (uint16_t)(1U << 4); //exponent flag
+											nd->tran[tranInd].energy.exponent = (int8_t)atoi(tok);
+											gammaE = gammaE / powf(10.0f,(float)(nd->tran[tranInd].energy.exponent));
+											nd->tran[tranInd].energy.format |= (uint16_t)(1U << 4); //exponent flag
 										}
 									}
 								}else{
@@ -1622,20 +1628,20 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 										if(tok!=NULL){
 											//SDL_Log("%s\n",tok);
 											//value was in exponent format
-											nd->tran[(int)(nd->levels[nd->numLvls-1].firstTran) + nd->levels[nd->numLvls-1].numTran].energy.exponent = (int8_t)atoi(tok);
-											gammaE = gammaE / powf(10.0f,(float)(nd->tran[(int)(nd->levels[nd->numLvls-1].firstTran) + nd->levels[nd->numLvls-1].numTran].energy.exponent));
-											nd->tran[(int)(nd->levels[nd->numLvls-1].firstTran) + nd->levels[nd->numLvls-1].numTran].energy.format |= (uint16_t)(1U << 4); //exponent flag
+											nd->tran[tranInd].energy.exponent = (int8_t)atoi(tok);
+											gammaE = gammaE / powf(10.0f,(float)(nd->tran[tranInd].energy.exponent));
+											nd->tran[tranInd].energy.format |= (uint16_t)(1U << 4); //exponent flag
 										}
 									}
 								}
 
-								nd->tran[(int)(nd->levels[nd->numLvls-1].firstTran) + nd->levels[nd->numLvls-1].numTran].energy.val=gammaE;
-								nd->tran[(int)(nd->levels[nd->numLvls-1].firstTran) + nd->levels[nd->numLvls-1].numTran].energy.err=gammaEerr;
-								nd->tran[(int)(nd->levels[nd->numLvls-1].firstTran) + nd->levels[nd->numLvls-1].numTran].energy.unit=VALUE_UNIT_KEV;
+								nd->tran[tranInd].energy.val=gammaE;
+								nd->tran[tranInd].energy.err=gammaEerr;
+								nd->tran[tranInd].energy.unit=VALUE_UNIT_KEV;
 								
 								//check for final level of transition
 								float minEDiff = 1000.0f;
-								nd->tran[(int)(nd->levels[nd->numLvls-1].firstTran) + nd->levels[nd->numLvls-1].numTran].finalLvlOffset = 0;
+								nd->tran[tranInd].finalLvlOffset = 0;
 								uint8_t lvlValType = ((nd->levels[nd->numLvls-1].energy.format >> 5U) & 15U);
 								for(uint32_t lvlInd = (nd->numLvls-2); lvlInd >= nd->nuclData[nd->numNucl].firstLevel; lvlInd--){
 									
@@ -1660,7 +1666,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 									}
 									
 									
-									float fudgeFactor = (float)getRawErrFromDB(&nd->tran[(int)(nd->levels[nd->numLvls-1].firstTran) + nd->levels[nd->numLvls-1].numTran].energy);
+									float fudgeFactor = (float)getRawErrFromDB(&nd->tran[tranInd].energy);
 									if(fudgeFactor < 0.01f){
 										fudgeFactor = 1.0f; //default assumed energy resolution, when no error is reported 
 									}
@@ -1668,16 +1674,16 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 									if(eDiff <= fudgeFactor){
 										if(eDiff < minEDiff){
 											minEDiff = eDiff;
-											nd->tran[(int)(nd->levels[nd->numLvls-1].firstTran) + nd->levels[nd->numLvls-1].numTran].finalLvlOffset = (uint8_t)((nd->numLvls-1) - lvlInd);
+											nd->tran[tranInd].finalLvlOffset = (uint8_t)((nd->numLvls-1) - lvlInd);
 										}
-										//SDL_Log("finalLvlOffset: %u\n",nd->tran[(int)(nd->levels[nd->numLvls-1].firstTran) + nd->levels[nd->numLvls-1].numTran].finalLvlOffset);
+										//SDL_Log("finalLvlOffset: %u\n",nd->tran[tranInd].finalLvlOffset);
 									}
 								}
 
 								//gamma intensity
 								float gammaI = (float)atof(iBuff);
 								//get the number of sig figs
-								nd->tran[(int)(nd->levels[nd->numLvls-1].firstTran) + nd->levels[nd->numLvls-1].numTran].intensity.format = 0; //default
+								nd->tran[tranInd].intensity.format = 0; //default
 								//SDL_Log("ebuff: %s\n",ebuff);
 								tok = strtok(iBuff,".");
 								if(tok!=NULL){
@@ -1685,53 +1691,123 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 									tok = strtok(NULL,"E"); //some gamma energies are specified with exponents
 									if(tok!=NULL){
 										//SDL_Log("%s\n",tok);
-										nd->tran[(int)(nd->levels[nd->numLvls-1].firstTran) + nd->levels[nd->numLvls-1].numTran].intensity.format = (uint16_t)strlen(tok);
+										nd->tran[tranInd].intensity.format = (uint16_t)strlen(tok);
 										//check for trailing empty spaces
-										for(uint8_t i=0;i<nd->tran[(int)(nd->levels[nd->numLvls-1].firstTran) + nd->levels[nd->numLvls-1].numTran].intensity.format;i++){
+										for(uint8_t i=0;i<nd->tran[tranInd].intensity.format;i++){
 											if(isspace(tok[i])){
-												nd->tran[(int)(nd->levels[nd->numLvls-1].firstTran) + nd->levels[nd->numLvls-1].numTran].intensity.format = i;
+												nd->tran[tranInd].intensity.format = i;
 												break;
 											}
 										}
-										if(nd->tran[(int)(nd->levels[nd->numLvls-1].firstTran) + nd->levels[nd->numLvls-1].numTran].intensity.format > 15U){
-											nd->tran[(int)(nd->levels[nd->numLvls-1].firstTran) + nd->levels[nd->numLvls-1].numTran].intensity.format = 15U; //only 4 bits available for precision
+										if(nd->tran[tranInd].intensity.format > 15U){
+											nd->tran[tranInd].intensity.format = 15U; //only 4 bits available for precision
 										}
-										//SDL_Log("format: %u\n",nd->tran[(int)(nd->levels[nd->numLvls-1].firstTran) + nd->levels[nd->numLvls-1].numTran].intensity.format);
+										//SDL_Log("format: %u\n",nd->tran[tranInd].intensity.format);
 										tok = strtok(NULL,""); //get the remaining part of the string (only get past here if the value was expressed in exponent form)
 										if(tok!=NULL){
 											//SDL_Log("energy in exponent form: %s\n",ebuff);
 											//value was in exponent format
-											nd->tran[(int)(nd->levels[nd->numLvls-1].firstTran) + nd->levels[nd->numLvls-1].numTran].intensity.exponent = (int8_t)atoi(tok);
-											gammaI = gammaI / powf(10.0f,(float)(nd->tran[(int)(nd->levels[nd->numLvls-1].firstTran) + nd->levels[nd->numLvls-1].numTran].intensity.exponent));
-											nd->tran[(int)(nd->levels[nd->numLvls-1].firstTran) + nd->levels[nd->numLvls-1].numTran].intensity.format |= (uint16_t)(1U << 4); //exponent flag
+											nd->tran[tranInd].intensity.exponent = (int8_t)atoi(tok);
+											gammaI = gammaI / powf(10.0f,(float)(nd->tran[tranInd].intensity.exponent));
+											nd->tran[tranInd].intensity.format |= (uint16_t)(1U << 4); //exponent flag
 										}
 									}
 								}
 
 								//gamma intensity: check for special value type
-								nd->tran[(int)(nd->levels[nd->numLvls-1].firstTran) + nd->levels[nd->numLvls-1].numTran].intensity.err=0;
+								nd->tran[tranInd].intensity.err=0;
 								tok = strtok(ieBuff, " ");
 								if(tok!=NULL){
 									if(strcmp(tok,"GT")==0){
-										nd->tran[(int)(nd->levels[nd->numLvls-1].firstTran) + nd->levels[nd->numLvls-1].numTran].intensity.format |= (uint16_t)(VALUETYPE_GREATERTHAN << 5);
+										nd->tran[tranInd].intensity.format |= (uint16_t)(VALUETYPE_GREATERTHAN << 5);
 									}else if(strcmp(tok,"GT")==0){
-										nd->tran[(int)(nd->levels[nd->numLvls-1].firstTran) + nd->levels[nd->numLvls-1].numTran].intensity.format |= (uint16_t)(VALUETYPE_GREATERTHAN << 5);
+										nd->tran[tranInd].intensity.format |= (uint16_t)(VALUETYPE_GREATERTHAN << 5);
 									}else if(strcmp(tok,"GE")==0){
-										nd->tran[(int)(nd->levels[nd->numLvls-1].firstTran) + nd->levels[nd->numLvls-1].numTran].intensity.format |= (uint16_t)(VALUETYPE_GREATEROREQUALTHAN << 5);
+										nd->tran[tranInd].intensity.format |= (uint16_t)(VALUETYPE_GREATEROREQUALTHAN << 5);
 									}else if(strcmp(tok,"LT")==0){
-										nd->tran[(int)(nd->levels[nd->numLvls-1].firstTran) + nd->levels[nd->numLvls-1].numTran].intensity.format |= (uint16_t)(VALUETYPE_LESSTHAN << 5);
+										nd->tran[tranInd].intensity.format |= (uint16_t)(VALUETYPE_LESSTHAN << 5);
 									}else if(strcmp(tok,"LE")==0){
-										nd->tran[(int)(nd->levels[nd->numLvls-1].firstTran) + nd->levels[nd->numLvls-1].numTran].intensity.format |= (uint16_t)(VALUETYPE_LESSOREQUALTHAN << 5);
+										nd->tran[tranInd].intensity.format |= (uint16_t)(VALUETYPE_LESSOREQUALTHAN << 5);
 									}else if(strcmp(tok,"AP")==0){
-										nd->tran[(int)(nd->levels[nd->numLvls-1].firstTran) + nd->levels[nd->numLvls-1].numTran].intensity.format |= (uint16_t)(VALUETYPE_APPROX << 5);
+										nd->tran[tranInd].intensity.format |= (uint16_t)(VALUETYPE_APPROX << 5);
 									}else if(strcmp(tok,"?")==0){
-										nd->tran[(int)(nd->levels[nd->numLvls-1].firstTran) + nd->levels[nd->numLvls-1].numTran].intensity.format |= (uint16_t)(VALUETYPE_UNKNOWN << 5);
+										nd->tran[tranInd].intensity.format |= (uint16_t)(VALUETYPE_UNKNOWN << 5);
 									}else{
-										nd->tran[(int)(nd->levels[nd->numLvls-1].firstTran) + nd->levels[nd->numLvls-1].numTran].intensity.err=(uint8_t)atoi(ieBuff);
+										nd->tran[tranInd].intensity.err=(uint8_t)atoi(ieBuff);
 									}
 								}
 
-								nd->tran[(int)(nd->levels[nd->numLvls-1].firstTran) + nd->levels[nd->numLvls-1].numTran].intensity.val=gammaI;
+								//gamma multipolarity
+								nd->tran[tranInd].numMultipoles = 0;
+								tok = strtok(mBuff," ");
+								if(tok != NULL){
+									uint8_t tentative = 0;
+									uint8_t derived = 0;
+									//SDL_Log("%s\n",tok);
+									nd->tran[tranInd].multipole[0] = 0; //default
+									for(int i=0;i<(int)strlen(tok);i++){
+										if(nd->tran[tranInd].numMultipoles >= MAXMULTPERLEVEL){
+											SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"parseENSDFFile - too many multipoles in string: %s\n",tok);
+											return -1;
+										}
+										if(tok[i]=='('){
+											tentative = 1;
+											if(i == 0){
+												nd->tran[tranInd].multipole[nd->tran[tranInd].numMultipoles] |= (uint8_t)(TENTATIVEMULT_YES << 5);
+											}
+										}else if(tok[i]==')'){
+											tentative = 0;
+										}else if(tok[i]=='['){
+											derived = 1;
+											if(i == 0){
+												nd->tran[tranInd].multipole[nd->tran[tranInd].numMultipoles] |= (uint8_t)(TENTATIVEMULT_DERIVED << 5U);
+											}
+										}else if(tok[i]==']'){
+											derived = 0;
+										}else if((tok[i]=='+')||(tok[i]==',')){
+											nd->tran[tranInd].numMultipoles++;
+											nd->tran[tranInd].multipole[nd->tran[tranInd].numMultipoles] = 0; //default
+											if(tentative){
+												nd->tran[tranInd].multipole[nd->tran[tranInd].numMultipoles] |= (uint8_t)(TENTATIVEMULT_YES << 5);
+											}else if(derived){
+												nd->tran[tranInd].multipole[nd->tran[tranInd].numMultipoles] |= (uint8_t)(TENTATIVEMULT_DERIVED << 5);
+											}else{
+												nd->tran[tranInd].multipole[nd->tran[tranInd].numMultipoles] |= (uint8_t)(TENTATIVEMULT_NONE << 5);
+											}
+										}else if(tok[i]=='E'){
+											nd->tran[tranInd].multipole[nd->tran[tranInd].numMultipoles] &= (uint8_t)(~(uint8_t)(1U)); //unset
+										}else if(tok[i]=='M'){
+											nd->tran[tranInd].multipole[nd->tran[tranInd].numMultipoles] |= (uint8_t)(1U);
+										}else if(tok[i]=='D'){
+											//set M1 as placeholder value
+											nd->tran[tranInd].multipole[nd->tran[tranInd].numMultipoles] |= (uint8_t)(1U);
+											nd->tran[tranInd].multipole[nd->tran[tranInd].numMultipoles] |= (uint8_t)((uint8_t)(1U) << 1);
+											//specify that assignment is 'D'
+											nd->tran[tranInd].multipole[nd->tran[tranInd].numMultipoles] |= (uint8_t)(1U << 7);
+										}else if(tok[i]=='Q'){
+											//set E2 as placeholder value
+											nd->tran[tranInd].multipole[nd->tran[tranInd].numMultipoles] &= (uint8_t)(~(uint8_t)(1U)); //unset
+											nd->tran[tranInd].multipole[nd->tran[tranInd].numMultipoles] |= (uint8_t)((uint8_t)(2U) << 1);
+											//specify that assignment is 'Q'
+											nd->tran[tranInd].multipole[nd->tran[tranInd].numMultipoles] |= (uint8_t)(1U << 7);
+										}else if(isdigit(tok[i])){
+											//set multipole order
+											nd->tran[tranInd].multipole[nd->tran[tranInd].numMultipoles] |= (uint8_t)(((uint8_t)(tok[i] - '0') & 15U) << 1);
+										}
+									}
+									nd->tran[tranInd].numMultipoles++;
+									//SDL_Log("Number of multipoles: %u\n",nd->tran[tranInd].numMultipoles);
+								}else{
+									//recopy buffer
+									memcpy(mBuff, &line[31], 10);
+									mBuff[10] = '\0';
+									if(!isspace(mBuff[0])){
+										//string with no preceding or trailing spaces
+										SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,"Unhandled multipolarity string: %s\n",mBuff);
+									}
+								}
+
+								nd->tran[tranInd].intensity.val=gammaI;
 								nd->levels[nd->numLvls-1].numTran++;
 								nd->numTran++;
 									
@@ -1947,8 +2023,11 @@ int parseAppData(app_data *restrict dat, const char *appBasePath){
   }else if(MAX_SPIN_VARS > /* DISABLES CODE */ (32)){
     SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"MAX_SPIN_VARS is too large, can't store as 5 bits in a bit pattern (eg. spinparval->format).\n");
     return -1;
-  }else if(TENTATIVE_ENUM_LENGTH > /* DISABLES CODE */ (8)){
-    SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"TENTATIVE_ENUM_LENGTH is too large, can't store as 3 bits in a bit pattern (eg. spinparval->format).\n");
+  }else if(TENTATIVESP_ENUM_LENGTH > /* DISABLES CODE */ (8)){
+    SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"TENTATIVESP_ENUM_LENGTH is too large, can't store as 3 bits in a bit pattern (eg. spinparval->format).\n");
+    return -1;
+  }else if(TENTATIVEMULT_ENUM_LENGTH > /* DISABLES CODE */ (4)){
+    SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"TENTATIVEMULT_ENUM_LENGTH is too large, can't store as 2 bits in a bit pattern (eg. transition->multipole).\n");
     return -1;
   }
 

@@ -47,7 +47,8 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //the nuclear database stored in memory (and on disk)
 #define MAXCASCDELENGTH 20
 #define MAXGAMMASPERLEVEL 10
-#define MAXSPPERLEVEL 3
+#define MAXSPPERLEVEL            3
+#define MAXMULTPERLEVEL          3
 #define MAXNUMNUCL               3500
 #define MAXNUMLVLS               200000
 #define MAXNUMTRAN               300000
@@ -88,14 +89,15 @@ typedef struct
   uint16_t format; //bit 0: whether or not spin is variable
   //bits 1-4: value type (from value_type_enum)
   //bits 5-9: variable index if bit 0 is set
-  //bits 9-11: whether value is tentative (values from tentative_enum)
+  //bits 9-11: whether value is tentative (values from tentative_sp_enum)
 }spinparval; //spin parity value
 
 typedef struct
 {
   valWithErr energy; //transition energy, in keV
   valWithErr intensity; //relative intensity
-  uint8_t multiplicity; //bits 0-5: from multiplicity_enum, bits 6-7: from tentative_enum
+  uint8_t numMultipoles; //only uses the first couple bits
+  uint8_t multipole[MAXMULTPERLEVEL]; //bit 0: E (unset) or M (set), bits 1-4: multipole order, bits 5-6: values from tentative_mult_enum, bit 7: if set, bit 0 corresponds to quadrupole/dipole
   uint8_t finalLvlOffset; //offset of the index of the final level from the initial level
 }transition; //a transition between levels
 
@@ -106,7 +108,7 @@ typedef struct
   int16_t numSpinParVals; //number of assigned spin parity values
   spinparval spval[MAXSPPERLEVEL]; //assinged spin parity value(s) 
   uint8_t halfInt; //if spin-parity values are half integer (1=true, in this case spinVal is multiplied by 0.5)
-  int16_t numTran; //number of gamma rays in this level
+  uint16_t numTran; //number of gamma rays in this level
   uint32_t firstTran; //index of first transition from this level
   int8_t numDecModes; //-1 by default for no decay modes specified (assume 100% IT in that case)
   uint16_t firstDecMode;
@@ -237,7 +239,7 @@ typedef struct
   SDL_Gamepad *gamepad;
   SDL_Renderer *renderer;
   SDL_Window *window;
-  char *appBasePath, *appPrefPath; //filesystem paths to on-disk resources
+  char *appPrefPath; //filesystem paths to on-disk resources
 }resource_data; //structure containing data relating to resources such as textures and fonts
 
 typedef struct

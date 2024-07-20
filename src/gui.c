@@ -475,6 +475,8 @@ void drawNuclFullInfoBox(const app_data *restrict dat, const app_state *restrict
           drawTextAlignedSized(rdat,drawXPos+NUCL_FULLINFOBOX_EGAMMA_COL_OFFSET,drawYPos,rdat->font,(hl > 1.0E3) ? whiteCol8Bit : blackCol8Bit,255,tmpStr,ALIGN_LEFT,16384); //draw transition energy label
           getGammaIntensityStr(tmpStr,&dat->ndat,(uint32_t)(dat->ndat.levels[lvlInd].firstTran + i),1);
           drawTextAlignedSized(rdat,drawXPos+NUCL_FULLINFOBOX_IGAMMA_COL_OFFSET,drawYPos,rdat->font,(hl > 1.0E3) ? whiteCol8Bit : blackCol8Bit,255,tmpStr,ALIGN_LEFT,16384); //draw transition intensity label
+          getGammaMultipolarityStr(tmpStr,&dat->ndat,(uint32_t)(dat->ndat.levels[lvlInd].firstTran + i));
+          drawTextAlignedSized(rdat,drawXPos+NUCL_FULLINFOBOX_MGAMMA_COL_OFFSET,drawYPos,rdat->font,(hl > 1.0E3) ? whiteCol8Bit : blackCol8Bit,255,tmpStr,ALIGN_LEFT,16384); //draw transition multipolarity label
           if(dat->ndat.tran[(uint32_t)(dat->ndat.levels[lvlInd].firstTran + i)].finalLvlOffset != 0){
             uint32_t finalLvlInd = getFinalLvlInd(&dat->ndat,lvlInd,(uint32_t)(dat->ndat.levels[lvlInd].firstTran + i));
             getLvlEnergyStr(tmpStr,&dat->ndat,finalLvlInd,0);
@@ -514,6 +516,7 @@ void drawNuclFullInfoBox(const app_data *restrict dat, const app_state *restrict
   drawTextAlignedSized(rdat,drawXPos+NUCL_FULLINFOBOX_HALFLIFE_COL_OFFSET,drawYPos,rdat->font,blackCol8Bit,255,dat->strings[LOCSTR_HALFLIFE],ALIGN_LEFT,16384);
   drawTextAlignedSized(rdat,drawXPos+NUCL_FULLINFOBOX_EGAMMA_COL_OFFSET,drawYPos,rdat->font,blackCol8Bit,255,dat->strings[LOCSTR_ENERGY_GAMMA],ALIGN_LEFT,16384);
   drawTextAlignedSized(rdat,drawXPos+NUCL_FULLINFOBOX_IGAMMA_COL_OFFSET,drawYPos,rdat->font,blackCol8Bit,255,dat->strings[LOCSTR_INTENSITY_GAMMA],ALIGN_LEFT,16384);
+  drawTextAlignedSized(rdat,drawXPos+NUCL_FULLINFOBOX_MGAMMA_COL_OFFSET,drawYPos,rdat->font,blackCol8Bit,255,dat->strings[LOCSTR_MULTIPOLARITY_GAMMA],ALIGN_LEFT,16384);
   drawTextAlignedSized(rdat,drawXPos+NUCL_FULLINFOBOX_FINALLEVEL_E_COL_OFFSET,drawYPos,rdat->font,blackCol8Bit,255,dat->strings[LOCSTR_FINALLEVEL],ALIGN_LEFT,16384);
 
   //back button

@@ -19,7 +19,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include "app.h"
 
 void shutdownApp(const global_data *gdat, const uint8_t skipDealloc){
-  updateConfigFile(gdat->rdat.appBasePath,&gdat->dat.rules,&gdat->state); //save settings to disk
+  updateConfigFile(gdat->rdat.appPrefPath,&gdat->dat.rules,&gdat->state); //save settings to disk
   if(!skipDealloc){
     FC_FreeFont(gdat->rdat.font);
     if(gdat->rdat.fontData!=NULL){
@@ -84,9 +84,8 @@ int main(int argc, char *argv[]){
   }
 
   //setup paths
-  gdat->rdat.appBasePath = SDL_GetBasePath();
-  //gdat->rdat.appPrefPath = SDL_GetPrefPath("con","con");
-  //SDL_Log("Base path: %s\nPref path: %s\n",gdat->rdat.appBasePath,gdat->rdat.appPrefPath);
+  gdat->rdat.appPrefPath = SDL_GetPrefPath(NULL,"con");
+  SDL_Log("Data file path: %s\n",gdat->rdat.appPrefPath);
 
   //load preferences (needed prior to window created)
   gdat->state.gamepadDeadzone = 16000;
@@ -97,7 +96,7 @@ int main(int argc, char *argv[]){
   gdat->state.ds.drawPerformanceStats = 0;
 
   initializeTempState(&gdat->dat,&gdat->state);
-  updatePrefsFromConfigFile(gdat->rdat.appBasePath,&gdat->dat.rules,&gdat->state); //read settings from .ini file
+  updatePrefsFromConfigFile(gdat->rdat.appPrefPath,&gdat->dat.rules,&gdat->state); //read settings from .ini file
 
   //setup the application window
   gdat->rdat.window = SDL_CreateWindow("Loading...",gdat->state.ds.windowXRes,gdat->state.ds.windowYRes,SDL_WINDOW_RESIZABLE|SDL_WINDOW_HIGH_PIXEL_DENSITY);

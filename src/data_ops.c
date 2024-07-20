@@ -859,6 +859,37 @@ const char* getDecayTypeShortStr(const uint8_t type){
 	}
 }
 
+//for two multipolarity values, determine whether or not they
+//can occur within the same transition (mix)
+//if they can mix, return 1
+//if not, return 0
+uint8_t multsCanMix(const uint8_t mult1, const uint8_t mult2){
+	uint8_t mOrder1 = (uint8_t)((mult1 >> 1U) & 15U);
+	uint8_t mEM1 = (uint8_t)(mult1 & 1U);
+	uint8_t mDQ1 = (uint8_t)((mult1 >> 7U) & 1U);
+	uint8_t mOrder2 = (uint8_t)((mult2 >> 1U) & 15U);
+	uint8_t mEM2 = (uint8_t)(mult2 & 1U);
+	uint8_t mDQ2 = (uint8_t)((mult2 >> 7U) & 1U);
+
+	if(mDQ1 != mDQ2){
+		return 0;
+	}else if(((mOrder1 + mOrder2) % 2) == 0){
+		//both orders are even or both are odd, can only occur
+		//if both multipolarities are M or both are E
+		if(mEM1 == mEM2){
+			return 1;
+		}else{
+			return 0;
+		}
+	}else{
+		if(mEM1 == mEM2){
+			return 0;
+		}else{
+			return 1;
+		}
+	}
+}
+
 void getGammaEnergyStr(char strOut[32], const ndata *restrict nd, const uint32_t tranInd, const uint8_t showErr){
 
 	uint8_t ePrecision = (uint8_t)(nd->tran[tranInd].energy.format & 15U);
@@ -900,6 +931,75 @@ void getGammaIntensityStr(char strOut[32], const ndata *restrict nd, const uint3
 		}
 	}
 	
+}
+
+void getGammaMultipolarityStr(char strOut[32], const ndata *restrict nd, const uint32_t tranInd){
+
+	strcpy(strOut,""); //clear the string
+	uint8_t tentative = 0;
+	uint8_t derived = 0;
+
+	for(uint8_t i=0; i<nd->tran[tranInd].numMultipoles; i++){
+		uint8_t mTentative = (uint8_t)((nd->tran[tranInd].multipole[i] >> 5U) & 3U);
+		uint8_t mOrder = (uint8_t)((nd->tran[tranInd].multipole[i] >> 1U) & 15U);
+		uint8_t mEM = (uint8_t)(nd->tran[tranInd].multipole[i] & 1U);
+		uint8_t mDQ = (uint8_t)((nd->tran[tranInd].multipole[i] >> 7U) & 1U);
+		if(mTentative == TENTATIVEMULT_YES){
+			if(tentative == 0){
+				tentative = 1;
+				strcat(strOut,"(");
+			}
+		}else if(mTentative == TENTATIVEMULT_DERIVED){
+			if(derived == 0){
+				derived = 1;
+				strcat(strOut,"[");
+			}
+		}else if(mTentative == TENTATIVESP_NONE){
+			if(tentative == 1){
+				tentative = 0;
+				strcat(strOut,")");
+			}
+			if(derived == 1){
+				derived = 0;
+				strcat(strOut,"]");
+			}
+		}
+		if(i>0){
+			if(multsCanMix(nd->tran[tranInd].multipole[i],nd->tran[tranInd].multipole[i-1])){
+				strcat(strOut,"+");
+			}else{
+				strcat(strOut,",");
+			}
+		}
+
+		if(mDQ){
+			//dipole/quadrupole assignment
+			//check placeholder multipole values to determine which is which
+			if((mEM == 0)&&(mOrder == 2)){
+				strcat(strOut,"Q");
+			}else if((mEM == 1)&&(mOrder == 1)){
+				strcat(strOut,"D");
+			}
+		}else{
+			if(mEM){
+				strcat(strOut,"M");
+			}else{
+				strcat(strOut,"E");
+			}
+			char order[16];
+		  SDL_snprintf(order,16,"%u",mOrder);
+			strcat(strOut,order);
+		}
+
+		if(i==(nd->tran[tranInd].numMultipoles-1)){
+			if(derived == 1){
+				strcat(strOut,"]");
+			}
+			if(tentative == 1){
+				strcat(strOut,")");
+			}
+		}
+	}
 }
 
 void getLvlEnergyStr(char strOut[32], const ndata *restrict nd, const uint32_t lvlInd, const uint8_t showErr){
@@ -1042,7 +1142,7 @@ void getSpinParStr(char strOut[32], const ndata *restrict nd, const uint32_t lvl
 			nextTentative = (uint8_t)((uint16_t)(nd->levels[lvlInd].spval[i+1].format >> 9U) & 7U);
 		}
 
-		if(tentative == TENTATIVE_RANGE){
+		if(tentative == TENTATIVESP_RANGE){
 			strcat(strOut,"to");
 		}else{
 
@@ -1050,9 +1150,9 @@ void getSpinParStr(char strOut[32], const ndata *restrict nd, const uint32_t lvl
 			uint8_t spinVarInd = (uint8_t)((nd->levels[lvlInd].spval[i].format >> 5U) & 31U);
 			uint8_t spinValType = (uint8_t)((nd->levels[lvlInd].spval[i].format >> 1U) & 15U);
 			
-			if((tentative == TENTATIVE_SPINANDPARITY)||(tentative == TENTATIVE_SPINONLY)){
-				if((i==0)||((i>0)&&((prevTentative != TENTATIVE_SPINANDPARITY)&&(prevTentative != TENTATIVE_SPINONLY)))){
-					if((i>0)&&(prevTentative == TENTATIVE_RANGE)){
+			if((tentative == TENTATIVESP_SPINANDPARITY)||(tentative == TENTATIVESP_SPINONLY)){
+				if((i==0)||((i>0)&&((prevTentative != TENTATIVESP_SPINANDPARITY)&&(prevTentative != TENTATIVESP_SPINONLY)))){
+					if((i>0)&&(prevTentative == TENTATIVESP_RANGE)){
 						//previous spin parity value specified a range
 						strcat(strOut," ");
 					}else{
@@ -1097,13 +1197,13 @@ void getSpinParStr(char strOut[32], const ndata *restrict nd, const uint32_t lvl
 			}else if(nd->levels[lvlInd].spval[i].parVal == 1){
 				strcat(strOut,"+");
 			}
-			if((tentative == TENTATIVE_SPINANDPARITY)||(tentative == TENTATIVE_SPINONLY)){
+			if((tentative == TENTATIVESP_SPINANDPARITY)||(tentative == TENTATIVESP_SPINONLY)){
 				if(i==nd->levels[lvlInd].numSpinParVals-1){
 					strcat(strOut,")");
 				}else if(i<nd->levels[lvlInd].numSpinParVals-1){
-					if(nextTentative != TENTATIVE_RANGE){
-						if(nextTentative != TENTATIVE_SPINANDPARITY){
-							if(nextTentative != TENTATIVE_SPINONLY){
+					if(nextTentative != TENTATIVESP_RANGE){
+						if(nextTentative != TENTATIVESP_SPINANDPARITY){
+							if(nextTentative != TENTATIVESP_SPINONLY){
 								strcat(strOut,")");
 							}
 						}
@@ -1111,7 +1211,7 @@ void getSpinParStr(char strOut[32], const ndata *restrict nd, const uint32_t lvl
 				}
 			}
 			if(i!=nd->levels[lvlInd].numSpinParVals-1){
-				if(nextTentative == TENTATIVE_RANGE){
+				if(nextTentative == TENTATIVESP_RANGE){
 					//next spin parity value specifies a range
 					strcat(strOut," ");
 				}else{

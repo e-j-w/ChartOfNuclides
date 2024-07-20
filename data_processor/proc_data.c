@@ -78,11 +78,13 @@ int main(int argc, char *argv[]){
     SDL_Log("Cannot initialize SDL: %s\n",SDL_GetError());
     return 0;
   }
-
-  const char fileName[16] = "con.dat";
+  
+  const char *appBasePath = SDL_GetBasePath();
+  const char *appPrefPath = SDL_GetPrefPath(NULL,"con");
+  char fileName[512];
+  SDL_snprintf(fileName,512,"%scon.dat",appPrefPath);
   const char headerStr[6] = "<>|<>";
   const uint8_t version = 0; //revision of data format
-  const char *appBasePath = SDL_GetBasePath();
 
   //parse data + metadata into an app_data struct
   app_data *dat=(app_data*)SDL_calloc(1,sizeof(app_data));

@@ -103,8 +103,9 @@ static const uint8_t UITHEME_ICON_TILE_Y[UIICON_ENUM_LENGTH] = {10,10,10,9,9};
 #define NUCL_FULLINFOBOX_HALFLIFE_COL_OFFSET        280.0f //in unscaled pixels
 #define NUCL_FULLINFOBOX_EGAMMA_COL_OFFSET          410.0f //in unscaled pixels
 #define NUCL_FULLINFOBOX_IGAMMA_COL_OFFSET          530.0f //in unscaled pixels
-#define NUCL_FULLINFOBOX_FINALLEVEL_E_COL_OFFSET    630.0f //in unscaled pixels
-#define NUCL_FULLINFOBOX_FINALLEVEL_JPI_COL_OFFSET  730.0f //in unscaled pixels
+#define NUCL_FULLINFOBOX_MGAMMA_COL_OFFSET          630.0f //in unscaled pixels
+#define NUCL_FULLINFOBOX_FINALLEVEL_E_COL_OFFSET    730.0f //in unscaled pixels
+#define NUCL_FULLINFOBOX_FINALLEVEL_JPI_COL_OFFSET  830.0f //in unscaled pixels
 #define NUCL_FULLINFOBOX_LEVELLIST_POS_Y            120.0f //in unscaled pixels
 
 //performance overlay
