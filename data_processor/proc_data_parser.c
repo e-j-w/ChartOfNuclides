@@ -1501,6 +1501,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 												tok2 = strtok(NULL," ");
 											}
 											if(tok2!=NULL){
+												nd->dcyMode[nd->numDecModes].prob.format = 0;
 												char value[16];
 												strncpy(value,tok2,15);
 												//SDL_Log("%s\n",tok2);
@@ -1508,19 +1509,35 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 												tok2 = strtok(NULL,""); //get the rest of the string
 												if(tok2 != NULL){
 													//SDL_Log("%s\n",tok2);
-													nd->dcyMode[nd->numDecModes].prob.err = (uint8_t)atoi(tok2);
+													if(tok2[0]=='+'){
+														//asymmetric errors
+														//SDL_Log("err: %s\n",tok2);
+														char errVal[16];
+														strncpy(errVal,tok2,15);
+														tok2 = strtok(errVal, "-");
+														if(tok2 != NULL){
+															//SDL_Log("pos err: %s\n",tok2);
+															nd->dcyMode[nd->numDecModes].prob.err = (uint8_t)atoi(tok2); //positive error
+															tok2 = strtok(NULL, ""); //get rest of the string
+															if(tok2 != NULL){
+																uint16_t negErr = ((uint16_t)atoi(tok2) & 127U); //negative error
+																//SDL_Log("neg err: %u\n",negErr);
+																nd->dcyMode[nd->numDecModes].prob.format |= (uint16_t)(VALUETYPE_ASYMERROR << 5);
+																nd->dcyMode[nd->numDecModes].prob.format |= (uint16_t)(negErr << 9);
+															}
+														}
+													}else{
+														nd->dcyMode[nd->numDecModes].prob.err = (uint8_t)atoi(tok2);
+													}
 												}
-												nd->dcyMode[nd->numDecModes].prob.format = 0;
 												tok2 = strtok(value,".");
 												if(tok2!=NULL){
 													//SDL_Log("tok2: %s\n",tok2);
 													tok2 = strtok(NULL,"");
 													if(tok2!=NULL){
 														//SDL_Log("tok2: %s\n",tok2);
-														nd->dcyMode[nd->numDecModes].prob.format = (uint16_t)strlen(tok2);
-														if(nd->dcyMode[nd->numDecModes].prob.format > 15U){
-															nd->dcyMode[nd->numDecModes].prob.format = 15U; //only 4 bits available for precision
-														}
+														uint8_t sigFigs = (uint16_t)(strlen(tok2) & 15U); //only 4 bits available for precision
+														nd->dcyMode[nd->numDecModes].prob.format |= sigFigs;
 													}
 													//SDL_Log("format: %u\n",nd->dcyMode[nd->numDecModes].prob.format);
 												}

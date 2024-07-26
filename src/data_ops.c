@@ -1090,19 +1090,26 @@ void getGSHalfLifeStr(char strOut[32], const ndata *restrict nd, const uint16_t 
 
 void getDecayModeStr(char strOut[32], const ndata *restrict nd, const uint32_t dcyModeInd){
 	if(dcyModeInd < nd->numDecModes){
-		uint8_t decValueType = nd->dcyMode[dcyModeInd].prob.unit;
+		uint8_t decUnitType = nd->dcyMode[dcyModeInd].prob.unit;
 		uint8_t decType = nd->dcyMode[dcyModeInd].type;
 		uint8_t decPrecision = (uint8_t)(nd->dcyMode[dcyModeInd].prob.format & 15U);
-		if(decValueType == VALUETYPE_NUMBER){
-			if(nd->dcyMode[dcyModeInd].prob.err > 0){
-				SDL_snprintf(strOut,32,"%s = %.*f(%u)%%%%",getDecayTypeShortStr(decType),decPrecision,(double)nd->dcyMode[dcyModeInd].prob.val,nd->dcyMode[dcyModeInd].prob.err); //%%%% will be parsed to "%%" in tmpStr, which will then be parsed as a format string by SDL_FontCacahe, leaving "%"
+		uint8_t decValueType = (uint8_t)((nd->dcyMode[dcyModeInd].prob.format >> 5U) & 15U);
+		if(decUnitType == VALUETYPE_NUMBER){
+			if(decValueType == VALUETYPE_ASYMERROR){
+				uint8_t negErr = (uint8_t)((nd->dcyMode[dcyModeInd].prob.format >> 9U) & 127U);
+				SDL_snprintf(strOut,32,"%s = %.*f(+%u-%u)%%%%",getDecayTypeShortStr(decType),decPrecision,(double)(nd->dcyMode[dcyModeInd].prob.val),nd->dcyMode[dcyModeInd].prob.err,negErr);
 			}else{
-				SDL_snprintf(strOut,32,"%s = %.*f%%%%",getDecayTypeShortStr(decType),decPrecision,(double)nd->dcyMode[dcyModeInd].prob.val); //%%%% will be parsed to "%%" in tmpStr, which will then be parsed as a format string by SDL_FontCacahe, leaving "%"
+				if(nd->dcyMode[dcyModeInd].prob.err > 0){
+					SDL_snprintf(strOut,32,"%s = %.*f(%u)%%%%",getDecayTypeShortStr(decType),decPrecision,(double)nd->dcyMode[dcyModeInd].prob.val,nd->dcyMode[dcyModeInd].prob.err); //%%%% will be parsed to "%%" in tmpStr, which will then be parsed as a format string by SDL_FontCacahe, leaving "%"
+				}else{
+					SDL_snprintf(strOut,32,"%s = %.*f%%%%",getDecayTypeShortStr(decType),decPrecision,(double)nd->dcyMode[dcyModeInd].prob.val); //%%%% will be parsed to "%%" in tmpStr, which will then be parsed as a format string by SDL_FontCacahe, leaving "%"
+				}
 			}
-		}else if(decValueType == VALUETYPE_UNKNOWN){
-			SDL_snprintf(strOut,32,"%s%s",getDecayTypeShortStr(decType),getValueTypeShortStr(decValueType));
+			
+		}else if(decUnitType == VALUETYPE_UNKNOWN){
+			SDL_snprintf(strOut,32,"%s%s",getDecayTypeShortStr(decType),getValueTypeShortStr(decUnitType));
 		}else{
-			SDL_snprintf(strOut,32,"%s %s%.*f%%%%",getDecayTypeShortStr(decType),getValueTypeShortStr(decValueType),decPrecision,(double)nd->dcyMode[dcyModeInd].prob.val); //%%%% will be parsed to "%%" in tmpStr, which will then be parsed as a format string by SDL_FontCacahe, leaving "%"
+			SDL_snprintf(strOut,32,"%s %s%.*f%%%%",getDecayTypeShortStr(decType),getValueTypeShortStr(decUnitType),decPrecision,(double)nd->dcyMode[dcyModeInd].prob.val); //%%%% will be parsed to "%%" in tmpStr, which will then be parsed as a format string by SDL_FontCacahe, leaving "%"
 		}
 	}else{
 		SDL_snprintf(strOut,32," ");
