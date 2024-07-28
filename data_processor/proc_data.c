@@ -80,9 +80,8 @@ int main(int argc, char *argv[]){
   }
   
   const char *appBasePath = SDL_GetBasePath();
-  const char *appPrefPath = SDL_GetPrefPath(NULL,"con");
   char fileName[512];
-  SDL_snprintf(fileName,512,"%scon.dat",appPrefPath);
+  SDL_snprintf(fileName,512,"%scon.dat",appBasePath);
   const char headerStr[6] = "<>|<>";
   const uint8_t version = 0; //revision of data format
 

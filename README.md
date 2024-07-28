@@ -23,15 +23,6 @@ The goal is to develop a performant and multiplatform tool that will be useful i
 
 ## Building and installing from source
 
-### Collect data
-
-If you're building the database from scratch, you'll need various isotope and nuclear structure data, from the sources below:
-
-| Data       | Source location | Instructions |
-| :--------- | :---------------| :----------- |
-| Nuclear structure data    |  [ENSDF](https://www.nndc.bnl.gov/ensarchivals/) | Download the zip archive from the link in the 'Latest Dataset' section. Unzip it in the source tree into the directory `data/ensdf/` (such that the `ensdf` subdirectory contains the files `ensdf.001`, `ensdf.002`, etc.). |
-| Isotope abundance data    | [NIST](https://www.nist.gov/pml/atomic-weights-and-isotopic-compositions-relative-atomic-masses) | Under 'Search the Database', select 'All Elements', output type 'Linearized ASCII Output', with the option 'Most common isotopes'.  Select 'Get Data'.  Copy the resulting plaintext data into a text file, save the text file in the source tree under `data/abundances.txt`. |
-
 ### Build dependencies
 
 * C compiler: gcc (or clang)
@@ -40,7 +31,7 @@ If you're building the database from scratch, you'll need various isotope and nu
 
 The current version has been tested under Arch Linux as of July 2024.  For now you'll probably have to manually compile SDL3 and its libraries, as they aren't (yet) packaged for major Linux distros.
 
-### Build the database and program
+### Build the application
 
 Install all build dependencies listed above, then build the application binaries using `make` (from the source tree root directory):
 
@@ -51,19 +42,40 @@ make all -j
 make all -j CC=clang
 ```
 
-Two executables will be built: `proc_data` (which generates the data package `con.dat` containing the nuclear structure database used by the main application), and `con` (the main application). Obtain the [required data files](#collect-data), then build the nuclear structure database and generate the packaged data file (`con.dat`) by running: 
-
-```
-./proc_data
-```
-
-This will build the data package file `con.dat` in the user data directory (`~/.local/share/con/` on Linux). Then, the main application can be run:
+Two executables will be built: `proc_data` (which generates the data package containing the nuclear structure database used by the main application), and `con` (the main application).  [Build the data files](#build-data-files) if neccessary, then run the application:
 
 ```
 ./con
 ```
 
 Have fun!
+
+
+### Build data files
+
+In order for the application to run, it requires a data file (`con.dat`) containing the nuclear structure database and graphics/font resources.  The application will look for the data file in any of the following locations (in order of preference):
+
+| Location Name            | Path |
+| :----------------------- | :----- |
+| User-specific data path  | `~/.local/share/con/` (Linux) |
+| Executable directory     | The same directory that the executable was run from.  |
+| System-wide data path    | `/usr/share/con/` (Linux) |
+
+
+If you don't have the `con.dat` data file, it can be built from the original data files using the `proc_data` program (built during the [previous step](#build-the-application)).  First you must obtain the required data files:
+
+| Data       | Source location | Instructions |
+| :--------- | :---------------| :----------- |
+| Nuclear structure data    |  [ENSDF](https://www.nndc.bnl.gov/ensarchivals/) | Download the zip archive from the link in the 'Latest Dataset' section. Unzip it in the source tree into the directory `data/ensdf/` (such that the `ensdf` subdirectory contains the files `ensdf.001`, `ensdf.002`, etc.). |
+| Isotope abundance data    | [NIST](https://www.nist.gov/pml/atomic-weights-and-isotopic-compositions-relative-atomic-masses) | Under 'Search the Database', select 'All Elements', output type 'Linearized ASCII Output', with the option 'Most common isotopes'.  Select 'Get Data'.  Copy the resulting plaintext data into a text file, save the text file in the source tree under `data/abundances.txt`. |
+
+Once the data files are properly set up, run: 
+
+```
+./proc_data
+```
+
+This will build the data package file `con.dat` in the same directory (you can then get rid of the original data files if you don't want them anymore).
 
 ## Using the program
 

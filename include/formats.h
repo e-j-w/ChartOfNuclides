@@ -240,6 +240,7 @@ typedef struct
   SDL_Renderer *renderer;
   SDL_Window *window;
   char *appPrefPath; //filesystem paths to on-disk resources
+  char appDataFilepath[270]; //the absolute path to the app data file
 }resource_data; //structure containing data relating to resources such as textures and fonts
 
 typedef struct
