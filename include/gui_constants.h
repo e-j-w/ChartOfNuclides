@@ -38,6 +38,8 @@ which can be referenced by both the GUI draw code as well as the interaction cod
 #define UITHEME_BUTTON_TILE_Y 0
 #define UITHEME_PANELBG_TILE_X 0
 #define UITHEME_PANELBG_TILE_Y 5
+#define UITHEME_HIGHLIGHT_TILE_X 0
+#define UITHEME_HIGHLIGHT_TILE_Y 2
 
 //UI theme icons
 static const uint8_t UITHEME_ICON_TILE_X[UIICON_ENUM_LENGTH] = {0,1,2,1,2};
@@ -57,10 +59,11 @@ static const uint8_t UITHEME_ICON_TILE_Y[UIICON_ENUM_LENGTH] = {10,10,10,9,9};
 #define MENU_BUTTON_POS_Y     UI_PADDING_SIZE   //in unscaled pixels
 #define MENU_BUTTON_WIDTH     40 //in unscaled pixels
 
-#define PRIMARY_MENU_POS_XR   (UI_PADDING_SIZE-4)   //in unscaled pixels
-#define PRIMARY_MENU_POS_Y    (UI_TILE_SIZE+2*UI_PADDING_SIZE)  //in unscaled pixels
-#define PRIMARY_MENU_WIDTH    160 //in unscaled pixels
-#define PRIMARY_MENU_HEIGHT   280 //in unscaled pixels
+#define PRIMARY_MENU_POS_XR        (UI_PADDING_SIZE-4)   //in unscaled pixels
+#define PRIMARY_MENU_POS_Y         (UI_TILE_SIZE+UI_PADDING_SIZE)  //in unscaled pixels
+#define PRIMARY_MENU_WIDTH         200 //in unscaled pixels
+#define PRIMARY_MENU_HEIGHT        2*PRIMARY_MENU_ITEM_SPACING + 4*UI_PADDING_SIZE //in unscaled pixels
+#define PRIMARY_MENU_ITEM_SPACING  40 //in unscaled pixels
 
 #define DIMMER_OPACITY        0.20f
 

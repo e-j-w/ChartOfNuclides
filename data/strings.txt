@@ -14,3 +14,5 @@ multipolarity_gamma|M(γ)
 final_level|Final Level
 all_levels|All levels/gammas
 back_to_summary|Back to summary
+menuitem_preferences|Preferences
+menuitem_about|About Chart of Nuclides

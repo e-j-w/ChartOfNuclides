@@ -89,6 +89,9 @@ void stopUIAnimation(const app_data *restrict dat, app_state *restrict state, co
 
   //take action at the end of the animation
   switch(uiAnim){
+		case UIANIM_PRIMARY_MENU_HIDE:
+			state->ds.shownElements &= (uint32_t)(~(1U << UIELEM_PRIMARY_MENU)); //close the menu
+			break;
     case UIANIM_MSG_BOX_HIDE:
       state->ds.shownElements &= (uint32_t)(~(1U << UIELEM_MSG_BOX)); //close the message box
       break;
@@ -1477,10 +1480,11 @@ void uiElemClickAction(const app_data *restrict dat, app_state *restrict state, 
   switch(uiElemID){
     case UIELEM_MENU_BUTTON:
       if(state->ds.shownElements & (1U << UIELEM_PRIMARY_MENU)){
-        state->ds.shownElements &= (uint32_t)(~(1 << UIELEM_PRIMARY_MENU)); //close the menu
+				startUIAnimation(&state->ds,UIANIM_PRIMARY_MENU_HIDE); //menu will be closed after animation finishes
         state->clickedUIElem = UIELEM_ENUM_LENGTH; //'unclick' the menu button
       }else{
         state->ds.shownElements |= (1U << UIELEM_PRIMARY_MENU);
+				startUIAnimation(&state->ds,UIANIM_PRIMARY_MENU_SHOW);
       }
       break;
     case UIELEM_MSG_BOX_OK_BUTTON:
@@ -1569,7 +1573,15 @@ void uiElemClickAction(const app_data *restrict dat, app_state *restrict state, 
 					//full info box, do nothing for now
 				}else{
 					//clicked out of a menu
-					state->ds.shownElements = 0; //close any menu being shown
+					//handle individual menu closing animations
+					if(state->ds.shownElements & (1U << UIELEM_PRIMARY_MENU)){
+						startUIAnimation(&state->ds,UIANIM_PRIMARY_MENU_HIDE); //menu will be closed after animation finishes
+						state->clickedUIElem = UIELEM_ENUM_LENGTH; //'unclick' the menu button
+					}
+					if((state->ds.shownElements & (1U << UIELEM_NUCL_INFOBOX))&&(state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_HIDE]==0.0f)){
+						startUIAnimation(&state->ds,UIANIM_NUCLINFOBOX_HIDE); //hide the info box, see stopUIAnimation() for info box hiding action
+						startUIAnimation(&state->ds,UIANIM_NUCLHIGHLIGHT_HIDE);
+					}
 					state->ds.shownElements |= (1U << UIELEM_CHARTOFNUCLIDES);
 				}
       }

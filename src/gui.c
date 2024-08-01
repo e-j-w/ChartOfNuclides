@@ -689,6 +689,54 @@ void drawMessageBox(const app_data *restrict dat, const app_state *restrict stat
   //SDL_Log("%.3f %.3f alpha %u\n",(double)state->ds.timeLeftInUIAnimation[UIANIM_MSG_BOX_SHOW],(double)state->ds.timeLeftInUIAnimation[UIANIM_MSG_BOX_HIDE],alpha);
 }
 
+void drawPrimaryMenu(const app_data *restrict dat, const app_state *restrict state, resource_data *restrict rdat){
+  
+  float alpha = 1.0f;
+  float yOffset = 0;
+  if(state->ds.uiAnimPlaying & (1U << UIANIM_PRIMARY_MENU_HIDE)){
+    alpha = (float)(1.0f*juice_smoothStart2(state->ds.timeLeftInUIAnimation[UIANIM_PRIMARY_MENU_HIDE]/(UI_ANIM_LENGTH)));
+    yOffset = (-30.0f*juice_smoothStop2(1.0f - state->ds.timeLeftInUIAnimation[UIANIM_PRIMARY_MENU_HIDE]/UI_ANIM_LENGTH));
+  }else if(state->ds.uiAnimPlaying & (1U << UIANIM_PRIMARY_MENU_SHOW)){
+    alpha = (float)(1.0f*juice_smoothStop2(1.0f - state->ds.timeLeftInUIAnimation[UIANIM_PRIMARY_MENU_SHOW]/UI_ANIM_LENGTH));
+    yOffset = (-30.0f*juice_smoothStart2(state->ds.timeLeftInUIAnimation[UIANIM_PRIMARY_MENU_SHOW]/(UI_ANIM_LENGTH)));
+  }
+  //SDL_Log("alpha: %f\n",(double)alpha);
+  
+  //draw menu background
+  SDL_FRect drawRect;
+  drawRect.x = state->ds.uiElemPosX[UIELEM_PRIMARY_MENU];
+  drawRect.y = ((float)state->ds.uiElemPosY[UIELEM_PRIMARY_MENU] + yOffset);
+  drawRect.w = state->ds.uiElemWidth[UIELEM_PRIMARY_MENU];
+  drawRect.h = state->ds.uiElemHeight[UIELEM_PRIMARY_MENU];
+  drawPanelBG(rdat,drawRect,alpha);
+
+  //draw menu item text
+  Uint8 txtAlpha = (Uint8)(alpha*255.0f);
+  drawTextAlignedSized(rdat,drawRect.x + 4*UI_PADDING_SIZE,drawRect.y + 0.5f*PRIMARY_MENU_ITEM_SPACING + yOffset,rdat->font,blackCol8Bit,txtAlpha,dat->strings[LOCSTR_MENUITEM_PREFS],ALIGN_LEFT,(Uint16)(drawRect.w - 8*UI_PADDING_SIZE));
+  drawTextAlignedSized(rdat,drawRect.x + 4*UI_PADDING_SIZE,drawRect.y + 1.5f*PRIMARY_MENU_ITEM_SPACING + yOffset,rdat->font,blackCol8Bit,txtAlpha,dat->strings[LOCSTR_MENUITEM_ABOUT],ALIGN_LEFT,(Uint16)(drawRect.w - 8*UI_PADDING_SIZE));
+
+  //draw menu item highlight
+  drawRect.x += 3*UI_PADDING_SIZE;
+  drawRect.y += 3*UI_PADDING_SIZE;
+  drawRect.w -= 8*UI_PADDING_SIZE;
+  drawRect.h = PRIMARY_MENU_ITEM_SPACING; 
+  for(uint8_t i=1;i<=2;i++){
+    drawRect.y += PRIMARY_MENU_ITEM_SPACING;
+    switch(getHighlightState(state,UIELEM_PRIMARY_MENU+i)){
+      case HIGHLIGHT_SELECTED:
+        drawFlatRect(rdat,drawRect,dat->rules.themeRules.modSelectedCol);
+        break;
+      case HIGHLIGHT_MOUSEOVER:
+        drawFlatRect(rdat,drawRect,dat->rules.themeRules.modMouseOverCol);
+        break;
+      case HIGHLIGHT_NORMAL:
+      default:
+        break;
+    }
+  }
+
+}
+
 //meta-function which draws any UI menus, if applicable
 void drawUI(const app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat){
 
@@ -707,12 +755,7 @@ void drawUI(const app_data *restrict dat, app_state *restrict state, resource_da
     drawNuclFullInfoBox(dat,state,rdat,state->chartSelectedNucl);
   }
   if(state->ds.shownElements & (1U << UIELEM_PRIMARY_MENU)){
-    SDL_FRect menuRect;
-    menuRect.x = state->ds.uiElemPosX[UIELEM_PRIMARY_MENU];
-    menuRect.y = state->ds.uiElemPosY[UIELEM_PRIMARY_MENU];
-    menuRect.w = state->ds.uiElemWidth[UIELEM_PRIMARY_MENU];
-    menuRect.h = state->ds.uiElemHeight[UIELEM_PRIMARY_MENU];
-    drawPanelBG(rdat,menuRect,1.0f);
+    drawPrimaryMenu(dat,state,rdat);
   }
   if(state->ds.shownElements & (1U << UIELEM_MSG_BOX)){
     drawMessageBox(dat,state,rdat);
