@@ -40,6 +40,7 @@ void initializeTempState(const app_data *restrict dat, app_state *restrict state
 	state->chartSelectedNucl = MAXNUMNUCL;
   state->quitAppFlag = 0;
   //ui state
+	state->lastUIState = UISTATE_DEFAULT;
   changeUIState(dat,state,UISTATE_DEFAULT);
   state->clickedUIElem = UIELEM_ENUM_LENGTH; //no selected UI element
   state->ds.shownElements = 0; //no UI elements being shown
@@ -71,13 +72,25 @@ void initializeTempState(const app_data *restrict dat, app_state *restrict state
 }
 
 
-void startUIAnimation(drawing_state *restrict ds, const uint8_t uiAnim){
+void startUIAnimation(const app_data *restrict dat, app_state *restrict state, const uint8_t uiAnim){
   if(uiAnim >= UIANIM_ENUM_LENGTH){
     SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,"startUIAnimation - invalid animation ID (%u, max %u).\n",uiAnim,UIANIM_ENUM_LENGTH-1);
     return;
   }
-  ds->timeLeftInUIAnimation[uiAnim] = UI_ANIM_LENGTH;
-  ds->uiAnimPlaying |= (1U << uiAnim);
+  state->ds.timeLeftInUIAnimation[uiAnim] = UI_ANIM_LENGTH;
+  state->ds.uiAnimPlaying |= (1U << uiAnim);
+
+	//take action at the start of the animation
+	switch(uiAnim){
+		case UIANIM_PRIMARY_MENU_HIDE:
+			changeUIState(dat,state,state->uiState); //make menu items uninteractable
+			break;
+		case UIANIM_NUCLINFOBOX_HIDE:
+			changeUIState(dat,state,UISTATE_DEFAULT); //make info box un-interactable
+			break;
+		default:
+			break;
+	}
 }
 void stopUIAnimation(const app_data *restrict dat, app_state *restrict state, const uint8_t uiAnim){
   if(uiAnim >= UIANIM_ENUM_LENGTH){
@@ -94,10 +107,10 @@ void stopUIAnimation(const app_data *restrict dat, app_state *restrict state, co
 			break;
     case UIANIM_MSG_BOX_HIDE:
       state->ds.shownElements &= (uint32_t)(~(1U << UIELEM_MSG_BOX)); //close the message box
+			state->ds.shownElements &= (uint32_t)(~(1U << UIELEM_ABOUT_BOX)); //close the about box
       break;
 		case UIANIM_NUCLINFOBOX_HIDE:
 			state->ds.shownElements &= (uint32_t)(~(1U << UIELEM_NUCL_INFOBOX)); //close the info box
-			changeUIState(dat,state,UISTATE_DEFAULT); //make info box un-interactable
 			state->chartSelectedNucl = MAXNUMNUCL;
 			break;
 		case UIANIM_NUCLINFOBOX_EXPAND:
@@ -206,7 +219,7 @@ void setupMessageBox(const app_data *restrict dat, app_state *restrict state, co
   strncpy(state->msgBoxHeaderTxt,headerTxt,31);
   strncpy(state->msgBoxTxt,msgTxt,255);
   state->ds.shownElements |= (uint32_t)(1U << UIELEM_MSG_BOX);
-  startUIAnimation(&state->ds,UIANIM_MSG_BOX_SHOW);
+  startUIAnimation(dat,state,UIANIM_MSG_BOX_SHOW);
   changeUIState(dat,state,UISTATE_MSG_BOX);
 }
 
@@ -1422,7 +1435,11 @@ void changeUIState(const app_data *restrict dat, app_state *restrict state, cons
   state->interactableElement = 0;
   state->mouseoverElement = UIELEM_ENUM_LENGTH; //by default, no element is moused over
   state->clickedUIElem = UIELEM_ENUM_LENGTH; //'unclick' any buttons
-  state->uiState = newState;
+	if(newState != state->uiState){
+		//^only update the last UI state if the UI state is actually being changed
+		state->lastUIState = state->uiState; //useful to remember old UI states, for modal dialogs
+  	state->uiState = newState;
+	}
   
   switch(state->uiState){
     case UISTATE_UNINTERACTABLE:
@@ -1431,19 +1448,32 @@ void changeUIState(const app_data *restrict dat, app_state *restrict state, cons
     case UISTATE_MSG_BOX:
       state->interactableElement |= (uint32_t)(1U << UIELEM_MSG_BOX_OK_BUTTON);
       break;
+		case UISTATE_ABOUT_BOX:
+			state->interactableElement |= (uint32_t)(1U << UIELEM_ABOUT_BOX_OK_BUTTON);
+			break;
 		case UISTATE_FULLLEVELINFO:
 			state->ds.nuclFullInfoMaxScrollY = getMaxNumLvlDispLines(&dat->ndat,state); //find total number of lines displayable
 			state->interactableElement |= (uint32_t)(1U << UIELEM_MENU_BUTTON);
 			state->interactableElement |= (uint32_t)(1U << UIELEM_NUCL_FULLINFOBOX);
 			state->interactableElement |= (uint32_t)(1U << UIELEM_NUCL_FULLINFOBOX_BACKBUTTON);
+			if((state->ds.shownElements & (1U << UIELEM_PRIMARY_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_PRIMARY_MENU_HIDE]==0.0f)){
+				state->interactableElement |= (uint32_t)(1U << UIELEM_PM_PREFS_BUTTON);
+				state->interactableElement |= (uint32_t)(1U << UIELEM_PM_ABOUT_BUTTON);
+				state->interactableElement |= (uint32_t)(1U << UIELEM_PRIMARY_MENU);
+			}
 			break;
     case UISTATE_DEFAULT:
     default:
       state->interactableElement |= (uint32_t)(1U << UIELEM_MENU_BUTTON);
-			if(state->ds.shownElements & (1U << UIELEM_NUCL_INFOBOX)){
+			if((state->ds.shownElements & (1U << UIELEM_NUCL_INFOBOX))&&(state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_HIDE]==0.0f)){
 				state->interactableElement |= (uint32_t)(1U << UIELEM_NUCL_INFOBOX);
 				state->interactableElement |= (uint32_t)(1U << UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON);
 				state->interactableElement |= (uint32_t)(1U << UIELEM_NUCL_INFOBOX_CLOSEBUTTON);
+			}
+			if((state->ds.shownElements & (1U << UIELEM_PRIMARY_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_PRIMARY_MENU_HIDE]==0.0f)){
+				state->interactableElement |= (uint32_t)(1U << UIELEM_PM_PREFS_BUTTON);
+				state->interactableElement |= (uint32_t)(1U << UIELEM_PM_ABOUT_BUTTON);
+				state->interactableElement |= (uint32_t)(1U << UIELEM_PRIMARY_MENU);
 			}
       break;
   }
@@ -1476,40 +1506,72 @@ void panChartToPos(const app_data *restrict dat, drawing_state *restrict ds, con
 //take action after clicking a button or other UI element
 void uiElemClickAction(const app_data *restrict dat, app_state *restrict state, const uint8_t doubleClick, const uint8_t uiElemID){
 
+	//SDL_Log("Clicked UI element %u\n",uiElemID);
   state->clickedUIElem = uiElemID;
+
+	//handle extraneous opened menus
+	if((uiElemID != UIELEM_MENU_BUTTON)&&(uiElemID != UIELEM_PRIMARY_MENU)&&(uiElemID != UIELEM_PM_PREFS_BUTTON)&&(uiElemID != UIELEM_PM_ABOUT_BUTTON)){
+		if(state->ds.shownElements & (1U << UIELEM_PRIMARY_MENU)){
+			startUIAnimation(dat,state,UIANIM_PRIMARY_MENU_HIDE); //menu will be closed after animation finishes
+			state->clickedUIElem = UIELEM_ENUM_LENGTH; //'unclick' the menu button
+		}
+	}
+
+	//take action from click
   switch(uiElemID){
     case UIELEM_MENU_BUTTON:
       if(state->ds.shownElements & (1U << UIELEM_PRIMARY_MENU)){
-				startUIAnimation(&state->ds,UIANIM_PRIMARY_MENU_HIDE); //menu will be closed after animation finishes
+				startUIAnimation(dat,state,UIANIM_PRIMARY_MENU_HIDE); //menu will be closed after animation finishes
         state->clickedUIElem = UIELEM_ENUM_LENGTH; //'unclick' the menu button
       }else{
         state->ds.shownElements |= (1U << UIELEM_PRIMARY_MENU);
-				startUIAnimation(&state->ds,UIANIM_PRIMARY_MENU_SHOW);
+				startUIAnimation(dat,state,UIANIM_PRIMARY_MENU_SHOW);
+				changeUIState(dat,state,state->uiState);
       }
       break;
     case UIELEM_MSG_BOX_OK_BUTTON:
-      changeUIState(dat,state,UISTATE_DEFAULT);
-      startUIAnimation(&state->ds,UIANIM_MSG_BOX_HIDE); //message box will be closed after animation finishes
+      changeUIState(dat,state,state->lastUIState); //restore previous interactable elements
+      startUIAnimation(dat,state,UIANIM_MSG_BOX_HIDE); //message box will be closed after animation finishes
+      break;
+		case UIELEM_ABOUT_BOX_OK_BUTTON:
+      changeUIState(dat,state,state->lastUIState); //restore previous interactable elements
+      startUIAnimation(dat,state,UIANIM_MSG_BOX_HIDE); //about box will be closed after animation finishes
       break;
 		case UIELEM_NUCL_INFOBOX:
 			break;
 		case UIELEM_NUCL_INFOBOX_CLOSEBUTTON:
 			//close the info box
 			if((state->ds.shownElements & (1U << UIELEM_NUCL_INFOBOX))&&(state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_HIDE]==0.0f)){
-				startUIAnimation(&state->ds,UIANIM_NUCLINFOBOX_HIDE); //hide the info box, see stopUIAnimation() for info box hiding action
-				startUIAnimation(&state->ds,UIANIM_NUCLHIGHLIGHT_HIDE);
+				startUIAnimation(dat,state,UIANIM_NUCLINFOBOX_HIDE); //hide the info box, see stopUIAnimation() for info box hiding action
+				startUIAnimation(dat,state,UIANIM_NUCLHIGHLIGHT_HIDE);
 			}
 			break;
 		case UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON:
 				state->ds.nuclFullInfoScrollY = 0.0f;
-				startUIAnimation(&state->ds,UIANIM_NUCLINFOBOX_EXPAND);
+				startUIAnimation(dat,state,UIANIM_NUCLINFOBOX_EXPAND);
 			break;
 		case UIELEM_NUCL_FULLINFOBOX_BACKBUTTON:
 			state->ds.shownElements &= (uint32_t)(~(1U << UIELEM_NUCL_FULLINFOBOX)); //close the full info box
 			state->ds.shownElements |= (1U << UIELEM_NUCL_INFOBOX); //show the info box
 			state->ds.shownElements |= (1U << UIELEM_CHARTOFNUCLIDES); //show the chart
-			startUIAnimation(&state->ds,UIANIM_NUCLINFOBOX_CONTRACT);
+			startUIAnimation(dat,state,UIANIM_NUCLINFOBOX_CONTRACT);
 			changeUIState(dat,state,UISTATE_DEFAULT); //update UI state now that the regular info box is visible
+			break;
+		case UIELEM_PM_PREFS_BUTTON:
+			//SDL_Log("Clicked prefs button.\n");
+			startUIAnimation(dat,state,UIANIM_PRIMARY_MENU_HIDE); //menu will be closed after animation finishes
+      state->clickedUIElem = UIELEM_ENUM_LENGTH; //'unclick' the menu button
+			break;
+		case UIELEM_PM_ABOUT_BUTTON:
+			//SDL_Log("Clicked about button.\n");
+			startUIAnimation(dat,state,UIANIM_PRIMARY_MENU_HIDE); //menu will be closed after animation finishes
+      state->clickedUIElem = UIELEM_ENUM_LENGTH; //'unclick' the menu button
+			state->ds.shownElements |= (uint32_t)(1U << UIELEM_ABOUT_BOX);
+			startUIAnimation(dat,state,UIANIM_MSG_BOX_SHOW);
+			changeUIState(dat,state,UISTATE_ABOUT_BOX);
+			break;
+		case UIELEM_PRIMARY_MENU:
+			//clicked on menu background, do nothing
 			break;
 		case UIELEM_ENUM_LENGTH:
     default:
@@ -1543,9 +1605,9 @@ void uiElemClickAction(const app_data *restrict dat, app_state *restrict state, 
 						if(!(state->ds.shownElements & (1U << UIELEM_NUCL_INFOBOX))){
 							state->ds.shownElements |= (1U << UIELEM_NUCL_INFOBOX);
 							changeUIState(dat,state,UISTATE_DEFAULT); //make info box interactable
-							startUIAnimation(&state->ds,UIANIM_NUCLINFOBOX_SHOW);
+							startUIAnimation(dat,state,UIANIM_NUCLINFOBOX_SHOW);
 						}
-						startUIAnimation(&state->ds,UIANIM_NUCLHIGHLIGHT_SHOW);
+						startUIAnimation(dat,state,UIANIM_NUCLHIGHLIGHT_SHOW);
 						//check occlusion by info box
 						float xOcclLeft = chartNtoXPx(&state->ds,floorf(mouseX + 1.0f));
 						float xOcclRight = chartNtoXPx(&state->ds,floorf(mouseX));
@@ -1563,24 +1625,22 @@ void uiElemClickAction(const app_data *restrict dat, app_state *restrict state, 
 							//SDL_Log("starting pan to: %f %f\n",(double)mouseX,(double)mouseY);
 							panChartToPos(dat,&state->ds,(uint16_t)floorf(fabsf(mouseX)),(uint16_t)floorf(fabsf(mouseY)));
 						}else if((state->ds.shownElements & (1U << UIELEM_NUCL_INFOBOX))&&(state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_HIDE]==0.0f)){
-							startUIAnimation(&state->ds,UIANIM_NUCLINFOBOX_HIDE); //hide the info box, see stopUIAnimation() for info box hiding action
-							startUIAnimation(&state->ds,UIANIM_NUCLHIGHLIGHT_HIDE);
+							startUIAnimation(dat,state,UIANIM_NUCLINFOBOX_HIDE); //hide the info box, see stopUIAnimation() for info box hiding action
+							startUIAnimation(dat,state,UIANIM_NUCLHIGHLIGHT_HIDE);
 						}else{
 							state->chartSelectedNucl = selNucl;
 						}
 					}
-				}else if(state->ds.shownElements & (1U << UIELEM_NUCL_FULLINFOBOX)){
-					//full info box, do nothing for now
 				}else{
 					//clicked out of a menu
 					//handle individual menu closing animations
 					if(state->ds.shownElements & (1U << UIELEM_PRIMARY_MENU)){
-						startUIAnimation(&state->ds,UIANIM_PRIMARY_MENU_HIDE); //menu will be closed after animation finishes
+						startUIAnimation(dat,state,UIANIM_PRIMARY_MENU_HIDE); //menu will be closed after animation finishes
 						state->clickedUIElem = UIELEM_ENUM_LENGTH; //'unclick' the menu button
 					}
 					if((state->ds.shownElements & (1U << UIELEM_NUCL_INFOBOX))&&(state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_HIDE]==0.0f)){
-						startUIAnimation(&state->ds,UIANIM_NUCLINFOBOX_HIDE); //hide the info box, see stopUIAnimation() for info box hiding action
-						startUIAnimation(&state->ds,UIANIM_NUCLHIGHLIGHT_HIDE);
+						startUIAnimation(dat,state,UIANIM_NUCLINFOBOX_HIDE); //hide the info box, see stopUIAnimation() for info box hiding action
+						startUIAnimation(dat,state,UIANIM_NUCLHIGHLIGHT_HIDE);
 					}
 					state->ds.shownElements |= (1U << UIELEM_CHARTOFNUCLIDES);
 				}
@@ -1605,6 +1665,18 @@ void updateSingleUIElemPosition(drawing_state *restrict ds, const uint8_t uiElem
 			ds->uiElemWidth[uiElemInd] = PRIMARY_MENU_WIDTH;
 			ds->uiElemHeight[uiElemInd] = PRIMARY_MENU_HEIGHT;
 			break;
+		case UIELEM_PM_PREFS_BUTTON:
+			ds->uiElemPosX[uiElemInd] = (uint16_t)(ds->windowXRes-PRIMARY_MENU_WIDTH-PRIMARY_MENU_POS_XR + 3*UI_PADDING_SIZE);
+			ds->uiElemPosY[uiElemInd] = PRIMARY_MENU_POS_Y + 3*UI_PADDING_SIZE;
+			ds->uiElemWidth[uiElemInd] = PRIMARY_MENU_WIDTH - 6*UI_PADDING_SIZE;
+			ds->uiElemHeight[uiElemInd] = PRIMARY_MENU_ITEM_SPACING - UI_PADDING_SIZE;
+			break;
+		case UIELEM_PM_ABOUT_BUTTON:
+			ds->uiElemPosX[uiElemInd] = (uint16_t)(ds->windowXRes-PRIMARY_MENU_WIDTH-PRIMARY_MENU_POS_XR + 3*UI_PADDING_SIZE);
+			ds->uiElemPosY[uiElemInd] = PRIMARY_MENU_POS_Y + 3*UI_PADDING_SIZE + PRIMARY_MENU_ITEM_SPACING;
+			ds->uiElemWidth[uiElemInd] = PRIMARY_MENU_WIDTH - 6*UI_PADDING_SIZE;
+			ds->uiElemHeight[uiElemInd] = PRIMARY_MENU_ITEM_SPACING - UI_PADDING_SIZE;
+			break;
 		case UIELEM_MSG_BOX:
 			ds->uiElemPosX[uiElemInd] = (uint16_t)((ds->windowXRes - MESSAGE_BOX_WIDTH)/2);
 			ds->uiElemPosY[uiElemInd] = (uint16_t)((ds->windowYRes - MESSAGE_BOX_HEIGHT)/2);
@@ -1615,6 +1687,18 @@ void updateSingleUIElemPosition(drawing_state *restrict ds, const uint8_t uiElem
 			ds->uiElemPosX[uiElemInd] = (uint16_t)((ds->windowXRes - MESSAGE_BOX_OK_BUTTON_WIDTH)/2);
 			ds->uiElemPosY[uiElemInd] = (uint16_t)((ds->windowYRes + MESSAGE_BOX_HEIGHT)/2 - MESSAGE_BOX_OK_BUTTON_YB - UI_TILE_SIZE);
 			ds->uiElemWidth[uiElemInd] = MESSAGE_BOX_OK_BUTTON_WIDTH;
+			ds->uiElemHeight[uiElemInd] = UI_TILE_SIZE;
+			break;
+		case UIELEM_ABOUT_BOX:
+			ds->uiElemPosX[uiElemInd] = (uint16_t)((ds->windowXRes - ABOUT_BOX_WIDTH)/2);
+			ds->uiElemPosY[uiElemInd] = (uint16_t)((ds->windowYRes - ABOUT_BOX_HEIGHT)/2);
+			ds->uiElemWidth[uiElemInd] = ABOUT_BOX_WIDTH;
+			ds->uiElemHeight[uiElemInd] = ABOUT_BOX_HEIGHT;
+			break;
+		case UIELEM_ABOUT_BOX_OK_BUTTON:
+			ds->uiElemPosX[uiElemInd] = (uint16_t)((ds->windowXRes - ABOUT_BOX_OK_BUTTON_WIDTH)/2);
+			ds->uiElemPosY[uiElemInd] = (uint16_t)((ds->windowYRes + ABOUT_BOX_HEIGHT)/2 - ABOUT_BOX_OK_BUTTON_YB - UI_TILE_SIZE);
+			ds->uiElemWidth[uiElemInd] = ABOUT_BOX_OK_BUTTON_WIDTH;
 			ds->uiElemHeight[uiElemInd] = UI_TILE_SIZE;
 			break;
 		case UIELEM_NUCL_INFOBOX:

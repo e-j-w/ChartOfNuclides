@@ -665,12 +665,12 @@ void drawMessageBox(const app_data *restrict dat, const app_state *restrict stat
   if(state->ds.uiAnimPlaying & (1U << UIANIM_MSG_BOX_HIDE)){
     alpha = (float)(DIMMER_OPACITY*juice_smoothStart2(state->ds.timeLeftInUIAnimation[UIANIM_MSG_BOX_HIDE]/UI_ANIM_LENGTH));
     drawScreenDimmer(&state->ds,rdat,alpha);
-    alpha = (float)(255.0f*juice_smoothStart2(state->ds.timeLeftInUIAnimation[UIANIM_MSG_BOX_HIDE]/(UI_ANIM_LENGTH)));
+    alpha = (float)(1.0f*juice_smoothStart2(state->ds.timeLeftInUIAnimation[UIANIM_MSG_BOX_HIDE]/(UI_ANIM_LENGTH)));
     yOffset = (uint16_t)(100.0f*juice_smoothStop2(1.0f - state->ds.timeLeftInUIAnimation[UIANIM_MSG_BOX_HIDE]/UI_ANIM_LENGTH));
   }else if(state->ds.uiAnimPlaying & (1U << UIANIM_MSG_BOX_SHOW)){
     alpha = (float)(DIMMER_OPACITY*juice_smoothStop2(1.0f - state->ds.timeLeftInUIAnimation[UIANIM_MSG_BOX_SHOW]/UI_ANIM_LENGTH));
     drawScreenDimmer(&state->ds,rdat,alpha);
-    alpha = (float)(255.0f*juice_smoothStop2(1.0f - state->ds.timeLeftInUIAnimation[UIANIM_MSG_BOX_SHOW]/UI_ANIM_LENGTH));
+    alpha = (float)(1.0f*juice_smoothStop2(1.0f - state->ds.timeLeftInUIAnimation[UIANIM_MSG_BOX_SHOW]/UI_ANIM_LENGTH));
     yOffset = (uint16_t)(100.0f*juice_smoothStart2(state->ds.timeLeftInUIAnimation[UIANIM_MSG_BOX_SHOW]/(UI_ANIM_LENGTH)));
   }else{
     drawScreenDimmer(&state->ds,rdat,DIMMER_OPACITY);
@@ -686,6 +686,39 @@ void drawMessageBox(const app_data *restrict dat, const app_state *restrict stat
   drawTextAlignedSized(rdat,msgBoxPanelRect.x+(msgBoxPanelRect.w/2),msgBoxPanelRect.y+MESSAGE_BOX_HEADERTXT_Y,rdat->bigFont,dat->rules.themeRules.textColNormal,(uint8_t)floorf(alpha*255.0f),state->msgBoxHeaderTxt,ALIGN_CENTER,(Uint16)(msgBoxPanelRect.w - 2*UI_PADDING_SIZE));
   drawTextAlignedSized(rdat,msgBoxPanelRect.x+(msgBoxPanelRect.w/2),msgBoxPanelRect.y+(msgBoxPanelRect.h/2),rdat->font,dat->rules.themeRules.textColNormal,(uint8_t)floorf(alpha*255.0f),state->msgBoxTxt,ALIGN_CENTER,(Uint16)(msgBoxPanelRect.w - 2*UI_PADDING_SIZE));
   drawTextButton(&dat->rules.themeRules,rdat,state->ds.uiElemPosX[UIELEM_MSG_BOX_OK_BUTTON],state->ds.uiElemPosY[UIELEM_MSG_BOX_OK_BUTTON]+yOffset,state->ds.uiElemWidth[UIELEM_MSG_BOX_OK_BUTTON],getHighlightState(state,UIELEM_MSG_BOX_OK_BUTTON),(uint8_t)floorf(alpha*255.0f),dat->strings[dat->locStringIDs[LOCSTR_OK]]);
+  //SDL_Log("%.3f %.3f alpha %u\n",(double)state->ds.timeLeftInUIAnimation[UIANIM_MSG_BOX_SHOW],(double)state->ds.timeLeftInUIAnimation[UIANIM_MSG_BOX_HIDE],alpha);
+}
+
+void drawAboutBox(const app_data *restrict dat, const app_state *restrict state, resource_data *restrict rdat){
+  
+  float alpha = 1.0f;
+  float yOffset = 0;
+  if(state->ds.uiAnimPlaying & (1U << UIANIM_MSG_BOX_HIDE)){
+    alpha = (float)(DIMMER_OPACITY*juice_smoothStart2(state->ds.timeLeftInUIAnimation[UIANIM_MSG_BOX_HIDE]/UI_ANIM_LENGTH));
+    drawScreenDimmer(&state->ds,rdat,alpha);
+    alpha = (float)(1.0f*juice_smoothStart2(state->ds.timeLeftInUIAnimation[UIANIM_MSG_BOX_HIDE]/(UI_ANIM_LENGTH)));
+    yOffset = (-100.0f*juice_smoothStop2(1.0f - state->ds.timeLeftInUIAnimation[UIANIM_MSG_BOX_HIDE]/UI_ANIM_LENGTH));
+  }else if(state->ds.uiAnimPlaying & (1U << UIANIM_MSG_BOX_SHOW)){
+    alpha = (float)(DIMMER_OPACITY*juice_smoothStop2(1.0f - state->ds.timeLeftInUIAnimation[UIANIM_MSG_BOX_SHOW]/UI_ANIM_LENGTH));
+    drawScreenDimmer(&state->ds,rdat,alpha);
+    alpha = (float)(1.0f*juice_smoothStop2(1.0f - state->ds.timeLeftInUIAnimation[UIANIM_MSG_BOX_SHOW]/UI_ANIM_LENGTH));
+    yOffset = (100.0f*juice_smoothStart2(state->ds.timeLeftInUIAnimation[UIANIM_MSG_BOX_SHOW]/(UI_ANIM_LENGTH)));
+  }else{
+    drawScreenDimmer(&state->ds,rdat,DIMMER_OPACITY);
+  }
+  
+  SDL_FRect aboutBoxPanelRect;
+  aboutBoxPanelRect.x = state->ds.uiElemPosX[UIELEM_ABOUT_BOX];
+  aboutBoxPanelRect.y = state->ds.uiElemPosY[UIELEM_ABOUT_BOX] + yOffset;
+  aboutBoxPanelRect.w = state->ds.uiElemWidth[UIELEM_ABOUT_BOX];
+  aboutBoxPanelRect.h = state->ds.uiElemHeight[UIELEM_ABOUT_BOX];
+  drawPanelBG(rdat,aboutBoxPanelRect,alpha);
+
+  drawTextAlignedSized(rdat,aboutBoxPanelRect.x+(aboutBoxPanelRect.w/2),aboutBoxPanelRect.y+ABOUT_BOX_HEADERTXT_Y,rdat->bigFont,dat->rules.themeRules.textColNormal,(uint8_t)floorf(alpha*255.0f),dat->rules.appName,ALIGN_CENTER,(Uint16)(aboutBoxPanelRect.w - 2*UI_PADDING_SIZE));
+  drawTextAlignedSized(rdat,aboutBoxPanelRect.x+(aboutBoxPanelRect.w/2),aboutBoxPanelRect.y+ABOUT_BOX_VERSION_Y,rdat->smallFont,dat->rules.themeRules.textColNormal,(uint8_t)floorf(alpha*255.0f),dat->strings[dat->locStringIDs[LOCSTR_ABOUTSTR_VERSION]],ALIGN_CENTER,16384);
+  drawTextAlignedSized(rdat,aboutBoxPanelRect.x+(aboutBoxPanelRect.w/2),aboutBoxPanelRect.y+ABOUT_BOX_STR1_Y,rdat->font,dat->rules.themeRules.textColNormal,(uint8_t)floorf(alpha*255.0f),dat->strings[dat->locStringIDs[LOCSTR_ABOUTSTR_1]],ALIGN_CENTER,(Uint16)(aboutBoxPanelRect.w - 12*UI_PADDING_SIZE));
+  drawTextAlignedSized(rdat,aboutBoxPanelRect.x+(aboutBoxPanelRect.w/2),aboutBoxPanelRect.y+ABOUT_BOX_STR2_Y,rdat->font,dat->rules.themeRules.textColNormal,(uint8_t)floorf(alpha*255.0f),dat->strings[dat->locStringIDs[LOCSTR_ABOUTSTR_2]],ALIGN_CENTER,(Uint16)(aboutBoxPanelRect.w - 12*UI_PADDING_SIZE));
+  drawTextButton(&dat->rules.themeRules,rdat,state->ds.uiElemPosX[UIELEM_ABOUT_BOX_OK_BUTTON],(uint16_t)(state->ds.uiElemPosY[UIELEM_ABOUT_BOX_OK_BUTTON]+yOffset),state->ds.uiElemWidth[UIELEM_ABOUT_BOX_OK_BUTTON],getHighlightState(state,UIELEM_ABOUT_BOX_OK_BUTTON),(uint8_t)floorf(alpha*255.0f),dat->strings[dat->locStringIDs[LOCSTR_OK]]);
   //SDL_Log("%.3f %.3f alpha %u\n",(double)state->ds.timeLeftInUIAnimation[UIANIM_MSG_BOX_SHOW],(double)state->ds.timeLeftInUIAnimation[UIANIM_MSG_BOX_HIDE],alpha);
 }
 
@@ -709,20 +742,14 @@ void drawPrimaryMenu(const app_data *restrict dat, const app_state *restrict sta
   drawRect.w = state->ds.uiElemWidth[UIELEM_PRIMARY_MENU];
   drawRect.h = state->ds.uiElemHeight[UIELEM_PRIMARY_MENU];
   drawPanelBG(rdat,drawRect,alpha);
-
-  //draw menu item text
-  Uint8 txtAlpha = (Uint8)(alpha*255.0f);
-  drawTextAlignedSized(rdat,drawRect.x + 4*UI_PADDING_SIZE,drawRect.y + 0.5f*PRIMARY_MENU_ITEM_SPACING + yOffset,rdat->font,blackCol8Bit,txtAlpha,dat->strings[LOCSTR_MENUITEM_PREFS],ALIGN_LEFT,(Uint16)(drawRect.w - 8*UI_PADDING_SIZE));
-  drawTextAlignedSized(rdat,drawRect.x + 4*UI_PADDING_SIZE,drawRect.y + 1.5f*PRIMARY_MENU_ITEM_SPACING + yOffset,rdat->font,blackCol8Bit,txtAlpha,dat->strings[LOCSTR_MENUITEM_ABOUT],ALIGN_LEFT,(Uint16)(drawRect.w - 8*UI_PADDING_SIZE));
-
+  
   //draw menu item highlight
-  drawRect.x += 3*UI_PADDING_SIZE;
-  drawRect.y += 3*UI_PADDING_SIZE;
-  drawRect.w -= 8*UI_PADDING_SIZE;
-  drawRect.h = PRIMARY_MENU_ITEM_SPACING; 
   for(uint8_t i=1;i<=2;i++){
-    drawRect.y += PRIMARY_MENU_ITEM_SPACING;
-    switch(getHighlightState(state,UIELEM_PRIMARY_MENU+i)){
+    drawRect.x = state->ds.uiElemPosX[UIELEM_PRIMARY_MENU-i]*rdat->uiScale;
+    drawRect.y = (state->ds.uiElemPosY[UIELEM_PRIMARY_MENU-i] + yOffset)*rdat->uiScale;
+    drawRect.w = state->ds.uiElemWidth[UIELEM_PRIMARY_MENU-i]*rdat->uiScale;
+    drawRect.h = state->ds.uiElemHeight[UIELEM_PRIMARY_MENU-i]*rdat->uiScale;
+    switch(getHighlightState(state,UIELEM_PRIMARY_MENU-i)){
       case HIGHLIGHT_SELECTED:
         drawFlatRect(rdat,drawRect,dat->rules.themeRules.modSelectedCol);
         break;
@@ -734,6 +761,15 @@ void drawPrimaryMenu(const app_data *restrict dat, const app_state *restrict sta
         break;
     }
   }
+
+  //draw menu item text
+  drawRect.x = state->ds.uiElemPosX[UIELEM_PRIMARY_MENU];
+  drawRect.y = ((float)state->ds.uiElemPosY[UIELEM_PRIMARY_MENU] + yOffset);
+  drawRect.w = state->ds.uiElemWidth[UIELEM_PRIMARY_MENU];
+  drawRect.h = state->ds.uiElemHeight[UIELEM_PRIMARY_MENU];
+  Uint8 txtAlpha = (Uint8)(alpha*255.0f);
+  drawTextAlignedSized(rdat,drawRect.x + 4*UI_PADDING_SIZE,drawRect.y + 0.5f*PRIMARY_MENU_ITEM_SPACING + yOffset,rdat->font,blackCol8Bit,txtAlpha,dat->strings[LOCSTR_MENUITEM_PREFS],ALIGN_LEFT,(Uint16)(drawRect.w - 8*UI_PADDING_SIZE));
+  drawTextAlignedSized(rdat,drawRect.x + 4*UI_PADDING_SIZE,drawRect.y + 1.5f*PRIMARY_MENU_ITEM_SPACING + yOffset,rdat->font,blackCol8Bit,txtAlpha,dat->strings[LOCSTR_MENUITEM_ABOUT],ALIGN_LEFT,(Uint16)(drawRect.w - 8*UI_PADDING_SIZE));
 
 }
 
@@ -757,12 +793,16 @@ void drawUI(const app_data *restrict dat, app_state *restrict state, resource_da
   if(state->ds.shownElements & (1U << UIELEM_PRIMARY_MENU)){
     drawPrimaryMenu(dat,state,rdat);
   }
-  if(state->ds.shownElements & (1U << UIELEM_MSG_BOX)){
-    drawMessageBox(dat,state,rdat);
-  }
-
+  
   //draw persistent button(s)
   drawIconButton(&dat->rules.themeRules,rdat,state->ds.uiElemPosX[UIELEM_MENU_BUTTON],state->ds.uiElemPosY[UIELEM_MENU_BUTTON],state->ds.uiElemWidth[UIELEM_MENU_BUTTON],getHighlightState(state,UIELEM_MENU_BUTTON),255,UIICON_MENU);
+
+  //draw modal dialogs
+  if(state->ds.shownElements & (1U << UIELEM_MSG_BOX)){
+    drawMessageBox(dat,state,rdat);
+  }else if(state->ds.shownElements & (1U << UIELEM_ABOUT_BOX)){
+    drawAboutBox(dat,state,rdat);
+  }
 
   if(state->ds.uiAnimPlaying & (1U << UIANIM_CHART_FADEIN)){
     

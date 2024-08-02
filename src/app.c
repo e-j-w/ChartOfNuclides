@@ -156,7 +156,7 @@ int main(int argc, char *argv[]){
     gdat->state.gamepadDisabled = 1;
   }
 
-  startUIAnimation(&gdat->state.ds,UIANIM_CHART_FADEIN);
+  startUIAnimation(&gdat->dat,&gdat->state,UIANIM_CHART_FADEIN);
   
   //main loop
   while(!gdat->state.quitAppFlag){

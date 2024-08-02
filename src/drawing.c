@@ -175,7 +175,7 @@ void drawPanelBG(resource_data *restrict rdat, const SDL_FRect panelRect, const 
 
 //x, y, w: position and size of the button, assuming a UI scale of 1 (height assumed to be one tile height)
 //highlightState: values from highlight_state_enum
-void drawButton(const ui_theme_rules *restrict uirules, resource_data *restrict rdat, const uint16_t x, const uint16_t y, const uint16_t w, const uint8_t highlightState, const uint8_t alpha){
+void drawButton(const ui_theme_rules *restrict uirules, resource_data *restrict rdat, const uint16_t x, const uint16_t y, const uint16_t w, const uint8_t highlightState, const float alpha){
   
   switch(highlightState){
     case HIGHLIGHT_NORMAL:
@@ -254,13 +254,13 @@ void drawButton(const ui_theme_rules *restrict uirules, resource_data *restrict 
 
 //draw a button with a text label
 void drawTextButton(const ui_theme_rules *restrict uirules, resource_data *restrict rdat, const uint16_t x, const uint16_t y, const uint16_t w, const uint8_t highlightState, const uint8_t alpha, const char *text){
-  drawButton(uirules,rdat,x,y,w,highlightState,alpha);
+  drawButton(uirules,rdat,x,y,w,highlightState,(float)(alpha/255.0f));
   //get the text width and height
   //these should already fit a 1 tile height button well, with the default font size
   //(remember that the font size is scaled by the UI scale, during font import)
   float textX = (float)x + (float)(w)/2.0f;
   float textY = (float)y + (float)(UI_TILE_SIZE)/2.0f;
-  drawTextAlignedSized(rdat,textX,textY,rdat->font,uirules->textColNormal,255,text,ALIGN_CENTER,(Uint16)w);
+  drawTextAlignedSized(rdat,textX,textY,rdat->font,uirules->textColNormal,alpha,text,ALIGN_CENTER,(Uint16)w);
 }
 
 void drawIcon(const ui_theme_rules *restrict uirules, resource_data *restrict rdat, const uint16_t x, const uint16_t y, const uint16_t w, const uint8_t highlightState, const uint8_t alpha, const uint8_t iconInd){
@@ -305,12 +305,12 @@ void drawIcon(const ui_theme_rules *restrict uirules, resource_data *restrict rd
 }
 
 void drawIconButton(const ui_theme_rules *restrict uirules, resource_data *restrict rdat, const uint16_t x, const uint16_t y, const uint16_t w, const uint8_t highlightState, const uint8_t alpha, const uint8_t iconInd){
-  drawButton(uirules,rdat,x,y,w,highlightState,alpha);
+  drawButton(uirules,rdat,x,y,w,highlightState,(float)(alpha/255.0f));
   drawIcon(uirules,rdat,x,y,w,HIGHLIGHT_NORMAL,alpha,iconInd);
 }
 
 void drawIconAndTextButton(const ui_theme_rules *restrict uirules, resource_data *restrict rdat, const uint16_t x, const uint16_t y, const uint16_t w, const uint8_t highlightState, const uint8_t alpha, const uint8_t iconInd, const char *text){
-  drawButton(uirules,rdat,x,y,w,highlightState,alpha);
+  drawButton(uirules,rdat,x,y,w,highlightState,(float)(alpha/255.0f));
   drawIcon(uirules,rdat,x+UI_PADDING_SIZE,y,UI_TILE_SIZE,HIGHLIGHT_NORMAL,alpha,iconInd);
   //get the text width and height
   //these should already fit a 1 tile height button well, with the default font size
@@ -361,6 +361,10 @@ SDL_FRect drawTextAlignedSized(resource_data *restrict rdat, const float xPos, c
   float drawX = xPos*rdat->uiScale;
   float drawY = yPos*rdat->uiScale;
   float drawW = (float)FC_GetWidth(font,txt);
+  if(drawW > maxWidth*rdat->uiScale){
+    drawW = maxWidth*rdat->uiScale;
+  }
+  //SDL_Log("Width: %f\n", (double)drawW);
   if(alignment == ALIGN_RIGHT){
     drawX = drawX - drawW;
   }else if(alignment == ALIGN_CENTER){
@@ -372,9 +376,9 @@ SDL_FRect drawTextAlignedSized(resource_data *restrict rdat, const float xPos, c
   if(alpha != textColor.a){
     SDL_Color drawCol = textColor;
     drawCol.a = alpha;
-    drawRect = FC_DrawColumnColor(font,rdat->renderer,drawX,drawY,maxWidth,drawCol,txt);
+    drawRect = FC_DrawColumnColor(font,rdat->renderer,drawX,drawY,(Uint16)(maxWidth*rdat->uiScale),drawCol,txt);
   }else{
-    drawRect = FC_DrawColumnColor(font,rdat->renderer,drawX,drawY,maxWidth,textColor,txt);
+    drawRect = FC_DrawColumnColor(font,rdat->renderer,drawX,drawY,(Uint16)(maxWidth*rdat->uiScale),textColor,txt);
   }
   drawRect.w /= rdat->uiScale;
   drawRect.h /= rdat->uiScale;

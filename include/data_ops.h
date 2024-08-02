@@ -10,7 +10,7 @@
 //function prototypes
 void initializeTempState(const app_data *restrict dat, app_state *restrict state);
 
-void startUIAnimation(drawing_state *restrict ds, const uint8_t uiAnim);
+void startUIAnimation(const app_data *restrict dat, app_state *restrict state, const uint8_t uiAnim);
 void stopUIAnimation(const app_data *restrict dat, app_state *restrict state, const uint8_t uiAnim);
 void updateUIAnimationTimes(const app_data *restrict dat, app_state *restrict state, const float deltaTime);
 

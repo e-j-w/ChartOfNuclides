@@ -206,6 +206,9 @@ static int parseAppRules(app_data *restrict dat, asset_mapping *restrict stringI
 	dat->locStringIDs[LOCSTR_BACKTOSUMMARY] = (uint16_t)nameToAssetID("back_to_summary",stringIDmap);
 	dat->locStringIDs[LOCSTR_MENUITEM_PREFS] = (uint16_t)nameToAssetID("menuitem_preferences",stringIDmap);
 	dat->locStringIDs[LOCSTR_MENUITEM_ABOUT] = (uint16_t)nameToAssetID("menuitem_about",stringIDmap);
+	dat->locStringIDs[LOCSTR_ABOUTSTR_VERSION] = (uint16_t)nameToAssetID("about_string_version",stringIDmap);
+	dat->locStringIDs[LOCSTR_ABOUTSTR_1] = (uint16_t)nameToAssetID("about_string_1",stringIDmap);
+	dat->locStringIDs[LOCSTR_ABOUTSTR_2] = (uint16_t)nameToAssetID("about_string_2",stringIDmap);
 
   return 0; //success
 
@@ -1538,7 +1541,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 													tok2 = strtok(NULL,"");
 													if(tok2!=NULL){
 														//SDL_Log("tok2: %s\n",tok2);
-														uint8_t sigFigs = (uint16_t)(strlen(tok2) & 15U); //only 4 bits available for precision
+														uint8_t sigFigs = (uint8_t)(strlen(tok2) & 15U); //only 4 bits available for precision
 														nd->dcyMode[nd->numDecModes].prob.format |= sigFigs;
 													}
 													//SDL_Log("format: %u\n",nd->dcyMode[nd->numDecModes].prob.format);

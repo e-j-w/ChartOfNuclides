@@ -62,7 +62,7 @@ static const uint8_t UITHEME_ICON_TILE_Y[UIICON_ENUM_LENGTH] = {10,10,10,9,9};
 #define PRIMARY_MENU_POS_XR        (UI_PADDING_SIZE-4)   //in unscaled pixels
 #define PRIMARY_MENU_POS_Y         (UI_TILE_SIZE+UI_PADDING_SIZE)  //in unscaled pixels
 #define PRIMARY_MENU_WIDTH         200 //in unscaled pixels
-#define PRIMARY_MENU_HEIGHT        2*PRIMARY_MENU_ITEM_SPACING + 4*UI_PADDING_SIZE //in unscaled pixels
+#define PRIMARY_MENU_HEIGHT        2*PRIMARY_MENU_ITEM_SPACING + 5*UI_PADDING_SIZE //in unscaled pixels
 #define PRIMARY_MENU_ITEM_SPACING  40 //in unscaled pixels
 
 #define DIMMER_OPACITY        0.20f
@@ -73,6 +73,16 @@ static const uint8_t UITHEME_ICON_TILE_Y[UIICON_ENUM_LENGTH] = {10,10,10,9,9};
 #define MESSAGE_BOX_HEADERTXT_Y      (6*UI_PADDING_SIZE)
 #define MESSAGE_BOX_OK_BUTTON_WIDTH  120
 #define MESSAGE_BOX_OK_BUTTON_YB     (3*UI_PADDING_SIZE)
+
+//about box (credits etc.)
+#define ABOUT_BOX_WIDTH            420 //in unscaled pixels
+#define ABOUT_BOX_HEIGHT           300 //in unscaled pixels
+#define ABOUT_BOX_HEADERTXT_Y      (8*UI_PADDING_SIZE)
+#define ABOUT_BOX_VERSION_Y        (14*UI_PADDING_SIZE)
+#define ABOUT_BOX_STR1_Y           110 //in unscaled pixels
+#define ABOUT_BOX_STR2_Y           166 //in unscaled pixels
+#define ABOUT_BOX_OK_BUTTON_WIDTH  120
+#define ABOUT_BOX_OK_BUTTON_YB     (4*UI_PADDING_SIZE)
 
 //chart of nuclides
 #define DEFAULT_NUCLBOX_DIM                8.0f

@@ -16,3 +16,6 @@ all_levels|All levels/gammas
 back_to_summary|Back to summary
 menuitem_preferences|Preferences
 menuitem_about|About Chart of Nuclides
+about_string_version|Version 0.1
+about_string_1|Developed by Jonathan Williams.
+about_string_2|This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, version 3 or later.

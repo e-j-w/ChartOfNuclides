@@ -123,9 +123,13 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
   }
   if(state->inputFlags & (1U << INPUT_BACK)){
     //escape open menus
-    if((state->ds.shownElements & (1U << UIELEM_NUCL_INFOBOX))&&(state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_HIDE]==0.0f)){
-      startUIAnimation(&state->ds,UIANIM_NUCLINFOBOX_HIDE); //hide the info box, see stopUIAnimation() for info box hiding action
-      startUIAnimation(&state->ds,UIANIM_NUCLHIGHLIGHT_HIDE);
+    //handle modal dialogs first
+    if((state->ds.shownElements & (1U << UIELEM_ABOUT_BOX))&&(state->ds.timeLeftInUIAnimation[UIANIM_MSG_BOX_HIDE]==0.0f)){
+      changeUIState(dat,state,state->lastUIState); //restore previous interactable elements
+      startUIAnimation(dat,state,UIANIM_MSG_BOX_HIDE); //hide the about/message box, see stopUIAnimation()
+    }else if((state->ds.shownElements & (1U << UIELEM_NUCL_INFOBOX))&&(state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_HIDE]==0.0f)){
+      startUIAnimation(dat,state,UIANIM_NUCLINFOBOX_HIDE); //hide the info box, see stopUIAnimation() for info box hiding action
+      startUIAnimation(dat,state,UIANIM_NUCLHIGHLIGHT_HIDE);
     }else if((state->uiState == UISTATE_FULLLEVELINFO)&&(state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_EXPAND]==0.0f)){
       uiElemClickAction(dat,state,0,UIELEM_NUCL_FULLINFOBOX_BACKBUTTON); //go back to the main chart
     }else if(state->ds.windowFullscreenMode){
@@ -180,14 +184,22 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
   //only get here if no button was clicked
   //check if a click was made outside of any button
   //SDL_Log("click pos x: %f, drag start: [%f %f]\n",(double)state->mouseClickPosXPx,(double)state->ds.chartDragStartMouseX,(double)state->ds.chartDragStartMouseY);
-  if((state->mouseClickPosXPx >= 0.0f) && (fabsf(state->ds.chartDragStartMouseX - state->mouseXPx) < 5.0f) && (fabsf(state->ds.chartDragStartMouseY - state->mouseYPx) < 5.0f) ){
-    //unclick (or click on chart view)
-    if(doubleClick){
-      uiElemClickAction(dat,state,1,UIELEM_ENUM_LENGTH);
-    }else{
+  if(state->uiState == UISTATE_DEFAULT){
+    if((state->mouseClickPosXPx >= 0.0f) && (fabsf(state->ds.chartDragStartMouseX - state->mouseXPx) < 5.0f) && (fabsf(state->ds.chartDragStartMouseY - state->mouseYPx) < 5.0f) ){
+      //unclick (or click on chart view)
+      if(doubleClick){
+        uiElemClickAction(dat,state,1,UIELEM_ENUM_LENGTH);
+      }else{
+        uiElemClickAction(dat,state,0,UIELEM_ENUM_LENGTH);
+      }
+    }
+  }else if(state->uiState == UISTATE_FULLLEVELINFO){
+    if(state->mouseClickPosXPx >= 0.0f){
+      //clicked outside of interactable items on the full level info screen
       uiElemClickAction(dat,state,0,UIELEM_ENUM_LENGTH);
     }
   }
+  
 
   /* Handle zoom input */
   if((state->inputFlags & (1U << INPUT_ZOOM))&&(fabsf(state->zoomDeltaVal)>0.05f)){
