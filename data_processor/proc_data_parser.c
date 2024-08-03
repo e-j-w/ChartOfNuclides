@@ -1080,6 +1080,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
   int tokPos;//position when tokenizing
   int firstQLine = 1; //flag to specify whether Q values have been read in for a specific nucleus
 	double longestIsomerHl = 0.0; //longest isomeric state half-life for a given nucleus
+	uint8_t isomerMValInNucl = 0;
 	sp_var_data varDat;
   
   //subsection of the entry for a particular nucleus that the parser is at
@@ -1127,6 +1128,8 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 					nd->numNucl++;
 					subSec=0; //we're at the beginning of the entry for this nucleus
 					longestIsomerHl = 0.0;
+					isomerMValInNucl = 0;
+					nd->nuclData[nd->numNucl].numIsomerMVals = 0;
 					nd->nuclData[nd->numNucl].longestIsomerLevel = MAXNUMLVLS;
 					nd->nuclData[nd->numNucl].abundance.unit = VALUE_UNIT_NOVAL; //default
 					memset(&varDat,0,sizeof(sp_var_data));
@@ -1376,17 +1379,26 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 									double hl = getLevelHalfLifeSeconds(nd,nd->numLvls-1);
 									//SDL_Log("hl: %f\n",hl);
 									if(hl >= 10.0E-9){
+										if(hl >= 1E-3){
+											isomerMValInNucl++; //m-values are somewhat informal but are generally only assigned for longer-lived isomers
+											nd->nuclData[nd->numNucl].numIsomerMVals++;
+										}
 										if(hl > longestIsomerHl){
 											longestIsomerHl = hl;
 											nd->nuclData[nd->numNucl].longestIsomerLevel = nd->numLvls-1;
+											nd->nuclData[nd->numNucl].longestIsomerMVal = isomerMValInNucl;
+											
 										}
 									}else if(en < 0.02){
 										//low energy levels are generally isomers (even if their half-life is unknown)
 										//229Th is a famous case
 										//only include these if no other long-lived isomers are found
+										isomerMValInNucl++;
+										nd->nuclData[nd->numNucl].numIsomerMVals++;
 										if(!(longestIsomerHl > 0.0)&&(hl <= longestIsomerHl)){
 											longestIsomerHl = hl;
 											nd->nuclData[nd->numNucl].longestIsomerLevel = nd->numLvls-1;
+											nd->nuclData[nd->numNucl].longestIsomerMVal = isomerMValInNucl;
 										}
 									}
 								}

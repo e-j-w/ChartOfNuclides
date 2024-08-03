@@ -199,7 +199,6 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
       uiElemClickAction(dat,state,0,UIELEM_ENUM_LENGTH);
     }
   }
-  
 
   /* Handle zoom input */
   if((state->inputFlags & (1U << INPUT_ZOOM))&&(fabsf(state->zoomDeltaVal)>0.05f)){
@@ -401,7 +400,7 @@ void processSingleEvent(app_data *restrict dat, app_state *restrict state, resou
           state->inputFlags |= (1U << INPUT_BACK);
           break;
         case SDL_SCANCODE_EQUALS:
-          state->zoomDeltaVal = 1.0f;
+          state->zoomDeltaVal = 2.0f;
           state->inputFlags |= (1U << INPUT_ZOOM);
           break;
         case SDL_SCANCODE_MINUS:

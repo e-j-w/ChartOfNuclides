@@ -137,9 +137,8 @@ static int writeConfigFile(FILE *file, const app_rules *restrict rules, const ap
   }else{
     fprintf(file,"fullscreen=no\n");
   }
-  //fprintf(file,"# Windowed resolution: 0 = 1280 x 720, 1 = 1920 x 1080\n");
-  fprintf(file,"window_res_x=%i\n",state->ds.windowXRes);
-  fprintf(file,"window_res_y=%i\n",state->ds.windowYRes);
+  fprintf(file,"window_res_x=%u\n",state->ds.windowXRes);
+  fprintf(file,"window_res_y=%u\n",state->ds.windowYRes);
 
   fprintf(file,"\n### Input Settings ###\n");
   fprintf(file,"scroll_speed=%0.3f\n",(double)state->scrollSpeedMultiplier);
@@ -170,7 +169,7 @@ void updateConfigFile(const char *configPath, const app_rules *restrict rules, c
   FILE *configFile = fopen(configFilePath, "w");
 
   if(configFile != NULL){
-    writeConfigFile(configFile,rules,state); //write the default configuration values
+    writeConfigFile(configFile,rules,state); //write the current configuration values
     fclose(configFile);
     SDL_Log("Wrote preferences to configuration file (%s).\n",configFilePath);
   }else{

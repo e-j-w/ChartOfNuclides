@@ -124,7 +124,9 @@ typedef struct
   uint32_t firstLevel; //index of first level in this nuclide
   uint16_t numLevels; //number of excited levels in this nuclide
   uint8_t gsLevel; //which level in the nucleus (0 indexed) is the ground state (determined when parsing ENSDF, not always 0)
-  uint32_t longestIsomerLevel; //which isomer in the nucleus is longest lived (=0 if no isomers)
+  uint32_t longestIsomerLevel; //which isomer in the nucleus is longest lived (=MAXNUMLVLS if no isomers)
+  uint8_t longestIsomerMVal; //m-value of longest lived isomer (eg. 1 or 2 for 178m1Hf vs. 178m2Hf)
+  uint8_t numIsomerMVals; //total number of isomer m-values assigned
   valWithErr abundance;
   uint8_t flags; //bits 0 to 1: observation flag (observed/unobserved/inferred/tentative)
 }nucl; //gamma data for a given nuclide

@@ -38,6 +38,7 @@ run: con
 #	fi
 
 all: $(OBJ) proc_data con
+	rm */*.o *.o
 
 con: src/*.c include/*.h $(OBJ)
 	$(CC) src/app.c $(INC) $(OBJ) $(SDL) $(CFLAGS) -lm -o con

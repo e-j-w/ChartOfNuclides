@@ -27,9 +27,9 @@ The goal is to develop a performant and multiplatform tool that will be useful i
 
 * C compiler: gcc (or clang)
 * GNU make
-* SDL3, SDL_image, SDL_ttf
+* SDL3, SDL3_image, SDL3_ttf
 
-The current version has been tested under Arch Linux as of July 2024.  For now you'll probably have to manually compile SDL3 and its libraries, as they aren't (yet) packaged for major Linux distros.
+The current version has been tested under Arch Linux as of August 2024.  For now you'll probably have to manually compile SDL3 and its libraries, as they aren't (yet) packaged for major Linux distros.
 
 ### Build the application
 
@@ -42,7 +42,7 @@ make all -j
 make all -j CC=clang
 ```
 
-Two executables will be built: `proc_data` (which generates the data package containing the nuclear structure database used by the main application), and `con` (the main application).  [Build the data files](#build-data-files) if neccessary, then run the application:
+Two executables will be built: `proc_data` (which generates the data package containing the nuclear structure database used by the main application), and `con` (the main application).  [Build the data files](#build-data-files) if necessary, then run the application:
 
 ```
 ./con

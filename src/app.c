@@ -88,13 +88,6 @@ int main(int argc, char *argv[]){
   SDL_Log("Data file path: %s\n",gdat->rdat.appPrefPath);
 
   //load preferences (needed prior to window created)
-  gdat->state.gamepadDeadzone = 16000;
-  gdat->state.ds.windowXRes = MIN_RENDER_WIDTH;
-  gdat->state.ds.windowYRes = MIN_RENDER_HEIGHT;
-  gdat->state.lastInputType = INPUT_TYPE_KEYBOARD;
-  gdat->state.mouseoverElement = UIELEM_ENUM_LENGTH;
-  gdat->state.ds.drawPerformanceStats = 0;
-
   initializeTempState(&gdat->dat,&gdat->state);
   updatePrefsFromConfigFile(gdat->rdat.appPrefPath,&gdat->dat.rules,&gdat->state); //read settings from .ini file
 

@@ -25,7 +25,8 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 //Initializes the temporary (unsaved) portion of the app state.
 void initializeTempState(const app_data *restrict dat, app_state *restrict state){
-  //input
+  
+	//input
   state->mouseXPx = -1;
   state->mouseYPx = -1;
   state->mouseHoldStartPosXPx = -1;
@@ -34,11 +35,16 @@ void initializeTempState(const app_data *restrict dat, app_state *restrict state
   state->lastAxisValY = 0;
   state->activeAxis = 0; //the last used axis
   state->lastInputType = INPUT_TYPE_KEYBOARD; //default input type
+	state->mouseoverElement = UIELEM_ENUM_LENGTH;
 	state->scrollSpeedMultiplier = 16.0f;
 	state->inputFlags = 0;
   //app state
 	state->chartSelectedNucl = MAXNUMNUCL;
   state->quitAppFlag = 0;
+	state->gamepadDeadzone = 16000;
+  state->ds.windowXRes = 880;
+  state->ds.windowYRes = 580;
+  state->ds.drawPerformanceStats = 0;
   //ui state
 	state->lastUIState = UISTATE_DEFAULT;
   changeUIState(dat,state,UISTATE_DEFAULT);
@@ -47,8 +53,8 @@ void initializeTempState(const app_data *restrict dat, app_state *restrict state
 	state->ds.shownElements |= (1U << UIELEM_CHARTOFNUCLIDES);
   state->ds.uiAnimPlaying = 0; //no UI animations playing
   state->ds.useZoomAnimations = 1;
-	state->ds.chartPosX = 62.0f;
-	state->ds.chartPosY = 33.0f;
+	state->ds.chartPosX = 86.0f;
+	state->ds.chartPosY = 52.0f;
 	state->ds.chartZoomScale = 0.5f;
 	state->ds.chartZoomToScale = state->ds.chartZoomScale;
 	state->ds.chartZoomStartScale = state->ds.chartZoomScale;
