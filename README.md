@@ -23,13 +23,15 @@ The goal is to develop a performant and multiplatform tool that will be useful i
 
 ## Building and installing from source
 
+The current version has been tested under Arch Linux as of August 2024, in principle most recent Linux distros should work as well.  The plan is to eventually support other platforms (Windows especially) later in development.
+
 ### Build dependencies
 
 * C compiler: gcc (or clang)
 * GNU make
 * SDL3, SDL3_image, SDL3_ttf
 
-The current version has been tested under Arch Linux as of August 2024.  For now you'll probably have to manually compile SDL3 and its libraries, as they aren't (yet) packaged for major Linux distros.
+For now you'll probably have to manually compile SDL3 and its libraries, as they aren't (yet) packaged for major Linux distros.
 
 ### Build the application
 

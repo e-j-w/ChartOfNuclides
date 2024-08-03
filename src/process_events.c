@@ -207,7 +207,7 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
         state->ds.chartZoomStartScale = state->ds.chartZoomScale;
         if(state->zoomDeltaVal > 0){
           //zoom in
-          state->ds.chartZoomToScale += state->zoomDeltaVal*state->ds.chartZoomToScale*0.5f;
+          state->ds.chartZoomToScale += state->zoomDeltaVal*state->ds.chartZoomToScale*1.0f;
           if(state->ds.chartZoomToScale > MAX_CHART_ZOOM_SCALE){
             state->ds.chartZoomToScale = MAX_CHART_ZOOM_SCALE;
           }
@@ -400,7 +400,7 @@ void processSingleEvent(app_data *restrict dat, app_state *restrict state, resou
           state->inputFlags |= (1U << INPUT_BACK);
           break;
         case SDL_SCANCODE_EQUALS:
-          state->zoomDeltaVal = 2.0f;
+          state->zoomDeltaVal = 1.0f;
           state->inputFlags |= (1U << INPUT_ZOOM);
           break;
         case SDL_SCANCODE_MINUS:
