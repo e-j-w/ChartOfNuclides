@@ -110,6 +110,12 @@ static int readConfigFile(FILE *file, app_state *restrict state){
         }
         state->ds.chartZoomToScale = state->ds.chartZoomScale;
 	      state->ds.chartZoomStartScale = state->ds.chartZoomScale;
+      }else if(strcmp(par,"shell_closures") == 0){
+        if(strcmp(val,"yes") == 0){
+          state->ds.drawShellClosures = 1;
+        }else{
+          state->ds.drawShellClosures = 0;
+        }
       }else if(strcmp(par,"gamepad_deadzone") == 0){
         int dz = atoi(val);
         if((dz > 1000)&&(dz < 32768)){
@@ -147,6 +153,11 @@ static int writeConfigFile(FILE *file, const app_rules *restrict rules, const ap
   fprintf(file,"chart_pos_x=%0.3f\n",(double)state->ds.chartPosX);
   fprintf(file,"chart_pos_y=%0.3f\n",(double)state->ds.chartPosY);
   fprintf(file,"zoom_scale=%0.3f\n",(double)state->ds.chartZoomScale);
+  if(state->ds.drawShellClosures){
+    fprintf(file,"shell_closures=yes\n");
+  }else{
+    fprintf(file,"shell_closures=no\n");
+  }
 
   fprintf(file,"\n### Gamepad Settings ###\n");
   fprintf(file,"gamepad_deadzone=%i\n",state->gamepadDeadzone);

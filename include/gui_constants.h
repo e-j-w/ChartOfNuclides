@@ -50,8 +50,8 @@ which can be referenced by both the GUI draw code as well as the interaction cod
 #define UITHEME_HIGHLIGHT_TILE_Y 2
 
 //UI theme icons
-static const uint8_t UITHEME_ICON_TILE_X[UIICON_ENUM_LENGTH] = {0,1,2,1,2};
-static const uint8_t UITHEME_ICON_TILE_Y[UIICON_ENUM_LENGTH] = {10,10,10,9,9};
+static const uint8_t UITHEME_ICON_TILE_X[UIICON_ENUM_LENGTH] = {0,1,2,1,2,0,1};
+static const uint8_t UITHEME_ICON_TILE_Y[UIICON_ENUM_LENGTH] = {10,10,10,9,9,8,8};
 
 #define SMALL_FONT_SIZE      13
 #define DEFAULT_FONT_SIZE    15
@@ -60,8 +60,6 @@ static const uint8_t UITHEME_ICON_TILE_Y[UIICON_ENUM_LENGTH] = {10,10,10,9,9};
 
 /* UI LAYOUT CONSTANTS */
 /* see updateUIElemPositions in data_ops.c for how these values are assigned */
-
-#define MENU_BAR_HEIGHT      (UI_TILE_SIZE+2*UI_PADDING_SIZE)
 
 #define MENU_BUTTON_POS_XR    UI_PADDING_SIZE   //in unscaled pixels
 #define MENU_BUTTON_POS_Y     UI_PADDING_SIZE   //in unscaled pixels
@@ -93,10 +91,13 @@ static const uint8_t UITHEME_ICON_TILE_Y[UIICON_ENUM_LENGTH] = {10,10,10,9,9};
 #define ABOUT_BOX_OK_BUTTON_YB     (4*UI_PADDING_SIZE)
 
 //preferences dialog
-#define PREFS_DIALOG_WIDTH            520 //in unscaled pixels
+#define PREFS_DIALOG_WIDTH            600 //in unscaled pixels
 #define PREFS_DIALOG_HEIGHT           400 //in unscaled pixels
 #define PREFS_DIALOG_HEADERTXT_X      (6*UI_PADDING_SIZE)
 #define PREFS_DIALOG_HEADERTXT_Y      (6*UI_PADDING_SIZE)
+#define PREFS_DIALOG_PREF_Y_SPACING   32 //in unscaled pixels
+#define PREFS_DIALOG_PREFCOL1_X       (6*UI_PADDING_SIZE)
+#define PREFS_DIALOG_PREFCOL1_Y       80 //in unscaled pixels
 
 //chart of nuclides
 #define DEFAULT_NUCLBOX_DIM                8.0f

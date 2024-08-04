@@ -322,6 +322,10 @@ void drawIconAndTextButton(const ui_theme_rules *restrict uirules, resource_data
   
 }
 
+void drawCheckbox(const ui_theme_rules *restrict uirules, resource_data *restrict rdat,const uint16_t x, const uint16_t y, const uint16_t w, const uint8_t highlightState, const uint8_t alpha, const uint8_t checked){
+  drawIcon(uirules,rdat,x,y,w,highlightState,alpha,checked ? UIICON_CHECKBOX_CHECKED : UIICON_CHECKBOX_UNCHECKED);
+}
+
 //draws a selection indicator with the position and size specified by the input SDL_Rect
 void drawSelectionRect(resource_data *restrict rdat, const SDL_FRect pos, const SDL_FColor col, const float thicknessPx){
   float scaledThickness = thicknessPx*rdat->uiScale;

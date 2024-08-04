@@ -24,6 +24,8 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include "gui_constants.h"
 
 //Initializes the temporary (unsaved) portion of the app state.
+//The default preferences are set here, these will later be overwritten during
+//app startup by the values in con.ini
 void initializeTempState(const app_data *restrict dat, app_state *restrict state){
   
 	//input
@@ -52,7 +54,7 @@ void initializeTempState(const app_data *restrict dat, app_state *restrict state
   state->ds.shownElements = 0; //no UI elements being shown
 	state->ds.shownElements |= (1U << UIELEM_CHARTOFNUCLIDES);
   state->ds.uiAnimPlaying = 0; //no UI animations playing
-  state->ds.useZoomAnimations = 1;
+  state->ds.drawShellClosures = 1;
 	state->ds.chartPosX = 86.0f;
 	state->ds.chartPosY = 52.0f;
 	state->ds.chartZoomScale = 0.5f;
@@ -1460,6 +1462,7 @@ void changeUIState(const app_data *restrict dat, app_state *restrict state, cons
 			break;
 		case UISTATE_PREFS_DIALOG:
 			state->interactableElement |= (uint32_t)(1U << UIELEM_PREFS_DIALOG_CLOSEBUTTON);
+			state->interactableElement |= (uint32_t)(1U << UIELEM_PREFS_DIALOG_SHELLCLOSURE_CHECKBOX);
 			break;
 		case UISTATE_FULLLEVELINFO:
 			state->ds.nuclFullInfoMaxScrollY = getMaxNumLvlDispLines(&dat->ndat,state); //find total number of lines displayable
@@ -1551,6 +1554,11 @@ void uiElemClickAction(const app_data *restrict dat, app_state *restrict state, 
       changeUIState(dat,state,state->lastUIState); //restore previous interactable elements
       startUIAnimation(dat,state,UIANIM_MODAL_BOX_HIDE); //about box will be closed after animation finishes
       break;
+		case UIELEM_PREFS_DIALOG_SHELLCLOSURE_CHECKBOX:
+			state->ds.drawShellClosures = !(state->ds.drawShellClosures);
+			state->ds.forceRedraw = 1;
+			state->clickedUIElem = UIELEM_ENUM_LENGTH; //'unclick' the button
+			break;
 		case UIELEM_NUCL_INFOBOX:
 			break;
 		case UIELEM_NUCL_INFOBOX_CLOSEBUTTON:
@@ -1725,12 +1733,19 @@ void updateSingleUIElemPosition(drawing_state *restrict ds, const uint8_t uiElem
 			ds->uiElemHeight[uiElemInd] = PREFS_DIALOG_HEIGHT;
 			//update child/dependant UI elements
 			updateSingleUIElemPosition(ds,UIELEM_PREFS_DIALOG_CLOSEBUTTON);
+			updateSingleUIElemPosition(ds,UIELEM_PREFS_DIALOG_SHELLCLOSURE_CHECKBOX);
 			break;
 		case UIELEM_PREFS_DIALOG_CLOSEBUTTON:
 			ds->uiElemWidth[UIELEM_PREFS_DIALOG_CLOSEBUTTON] = UI_TILE_SIZE;
 			ds->uiElemHeight[UIELEM_PREFS_DIALOG_CLOSEBUTTON] = ds->uiElemWidth[UIELEM_PREFS_DIALOG_CLOSEBUTTON];
 			ds->uiElemPosX[UIELEM_PREFS_DIALOG_CLOSEBUTTON] = (uint16_t)(ds->uiElemPosX[UIELEM_PREFS_DIALOG] + ds->uiElemWidth[UIELEM_PREFS_DIALOG] - ds->uiElemWidth[UIELEM_PREFS_DIALOG_CLOSEBUTTON] - 4*UI_PADDING_SIZE);
 			ds->uiElemPosY[UIELEM_PREFS_DIALOG_CLOSEBUTTON] = ds->uiElemPosY[UIELEM_PREFS_DIALOG] + 4*UI_PADDING_SIZE;
+			break;
+		case UIELEM_PREFS_DIALOG_SHELLCLOSURE_CHECKBOX:
+			ds->uiElemWidth[UIELEM_PREFS_DIALOG_SHELLCLOSURE_CHECKBOX] = UI_TILE_SIZE;
+			ds->uiElemHeight[UIELEM_PREFS_DIALOG_SHELLCLOSURE_CHECKBOX] = ds->uiElemWidth[UIELEM_PREFS_DIALOG_SHELLCLOSURE_CHECKBOX];
+			ds->uiElemPosX[UIELEM_PREFS_DIALOG_SHELLCLOSURE_CHECKBOX] = ds->uiElemPosX[UIELEM_PREFS_DIALOG] + PREFS_DIALOG_PREFCOL1_X;
+			ds->uiElemPosY[UIELEM_PREFS_DIALOG_SHELLCLOSURE_CHECKBOX] = ds->uiElemPosY[UIELEM_PREFS_DIALOG] + PREFS_DIALOG_PREFCOL1_Y;
 			break;
 		case UIELEM_NUCL_INFOBOX:
 			ds->uiElemPosX[uiElemInd] = (uint16_t)((ds->windowXRes - NUCL_INFOBOX_WIDTH)/2);
