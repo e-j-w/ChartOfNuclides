@@ -24,6 +24,14 @@ which can be referenced by both the GUI draw code as well as the interaction cod
 
 /* GLOBAL GUI PARAMETERS */
 
+//minimum dimensions of the window
+#define MIN_RENDER_WIDTH  800
+#define MIN_RENDER_HEIGHT 480
+
+//maximum dimensions of the window
+#define MAX_RENDER_WIDTH  16384
+#define MAX_RENDER_HEIGHT 16384
+
 #define UI_ANIM_LENGTH       0.2f //length of UI animations, in seconds
 #define SPEC_ZOOM_TIME       0.5f //amount of time for spectrum zoom animations
 
@@ -84,6 +92,12 @@ static const uint8_t UITHEME_ICON_TILE_Y[UIICON_ENUM_LENGTH] = {10,10,10,9,9};
 #define ABOUT_BOX_OK_BUTTON_WIDTH  120
 #define ABOUT_BOX_OK_BUTTON_YB     (4*UI_PADDING_SIZE)
 
+//preferences dialog
+#define PREFS_DIALOG_WIDTH            520 //in unscaled pixels
+#define PREFS_DIALOG_HEIGHT           400 //in unscaled pixels
+#define PREFS_DIALOG_HEADERTXT_X      (6*UI_PADDING_SIZE)
+#define PREFS_DIALOG_HEADERTXT_Y      (6*UI_PADDING_SIZE)
+
 //chart of nuclides
 #define DEFAULT_NUCLBOX_DIM                8.0f
 #define DEFAULT_ISOMERBOX_PADDING          0.25f
@@ -99,7 +113,7 @@ static const uint8_t UITHEME_ICON_TILE_Y[UIICON_ENUM_LENGTH] = {10,10,10,9,9};
 #define CHART_SHELLCLOSURELINE_THICKNESS   3.0f
 
 #define NUCL_INFOBOX_X_PADDING              (UI_PADDING_SIZE+CHART_AXIS_DEPTH) //in unscaled pixels
-#define NUCL_INFOBOX_WIDTH                  (MIN_RENDER_WIDTH-2*NUCL_INFOBOX_X_PADDING) //in unscaled pixels
+#define NUCL_INFOBOX_WIDTH                  500 //in unscaled pixels
 #define NUCL_INFOBOX_MIN_HEIGHT             120 //in unscaled pixels
 #define NUCL_INFOBOX_BIGLINE_HEIGHT         30.0f //in unscaled pixels
 #define NUCL_INFOBOX_SMALLLINE_HEIGHT       20.0f //in unscaled pixels

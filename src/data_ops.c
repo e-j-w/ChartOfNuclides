@@ -111,9 +111,10 @@ void stopUIAnimation(const app_data *restrict dat, app_state *restrict state, co
 		case UIANIM_PRIMARY_MENU_HIDE:
 			state->ds.shownElements &= (uint32_t)(~(1U << UIELEM_PRIMARY_MENU)); //close the menu
 			break;
-    case UIANIM_MSG_BOX_HIDE:
+    case UIANIM_MODAL_BOX_HIDE:
       state->ds.shownElements &= (uint32_t)(~(1U << UIELEM_MSG_BOX)); //close the message box
 			state->ds.shownElements &= (uint32_t)(~(1U << UIELEM_ABOUT_BOX)); //close the about box
+			state->ds.shownElements &= (uint32_t)(~(1U << UIELEM_PREFS_DIALOG)); //close the preferences dialog
       break;
 		case UIANIM_NUCLINFOBOX_HIDE:
 			state->ds.shownElements &= (uint32_t)(~(1U << UIELEM_NUCL_INFOBOX)); //close the info box
@@ -225,7 +226,7 @@ void setupMessageBox(const app_data *restrict dat, app_state *restrict state, co
   strncpy(state->msgBoxHeaderTxt,headerTxt,31);
   strncpy(state->msgBoxTxt,msgTxt,255);
   state->ds.shownElements |= (uint32_t)(1U << UIELEM_MSG_BOX);
-  startUIAnimation(dat,state,UIANIM_MSG_BOX_SHOW);
+  startUIAnimation(dat,state,UIANIM_MODAL_BOX_SHOW);
   changeUIState(dat,state,UISTATE_MSG_BOX);
 }
 
@@ -1457,6 +1458,9 @@ void changeUIState(const app_data *restrict dat, app_state *restrict state, cons
 		case UISTATE_ABOUT_BOX:
 			state->interactableElement |= (uint32_t)(1U << UIELEM_ABOUT_BOX_OK_BUTTON);
 			break;
+		case UISTATE_PREFS_DIALOG:
+			state->interactableElement |= (uint32_t)(1U << UIELEM_PREFS_DIALOG_CLOSEBUTTON);
+			break;
 		case UISTATE_FULLLEVELINFO:
 			state->ds.nuclFullInfoMaxScrollY = getMaxNumLvlDispLines(&dat->ndat,state); //find total number of lines displayable
 			state->interactableElement |= (uint32_t)(1U << UIELEM_MENU_BUTTON);
@@ -1537,11 +1541,15 @@ void uiElemClickAction(const app_data *restrict dat, app_state *restrict state, 
       break;
     case UIELEM_MSG_BOX_OK_BUTTON:
       changeUIState(dat,state,state->lastUIState); //restore previous interactable elements
-      startUIAnimation(dat,state,UIANIM_MSG_BOX_HIDE); //message box will be closed after animation finishes
+      startUIAnimation(dat,state,UIANIM_MODAL_BOX_HIDE); //message box will be closed after animation finishes
       break;
 		case UIELEM_ABOUT_BOX_OK_BUTTON:
       changeUIState(dat,state,state->lastUIState); //restore previous interactable elements
-      startUIAnimation(dat,state,UIANIM_MSG_BOX_HIDE); //about box will be closed after animation finishes
+      startUIAnimation(dat,state,UIANIM_MODAL_BOX_HIDE); //about box will be closed after animation finishes
+      break;
+		case UIELEM_PREFS_DIALOG_CLOSEBUTTON:
+      changeUIState(dat,state,state->lastUIState); //restore previous interactable elements
+      startUIAnimation(dat,state,UIANIM_MODAL_BOX_HIDE); //about box will be closed after animation finishes
       break;
 		case UIELEM_NUCL_INFOBOX:
 			break;
@@ -1567,13 +1575,16 @@ void uiElemClickAction(const app_data *restrict dat, app_state *restrict state, 
 			//SDL_Log("Clicked prefs button.\n");
 			startUIAnimation(dat,state,UIANIM_PRIMARY_MENU_HIDE); //menu will be closed after animation finishes
       state->clickedUIElem = UIELEM_ENUM_LENGTH; //'unclick' the menu button
+			state->ds.shownElements |= (uint32_t)(1U << UIELEM_PREFS_DIALOG);
+			startUIAnimation(dat,state,UIANIM_MODAL_BOX_SHOW);
+			changeUIState(dat,state,UISTATE_PREFS_DIALOG);
 			break;
 		case UIELEM_PM_ABOUT_BUTTON:
 			//SDL_Log("Clicked about button.\n");
 			startUIAnimation(dat,state,UIANIM_PRIMARY_MENU_HIDE); //menu will be closed after animation finishes
       state->clickedUIElem = UIELEM_ENUM_LENGTH; //'unclick' the menu button
 			state->ds.shownElements |= (uint32_t)(1U << UIELEM_ABOUT_BOX);
-			startUIAnimation(dat,state,UIANIM_MSG_BOX_SHOW);
+			startUIAnimation(dat,state,UIANIM_MODAL_BOX_SHOW);
 			changeUIState(dat,state,UISTATE_ABOUT_BOX);
 			break;
 		case UIELEM_PRIMARY_MENU:
@@ -1706,6 +1717,20 @@ void updateSingleUIElemPosition(drawing_state *restrict ds, const uint8_t uiElem
 			ds->uiElemPosY[uiElemInd] = (uint16_t)((ds->windowYRes + ABOUT_BOX_HEIGHT)/2 - ABOUT_BOX_OK_BUTTON_YB - UI_TILE_SIZE);
 			ds->uiElemWidth[uiElemInd] = ABOUT_BOX_OK_BUTTON_WIDTH;
 			ds->uiElemHeight[uiElemInd] = UI_TILE_SIZE;
+			break;
+		case UIELEM_PREFS_DIALOG:
+			ds->uiElemPosX[uiElemInd] = (uint16_t)((ds->windowXRes - PREFS_DIALOG_WIDTH)/2);
+			ds->uiElemPosY[uiElemInd] = (uint16_t)((ds->windowYRes - PREFS_DIALOG_HEIGHT)/2);
+			ds->uiElemWidth[uiElemInd] = PREFS_DIALOG_WIDTH;
+			ds->uiElemHeight[uiElemInd] = PREFS_DIALOG_HEIGHT;
+			//update child/dependant UI elements
+			updateSingleUIElemPosition(ds,UIELEM_PREFS_DIALOG_CLOSEBUTTON);
+			break;
+		case UIELEM_PREFS_DIALOG_CLOSEBUTTON:
+			ds->uiElemWidth[UIELEM_PREFS_DIALOG_CLOSEBUTTON] = UI_TILE_SIZE;
+			ds->uiElemHeight[UIELEM_PREFS_DIALOG_CLOSEBUTTON] = ds->uiElemWidth[UIELEM_PREFS_DIALOG_CLOSEBUTTON];
+			ds->uiElemPosX[UIELEM_PREFS_DIALOG_CLOSEBUTTON] = (uint16_t)(ds->uiElemPosX[UIELEM_PREFS_DIALOG] + ds->uiElemWidth[UIELEM_PREFS_DIALOG] - ds->uiElemWidth[UIELEM_PREFS_DIALOG_CLOSEBUTTON] - 4*UI_PADDING_SIZE);
+			ds->uiElemPosY[UIELEM_PREFS_DIALOG_CLOSEBUTTON] = ds->uiElemPosY[UIELEM_PREFS_DIALOG] + 4*UI_PADDING_SIZE;
 			break;
 		case UIELEM_NUCL_INFOBOX:
 			ds->uiElemPosX[uiElemInd] = (uint16_t)((ds->windowXRes - NUCL_INFOBOX_WIDTH)/2);

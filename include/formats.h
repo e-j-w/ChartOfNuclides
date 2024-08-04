@@ -31,14 +31,6 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "enums.h"
 
-//minimum dimensions of the window
-#define MIN_RENDER_WIDTH  640
-#define MIN_RENDER_HEIGHT 360
-
-//maximum dimensions of the window
-#define MAX_RENDER_WIDTH  16384
-#define MAX_RENDER_HEIGHT 16384
-
 //app data parameters (should all be powers of 2)
 #define MAX_ARRAY_SIZE                 65536
 #define MAX_NUM_STRINGS                512  //maximum number of text strings

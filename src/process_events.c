@@ -124,9 +124,12 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
   if(state->inputFlags & (1U << INPUT_BACK)){
     //escape open menus
     //handle modal dialogs first
-    if((state->ds.shownElements & (1U << UIELEM_ABOUT_BOX))&&(state->ds.timeLeftInUIAnimation[UIANIM_MSG_BOX_HIDE]==0.0f)){
+    if((state->ds.shownElements & (1U << UIELEM_ABOUT_BOX))&&(state->ds.timeLeftInUIAnimation[UIANIM_MODAL_BOX_HIDE]==0.0f)){
       changeUIState(dat,state,state->lastUIState); //restore previous interactable elements
-      startUIAnimation(dat,state,UIANIM_MSG_BOX_HIDE); //hide the about/message box, see stopUIAnimation()
+      startUIAnimation(dat,state,UIANIM_MODAL_BOX_HIDE); //hide the about/message box, see stopUIAnimation()
+    }else if((state->ds.shownElements & (1U << UIELEM_PREFS_DIALOG))&&(state->ds.timeLeftInUIAnimation[UIANIM_MODAL_BOX_HIDE]==0.0f)){
+      changeUIState(dat,state,state->lastUIState); //restore previous interactable elements
+      startUIAnimation(dat,state,UIANIM_MODAL_BOX_HIDE); //hide the about/message box, see stopUIAnimation()
     }else if((state->ds.shownElements & (1U << UIELEM_NUCL_INFOBOX))&&(state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_HIDE]==0.0f)){
       startUIAnimation(dat,state,UIANIM_NUCLINFOBOX_HIDE); //hide the info box, see stopUIAnimation() for info box hiding action
       startUIAnimation(dat,state,UIANIM_NUCLHIGHLIGHT_HIDE);
