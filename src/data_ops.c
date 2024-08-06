@@ -1750,7 +1750,7 @@ void updateSingleUIElemPosition(const app_data *restrict dat, drawing_state *res
 			ds->uiElemHeight[UIELEM_PREFS_DIALOG_SHELLCLOSURE_CHECKBOX] = ds->uiElemWidth[UIELEM_PREFS_DIALOG_SHELLCLOSURE_CHECKBOX];
 			ds->uiElemPosX[UIELEM_PREFS_DIALOG_SHELLCLOSURE_CHECKBOX] = ds->uiElemPosX[UIELEM_PREFS_DIALOG] + PREFS_DIALOG_PREFCOL1_X;
 			ds->uiElemPosY[UIELEM_PREFS_DIALOG_SHELLCLOSURE_CHECKBOX] = ds->uiElemPosY[UIELEM_PREFS_DIALOG] + PREFS_DIALOG_PREFCOL1_Y;
-			ds->uiElemExtPlusX[UIELEM_PREFS_DIALOG_SHELLCLOSURE_CHECKBOX] = 2*UI_PADDING_SIZE + FC_GetWidth(rdat->font,dat->strings[dat->locStringIDs[LOCSTR_PREF_SHELLCLOSURE]]); //so that checkbox can be toggled by clicking on adjacent text
+			ds->uiElemExtPlusX[UIELEM_PREFS_DIALOG_SHELLCLOSURE_CHECKBOX] = 2*UI_PADDING_SIZE + (uint16_t)(FC_GetWidth(rdat->font,dat->strings[dat->locStringIDs[LOCSTR_PREF_SHELLCLOSURE]])/rdat->uiScale); //so that checkbox can be toggled by clicking on adjacent text
 			break;
 		case UIELEM_NUCL_INFOBOX:
 			ds->uiElemPosX[uiElemInd] = (uint16_t)((ds->windowXRes - NUCL_INFOBOX_WIDTH)/2);
