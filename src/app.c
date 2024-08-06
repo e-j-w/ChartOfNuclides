@@ -99,7 +99,7 @@ int main(int argc, char *argv[]){
     return 0;
   }
   //setup the renderer
-  gdat->rdat.renderer = SDL_CreateRenderer(gdat->rdat.window, NULL, SDL_RENDERER_PRESENTVSYNC);
+  gdat->rdat.renderer = SDL_CreateRenderer(gdat->rdat.window, NULL);
   if(!gdat->rdat.renderer){
     SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,"Error","Cannot initialize renderer.",gdat->rdat.window);
     SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"cannot create renderer - %s\n",SDL_GetError());

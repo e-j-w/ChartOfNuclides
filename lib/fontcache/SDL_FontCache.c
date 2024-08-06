@@ -860,7 +860,7 @@ Uint8 FC_UploadGlyphCache(FC_Font* font, int cache_level, SDL_Surface* data_surf
         // Must upload with render target enabled so we can put more glyphs on later
         SDL_Renderer* renderer = font->renderer;
 
-        new_level = SDL_CreateTexture(renderer, data_surface->format->format, SDL_TEXTUREACCESS_TARGET, data_surface->w, data_surface->h);
+        new_level = SDL_CreateTexture(renderer, data_surface->format, SDL_TEXTUREACCESS_TARGET, data_surface->w, data_surface->h);
         SDL_SetTextureBlendMode(new_level, SDL_BLENDMODE_BLEND);
 
         Uint8 r, g, b, a;
@@ -1024,9 +1024,6 @@ Uint8 FC_LoadFontFromTTF(FC_Font* font, SDL_Renderer* renderer, TTF_Font* ttf, S
 
     FC_ClearFont(font);
 
-    // Might as well check render target support here
-    SDL_RendererInfo info;
-    SDL_GetRendererInfo(renderer, &info);
     fc_has_render_target_support = 1; //JW: render to texture is always supported in SDL3, setting this to 0 apparently prevents rendering of UTF-8 characters
 
     font->renderer = renderer;
@@ -1401,7 +1398,7 @@ Uint8 FC_GetGlyphData(FC_Font* font, FC_GlyphData* result, Uint32 codepoint)
     if(e == NULL)
     {
         char buff[5];
-        int w, h;
+        float w, h;
         SDL_Color white = {255, 255, 255, 255};
         SDL_Surface* surf;
         FC_Image* cache_image;
@@ -1419,7 +1416,7 @@ Uint8 FC_GetGlyphData(FC_Font* font, FC_GlyphData* result, Uint32 codepoint)
             return 0;
         }
 
-        SDL_QueryTexture(cache_image, NULL, NULL, &w, &h);
+        SDL_GetTextureSize(cache_image, &w, &h);
 
         surf = TTF_RenderUTF8_Blended(font->ttf_source, buff, white);
         if(surf == NULL)

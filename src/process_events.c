@@ -381,7 +381,7 @@ void processSingleEvent(app_data *restrict dat, app_state *restrict state, resou
     
     case SDL_EVENT_KEY_DOWN: //pressing key
       state->lastInputType = INPUT_TYPE_KEYBOARD; //set keyboard input
-      switch(evt.key.keysym.scancode){
+      switch(evt.key.scancode){
         case SDL_SCANCODE_LEFT:
         case SDL_SCANCODE_A:
           state->inputFlags |= (1U << INPUT_LEFT);
@@ -428,7 +428,7 @@ void processSingleEvent(app_data *restrict dat, app_state *restrict state, resou
     case SDL_EVENT_GAMEPAD_BUTTON_UP:
       break;
     case SDL_EVENT_KEY_UP: //released key
-      switch(evt.key.keysym.scancode){
+      switch(evt.key.scancode){
         case SDL_SCANCODE_LEFT:
         case SDL_SCANCODE_A:
           state->inputFlags &= ~(1U << INPUT_LEFT);
