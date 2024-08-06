@@ -176,7 +176,8 @@ typedef struct
   float timeLeftInUIAnimation[UIANIM_ENUM_LENGTH]; //time left in each UI animation
   uint16_t windowXRes, windowYRes; //resolution of the window
   uint16_t windowXRenderRes, windowYRenderRes; //render resolution (in pixels) taking HI-DPI into account
-  uint16_t uiElemPosX[UIELEM_ENUM_LENGTH], uiElemPosY[UIELEM_ENUM_LENGTH], uiElemWidth[UIELEM_ENUM_LENGTH], uiElemHeight[UIELEM_ENUM_LENGTH];
+  uint16_t uiElemPosX[UIELEM_ENUM_LENGTH], uiElemPosY[UIELEM_ENUM_LENGTH], uiElemWidth[UIELEM_ENUM_LENGTH], uiElemHeight[UIELEM_ENUM_LENGTH]; //UI element positioning, used both for drawing elements and calculating mouse interactions 
+  uint16_t uiElemExtPlusX[UIELEM_ENUM_LENGTH], uiElemExtPlusY[UIELEM_ENUM_LENGTH], uiElemExtMinusX[UIELEM_ENUM_LENGTH], uiElemExtMinusY[UIELEM_ENUM_LENGTH]; //'extension' of each UI element, to allow mouse interactions outside of the visible area of the UI element (eg. so that checkbox text can be clicked as well as the checkbox itself)
   uint8_t texModR, texModG, texModB, texModA; //texture color and alpha modulation values
   unsigned int fcScrollInProgress : 1;
   unsigned int fcScrollFinished : 1;

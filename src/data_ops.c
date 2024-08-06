@@ -67,6 +67,10 @@ void initializeTempState(const app_data *restrict dat, app_state *restrict state
 	state->ds.dragInProgress = 0;
 	state->ds.fcScrollFinished = 0;
 	state->ds.fcScrollInProgress = 0;
+	memset(state->ds.uiElemExtPlusX,0,sizeof(state->ds.uiElemExtPlusX));
+	memset(state->ds.uiElemExtPlusY,0,sizeof(state->ds.uiElemExtPlusY));
+	memset(state->ds.uiElemExtMinusX,0,sizeof(state->ds.uiElemExtMinusX));
+	memset(state->ds.uiElemExtMinusY,0,sizeof(state->ds.uiElemExtMinusY));
 
   //check that constants are valid
   if(UIELEM_ENUM_LENGTH > /* DISABLES CODE */ (32)){
@@ -1517,7 +1521,7 @@ void panChartToPos(const app_data *restrict dat, drawing_state *restrict ds, con
 }
 
 //take action after clicking a button or other UI element
-void uiElemClickAction(const app_data *restrict dat, app_state *restrict state, const uint8_t doubleClick, const uint8_t uiElemID){
+void uiElemClickAction(const app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat, const uint8_t doubleClick, const uint8_t uiElemID){
 
 	//SDL_Log("Clicked UI element %u\n",uiElemID);
   state->clickedUIElem = uiElemID;
@@ -1625,8 +1629,8 @@ void uiElemClickAction(const app_data *restrict dat, app_state *restrict state, 
 								}
 							}
 						}
-						updateSingleUIElemPosition(&state->ds,UIELEM_NUCL_INFOBOX);
-						updateSingleUIElemPosition(&state->ds,UIELEM_NUCL_INFOBOX_CLOSEBUTTON);
+						updateSingleUIElemPosition(dat,&state->ds,rdat,UIELEM_NUCL_INFOBOX);
+						updateSingleUIElemPosition(dat,&state->ds,rdat,UIELEM_NUCL_INFOBOX_CLOSEBUTTON);
 						if(!(state->ds.shownElements & (1U << UIELEM_NUCL_INFOBOX))){
 							state->ds.shownElements |= (1U << UIELEM_NUCL_INFOBOX);
 							changeUIState(dat,state,UISTATE_DEFAULT); //make info box interactable
@@ -1676,7 +1680,7 @@ void uiElemClickAction(const app_data *restrict dat, app_state *restrict state, 
 
 //updates UI element (buttons etc.) positions, based on the screen resolution and other factors
 //positioning constants are defined in gui_constants.h
-void updateSingleUIElemPosition(drawing_state *restrict ds, const uint8_t uiElemInd){
+void updateSingleUIElemPosition(const app_data *restrict dat, drawing_state *restrict ds, resource_data *restrict rdat, const uint8_t uiElemInd){
 	switch(uiElemInd){
 		case UIELEM_MENU_BUTTON:
 			ds->uiElemPosX[uiElemInd] = (uint16_t)(ds->windowXRes-MENU_BUTTON_WIDTH-MENU_BUTTON_POS_XR);
@@ -1732,8 +1736,8 @@ void updateSingleUIElemPosition(drawing_state *restrict ds, const uint8_t uiElem
 			ds->uiElemWidth[uiElemInd] = PREFS_DIALOG_WIDTH;
 			ds->uiElemHeight[uiElemInd] = PREFS_DIALOG_HEIGHT;
 			//update child/dependant UI elements
-			updateSingleUIElemPosition(ds,UIELEM_PREFS_DIALOG_CLOSEBUTTON);
-			updateSingleUIElemPosition(ds,UIELEM_PREFS_DIALOG_SHELLCLOSURE_CHECKBOX);
+			updateSingleUIElemPosition(dat,ds,rdat,UIELEM_PREFS_DIALOG_CLOSEBUTTON);
+			updateSingleUIElemPosition(dat,ds,rdat,UIELEM_PREFS_DIALOG_SHELLCLOSURE_CHECKBOX);
 			break;
 		case UIELEM_PREFS_DIALOG_CLOSEBUTTON:
 			ds->uiElemWidth[UIELEM_PREFS_DIALOG_CLOSEBUTTON] = UI_TILE_SIZE;
@@ -1746,6 +1750,7 @@ void updateSingleUIElemPosition(drawing_state *restrict ds, const uint8_t uiElem
 			ds->uiElemHeight[UIELEM_PREFS_DIALOG_SHELLCLOSURE_CHECKBOX] = ds->uiElemWidth[UIELEM_PREFS_DIALOG_SHELLCLOSURE_CHECKBOX];
 			ds->uiElemPosX[UIELEM_PREFS_DIALOG_SHELLCLOSURE_CHECKBOX] = ds->uiElemPosX[UIELEM_PREFS_DIALOG] + PREFS_DIALOG_PREFCOL1_X;
 			ds->uiElemPosY[UIELEM_PREFS_DIALOG_SHELLCLOSURE_CHECKBOX] = ds->uiElemPosY[UIELEM_PREFS_DIALOG] + PREFS_DIALOG_PREFCOL1_Y;
+			ds->uiElemExtPlusX[UIELEM_PREFS_DIALOG_SHELLCLOSURE_CHECKBOX] = 2*UI_PADDING_SIZE + FC_GetWidth(rdat->font,dat->strings[dat->locStringIDs[LOCSTR_PREF_SHELLCLOSURE]]); //so that checkbox can be toggled by clicking on adjacent text
 			break;
 		case UIELEM_NUCL_INFOBOX:
 			ds->uiElemPosX[uiElemInd] = (uint16_t)((ds->windowXRes - NUCL_INFOBOX_WIDTH)/2);
@@ -1757,8 +1762,8 @@ void updateSingleUIElemPosition(drawing_state *restrict ds, const uint8_t uiElem
 			ds->uiElemPosY[uiElemInd] = (uint16_t)(ds->windowYRes - ds->uiElemHeight[uiElemInd] - UI_PADDING_SIZE - (int32_t)CHART_AXIS_DEPTH);
 			ds->uiElemWidth[uiElemInd] = (uint16_t)(NUCL_INFOBOX_WIDTH);
 			//update child/dependant UI elements
-			updateSingleUIElemPosition(ds,UIELEM_NUCL_INFOBOX_CLOSEBUTTON);
-			updateSingleUIElemPosition(ds,UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON);
+			updateSingleUIElemPosition(dat,ds,rdat,UIELEM_NUCL_INFOBOX_CLOSEBUTTON);
+			updateSingleUIElemPosition(dat,ds,rdat,UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON);
 			break;
 		case UIELEM_NUCL_INFOBOX_CLOSEBUTTON:
 			ds->uiElemWidth[UIELEM_NUCL_INFOBOX_CLOSEBUTTON] = UI_TILE_SIZE;
@@ -1801,9 +1806,9 @@ void updateSingleUIElemPosition(drawing_state *restrict ds, const uint8_t uiElem
 			break;
 	}
 }
-void updateUIElemPositions(drawing_state *restrict ds){
+void updateUIElemPositions(const app_data *restrict dat, drawing_state *restrict ds, resource_data *restrict rdat){
   for(uint8_t i=0; i<UIELEM_ENUM_LENGTH; i++){
-    updateSingleUIElemPosition(ds,i);
+    updateSingleUIElemPosition(dat,ds,rdat,i);
   }
 }
 
@@ -1840,7 +1845,7 @@ void updateWindowRes(app_data *restrict dat, app_state *restrict state, resource
   state->ds.windowYRenderRes = (uint16_t)rheight;
 
   //update things that depend on the window res
-  updateUIElemPositions(&state->ds); //UI element positions
+  updateUIElemPositions(dat,&state->ds,rdat); //UI element positions
 	changeUIState(dat,state,state->uiState);
 }
 

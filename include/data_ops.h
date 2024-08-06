@@ -60,9 +60,10 @@ float getChartWidthNAfterZoom(const drawing_state *restrict ds);
 float getChartHeightZAfterZoom(const drawing_state *restrict ds);
 
 void changeUIState(const app_data *restrict dat, app_state *restrict state, const uint8_t newState);
-void uiElemClickAction(const app_data *restrict dat, app_state *restrict state, const uint8_t doubleClick, const uint8_t uiElemID);
+void uiElemClickAction(const app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat, const uint8_t doubleClick, const uint8_t uiElemID);
 
-void updateSingleUIElemPosition(drawing_state *restrict ds, const uint8_t uiElemInd);
+void updateSingleUIElemPosition(const app_data *restrict dat, drawing_state *restrict ds, resource_data *restrict rdat, const uint8_t uiElemInd);
+void updateUIElemPositions(const app_data *restrict dat, drawing_state *restrict ds, resource_data *restrict rdat);
 
 float getUIthemeScale(const float uiScale);
 void updateWindowRes(app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat);

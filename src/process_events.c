@@ -134,7 +134,7 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
       startUIAnimation(dat,state,UIANIM_NUCLINFOBOX_HIDE); //hide the info box, see stopUIAnimation() for info box hiding action
       startUIAnimation(dat,state,UIANIM_NUCLHIGHLIGHT_HIDE);
     }else if((state->uiState == UISTATE_FULLLEVELINFO)&&(state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_EXPAND]==0.0f)){
-      uiElemClickAction(dat,state,0,UIELEM_NUCL_FULLINFOBOX_BACKBUTTON); //go back to the main chart
+      uiElemClickAction(dat,state,rdat,0,UIELEM_NUCL_FULLINFOBOX_BACKBUTTON); //go back to the main chart
     }else if(state->ds.windowFullscreenMode){
       //exit fullscreen
       state->ds.windowFullscreenMode = 0;
@@ -150,15 +150,15 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
   if(state->ds.dragInProgress == 0){
     for(uint8_t i=0; i<UIELEM_ENUM_LENGTH; i++){ //ordering in ui_element_enum defines order in which UI elements receive input
       if(state->interactableElement & (uint32_t)(1U << i)){
-        if((state->mouseHoldStartPosXPx >= state->ds.uiElemPosX[i])&&(state->mouseHoldStartPosXPx < (state->ds.uiElemPosX[i]+state->ds.uiElemWidth[i]))&&(state->mouseHoldStartPosYPx >= state->ds.uiElemPosY[i])&&(state->mouseHoldStartPosYPx < (state->ds.uiElemPosY[i]+state->ds.uiElemHeight[i]))){
+        if((state->mouseHoldStartPosXPx >= (state->ds.uiElemPosX[i]-state->ds.uiElemExtMinusX[i]))&&(state->mouseHoldStartPosXPx < (state->ds.uiElemPosX[i]+state->ds.uiElemWidth[i]+state->ds.uiElemExtPlusX[i]))&&(state->mouseHoldStartPosYPx >= (state->ds.uiElemPosY[i]-state->ds.uiElemExtMinusY[i]))&&(state->mouseHoldStartPosYPx < (state->ds.uiElemPosY[i]+state->ds.uiElemHeight[i]+state->ds.uiElemExtPlusY[i]))){
           state->mouseholdElement = i;
         }
-        if((state->mouseXPx >= state->ds.uiElemPosX[i])&&(state->mouseXPx < (state->ds.uiElemPosX[i]+state->ds.uiElemWidth[i]))&&(state->mouseYPx >= state->ds.uiElemPosY[i])&&(state->mouseYPx < (state->ds.uiElemPosY[i]+state->ds.uiElemHeight[i]))){
+        if((state->mouseXPx >= (state->ds.uiElemPosX[i]-state->ds.uiElemExtMinusX[i]))&&(state->mouseXPx < (state->ds.uiElemPosX[i]+state->ds.uiElemWidth[i]+state->ds.uiElemExtPlusX[i]))&&(state->mouseYPx >= (state->ds.uiElemPosY[i]-state->ds.uiElemExtMinusY[i]))&&(state->mouseYPx < (state->ds.uiElemPosY[i]+state->ds.uiElemHeight[i]+state->ds.uiElemExtPlusY[i]))){
           state->mouseoverElement = i;
           //SDL_Log("mouseover element: %u\n",i);
-          if((state->mouseClickPosXPx >= state->ds.uiElemPosX[i])&&(state->mouseClickPosXPx < (state->ds.uiElemPosX[i]+state->ds.uiElemWidth[i]))&&(state->mouseClickPosYPx >= state->ds.uiElemPosY[i])&&(state->mouseClickPosYPx < (state->ds.uiElemPosY[i]+state->ds.uiElemHeight[i]))){
+          if((state->mouseClickPosXPx >= (state->ds.uiElemPosX[i]-state->ds.uiElemExtMinusX[i]))&&(state->mouseClickPosXPx < (state->ds.uiElemPosX[i]+state->ds.uiElemWidth[i]+state->ds.uiElemExtPlusX[i]))&&(state->mouseClickPosYPx >= (state->ds.uiElemPosY[i]-state->ds.uiElemExtMinusY[i]))&&(state->mouseClickPosYPx < (state->ds.uiElemPosY[i]+state->ds.uiElemHeight[i]+state->ds.uiElemExtPlusY[i]))){
             //take action
-            uiElemClickAction(dat,state,0,i);
+            uiElemClickAction(dat,state,rdat,0,i);
             return;
           }
           break;
@@ -191,15 +191,15 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
     if((state->mouseClickPosXPx >= 0.0f) && (fabsf(state->ds.chartDragStartMouseX - state->mouseXPx) < 5.0f) && (fabsf(state->ds.chartDragStartMouseY - state->mouseYPx) < 5.0f) ){
       //unclick (or click on chart view)
       if(doubleClick){
-        uiElemClickAction(dat,state,1,UIELEM_ENUM_LENGTH);
+        uiElemClickAction(dat,state,rdat,1,UIELEM_ENUM_LENGTH);
       }else{
-        uiElemClickAction(dat,state,0,UIELEM_ENUM_LENGTH);
+        uiElemClickAction(dat,state,rdat,0,UIELEM_ENUM_LENGTH);
       }
     }
   }else if(state->uiState == UISTATE_FULLLEVELINFO){
     if(state->mouseClickPosXPx >= 0.0f){
       //clicked outside of interactable items on the full level info screen
-      uiElemClickAction(dat,state,0,UIELEM_ENUM_LENGTH);
+      uiElemClickAction(dat,state,rdat,0,UIELEM_ENUM_LENGTH);
     }
   }
 
@@ -412,7 +412,7 @@ void processSingleEvent(app_data *restrict dat, app_state *restrict state, resou
           break;
         case SDL_SCANCODE_F:
           if((state->ds.shownElements & (1U << UIELEM_NUCL_INFOBOX))&&(state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_SHOW]==0.0f)){
-            uiElemClickAction(dat,state,0,UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON);
+            uiElemClickAction(dat,state,rdat,0,UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON);
           }
           break;
         case SDL_SCANCODE_P:

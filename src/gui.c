@@ -737,7 +737,7 @@ void drawNuclInfoBox(const app_data *restrict dat, app_state *restrict state, re
   drawInfoBoxHeader(dat,rdat,infoBoxPanelRect.x,infoBoxPanelRect.y,alpha,nuclInd);
 
   //all level info button
-  updateSingleUIElemPosition(&state->ds,UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON);
+  updateSingleUIElemPosition(dat,&state->ds,rdat,UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON);
   if((state->ds.uiAnimPlaying & (1U << UIANIM_NUCLINFOBOX_EXPAND))||(state->ds.uiAnimPlaying & (1U << UIANIM_NUCLINFOBOX_CONTRACT))){ 
     drawIconAndTextButton(&dat->rules.themeRules,rdat,state->ds.uiElemPosX[UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON],state->ds.uiElemPosY[UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON],state->ds.uiElemWidth[UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON],getHighlightState(state,UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON),255,UIICON_UPARROWS,dat->strings[dat->locStringIDs[LOCSTR_ALLLEVELS]]);
   }else{
