@@ -55,15 +55,31 @@ int main(int argc, char *argv[]){
     SDL_Log("Video driver available: %s\n",SDL_GetVideoDriver(i));
   }*/
 
+  
+  
+
   uint32_t sdlFlags = 0;
   if(cliArgs&(1U<<CLI_NOGAMEPAD)){
     sdlFlags = SDL_INIT_VIDEO|SDL_INIT_TIMER;
   }else{
     sdlFlags = SDL_INIT_VIDEO|SDL_INIT_TIMER|SDL_INIT_GAMEPAD;
   }
+  if(strcmp(SDL_GetPlatform(),"Linux")==0){
+    //Use Wayland by default on Linux instead of X11,
+    //since Wayland seems to have better frame pacing
+    SDL_SetHint(SDL_HINT_VIDEO_DRIVER,"wayland");
+  }
   if(SDL_Init(sdlFlags) != 0){
-    SDL_Log("Cannot initialize SDL: %s\n",SDL_GetError());
-    return 0;
+    if(strcmp(SDL_GetPlatform(),"Linux")==0){
+      SDL_ResetHint(SDL_HINT_VIDEO_DRIVER); //try X11 instead of wayland
+      if(SDL_Init(sdlFlags) != 0){
+        SDL_Log("Cannot initialize SDL: %s\n",SDL_GetError());
+        return 0;
+      }
+    }else{
+      SDL_Log("Cannot initialize SDL: %s\n",SDL_GetError());
+      return 0;
+    }
   }
   if(TTF_Init() != 0){
     SDL_Log("Cannot initialize SDL_TTF: %s\n", TTF_GetError());
