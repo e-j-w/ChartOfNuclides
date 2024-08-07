@@ -33,7 +33,6 @@ which can be referenced by both the GUI draw code as well as the interaction cod
 #define MAX_RENDER_HEIGHT 16384
 
 #define UI_ANIM_LENGTH       0.2f //length of UI animations, in seconds
-#define SPEC_ZOOM_TIME       0.5f //amount of time for spectrum zoom animations
 
 #define UI_TILE_SIZE         32  //pixel size of a UI tile at 1x scaling
 #define UI_PADDING_SIZE      4   //pixel size of the default UI element padding

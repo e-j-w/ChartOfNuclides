@@ -162,7 +162,7 @@ int main(int argc, char *argv[]){
     //SDL_Log("deltaTime: %f\n",deltaTime);
     deltaTime = deltaTime/1000.0f; //convert to seconds
     if(deltaTime > 0.033f){
-      deltaTime = 0.033f; //because of main thread blocking, set maximum delta to prevent weird timing bugs
+      deltaTime = 0.001f; //because of main thread blocking, set artificially low delta to prevent weird timing bugs
     }
 
     updateUIAnimationTimes(&gdat->dat,&gdat->state,deltaTime);
