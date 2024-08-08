@@ -11,37 +11,43 @@ CC = gcc
 run: con
 	./con
 
-#install: con
-#	@echo "Will install to /usr/bin."
-#	@echo "Run 'make uninstall' to undo installation."
-#	@if ! [ "$(shell id -u)" = 0 ]; then \
-#		echo "This must be run with administrator privileges (eg. with 'sudo')."; \
-#	else \
-#		cp con /usr/bin ; \
-#		cp data/icon.svg /usr/share/icons/hicolor/scalable/apps/con-application-icon.svg ; \
-#		cp data/con.desktop /usr/share/applications ; \
-#		update-desktop-database /usr/share/applications ; \
-#		echo "Done!" ; \
-#	fi
+install-linux: con
+	@echo "Will install executable to /usr/bin and data to /usr/share/con."
+	@echo "Run 'make uninstall-linux' to undo installation."
+	@if ! [ "$(shell id -u)" = 0 ]; then \
+		echo "This must be run with administrator privileges (eg. with 'sudo')." ; \
+	else \
+		cp con /usr/bin ; \
+		mkdir /usr/share/con ; \
+		cp con.dat /usr/share/con ; \
+		cp data/icon.svg /usr/share/icons/hicolor/scalable/apps/con-application-icon.svg ; \
+		cp data/con.desktop /usr/share/applications ; \
+		update-desktop-database /usr/share/applications ; \
+		echo "Done!" ; \
+	fi
 
-#uninstall:
-#	@echo "Will undo changes made from running 'make install'."
-#	@if ! [ "$(shell id -u)" = 0 ]; then \
-#		echo "This must be run with administrator privileges (eg. with 'sudo')."; \
-#	else \
-#		rm /usr/bin/con ; \
-#		rm /usr/share/icons/hicolor/scalable/apps/con-application-icon.svg ; \
-#		rm /usr/share/applications/con.desktop ; \
-#		rm /usr/share/mime/packages/specfitter-mime.xml ; \
-#		update-desktop-database /usr/share/applications ; \
-#		echo "Done!" ; \
-#	fi
+uninstall-linux:
+	@echo "Will undo changes made from running 'make install-linux'."
+	@if ! [ "$(shell id -u)" = 0 ]; then \
+		echo "This must be run with administrator privileges (eg. with 'sudo')." ; \
+	else \
+		rm /usr/bin/con ; \
+		rm /usr/share/con/con.dat ; \
+		rmdir /usr/share/con ; \
+		rm /usr/share/icons/hicolor/scalable/apps/con-application-icon.svg ; \
+		rm /usr/share/applications/con.desktop ; \
+		rm /usr/share/mime/packages/specfitter-mime.xml ; \
+		update-desktop-database /usr/share/applications ; \
+		echo "Done!" ; \
+	fi
 
 all: $(OBJ) proc_data con
-	rm */*.o *.o
 
-con: src/*.c include/*.h $(OBJ)
+con: src/*.c include/*.h $(OBJ) con.dat
 	$(CC) src/app.c $(INC) $(OBJ) $(SDL) $(CFLAGS) -lm -o con
+
+con.dat: proc_data
+	./proc_data
 
 lib/juicer.o: lib/juicer/*.c lib/juicer/*.h
 	$(CC) lib/juicer/juicer.c $(CFLAGS) -c -o lib/juicer.o
@@ -74,4 +80,4 @@ proc_data_parser.o: data_processor/proc_data_parser.c data_processor/proc_data_p
 	$(CC) data_processor/proc_data_parser.c $(INC) $(CFLAGS) -c -o proc_data_parser.o
 
 clean:
-	rm -rf *~ *# */*.o *.o con proc_data
+	rm -rf *~ *# */*.o *.o con proc_data con.dat

@@ -23,13 +23,14 @@ The goal is to develop a performant and multiplatform tool that will be useful i
 
 ## Building and installing from source
 
-The current version has been tested under Arch Linux as of August 2024, in principle most recent Linux distros should work as well.  The plan is to eventually support other platforms (Windows especially) later in development.
+The current version has been tested under Arch Linux and Debian 12 as of August 2024, in principle most recent Linux distros should work as well.  The plan is to eventually support other platforms (Windows especially) later in development.
 
 ### Build dependencies
 
 * C compiler: gcc (or clang)
 * GNU make
 * SDL3, SDL3_image, SDL3_ttf
+  * SDL3 should be built with `libdecor` on Linux when using GNOME, for proper Wayland support
 
 For now you'll probably have to manually compile SDL3 and its libraries, as they aren't (yet) packaged for major Linux distros.
 
@@ -48,6 +49,12 @@ Two executables will be built: `proc_data` (which generates the data package con
 
 ```
 ./con
+```
+
+To install the application for all users, on a Linux system:
+
+```
+sudo make install-linux
 ```
 
 Have fun!
@@ -95,6 +102,16 @@ Zoom and pan with the mouse, the controls are basically identical to Google Maps
 | Escape / backspace | Exit out of open menus, cancel selection, etc. |
 | F11                | Toggle fullscreen mode |
 | P                  | Toggle performance stats debug overlay |
+
+## Troubleshooting
+
+#### The application window has no titlebar on Linux
+
+You're probably running the application on Wayland without `libdecor` support. GNOME (and perhaps other DEs/compositors) assumes that applications will always draw their own window decorations, because they like to make life more difficult for their developers and users. You should either install `libdecor` (`libdecor-0-dev` on Debian) and rebuild SDL3, or run the application in X11 mode (at the cost of potential input and display latency) by setting the environment variable:
+
+```
+SDL_VIDEO_DRIVER=x11
+```
 
 ## Disclaimer
 

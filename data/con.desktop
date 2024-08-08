@@ -1,0 +1,10 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name[en_CA]=Chart of Nuclides
+Name[en_US]=Chart of Nuclides
+Name=Chart of Nuclides
+GenericName=Chart of Nuclides
+Exec=/usr/bin/con
+Icon=con-application-icon
+Categories=Utility;
