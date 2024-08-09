@@ -23,6 +23,7 @@ install-linux: con
 		cp data/icon.svg /usr/share/icons/hicolor/scalable/apps/con-application-icon.svg ; \
 		cp data/con.desktop /usr/share/applications ; \
 		update-desktop-database /usr/share/applications ; \
+		gtk-update-icon-cache -f -t /usr/share/icons/hicolor ; \
 		echo "Done!" ; \
 	fi
 
@@ -36,7 +37,6 @@ uninstall-linux:
 		rmdir /usr/share/con ; \
 		rm /usr/share/icons/hicolor/scalable/apps/con-application-icon.svg ; \
 		rm /usr/share/applications/con.desktop ; \
-		rm /usr/share/mime/packages/specfitter-mime.xml ; \
 		update-desktop-database /usr/share/applications ; \
 		echo "Done!" ; \
 	fi

@@ -10,7 +10,7 @@
 
 An offline viewer of isotope and nuclear structure data, presented in the familiar [Chart of Nuclides / Segrè chart](https://en.wikipedia.org/wiki/Table_of_nuclides) format.  The data comes from various sources, most notably [ENSDF](https://www.nndc.bnl.gov/ensdf/about.jsp).  The UI is implemented in [SDL](https://github.com/libsdl-org/SDL) (so you can browse nuclear half-lives using some of the same code that powers [Half-Life](https://www.pcgamingwiki.com/wiki/Half-Life#Middleware)).
 
-The goal is to develop a performant and multiplatform tool that will be useful in both professional (nuclear structure research) and educational contexts.
+The goal is to develop a simple, performant, and multiplatform tool that will be useful in both professional (nuclear structure research) and educational contexts.
 
 ## Features
 
