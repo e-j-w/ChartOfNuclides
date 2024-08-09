@@ -54,7 +54,8 @@ void initializeTempState(const app_data *restrict dat, app_state *restrict state
   state->ds.shownElements = 0; //no UI elements being shown
 	state->ds.shownElements |= (1U << UIELEM_CHARTOFNUCLIDES);
   state->ds.uiAnimPlaying = 0; //no UI animations playing
-  state->ds.drawShellClosures = 1;
+  state->ds.useLifetimes = 0;
+	state->ds.drawShellClosures = 1;
 	state->ds.chartPosX = 86.0f;
 	state->ds.chartPosY = 52.0f;
 	state->ds.chartZoomScale = 0.5f;
@@ -1062,7 +1063,7 @@ void getLvlEnergyStr(char strOut[32], const ndata *restrict nd, const uint32_t l
 	
 }
 
-void getHalfLifeStr(char strOut[32], const ndata *restrict nd, const uint32_t lvlInd, const uint8_t showErr, const uint8_t showUnknown){
+void getHalfLifeStr(char strOut[32], const ndata *restrict nd, const uint32_t lvlInd, const uint8_t showErr, const uint8_t showUnknown, const uint8_t useLifetime){
 	if(lvlInd < nd->numLvls){
 		if(nd->levels[lvlInd].halfLife.unit == VALUE_UNIT_STABLE){
 			SDL_snprintf(strOut,32,"STABLE");
@@ -1073,28 +1074,39 @@ void getHalfLifeStr(char strOut[32], const ndata *restrict nd, const uint32_t lv
 				SDL_snprintf(strOut,32," ");
 			}
 		}else if(nd->levels[lvlInd].halfLife.val > 0.0f){
+			double hlVal = (double)(nd->levels[lvlInd].halfLife.val);
+			if(useLifetime){
+				hlVal *= 1.4427; //convert half-life to lifetime
+			} 
 			uint8_t hlPrecision = (uint8_t)(nd->levels[lvlInd].halfLife.format & 15U);
 			uint8_t hlExponent = (uint8_t)((nd->levels[lvlInd].halfLife.format >> 4U) & 1U);
 			uint8_t hlValueType = (uint8_t)((nd->levels[lvlInd].halfLife.format >> 5U) & 15U);
+			uint8_t hlErr = nd->levels[lvlInd].halfLife.err;
+			if(useLifetime){
+				hlErr = (uint8_t)(SDL_ceil((double)hlErr * 1.4427)); //convert half-life error to lifetime error
+			}
 			if(hlValueType == VALUETYPE_ASYMERROR){
 				uint8_t negErr = (uint8_t)((nd->levels[lvlInd].halfLife.format >> 9U) & 127U);
+				if(useLifetime){
+					negErr = (uint8_t)(SDL_ceil((double)negErr * 1.4427)); //convert half-life error to lifetime error
+				}
 				if(hlExponent == 0){
-					SDL_snprintf(strOut,32,"%.*f(+%u-%u) %s",hlPrecision,(double)(nd->levels[lvlInd].halfLife.val),nd->levels[lvlInd].halfLife.err,negErr,getHalfLifeUnitShortStr(nd->levels[lvlInd].halfLife.unit));
+					SDL_snprintf(strOut,32,"%.*f(+%u-%u) %s",hlPrecision,hlVal,hlErr,negErr,getHalfLifeUnitShortStr(nd->levels[lvlInd].halfLife.unit));
 				}else{
-					SDL_snprintf(strOut,32,"%.*f(+%u-%u)E%i %s",hlPrecision,(double)(nd->levels[lvlInd].halfLife.val),nd->levels[lvlInd].halfLife.err,negErr,nd->levels[lvlInd].halfLife.exponent,getHalfLifeUnitShortStr(nd->levels[lvlInd].halfLife.unit));
+					SDL_snprintf(strOut,32,"%.*f(+%u-%u)E%i %s",hlPrecision,hlVal,hlErr,negErr,nd->levels[lvlInd].halfLife.exponent,getHalfLifeUnitShortStr(nd->levels[lvlInd].halfLife.unit));
 				}
 			}else{
-				if((showErr == 0)||(nd->levels[lvlInd].halfLife.err == 0)){
+				if((showErr == 0)||(hlErr == 0)){
 					if(hlExponent == 0){
-						SDL_snprintf(strOut,32,"%s%.*f %s",getValueTypeShortStr(hlValueType),hlPrecision,(double)(nd->levels[lvlInd].halfLife.val),getHalfLifeUnitShortStr(nd->levels[lvlInd].halfLife.unit));
+						SDL_snprintf(strOut,32,"%s%.*f %s",getValueTypeShortStr(hlValueType),hlPrecision,hlVal,getHalfLifeUnitShortStr(nd->levels[lvlInd].halfLife.unit));
 					}else{
-						SDL_snprintf(strOut,32,"%s%.*fE%i %s",getValueTypeShortStr(hlValueType),hlPrecision,(double)(nd->levels[lvlInd].halfLife.val),nd->levels[lvlInd].halfLife.exponent,getHalfLifeUnitShortStr(nd->levels[lvlInd].halfLife.unit));
+						SDL_snprintf(strOut,32,"%s%.*fE%i %s",getValueTypeShortStr(hlValueType),hlPrecision,hlVal,nd->levels[lvlInd].halfLife.exponent,getHalfLifeUnitShortStr(nd->levels[lvlInd].halfLife.unit));
 					}
 				}else{
 					if(hlExponent == 0){
-						SDL_snprintf(strOut,32,"%s%.*f(%u) %s",getValueTypeShortStr(hlValueType),hlPrecision,(double)(nd->levels[lvlInd].halfLife.val),nd->levels[lvlInd].halfLife.err,getHalfLifeUnitShortStr(nd->levels[lvlInd].halfLife.unit));
+						SDL_snprintf(strOut,32,"%s%.*f(%u) %s",getValueTypeShortStr(hlValueType),hlPrecision,hlVal,hlErr,getHalfLifeUnitShortStr(nd->levels[lvlInd].halfLife.unit));
 					}else{
-						SDL_snprintf(strOut,32,"%s%.*f(%u)E%i %s",getValueTypeShortStr(hlValueType),hlPrecision,(double)(nd->levels[lvlInd].halfLife.val),nd->levels[lvlInd].halfLife.err,nd->levels[lvlInd].halfLife.exponent,getHalfLifeUnitShortStr(nd->levels[lvlInd].halfLife.unit));
+						SDL_snprintf(strOut,32,"%s%.*f(%u)E%i %s",getValueTypeShortStr(hlValueType),hlPrecision,hlVal,hlErr,nd->levels[lvlInd].halfLife.exponent,getHalfLifeUnitShortStr(nd->levels[lvlInd].halfLife.unit));
 					}
 				}
 			}
@@ -1109,9 +1121,9 @@ void getHalfLifeStr(char strOut[32], const ndata *restrict nd, const uint32_t lv
 		}
 	}
 }
-void getGSHalfLifeStr(char strOut[32], const ndata *restrict nd, const uint16_t nuclInd){
+void getGSHalfLifeStr(char strOut[32], const ndata *restrict nd, const uint16_t nuclInd, const uint8_t useLifetime){
 	if(nd->nuclData[nuclInd].numLevels > 0){
-		getHalfLifeStr(strOut,nd,nd->nuclData[nuclInd].firstLevel + nd->nuclData[nuclInd].gsLevel,1,1);
+		getHalfLifeStr(strOut,nd,nd->nuclData[nuclInd].firstLevel + nd->nuclData[nuclInd].gsLevel,1,1,useLifetime);
 	}else{
 		SDL_snprintf(strOut,32,"Unknown");
 	}
@@ -1396,7 +1408,7 @@ uint16_t getMaxNumLvlDispLines(const ndata *restrict nd, const app_state *restri
 	for(uint32_t lvlInd = nd->nuclData[state->chartSelectedNucl].firstLevel; lvlInd<(nd->nuclData[state->chartSelectedNucl].firstLevel + nd->nuclData[state->chartSelectedNucl].numLevels); lvlInd++){
 		numLines += getNumDispLinesForLvl(nd,lvlInd);
 	}
-	uint16_t numScreenLines = (uint16_t)(floorf((state->ds.windowYRes - NUCL_FULLINFOBOX_LEVELLIST_POS_Y)/NUCL_INFOBOX_SMALLLINE_HEIGHT));
+	uint16_t numScreenLines = (uint16_t)(SDL_floorf((state->ds.windowYRes - NUCL_FULLINFOBOX_LEVELLIST_POS_Y)/NUCL_INFOBOX_SMALLLINE_HEIGHT));
 	if(numLines > numScreenLines){
 		numLines -= numScreenLines;
 	}else{
@@ -1467,6 +1479,7 @@ void changeUIState(const app_data *restrict dat, app_state *restrict state, cons
 		case UISTATE_PREFS_DIALOG:
 			state->interactableElement |= (uint32_t)(1U << UIELEM_PREFS_DIALOG_CLOSEBUTTON);
 			state->interactableElement |= (uint32_t)(1U << UIELEM_PREFS_DIALOG_SHELLCLOSURE_CHECKBOX);
+			state->interactableElement |= (uint32_t)(1U << UIELEM_PREFS_DIALOG_LIFETIME_CHECKBOX);
 			break;
 		case UISTATE_FULLLEVELINFO:
 			state->ds.nuclFullInfoMaxScrollY = getMaxNumLvlDispLines(&dat->ndat,state); //find total number of lines displayable
@@ -1563,6 +1576,11 @@ void uiElemClickAction(const app_data *restrict dat, app_state *restrict state, 
 			state->ds.forceRedraw = 1;
 			state->clickedUIElem = UIELEM_ENUM_LENGTH; //'unclick' the button
 			break;
+		case UIELEM_PREFS_DIALOG_LIFETIME_CHECKBOX:
+			state->ds.useLifetimes = !(state->ds.useLifetimes);
+			state->ds.forceRedraw = 1;
+			state->clickedUIElem = UIELEM_ENUM_LENGTH; //'unclick' the button
+			break;
 		case UIELEM_NUCL_INFOBOX:
 			break;
 		case UIELEM_NUCL_INFOBOX_CLOSEBUTTON:
@@ -1612,7 +1630,7 @@ void uiElemClickAction(const app_data *restrict dat, app_state *restrict state, 
 					float mouseX = mouseXPxToN(&state->ds,state->mouseXPx);
     			float mouseY = mouseYPxToZ(&state->ds,state->mouseYPx);
 					//select nucleus
-					uint16_t selNucl = getNuclInd(&dat->ndat,(int16_t)floorf(mouseX),(int16_t)floorf(mouseY + 1.0f));
+					uint16_t selNucl = getNuclInd(&dat->ndat,(int16_t)SDL_floorf(mouseX),(int16_t)SDL_floorf(mouseY + 1.0f));
 					//SDL_Log("Selected nucleus: %u\n",state->chartSelectedNucl);
 					if((selNucl < MAXNUMNUCL)&&(selNucl != state->chartSelectedNucl)){
 						state->chartSelectedNucl = selNucl;
@@ -1638,13 +1656,13 @@ void uiElemClickAction(const app_data *restrict dat, app_state *restrict state, 
 						}
 						startUIAnimation(dat,state,UIANIM_NUCLHIGHLIGHT_SHOW);
 						//check occlusion by info box
-						float xOcclLeft = chartNtoXPx(&state->ds,floorf(mouseX + 1.0f));
-						float xOcclRight = chartNtoXPx(&state->ds,floorf(mouseX));
-						float yOcclTop = chartZtoYPx(&state->ds,floorf(mouseY));
+						float xOcclLeft = chartNtoXPx(&state->ds,SDL_floorf(mouseX + 1.0f));
+						float xOcclRight = chartNtoXPx(&state->ds,SDL_floorf(mouseX));
+						float yOcclTop = chartZtoYPx(&state->ds,SDL_floorf(mouseY));
 						if((xOcclLeft >= state->ds.uiElemPosX[UIELEM_NUCL_INFOBOX])&&(xOcclRight <= (state->ds.uiElemPosX[UIELEM_NUCL_INFOBOX] + state->ds.uiElemWidth[UIELEM_NUCL_INFOBOX]))){
 							if(yOcclTop >= state->ds.uiElemPosY[UIELEM_NUCL_INFOBOX]){
 								//pan chart to dodge occlusion
-								panChartToPos(dat,&state->ds,(uint16_t)floorf(fabsf(mouseX)),(uint16_t)floorf(fabsf(mouseY)));
+								panChartToPos(dat,&state->ds,(uint16_t)SDL_floorf(fabsf(mouseX)),(uint16_t)SDL_floorf(fabsf(mouseY)));
 							}
 						}
 
@@ -1652,7 +1670,7 @@ void uiElemClickAction(const app_data *restrict dat, app_state *restrict state, 
 						if(doubleClick && (state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_HIDE]==0.0f)){
 							//pan chart to nuclide that is clicked
 							//SDL_Log("starting pan to: %f %f\n",(double)mouseX,(double)mouseY);
-							panChartToPos(dat,&state->ds,(uint16_t)floorf(fabsf(mouseX)),(uint16_t)floorf(fabsf(mouseY)));
+							panChartToPos(dat,&state->ds,(uint16_t)SDL_floorf(fabsf(mouseX)),(uint16_t)SDL_floorf(fabsf(mouseY)));
 						}else if((state->ds.shownElements & (1U << UIELEM_NUCL_INFOBOX))&&(state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_HIDE]==0.0f)){
 							startUIAnimation(dat,state,UIANIM_NUCLINFOBOX_HIDE); //hide the info box, see stopUIAnimation() for info box hiding action
 							startUIAnimation(dat,state,UIANIM_NUCLHIGHLIGHT_HIDE);
@@ -1738,6 +1756,7 @@ void updateSingleUIElemPosition(const app_data *restrict dat, drawing_state *res
 			//update child/dependant UI elements
 			updateSingleUIElemPosition(dat,ds,rdat,UIELEM_PREFS_DIALOG_CLOSEBUTTON);
 			updateSingleUIElemPosition(dat,ds,rdat,UIELEM_PREFS_DIALOG_SHELLCLOSURE_CHECKBOX);
+			updateSingleUIElemPosition(dat,ds,rdat,UIELEM_PREFS_DIALOG_LIFETIME_CHECKBOX);
 			break;
 		case UIELEM_PREFS_DIALOG_CLOSEBUTTON:
 			ds->uiElemWidth[UIELEM_PREFS_DIALOG_CLOSEBUTTON] = UI_TILE_SIZE;
@@ -1751,6 +1770,13 @@ void updateSingleUIElemPosition(const app_data *restrict dat, drawing_state *res
 			ds->uiElemPosX[UIELEM_PREFS_DIALOG_SHELLCLOSURE_CHECKBOX] = ds->uiElemPosX[UIELEM_PREFS_DIALOG] + PREFS_DIALOG_PREFCOL1_X;
 			ds->uiElemPosY[UIELEM_PREFS_DIALOG_SHELLCLOSURE_CHECKBOX] = ds->uiElemPosY[UIELEM_PREFS_DIALOG] + PREFS_DIALOG_PREFCOL1_Y;
 			ds->uiElemExtPlusX[UIELEM_PREFS_DIALOG_SHELLCLOSURE_CHECKBOX] = 2*UI_PADDING_SIZE + (uint16_t)(FC_GetWidth(rdat->font,dat->strings[dat->locStringIDs[LOCSTR_PREF_SHELLCLOSURE]])/rdat->uiScale); //so that checkbox can be toggled by clicking on adjacent text
+			break;
+		case UIELEM_PREFS_DIALOG_LIFETIME_CHECKBOX:
+			ds->uiElemWidth[UIELEM_PREFS_DIALOG_LIFETIME_CHECKBOX] = UI_TILE_SIZE;
+			ds->uiElemHeight[UIELEM_PREFS_DIALOG_LIFETIME_CHECKBOX] = ds->uiElemWidth[UIELEM_PREFS_DIALOG_LIFETIME_CHECKBOX];
+			ds->uiElemPosX[UIELEM_PREFS_DIALOG_LIFETIME_CHECKBOX] = ds->uiElemPosX[UIELEM_PREFS_DIALOG] + PREFS_DIALOG_PREFCOL1_X;
+			ds->uiElemPosY[UIELEM_PREFS_DIALOG_LIFETIME_CHECKBOX] = ds->uiElemPosY[UIELEM_PREFS_DIALOG] + PREFS_DIALOG_PREFCOL1_Y + PREFS_DIALOG_PREF_Y_SPACING;
+			ds->uiElemExtPlusX[UIELEM_PREFS_DIALOG_LIFETIME_CHECKBOX] = 2*UI_PADDING_SIZE + (uint16_t)(FC_GetWidth(rdat->font,dat->strings[dat->locStringIDs[LOCSTR_PREF_LIFETIME]])/rdat->uiScale); //so that checkbox can be toggled by clicking on adjacent text
 			break;
 		case UIELEM_NUCL_INFOBOX:
 			ds->uiElemPosX[uiElemInd] = (uint16_t)((ds->windowXRes - NUCL_INFOBOX_WIDTH)/2);

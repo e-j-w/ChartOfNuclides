@@ -50,13 +50,10 @@ int main(int argc, char *argv[]){
       cliArgs |= (uint8_t)(1U<<CLI_NOGAMEPAD);
     }
   }
-
+  
   /*for(i=0;i<SDL_GetNumVideoDrivers();i++){
     SDL_Log("Video driver available: %s\n",SDL_GetVideoDriver(i));
   }*/
-
-  
-  
 
   uint32_t sdlFlags = 0;
   if(cliArgs&(1U<<CLI_NOGAMEPAD)){
@@ -66,7 +63,8 @@ int main(int argc, char *argv[]){
   }
   if(strcmp(SDL_GetPlatform(),"Linux")==0){
     //Use Wayland by default on Linux instead of X11,
-    //since Wayland seems to have better frame pacing
+    //since Wayland seems to have better frame pacing,
+    //and support for high resolution trackpads.
     SDL_SetHint(SDL_HINT_VIDEO_DRIVER,"wayland");
   }
   if(SDL_Init(sdlFlags) != 0){
@@ -99,11 +97,8 @@ int main(int argc, char *argv[]){
     SDL_Log("resource_data - allocated: %10li bytes\n",(long int)sizeof(resource_data));
   }
 
-  //setup paths
-  gdat->rdat.appPrefPath = SDL_GetPrefPath(NULL,"con");
-  SDL_Log("Data file path: %s\n",gdat->rdat.appPrefPath);
-
   //load preferences (needed prior to window created)
+  gdat->rdat.appPrefPath = SDL_GetPrefPath(NULL,"con"); //setup path
   initializeTempState(&gdat->dat,&gdat->state);
   updatePrefsFromConfigFile(gdat->rdat.appPrefPath,&gdat->dat.rules,&gdat->state); //read settings from .ini file
 

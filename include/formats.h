@@ -187,6 +187,7 @@ typedef struct
   unsigned int dragFinished : 1;
   unsigned int zoomInProgress : 1;
   unsigned int zoomFinished : 1;
+  unsigned int useLifetimes : 1;
   unsigned int drawShellClosures : 1;
   unsigned int drawPerformanceStats : 1; //0=don't draw, 1=draw
   unsigned int windowFullscreenMode : 1; //true if the window is fullscreen

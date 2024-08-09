@@ -6,7 +6,7 @@
 
 ## Description
 
-**NOTE: This is early in development and has limited functionality right now.**
+**NOTE: This is early in development, expect some issues...**
 
 An offline viewer of isotope and nuclear structure data, presented in the familiar [Chart of Nuclides / Segrè chart](https://en.wikipedia.org/wiki/Table_of_nuclides) format.  The data comes from various sources, most notably [ENSDF](https://www.nndc.bnl.gov/ensdf/about.jsp).  The UI is implemented in [SDL](https://github.com/libsdl-org/SDL) (so you can browse nuclear half-lives using some of the same code that powers [Half-Life](https://www.pcgamingwiki.com/wiki/Half-Life#Middleware)).
 
@@ -15,7 +15,7 @@ The goal is to develop a performant and multiplatform tool that will be useful i
 ## Features
 
 - Select individual nuclides to browse ground and excited state data, including:
-  - Level energies, half-lives, decay modes...
+  - Level energies, half-lives/lifetimes, decay modes...
   - Gamma energies, branching fractions, multipolarities...
 - Runs locally, with no network connection needed.
 - Fast hardware accelerated rendering using `SDL_Renderer`, HI-DPI scaling support. 
@@ -30,7 +30,7 @@ The current version has been tested under Arch Linux and Debian 12 as of August 
 * C compiler: gcc (or clang)
 * GNU make
 * SDL3, SDL3_image, SDL3_ttf
-  * SDL3 should be built with `libdecor` on Linux when using GNOME, for proper Wayland support
+  * SDL3 should be built with `libdecor` on Linux when using GNOME Wayland, as discussed [below](#the-application-window-has-no-titlebar-on-linux).
 
 For now you'll probably have to manually compile SDL3 and its libraries, as they aren't (yet) packaged for major Linux distros.
 
@@ -107,7 +107,7 @@ Zoom and pan with the mouse, the controls are basically identical to Google Maps
 
 #### The application window has no titlebar on Linux
 
-You're probably running the application on Wayland without `libdecor` support. GNOME (and perhaps other DEs/compositors) assumes that applications will always draw their own window decorations, because they like to make life more difficult for their developers and users. You should either install `libdecor` (`libdecor-0-dev` on Debian) and rebuild SDL3, or run the application in X11 mode (at the cost of potential input and display latency) by setting the environment variable:
+You're probably running the application on GNOME Wayland without `libdecor` support. GNOME won't automatically draw window decorations for apps and mandates that they draw their own decorations instead, perhaps because they enjoy making life more difficult for their app developers and users. You'll have to either install `libdecor` (`libdecor-0-dev` on Debian) and rebuild SDL3, or run the application in X11 mode (at the cost of potential input and display latency) by setting the environment variable:
 
 ```
 SDL_VIDEO_DRIVER=x11

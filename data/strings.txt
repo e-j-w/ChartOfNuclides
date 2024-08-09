@@ -7,6 +7,7 @@ level_info_header|Levels and gammas:
 energy_kev|Energy (keV)
 jpi|Jπ
 halflife|t1/2
+lifetime|τ
 decay_mode|Decay Mode
 energy_gamma|E(γ) (keV)
 intensity_gamma|I(γ)
@@ -20,3 +21,4 @@ about_string_version|Version 0.1 - "There Is No Hope"
 about_string_1|Developed by Jonathan Williams
 about_string_2|This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, version 3 or later.
 pref_shellclosure|Show shell closures on chart
+pref_lifetime|Show lifetimes instead of half-lives
