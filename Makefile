@@ -47,7 +47,9 @@ con: src/*.c include/*.h $(OBJ) con.dat
 	$(CC) src/app.c $(INC) $(OBJ) $(SDL) $(CFLAGS) -lm -o con
 
 con.dat: proc_data
-	./proc_data
+	@if [ ! -f con.dat ]; then \
+		./proc_data ; \
+	fi
 
 lib/juicer.o: lib/juicer/*.c lib/juicer/*.h
 	$(CC) lib/juicer/juicer.c $(CFLAGS) -c -o lib/juicer.o

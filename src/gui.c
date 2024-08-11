@@ -527,6 +527,16 @@ void drawInfoBoxHeader(const app_data *restrict dat, resource_data *restrict rda
 
 void drawNuclFullInfoBox(const app_data *restrict dat, const app_state *restrict state, resource_data *restrict rdat, const uint16_t nuclInd){
 
+  float txtYOffset = 0.0f;
+  Uint8 txtAlpha = 255;
+  if(state->ds.uiAnimPlaying & (1U << UIANIM_NUCLINFOBOX_TXTFADEOUT)){
+    txtYOffset = (20.0f*juice_smoothStop2(1.0f - state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_TXTFADEOUT]/SHORT_UI_ANIM_LENGTH));
+    txtAlpha = (uint8_t)(255.0f*juice_smoothStop2(state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_TXTFADEOUT]/SHORT_UI_ANIM_LENGTH));
+  }else if(state->ds.uiAnimPlaying & (1U << UIANIM_NUCLINFOBOX_TXTFADEIN)){
+    txtYOffset = (20.0f*juice_smoothStart2(state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_TXTFADEIN]/(UI_ANIM_LENGTH)));
+    txtAlpha = (uint8_t)(255.0f*juice_smoothStart2(1.0f - state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_TXTFADEIN]/UI_ANIM_LENGTH));
+  }
+  
   //level and gamma data
   char tmpStr[32];
   SDL_FRect rect;
@@ -544,7 +554,7 @@ void drawNuclFullInfoBox(const app_data *restrict dat, const app_state *restrict
   }
   float origDrawXPos = (state->ds.windowXRes - allColWidth)/2.0f;
   float drawXPos = origDrawXPos;
-  float drawYPos = NUCL_FULLINFOBOX_LEVELLIST_POS_Y - NUCL_INFOBOX_SMALLLINE_HEIGHT*(state->ds.nuclFullInfoScrollY);
+  float drawYPos = NUCL_FULLINFOBOX_LEVELLIST_POS_Y - NUCL_INFOBOX_SMALLLINE_HEIGHT*(state->ds.nuclFullInfoScrollY) + txtYOffset;
   //SDL_Log("drawYPos: %f\n",(double)drawYPos);
   float levelStartDrawPos;
   for(uint32_t lvlInd = dat->ndat.nuclData[nuclInd].firstLevel; lvlInd<(dat->ndat.nuclData[nuclInd].firstLevel+dat->ndat.nuclData[nuclInd].numLevels); lvlInd++){
@@ -559,7 +569,11 @@ void drawNuclFullInfoBox(const app_data *restrict dat, const app_state *restrict
         if((((dat->ndat.levels[lvlInd].halfLife.format >> 5U) & 15U) != VALUETYPE_LESSTHAN)&&(((dat->ndat.levels[lvlInd].halfLife.format >> 5U) & 15U) != VALUETYPE_LESSOREQUALTHAN)){
           rect.h = NUCL_INFOBOX_SMALLLINE_HEIGHT*numLines*rdat->uiScale;
           rect.y = drawYPos*rdat->uiScale;
-          drawFlatRect(rdat,rect,getHalfLifeCol(hl));
+          SDL_FColor rectCol = getHalfLifeCol(hl);
+          if(txtAlpha != 255){
+            rectCol.a *= txtAlpha/255.0f;
+          }
+          drawFlatRect(rdat,rect,rectCol);
         }
         
       }
@@ -570,19 +584,19 @@ void drawNuclFullInfoBox(const app_data *restrict dat, const app_state *restrict
       }else{
         getLvlEnergyStr(tmpStr,&dat->ndat,lvlInd,1);
       }
-      drawTextAlignedSized(rdat,drawXPos,drawYPos,rdat->font,(hl > 1.0E3) ? whiteCol8Bit : blackCol8Bit,255,tmpStr,ALIGN_LEFT,16384);
+      drawTextAlignedSized(rdat,drawXPos,drawYPos,rdat->font,(hl > 1.0E3) ? whiteCol8Bit : blackCol8Bit,txtAlpha,tmpStr,ALIGN_LEFT,16384);
       drawXPos += NUCL_FULLINFOBOX_ENERGY_COL_WIDTH;
       getSpinParStr(tmpStr,&dat->ndat,lvlInd);
-      drawTextAlignedSized(rdat,drawXPos,drawYPos,rdat->font,(hl > 1.0E3) ? whiteCol8Bit : blackCol8Bit,255,tmpStr,ALIGN_LEFT,16384);
+      drawTextAlignedSized(rdat,drawXPos,drawYPos,rdat->font,(hl > 1.0E3) ? whiteCol8Bit : blackCol8Bit,txtAlpha,tmpStr,ALIGN_LEFT,16384);
       drawXPos += NUCL_FULLINFOBOX_JPI_COL_WIDTH;
       getHalfLifeStr(tmpStr,&dat->ndat,lvlInd,1,0,state->ds.useLifetimes);
-      drawTextAlignedSized(rdat,drawXPos,drawYPos,rdat->font,(hl > 1.0E3) ? whiteCol8Bit : blackCol8Bit,255,tmpStr,ALIGN_LEFT,16384);
+      drawTextAlignedSized(rdat,drawXPos,drawYPos,rdat->font,(hl > 1.0E3) ? whiteCol8Bit : blackCol8Bit,txtAlpha,tmpStr,ALIGN_LEFT,16384);
       if(dat->ndat.levels[lvlInd].numDecModes > 0){
         for(int8_t i=0; i<dat->ndat.levels[lvlInd].numDecModes; i++){
           drawYPos += NUCL_INFOBOX_SMALLLINE_HEIGHT;
           getDecayModeStr(tmpStr,&dat->ndat,dat->ndat.levels[lvlInd].firstDecMode + (uint32_t)i);
           //SDL_Log("%s\n",tmpStr);
-          drawTextAlignedSized(rdat,drawXPos+2*UI_PADDING_SIZE,drawYPos,rdat->font,(hl > 1.0E3) ? whiteCol8Bit : blackCol8Bit,255,tmpStr,ALIGN_LEFT,16384); //draw decay mode label
+          drawTextAlignedSized(rdat,drawXPos+2*UI_PADDING_SIZE,drawYPos,rdat->font,(hl > 1.0E3) ? whiteCol8Bit : blackCol8Bit,txtAlpha,tmpStr,ALIGN_LEFT,16384); //draw decay mode label
         }
       }
       drawXPos += NUCL_FULLINFOBOX_HALFLIFE_COL_WIDTH;
@@ -591,25 +605,25 @@ void drawNuclFullInfoBox(const app_data *restrict dat, const app_state *restrict
         for(uint16_t i=0; i<dat->ndat.levels[lvlInd].numTran; i++){
           float drawXPosTran = drawXPos;
           getGammaEnergyStr(tmpStr,&dat->ndat,(uint32_t)(dat->ndat.levels[lvlInd].firstTran + i),1);
-          drawTextAlignedSized(rdat,drawXPosTran,drawYPos,rdat->font,(hl > 1.0E3) ? whiteCol8Bit : blackCol8Bit,255,tmpStr,ALIGN_LEFT,16384); //draw transition energy label
+          drawTextAlignedSized(rdat,drawXPosTran,drawYPos,rdat->font,(hl > 1.0E3) ? whiteCol8Bit : blackCol8Bit,txtAlpha,tmpStr,ALIGN_LEFT,16384); //draw transition energy label
           drawXPosTran += NUCL_FULLINFOBOX_EGAMMA_COL_WIDTH;
           getGammaIntensityStr(tmpStr,&dat->ndat,(uint32_t)(dat->ndat.levels[lvlInd].firstTran + i),1);
-          drawTextAlignedSized(rdat,drawXPosTran,drawYPos,rdat->font,(hl > 1.0E3) ? whiteCol8Bit : blackCol8Bit,255,tmpStr,ALIGN_LEFT,16384); //draw transition intensity label
+          drawTextAlignedSized(rdat,drawXPosTran,drawYPos,rdat->font,(hl > 1.0E3) ? whiteCol8Bit : blackCol8Bit,txtAlpha,tmpStr,ALIGN_LEFT,16384); //draw transition intensity label
           drawXPosTran += NUCL_FULLINFOBOX_IGAMMA_COL_WIDTH;
           if(drawMode == 0){
             getGammaMultipolarityStr(tmpStr,&dat->ndat,(uint32_t)(dat->ndat.levels[lvlInd].firstTran + i));
-            drawTextAlignedSized(rdat,drawXPosTran,drawYPos,rdat->font,(hl > 1.0E3) ? whiteCol8Bit : blackCol8Bit,255,tmpStr,ALIGN_LEFT,16384); //draw transition multipolarity label
+            drawTextAlignedSized(rdat,drawXPosTran,drawYPos,rdat->font,(hl > 1.0E3) ? whiteCol8Bit : blackCol8Bit,txtAlpha,tmpStr,ALIGN_LEFT,16384); //draw transition multipolarity label
             drawXPosTran += NUCL_FULLINFOBOX_MGAMMA_COL_WIDTH;
           }
           if(dat->ndat.tran[(uint32_t)(dat->ndat.levels[lvlInd].firstTran + i)].finalLvlOffset != 0){
             float drawXPosFL = drawXPosTran;
             uint32_t finalLvlInd = getFinalLvlInd(&dat->ndat,lvlInd,(uint32_t)(dat->ndat.levels[lvlInd].firstTran + i));
             getLvlEnergyStr(tmpStr,&dat->ndat,finalLvlInd,0);
-            drawTextAlignedSized(rdat,drawXPosFL,drawYPos,rdat->font,(hl > 1.0E3) ? whiteCol8Bit : blackCol8Bit,255,tmpStr,ALIGN_LEFT,16384); //draw final level energy label
+            drawTextAlignedSized(rdat,drawXPosFL,drawYPos,rdat->font,(hl > 1.0E3) ? whiteCol8Bit : blackCol8Bit,txtAlpha,tmpStr,ALIGN_LEFT,16384); //draw final level energy label
             if(drawMode <= 1){
               drawXPosFL += NUCL_FULLINFOBOX_FINALLEVEL_E_COL_WIDTH;
               getSpinParStr(tmpStr,&dat->ndat,finalLvlInd);
-              drawTextAlignedSized(rdat,drawXPosFL,drawYPos,rdat->font,(hl > 1.0E3) ? whiteCol8Bit : blackCol8Bit,255,tmpStr,ALIGN_LEFT,16384); //draw final level spin-parity label
+              drawTextAlignedSized(rdat,drawXPosFL,drawYPos,rdat->font,(hl > 1.0E3) ? whiteCol8Bit : blackCol8Bit,txtAlpha,tmpStr,ALIGN_LEFT,16384); //draw final level spin-parity label
             }
           }
 
@@ -637,28 +651,28 @@ void drawNuclFullInfoBox(const app_data *restrict dat, const app_state *restrict
 
   //draw column title strings
   drawXPos = origDrawXPos;
-  drawYPos = (float)(4*UI_PADDING_SIZE) + 40.0f;
-  drawTextAlignedSized(rdat,drawXPos,drawYPos,rdat->font,blackCol8Bit,255,dat->strings[LOCSTR_LEVELINFO_HEADER],ALIGN_LEFT,16384);
+  drawYPos = (float)(4*UI_PADDING_SIZE) + 40.0f + txtYOffset;
+  drawTextAlignedSized(rdat,drawXPos,drawYPos,rdat->font,blackCol8Bit,txtAlpha,dat->strings[LOCSTR_LEVELINFO_HEADER],ALIGN_LEFT,16384);
   drawYPos += NUCL_INFOBOX_BIGLINE_HEIGHT;
-  drawTextAlignedSized(rdat,drawXPos,drawYPos,rdat->font,blackCol8Bit,255,dat->strings[LOCSTR_ENERGY_KEV],ALIGN_LEFT,16384);
+  drawTextAlignedSized(rdat,drawXPos,drawYPos,rdat->font,blackCol8Bit,txtAlpha,dat->strings[LOCSTR_ENERGY_KEV],ALIGN_LEFT,16384);
   drawXPos += NUCL_FULLINFOBOX_ENERGY_COL_WIDTH;
-  drawTextAlignedSized(rdat,drawXPos,drawYPos,rdat->font,blackCol8Bit,255,dat->strings[LOCSTR_JPI],ALIGN_LEFT,16384);
+  drawTextAlignedSized(rdat,drawXPos,drawYPos,rdat->font,blackCol8Bit,txtAlpha,dat->strings[LOCSTR_JPI],ALIGN_LEFT,16384);
   drawXPos += NUCL_FULLINFOBOX_JPI_COL_WIDTH;
   if(state->ds.useLifetimes){
-    drawTextAlignedSized(rdat,drawXPos,drawYPos,rdat->font,blackCol8Bit,255,dat->strings[LOCSTR_LIFETIME],ALIGN_LEFT,16384);
+    drawTextAlignedSized(rdat,drawXPos,drawYPos,rdat->font,blackCol8Bit,txtAlpha,dat->strings[LOCSTR_LIFETIME],ALIGN_LEFT,16384);
   }else{
-    drawTextAlignedSized(rdat,drawXPos,drawYPos,rdat->font,blackCol8Bit,255,dat->strings[LOCSTR_HALFLIFE],ALIGN_LEFT,16384);
+    drawTextAlignedSized(rdat,drawXPos,drawYPos,rdat->font,blackCol8Bit,txtAlpha,dat->strings[LOCSTR_HALFLIFE],ALIGN_LEFT,16384);
   }
   drawXPos += NUCL_FULLINFOBOX_HALFLIFE_COL_WIDTH;
-  drawTextAlignedSized(rdat,drawXPos,drawYPos,rdat->font,blackCol8Bit,255,dat->strings[LOCSTR_ENERGY_GAMMA],ALIGN_LEFT,16384);
+  drawTextAlignedSized(rdat,drawXPos,drawYPos,rdat->font,blackCol8Bit,txtAlpha,dat->strings[LOCSTR_ENERGY_GAMMA],ALIGN_LEFT,16384);
   drawXPos += NUCL_FULLINFOBOX_EGAMMA_COL_WIDTH;
-  drawTextAlignedSized(rdat,drawXPos,drawYPos,rdat->font,blackCol8Bit,255,dat->strings[LOCSTR_INTENSITY_GAMMA],ALIGN_LEFT,16384);
+  drawTextAlignedSized(rdat,drawXPos,drawYPos,rdat->font,blackCol8Bit,txtAlpha,dat->strings[LOCSTR_INTENSITY_GAMMA],ALIGN_LEFT,16384);
   drawXPos += NUCL_FULLINFOBOX_IGAMMA_COL_WIDTH;
   if(drawMode == 0){
-    drawTextAlignedSized(rdat,drawXPos,drawYPos,rdat->font,blackCol8Bit,255,dat->strings[LOCSTR_MULTIPOLARITY_GAMMA],ALIGN_LEFT,16384);
+    drawTextAlignedSized(rdat,drawXPos,drawYPos,rdat->font,blackCol8Bit,txtAlpha,dat->strings[LOCSTR_MULTIPOLARITY_GAMMA],ALIGN_LEFT,16384);
     drawXPos += NUCL_FULLINFOBOX_MGAMMA_COL_WIDTH;
   }
-  drawTextAlignedSized(rdat,drawXPos,drawYPos,rdat->font,blackCol8Bit,255,dat->strings[LOCSTR_FINALLEVEL],ALIGN_LEFT,16384);
+  drawTextAlignedSized(rdat,drawXPos,drawYPos,rdat->font,blackCol8Bit,txtAlpha,dat->strings[LOCSTR_FINALLEVEL],ALIGN_LEFT,16384);
 
   //back button
   drawIconAndTextButton(&dat->rules.themeRules,rdat,state->ds.uiElemPosX[UIELEM_NUCL_FULLINFOBOX_BACKBUTTON],state->ds.uiElemPosY[UIELEM_NUCL_FULLINFOBOX_BACKBUTTON],state->ds.uiElemWidth[UIELEM_NUCL_FULLINFOBOX_BACKBUTTON],getHighlightState(state,UIELEM_NUCL_FULLINFOBOX_BACKBUTTON),255,UIICON_DOWNARROWS,dat->strings[dat->locStringIDs[LOCSTR_BACKTOSUMMARY]]);
@@ -673,8 +687,10 @@ void drawNuclInfoBox(const app_data *restrict dat, app_state *restrict state, re
     yOffset = (uint16_t)(300.0f*juice_smoothStart2(state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_SHOW]/(UI_ANIM_LENGTH)));
   }
   Uint8 alpha = 255;
-  if(state->ds.uiAnimPlaying & (1U << UIANIM_NUCLHIGHLIGHT_SHOW)){
-    alpha = (uint8_t)(255.0f*juice_smoothStop2(1.0f - state->ds.timeLeftInUIAnimation[UIANIM_NUCLHIGHLIGHT_SHOW]/UI_ANIM_LENGTH));
+  if(state->ds.uiAnimPlaying & (1U << UIANIM_NUCLINFOBOX_CONTRACT)){
+    alpha = (uint8_t)(255.0f*juice_smoothStart2(1.0f - state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_CONTRACT]/UI_ANIM_LENGTH));
+  }else if(state->ds.uiAnimPlaying & (1U << UIANIM_NUCLINFOBOX_EXPAND)){
+    alpha = (uint8_t)(255.0f*juice_smoothStart2(state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_EXPAND]/UI_ANIM_LENGTH));
   }
 
   //draw panel background
@@ -776,7 +792,7 @@ void drawNuclInfoBox(const app_data *restrict dat, app_state *restrict state, re
   }
 
   //header
-  drawInfoBoxHeader(dat,rdat,infoBoxPanelRect.x,infoBoxPanelRect.y,alpha,nuclInd);
+  drawInfoBoxHeader(dat,rdat,infoBoxPanelRect.x,infoBoxPanelRect.y,255,nuclInd);
 
   //all level info button
   updateSingleUIElemPosition(dat,&state->ds,rdat,UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON);

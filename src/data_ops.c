@@ -90,7 +90,16 @@ void startUIAnimation(const app_data *restrict dat, app_state *restrict state, c
     SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,"startUIAnimation - invalid animation ID (%u, max %u).\n",uiAnim,UIANIM_ENUM_LENGTH-1);
     return;
   }
-  state->ds.timeLeftInUIAnimation[uiAnim] = UI_ANIM_LENGTH;
+	switch(uiAnim){
+		case UIANIM_NUCLINFOBOX_TXTFADEOUT:
+			//short animation
+			state->ds.timeLeftInUIAnimation[uiAnim] = SHORT_UI_ANIM_LENGTH;
+			break;
+		default:
+			state->ds.timeLeftInUIAnimation[uiAnim] = UI_ANIM_LENGTH;
+			break;
+	}
+  
   state->ds.uiAnimPlaying |= (1U << uiAnim);
 
 	//take action at the start of the animation
@@ -131,7 +140,15 @@ void stopUIAnimation(const app_data *restrict dat, app_state *restrict state, co
 			state->ds.shownElements &= (uint32_t)(~(1U << UIELEM_NUCL_INFOBOX)); //close the info box
 			state->ds.shownElements &= (uint32_t)(~(1U << UIELEM_CHARTOFNUCLIDES)); //don't show the chart
 			state->ds.shownElements |= (1U << UIELEM_NUCL_FULLINFOBOX); //show the full info box
+			startUIAnimation(dat,state,UIANIM_NUCLINFOBOX_TXTFADEIN);
 			changeUIState(dat,state,UISTATE_FULLLEVELINFO); //update UI state now that the full info box is visible
+			break;
+		case UIANIM_NUCLINFOBOX_TXTFADEOUT:
+			state->ds.shownElements &= (uint32_t)(~(1U << UIELEM_NUCL_FULLINFOBOX)); //close the full info box
+			state->ds.shownElements |= (1U << UIELEM_NUCL_INFOBOX); //show the info box
+			state->ds.shownElements |= (1U << UIELEM_CHARTOFNUCLIDES); //show the chart
+			startUIAnimation(dat,state,UIANIM_NUCLINFOBOX_CONTRACT);
+			changeUIState(dat,state,UISTATE_DEFAULT); //update UI state now that the regular info box is visible
 			break;
     default:
       break;
@@ -1595,11 +1612,7 @@ void uiElemClickAction(const app_data *restrict dat, app_state *restrict state, 
 				startUIAnimation(dat,state,UIANIM_NUCLINFOBOX_EXPAND);
 			break;
 		case UIELEM_NUCL_FULLINFOBOX_BACKBUTTON:
-			state->ds.shownElements &= (uint32_t)(~(1U << UIELEM_NUCL_FULLINFOBOX)); //close the full info box
-			state->ds.shownElements |= (1U << UIELEM_NUCL_INFOBOX); //show the info box
-			state->ds.shownElements |= (1U << UIELEM_CHARTOFNUCLIDES); //show the chart
-			startUIAnimation(dat,state,UIANIM_NUCLINFOBOX_CONTRACT);
-			changeUIState(dat,state,UISTATE_DEFAULT); //update UI state now that the regular info box is visible
+			startUIAnimation(dat,state,UIANIM_NUCLINFOBOX_TXTFADEOUT); //menu will be closed after animation finishes
 			break;
 		case UIELEM_PM_PREFS_BUTTON:
 			//SDL_Log("Clicked prefs button.\n");
