@@ -33,7 +33,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 //app data parameters (should all be powers of 2)
 #define MAX_ARRAY_SIZE                 65536
-#define MAX_NUM_STRINGS                512  //maximum number of text strings
+#define MAX_NUM_STRINGS                128  //maximum number of text strings
 
 //increasing these numbers will increase the size of 
 //the nuclear database stored in memory (and on disk)
@@ -109,8 +109,8 @@ typedef struct
 
 typedef struct
 {
-  float qbeta, qalpha;
-  float sp, sn; //proton and neutron separation energies
+  valWithErr qbeta, qalpha;
+  valWithErr sp, sn; //proton and neutron separation energies
   int16_t N; //neutrons in nuclide
   int16_t Z; //protons in nuclide
   uint32_t firstLevel; //index of first level in this nuclide

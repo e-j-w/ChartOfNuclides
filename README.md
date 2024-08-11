@@ -15,7 +15,7 @@ The goal is to develop a simple, performant, and multiplatform tool that will be
 ## Features
 
 - Select individual nuclides to browse ground and excited state data, including:
-  - Level energies, half-lives/lifetimes, decay modes...
+  - Level energies, half-lives/lifetimes, decay modes, spin-parities...
   - Gamma energies, branching fractions, multipolarities...
 - Runs locally, with no network connection needed.
 - Fast hardware accelerated rendering using `SDL_Renderer`, HI-DPI scaling support. 
@@ -23,7 +23,7 @@ The goal is to develop a simple, performant, and multiplatform tool that will be
 
 ## Building and installing from source
 
-The current version has been tested under Arch Linux and Debian 12 as of August 2024, in principle most recent Linux distros should work as well.  The plan is to eventually support other platforms (Windows especially) once SDL3 has released.
+The current version has been tested under Arch Linux and Debian 12 as of August 2024. In principle most other recent Linux distros should work as well. The plan is to eventually support other platforms (Windows especially) once a stable SDL3 release is available.
 
 ### Build dependencies
 

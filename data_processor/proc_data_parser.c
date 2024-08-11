@@ -193,6 +193,10 @@ static int parseAppRules(app_data *restrict dat, asset_mapping *restrict stringI
   dat->locStringIDs[LOCSTR_OK] = (uint16_t)nameToAssetID("ok",stringIDmap);
   dat->locStringIDs[LOCSTR_NODB] = (uint16_t)nameToAssetID("no_db",stringIDmap);
 	dat->locStringIDs[LOCSTR_GM_STATE] = (uint16_t)nameToAssetID("gm_state",stringIDmap);
+	dat->locStringIDs[LOCSTR_QALPHA] = (uint16_t)nameToAssetID("qalpha",stringIDmap);
+	dat->locStringIDs[LOCSTR_QBETAMNUS] = (uint16_t)nameToAssetID("q_betaminus",stringIDmap);
+	dat->locStringIDs[LOCSTR_SP] = (uint16_t)nameToAssetID("protonsep_energy",stringIDmap);
+	dat->locStringIDs[LOCSTR_SN] = (uint16_t)nameToAssetID("neutronsep_energy",stringIDmap);
 	dat->locStringIDs[LOCSTR_LEVELINFO_HEADER] = (uint16_t)nameToAssetID("level_info_header",stringIDmap);
 	dat->locStringIDs[LOCSTR_ENERGY_KEV] = (uint16_t)nameToAssetID("energy_kev",stringIDmap);
 	dat->locStringIDs[LOCSTR_JPI] = (uint16_t)nameToAssetID("jpi",stringIDmap);
@@ -1861,30 +1865,227 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 							//parse the beta Q-value
 							char qbBuff[11];
 							memcpy(qbBuff, &line[9], 10);
-							qbBuff[10] = '\0';
-							
-							nd->nuclData[nd->numNucl].qbeta = (float)atof(qbBuff);
+							for(uint8_t i=1;i<10;i++){
+								if((isspace(qbBuff[i])) && (!(isspace(qbBuff[i-1])))){
+									qbBuff[i] = '\0'; //terminate string at first trailing space
+								}else if(i==9){
+									qbBuff[10] = '\0'; //terminate string at end
+								}
+							}
+							char qbErrBuff[3];
+							memcpy(qbErrBuff, &line[19], 2);
+							qbErrBuff[2] = '\0';
+
+							nd->nuclData[nd->numNucl].qbeta.val = (float)atof(qbBuff);
+							if(strcmp(qbErrBuff,"SY")==0){
+								nd->nuclData[nd->numNucl].qbeta.err = 255; //systematic
+							}else{
+								nd->nuclData[nd->numNucl].qbeta.err = (uint8_t)atoi(qbErrBuff);
+							}
+							nd->nuclData[nd->numNucl].qbeta.unit = VALUE_UNIT_KEV;
+
+							//handle expoenents
+							tok = strtok(qbBuff,".");
+							if(tok!=NULL){
+								//SDL_Log("%s\n",tok);
+								tok = strtok(NULL,"E+");
+								if(tok!=NULL){
+									//SDL_Log("%s\n",tok);
+									nd->nuclData[nd->numNucl].qbeta.format = (uint16_t)strlen(tok);
+									if(nd->nuclData[nd->numNucl].qbeta.format > 15U){
+										nd->nuclData[nd->numNucl].qbeta.format = 15U; //only 4 bits available for precision
+									}
+									tok = strtok(NULL,""); //get the rest of the string (the part after the exponent, if it exists)
+									if(tok!=NULL){
+										//value was in exponent format
+										nd->nuclData[nd->numNucl].qbeta.exponent = (int8_t)atoi(tok);
+										//SDL_Log("%s, parsed to %i\n",tok,nd->nuclData[nd->numNucl].qbeta.exponent);
+										nd->nuclData[nd->numNucl].qbeta.val = nd->nuclData[nd->numNucl].qbeta.val / powf(10.0f,(float)(nd->nuclData[nd->numNucl].qbeta.exponent));
+										nd->nuclData[nd->numNucl].qbeta.format |= (uint16_t)(1U << 4); //exponent flag
+									}
+								}else{
+									tok = strtok(qbBuff,"E");
+									if(tok!=NULL){
+										tok = strtok(NULL,""); //get the rest of the string (the part after the exponent, if it exists)
+										if(tok!=NULL){
+											//value was in exponent format
+											nd->nuclData[nd->numNucl].qbeta.exponent = (int8_t)atoi(tok);
+											//SDL_Log("%s, parsed to %i\n",tok,nd->nuclData[nd->numNucl].qbeta.exponent);
+											nd->nuclData[nd->numNucl].qbeta.val = nd->nuclData[nd->numNucl].qbeta.val / powf(10.0f,(float)(nd->nuclData[nd->numNucl].qbeta.exponent));
+											nd->nuclData[nd->numNucl].qbeta.format |= (uint16_t)(1U << 4); //exponent flag
+										}
+									}
+								}
+							}
 
 							//parse the neutron sep energy
 							char nsBuff[9];
 							memcpy(nsBuff, &line[21], 8);
-							nsBuff[8] = '\0';
+							for(uint8_t i=1;i<8;i++){
+								if((isspace(nsBuff[i])) && (!(isspace(nsBuff[i-1])))){
+									nsBuff[i] = '\0'; //terminate string at first trailing space
+								}else if(i==7){
+									nsBuff[8] = '\0'; //terminate string at end
+								}
+							}
+							char nsErrBuff[3];
+							memcpy(nsErrBuff, &line[29], 2);
+							nsErrBuff[2] = '\0';
 
-							nd->nuclData[nd->numNucl].sn = (float)atof(nsBuff);
+							nd->nuclData[nd->numNucl].sn.val = (float)atof(nsBuff);
+							if(strcmp(nsErrBuff,"SY")==0){
+								nd->nuclData[nd->numNucl].sn.err = 255; //systematic
+							}else{
+								nd->nuclData[nd->numNucl].sn.err = (uint8_t)atoi(nsErrBuff);
+							}
+							nd->nuclData[nd->numNucl].sn.unit = VALUE_UNIT_KEV;
+
+							//handle expoenents
+							tok = strtok(nsBuff,".");
+							if(tok!=NULL){
+								//SDL_Log("%s\n",tok);
+								tok = strtok(NULL,"E+");
+								if(tok!=NULL){
+									//SDL_Log("%s\n",tok);
+									nd->nuclData[nd->numNucl].sn.format = (uint16_t)strlen(tok);
+									if(nd->nuclData[nd->numNucl].sn.format > 15U){
+										nd->nuclData[nd->numNucl].sn.format = 15U; //only 4 bits available for precision
+									}
+									tok = strtok(NULL,""); //get the rest of the string (the part after the exponent, if it exists)
+									if(tok!=NULL){
+										//value was in exponent format
+										nd->nuclData[nd->numNucl].sn.exponent = (int8_t)atoi(tok);
+										//SDL_Log("%s, parsed to %i\n",tok,nd->nuclData[nd->numNucl].sn.exponent);
+										nd->nuclData[nd->numNucl].sn.val = nd->nuclData[nd->numNucl].sn.val / powf(10.0f,(float)(nd->nuclData[nd->numNucl].sn.exponent));
+										nd->nuclData[nd->numNucl].sn.format |= (uint16_t)(1U << 4); //exponent flag
+									}
+								}else{
+									tok = strtok(nsBuff,"E");
+									if(tok!=NULL){
+										tok = strtok(NULL,""); //get the rest of the string (the part after the exponent, if it exists)
+										if(tok!=NULL){
+											//value was in exponent format
+											nd->nuclData[nd->numNucl].sn.exponent = (int8_t)atoi(tok);
+											//SDL_Log("%s, parsed to %i\n",tok,nd->nuclData[nd->numNucl].sn.exponent);
+											nd->nuclData[nd->numNucl].sn.val = nd->nuclData[nd->numNucl].sn.val / powf(10.0f,(float)(nd->nuclData[nd->numNucl].sn.exponent));
+											nd->nuclData[nd->numNucl].sn.format |= (uint16_t)(1U << 4); //exponent flag
+										}
+									}
+								}
+							}
 
 							//parse the proton sep energy
 							char psBuff[9];
 							memcpy(psBuff, &line[31], 8);
-							psBuff[8] = '\0';
+							for(uint8_t i=1;i<8;i++){
+								if((isspace(psBuff[i])) && (!(isspace(psBuff[i-1])))){
+									psBuff[i] = '\0'; //terminate string at first trailing space
+								}else if(i==7){
+									psBuff[8] = '\0'; //terminate string at end
+								}
+							}
+							char psErrBuff[3];
+							memcpy(psErrBuff, &line[39], 2);
+							psErrBuff[2] = '\0';
 
-							nd->nuclData[nd->numNucl].sp = (float)atof(psBuff);
+							nd->nuclData[nd->numNucl].sp.val = (float)atof(psBuff);
+							if(strcmp(psErrBuff,"SY")==0){
+								nd->nuclData[nd->numNucl].sp.err = 255; //systematic
+							}else{
+								nd->nuclData[nd->numNucl].sp.err = (uint8_t)atoi(psErrBuff);
+							}
+							nd->nuclData[nd->numNucl].sp.unit = VALUE_UNIT_KEV;
+
+							//handle expoenents
+							tok = strtok(psBuff,".");
+							if(tok!=NULL){
+								//SDL_Log("%s\n",tok);
+								tok = strtok(NULL,"E+");
+								if(tok!=NULL){
+									//SDL_Log("%s\n",tok);
+									nd->nuclData[nd->numNucl].sp.format = (uint16_t)strlen(tok);
+									if(nd->nuclData[nd->numNucl].sp.format > 15U){
+										nd->nuclData[nd->numNucl].sp.format = 15U; //only 4 bits available for precision
+									}
+									tok = strtok(NULL,""); //get the rest of the string (the part after the exponent, if it exists)
+									if(tok!=NULL){
+										//value was in exponent format
+										nd->nuclData[nd->numNucl].sp.exponent = (int8_t)atoi(tok);
+										//SDL_Log("%s, parsed to %i\n",tok,nd->nuclData[nd->numNucl].sp.exponent);
+										nd->nuclData[nd->numNucl].sp.val = nd->nuclData[nd->numNucl].sp.val / powf(10.0f,(float)(nd->nuclData[nd->numNucl].sp.exponent));
+										nd->nuclData[nd->numNucl].sp.format |= (uint16_t)(1U << 4); //exponent flag
+									}
+								}else{
+									tok = strtok(psBuff,"E");
+									if(tok!=NULL){
+										tok = strtok(NULL,""); //get the rest of the string (the part after the exponent, if it exists)
+										if(tok!=NULL){
+											//value was in exponent format
+											nd->nuclData[nd->numNucl].sp.exponent = (int8_t)atoi(tok);
+											//SDL_Log("%s, parsed to %i\n",tok,nd->nuclData[nd->numNucl].sp.exponent);
+											nd->nuclData[nd->numNucl].sp.val = nd->nuclData[nd->numNucl].sp.val / powf(10.0f,(float)(nd->nuclData[nd->numNucl].sp.exponent));
+											nd->nuclData[nd->numNucl].sp.format |= (uint16_t)(1U << 4); //exponent flag
+										}
+									}
+								}
+							}
 
 							//parse the alpha Q-value
 							char qaBuff[9];
 							memcpy(qaBuff, &line[41], 8);
-							qaBuff[8] = '\0';
+							for(uint8_t i=1;i<8;i++){
+								if((isspace(qaBuff[i])) && (!(isspace(qaBuff[i-1])))){
+									qaBuff[i] = '\0'; //terminate string at first trailing space
+								}else if(i==7){
+									qaBuff[8] = '\0'; //terminate string at end
+								}
+							}
+							char qaErrBuff[9];
+							memcpy(qaErrBuff, &line[49], 2);
+							qaErrBuff[2] = '\0';
 							
-							nd->nuclData[nd->numNucl].qalpha = (float)atof(qaBuff);
+							nd->nuclData[nd->numNucl].qalpha.val = (float)atof(qaBuff);
+							if(strcmp(qaErrBuff,"SY")==0){
+								nd->nuclData[nd->numNucl].qalpha.err = 255; //systematic
+							}else{
+								nd->nuclData[nd->numNucl].qalpha.err = (uint8_t)atoi(qaErrBuff);
+							}
+							nd->nuclData[nd->numNucl].qalpha.unit = VALUE_UNIT_KEV;
+
+							//handle expoenents
+							tok = strtok(qaBuff,".");
+							if(tok!=NULL){
+								//SDL_Log("%s\n",tok);
+								tok = strtok(NULL,"E+");
+								if(tok!=NULL){
+									//SDL_Log("%s\n",tok);
+									nd->nuclData[nd->numNucl].qalpha.format = (uint16_t)strlen(tok);
+									if(nd->nuclData[nd->numNucl].qalpha.format > 15U){
+										nd->nuclData[nd->numNucl].qalpha.format = 15U; //only 4 bits available for precision
+									}
+									tok = strtok(NULL,""); //get the rest of the string (the part after the exponent, if it exists)
+									if(tok!=NULL){
+										//value was in exponent format
+										nd->nuclData[nd->numNucl].qalpha.exponent = (int8_t)atoi(tok);
+										//SDL_Log("%s, parsed to %i\n",tok,nd->nuclData[nd->numNucl].qalpha.exponent);
+										nd->nuclData[nd->numNucl].qalpha.val = nd->nuclData[nd->numNucl].qalpha.val / powf(10.0f,(float)(nd->nuclData[nd->numNucl].qalpha.exponent));
+										nd->nuclData[nd->numNucl].qalpha.format |= (uint16_t)(1U << 4); //exponent flag
+									}
+								}else{
+									tok = strtok(qaBuff,"E");
+									if(tok!=NULL){
+										tok = strtok(NULL,""); //get the rest of the string (the part after the exponent, if it exists)
+										if(tok!=NULL){
+											//value was in exponent format
+											nd->nuclData[nd->numNucl].qalpha.exponent = (int8_t)atoi(tok);
+											//SDL_Log("%s, parsed to %i\n",tok,nd->nuclData[nd->numNucl].qalpha.exponent);
+											nd->nuclData[nd->numNucl].qalpha.val = nd->nuclData[nd->numNucl].qalpha.val / powf(10.0f,(float)(nd->nuclData[nd->numNucl].qalpha.exponent));
+											nd->nuclData[nd->numNucl].qalpha.format |= (uint16_t)(1U << 4); //exponent flag
+										}
+									}
+								}
+							}
+
 						}
 						firstQLine = 0;
 					}

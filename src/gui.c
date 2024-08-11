@@ -533,8 +533,8 @@ void drawNuclFullInfoBox(const app_data *restrict dat, const app_state *restrict
     txtYOffset = (20.0f*juice_smoothStop2(1.0f - state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_TXTFADEOUT]/SHORT_UI_ANIM_LENGTH));
     txtAlpha = (uint8_t)(255.0f*juice_smoothStop2(state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_TXTFADEOUT]/SHORT_UI_ANIM_LENGTH));
   }else if(state->ds.uiAnimPlaying & (1U << UIANIM_NUCLINFOBOX_TXTFADEIN)){
-    txtYOffset = (20.0f*juice_smoothStart2(state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_TXTFADEIN]/(UI_ANIM_LENGTH)));
-    txtAlpha = (uint8_t)(255.0f*juice_smoothStart2(1.0f - state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_TXTFADEIN]/UI_ANIM_LENGTH));
+    txtYOffset = (20.0f*juice_smoothStart2(state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_TXTFADEIN]/SHORT_UI_ANIM_LENGTH));
+    txtAlpha = (uint8_t)(255.0f*juice_smoothStart2(1.0f - state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_TXTFADEIN]/SHORT_UI_ANIM_LENGTH));
   }
   
   //level and gamma data
@@ -649,9 +649,37 @@ void drawNuclFullInfoBox(const app_data *restrict dat, const app_state *restrict
   //header
   drawInfoBoxHeader(dat,rdat,0.0f,0.0f,255,nuclInd);
 
+  //Q-values
+  char qValStr[32];
+  drawXPos = NUCL_FULLINFOBOX_QVAL_POS_X;
+  drawYPos = NUCL_FULLINFOBOX_QVAL_POS_Y + txtYOffset;
+  if(dat->ndat.nuclData[nuclInd].sn.val != 0.0f){
+    getQValStr(qValStr,dat->ndat.nuclData[nuclInd].sn,1);
+    SDL_snprintf(tmpStr,32,"%s=%s %s",dat->strings[LOCSTR_SN],qValStr,getValueUnitShortStr(dat->ndat.nuclData[nuclInd].sn.unit));
+    rect = drawTextAlignedSized(rdat,drawXPos,drawYPos,rdat->font,blackCol8Bit,txtAlpha,tmpStr,ALIGN_LEFT,16384);
+    drawXPos += rect.w + 4*UI_PADDING_SIZE;
+  }
+  if(dat->ndat.nuclData[nuclInd].sp.val != 0.0f){
+    getQValStr(qValStr,dat->ndat.nuclData[nuclInd].sp,1);
+    SDL_snprintf(tmpStr,32,"%s=%s %s",dat->strings[LOCSTR_SP],qValStr,getValueUnitShortStr(dat->ndat.nuclData[nuclInd].sp.unit));
+    rect = drawTextAlignedSized(rdat,drawXPos,drawYPos,rdat->font,blackCol8Bit,txtAlpha,tmpStr,ALIGN_LEFT,16384);
+    drawXPos += rect.w + 4*UI_PADDING_SIZE;
+  }
+  if(dat->ndat.nuclData[nuclInd].qalpha.val != 0.0f){
+    getQValStr(qValStr,dat->ndat.nuclData[nuclInd].qalpha,1);
+    SDL_snprintf(tmpStr,32,"%s=%s %s",dat->strings[LOCSTR_QALPHA],qValStr,getValueUnitShortStr(dat->ndat.nuclData[nuclInd].qalpha.unit));
+    rect = drawTextAlignedSized(rdat,drawXPos,drawYPos,rdat->font,blackCol8Bit,txtAlpha,tmpStr,ALIGN_LEFT,16384);
+    drawXPos += rect.w + 4*UI_PADDING_SIZE;
+  }
+  if(dat->ndat.nuclData[nuclInd].qbeta.val != 0.0f){
+    getQValStr(qValStr,dat->ndat.nuclData[nuclInd].qbeta,1);
+    SDL_snprintf(tmpStr,32,"%s=%s %s",dat->strings[LOCSTR_QBETAMNUS],qValStr,getValueUnitShortStr(dat->ndat.nuclData[nuclInd].qbeta.unit));
+    drawTextAlignedSized(rdat,drawXPos,drawYPos,rdat->font,blackCol8Bit,txtAlpha,tmpStr,ALIGN_LEFT,16384);
+  }
+
   //draw column title strings
   drawXPos = origDrawXPos;
-  drawYPos = (float)(4*UI_PADDING_SIZE) + 40.0f + txtYOffset;
+  drawYPos = NUCL_FULLINFOBOX_LEVELLIST_HEADER_POS_Y + txtYOffset;
   drawTextAlignedSized(rdat,drawXPos,drawYPos,rdat->font,blackCol8Bit,txtAlpha,dat->strings[LOCSTR_LEVELINFO_HEADER],ALIGN_LEFT,16384);
   drawYPos += NUCL_INFOBOX_BIGLINE_HEIGHT;
   drawTextAlignedSized(rdat,drawXPos,drawYPos,rdat->font,blackCol8Bit,txtAlpha,dat->strings[LOCSTR_ENERGY_KEV],ALIGN_LEFT,16384);

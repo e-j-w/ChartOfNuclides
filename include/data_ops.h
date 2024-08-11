@@ -18,8 +18,9 @@ void updateDrawingState(const app_data *restrict dat, app_state *restrict state,
 
 const char* getFullElemStr(const uint8_t Z, const uint8_t N);
 const char* getElemStr(const uint8_t Z);
-const char* getHalfLifeUnitShortStr(const uint8_t unit);
+const char* getValueUnitShortStr(const uint8_t unit);
 const char* getValueTypeShortStr(const uint8_t type);
+void getQValStr(char strOut[32], const valWithErr qVal, const uint8_t showErr);
 void getGammaEnergyStr(char strOut[32], const ndata *restrict nd, const uint32_t tranInd, const uint8_t showErr);
 void getGammaIntensityStr(char strOut[32], const ndata *restrict nd, const uint32_t tranInd, const uint8_t showErr);
 void getGammaMultipolarityStr(char strOut[32], const ndata *restrict nd, const uint32_t tranInd);

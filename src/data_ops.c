@@ -92,6 +92,7 @@ void startUIAnimation(const app_data *restrict dat, app_state *restrict state, c
   }
 	switch(uiAnim){
 		case UIANIM_NUCLINFOBOX_TXTFADEOUT:
+		case UIANIM_NUCLINFOBOX_TXTFADEIN:
 			//short animation
 			state->ds.timeLeftInUIAnimation[uiAnim] = SHORT_UI_ANIM_LENGTH;
 			break;
@@ -787,7 +788,7 @@ const char* getElemStr(const uint8_t Z){
 	}
 }
 
-const char* getHalfLifeUnitShortStr(const uint8_t unit){
+const char* getValueUnitShortStr(const uint8_t unit){
 	switch(unit){
 		case VALUE_UNIT_STABLE:
 			return "STABLE"; //stable
@@ -937,6 +938,33 @@ uint8_t multsCanMix(const uint8_t mult1, const uint8_t mult2){
 	}
 }
 
+void getQValStr(char strOut[32], const valWithErr qVal, const uint8_t showErr){
+	uint8_t qPrecision = (uint8_t)(qVal.format & 15U);
+	uint8_t qExponent = (uint8_t)((qVal.format >> 4U) & 1U);
+	if((showErr == 0)||(qVal.err == 0)){
+		if(qExponent == 0){
+			SDL_snprintf(strOut,32,"%.*f",qPrecision,(double)(qVal.val));
+		}else{
+			SDL_snprintf(strOut,32,"%.*fE%i",qPrecision,(double)(qVal.val),qVal.exponent);
+		}
+	}else{
+		if(qExponent == 0){
+			if(qVal.err == 255){
+				//systematic
+				SDL_snprintf(strOut,32,"%.*f(sys.)",qPrecision,(double)(qVal.val));
+			}else{
+				SDL_snprintf(strOut,32,"%.*f(%u)",qPrecision,(double)(qVal.val),qVal.err);
+			}
+		}else{
+			if(qVal.err == 255){
+				SDL_snprintf(strOut,32,"%.*f(sys.)E%i",qPrecision,(double)(qVal.val),qVal.exponent);
+			}else{
+				SDL_snprintf(strOut,32,"%.*f(%u)E%i",qPrecision,(double)(qVal.val),qVal.err,qVal.exponent);
+			}
+		}
+	}
+}
+
 void getGammaEnergyStr(char strOut[32], const ndata *restrict nd, const uint32_t tranInd, const uint8_t showErr){
 
 	uint8_t ePrecision = (uint8_t)(nd->tran[tranInd].energy.format & 15U);
@@ -951,7 +979,7 @@ void getGammaEnergyStr(char strOut[32], const ndata *restrict nd, const uint32_t
 		if(eExponent == 0){
 			SDL_snprintf(strOut,32,"%.*f(%u)",ePrecision,(double)(nd->tran[tranInd].energy.val),nd->tran[tranInd].energy.err);
 		}else{
-			SDL_snprintf(strOut,32,"%.*f(%u)E%i",ePrecision,(double)(nd->tran[tranInd].energy.val),nd->tran[tranInd].energy.exponent,nd->tran[tranInd].energy.err);
+			SDL_snprintf(strOut,32,"%.*f(%u)E%i",ePrecision,(double)(nd->tran[tranInd].energy.val),nd->tran[tranInd].energy.err,nd->tran[tranInd].energy.exponent);
 		}
 	}
 	
@@ -1108,22 +1136,22 @@ void getHalfLifeStr(char strOut[32], const ndata *restrict nd, const uint32_t lv
 					negErr = (uint8_t)(SDL_ceil((double)negErr * 1.4427)); //convert half-life error to lifetime error
 				}
 				if(hlExponent == 0){
-					SDL_snprintf(strOut,32,"%.*f(+%u-%u) %s",hlPrecision,hlVal,hlErr,negErr,getHalfLifeUnitShortStr(nd->levels[lvlInd].halfLife.unit));
+					SDL_snprintf(strOut,32,"%.*f(+%u-%u) %s",hlPrecision,hlVal,hlErr,negErr,getValueUnitShortStr(nd->levels[lvlInd].halfLife.unit));
 				}else{
-					SDL_snprintf(strOut,32,"%.*f(+%u-%u)E%i %s",hlPrecision,hlVal,hlErr,negErr,nd->levels[lvlInd].halfLife.exponent,getHalfLifeUnitShortStr(nd->levels[lvlInd].halfLife.unit));
+					SDL_snprintf(strOut,32,"%.*f(+%u-%u)E%i %s",hlPrecision,hlVal,hlErr,negErr,nd->levels[lvlInd].halfLife.exponent,getValueUnitShortStr(nd->levels[lvlInd].halfLife.unit));
 				}
 			}else{
 				if((showErr == 0)||(hlErr == 0)){
 					if(hlExponent == 0){
-						SDL_snprintf(strOut,32,"%s%.*f %s",getValueTypeShortStr(hlValueType),hlPrecision,hlVal,getHalfLifeUnitShortStr(nd->levels[lvlInd].halfLife.unit));
+						SDL_snprintf(strOut,32,"%s%.*f %s",getValueTypeShortStr(hlValueType),hlPrecision,hlVal,getValueUnitShortStr(nd->levels[lvlInd].halfLife.unit));
 					}else{
-						SDL_snprintf(strOut,32,"%s%.*fE%i %s",getValueTypeShortStr(hlValueType),hlPrecision,hlVal,nd->levels[lvlInd].halfLife.exponent,getHalfLifeUnitShortStr(nd->levels[lvlInd].halfLife.unit));
+						SDL_snprintf(strOut,32,"%s%.*fE%i %s",getValueTypeShortStr(hlValueType),hlPrecision,hlVal,nd->levels[lvlInd].halfLife.exponent,getValueUnitShortStr(nd->levels[lvlInd].halfLife.unit));
 					}
 				}else{
 					if(hlExponent == 0){
-						SDL_snprintf(strOut,32,"%s%.*f(%u) %s",getValueTypeShortStr(hlValueType),hlPrecision,hlVal,hlErr,getHalfLifeUnitShortStr(nd->levels[lvlInd].halfLife.unit));
+						SDL_snprintf(strOut,32,"%s%.*f(%u) %s",getValueTypeShortStr(hlValueType),hlPrecision,hlVal,hlErr,getValueUnitShortStr(nd->levels[lvlInd].halfLife.unit));
 					}else{
-						SDL_snprintf(strOut,32,"%s%.*f(%u)E%i %s",getValueTypeShortStr(hlValueType),hlPrecision,hlVal,hlErr,nd->levels[lvlInd].halfLife.exponent,getHalfLifeUnitShortStr(nd->levels[lvlInd].halfLife.unit));
+						SDL_snprintf(strOut,32,"%s%.*f(%u)E%i %s",getValueTypeShortStr(hlValueType),hlPrecision,hlVal,hlErr,nd->levels[lvlInd].halfLife.exponent,getValueUnitShortStr(nd->levels[lvlInd].halfLife.unit));
 					}
 				}
 			}
