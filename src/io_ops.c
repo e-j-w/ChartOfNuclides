@@ -122,6 +122,12 @@ static int readConfigFile(FILE *file, app_state *restrict state){
         }else{
           state->ds.useLifetimes = 0;
         }
+      }else if(strcmp(par,"use_ui_animations") == 0){
+        if(strcmp(val,"yes") == 0){
+          state->ds.useUIAnimations = 1;
+        }else{
+          state->ds.useUIAnimations = 0;
+        }
       }else if(strcmp(par,"gamepad_deadzone") == 0){
         int dz = atoi(val);
         if((dz > 1000)&&(dz < 32768)){
@@ -168,6 +174,11 @@ static int writeConfigFile(FILE *file, const app_rules *restrict rules, const ap
     fprintf(file,"use_lifetimes=yes\n");
   }else{
     fprintf(file,"use_lifetimes=no\n");
+  }
+  if(state->ds.useUIAnimations){
+    fprintf(file,"use_ui_animations=yes\n");
+  }else{
+    fprintf(file,"use_ui_animations=no\n");
   }
 
   fprintf(file,"\n### Gamepad Settings ###\n");

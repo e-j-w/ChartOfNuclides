@@ -26,3 +26,4 @@ about_string_1|Developed by Jonathan Williams
 about_string_2|This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, version 3 or later.
 pref_shellclosure|Show shell closures on chart
 pref_lifetime|Show lifetimes instead of half-lives
+pref_ui_animations|Show UI animations

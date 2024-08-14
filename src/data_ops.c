@@ -54,7 +54,8 @@ void initializeTempState(const app_data *restrict dat, app_state *restrict state
   state->ds.shownElements = 0; //no UI elements being shown
 	state->ds.shownElements |= (1U << UIELEM_CHARTOFNUCLIDES);
   state->ds.uiAnimPlaying = 0; //no UI animations playing
-  state->ds.useLifetimes = 0;
+  state->ds.useUIAnimations = 1;
+	state->ds.useLifetimes = 0;
 	state->ds.drawShellClosures = 1;
 	state->ds.chartPosX = 86.0f;
 	state->ds.chartPosY = 52.0f;
@@ -163,7 +164,7 @@ void updateUIAnimationTimes(const app_data *restrict dat, app_state *restrict st
     if(state->ds.uiAnimPlaying & (uint32_t)(1U << i)){
       state->ds.timeLeftInUIAnimation[i] -= deltaTime;
       //SDL_Log("anim %u dt %.3f timeleft %.3f\n",i,(double)deltaTime,(double)state->ds.timeLeftInUIAnimation[i]);
-      if(state->ds.timeLeftInUIAnimation[i] <= 0.0f){
+      if((state->ds.timeLeftInUIAnimation[i] <= 0.0f)||(state->ds.useUIAnimations == 0)){
         state->ds.timeLeftInUIAnimation[i] = 0.0f;
         stopUIAnimation(dat,state,i);
       }
@@ -1525,6 +1526,7 @@ void changeUIState(const app_data *restrict dat, app_state *restrict state, cons
 			state->interactableElement |= (uint32_t)(1U << UIELEM_PREFS_DIALOG_CLOSEBUTTON);
 			state->interactableElement |= (uint32_t)(1U << UIELEM_PREFS_DIALOG_SHELLCLOSURE_CHECKBOX);
 			state->interactableElement |= (uint32_t)(1U << UIELEM_PREFS_DIALOG_LIFETIME_CHECKBOX);
+			state->interactableElement |= (uint32_t)(1U << UIELEM_PREFS_DIALOG_UIANIM_CHECKBOX);
 			break;
 		case UISTATE_FULLLEVELINFO:
 			state->ds.nuclFullInfoMaxScrollY = getMaxNumLvlDispLines(&dat->ndat,state); //find total number of lines displayable
@@ -1623,6 +1625,11 @@ void uiElemClickAction(const app_data *restrict dat, app_state *restrict state, 
 			break;
 		case UIELEM_PREFS_DIALOG_LIFETIME_CHECKBOX:
 			state->ds.useLifetimes = !(state->ds.useLifetimes);
+			state->ds.forceRedraw = 1;
+			state->clickedUIElem = UIELEM_ENUM_LENGTH; //'unclick' the button
+			break;
+		case UIELEM_PREFS_DIALOG_UIANIM_CHECKBOX:
+			state->ds.useUIAnimations = !(state->ds.useUIAnimations);
 			state->ds.forceRedraw = 1;
 			state->clickedUIElem = UIELEM_ENUM_LENGTH; //'unclick' the button
 			break;
@@ -1798,6 +1805,7 @@ void updateSingleUIElemPosition(const app_data *restrict dat, drawing_state *res
 			updateSingleUIElemPosition(dat,ds,rdat,UIELEM_PREFS_DIALOG_CLOSEBUTTON);
 			updateSingleUIElemPosition(dat,ds,rdat,UIELEM_PREFS_DIALOG_SHELLCLOSURE_CHECKBOX);
 			updateSingleUIElemPosition(dat,ds,rdat,UIELEM_PREFS_DIALOG_LIFETIME_CHECKBOX);
+			updateSingleUIElemPosition(dat,ds,rdat,UIELEM_PREFS_DIALOG_UIANIM_CHECKBOX);
 			break;
 		case UIELEM_PREFS_DIALOG_CLOSEBUTTON:
 			ds->uiElemWidth[UIELEM_PREFS_DIALOG_CLOSEBUTTON] = UI_TILE_SIZE;
@@ -1818,6 +1826,13 @@ void updateSingleUIElemPosition(const app_data *restrict dat, drawing_state *res
 			ds->uiElemPosX[UIELEM_PREFS_DIALOG_LIFETIME_CHECKBOX] = ds->uiElemPosX[UIELEM_PREFS_DIALOG] + PREFS_DIALOG_PREFCOL1_X;
 			ds->uiElemPosY[UIELEM_PREFS_DIALOG_LIFETIME_CHECKBOX] = ds->uiElemPosY[UIELEM_PREFS_DIALOG] + PREFS_DIALOG_PREFCOL1_Y + PREFS_DIALOG_PREF_Y_SPACING;
 			ds->uiElemExtPlusX[UIELEM_PREFS_DIALOG_LIFETIME_CHECKBOX] = 2*UI_PADDING_SIZE + (uint16_t)(FC_GetWidth(rdat->font,dat->strings[dat->locStringIDs[LOCSTR_PREF_LIFETIME]])/rdat->uiScale); //so that checkbox can be toggled by clicking on adjacent text
+			break;
+		case UIELEM_PREFS_DIALOG_UIANIM_CHECKBOX:
+			ds->uiElemWidth[UIELEM_PREFS_DIALOG_UIANIM_CHECKBOX] = UI_TILE_SIZE;
+			ds->uiElemHeight[UIELEM_PREFS_DIALOG_UIANIM_CHECKBOX] = ds->uiElemWidth[UIELEM_PREFS_DIALOG_UIANIM_CHECKBOX];
+			ds->uiElemPosX[UIELEM_PREFS_DIALOG_UIANIM_CHECKBOX] = ds->uiElemPosX[UIELEM_PREFS_DIALOG] + PREFS_DIALOG_PREFCOL1_X;
+			ds->uiElemPosY[UIELEM_PREFS_DIALOG_UIANIM_CHECKBOX] = ds->uiElemPosY[UIELEM_PREFS_DIALOG] + PREFS_DIALOG_PREFCOL1_Y + 2*PREFS_DIALOG_PREF_Y_SPACING;
+			ds->uiElemExtPlusX[UIELEM_PREFS_DIALOG_UIANIM_CHECKBOX] = 2*UI_PADDING_SIZE + (uint16_t)(FC_GetWidth(rdat->font,dat->strings[dat->locStringIDs[LOCSTR_PREF_UIANIM]])/rdat->uiScale); //so that checkbox can be toggled by clicking on adjacent text
 			break;
 		case UIELEM_NUCL_INFOBOX:
 			ds->uiElemPosX[uiElemInd] = (uint16_t)((ds->windowXRes - NUCL_INFOBOX_WIDTH)/2);
