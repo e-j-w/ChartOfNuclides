@@ -69,6 +69,7 @@ void initializeTempState(const app_data *restrict dat, app_state *restrict state
 	state->ds.dragInProgress = 0;
 	state->ds.fcScrollFinished = 0;
 	state->ds.fcScrollInProgress = 0;
+	state->ds.fcNuclChangeInProgress = 0;
 	memset(state->ds.uiElemExtPlusX,0,sizeof(state->ds.uiElemExtPlusX));
 	memset(state->ds.uiElemExtPlusY,0,sizeof(state->ds.uiElemExtPlusY));
 	memset(state->ds.uiElemExtMinusX,0,sizeof(state->ds.uiElemExtMinusX));
@@ -193,6 +194,10 @@ void updateDrawingState(const app_data *restrict dat, app_state *restrict state,
 		state->ds.fcScrollInProgress = 0;
 		state->ds.fcScrollFinished = 0; //reset flag
 	}
+	if(state->ds.fcNuclChangeFinished){
+		state->ds.fcNuclChangeInProgress = 0;
+		state->ds.fcNuclChangeFinished = 0; //reset flag
+	}
 	if(state->ds.zoomInProgress){
 		state->ds.timeSinceZoomStart += deltaTime;
 		state->ds.chartZoomScale = state->ds.chartZoomStartScale + ((state->ds.chartZoomToScale - state->ds.chartZoomStartScale)*juice_smoothStop2(state->ds.timeSinceZoomStart/CHART_ZOOM_TIME));
@@ -234,6 +239,13 @@ void updateDrawingState(const app_data *restrict dat, app_state *restrict state,
 		}
 		//SDL_Log("scroll t: %0.3f, pos: %f\n",(double)state->ds.timeSinceFCScollStart,(double)state->ds.nuclFullInfoScrollY);
 	}
+	if(state->ds.fcNuclChangeInProgress){
+		state->ds.timeSinceFCNuclChangeStart += deltaTime;
+		if(state->ds.timeSinceFCNuclChangeStart >= NUCL_FULLINFOBOX_SCROLL_TIME){
+			state->ds.fcNuclChangeFinished = 1;
+		}
+		//SDL_Log("scroll t: %0.3f, pos: %f\n",(double)state->ds.timeSinceFCScollStart,(double)state->ds.nuclFullInfoScrollY);
+	}
 	//clamp chart display range
 	if(state->ds.chartPosX < 0.0f){
 		state->ds.chartPosX = 0.0f;
@@ -244,6 +256,23 @@ void updateDrawingState(const app_data *restrict dat, app_state *restrict state,
 		state->ds.chartPosY = 0.0f;
 	}else if(state->ds.chartPosY > (dat->ndat.maxZ+1)){
 		state->ds.chartPosY = (float)dat->ndat.maxZ+1.0f;
+	}
+
+	//dismiss info box if it selected nuclide is offscreen
+	if(state->chartSelectedNucl != MAXNUMNUCL){
+		if(state->ds.shownElements & (1U << UIELEM_NUCL_INFOBOX)){
+			if(state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_HIDE]==0.0f){
+				if(((dat->ndat.nuclData[state->chartSelectedNucl].N+1) < getMinChartN(&state->ds))||(dat->ndat.nuclData[state->chartSelectedNucl].N > getMaxChartN(&state->ds))){
+					//SDL_Log("hiding info box\n");
+					startUIAnimation(dat,state,UIANIM_NUCLINFOBOX_HIDE); //hide the info box, see stopUIAnimation() for info box hiding action
+					startUIAnimation(dat,state,UIANIM_NUCLHIGHLIGHT_HIDE);
+				}else if((dat->ndat.nuclData[state->chartSelectedNucl].Z < getMinChartZ(&state->ds))||((dat->ndat.nuclData[state->chartSelectedNucl].Z-1) > getMaxChartZ(&state->ds))){
+					//SDL_Log("hiding info box\n");
+					startUIAnimation(dat,state,UIANIM_NUCLINFOBOX_HIDE); //hide the info box, see stopUIAnimation() for info box hiding action
+					startUIAnimation(dat,state,UIANIM_NUCLHIGHLIGHT_HIDE);
+				}
+			}
+		}
 	}
 }
 
@@ -1556,11 +1585,11 @@ void changeUIState(const app_data *restrict dat, app_state *restrict state, cons
   }
 }
 
-void panChartToPos(const app_data *restrict dat, drawing_state *restrict ds, const uint16_t posN, const uint16_t posZ){
+void panChartToPos(const app_data *restrict dat, drawing_state *restrict ds, const uint16_t posN, const uint16_t posZ, float panTime){
 	ds->chartPanStartX = ds->chartPosX;
 	ds->chartPanStartY = ds->chartPosY;
 	ds->chartPanToX = posN*1.0f + 0.5f;
-	ds->chartPanToY = posZ*1.0f + 0.5f - (16.0f/ds->chartZoomScale);
+	ds->chartPanToY = posZ*1.0f - 0.5f - (16.0f/ds->chartZoomScale);
 	//SDL_Log("pos: %u %u, panning to: %f %f\n",posN,posZ,(double)ds->chartPanToX,(double)ds->chartPanToY);
 	//clamp chart display range
 	if(ds->chartPanToX < 0.0f){
@@ -1575,9 +1604,96 @@ void panChartToPos(const app_data *restrict dat, drawing_state *restrict ds, con
 	}
 	//SDL_Log("panning to: %f %f\n",(double)ds->chartPanToX,(double)ds->chartPanToY);
 	ds->timeSincePanStart = 0.0f;
-	ds->totalPanTime = CHART_DOUBLECLICK_PAN_TIME;
+	ds->totalPanTime = panTime;
 	ds->panInProgress = 1;
 	ds->panFinished = 0;
+}
+
+void setSelectedNuclOnLevelList(const app_data *restrict dat, app_state *restrict state, const uint16_t N, const uint16_t Z){
+	uint16_t selNucl = getNuclInd(&dat->ndat,(int16_t)N,(int16_t)Z);
+	//SDL_Log("Selected nucleus: %u\n",state->chartSelectedNucl);
+	if((selNucl < MAXNUMNUCL)&&(selNucl != state->chartSelectedNucl)){
+		state->chartSelectedNucl = selNucl;
+		state->ds.nuclFullInfoScrollY = 0.0f;
+		state->ds.timeSinceFCScollStart = 0.0f;
+		state->ds.fcScrollInProgress = 0;
+		state->ds.fcScrollFinished = 1;
+		state->ds.timeSinceFCNuclChangeStart = 0.0f;
+		state->ds.fcNuclChangeInProgress = 1;
+		state->ds.fcNuclChangeFinished = 0;
+		startUIAnimation(dat,state,UIANIM_NUCLINFOBOX_TXTFADEIN);
+
+		//also pan the chart 'behind the scenes'
+		state->ds.chartPosX = N*1.0f + 0.5f;
+		state->ds.chartPosY = Z*1.0f - 0.5f - (16.0f/state->ds.chartZoomScale);
+	}
+}
+
+//handles everything needed to select a new nucleus on the main chart view
+//forcePan: 0=don't pan chart (except to dodge UI elements)
+//          1=pan chart from mouse (double-click)
+//          2=pan chart from keyboard (fast)
+void setSelectedNuclOnChart(const app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat, const uint16_t N, const uint16_t Z, const uint8_t forcePan){
+	uint16_t selNucl = getNuclInd(&dat->ndat,(int16_t)N,(int16_t)Z);
+	//SDL_Log("Selected nucleus: %u\n",state->chartSelectedNucl);
+	if((selNucl < MAXNUMNUCL)&&(selNucl != state->chartSelectedNucl)){
+		state->chartSelectedNucl = selNucl;
+		//calculate the number of unscaled pixels needed to show the ground and isomeric state info
+		state->ds.infoBoxTableHeight = NUCL_INFOBOX_BIGLINE_HEIGHT;
+		if(dat->ndat.levels[dat->ndat.nuclData[selNucl].firstLevel + dat->ndat.nuclData[selNucl].gsLevel].numDecModes > 1){
+			state->ds.infoBoxTableHeight += NUCL_INFOBOX_SMALLLINE_HEIGHT*(dat->ndat.levels[dat->ndat.nuclData[selNucl].firstLevel + dat->ndat.nuclData[selNucl].gsLevel].numDecModes - 1);
+		}
+		if(dat->ndat.nuclData[selNucl].longestIsomerLevel != MAXNUMLVLS){
+			if(dat->ndat.nuclData[selNucl].longestIsomerLevel != (dat->ndat.nuclData[selNucl].firstLevel + dat->ndat.nuclData[selNucl].gsLevel)){
+				state->ds.infoBoxTableHeight += NUCL_INFOBOX_BIGLINE_HEIGHT;
+				if(dat->ndat.levels[dat->ndat.nuclData[selNucl].longestIsomerLevel].numDecModes > 1){
+					state->ds.infoBoxTableHeight += NUCL_INFOBOX_SMALLLINE_HEIGHT*(dat->ndat.levels[dat->ndat.nuclData[selNucl].longestIsomerLevel].numDecModes - 1);
+				}
+			}
+		}
+		updateSingleUIElemPosition(dat,&state->ds,rdat,UIELEM_NUCL_INFOBOX);
+		updateSingleUIElemPosition(dat,&state->ds,rdat,UIELEM_NUCL_INFOBOX_CLOSEBUTTON);
+		if(!(state->ds.shownElements & (1U << UIELEM_NUCL_INFOBOX))){
+			state->ds.shownElements |= (1U << UIELEM_NUCL_INFOBOX);
+			changeUIState(dat,state,UISTATE_DEFAULT); //make info box interactable
+			startUIAnimation(dat,state,UIANIM_NUCLINFOBOX_SHOW);
+		}
+		startUIAnimation(dat,state,UIANIM_NUCLHIGHLIGHT_SHOW);
+		if(forcePan==1){
+			panChartToPos(dat,&state->ds,N,Z,CHART_DOUBLECLICK_PAN_TIME);
+		}else if(forcePan==2){
+			panChartToPos(dat,&state->ds,N,Z,CHART_KEY_PAN_TIME);
+		}else{
+			//check occlusion by info box
+			float xOcclLeft = chartNtoXPx(&state->ds,(float)(N+1));
+			float xOcclRight = chartNtoXPx(&state->ds,(float)N);
+			float yOcclTop = chartZtoYPx(&state->ds,(float)(Z-1));
+			if((xOcclLeft >= state->ds.uiElemPosX[UIELEM_NUCL_INFOBOX])&&(xOcclRight <= (state->ds.uiElemPosX[UIELEM_NUCL_INFOBOX] + state->ds.uiElemWidth[UIELEM_NUCL_INFOBOX]))){
+				if(yOcclTop >= state->ds.uiElemPosY[UIELEM_NUCL_INFOBOX]){
+					//always pan chart to dodge occlusion
+					if(forcePan==2){
+						panChartToPos(dat,&state->ds,N,Z,CHART_KEY_PAN_TIME);
+					}else{
+						panChartToPos(dat,&state->ds,N,Z,CHART_DOUBLECLICK_PAN_TIME);
+					}
+				}
+			}
+		}	
+	}else{
+		if((forcePan==1) && (state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_HIDE]==0.0f)){
+			//pan chart to nuclide that is clicked
+			//SDL_Log("starting pan to: %f %f\n",(double)mouseX,(double)mouseY);
+			panChartToPos(dat,&state->ds,N,Z,CHART_DOUBLECLICK_PAN_TIME);
+		}else if(forcePan == 0){
+			if((state->ds.shownElements & (1U << UIELEM_NUCL_INFOBOX))&&(state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_HIDE]==0.0f)){
+				startUIAnimation(dat,state,UIANIM_NUCLINFOBOX_HIDE); //hide the info box, see stopUIAnimation() for info box hiding action
+				startUIAnimation(dat,state,UIANIM_NUCLHIGHLIGHT_HIDE);
+			}else{
+				state->chartSelectedNucl = selNucl;
+			}
+		}
+	}
+	
 }
 
 //take action after clicking a button or other UI element
@@ -1675,57 +1791,10 @@ void uiElemClickAction(const app_data *restrict dat, app_state *restrict state, 
 				if(((state->ds.shownElements) == (uint32_t)(1U << UIELEM_CHARTOFNUCLIDES))||((state->ds.shownElements >> (UIELEM_CHARTOFNUCLIDES+1)) == (1U << (UIELEM_NUCL_INFOBOX-1)))){
 					//only the chart of nuclides and/or info box are open
 					//clicked on the chart view
-					float mouseX = mouseXPxToN(&state->ds,state->mouseXPx);
-    			float mouseY = mouseYPxToZ(&state->ds,state->mouseYPx);
+					uint16_t mouseX = (uint16_t)mouseXPxToN(&state->ds,state->mouseXPx);
+    			uint16_t mouseY = (uint16_t)SDL_ceilf(mouseYPxToZ(&state->ds,state->mouseYPx));
 					//select nucleus
-					uint16_t selNucl = getNuclInd(&dat->ndat,(int16_t)SDL_floorf(mouseX),(int16_t)SDL_floorf(mouseY + 1.0f));
-					//SDL_Log("Selected nucleus: %u\n",state->chartSelectedNucl);
-					if((selNucl < MAXNUMNUCL)&&(selNucl != state->chartSelectedNucl)){
-						state->chartSelectedNucl = selNucl;
-						//calculate the number of unscaled pixels needed to show the ground and isomeric state info
-						state->ds.infoBoxTableHeight = NUCL_INFOBOX_BIGLINE_HEIGHT;
-						if(dat->ndat.levels[dat->ndat.nuclData[selNucl].firstLevel + dat->ndat.nuclData[selNucl].gsLevel].numDecModes > 1){
-							state->ds.infoBoxTableHeight += NUCL_INFOBOX_SMALLLINE_HEIGHT*(dat->ndat.levels[dat->ndat.nuclData[selNucl].firstLevel + dat->ndat.nuclData[selNucl].gsLevel].numDecModes - 1);
-						}
-						if(dat->ndat.nuclData[selNucl].longestIsomerLevel != MAXNUMLVLS){
-							if(dat->ndat.nuclData[selNucl].longestIsomerLevel != (dat->ndat.nuclData[selNucl].firstLevel + dat->ndat.nuclData[selNucl].gsLevel)){
-								state->ds.infoBoxTableHeight += NUCL_INFOBOX_BIGLINE_HEIGHT;
-								if(dat->ndat.levels[dat->ndat.nuclData[selNucl].longestIsomerLevel].numDecModes > 1){
-									state->ds.infoBoxTableHeight += NUCL_INFOBOX_SMALLLINE_HEIGHT*(dat->ndat.levels[dat->ndat.nuclData[selNucl].longestIsomerLevel].numDecModes - 1);
-								}
-							}
-						}
-						updateSingleUIElemPosition(dat,&state->ds,rdat,UIELEM_NUCL_INFOBOX);
-						updateSingleUIElemPosition(dat,&state->ds,rdat,UIELEM_NUCL_INFOBOX_CLOSEBUTTON);
-						if(!(state->ds.shownElements & (1U << UIELEM_NUCL_INFOBOX))){
-							state->ds.shownElements |= (1U << UIELEM_NUCL_INFOBOX);
-							changeUIState(dat,state,UISTATE_DEFAULT); //make info box interactable
-							startUIAnimation(dat,state,UIANIM_NUCLINFOBOX_SHOW);
-						}
-						startUIAnimation(dat,state,UIANIM_NUCLHIGHLIGHT_SHOW);
-						//check occlusion by info box
-						float xOcclLeft = chartNtoXPx(&state->ds,SDL_floorf(mouseX + 1.0f));
-						float xOcclRight = chartNtoXPx(&state->ds,SDL_floorf(mouseX));
-						float yOcclTop = chartZtoYPx(&state->ds,SDL_floorf(mouseY));
-						if((xOcclLeft >= state->ds.uiElemPosX[UIELEM_NUCL_INFOBOX])&&(xOcclRight <= (state->ds.uiElemPosX[UIELEM_NUCL_INFOBOX] + state->ds.uiElemWidth[UIELEM_NUCL_INFOBOX]))){
-							if(yOcclTop >= state->ds.uiElemPosY[UIELEM_NUCL_INFOBOX]){
-								//pan chart to dodge occlusion
-								panChartToPos(dat,&state->ds,(uint16_t)SDL_floorf(fabsf(mouseX)),(uint16_t)SDL_floorf(fabsf(mouseY)));
-							}
-						}
-
-					}else{
-						if(doubleClick && (state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_HIDE]==0.0f)){
-							//pan chart to nuclide that is clicked
-							//SDL_Log("starting pan to: %f %f\n",(double)mouseX,(double)mouseY);
-							panChartToPos(dat,&state->ds,(uint16_t)SDL_floorf(fabsf(mouseX)),(uint16_t)SDL_floorf(fabsf(mouseY)));
-						}else if((state->ds.shownElements & (1U << UIELEM_NUCL_INFOBOX))&&(state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_HIDE]==0.0f)){
-							startUIAnimation(dat,state,UIANIM_NUCLINFOBOX_HIDE); //hide the info box, see stopUIAnimation() for info box hiding action
-							startUIAnimation(dat,state,UIANIM_NUCLHIGHLIGHT_HIDE);
-						}else{
-							state->chartSelectedNucl = selNucl;
-						}
-					}
+					setSelectedNuclOnChart(dat,state,rdat,mouseX,mouseY,doubleClick? 1 : 0);
 				}else{
 					//clicked out of a menu
 					//handle individual menu closing animations

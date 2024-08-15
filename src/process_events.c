@@ -39,14 +39,20 @@ void fcScrollAction(app_state *restrict state, const float deltaVal){
 void processInputFlags(app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat){
   
   /* Handle directional input */
+  uint32_t up,down,left,right,altup,altdown,altleft,altright;
+  up = (state->inputFlags & (1U << INPUT_UP));
+  down = (state->inputFlags & (1U << INPUT_DOWN));
+  left = (state->inputFlags & (1U << INPUT_LEFT));
+  right = (state->inputFlags & (1U << INPUT_RIGHT));
+  altup = (state->inputFlags & (1U << INPUT_ALTUP));
+  altdown = (state->inputFlags & (1U << INPUT_ALTDOWN));
+  altleft = (state->inputFlags & (1U << INPUT_ALTLEFT));
+  altright = (state->inputFlags & (1U << INPUT_ALTRIGHT));
   
   if(state->uiState == UISTATE_DEFAULT){
 
     //in main chart view, handle chart panning
-    uint32_t up = (state->inputFlags & (1U << INPUT_UP));
-    uint32_t down = (state->inputFlags & (1U << INPUT_DOWN));
-    uint32_t left = (state->inputFlags & (1U << INPUT_LEFT));
-    uint32_t right = (state->inputFlags & (1U << INPUT_RIGHT));
+    
     //SDL_Log("dir: [%u %u %u %u]\n",!(up==0),!(down==0),!(left==0),!(right==0));
     
     if(left || right || up || down){
@@ -109,15 +115,46 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
         state->ds.panInProgress = 1;
         state->ds.panFinished = 0;
       }
+    }else if(altleft || altright || altup || altdown){
+      
+      if(state->chartSelectedNucl == MAXNUMNUCL){
+        //select nucleus
+        setSelectedNuclOnChart(dat,state,rdat,(uint16_t)(state->ds.chartPosX - 0.5f),(uint16_t)(state->ds.chartPosY + 0.5f + (16.0f/state->ds.chartZoomScale)),2);
+      }else{
+        //change selected nucleus
+        if(state->ds.panInProgress == 0){
+          if(altleft && !altright){
+            setSelectedNuclOnChart(dat,state,rdat,(uint16_t)(dat->ndat.nuclData[state->chartSelectedNucl].N-1),(uint16_t)(dat->ndat.nuclData[state->chartSelectedNucl].Z),2);
+          }else if(altright && !altleft){
+            setSelectedNuclOnChart(dat,state,rdat,(uint16_t)(dat->ndat.nuclData[state->chartSelectedNucl].N+1),(uint16_t)(dat->ndat.nuclData[state->chartSelectedNucl].Z),2);
+          }
+          if(altup && !altdown){
+            setSelectedNuclOnChart(dat,state,rdat,(uint16_t)(dat->ndat.nuclData[state->chartSelectedNucl].N),(uint16_t)(dat->ndat.nuclData[state->chartSelectedNucl].Z+1),2);
+          }else if(altdown && !altup){
+            setSelectedNuclOnChart(dat,state,rdat,(uint16_t)(dat->ndat.nuclData[state->chartSelectedNucl].N),(uint16_t)(dat->ndat.nuclData[state->chartSelectedNucl].Z-1),2);
+          }
+        }
+      }
+      
     }
   }else if(state->uiState == UISTATE_FULLLEVELINFO){
-    uint32_t up = (state->inputFlags & (1U << INPUT_UP));
-    uint32_t down = (state->inputFlags & (1U << INPUT_DOWN));
 
     if(up && !down){
       fcScrollAction(state,0.5f);
     }else if(down && !up){
       fcScrollAction(state,-0.5f);
+    }else if(state->ds.fcNuclChangeInProgress == 0){
+      //change selected nucleus
+      if(altleft && !altright){
+        setSelectedNuclOnLevelList(dat,state,(uint16_t)(dat->ndat.nuclData[state->chartSelectedNucl].N-1),(uint16_t)(dat->ndat.nuclData[state->chartSelectedNucl].Z));
+      }else if(altright && !altleft){
+        setSelectedNuclOnLevelList(dat,state,(uint16_t)(dat->ndat.nuclData[state->chartSelectedNucl].N+1),(uint16_t)(dat->ndat.nuclData[state->chartSelectedNucl].Z));
+      }
+      if(altup && !altdown){
+        setSelectedNuclOnLevelList(dat,state,(uint16_t)(dat->ndat.nuclData[state->chartSelectedNucl].N),(uint16_t)(dat->ndat.nuclData[state->chartSelectedNucl].Z+1));
+      }else if(altdown && !altup){
+        setSelectedNuclOnLevelList(dat,state,(uint16_t)(dat->ndat.nuclData[state->chartSelectedNucl].N),(uint16_t)(dat->ndat.nuclData[state->chartSelectedNucl].Z-1));
+      }
     }
 
   }
@@ -229,7 +266,11 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
           }else{
             //zoom using keyboard or gamepad, zoom to center of screen
             state->ds.chartZoomStartMouseX = state->ds.chartPosX;
-            state->ds.chartZoomStartMouseY = state->ds.chartPosY;
+            if(state->chartSelectedNucl != MAXNUMNUCL){
+              state->ds.chartZoomStartMouseY = state->ds.chartPosY + (16.0f/state->ds.chartZoomScale); //corrected for position of selected nuclide
+            }else{
+              state->ds.chartZoomStartMouseY = state->ds.chartPosY; //centred on screen
+            }
           }
           if(state->ds.chartZoomStartMouseX > dat->ndat.maxN){
             state->ds.chartZoomStartMouseX = (float)dat->ndat.maxN;
@@ -383,20 +424,28 @@ void processSingleEvent(app_data *restrict dat, app_state *restrict state, resou
       state->lastInputType = INPUT_TYPE_KEYBOARD; //set keyboard input
       switch(evt.key.scancode){
         case SDL_SCANCODE_LEFT:
-        case SDL_SCANCODE_A:
           state->inputFlags |= (1U << INPUT_LEFT);
           break;
+        case SDL_SCANCODE_A:
+          state->inputFlags |= (1U << INPUT_ALTLEFT);
+          break;
         case SDL_SCANCODE_RIGHT:
-        case SDL_SCANCODE_D:
           state->inputFlags |= (1U << INPUT_RIGHT);
           break;
+        case SDL_SCANCODE_D:
+          state->inputFlags |= (1U << INPUT_ALTRIGHT);
+          break;
         case SDL_SCANCODE_UP:
-        case SDL_SCANCODE_W:
           state->inputFlags |= (1U << INPUT_UP);
           break;
+        case SDL_SCANCODE_W:
+          state->inputFlags |= (1U << INPUT_ALTUP);
+          break;
         case SDL_SCANCODE_DOWN:
-        case SDL_SCANCODE_S:
           state->inputFlags |= (1U << INPUT_DOWN);
+          break;
+        case SDL_SCANCODE_S:
+          state->inputFlags |= (1U << INPUT_ALTDOWN);
           break;
         case SDL_SCANCODE_ESCAPE:
         case SDL_SCANCODE_BACKSPACE:
@@ -410,8 +459,8 @@ void processSingleEvent(app_data *restrict dat, app_state *restrict state, resou
           state->zoomDeltaVal = -1.0f;
           state->inputFlags |= (1U << INPUT_ZOOM);
           break;
-        case SDL_SCANCODE_F:
-          if((state->ds.shownElements & (1U << UIELEM_NUCL_INFOBOX))&&(state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_SHOW]==0.0f)){
+        case SDL_SCANCODE_RETURN:
+          if((state->ds.shownElements & (1U << UIELEM_NUCL_INFOBOX))&&(state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_SHOW]==0.0f)&&(state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_EXPAND]==0.0f)){
             uiElemClickAction(dat,state,rdat,0,UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON);
           }
           break;
@@ -430,20 +479,28 @@ void processSingleEvent(app_data *restrict dat, app_state *restrict state, resou
     case SDL_EVENT_KEY_UP: //released key
       switch(evt.key.scancode){
         case SDL_SCANCODE_LEFT:
-        case SDL_SCANCODE_A:
           state->inputFlags &= ~(1U << INPUT_LEFT);
           break;
+        case SDL_SCANCODE_A:
+          state->inputFlags &= ~(1U << INPUT_ALTLEFT);
+          break;
         case SDL_SCANCODE_RIGHT:
-        case SDL_SCANCODE_D:
           state->inputFlags &= ~(1U << INPUT_RIGHT);
           break;
+        case SDL_SCANCODE_D:
+          state->inputFlags &= ~(1U << INPUT_ALTRIGHT);
+          break;
         case SDL_SCANCODE_UP:
-        case SDL_SCANCODE_W:
           state->inputFlags &= ~(1U << INPUT_UP);
           break;
+        case SDL_SCANCODE_W:
+          state->inputFlags &= ~(1U << INPUT_ALTUP);
+          break;
         case SDL_SCANCODE_DOWN:
-        case SDL_SCANCODE_S:
           state->inputFlags &= ~(1U << INPUT_DOWN);
+          break;
+        case SDL_SCANCODE_S:
+          state->inputFlags &= ~(1U << INPUT_ALTDOWN);
           break;
         default:
           break;
@@ -521,7 +578,7 @@ void processFrameEvents(app_data *restrict dat, app_state *restrict state, resou
       state->inputFlags &= ~(1U << INPUT_DOUBLECLICK);
     }
 
-    if((state->ds.uiAnimPlaying != 0)||(state->ds.zoomInProgress)||(state->ds.dragInProgress)||(state->ds.panInProgress)||(state->ds.fcScrollInProgress)){
+    if((state->ds.uiAnimPlaying != 0)||(state->ds.zoomInProgress)||(state->ds.dragInProgress)||(state->ds.panInProgress)||(state->ds.fcScrollInProgress)||(state->ds.fcNuclChangeInProgress)){
       //a UI animation is playing, don't block the main thread
       state->ds.forceRedraw = 1;
     }

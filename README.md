@@ -96,9 +96,10 @@ Zoom and pan with the mouse, the controls are basically identical to Google Maps
 
 | Key                | Action |
 | :----------------- | :----- |
-| Arrow keys / WASD  | Pan chart view |
+| Arrow keys         | Pan chart view |
+| WASD               | Pan selected nuclide (in chart and level list views) |
 | +/-                | Zoom in/out on chart |
-| F                  | Show full list of levels/gammas for selected nuclide |
+| Enter              | Show full list of levels/gammas for selected nuclide |
 | Escape / backspace | Exit out of open menus, cancel selection, etc. |
 | F11                | Toggle fullscreen mode |
 | P                  | Toggle performance stats debug overlay |
