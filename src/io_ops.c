@@ -86,20 +86,10 @@ static int readConfigFile(FILE *file, app_state *restrict state){
         }
       }else if(strcmp(par,"chart_pos_x") == 0){
         float posx = (float)atof(val);
-        if((posx>=0.0f)&&(posx<=MAX_NEUTRON_NUM)){
-          state->ds.chartPosX = posx;
-        }else{
-          SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,"invalid chart x-position (%f) in config file, setting to default.\n",(double)posx);
-          state->ds.chartPosX = 90.0f;
-        }
+        state->ds.chartPosX = posx;
       }else if(strcmp(par,"chart_pos_y") == 0){
         float posy = (float)atof(val);
-        if((posy>=0.0f)&&(posy<=MAX_PROTON_NUM)){
-          state->ds.chartPosY = posy;
-        }else{
-          SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,"invalid chart y-position (%f) in config file, setting to default.\n",(double)posy);
-          state->ds.chartPosY = 55.0f;
-        }
+        state->ds.chartPosY = posy;
       }else if(strcmp(par,"zoom_scale") == 0){
         float zs = (float)atof(val);
         if((zs>=MIN_CHART_ZOOM_SCALE)&&(zs<=MAX_CHART_ZOOM_SCALE)){
@@ -140,6 +130,18 @@ static int readConfigFile(FILE *file, app_state *restrict state){
 
     }
   }
+
+  //clamp chart display range
+	if(state->ds.chartPosX < (-0.25f*getChartWidthN(&state->ds))){
+		state->ds.chartPosX = (-0.25f*getChartWidthN(&state->ds));
+	}else if(state->ds.chartPosX > (MAX_NEUTRON_NUM+1)){
+		state->ds.chartPosX = (float)MAX_NEUTRON_NUM+1.0f;
+	}
+	if(state->ds.chartPosY < (-0.25f*getChartHeightZ(&state->ds))){
+		state->ds.chartPosY = (-0.25f*getChartHeightZ(&state->ds));
+	}else if(state->ds.chartPosY > (MAX_PROTON_NUM+1)){
+		state->ds.chartPosY = (float)MAX_PROTON_NUM+1.0f;
+	}
 
   return 1;
 }

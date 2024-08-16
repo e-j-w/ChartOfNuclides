@@ -63,8 +63,8 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
         if(state->ds.panInProgress == 0){
           state->ds.chartPanToY = state->ds.chartPosY;
         }
-        if(state->ds.chartPanToX <= 0.0f){
-          state->ds.chartPanToX = 0.0f;
+        if(state->ds.chartPanToX <= (-0.25f*getChartWidthN(&state->ds))){
+          state->ds.chartPanToX = (-0.25f*getChartWidthN(&state->ds));
         }
         state->ds.timeSincePanStart = 0.0f;
         state->ds.totalPanTime = CHART_KEY_PAN_TIME;
@@ -77,8 +77,8 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
         if(state->ds.panInProgress == 0){
           state->ds.chartPanToY = state->ds.chartPosY;
         }
-        if(state->ds.chartPanToX >= (dat->ndat.maxN+1)){
-          state->ds.chartPanToX = dat->ndat.maxN+1.0f;
+        if(state->ds.chartPanToX >= (dat->ndat.maxN+(0.25f*getChartWidthN(&state->ds)))){
+          state->ds.chartPanToX = dat->ndat.maxN+(0.25f*getChartWidthN(&state->ds));
         }
         state->ds.timeSincePanStart = 0.0f;
         state->ds.totalPanTime = CHART_KEY_PAN_TIME;
@@ -92,8 +92,8 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
           state->ds.chartPanToX = state->ds.chartPosX;
         }
         state->ds.chartPanToY = state->ds.chartPosY + (CHART_PAN_DIST/state->ds.chartZoomScale);
-        if(state->ds.chartPanToY >= (dat->ndat.maxZ+1)){
-          state->ds.chartPanToY = dat->ndat.maxZ+1.0f;
+        if(state->ds.chartPanToY >= (dat->ndat.maxZ+(0.25f*getChartHeightZ(&state->ds)))){
+          state->ds.chartPanToY = dat->ndat.maxZ+(0.25f*getChartHeightZ(&state->ds));
         }
         state->ds.timeSincePanStart = 0.0f;
         state->ds.totalPanTime = CHART_KEY_PAN_TIME;
@@ -107,8 +107,8 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
           state->ds.chartPanToX = state->ds.chartPosX;
         }
         state->ds.chartPanToY = state->ds.chartPosY - (CHART_PAN_DIST/state->ds.chartZoomScale);
-        if(state->ds.chartPanToY <= 0.0f){
-          state->ds.chartPanToY = 0.0f;
+        if(state->ds.chartPanToY <= (-0.25f*getChartHeightZ(&state->ds))){
+          state->ds.chartPanToY = (-0.25f*getChartHeightZ(&state->ds));
         }
         state->ds.timeSincePanStart = 0.0f;
         state->ds.totalPanTime = CHART_KEY_PAN_TIME;
@@ -119,19 +119,46 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
       
       if(state->chartSelectedNucl == MAXNUMNUCL){
         //select nucleus
-        setSelectedNuclOnChart(dat,state,rdat,(uint16_t)(state->ds.chartPosX - 0.5f),(uint16_t)(state->ds.chartPosY + 0.5f + (16.0f/state->ds.chartZoomScale)),2);
+        int16_t selectedN = (int16_t)(state->ds.chartPosX - 0.5f);
+        int16_t selectedZ = (int16_t)(state->ds.chartPosY + 0.5f + (16.0f/state->ds.chartZoomScale));
+        uint16_t selNucl = getNearestNuclInd(dat,selectedN,selectedZ);
+        setSelectedNuclOnChartDirect(dat,state,rdat,selNucl,2);
       }else{
         //change selected nucleus
         if(state->ds.panInProgress == 0){
           if(altleft && !altright){
-            setSelectedNuclOnChart(dat,state,rdat,(uint16_t)(dat->ndat.nuclData[state->chartSelectedNucl].N-1),(uint16_t)(dat->ndat.nuclData[state->chartSelectedNucl].Z),2);
+            for(uint8_t i=1; i<10; i++){ //skip empty entries in the chart if they exist
+              uint16_t selNucl = getNuclInd(&dat->ndat,(int16_t)(dat->ndat.nuclData[state->chartSelectedNucl].N-i),(int16_t)(dat->ndat.nuclData[state->chartSelectedNucl].Z));
+              if(selNucl != MAXNUMNUCL){
+                setSelectedNuclOnChartDirect(dat,state,rdat,selNucl,2);
+                break;
+              }
+            }
           }else if(altright && !altleft){
-            setSelectedNuclOnChart(dat,state,rdat,(uint16_t)(dat->ndat.nuclData[state->chartSelectedNucl].N+1),(uint16_t)(dat->ndat.nuclData[state->chartSelectedNucl].Z),2);
+            for(uint8_t i=1; i<10; i++){ //skip empty entries in the chart if they exist
+              uint16_t selNucl = getNuclInd(&dat->ndat,(int16_t)(dat->ndat.nuclData[state->chartSelectedNucl].N+i),(int16_t)(dat->ndat.nuclData[state->chartSelectedNucl].Z));
+              if(selNucl != MAXNUMNUCL){
+                setSelectedNuclOnChartDirect(dat,state,rdat,selNucl,2);
+                break;
+              }
+            }
           }
           if(altup && !altdown){
-            setSelectedNuclOnChart(dat,state,rdat,(uint16_t)(dat->ndat.nuclData[state->chartSelectedNucl].N),(uint16_t)(dat->ndat.nuclData[state->chartSelectedNucl].Z+1),2);
+            for(uint8_t i=1; i<10; i++){ //skip empty entries in the chart if they exist
+              uint16_t selNucl = getNuclInd(&dat->ndat,(int16_t)(dat->ndat.nuclData[state->chartSelectedNucl].N),(int16_t)(dat->ndat.nuclData[state->chartSelectedNucl].Z+i));
+              if(selNucl != MAXNUMNUCL){
+                setSelectedNuclOnChartDirect(dat,state,rdat,selNucl,2);
+                break;
+              }
+            }
           }else if(altdown && !altup){
-            setSelectedNuclOnChart(dat,state,rdat,(uint16_t)(dat->ndat.nuclData[state->chartSelectedNucl].N),(uint16_t)(dat->ndat.nuclData[state->chartSelectedNucl].Z-1),2);
+            for(uint8_t i=1; i<10; i++){ //skip empty entries in the chart if they exist
+              uint16_t selNucl = getNuclInd(&dat->ndat,(int16_t)(dat->ndat.nuclData[state->chartSelectedNucl].N),(int16_t)(dat->ndat.nuclData[state->chartSelectedNucl].Z-i));
+              if(selNucl != MAXNUMNUCL){
+                setSelectedNuclOnChartDirect(dat,state,rdat,selNucl,2);
+                break;
+              }
+            }
           }
         }
       }
@@ -146,14 +173,38 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
     }else if(state->ds.fcNuclChangeInProgress == 0){
       //change selected nucleus
       if(altleft && !altright){
-        setSelectedNuclOnLevelList(dat,state,(uint16_t)(dat->ndat.nuclData[state->chartSelectedNucl].N-1),(uint16_t)(dat->ndat.nuclData[state->chartSelectedNucl].Z));
+        for(uint8_t i=1; i<10; i++){ //skip empty entries in the chart if they exist
+          uint16_t selNucl = getNuclInd(&dat->ndat,(int16_t)(dat->ndat.nuclData[state->chartSelectedNucl].N-i),(int16_t)(dat->ndat.nuclData[state->chartSelectedNucl].Z));
+          if(selNucl != MAXNUMNUCL){
+            setSelectedNuclOnLevelList(dat,state,(uint16_t)(dat->ndat.nuclData[state->chartSelectedNucl].N-i),(uint16_t)(dat->ndat.nuclData[state->chartSelectedNucl].Z));
+            break;
+          }
+        }
       }else if(altright && !altleft){
-        setSelectedNuclOnLevelList(dat,state,(uint16_t)(dat->ndat.nuclData[state->chartSelectedNucl].N+1),(uint16_t)(dat->ndat.nuclData[state->chartSelectedNucl].Z));
+        for(uint8_t i=1; i<10; i++){ //skip empty entries in the chart if they exist
+          uint16_t selNucl = getNuclInd(&dat->ndat,(int16_t)(dat->ndat.nuclData[state->chartSelectedNucl].N+i),(int16_t)(dat->ndat.nuclData[state->chartSelectedNucl].Z));
+          if(selNucl != MAXNUMNUCL){
+            setSelectedNuclOnLevelList(dat,state,(uint16_t)(dat->ndat.nuclData[state->chartSelectedNucl].N+i),(uint16_t)(dat->ndat.nuclData[state->chartSelectedNucl].Z));
+            break;
+          }
+        }
       }
       if(altup && !altdown){
-        setSelectedNuclOnLevelList(dat,state,(uint16_t)(dat->ndat.nuclData[state->chartSelectedNucl].N),(uint16_t)(dat->ndat.nuclData[state->chartSelectedNucl].Z+1));
+        for(uint8_t i=1; i<10; i++){ //skip empty entries in the chart if they exist
+          uint16_t selNucl = getNuclInd(&dat->ndat,(int16_t)(dat->ndat.nuclData[state->chartSelectedNucl].N),(int16_t)(dat->ndat.nuclData[state->chartSelectedNucl].Z+i));
+          if(selNucl != MAXNUMNUCL){
+            setSelectedNuclOnLevelList(dat,state,(uint16_t)(dat->ndat.nuclData[state->chartSelectedNucl].N),(uint16_t)(dat->ndat.nuclData[state->chartSelectedNucl].Z+i));
+            break;
+          }
+        }
       }else if(altdown && !altup){
-        setSelectedNuclOnLevelList(dat,state,(uint16_t)(dat->ndat.nuclData[state->chartSelectedNucl].N),(uint16_t)(dat->ndat.nuclData[state->chartSelectedNucl].Z-1));
+        for(uint8_t i=1; i<10; i++){ //skip empty entries in the chart if they exist
+          uint16_t selNucl = getNuclInd(&dat->ndat,(int16_t)(dat->ndat.nuclData[state->chartSelectedNucl].N),(int16_t)(dat->ndat.nuclData[state->chartSelectedNucl].Z-i));
+          if(selNucl != MAXNUMNUCL){
+            setSelectedNuclOnLevelList(dat,state,(uint16_t)(dat->ndat.nuclData[state->chartSelectedNucl].N),(uint16_t)(dat->ndat.nuclData[state->chartSelectedNucl].Z-i));
+            break;
+          }
+        }
       }
     }
 
@@ -272,15 +323,15 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
               state->ds.chartZoomStartMouseY = state->ds.chartPosY; //centred on screen
             }
           }
-          if(state->ds.chartZoomStartMouseX > dat->ndat.maxN){
-            state->ds.chartZoomStartMouseX = (float)dat->ndat.maxN;
-          }else if(state->ds.chartZoomStartMouseX < 0.0f){
-            state->ds.chartZoomStartMouseX = 0.0f;
+          if(state->ds.chartZoomStartMouseX > (dat->ndat.maxN+(0.25f*getChartWidthNAfterZoom(&state->ds)))){
+            state->ds.chartZoomStartMouseX = (float)dat->ndat.maxN+(0.25f*getChartWidthNAfterZoom(&state->ds));
+          }else if(state->ds.chartZoomStartMouseX < (-0.25f*getChartWidthNAfterZoom(&state->ds))){
+            state->ds.chartZoomStartMouseX = (-0.25f*getChartWidthNAfterZoom(&state->ds));
           }
-          if(state->ds.chartZoomStartMouseY > dat->ndat.maxZ){
-            state->ds.chartZoomStartMouseY = (float)dat->ndat.maxZ;
-          }else if(state->ds.chartZoomStartMouseY < 0.0f){
-            state->ds.chartZoomStartMouseY = 0.0f;
+          if(state->ds.chartZoomStartMouseY > (dat->ndat.maxZ+(0.25f*getChartHeightZAfterZoom(&state->ds)))){
+            state->ds.chartZoomStartMouseY = (float)dat->ndat.maxZ+(0.25f*getChartHeightZAfterZoom(&state->ds));
+          }else if(state->ds.chartZoomStartMouseY < (-0.25f*getChartHeightZAfterZoom(&state->ds))){
+            state->ds.chartZoomStartMouseY = (-0.25f*getChartHeightZAfterZoom(&state->ds));
           }
         }
         state->ds.chartZoomStartMouseXFrac = (state->ds.chartZoomStartMouseX - getMinChartN(&state->ds))/getChartWidthN(&state->ds);
@@ -289,15 +340,15 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
         state->ds.chartZoomStartMouseYFrac = (state->ds.chartZoomStartMouseY - getMinChartZ(&state->ds))/getChartHeightZ(&state->ds);
         float afterZoomMinZ = state->ds.chartZoomStartMouseY - getChartHeightZAfterZoom(&state->ds)*state->ds.chartZoomStartMouseYFrac;
         state->ds.chartZoomToY = afterZoomMinZ + getChartHeightZAfterZoom(&state->ds)*0.5f;
-        if(state->ds.chartZoomToX > dat->ndat.maxN){
-          state->ds.chartZoomToX = (float)dat->ndat.maxN;
-        }else if(state->ds.chartZoomToX < 0.0f){
-          state->ds.chartZoomToX = 0.0f;
+        if(state->ds.chartZoomToX > (dat->ndat.maxN+(0.25f*getChartWidthNAfterZoom(&state->ds)))){
+          state->ds.chartZoomToX = (float)dat->ndat.maxN+(0.25f*getChartWidthNAfterZoom(&state->ds));
+        }else if(state->ds.chartZoomToX < (-0.25f*getChartWidthNAfterZoom(&state->ds))){
+          state->ds.chartZoomToX = (-0.25f*getChartWidthNAfterZoom(&state->ds));
         }
-        if(state->ds.chartZoomToY > dat->ndat.maxZ){
-          state->ds.chartZoomToY = (float)dat->ndat.maxZ;
-        }else if(state->ds.chartZoomToY < 0.0f){
-          state->ds.chartZoomToY = 0.0f;
+        if(state->ds.chartZoomToY > (dat->ndat.maxZ+(0.25f*getChartHeightZAfterZoom(&state->ds)))){
+          state->ds.chartZoomToY = (float)dat->ndat.maxZ+(0.25f*getChartHeightZAfterZoom(&state->ds));
+        }else if(state->ds.chartZoomToY < (-0.25f*getChartHeightZAfterZoom(&state->ds))){
+          state->ds.chartZoomToY = (-0.25f*getChartHeightZAfterZoom(&state->ds));
         }
         //SDL_Log("xZoomFrac: %0.3f, afterZoomMinN: %0.3f\n",(double)state->ds.chartZoomStartMouseXFrac,(double)afterZoomMinN);
         //SDL_Log("yZoomFrac: %0.3f, afterZoomMinZ: %0.3f\n",(double)state->ds.chartZoomStartMouseYFrac,(double)afterZoomMinZ);

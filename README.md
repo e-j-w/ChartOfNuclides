@@ -97,7 +97,7 @@ Zoom and pan with the mouse, the controls are basically identical to Google Maps
 | Key                | Action |
 | :----------------- | :----- |
 | Arrow keys         | Pan chart view |
-| WASD               | Pan selected nuclide (in chart and level list views) |
+| W/A/S/D            | Pan selected nuclide (in chart and level list views) |
 | +/-                | Zoom in/out on chart |
 | Enter              | Show full list of levels/gammas for selected nuclide |
 | Escape / backspace | Exit out of open menus, cancel selection, etc. |

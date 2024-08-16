@@ -247,21 +247,21 @@ void updateDrawingState(const app_data *restrict dat, app_state *restrict state,
 		//SDL_Log("scroll t: %0.3f, pos: %f\n",(double)state->ds.timeSinceFCScollStart,(double)state->ds.nuclFullInfoScrollY);
 	}
 	//clamp chart display range
-	if(state->ds.chartPosX < 0.0f){
-		state->ds.chartPosX = 0.0f;
-	}else if(state->ds.chartPosX > (dat->ndat.maxN+1)){
-		state->ds.chartPosX = (float)dat->ndat.maxN+1.0f;
+	if(state->ds.chartPosX < (-0.25f*getChartWidthN(&state->ds))){
+		state->ds.chartPosX = (-0.25f*getChartWidthN(&state->ds));
+	}else if(state->ds.chartPosX > (dat->ndat.maxN+(0.25f*getChartWidthN(&state->ds)))){
+		state->ds.chartPosX = (float)dat->ndat.maxN+(0.25f*getChartWidthN(&state->ds));
 	}
-	if(state->ds.chartPosY < 0.0f){
-		state->ds.chartPosY = 0.0f;
-	}else if(state->ds.chartPosY > (dat->ndat.maxZ+1)){
-		state->ds.chartPosY = (float)dat->ndat.maxZ+1.0f;
+	if(state->ds.chartPosY < (-0.25f*getChartHeightZ(&state->ds))){
+		state->ds.chartPosY = (-0.25f*getChartHeightZ(&state->ds));
+	}else if(state->ds.chartPosY > (dat->ndat.maxZ+(0.25f*getChartHeightZ(&state->ds)))){
+		state->ds.chartPosY = (float)dat->ndat.maxZ+(0.25f*getChartHeightZ(&state->ds));
 	}
 
 	//dismiss info box if it selected nuclide is offscreen
 	if(state->chartSelectedNucl != MAXNUMNUCL){
 		if(state->ds.shownElements & (1U << UIELEM_NUCL_INFOBOX)){
-			if(state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_HIDE]==0.0f){
+			if((state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_HIDE]==0.0f)&&(state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_SHOW]==0.0f)){
 				if(((dat->ndat.nuclData[state->chartSelectedNucl].N+1) < getMinChartN(&state->ds))||(dat->ndat.nuclData[state->chartSelectedNucl].N > getMaxChartN(&state->ds))){
 					//SDL_Log("hiding info box\n");
 					startUIAnimation(dat,state,UIANIM_NUCLINFOBOX_HIDE); //hide the info box, see stopUIAnimation() for info box hiding action
@@ -1592,21 +1592,106 @@ void panChartToPos(const app_data *restrict dat, drawing_state *restrict ds, con
 	ds->chartPanToY = posZ*1.0f - 0.5f - (16.0f/ds->chartZoomScale);
 	//SDL_Log("pos: %u %u, panning to: %f %f\n",posN,posZ,(double)ds->chartPanToX,(double)ds->chartPanToY);
 	//clamp chart display range
-	if(ds->chartPanToX < 0.0f){
-		ds->chartPanToX = 0.0f;
-	}else if(ds->chartPanToX > (dat->ndat.maxN+1)){
-		ds->chartPanToX = (float)dat->ndat.maxN+1.0f;
+	if(ds->chartPanToX < (-0.25f*getChartWidthN(ds))){
+		ds->chartPanToX = (-0.25f*getChartWidthN(ds));
+	}else if(ds->chartPanToX > (dat->ndat.maxN+(0.25f*getChartWidthN(ds)))){
+		ds->chartPanToX = (float)dat->ndat.maxN+(0.25f*getChartWidthN(ds));
 	}
-	if(ds->chartPanToY < 0.0f){
-		ds->chartPanToY = 0.0f;
-	}else if(ds->chartPanToY > (dat->ndat.maxZ+1)){
-		ds->chartPanToY = (float)dat->ndat.maxZ+1.0f;
+	if(ds->chartPanToY < (-0.25f*getChartHeightZ(ds))){
+		ds->chartPanToY = (-0.25f*getChartHeightZ(ds));
+	}else if(ds->chartPanToY > (dat->ndat.maxZ+(0.25f*getChartHeightZ(ds)))){
+		ds->chartPanToY = (float)dat->ndat.maxZ+(0.25f*getChartHeightZ(ds));
 	}
 	//SDL_Log("panning to: %f %f\n",(double)ds->chartPanToX,(double)ds->chartPanToY);
 	ds->timeSincePanStart = 0.0f;
 	ds->totalPanTime = panTime;
 	ds->panInProgress = 1;
 	ds->panFinished = 0;
+}
+
+
+//finds the nearest nuclide to the coordinates N,Z (values can be negative)
+//and returns its index
+uint16_t getNearestNuclInd(const app_data *restrict dat, const int16_t N, const int16_t Z){
+	int16_t selectedN = N;
+  int16_t selectedZ = Z;
+	uint8_t loopCtr = 0;
+	uint16_t nuclInd = getNuclInd(&dat->ndat,selectedN,selectedZ);
+	while(nuclInd == MAXNUMNUCL){
+		//try to guess closest
+		if(loopCtr > 10){
+			return MAXNUMNUCL; //safety valve
+		}
+		if((N <= 0)&&(Z <= 0)){
+			if(N < Z){
+				selectedN = 0;
+				selectedZ = 1;
+			}else{
+				selectedN = 0;
+				selectedZ = 1;
+			}
+		}else if((selectedN >= dat->ndat.maxN)&&(selectedZ >= dat->ndat.maxZ)){
+			if((selectedN > dat->ndat.maxN)||(selectedZ > dat->ndat.maxZ)){
+				if(selectedN > dat->ndat.maxN){
+					selectedN = (int16_t)(dat->ndat.maxN);
+				}
+				if(selectedZ > dat->ndat.maxZ){
+					selectedZ = (int16_t)(dat->ndat.maxZ);
+				}
+			}else{
+				selectedN -= 1;
+				selectedZ -= 1;
+			}
+		}else if(selectedN > selectedZ){
+			//go towards N=Z from neutron rich side
+			for(uint8_t i=0; i<100; i++){
+				selectedN -= 1;
+				selectedZ += 1;
+				nuclInd = getNuclInd(&dat->ndat,selectedN,selectedZ);
+				if(nuclInd != MAXNUMNUCL){
+					return nuclInd;
+				}
+			}
+			//if that didn't work, try the opposite direction
+			selectedN += 100;
+			selectedZ -= 100;
+			for(uint8_t i=0; i<100; i++){
+				selectedN += 1;
+				selectedZ -= 1;
+				nuclInd = getNuclInd(&dat->ndat,selectedN,selectedZ);
+				if(nuclInd != MAXNUMNUCL){
+					return nuclInd;
+				}
+			}
+			break; //don't do any more loops
+		}else{
+			//go towards N=Z from neutron deficient side
+			for(uint8_t i=0; i<100; i++){
+				selectedN += 1;
+				selectedZ -= 1;
+				nuclInd = getNuclInd(&dat->ndat,selectedN,selectedZ);
+				if(nuclInd != MAXNUMNUCL){
+					return nuclInd;
+				}
+			}
+			//if that didn't work, try the opposite direction
+			selectedN -= 100;
+			selectedZ += 100;
+			for(uint8_t i=0; i<100; i++){
+				selectedN -= 1;
+				selectedZ += 1;
+				nuclInd = getNuclInd(&dat->ndat,selectedN,selectedZ);
+				if(nuclInd != MAXNUMNUCL){
+					return nuclInd;
+				}
+			}
+			break; //don't do any more loops
+		}
+
+		nuclInd = getNuclInd(&dat->ndat,selectedN,selectedZ);
+		loopCtr++;
+	}
+	return nuclInd;
 }
 
 void setSelectedNuclOnLevelList(const app_data *restrict dat, app_state *restrict state, const uint16_t N, const uint16_t Z){
@@ -1628,6 +1713,8 @@ void setSelectedNuclOnLevelList(const app_data *restrict dat, app_state *restric
 		state->ds.chartPosY = Z*1.0f - 0.5f - (16.0f/state->ds.chartZoomScale);
 	}
 }
+
+
 
 //handles everything needed to select a new nucleus on the main chart view
 //forcePan: 0=don't pan chart (except to dodge UI elements)
@@ -1694,6 +1781,11 @@ void setSelectedNuclOnChart(const app_data *restrict dat, app_state *restrict st
 		}
 	}
 	
+}
+void setSelectedNuclOnChartDirect(const app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat, const uint16_t selNucl, const uint8_t forcePan){
+	if(selNucl < MAXNUMNUCL){
+		setSelectedNuclOnChart(dat,state,rdat,(uint16_t)(dat->ndat.nuclData[selNucl].N),(uint16_t)(dat->ndat.nuclData[selNucl].Z),forcePan);
+	}
 }
 
 //take action after clicking a button or other UI element
