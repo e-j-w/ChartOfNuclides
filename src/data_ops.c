@@ -1796,7 +1796,7 @@ void uiElemClickAction(const app_data *restrict dat, app_state *restrict state, 
 
 	//handle extraneous opened menus
 	if((uiElemID != UIELEM_MENU_BUTTON)&&(uiElemID != UIELEM_PRIMARY_MENU)&&(uiElemID != UIELEM_PM_PREFS_BUTTON)&&(uiElemID != UIELEM_PM_ABOUT_BUTTON)){
-		if(state->ds.shownElements & (1U << UIELEM_PRIMARY_MENU)){
+		if((state->ds.shownElements & (1U << UIELEM_PRIMARY_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_PRIMARY_MENU_HIDE]==0.0f)){
 			startUIAnimation(dat,state,UIANIM_PRIMARY_MENU_HIDE); //menu will be closed after animation finishes
 			state->clickedUIElem = UIELEM_ENUM_LENGTH; //'unclick' the menu button
 		}
@@ -1805,10 +1805,10 @@ void uiElemClickAction(const app_data *restrict dat, app_state *restrict state, 
 	//take action from click
   switch(uiElemID){
     case UIELEM_MENU_BUTTON:
-      if(state->ds.shownElements & (1U << UIELEM_PRIMARY_MENU)){
+      if((state->ds.shownElements & (1U << UIELEM_PRIMARY_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_PRIMARY_MENU_HIDE]==0.0f)){
 				startUIAnimation(dat,state,UIANIM_PRIMARY_MENU_HIDE); //menu will be closed after animation finishes
         state->clickedUIElem = UIELEM_ENUM_LENGTH; //'unclick' the menu button
-      }else{
+      }else if(state->ds.timeLeftInUIAnimation[UIANIM_PRIMARY_MENU_SHOW]==0.0f){
         state->ds.shownElements |= (1U << UIELEM_PRIMARY_MENU);
 				startUIAnimation(dat,state,UIANIM_PRIMARY_MENU_SHOW);
 				changeUIState(dat,state,state->uiState);
@@ -1890,7 +1890,7 @@ void uiElemClickAction(const app_data *restrict dat, app_state *restrict state, 
 				}else{
 					//clicked out of a menu
 					//handle individual menu closing animations
-					if(state->ds.shownElements & (1U << UIELEM_PRIMARY_MENU)){
+					if((state->ds.shownElements & (1U << UIELEM_PRIMARY_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_PRIMARY_MENU_HIDE]==0.0f)){
 						startUIAnimation(dat,state,UIANIM_PRIMARY_MENU_HIDE); //menu will be closed after animation finishes
 						state->clickedUIElem = UIELEM_ENUM_LENGTH; //'unclick' the menu button
 					}
@@ -1979,21 +1979,21 @@ void updateSingleUIElemPosition(const app_data *restrict dat, drawing_state *res
 			ds->uiElemHeight[UIELEM_PREFS_DIALOG_SHELLCLOSURE_CHECKBOX] = ds->uiElemWidth[UIELEM_PREFS_DIALOG_SHELLCLOSURE_CHECKBOX];
 			ds->uiElemPosX[UIELEM_PREFS_DIALOG_SHELLCLOSURE_CHECKBOX] = ds->uiElemPosX[UIELEM_PREFS_DIALOG] + PREFS_DIALOG_PREFCOL1_X;
 			ds->uiElemPosY[UIELEM_PREFS_DIALOG_SHELLCLOSURE_CHECKBOX] = ds->uiElemPosY[UIELEM_PREFS_DIALOG] + PREFS_DIALOG_PREFCOL1_Y;
-			ds->uiElemExtPlusX[UIELEM_PREFS_DIALOG_SHELLCLOSURE_CHECKBOX] = 2*UI_PADDING_SIZE + (uint16_t)(FC_GetWidth(rdat->font,dat->strings[dat->locStringIDs[LOCSTR_PREF_SHELLCLOSURE]])/rdat->uiScale); //so that checkbox can be toggled by clicking on adjacent text
+			ds->uiElemExtPlusX[UIELEM_PREFS_DIALOG_SHELLCLOSURE_CHECKBOX] = 2*UI_PADDING_SIZE + (uint16_t)(getTextWidth(rdat,FONT_SCALING_MEDIUM,dat->strings[dat->locStringIDs[LOCSTR_PREF_SHELLCLOSURE]])/rdat->uiScale); //so that checkbox can be toggled by clicking on adjacent text
 			break;
 		case UIELEM_PREFS_DIALOG_LIFETIME_CHECKBOX:
 			ds->uiElemWidth[UIELEM_PREFS_DIALOG_LIFETIME_CHECKBOX] = UI_TILE_SIZE;
 			ds->uiElemHeight[UIELEM_PREFS_DIALOG_LIFETIME_CHECKBOX] = ds->uiElemWidth[UIELEM_PREFS_DIALOG_LIFETIME_CHECKBOX];
 			ds->uiElemPosX[UIELEM_PREFS_DIALOG_LIFETIME_CHECKBOX] = ds->uiElemPosX[UIELEM_PREFS_DIALOG] + PREFS_DIALOG_PREFCOL1_X;
 			ds->uiElemPosY[UIELEM_PREFS_DIALOG_LIFETIME_CHECKBOX] = ds->uiElemPosY[UIELEM_PREFS_DIALOG] + PREFS_DIALOG_PREFCOL1_Y + PREFS_DIALOG_PREF_Y_SPACING;
-			ds->uiElemExtPlusX[UIELEM_PREFS_DIALOG_LIFETIME_CHECKBOX] = 2*UI_PADDING_SIZE + (uint16_t)(FC_GetWidth(rdat->font,dat->strings[dat->locStringIDs[LOCSTR_PREF_LIFETIME]])/rdat->uiScale); //so that checkbox can be toggled by clicking on adjacent text
+			ds->uiElemExtPlusX[UIELEM_PREFS_DIALOG_LIFETIME_CHECKBOX] = 2*UI_PADDING_SIZE + (uint16_t)(getTextWidth(rdat,FONT_SCALING_MEDIUM,dat->strings[dat->locStringIDs[LOCSTR_PREF_LIFETIME]])/rdat->uiScale); //so that checkbox can be toggled by clicking on adjacent text
 			break;
 		case UIELEM_PREFS_DIALOG_UIANIM_CHECKBOX:
 			ds->uiElemWidth[UIELEM_PREFS_DIALOG_UIANIM_CHECKBOX] = UI_TILE_SIZE;
 			ds->uiElemHeight[UIELEM_PREFS_DIALOG_UIANIM_CHECKBOX] = ds->uiElemWidth[UIELEM_PREFS_DIALOG_UIANIM_CHECKBOX];
 			ds->uiElemPosX[UIELEM_PREFS_DIALOG_UIANIM_CHECKBOX] = ds->uiElemPosX[UIELEM_PREFS_DIALOG] + PREFS_DIALOG_PREFCOL1_X;
 			ds->uiElemPosY[UIELEM_PREFS_DIALOG_UIANIM_CHECKBOX] = ds->uiElemPosY[UIELEM_PREFS_DIALOG] + PREFS_DIALOG_PREFCOL1_Y + 2*PREFS_DIALOG_PREF_Y_SPACING;
-			ds->uiElemExtPlusX[UIELEM_PREFS_DIALOG_UIANIM_CHECKBOX] = 2*UI_PADDING_SIZE + (uint16_t)(FC_GetWidth(rdat->font,dat->strings[dat->locStringIDs[LOCSTR_PREF_UIANIM]])/rdat->uiScale); //so that checkbox can be toggled by clicking on adjacent text
+			ds->uiElemExtPlusX[UIELEM_PREFS_DIALOG_UIANIM_CHECKBOX] = 2*UI_PADDING_SIZE + (uint16_t)(getTextWidth(rdat,FONT_SCALING_MEDIUM,dat->strings[dat->locStringIDs[LOCSTR_PREF_UIANIM]])/rdat->uiScale); //so that checkbox can be toggled by clicking on adjacent text
 			break;
 		case UIELEM_NUCL_INFOBOX:
 			ds->uiElemPosX[uiElemInd] = (uint16_t)((ds->windowXRes - NUCL_INFOBOX_WIDTH)/2);

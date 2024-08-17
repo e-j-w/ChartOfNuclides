@@ -233,7 +233,7 @@ typedef struct
   SDL_Texture *uiThemeTex; //the main texture atlas
   SDL_Texture *tempTex; //used to store temporary texture data during draw operations
   //using different fonts (rather than resizing a single font) decreases CPU usage at the expense of memory
-  FC_Font *smallFont, *font, *bigFont, *hugeFont; //the default font (in 3 sizes)
+  FC_Font *font; //the default font
   void *fontData; //memory adresses of the font data (must stay alive as long as fonts are used)
   SDL_Gamepad *gamepad;
   SDL_Renderer *renderer;

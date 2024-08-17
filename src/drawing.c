@@ -245,7 +245,6 @@ void drawButton(const ui_theme_rules *restrict uirules, resource_data *restrict 
     destRect.w = (float)(UI_TILE_SIZE*rdat->uiScale);
     SDL_RenderTexture(rdat->renderer,rdat->uiThemeTex,&srcRect,&destRect);
   }
-  
 
   //reset the color modulation
   setUITexColAlpha(rdat,1.0f,1.0f,1.0f,1.0f);
@@ -260,7 +259,7 @@ void drawTextButton(const ui_theme_rules *restrict uirules, resource_data *restr
   //(remember that the font size is scaled by the UI scale, during font import)
   float textX = (float)x + (float)(w)/2.0f;
   float textY = (float)y + (float)(UI_TILE_SIZE)/2.0f;
-  drawTextAlignedSized(rdat,textX,textY,rdat->font,uirules->textColNormal,alpha,text,ALIGN_CENTER,(Uint16)w);
+  drawTextAlignedSized(rdat,textX,textY,uirules->textColNormal,FONT_SCALING_MEDIUM,alpha,text,ALIGN_CENTER,(Uint16)w);
 }
 
 void drawIcon(const ui_theme_rules *restrict uirules, resource_data *restrict rdat, const uint16_t x, const uint16_t y, const uint16_t w, const uint8_t highlightState, const uint8_t alpha, const uint8_t iconInd){
@@ -318,7 +317,7 @@ void drawIconAndTextButton(const ui_theme_rules *restrict uirules, resource_data
   float textX = (float)x + (float)(w + UI_TILE_SIZE - 2*UI_PADDING_SIZE)/2.0f;
   float textY = (float)y + (float)(UI_TILE_SIZE)/2.0f;
   //printf("text x: %f, y: %f\n",(double)textX,(double)textY);
-  drawTextAlignedSized(rdat,textX,textY,rdat->font,uirules->textColNormal,255,text,ALIGN_CENTER,(Uint16)(w*rdat->uiScale));
+  drawTextAlignedSized(rdat,textX,textY,uirules->textColNormal,FONT_SCALING_MEDIUM,255,text,ALIGN_CENTER,(Uint16)(w*rdat->uiScale));
   
 }
 
@@ -360,11 +359,18 @@ void drawScreenDimmer(const drawing_state *restrict ds, resource_data *restrict 
 
 }
 
+float getTextHeight(resource_data *restrict rdat, const float fontScale, const char *str){
+  return FC_GetHeight(rdat->font,str)*fontScale;
+}
+float getTextWidth(resource_data *restrict rdat, const float fontScale, const char *str){
+  return FC_GetWidth(rdat->font,str)*fontScale;
+}
+
 //returns a rect containing dimensions of the drawn text (can be used for alignment purposes)
-SDL_FRect drawTextAlignedSized(resource_data *restrict rdat, const float xPos, const float yPos, FC_Font *font, const SDL_Color textColor, const Uint8 alpha, const char *txt, const uint8_t alignment, const Uint16 maxWidth){
+SDL_FRect drawTextAlignedSized(resource_data *restrict rdat, const float xPos, const float yPos, const SDL_Color textColor, const float fontScale, const Uint8 alpha, const char *txt, const uint8_t alignment, const Uint16 maxWidth){
   float drawX = xPos*rdat->uiScale;
   float drawY = yPos*rdat->uiScale;
-  float drawW = (float)FC_GetWidth(font,txt);
+  float drawW = getTextWidth(rdat,fontScale,txt);
   if(drawW > maxWidth*rdat->uiScale){
     drawW = maxWidth*rdat->uiScale;
   }
@@ -372,7 +378,7 @@ SDL_FRect drawTextAlignedSized(resource_data *restrict rdat, const float xPos, c
   if(alignment == ALIGN_RIGHT){
     drawX = drawX - drawW;
   }else if(alignment == ALIGN_CENTER){
-    float drawH = (float)FC_GetHeight(font,txt);
+    float drawH = getTextHeight(rdat,fontScale,txt);
     drawX = drawX - drawW/2.0f;
     drawY = drawY - drawH/2.0f;
   }
@@ -380,28 +386,28 @@ SDL_FRect drawTextAlignedSized(resource_data *restrict rdat, const float xPos, c
   if(alpha != textColor.a){
     SDL_Color drawCol = textColor;
     drawCol.a = alpha;
-    drawRect = FC_DrawColumnColor(font,rdat->renderer,drawX,drawY,(Uint16)(maxWidth*rdat->uiScale),drawCol,txt);
+    drawRect = FC_DrawColumnColorScale(rdat->font,rdat->renderer,drawX,drawY,(Uint16)(maxWidth*rdat->uiScale),drawCol,fontScale,txt);
   }else{
-    drawRect = FC_DrawColumnColor(font,rdat->renderer,drawX,drawY,(Uint16)(maxWidth*rdat->uiScale),textColor,txt);
+    drawRect = FC_DrawColumnColorScale(rdat->font,rdat->renderer,drawX,drawY,(Uint16)(maxWidth*rdat->uiScale),textColor,fontScale,txt);
   }
   drawRect.w /= rdat->uiScale;
   drawRect.h /= rdat->uiScale;
   return drawRect;
 }
-void drawTextAligned(resource_data *restrict rdat, const float xPos, const float yPos, FC_Font *font, const SDL_Color textColor, const char *txt, const uint8_t alignment){
-  drawTextAlignedSized(rdat,xPos,yPos,font,textColor,255,txt,alignment,16384);
+void drawTextAligned(resource_data *restrict rdat, const float xPos, const float yPos, const SDL_Color textColor, const float fontScale, const char *txt, const uint8_t alignment){
+  drawTextAlignedSized(rdat,xPos,yPos,textColor,fontScale,255,txt,alignment,16384);
 }
-void drawText(resource_data *restrict rdat, const float xPos, const float yPos, FC_Font *font, const SDL_Color textColor, const char *txt){
-  drawTextAligned(rdat,xPos,yPos,font,textColor,txt,ALIGN_LEFT);
+void drawText(resource_data *restrict rdat, const float xPos, const float yPos, const SDL_Color textColor, const float fontScale, const char *txt){
+  drawTextAligned(rdat,xPos,yPos,textColor,fontScale,txt,ALIGN_LEFT);
 }
-void drawColoredTextAligned(resource_data *restrict rdat, const float xPos, const float yPos, const SDL_Color textColor, const char *txt, const uint8_t alignment){
-  drawTextAligned(rdat,xPos,yPos,rdat->font,textColor,txt,alignment);
+void drawColoredTextAligned(resource_data *restrict rdat, const float xPos, const float yPos, const SDL_Color textColor, const float fontScale, const char *txt, const uint8_t alignment){
+  drawTextAligned(rdat,xPos,yPos,textColor,fontScale,txt,alignment);
 }
 void drawDefaultTextAligned(const ui_theme_rules *restrict uirules, resource_data *restrict rdat, const float xPos, const float yPos, const char *txt, const uint8_t alignment){
-  drawColoredTextAligned(rdat,xPos,yPos,uirules->textColNormal,txt,alignment);
+  drawColoredTextAligned(rdat,xPos,yPos,uirules->textColNormal,FONT_SCALING_MEDIUM,txt,alignment);
 }
 void drawColoredText(resource_data *restrict rdat, const float xPos, const float yPos, const SDL_Color textColor, const char *txt){
-  drawColoredTextAligned(rdat,xPos,yPos,textColor,txt,ALIGN_LEFT);
+  drawColoredTextAligned(rdat,xPos,yPos,textColor,FONT_SCALING_MEDIUM,txt,ALIGN_LEFT);
 }
 void drawDefaultText(const ui_theme_rules *restrict uirules, resource_data *restrict rdat, const float xPos, const float yPos, const char *txt){
   drawDefaultTextAligned(uirules,rdat,xPos,yPos,txt,ALIGN_LEFT);

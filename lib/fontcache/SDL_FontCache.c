@@ -1826,7 +1826,7 @@ static void FC_DrawColumnFromBuffer(FC_Font* font, FC_Target* dest, FC_Rect box,
     int y = (int)box.y;
     FC_StringList *ls, *iter;
 
-    ls = FC_GetBufferFitToColumn(font, (int)box.w, 0);
+    ls = FC_GetBufferFitToColumn(font, (int)(box.w), 0);
     for(iter = ls; iter != NULL; iter = iter->next)
     {
         FC_RenderAlign(font, dest, box.x, (float)y, box.w, scale, align, iter->value);
@@ -1919,6 +1919,29 @@ FC_Rect FC_DrawColumnColor(FC_Font* font, FC_Target* dest, float x, float y, Uin
     set_color_for_all_caches(font, color);
 
     FC_DrawColumnFromBuffer(font, dest, box, &total_height, FC_MakeScale(1,1), FC_ALIGN_LEFT);
+
+    return FC_MakeRect((float)box.x, (float)box.y, drawWidth, (float)total_height);
+}
+
+FC_Rect FC_DrawColumnColorScale(FC_Font* font, FC_Target* dest, float x, float y, Uint16 width, SDL_Color color, const float scale, const char* formatted_text, ...)
+{   
+    int total_height = 0;
+    float reqWidth = ((float)width)*scale;
+    FC_Rect box = {x, y, (float)(width/scale), 0.0f};
+
+    float drawWidth = FC_GetWidth(font,formatted_text)*scale;
+    if(drawWidth > reqWidth){
+        drawWidth = reqWidth;
+    }
+
+    if(formatted_text == NULL || font == NULL)
+        return FC_MakeRect(x, y, 0.0f, 0.0f);
+
+    FC_EXTRACT_VARARGS(fc_buffer, formatted_text);
+
+    set_color_for_all_caches(font, color);
+
+    FC_DrawColumnFromBuffer(font, dest, box, &total_height, FC_MakeScale(scale,scale), FC_ALIGN_LEFT);
 
     return FC_MakeRect((float)box.x, (float)box.y, drawWidth, (float)total_height);
 }

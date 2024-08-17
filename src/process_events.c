@@ -223,10 +223,16 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
       startUIAnimation(dat,state,UIANIM_NUCLHIGHLIGHT_HIDE);
     }else if((state->uiState == UISTATE_FULLLEVELINFO)&&(state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_EXPAND]==0.0f)){
       uiElemClickAction(dat,state,rdat,0,UIELEM_NUCL_FULLINFOBOX_BACKBUTTON); //go back to the main chart
+    }else if((state->ds.shownElements & (1U << UIELEM_PRIMARY_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_PRIMARY_MENU_HIDE]==0.0f)){
+      //close the primary menu
+      uiElemClickAction(dat,state,rdat,0,UIELEM_MENU_BUTTON);
     }else if(state->ds.windowFullscreenMode){
       //exit fullscreen
       state->ds.windowFullscreenMode = 0;
       handleScreenGraphicsMode(dat,state,rdat); 
+    }else if((state->uiState == UISTATE_DEFAULT)&&(state->ds.timeLeftInUIAnimation[UIANIM_PRIMARY_MENU_SHOW]==0.0f)){
+      //if nothing else is going on, open the primary menu
+      uiElemClickAction(dat,state,rdat,0,UIELEM_MENU_BUTTON);
     }
   }
 
