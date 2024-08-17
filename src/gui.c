@@ -1019,7 +1019,7 @@ void drawUI(const app_data *restrict dat, app_state *restrict state, resource_da
   if(state->ds.shownElements & (1U << UIELEM_PRIMARY_MENU)){
     drawPrimaryMenu(dat,state,rdat);
   }
-  
+
   //draw persistent button(s)
   drawIconButton(&dat->rules.themeRules,rdat,state->ds.uiElemPosX[UIELEM_MENU_BUTTON],state->ds.uiElemPosY[UIELEM_MENU_BUTTON],state->ds.uiElemWidth[UIELEM_MENU_BUTTON],getHighlightState(state,UIELEM_MENU_BUTTON),255,UIICON_MENU);
 

@@ -1809,9 +1809,10 @@ void uiElemClickAction(const app_data *restrict dat, app_state *restrict state, 
 				startUIAnimation(dat,state,UIANIM_PRIMARY_MENU_HIDE); //menu will be closed after animation finishes
         state->clickedUIElem = UIELEM_ENUM_LENGTH; //'unclick' the menu button
       }else if(state->ds.timeLeftInUIAnimation[UIANIM_PRIMARY_MENU_SHOW]==0.0f){
-        state->ds.shownElements |= (1U << UIELEM_PRIMARY_MENU);
+				state->ds.shownElements |= (1U << UIELEM_PRIMARY_MENU);
 				startUIAnimation(dat,state,UIANIM_PRIMARY_MENU_SHOW);
 				changeUIState(dat,state,state->uiState);
+				state->clickedUIElem = UIELEM_MENU_BUTTON;
       }
       break;
     case UIELEM_MSG_BOX_OK_BUTTON:
