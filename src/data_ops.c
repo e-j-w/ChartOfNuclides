@@ -42,6 +42,7 @@ void initializeTempState(const app_data *restrict dat, app_state *restrict state
 	state->inputFlags = 0;
   //app state
 	state->chartSelectedNucl = MAXNUMNUCL;
+	state->chartView = CHARTVIEW_HALFLIFE;
   state->quitAppFlag = 0;
 	state->gamepadDeadzone = 16000;
   state->ds.windowXRes = 880;
@@ -129,6 +130,9 @@ void stopUIAnimation(const app_data *restrict dat, app_state *restrict state, co
   switch(uiAnim){
 		case UIANIM_PRIMARY_MENU_HIDE:
 			state->ds.shownElements &= (uint32_t)(~(1U << UIELEM_PRIMARY_MENU)); //close the menu
+			break;
+		case UIANIM_CHARTVIEW_MENU_HIDE:
+			state->ds.shownElements &= (uint32_t)(~(1U << UIELEM_CHARTVIEW_MENU)); //close the menu
 			break;
     case UIANIM_MODAL_BOX_HIDE:
       state->ds.shownElements &= (uint32_t)(~(1U << UIELEM_MSG_BOX)); //close the message box
@@ -1394,6 +1398,39 @@ double getLevelEnergykeV(const ndata *restrict nd, const uint32_t levelInd){
 	}
 }
 
+uint32_t get2PlusLvlInd(const ndata *restrict nd, const uint16_t nuclInd){
+	if((nd->nuclData[nuclInd].N + nd->nuclData[nuclInd].Z) > 0){
+		if((nd->nuclData[nuclInd].N % 2)==0){
+			if((nd->nuclData[nuclInd].Z % 2)==0){
+				for(uint16_t i=0; i<nd->nuclData[nuclInd].numLevels; i++){
+					for(int16_t j=0; j<nd->levels[nd->nuclData[nuclInd].firstLevel + (uint32_t)i].numSpinParVals; j++){
+						if(nd->levels[nd->nuclData[nuclInd].firstLevel + (uint32_t)i].spval[j].spinVal == 2){
+							if(nd->levels[nd->nuclData[nuclInd].firstLevel + (uint32_t)i].spval[j].parVal == 1){
+								//one of the spin-parity values is 2+
+								uint8_t eValueType = (uint8_t)((nd->levels[nd->nuclData[nuclInd].firstLevel + (uint32_t)i].energy.format >> 5U) & 15U);
+								if(eValueType == VALUETYPE_NUMBER){
+									//not some weird offset or variable energy, use this level
+									return (uint32_t)(nd->nuclData[nuclInd].firstLevel + (uint32_t)i);
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	return MAXNUMLVLS;
+}
+
+//get the energy of the first 2+ state, for even-even nuclei
+double get2PlusEnergy(const ndata *restrict nd, const uint16_t nuclInd){
+	uint32_t lvlInd = get2PlusLvlInd(nd,nuclInd);
+	if(lvlInd != MAXNUMLVLS){
+		return getLevelEnergykeV(nd,lvlInd);
+	}
+	return -1.0f; //no 2+ state, or not even-even
+}
+
 double getLevelHalfLifeSeconds(const ndata *restrict nd, const uint32_t levelInd){
 	if(levelInd < nd->numLvls){
 		double hl = getRawValFromDB(&nd->levels[levelInd].halfLife);
@@ -1571,6 +1608,7 @@ void changeUIState(const app_data *restrict dat, app_state *restrict state, cons
     case UISTATE_DEFAULT:
     default:
       state->interactableElement |= (uint32_t)(1U << UIELEM_MENU_BUTTON);
+			state->interactableElement |= (uint32_t)(1U << UIELEM_CHARTVIEW_BUTTON);
 			if((state->ds.shownElements & (1U << UIELEM_NUCL_INFOBOX))&&(state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_HIDE]==0.0f)){
 				state->interactableElement |= (uint32_t)(1U << UIELEM_NUCL_INFOBOX);
 				state->interactableElement |= (uint32_t)(1U << UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON);
@@ -1580,6 +1618,11 @@ void changeUIState(const app_data *restrict dat, app_state *restrict state, cons
 				state->interactableElement |= (uint32_t)(1U << UIELEM_PM_PREFS_BUTTON);
 				state->interactableElement |= (uint32_t)(1U << UIELEM_PM_ABOUT_BUTTON);
 				state->interactableElement |= (uint32_t)(1U << UIELEM_PRIMARY_MENU);
+			}
+			if((state->ds.shownElements & (1U << UIELEM_CHARTVIEW_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_CHARTVIEW_MENU_HIDE]==0.0f)){
+				state->interactableElement |= (uint32_t)(1U << UIELEM_CVM_HALFLIFE_BUTTON);
+				state->interactableElement |= (uint32_t)(1U << UIELEM_CVM_2PLUS_BUTTON);
+				state->interactableElement |= (uint32_t)(1U << UIELEM_CHARTVIEW_MENU);
 			}
       break;
   }
@@ -1801,6 +1844,12 @@ void uiElemClickAction(const app_data *restrict dat, app_state *restrict state, 
 			state->clickedUIElem = UIELEM_ENUM_LENGTH; //'unclick' the menu button
 		}
 	}
+	if((uiElemID != UIELEM_CHARTVIEW_BUTTON)&&(uiElemID != UIELEM_CHARTVIEW_MENU)&&(uiElemID != UIELEM_CVM_HALFLIFE_BUTTON)&&(uiElemID != UIELEM_CVM_2PLUS_BUTTON)){
+		if((state->ds.shownElements & (1U << UIELEM_CHARTVIEW_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_CHARTVIEW_MENU_HIDE]==0.0f)){
+			startUIAnimation(dat,state,UIANIM_CHARTVIEW_MENU_HIDE); //menu will be closed after animation finishes
+			state->clickedUIElem = UIELEM_ENUM_LENGTH; //'unclick' the menu button
+		}
+	}
 
 	//take action from click
   switch(uiElemID){
@@ -1815,6 +1864,17 @@ void uiElemClickAction(const app_data *restrict dat, app_state *restrict state, 
 				state->clickedUIElem = UIELEM_MENU_BUTTON;
       }
       break;
+		case UIELEM_CHARTVIEW_BUTTON:
+			if((state->ds.shownElements & (1U << UIELEM_CHARTVIEW_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_CHARTVIEW_MENU_HIDE]==0.0f)){
+				startUIAnimation(dat,state,UIANIM_CHARTVIEW_MENU_HIDE); //menu will be closed after animation finishes
+        state->clickedUIElem = UIELEM_ENUM_LENGTH; //'unclick' the menu button
+      }else if(state->ds.timeLeftInUIAnimation[UIANIM_CHARTVIEW_MENU_SHOW]==0.0f){
+				state->ds.shownElements |= (1U << UIELEM_CHARTVIEW_MENU);
+				startUIAnimation(dat,state,UIANIM_CHARTVIEW_MENU_SHOW);
+				changeUIState(dat,state,state->uiState);
+				state->clickedUIElem = UIELEM_CHARTVIEW_BUTTON;
+      }
+			break;
     case UIELEM_MSG_BOX_OK_BUTTON:
       changeUIState(dat,state,state->lastUIState); //restore previous interactable elements
       startUIAnimation(dat,state,UIANIM_MODAL_BOX_HIDE); //message box will be closed after animation finishes
@@ -1874,8 +1934,25 @@ void uiElemClickAction(const app_data *restrict dat, app_state *restrict state, 
 			startUIAnimation(dat,state,UIANIM_MODAL_BOX_SHOW);
 			changeUIState(dat,state,UISTATE_ABOUT_BOX);
 			break;
+		case UIELEM_CVM_HALFLIFE_BUTTON:
+			startUIAnimation(dat,state,UIANIM_CHARTVIEW_MENU_HIDE); //menu will be closed after animation finishes
+			state->clickedUIElem = UIELEM_ENUM_LENGTH; //'unclick' the menu button
+			state->chartView = CHARTVIEW_HALFLIFE;
+			changeUIState(dat,state,UISTATE_DEFAULT); //prevents mouseover from still highlighting buttons whie the menu closes
+			break;
+		case UIELEM_CVM_2PLUS_BUTTON:
+			startUIAnimation(dat,state,UIANIM_CHARTVIEW_MENU_HIDE); //menu will be closed after animation finishes
+			state->clickedUIElem = UIELEM_ENUM_LENGTH; //'unclick' the menu button
+			state->chartView = CHARTVIEW_2PLUS;
+			changeUIState(dat,state,UISTATE_DEFAULT); //prevents mouseover from still highlighting buttons whie the menu closes
+			break;
 		case UIELEM_PRIMARY_MENU:
-			//clicked on menu background, do nothing
+			//clicked on menu background, do nothing except keep the menu button selected
+			state->clickedUIElem = UIELEM_MENU_BUTTON;
+			break;
+		case UIELEM_CHARTVIEW_MENU:
+			//clicked on menu background, do nothing except keep the menu button selected
+			state->clickedUIElem = UIELEM_CHARTVIEW_BUTTON;
 			break;
 		case UIELEM_ENUM_LENGTH:
     default:
@@ -1893,6 +1970,10 @@ void uiElemClickAction(const app_data *restrict dat, app_state *restrict state, 
 					//handle individual menu closing animations
 					if((state->ds.shownElements & (1U << UIELEM_PRIMARY_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_PRIMARY_MENU_HIDE]==0.0f)){
 						startUIAnimation(dat,state,UIANIM_PRIMARY_MENU_HIDE); //menu will be closed after animation finishes
+						state->clickedUIElem = UIELEM_ENUM_LENGTH; //'unclick' the menu button
+					}
+					if((state->ds.shownElements & (1U << UIELEM_CHARTVIEW_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_CHARTVIEW_MENU_HIDE]==0.0f)){
+						startUIAnimation(dat,state,UIANIM_CHARTVIEW_MENU_HIDE); //menu will be closed after animation finishes
 						state->clickedUIElem = UIELEM_ENUM_LENGTH; //'unclick' the menu button
 					}
 					if((state->ds.shownElements & (1U << UIELEM_NUCL_INFOBOX))&&(state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_HIDE]==0.0f)){
@@ -1916,6 +1997,12 @@ void updateSingleUIElemPosition(const app_data *restrict dat, drawing_state *res
 			ds->uiElemWidth[uiElemInd] = MENU_BUTTON_WIDTH;
 			ds->uiElemHeight[uiElemInd] = UI_TILE_SIZE;
 			break;
+		case UIELEM_CHARTVIEW_BUTTON:
+			ds->uiElemPosX[uiElemInd] = (uint16_t)(ds->windowXRes-CHARTVIEW_BUTTON_WIDTH-CHARTVIEW_BUTTON_POS_XR);
+			ds->uiElemPosY[uiElemInd] = CHARTVIEW_BUTTON_POS_Y;
+			ds->uiElemWidth[uiElemInd] = CHARTVIEW_BUTTON_WIDTH;
+			ds->uiElemHeight[uiElemInd] = UI_TILE_SIZE;
+			break;
 		case UIELEM_PRIMARY_MENU:
 			ds->uiElemPosX[uiElemInd] = (uint16_t)(ds->windowXRes-PRIMARY_MENU_WIDTH-PRIMARY_MENU_POS_XR);
 			ds->uiElemPosY[uiElemInd] = PRIMARY_MENU_POS_Y;
@@ -1933,6 +2020,24 @@ void updateSingleUIElemPosition(const app_data *restrict dat, drawing_state *res
 			ds->uiElemPosY[uiElemInd] = PRIMARY_MENU_POS_Y + 3*UI_PADDING_SIZE + PRIMARY_MENU_ITEM_SPACING;
 			ds->uiElemWidth[uiElemInd] = PRIMARY_MENU_WIDTH - 6*UI_PADDING_SIZE;
 			ds->uiElemHeight[uiElemInd] = PRIMARY_MENU_ITEM_SPACING - UI_PADDING_SIZE;
+			break;
+		case UIELEM_CHARTVIEW_MENU:
+			ds->uiElemPosX[uiElemInd] = (uint16_t)(ds->windowXRes-CHARTVIEW_MENU_WIDTH-CHARTVIEW_MENU_POS_XR);
+			ds->uiElemPosY[uiElemInd] = CHARTVIEW_MENU_POS_Y;
+			ds->uiElemWidth[uiElemInd] = CHARTVIEW_MENU_WIDTH;
+			ds->uiElemHeight[uiElemInd] = CHARTVIEW_MENU_HEIGHT;
+			break;
+		case UIELEM_CVM_HALFLIFE_BUTTON:
+			ds->uiElemPosX[uiElemInd] = (uint16_t)(ds->windowXRes-CHARTVIEW_MENU_WIDTH-CHARTVIEW_MENU_POS_XR + 3*UI_PADDING_SIZE);
+			ds->uiElemPosY[uiElemInd] = CHARTVIEW_MENU_POS_Y + 3*UI_PADDING_SIZE + CHARTVIEW_MENU_ITEM_SPACING;
+			ds->uiElemWidth[uiElemInd] = CHARTVIEW_MENU_WIDTH - 6*UI_PADDING_SIZE;
+			ds->uiElemHeight[uiElemInd] = CHARTVIEW_MENU_ITEM_SPACING - UI_PADDING_SIZE;
+			break;
+		case UIELEM_CVM_2PLUS_BUTTON:
+			ds->uiElemPosX[uiElemInd] = (uint16_t)(ds->windowXRes-CHARTVIEW_MENU_WIDTH-CHARTVIEW_MENU_POS_XR + 3*UI_PADDING_SIZE);
+			ds->uiElemPosY[uiElemInd] = CHARTVIEW_MENU_POS_Y + 3*UI_PADDING_SIZE + 2*CHARTVIEW_MENU_ITEM_SPACING;
+			ds->uiElemWidth[uiElemInd] = CHARTVIEW_MENU_WIDTH - 6*UI_PADDING_SIZE;
+			ds->uiElemHeight[uiElemInd] = CHARTVIEW_MENU_ITEM_SPACING - UI_PADDING_SIZE;
 			break;
 		case UIELEM_MSG_BOX:
 			ds->uiElemPosX[uiElemInd] = (uint16_t)((ds->windowXRes - MESSAGE_BOX_WIDTH)/2);

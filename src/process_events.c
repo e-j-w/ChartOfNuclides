@@ -516,6 +516,20 @@ void processSingleEvent(app_data *restrict dat, app_state *restrict state, resou
           state->zoomDeltaVal = -1.0f;
           state->inputFlags |= (1U << INPUT_ZOOM);
           break;
+        case SDL_SCANCODE_LEFTBRACKET:
+          if(state->chartView == 0){
+            state->chartView = (uint8_t)(CHARTVIEW_ENUM_LENGTH - 1);
+          }else{
+            state->chartView--;
+          }
+          break;
+        case SDL_SCANCODE_RIGHTBRACKET:
+          if(state->chartView == (uint8_t)(CHARTVIEW_ENUM_LENGTH - 1)){
+            state->chartView = 0;
+          }else{
+            state->chartView++;
+          }
+          break;
         case SDL_SCANCODE_RETURN:
           if((state->ds.shownElements & (1U << UIELEM_NUCL_INFOBOX))&&(state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_SHOW]==0.0f)&&(state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_EXPAND]==0.0f)){
             uiElemClickAction(dat,state,rdat,0,UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON);

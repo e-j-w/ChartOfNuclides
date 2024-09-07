@@ -27,3 +27,7 @@ about_string_2|This program is free software: you can redistribute it and/or mod
 pref_shellclosure|Show shell closures on chart
 pref_lifetime|Show lifetimes instead of half-lives
 pref_ui_animations|Show UI animations
+chartview_menu_title|Select color scheme:
+chartview_lifetime|Lifetime
+chartview_halflife|Half-life
+chartview_2plus|E(2+)

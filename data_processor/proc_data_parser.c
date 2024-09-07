@@ -217,6 +217,10 @@ static int parseAppRules(app_data *restrict dat, asset_mapping *restrict stringI
 	dat->locStringIDs[LOCSTR_PREF_SHELLCLOSURE] = (uint16_t)nameToAssetID("pref_shellclosure",stringIDmap);
 	dat->locStringIDs[LOCSTR_PREF_LIFETIME] = (uint16_t)nameToAssetID("pref_lifetime",stringIDmap);
 	dat->locStringIDs[LOCSTR_PREF_UIANIM] = (uint16_t)nameToAssetID("pref_ui_animations",stringIDmap);
+	dat->locStringIDs[LOCSTR_CHARTVIEW_MENUTITLE] = (uint16_t)nameToAssetID("chartview_menu_title",stringIDmap);
+	dat->locStringIDs[LOCSTR_CHARTVIEW_LIFETIME] = (uint16_t)nameToAssetID("chartview_lifetime",stringIDmap);
+	dat->locStringIDs[LOCSTR_CHARTVIEW_HALFLIFE] = (uint16_t)nameToAssetID("chartview_halflife",stringIDmap);
+	dat->locStringIDs[LOCSTR_CHARTVIEW_2PLUS] = (uint16_t)nameToAssetID("chartview_2plus",stringIDmap);
 
   return 0; //success
 

@@ -128,6 +128,92 @@ SDL_FColor getHalfLifeCol(const double halflifeSeconds){
   return col;
 }
 
+SDL_FColor get2PlusCol(const double e2PlusKeV){
+  SDL_FColor col;
+  col.r = 1.0f;
+  col.g = 1.0f;
+  col.b = 1.0f;
+  col.a = 1.0f;
+  if(e2PlusKeV >= 8000.0){
+    col.r = 0.0f;
+    col.g = 0.0f;
+    col.b = 0.0f;
+  }else if(e2PlusKeV >= 7000.0){
+    col.r = 0.0f;
+    col.g = 0.1f;
+    col.b = 0.4f;
+  }else if(e2PlusKeV >= 6000.0){
+    col.r = 0.1f;
+    col.g = 0.2f;
+    col.b = 0.5f;
+  }else if(e2PlusKeV >= 5000.0){
+    col.r = 0.1f;
+    col.g = 0.3f;
+    col.b = 0.7f;
+  }else if(e2PlusKeV >= 4000.0){
+    col.r = 0.2f;
+    col.g = 0.4f;
+    col.b = 0.8f;
+  }else if(e2PlusKeV >= 3000.0){
+    col.r = 0.3f;
+    col.g = 0.5f;
+    col.b = 0.8f;
+  }else if(e2PlusKeV >= 2500.0){
+    col.r = 0.3f;
+    col.g = 0.7f;
+    col.b = 0.7f;
+  }else if(e2PlusKeV >= 2000.0){
+    col.r = 0.3f;
+    col.g = 0.9f;
+    col.b = 0.7f;
+  }else if(e2PlusKeV >= 1500.0){
+    col.r = 0.5f;
+    col.g = 1.0f;
+    col.b = 0.7f;
+  }else if(e2PlusKeV >= 1200.0){
+    col.r = 0.7f;
+    col.g = 0.9f;
+    col.b = 0.5f;
+  }else if(e2PlusKeV >= 900.0){
+    col.r = 0.9f;
+    col.g = 0.9f;
+    col.b = 0.4f;
+  }else if(e2PlusKeV >= 700.0){
+    col.r = 1.0f;
+    col.g = 1.0f;
+    col.b = 0.2f;
+  }else if(e2PlusKeV >= 500.0){
+    col.r = 1.0f;
+    col.g = 0.8f;
+    col.b = 0.4f;
+  }else if(e2PlusKeV >= 400.0){
+    col.r = 1.0f;
+    col.g = 0.7f;
+    col.b = 0.5f;
+  }else if(e2PlusKeV >= 300.0){
+    col.r = 1.0f;
+    col.g = 0.6f;
+    col.b = 0.6f;
+  }else if(e2PlusKeV >= 200.0){
+    col.r = 1.0f;
+    col.g = 0.6f;
+    col.b = 0.7f;
+  }else if(e2PlusKeV >= 100.0){
+    col.r = 1.0f;
+    col.g = 0.7f;
+    col.b = 0.8f;
+  }else if(e2PlusKeV >= 50.0){
+    col.r = 1.0f;
+    col.g = 0.8f;
+    col.b = 0.9f;
+  }else if(e2PlusKeV > 0.0){
+    col.r = 1.0f;
+    col.g = 0.8f;
+    col.b = 0.9f;
+  }
+  return col;
+}
+
 uint8_t getNuclBoxLabelNumLines(const app_data *restrict dat, const uint16_t nuclInd){
   uint8_t numLines = 2;
   if(dat->ndat.nuclData[nuclInd].abundance.unit == VALUE_UNIT_PERCENT){
@@ -140,6 +226,25 @@ uint8_t getNuclBoxLabelNumLines(const app_data *restrict dat, const uint16_t nuc
     }
   }
   return numLines;
+}
+
+//draws label for the 2+ energy box
+void draw2PlusEnergyBoxLabel(const app_data *restrict dat, const drawing_state *restrict ds, resource_data *restrict rdat, const float xPos, const float yPos, const float boxWidth, const float boxHeight, SDL_Color col, const uint32_t lvlInd){
+  char tmpStr[32];
+  float drawXPos, drawYPos;
+  float labelMargin = NUCLBOX_LABEL_SMALLMARGIN*ds->chartZoomScale;
+  if(boxHeight > 38.0f){
+    drawXPos = xPos + labelMargin + getTextWidth(rdat,FONT_SCALING_LARGE,"2");
+    float totalLblHeight = (getTextHeight(rdat,FONT_SCALING_SMALL,"+") + getTextHeight(rdat,FONT_SCALING_LARGE,"2"))/rdat->uiScale;
+    drawYPos = yPos+boxHeight*0.5f - totalLblHeight*0.5f + 4.0f;
+    drawXPos -= (drawTextAlignedSized(rdat,drawXPos,drawYPos,col,FONT_SCALING_SMALL,255,"+",ALIGN_LEFT,16384)).w; //draw parity label
+    drawTextAlignedSized(rdat,drawXPos-2.0f,drawYPos+10.0f,col,FONT_SCALING_LARGE,255,"2",ALIGN_LEFT,16384); //draw spin label
+    //handle energy label
+    drawXPos = xPos + boxWidth - labelMargin;
+    getLvlEnergyStr(tmpStr,&dat->ndat,lvlInd,1);
+    strcat(tmpStr," keV");
+    drawTextAlignedSized(rdat,drawXPos,drawYPos+8.0f,col,FONT_SCALING_MEDIUM,255,tmpStr,ALIGN_RIGHT,16384); //draw energy label
+  }
 }
 
 //draws label for the isomer box
@@ -175,7 +280,6 @@ void drawisomerBoxLabel(const app_data *restrict dat, const drawing_state *restr
       drawTextAlignedSized(rdat,drawXPos,drawYPos+8.0f,col,FONT_SCALING_MEDIUM,255,tmpStr,ALIGN_RIGHT,16384); //draw half-life label
     }
   }
-  
 }
 
 //draws the main label for a box on the chart of nuclides
@@ -275,7 +379,7 @@ void drawChartOfNuclides(const app_data *restrict dat, const app_state *restrict
 
   SDL_FRect rect;
   float nuclBoxWidth = DEFAULT_NUCLBOX_DIM*state->ds.chartZoomScale*rdat->uiScale;
-  float isomerBoxPadding = DEFAULT_ISOMERBOX_PADDING*state->ds.chartZoomScale*rdat->uiScale;
+  float lowBoxPadding = DEFAULT_LOWBOX_PADDING*state->ds.chartZoomScale*rdat->uiScale;
   float boxLineLimit = powf(state->ds.chartZoomScale/MAX_CHART_ZOOM_SCALE,2.0f)*9.0f;
   //printf("line limit: %0.3f\n",(double)boxLineLimit);
   for(uint16_t i=0;i<dat->ndat.numNucl;i++){
@@ -290,36 +394,70 @@ void drawChartOfNuclides(const app_data *restrict dat, const app_state *restrict
               rect.x = ((float)dat->ndat.nuclData[i].N - minX)*rect.w;
               rect.y = (maxY - (float)dat->ndat.nuclData[i].Z)*rect.h;
               //SDL_Log("N: %i, Z: %i, i: %i, pos: [%0.2f %0.2f %0.2f %0.2f]\n",dat->ndat.nuclData[i].N,dat->ndat.nuclData[i].Z,i,(double)rect.x,(double)rect.y,(double)rect.w,(double)rect.h);
-              const double hl = getNuclGSHalfLifeSeconds(&dat->ndat,(uint16_t)i);
-              drawFlatRect(rdat,rect,getHalfLifeCol(hl));
+              //const double hl = getNuclGSHalfLifeSeconds(&dat->ndat,(uint16_t)i);
+              if(state->chartView == CHARTVIEW_HALFLIFE){
+                drawFlatRect(rdat,rect,getHalfLifeCol(getNuclGSHalfLifeSeconds(&dat->ndat,(uint16_t)i)));
+              }else if(state->chartView == CHARTVIEW_2PLUS){
+                drawFlatRect(rdat,rect,get2PlusCol(get2PlusEnergy(&dat->ndat,(uint16_t)i)));
+              }
+              
               if(state->ds.chartZoomScale >= 4.0f){
-                drawNuclBoxLabel(dat,&state->ds,rdat,rect.x/rdat->uiScale,rect.y/rdat->uiScale,rect.w/rdat->uiScale,(hl > 1.0E3) ? whiteCol8Bit : blackCol8Bit,(uint16_t)i);
-                
+                if(state->chartView == CHARTVIEW_HALFLIFE){
+                  drawNuclBoxLabel(dat,&state->ds,rdat,rect.x/rdat->uiScale,rect.y/rdat->uiScale,rect.w/rdat->uiScale,(getNuclGSHalfLifeSeconds(&dat->ndat,(uint16_t)i) > 1.0E3) ? whiteCol8Bit : blackCol8Bit,(uint16_t)i);
+                }else if(state->chartView == CHARTVIEW_2PLUS){
+                  drawNuclBoxLabel(dat,&state->ds,rdat,rect.x/rdat->uiScale,rect.y/rdat->uiScale,rect.w/rdat->uiScale,(get2PlusEnergy(&dat->ndat,(uint16_t)i) >= 3000.0) ? whiteCol8Bit : blackCol8Bit,(uint16_t)i);
+                }
                 if(state->ds.chartZoomScale >= 8.0f){
-                  //draw isomer box
-                  uint32_t isomerLvl = dat->ndat.nuclData[i].longestIsomerLevel;
-                  const double isomerHl = getLevelHalfLifeSeconds(&dat->ndat,isomerLvl);
-                  if((isomerLvl != MAXNUMLVLS)&&(isomerLvl != (dat->ndat.nuclData[i].firstLevel + dat->ndat.nuclData[i].gsLevel))){
-                    if((isomerHl >= 1.0E-1)||(isomerHl > hl)){ //only show 'important' isomers on chart
-                      float isomerBoxHeight = (boxLineLimit - getNuclBoxLabelNumLines(dat,i))*20.0f;
-                      if(isomerBoxHeight < 0.0f){
-                        isomerBoxHeight = 0.0f;
+                  if(state->chartView == CHARTVIEW_HALFLIFE){
+                    //draw isomer box
+                    uint32_t isomerLvl = dat->ndat.nuclData[i].longestIsomerLevel;
+                    const double isomerHl = getLevelHalfLifeSeconds(&dat->ndat,isomerLvl);
+                    if((isomerLvl != MAXNUMLVLS)&&(isomerLvl != (dat->ndat.nuclData[i].firstLevel + dat->ndat.nuclData[i].gsLevel))){
+                      if((isomerHl >= 1.0E-1)||(isomerHl > getNuclGSHalfLifeSeconds(&dat->ndat,(uint16_t)i))){ //only show 'important' isomers on chart
+                        float isomerBoxHeight = (boxLineLimit - getNuclBoxLabelNumLines(dat,i))*20.0f;
+                        if(isomerBoxHeight < 0.0f){
+                          isomerBoxHeight = 0.0f;
+                        }
+                        isomerBoxHeight += 1.5f*DEFAULT_LOWBOX_PADDING*state->ds.chartZoomScale; //minimum size
+                        if(isomerBoxHeight > 80.0f){
+                          isomerBoxHeight = 80.0f; //limit isomer box size
+                        }
+                        rect.x += lowBoxPadding;
+                        rect.y += rect.h - isomerBoxHeight - lowBoxPadding;
+                        rect.w = nuclBoxWidth - 2.0f*lowBoxPadding;
+                        rect.h = isomerBoxHeight;
+                        SDL_FColor boxCol = getHalfLifeCol(isomerHl);
+                        if(state->ds.chartZoomScale < 9.0f){
+                          //handle fading in of isomer boxes
+                          boxCol.a =  1.0f - (9.0f-state->ds.chartZoomScale);
+                        }
+                        drawFlatRect(rdat,rect,boxCol);
+                        drawisomerBoxLabel(dat,&state->ds,rdat,rect.x/rdat->uiScale,rect.y/rdat->uiScale,rect.w/rdat->uiScale,rect.h/rdat->uiScale,(isomerHl > 1.0E3) ? whiteCol8Bit : blackCol8Bit,(uint16_t)i,isomerLvl,dat->ndat.nuclData[i].longestIsomerMVal);
                       }
-                      isomerBoxHeight += 1.5f*DEFAULT_ISOMERBOX_PADDING*state->ds.chartZoomScale; //minimum size
-                      if(isomerBoxHeight > 80.0f){
-                        isomerBoxHeight = 80.0f; //limit isomer box size
+                    }
+                  }else if(state->chartView == CHARTVIEW_2PLUS){
+                    //draw 2+ energy box
+                    double e2Plus = get2PlusEnergy(&dat->ndat,(uint16_t)i);
+                    if(e2Plus > 0.0){
+                      float twoPlusBoxHeight = (boxLineLimit - getNuclBoxLabelNumLines(dat,i))*20.0f;
+                      if(twoPlusBoxHeight < 0.0f){
+                        twoPlusBoxHeight = 0.0f;
                       }
-                      rect.x += isomerBoxPadding;
-                      rect.y += rect.h - isomerBoxHeight - isomerBoxPadding;
-                      rect.w = nuclBoxWidth - 2.0f*isomerBoxPadding;
-                      rect.h = isomerBoxHeight;
-                      SDL_FColor boxCol = getHalfLifeCol(isomerHl);
+                      twoPlusBoxHeight += 1.5f*DEFAULT_LOWBOX_PADDING*state->ds.chartZoomScale; //minimum size
+                      if(twoPlusBoxHeight > 80.0f){
+                        twoPlusBoxHeight = 80.0f; //limit 2+ box size
+                      }
+                      rect.x += lowBoxPadding;
+                      rect.y += rect.h - twoPlusBoxHeight - lowBoxPadding;
+                      rect.w = nuclBoxWidth - 2.0f*lowBoxPadding;
+                      rect.h = twoPlusBoxHeight;
+                      SDL_FColor boxCol = whiteCol;
                       if(state->ds.chartZoomScale < 9.0f){
-                        //handle fading in of isomer boxes
+                        //handle fading in of 2+ boxes
                         boxCol.a =  1.0f - (9.0f-state->ds.chartZoomScale);
                       }
                       drawFlatRect(rdat,rect,boxCol);
-                      drawisomerBoxLabel(dat,&state->ds,rdat,rect.x/rdat->uiScale,rect.y/rdat->uiScale,rect.w/rdat->uiScale,rect.h/rdat->uiScale,(isomerHl > 1.0E3) ? whiteCol8Bit : blackCol8Bit,(uint16_t)i,isomerLvl,dat->ndat.nuclData[i].longestIsomerMVal);
+                      draw2PlusEnergyBoxLabel(dat,&state->ds,rdat,rect.x/rdat->uiScale,rect.y/rdat->uiScale,rect.w/rdat->uiScale,rect.h/rdat->uiScale,blackCol8Bit,get2PlusLvlInd(&dat->ndat,i));
                     }
                   }
                 }
@@ -948,6 +1086,66 @@ void drawPrefsDialog(const app_data *restrict dat, const app_state *restrict sta
   //SDL_Log("%.3f %.3f alpha %u\n",(double)state->ds.timeLeftInUIAnimation[UIANIM_MODAL_BOX_SHOW],(double)state->ds.timeLeftInUIAnimation[UIANIM_MODAL_BOX_HIDE],alpha);
 }
 
+void drawChartViewMenu(const app_data *restrict dat, const app_state *restrict state, resource_data *restrict rdat){
+  
+  float alpha = 1.0f;
+  float yOffset = 0;
+  if(state->ds.uiAnimPlaying & (1U << UIANIM_CHARTVIEW_MENU_HIDE)){
+    alpha = (float)(1.0f*juice_smoothStart2(state->ds.timeLeftInUIAnimation[UIANIM_CHARTVIEW_MENU_HIDE]/(UI_ANIM_LENGTH)));
+    yOffset = (-30.0f*juice_smoothStop2(1.0f - state->ds.timeLeftInUIAnimation[UIANIM_CHARTVIEW_MENU_HIDE]/UI_ANIM_LENGTH));
+  }else if(state->ds.uiAnimPlaying & (1U << UIANIM_CHARTVIEW_MENU_SHOW)){
+    alpha = (float)(1.0f*juice_smoothStop2(1.0f - state->ds.timeLeftInUIAnimation[UIANIM_CHARTVIEW_MENU_SHOW]/UI_ANIM_LENGTH));
+    yOffset = (-30.0f*juice_smoothStart2(state->ds.timeLeftInUIAnimation[UIANIM_CHARTVIEW_MENU_SHOW]/(UI_ANIM_LENGTH)));
+  }
+  //SDL_Log("alpha: %f\n",(double)alpha);
+  
+  //draw menu background
+  SDL_FRect drawRect;
+  drawRect.x = state->ds.uiElemPosX[UIELEM_CHARTVIEW_MENU];
+  drawRect.y = ((float)state->ds.uiElemPosY[UIELEM_CHARTVIEW_MENU] + yOffset);
+  drawRect.w = state->ds.uiElemWidth[UIELEM_CHARTVIEW_MENU];
+  drawRect.h = state->ds.uiElemHeight[UIELEM_CHARTVIEW_MENU];
+  drawPanelBG(rdat,drawRect,alpha);
+  
+  //draw menu item highlight
+  for(uint8_t i=1;i<=CHARTVIEW_ENUM_LENGTH;i++){
+    drawRect.x = state->ds.uiElemPosX[UIELEM_CHARTVIEW_MENU-i]*rdat->uiScale;
+    drawRect.y = (state->ds.uiElemPosY[UIELEM_CHARTVIEW_MENU-i] + yOffset)*rdat->uiScale;
+    drawRect.w = state->ds.uiElemWidth[UIELEM_CHARTVIEW_MENU-i]*rdat->uiScale;
+    drawRect.h = state->ds.uiElemHeight[UIELEM_CHARTVIEW_MENU-i]*rdat->uiScale;
+    switch(getHighlightState(state,UIELEM_CHARTVIEW_MENU-i)){
+      case HIGHLIGHT_SELECTED:
+        drawFlatRect(rdat,drawRect,dat->rules.themeRules.modSelectedCol);
+        break;
+      case HIGHLIGHT_MOUSEOVER:
+        drawFlatRect(rdat,drawRect,dat->rules.themeRules.modMouseOverCol);
+        break;
+      case HIGHLIGHT_NORMAL:
+      default:
+        break;
+    }
+  }
+
+  //draw menu item text
+  drawRect.x = state->ds.uiElemPosX[UIELEM_CHARTVIEW_MENU] + UI_TILE_SIZE + 4*UI_PADDING_SIZE;
+  drawRect.y = ((float)state->ds.uiElemPosY[UIELEM_CHARTVIEW_MENU] + yOffset);
+  drawRect.w = state->ds.uiElemWidth[UIELEM_CHARTVIEW_MENU];
+  drawRect.h = state->ds.uiElemHeight[UIELEM_CHARTVIEW_MENU];
+  Uint8 txtAlpha = (Uint8)(alpha*255.0f);
+  drawTextAlignedSized(rdat,state->ds.uiElemPosX[UIELEM_CHARTVIEW_MENU] + 4*UI_PADDING_SIZE,drawRect.y + 0.5f*CHARTVIEW_MENU_ITEM_SPACING + yOffset,blackCol8Bit,FONT_SCALING_MEDIUM,txtAlpha,dat->strings[LOCSTR_CHARTVIEW_MENUTITLE],ALIGN_LEFT,(Uint16)(drawRect.w - 8*UI_PADDING_SIZE));
+  for(uint8_t i=0;i<CHARTVIEW_ENUM_LENGTH;i++){
+    if(state->chartView == i){
+      drawIcon(&dat->rules.themeRules,rdat,(uint16_t)(state->ds.uiElemPosX[UIELEM_CHARTVIEW_MENU] + 3*UI_PADDING_SIZE),(uint16_t)(drawRect.y + (1.35f + 1.0f*i)*CHARTVIEW_MENU_ITEM_SPACING + yOffset),UI_TILE_SIZE,HIGHLIGHT_NORMAL,txtAlpha,UIICON_CHECKBOX_CHECK);
+    }
+    if((i==0)&&(state->ds.useLifetimes)){
+      drawTextAlignedSized(rdat,drawRect.x,drawRect.y + (1.5f + 1.0f*i)*CHARTVIEW_MENU_ITEM_SPACING + yOffset,blackCol8Bit,FONT_SCALING_MEDIUM,txtAlpha,dat->strings[LOCSTR_CHARTVIEW_LIFETIME],ALIGN_LEFT,(Uint16)(drawRect.w - 8*UI_PADDING_SIZE));
+    }else{
+      drawTextAlignedSized(rdat,drawRect.x,drawRect.y + (1.5f + 1.0f*i)*CHARTVIEW_MENU_ITEM_SPACING + yOffset,blackCol8Bit,FONT_SCALING_MEDIUM,txtAlpha,dat->strings[LOCSTR_CHARTVIEW_HALFLIFE+i],ALIGN_LEFT,(Uint16)(drawRect.w - 8*UI_PADDING_SIZE));
+    }
+  }
+
+}
+
 void drawPrimaryMenu(const app_data *restrict dat, const app_state *restrict state, resource_data *restrict rdat){
   
   float alpha = 1.0f;
@@ -1008,6 +1206,15 @@ void drawUI(const app_data *restrict dat, app_state *restrict state, resource_da
   //draw chart of nuclides below everything else
   if(state->ds.shownElements & (1U << UIELEM_CHARTOFNUCLIDES)){
     drawChartOfNuclides(dat,state,rdat);
+    if(state->chartView == CHARTVIEW_HALFLIFE){
+      if(state->ds.useLifetimes){
+        drawIconAndTextButton(&dat->rules.themeRules,rdat,state->ds.uiElemPosX[UIELEM_CHARTVIEW_BUTTON],state->ds.uiElemPosY[UIELEM_CHARTVIEW_BUTTON],state->ds.uiElemWidth[UIELEM_CHARTVIEW_BUTTON],getHighlightState(state,UIELEM_CHARTVIEW_BUTTON),255,UIICON_CHARTVIEW,dat->strings[LOCSTR_CHARTVIEW_LIFETIME]);
+      }else{
+        drawIconAndTextButton(&dat->rules.themeRules,rdat,state->ds.uiElemPosX[UIELEM_CHARTVIEW_BUTTON],state->ds.uiElemPosY[UIELEM_CHARTVIEW_BUTTON],state->ds.uiElemWidth[UIELEM_CHARTVIEW_BUTTON],getHighlightState(state,UIELEM_CHARTVIEW_BUTTON),255,UIICON_CHARTVIEW,dat->strings[LOCSTR_CHARTVIEW_HALFLIFE]);
+      }
+    }else if(state->chartView == CHARTVIEW_2PLUS){
+      drawIconAndTextButton(&dat->rules.themeRules,rdat,state->ds.uiElemPosX[UIELEM_CHARTVIEW_BUTTON],state->ds.uiElemPosY[UIELEM_CHARTVIEW_BUTTON],state->ds.uiElemWidth[UIELEM_CHARTVIEW_BUTTON],getHighlightState(state,UIELEM_CHARTVIEW_BUTTON),255,UIICON_CHARTVIEW,dat->strings[LOCSTR_CHARTVIEW_2PLUS]);
+    }
   }
   
   //draw menus/panels etc.
@@ -1018,6 +1225,9 @@ void drawUI(const app_data *restrict dat, app_state *restrict state, resource_da
   }
   if(state->ds.shownElements & (1U << UIELEM_PRIMARY_MENU)){
     drawPrimaryMenu(dat,state,rdat);
+  }
+  if(state->ds.shownElements & (1U << UIELEM_CHARTVIEW_MENU)){
+    drawChartViewMenu(dat,state,rdat);
   }
 
   //draw persistent button(s)
