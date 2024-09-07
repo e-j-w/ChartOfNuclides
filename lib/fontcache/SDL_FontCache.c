@@ -149,8 +149,6 @@ static unsigned int fc_tab_width = 4;
 static char* fc_buffer = NULL;
 static unsigned int fc_buffer_size = 1024;
 
-static Uint8 fc_has_render_target_support = 0;
-
 // The number of fonts that has been created but not freed
 static int NUM_EXISTING_FONTS = 0;
 
@@ -853,9 +851,7 @@ Uint8 FC_UploadGlyphCache(FC_Font* font, int cache_level, SDL_Surface* data_surf
     if(font == NULL || data_surface == NULL)
         return 0;
     SDL_Texture* new_level;
-    if(!fc_has_render_target_support)
-        new_level = SDL_CreateTextureFromSurface(font->renderer, data_surface);
-    else
+    
     {
         // Must upload with render target enabled so we can put more glyphs on later
         SDL_Renderer* renderer = font->renderer;
@@ -1024,8 +1020,6 @@ Uint8 FC_LoadFontFromTTF(FC_Font* font, SDL_Renderer* renderer, TTF_Font* ttf, S
 
     FC_ClearFont(font);
 
-    fc_has_render_target_support = 1; //JW: render to texture is always supported in SDL3, setting this to 0 apparently prevents rendering of UTF-8 characters
-
     font->renderer = renderer;
 
     font->ttf_source = ttf;
@@ -1171,7 +1165,7 @@ Uint8 FC_LoadFont_RW(FC_Font* font, FC_Target* renderer, SDL_IOStream* file_iost
         return 0;
     }
 
-    TTF_SetFontHinting(ttf,TTF_HINTING_LIGHT_SUBPIXEL); //hopefully helps font rendering on low-DPI displays
+    TTF_SetFontHinting(ttf,TTF_HINTING_LIGHT); //hopefully helps font rendering on low-DPI displays
 
     outline = (style & TTF_STYLE_OUTLINE);
     if(outline)

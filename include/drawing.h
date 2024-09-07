@@ -40,13 +40,13 @@ void drawSelectionRect(resource_data *restrict rdat, const SDL_FRect pos, const 
 
 void drawScreenDimmer(const drawing_state *restrict ds, resource_data *restrict rdat, const float alpha);
 
-float getTextHeight(resource_data *restrict rdat, const float fontScale, const char *str);
-float getTextWidth(resource_data *restrict rdat, const float fontScale, const char *str);
+float getTextHeight(resource_data *restrict rdat, const uint8_t fontSizeInd, const char *str);
+float getTextWidth(resource_data *restrict rdat, const uint8_t fontSizeInd, const char *str);
 
-SDL_FRect drawTextAlignedSized(resource_data *restrict rdat, const float xPos, const float yPos, const SDL_Color textColor, const float fontScale, const Uint8 alpha, const char *txt, const uint8_t alignment, const Uint16 maxWidth);
-void drawTextAligned(resource_data *restrict rdat, const float xPos, const float yPos, const SDL_Color textColor, const float fontScale, const char *txt, const uint8_t alignment);
-void drawText(resource_data *restrict rdat, const float xPos, const float yPos, const SDL_Color textColor, const float fontScale, const char *txt);
-void drawColoredTextAligned(resource_data *restrict rdat, const float xPos, const float yPos, const SDL_Color textColor, const float fontScale, const char *txt, const uint8_t alignment);
+SDL_FRect drawTextAlignedSized(resource_data *restrict rdat, const float xPos, const float yPos, const SDL_Color textColor, const uint8_t fontSizeInd, const Uint8 alpha, const char *txt, const uint8_t alignment, const Uint16 maxWidth);
+void drawTextAligned(resource_data *restrict rdat, const float xPos, const float yPos, const SDL_Color textColor, const uint8_t fontSizeInd, const char *txt, const uint8_t alignment);
+void drawText(resource_data *restrict rdat, const float xPos, const float yPos, const SDL_Color textColor, const uint8_t fontSizeInd, const char *txt);
+void drawColoredTextAligned(resource_data *restrict rdat, const float xPos, const float yPos, const SDL_Color textColor, const uint8_t fontSizeInd, const char *txt, const uint8_t alignment);
 void drawColoredText(resource_data *restrict rdat, const float xPos, const float yPos, const SDL_Color textColor, const char *txt);
 void drawDefaultTextAligned(const ui_theme_rules *restrict uirules, resource_data *restrict rdat, const float xPos, const float yPos, const char *txt, const uint8_t alignment);
 void drawDefaultText(const ui_theme_rules *restrict uirules, resource_data *restrict rdat, const float xPos, const float yPos, const char *txt);

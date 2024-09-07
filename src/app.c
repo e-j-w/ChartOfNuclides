@@ -21,7 +21,11 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 void shutdownApp(const global_data *gdat, const uint8_t skipDealloc){
   updateConfigFile(gdat->rdat.appPrefPath,&gdat->dat.rules,&gdat->state); //save settings to disk
   if(!skipDealloc){
-    FC_FreeFont(gdat->rdat.font);
+    for(uint8_t i=0; i<FONTSIZE_ENUM_LENGTH; i++){
+      if(gdat->rdat.font[i]){
+        FC_FreeFont(gdat->rdat.font[i]);
+      }
+    }
     if(gdat->rdat.fontData!=NULL){
       SDL_free(gdat->rdat.fontData);
     }

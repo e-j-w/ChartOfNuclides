@@ -181,13 +181,15 @@ int importAppData(app_data *restrict dat, resource_data *restrict rdat){
     SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"importAppData - couldn't read font data from file %s - %s.\n",rdat->appDataFilepath,SDL_GetError());
     return -1;
   }
-  
-  rdat->font = FC_CreateFont();
-  FC_LoadFont_RW(rdat->font, rdat->renderer,SDL_IOFromConstMem(rdat->fontData,(size_t)fontFilesize),1,(Uint32)(FONT_SIZE*rdat->uiScale),whiteCol8Bit,TTF_STYLE_NORMAL);
-  if(rdat->font==NULL){
-    SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,"Error","App data file read error - unable to load resource.",rdat->window);
-    SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"importAppData - couldn't read font resource - %s.\n",SDL_GetError());
-    return -1;
+
+  for(uint8_t i=0; i<FONTSIZE_ENUM_LENGTH; i++){
+    rdat->font[i] = FC_CreateFont();
+    FC_LoadFont_RW(rdat->font[i], rdat->renderer,SDL_IOFromConstMem(rdat->fontData,(size_t)fontFilesize),1,(Uint32)(fontSizes[i]*rdat->uiScale),whiteCol8Bit,TTF_STYLE_NORMAL);
+    if(rdat->font[i]==NULL){
+      SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,"Error","App data file read error - unable to load resource.",rdat->window);
+      SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"importAppData - couldn't read font resource %u - %s.\n",i,SDL_GetError());
+      return -1;
+    }
   }
 
   //read footer
@@ -238,8 +240,10 @@ int regenerateThemeAndFontCache(app_data *restrict dat, resource_data *restrict 
   if(rdat->uiThemeTex){
     SDL_DestroyTexture(rdat->uiThemeTex);
   }
-  if(rdat->font){
-    FC_FreeFont(rdat->font);
+  for(uint8_t i=0; i<FONTSIZE_ENUM_LENGTH; i++){
+    if(rdat->font[i]){
+      FC_FreeFont(rdat->font[i]);
+    }
   }
 
   //read theme data
@@ -291,12 +295,14 @@ int regenerateThemeAndFontCache(app_data *restrict dat, resource_data *restrict 
     SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"regenerateFontCache - couldn't read font data from file %s - %s.\n",rdat->appDataFilepath,SDL_GetError());
     return -1;
   }
-  
-  FC_LoadFont_RW(rdat->font, rdat->renderer,SDL_IOFromConstMem(rdat->fontData,(size_t)fontFilesize),1,(Uint32)(FONT_SIZE*rdat->uiScale),whiteCol8Bit,TTF_STYLE_NORMAL);
-  if(rdat->font==NULL){
-    SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,"Error","App data file read error - unable to load resource.",rdat->window);
-    SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"regenerateFontCache - couldn't read font resource - %s.\n",SDL_GetError());
-    return -1;
+
+  for(uint8_t i=0; i<FONTSIZE_ENUM_LENGTH; i++){
+    FC_LoadFont_RW(rdat->font[i], rdat->renderer,SDL_IOFromConstMem(rdat->fontData,(size_t)fontFilesize),1,(Uint32)(fontSizes[i]*rdat->uiScale),whiteCol8Bit,TTF_STYLE_NORMAL);
+    if(rdat->font[i]==NULL){
+      SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,"Error","App data file read error - unable to load resource.",rdat->window);
+      SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"importAppData - couldn't read font resource %u - %s.\n",i,SDL_GetError());
+      return -1;
+    }
   }
 
   if(SDL_CloseIO(inp)!=0){

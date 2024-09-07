@@ -53,11 +53,8 @@ which can be referenced by both the GUI draw code as well as the interaction cod
 static const uint8_t UITHEME_ICON_TILE_X[UIICON_ENUM_LENGTH] = {0,1,2,1,2,0,1,0};
 static const uint8_t UITHEME_ICON_TILE_Y[UIICON_ENUM_LENGTH] = {10,10,10,9,9,8,8,11};
 
-#define FONT_SIZE            32 //pt size at which the font is imported, same as the maximum pt size to be used
-#define FONT_SCALING_HUGE    0.75f
-#define FONT_SCALING_LARGE   0.59f
-#define FONT_SCALING_MEDIUM  0.47f
-#define FONT_SCALING_SMALL   0.41f
+//font sizes (assuming UI scale of 1)
+static const uint16_t fontSizes[FONTSIZE_ENUM_LENGTH] = {13,15,19};
 
 /* UI LAYOUT CONSTANTS */
 /* see updateUIElemPositions in data_ops.c for how these values are assigned */
