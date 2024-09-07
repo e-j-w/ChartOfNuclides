@@ -159,6 +159,7 @@ typedef struct
 
 typedef struct
 {
+  float uiUserScale; //scaling factor for UI, user preference
   float chartPosX, chartPosY, chartZoomScale; //x and y in chart units
   float chartZoomStartScale, chartZoomToScale; //start and target zoom scale
   float chartZoomToX, chartZoomToY; //in chart units
@@ -228,7 +229,8 @@ typedef struct
 typedef struct
 {
   size_t themeOffset; //data file offset for the embedded theme
-  float uiScale; //scaling factor for UI, for HI-DPI
+  float uiDPIScale; //scaling factor for UI, for HI-DPI only
+  float uiScale; //overall scaling factor for UI
   float uiThemeScale; //scale of the UI theme texture in GPU memory
   SDL_Surface *iconSurface; //surface for the application icon
   SDL_Texture *uiThemeTex; //the main texture atlas

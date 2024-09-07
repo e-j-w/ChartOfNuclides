@@ -71,6 +71,7 @@ void initializeTempState(const app_data *restrict dat, app_state *restrict state
 	state->ds.fcScrollFinished = 0;
 	state->ds.fcScrollInProgress = 0;
 	state->ds.fcNuclChangeInProgress = 0;
+	state->ds.uiUserScale = 1.0f;
 	memset(state->ds.uiElemExtPlusX,0,sizeof(state->ds.uiElemExtPlusX));
 	memset(state->ds.uiElemExtPlusY,0,sizeof(state->ds.uiElemExtPlusY));
 	memset(state->ds.uiElemExtMinusX,0,sizeof(state->ds.uiElemExtMinusX));
@@ -1987,21 +1988,23 @@ void uiElemClickAction(const app_data *restrict dat, app_state *restrict state, 
   }
 }
 
+
 //updates UI element (buttons etc.) positions, based on the screen resolution and other factors
 //positioning constants are defined in gui_constants.h
 void updateSingleUIElemPosition(const app_data *restrict dat, drawing_state *restrict ds, resource_data *restrict rdat, const uint8_t uiElemInd){
 	switch(uiElemInd){
 		case UIELEM_MENU_BUTTON:
-			ds->uiElemPosX[uiElemInd] = (uint16_t)(ds->windowXRes-MENU_BUTTON_WIDTH-MENU_BUTTON_POS_XR);
-			ds->uiElemPosY[uiElemInd] = MENU_BUTTON_POS_Y;
-			ds->uiElemWidth[uiElemInd] = MENU_BUTTON_WIDTH;
-			ds->uiElemHeight[uiElemInd] = UI_TILE_SIZE;
+			ds->uiElemPosX[uiElemInd] = (uint16_t)(ds->windowXRes-((MENU_BUTTON_WIDTH+MENU_BUTTON_POS_XR)*ds->uiUserScale));
+			ds->uiElemPosY[uiElemInd] = (uint16_t)(MENU_BUTTON_POS_Y*ds->uiUserScale);
+			ds->uiElemWidth[uiElemInd] = (uint16_t)(MENU_BUTTON_WIDTH*ds->uiUserScale);
+			ds->uiElemHeight[uiElemInd] = (uint16_t)(UI_TILE_SIZE*ds->uiUserScale);
+			//SDL_Log("res: [%u %u]\nx: %u, y: %u, w: %u, h: %u\n",ds->windowXRes,ds->windowYRes,ds->uiElemPosX[uiElemInd],ds->uiElemPosY[uiElemInd],ds->uiElemWidth[uiElemInd],ds->uiElemHeight[uiElemInd]);
 			break;
 		case UIELEM_CHARTVIEW_BUTTON:
-			ds->uiElemPosX[uiElemInd] = (uint16_t)(ds->windowXRes-CHARTVIEW_BUTTON_WIDTH-CHARTVIEW_BUTTON_POS_XR);
-			ds->uiElemPosY[uiElemInd] = CHARTVIEW_BUTTON_POS_Y;
-			ds->uiElemWidth[uiElemInd] = CHARTVIEW_BUTTON_WIDTH;
-			ds->uiElemHeight[uiElemInd] = UI_TILE_SIZE;
+			ds->uiElemPosX[uiElemInd] = (uint16_t)(ds->windowXRes-((CHARTVIEW_BUTTON_WIDTH+CHARTVIEW_BUTTON_POS_XR)*ds->uiUserScale));
+			ds->uiElemPosY[uiElemInd] = (uint16_t)(CHARTVIEW_BUTTON_POS_Y*ds->uiUserScale);
+			ds->uiElemWidth[uiElemInd] = (uint16_t)(CHARTVIEW_BUTTON_WIDTH*ds->uiUserScale);
+			ds->uiElemHeight[uiElemInd] = (uint16_t)(UI_TILE_SIZE*ds->uiUserScale);
 			break;
 		case UIELEM_PRIMARY_MENU:
 			ds->uiElemPosX[uiElemInd] = (uint16_t)(ds->windowXRes-PRIMARY_MENU_WIDTH-PRIMARY_MENU_POS_XR);
@@ -2169,6 +2172,19 @@ float getUIthemeScale(const float uiScale){
 	}
 }
 
+//updates the UI scaling, which requires the theme and 
+//font data to be reloaded from disk and re-scaled
+void updateUIScale(app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat){
+	rdat->uiScale = rdat->uiDPIScale * state->ds.uiUserScale;
+	rdat->uiThemeScale = getUIthemeScale(rdat->uiScale);
+	if(rdat->font[0]){
+		//rescale font and UI theme as well, this requires loading them from the app data file
+		regenerateThemeAndFontCache(dat,rdat); //load_data.c
+	}
+	updateUIElemPositions(dat,&state->ds,rdat); //UI element positions
+	state->ds.forceRedraw = 1;
+}
+
 void updateWindowRes(app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat){
   int wwidth, wheight;
   int rwidth, rheight;
@@ -2177,16 +2193,12 @@ void updateWindowRes(app_data *restrict dat, app_state *restrict state, resource
   if((rwidth != state->ds.windowXRenderRes)||(rheight != state->ds.windowYRenderRes)){
     state->ds.forceRedraw = 1;
   }
-	float newScale = (float)rwidth/((float)wwidth);
+	float newDPIScale = (float)rwidth/((float)wwidth);
 	//float newScale = 1.0f; //for testing UI scales
-	if(fabsf(rdat->uiScale - newScale) > 0.001f){
-		SDL_Log("Re-scaling UI from %0.9f to %0.9f.\n",(double)rdat->uiScale,(double)newScale);
-		rdat->uiScale = newScale; //set UI scale properly for HI-DPI
-		rdat->uiThemeScale = getUIthemeScale(rdat->uiScale);
-		if(rdat->font[0]){
-			//rescale font and UI theme as well, this requires loading them from the app data file
-			regenerateThemeAndFontCache(dat,rdat); //load_data.c
-		}
+	if(fabsf(rdat->uiDPIScale - newDPIScale) > 0.001f){
+		SDL_Log("Changing UI DPI scale from %0.9f to %0.9f.\n",(double)rdat->uiDPIScale,(double)newDPIScale);
+		rdat->uiDPIScale = newDPIScale; //set UI DPI scale properly for HI-DPI
+		updateUIScale(dat,state,rdat);
 	}
   state->ds.windowXRes = (uint16_t)wwidth;
   state->ds.windowYRes = (uint16_t)wheight;

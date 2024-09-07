@@ -75,6 +75,7 @@ void updateSingleUIElemPosition(const app_data *restrict dat, drawing_state *res
 void updateUIElemPositions(const app_data *restrict dat, drawing_state *restrict ds, resource_data *restrict rdat);
 
 float getUIthemeScale(const float uiScale);
+void updateUIScale(app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat);
 void updateWindowRes(app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat);
 void handleScreenGraphicsMode(app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat);
 

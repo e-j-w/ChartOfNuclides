@@ -191,11 +191,11 @@ void drawButton(const ui_theme_rules *restrict uirules, resource_data *restrict 
   }
 
   SDL_FRect srcRect, destRect;
-  float remainingWidth = (float)w;
+  float remainingWidth = (float)w*rdat->uiDPIScale/rdat->uiScale;
   if(remainingWidth <= 2.0f*UI_TILE_SIZE){
     //draw a smaller button using only the left/right side tiles
-    destRect.x = (float)(x*rdat->uiScale);
-    destRect.y = (float)(y*rdat->uiScale);
+    destRect.x = (float)(x*rdat->uiDPIScale);
+    destRect.y = (float)(y*rdat->uiDPIScale);
     destRect.w = (float)((float)remainingWidth*rdat->uiScale/2.0f);
     destRect.h = (float)(UI_TILE_SIZE*rdat->uiScale);
     srcRect.x = 0.0f;
@@ -212,8 +212,8 @@ void drawButton(const ui_theme_rules *restrict uirules, resource_data *restrict 
     destRect.w = (float)((float)remainingWidth*rdat->uiScale);
     SDL_RenderTexture(rdat->renderer,rdat->uiThemeTex,&srcRect,&destRect);
   }else{
-    destRect.x = (float)(x*rdat->uiScale);
-    destRect.y = (float)(y*rdat->uiScale);
+    destRect.x = (float)(x*rdat->uiDPIScale);
+    destRect.y = (float)(y*rdat->uiDPIScale);
     destRect.w = (float)(UI_TILE_SIZE*rdat->uiScale);
     destRect.h = destRect.w;
     srcRect.x = 0.0f;
@@ -289,8 +289,8 @@ void drawIcon(const ui_theme_rules *restrict uirules, resource_data *restrict rd
   srcRect.h = srcRect.w;
   drawPos.w = (float)(UI_TILE_SIZE*rdat->uiScale);
   drawPos.h = (float)(UI_TILE_SIZE*rdat->uiScale);
-  drawPos.x = (float)(x*rdat->uiScale) + (float)(w*rdat->uiScale)/2.0f - drawPos.w/2.0f;
-  drawPos.y = (float)(y*rdat->uiScale) + (float)(UI_TILE_SIZE*rdat->uiScale)/2.0f - drawPos.h/2.0f;
+  drawPos.x = (float)(x*rdat->uiDPIScale) + (float)(w*rdat->uiDPIScale)/2.0f - drawPos.w*rdat->uiDPIScale/2.0f;
+  drawPos.y = (float)(y*rdat->uiDPIScale) + (float)(UI_TILE_SIZE*rdat->uiScale)/2.0f - drawPos.h/2.0f;
   //printf("drawPos: %i %i %i %i\n",drawPos.x,drawPos.y,drawPos.w,drawPos.h);
   if(SDL_SetTextureAlphaMod(rdat->uiThemeTex,alpha)<0){
     SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,"drawIcon - cannot set texture alpha - %s\n",SDL_GetError());
@@ -310,12 +310,12 @@ void drawIconButton(const ui_theme_rules *restrict uirules, resource_data *restr
 
 void drawIconAndTextButton(const ui_theme_rules *restrict uirules, resource_data *restrict rdat, const uint16_t x, const uint16_t y, const uint16_t w, const uint8_t highlightState, const uint8_t alpha, const uint8_t iconInd, const char *text){
   drawButton(uirules,rdat,x,y,w,highlightState,(float)(alpha/255.0f));
-  drawIcon(uirules,rdat,x+UI_PADDING_SIZE,y,UI_TILE_SIZE,HIGHLIGHT_NORMAL,alpha,iconInd);
+  drawIcon(uirules,rdat,x,y,(uint16_t)(UI_TILE_SIZE*rdat->uiScale),HIGHLIGHT_NORMAL,alpha,iconInd);
   //get the text width and height
   //these should already fit a 1 tile height button well, with the default font size
   //(remember that the font size is scaled by the UI scale, during font import)
-  float textX = (float)x + (float)(w + UI_TILE_SIZE - 2*UI_PADDING_SIZE)/2.0f;
-  float textY = (float)y + (float)(UI_TILE_SIZE)/2.0f;
+  float textX = (float)x + (((float)(w + UI_TILE_SIZE - 2*UI_PADDING_SIZE)/2.0f)*rdat->uiScale/rdat->uiDPIScale);
+  float textY = (float)y + ((float)(UI_TILE_SIZE)/2.0f)*rdat->uiScale/rdat->uiDPIScale;
   //printf("text x: %f, y: %f\n",(double)textX,(double)textY);
   drawTextAlignedSized(rdat,textX,textY,uirules->textColNormal,FONTSIZE_NORMAL,255,text,ALIGN_CENTER,(Uint16)(w*rdat->uiScale));
   
@@ -375,8 +375,8 @@ float getTextWidth(resource_data *restrict rdat, const uint8_t fontSizeInd, cons
 //returns a rect containing dimensions of the drawn text (can be used for alignment purposes)
 //fontSizeInd: values from font_size_enum
 SDL_FRect drawTextAlignedSized(resource_data *restrict rdat, const float xPos, const float yPos, const SDL_Color textColor, const uint8_t fontSizeInd, const Uint8 alpha, const char *txt, const uint8_t alignment, const Uint16 maxWidth){
-  float drawX = xPos*rdat->uiScale;
-  float drawY = yPos*rdat->uiScale;
+  float drawX = xPos*rdat->uiDPIScale;
+  float drawY = yPos*rdat->uiDPIScale;
   float drawW = getTextWidth(rdat,fontSizeInd,txt);
   if(drawW > maxWidth*rdat->uiScale){
     drawW = maxWidth*rdat->uiScale;

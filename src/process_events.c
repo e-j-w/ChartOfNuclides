@@ -530,6 +530,22 @@ void processSingleEvent(app_data *restrict dat, app_state *restrict state, resou
             state->chartView++;
           }
           break;
+        case SDL_SCANCODE_F7:
+          //scale UI down
+          state->ds.uiUserScale -= 0.5f;
+          if(state->ds.uiUserScale < 1.0f){
+            state->ds.uiUserScale = 1.0f;
+          }
+          updateUIScale(dat,state,rdat);
+          break;
+        case SDL_SCANCODE_F8:
+          //scale UI up
+          state->ds.uiUserScale += 0.5f;
+          if(state->ds.uiUserScale > 3.0f){
+            state->ds.uiUserScale = 3.0f;
+          }
+          updateUIScale(dat,state,rdat);
+          break;
         case SDL_SCANCODE_RETURN:
           if((state->ds.shownElements & (1U << UIELEM_NUCL_INFOBOX))&&(state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_SHOW]==0.0f)&&(state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_EXPAND]==0.0f)){
             uiElemClickAction(dat,state,rdat,0,UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON);
