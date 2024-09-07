@@ -36,6 +36,9 @@ double getRawErrFromDB(const valWithErr *restrict valStruct);
 
 double getLevelEnergykeV(const ndata *restrict nd, const uint32_t levelInd);
 
+uint32_t get2PlusLvlInd(const ndata *restrict nd, const uint16_t nuclInd);
+double get2PlusEnergy(const ndata *restrict nd, const uint16_t nuclInd);
+
 double getLevelHalfLifeSeconds(const ndata *restrict nd, const uint32_t levelInd);
 double getNuclLevelHalfLifeSeconds(const ndata *restrict nd, const uint16_t nuclInd, const uint16_t nuclLevel);
 double getNuclGSHalfLifeSeconds(const ndata *restrict nd, const uint16_t nuclInd);

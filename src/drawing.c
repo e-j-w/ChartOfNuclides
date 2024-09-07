@@ -322,7 +322,13 @@ void drawIconAndTextButton(const ui_theme_rules *restrict uirules, resource_data
 }
 
 void drawCheckbox(const ui_theme_rules *restrict uirules, resource_data *restrict rdat,const uint16_t x, const uint16_t y, const uint16_t w, const uint8_t highlightState, const uint8_t alpha, const uint8_t checked){
-  drawIcon(uirules,rdat,x,y,w,highlightState,alpha,checked ? UIICON_CHECKBOX_CHECKED : UIICON_CHECKBOX_UNCHECKED);
+  if(checked){
+    drawIcon(uirules,rdat,x,y,w,highlightState,alpha,UIICON_CHECKBOX_OUTLINE);
+    drawIcon(uirules,rdat,x,y,w,highlightState,alpha,UIICON_CHECKBOX_CHECK);
+  }else{
+    drawIcon(uirules,rdat,x,y,w,highlightState,alpha,UIICON_CHECKBOX_OUTLINE);
+  }
+  
 }
 
 //draws a selection indicator with the position and size specified by the input SDL_Rect

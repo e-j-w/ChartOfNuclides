@@ -112,6 +112,11 @@ static int readConfigFile(FILE *file, app_state *restrict state){
         }else{
           state->ds.useLifetimes = 0;
         }
+      }else if(strcmp(par,"chart_display_mode") == 0){
+        int view = atoi(val);
+        if((view >= 0)&&(view < CHARTVIEW_ENUM_LENGTH)){
+          state->chartView = (uint8_t)view;
+        }
       }else if(strcmp(par,"use_ui_animations") == 0){
         if(strcmp(val,"yes") == 0){
           state->ds.useUIAnimations = 1;
@@ -177,6 +182,7 @@ static int writeConfigFile(FILE *file, const app_rules *restrict rules, const ap
   }else{
     fprintf(file,"use_lifetimes=no\n");
   }
+  fprintf(file,"chart_display_mode=%u\n",state->chartView);
   if(state->ds.useUIAnimations){
     fprintf(file,"use_ui_animations=yes\n");
   }else{

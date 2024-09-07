@@ -39,7 +39,7 @@ which can be referenced by both the GUI draw code as well as the interaction cod
 #define UI_PADDING_SIZE      4   //pixel size of the default UI element padding
 //dimensions of the UI theme texture, in units of tiles
 #define UI_THEME_TEX_TILES_X 3
-#define UI_THEME_TEX_TILES_Y 11
+#define UI_THEME_TEX_TILES_Y 12
 
 //positions of UI theme elements, in tiles
 #define UITHEME_BUTTON_TILE_X 0
@@ -50,8 +50,8 @@ which can be referenced by both the GUI draw code as well as the interaction cod
 #define UITHEME_HIGHLIGHT_TILE_Y 2
 
 //UI theme icons
-static const uint8_t UITHEME_ICON_TILE_X[UIICON_ENUM_LENGTH] = {0,1,2,1,2,0,1};
-static const uint8_t UITHEME_ICON_TILE_Y[UIICON_ENUM_LENGTH] = {10,10,10,9,9,8,8};
+static const uint8_t UITHEME_ICON_TILE_X[UIICON_ENUM_LENGTH] = {0,1,2,1,2,0,1,0};
+static const uint8_t UITHEME_ICON_TILE_Y[UIICON_ENUM_LENGTH] = {10,10,10,9,9,8,8,11};
 
 #define FONT_SIZE            32 //pt size at which the font is imported, same as the maximum pt size to be used
 #define FONT_SCALING_HUGE    0.75f
@@ -66,11 +66,21 @@ static const uint8_t UITHEME_ICON_TILE_Y[UIICON_ENUM_LENGTH] = {10,10,10,9,9,8,8
 #define MENU_BUTTON_POS_Y     UI_PADDING_SIZE   //in unscaled pixels
 #define MENU_BUTTON_WIDTH     40 //in unscaled pixels
 
-#define PRIMARY_MENU_POS_XR        (UI_PADDING_SIZE-4)   //in unscaled pixels
+#define PRIMARY_MENU_ITEM_SPACING  40 //in unscaled pixels
+#define PRIMARY_MENU_POS_XR        (MENU_BUTTON_POS_XR-4)   //in unscaled pixels
 #define PRIMARY_MENU_POS_Y         (UI_TILE_SIZE+UI_PADDING_SIZE)  //in unscaled pixels
 #define PRIMARY_MENU_WIDTH         200 //in unscaled pixels
 #define PRIMARY_MENU_HEIGHT        2*PRIMARY_MENU_ITEM_SPACING + 5*UI_PADDING_SIZE //in unscaled pixels
-#define PRIMARY_MENU_ITEM_SPACING  40 //in unscaled pixels
+
+#define CHARTVIEW_BUTTON_POS_XR    (2*UI_PADDING_SIZE + MENU_BUTTON_WIDTH)   //in unscaled pixels
+#define CHARTVIEW_BUTTON_POS_Y     UI_PADDING_SIZE   //in unscaled pixels
+#define CHARTVIEW_BUTTON_WIDTH     120 //in unscaled pixels
+
+#define CHARTVIEW_MENU_ITEM_SPACING  40 //in unscaled pixels
+#define CHARTVIEW_MENU_POS_XR        (CHARTVIEW_BUTTON_POS_XR-4)   //in unscaled pixels
+#define CHARTVIEW_MENU_POS_Y         (UI_TILE_SIZE+UI_PADDING_SIZE)  //in unscaled pixels
+#define CHARTVIEW_MENU_WIDTH         180 //in unscaled pixels
+#define CHARTVIEW_MENU_HEIGHT        (CHARTVIEW_ENUM_LENGTH+1)*CHARTVIEW_MENU_ITEM_SPACING + 5*UI_PADDING_SIZE //in unscaled pixels
 
 #define DIMMER_OPACITY        0.20f
 
@@ -102,7 +112,7 @@ static const uint8_t UITHEME_ICON_TILE_Y[UIICON_ENUM_LENGTH] = {10,10,10,9,9,8,8
 
 //chart of nuclides
 #define DEFAULT_NUCLBOX_DIM                8.0f
-#define DEFAULT_ISOMERBOX_PADDING          0.25f
+#define DEFAULT_LOWBOX_PADDING             0.25f //padding for the 'lower' box containing isomer info etc.
 #define MIN_CHART_ZOOM_SCALE               0.5f
 #define MAX_CHART_ZOOM_SCALE               32.0f
 #define CHART_ZOOM_TIME                    0.2f //time (in seconds) for the zoom animation to finish

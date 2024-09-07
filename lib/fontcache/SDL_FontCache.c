@@ -1171,6 +1171,8 @@ Uint8 FC_LoadFont_RW(FC_Font* font, FC_Target* renderer, SDL_IOStream* file_iost
         return 0;
     }
 
+    TTF_SetFontHinting(ttf,TTF_HINTING_LIGHT_SUBPIXEL); //hopefully helps font rendering on low-DPI displays
+
     outline = (style & TTF_STYLE_OUTLINE);
     if(outline)
     {

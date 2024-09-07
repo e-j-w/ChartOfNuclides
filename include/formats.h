@@ -211,6 +211,7 @@ typedef struct
   uint16_t gamepadDeadzone,tmpGamepadDeadzone;
   int16_t lastAxisValX, lastAxisValY; //used to mask out spurious events in the gamepad axis deadzone
   uint8_t activeAxis; //the last used analog stick axis
+  uint8_t chartView; //values from chart_view_enum
   uint8_t clickedUIElem; //which UI element was last clicked, values from ui_element_enum
   float timeSinceLastSec; //used to track play time, the amount of seconds that have passed since the last tick
   float mouseHoldTime; //amount of time the mouse button has been held down for

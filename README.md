@@ -12,6 +12,7 @@ The goal is to develop a simple, performant, and multiplatform tool that will be
 
 ## Features
 
+- Display nuclear chart with various color schemes: half-life/lifetime, E(2+)...
 - Select individual nuclides to browse ground and excited state data, including:
   - Level energies, half-lives/lifetimes, decay modes, spin-parities...
   - Gamma energies, branching fractions, multipolarities...
@@ -95,8 +96,9 @@ Zoom and pan with the mouse, the controls are basically identical to Google Maps
 | Key                | Action |
 | :----------------- | :----- |
 | Arrow keys         | Pan chart view |
-| W/A/S/D            | Pan selected nuclide (in chart and level list views) |
-| +/-                | Zoom in/out on chart |
+| W / A / S / D      | Pan selected nuclide (in chart and level list views) |
+| + / -              | Zoom in/out on chart |
+| ] / [              | Cycle between view modes for the chart (half-life, 2+ energy, etc.) |
 | Enter              | Show full list of levels/gammas for selected nuclide |
 | Escape / backspace | Exit out of open menus, cancel selection, etc. |
 | F11                | Toggle fullscreen mode |
