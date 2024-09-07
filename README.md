@@ -1,10 +1,8 @@
 <div align = center><img src="https://raw.githubusercontent.com/e-j-w/ChartOfNuclides/master/data/icon.svg" width="150" height="150" alt="icon">
 
-<b>Chart of Nuclides GUI</b>
-
 </div>
 
-## Description
+<h1 align="center">Chart of Nuclides</h1>
 
 **NOTE: This is early in development, expect some issues...**
 
