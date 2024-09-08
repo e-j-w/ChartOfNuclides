@@ -2007,46 +2007,46 @@ void updateSingleUIElemPosition(const app_data *restrict dat, drawing_state *res
 			ds->uiElemHeight[uiElemInd] = (uint16_t)(UI_TILE_SIZE*ds->uiUserScale);
 			break;
 		case UIELEM_PRIMARY_MENU:
-			ds->uiElemPosX[uiElemInd] = (uint16_t)(ds->windowXRes-PRIMARY_MENU_WIDTH-PRIMARY_MENU_POS_XR);
-			ds->uiElemPosY[uiElemInd] = PRIMARY_MENU_POS_Y;
-			ds->uiElemWidth[uiElemInd] = PRIMARY_MENU_WIDTH;
-			ds->uiElemHeight[uiElemInd] = PRIMARY_MENU_HEIGHT;
+			ds->uiElemPosX[uiElemInd] = (uint16_t)(ds->windowXRes-((PRIMARY_MENU_WIDTH+PRIMARY_MENU_POS_XR)*ds->uiUserScale));
+			ds->uiElemPosY[uiElemInd] = (uint16_t)(PRIMARY_MENU_POS_Y*ds->uiUserScale);
+			ds->uiElemWidth[uiElemInd] = (uint16_t)(PRIMARY_MENU_WIDTH*ds->uiUserScale);
+			ds->uiElemHeight[uiElemInd] = (uint16_t)(PRIMARY_MENU_HEIGHT*ds->uiUserScale);
 			break;
 		case UIELEM_PM_PREFS_BUTTON:
-			ds->uiElemPosX[uiElemInd] = (uint16_t)(ds->windowXRes-PRIMARY_MENU_WIDTH-PRIMARY_MENU_POS_XR + 3*UI_PADDING_SIZE);
-			ds->uiElemPosY[uiElemInd] = PRIMARY_MENU_POS_Y + 3*UI_PADDING_SIZE;
-			ds->uiElemWidth[uiElemInd] = PRIMARY_MENU_WIDTH - 6*UI_PADDING_SIZE;
-			ds->uiElemHeight[uiElemInd] = PRIMARY_MENU_ITEM_SPACING - UI_PADDING_SIZE;
+			ds->uiElemPosX[uiElemInd] = (uint16_t)(ds->windowXRes-((PRIMARY_MENU_WIDTH+PRIMARY_MENU_POS_XR - 3*UI_PADDING_SIZE)*ds->uiUserScale));
+			ds->uiElemPosY[uiElemInd] = (uint16_t)((PRIMARY_MENU_POS_Y + 3*UI_PADDING_SIZE)*ds->uiUserScale);
+			ds->uiElemWidth[uiElemInd] = (uint16_t)((PRIMARY_MENU_WIDTH - 6*UI_PADDING_SIZE)*ds->uiUserScale);
+			ds->uiElemHeight[uiElemInd] = (uint16_t)((PRIMARY_MENU_ITEM_SPACING - UI_PADDING_SIZE)*ds->uiUserScale);
 			break;
 		case UIELEM_PM_ABOUT_BUTTON:
-			ds->uiElemPosX[uiElemInd] = (uint16_t)(ds->windowXRes-PRIMARY_MENU_WIDTH-PRIMARY_MENU_POS_XR + 3*UI_PADDING_SIZE);
-			ds->uiElemPosY[uiElemInd] = PRIMARY_MENU_POS_Y + 3*UI_PADDING_SIZE + PRIMARY_MENU_ITEM_SPACING;
-			ds->uiElemWidth[uiElemInd] = PRIMARY_MENU_WIDTH - 6*UI_PADDING_SIZE;
-			ds->uiElemHeight[uiElemInd] = PRIMARY_MENU_ITEM_SPACING - UI_PADDING_SIZE;
+			ds->uiElemPosX[uiElemInd] = (uint16_t)(ds->windowXRes-((PRIMARY_MENU_WIDTH+PRIMARY_MENU_POS_XR - 3*UI_PADDING_SIZE)*ds->uiUserScale));
+			ds->uiElemPosY[uiElemInd] = (uint16_t)((PRIMARY_MENU_POS_Y + 3*UI_PADDING_SIZE + PRIMARY_MENU_ITEM_SPACING)*ds->uiUserScale);
+			ds->uiElemWidth[uiElemInd] = (uint16_t)((PRIMARY_MENU_WIDTH - 6*UI_PADDING_SIZE)*ds->uiUserScale);
+			ds->uiElemHeight[uiElemInd] = (uint16_t)((PRIMARY_MENU_ITEM_SPACING - UI_PADDING_SIZE)*ds->uiUserScale);
 			break;
 		case UIELEM_CHARTVIEW_MENU:
-			ds->uiElemPosX[uiElemInd] = (uint16_t)(ds->windowXRes-CHARTVIEW_MENU_WIDTH-CHARTVIEW_MENU_POS_XR);
-			ds->uiElemPosY[uiElemInd] = CHARTVIEW_MENU_POS_Y;
-			ds->uiElemWidth[uiElemInd] = CHARTVIEW_MENU_WIDTH;
-			ds->uiElemHeight[uiElemInd] = CHARTVIEW_MENU_HEIGHT;
+			ds->uiElemPosX[uiElemInd] = (uint16_t)(ds->windowXRes-((CHARTVIEW_MENU_WIDTH+CHARTVIEW_MENU_POS_XR)*ds->uiUserScale));
+			ds->uiElemPosY[uiElemInd] = (uint16_t)(CHARTVIEW_MENU_POS_Y*ds->uiUserScale);
+			ds->uiElemWidth[uiElemInd] = (uint16_t)(CHARTVIEW_MENU_WIDTH*ds->uiUserScale);
+			ds->uiElemHeight[uiElemInd] = (uint16_t)(CHARTVIEW_MENU_HEIGHT*ds->uiUserScale);
 			break;
 		case UIELEM_CVM_HALFLIFE_BUTTON:
-			ds->uiElemPosX[uiElemInd] = (uint16_t)(ds->windowXRes-CHARTVIEW_MENU_WIDTH-CHARTVIEW_MENU_POS_XR + 3*UI_PADDING_SIZE);
-			ds->uiElemPosY[uiElemInd] = CHARTVIEW_MENU_POS_Y + 3*UI_PADDING_SIZE + CHARTVIEW_MENU_ITEM_SPACING;
-			ds->uiElemWidth[uiElemInd] = CHARTVIEW_MENU_WIDTH - 6*UI_PADDING_SIZE;
-			ds->uiElemHeight[uiElemInd] = CHARTVIEW_MENU_ITEM_SPACING - UI_PADDING_SIZE;
+			ds->uiElemPosX[uiElemInd] = (uint16_t)(ds->windowXRes-((CHARTVIEW_MENU_WIDTH+CHARTVIEW_MENU_POS_XR - 3*UI_PADDING_SIZE)*ds->uiUserScale));
+			ds->uiElemPosY[uiElemInd] = (uint16_t)((CHARTVIEW_MENU_POS_Y + 3*UI_PADDING_SIZE + CHARTVIEW_MENU_ITEM_SPACING)*ds->uiUserScale);
+			ds->uiElemWidth[uiElemInd] = (uint16_t)((CHARTVIEW_MENU_WIDTH - 6*UI_PADDING_SIZE)*ds->uiUserScale);
+			ds->uiElemHeight[uiElemInd] = (uint16_t)((CHARTVIEW_MENU_ITEM_SPACING - UI_PADDING_SIZE)*ds->uiUserScale);
 			break;
 		case UIELEM_CVM_2PLUS_BUTTON:
-			ds->uiElemPosX[uiElemInd] = (uint16_t)(ds->windowXRes-CHARTVIEW_MENU_WIDTH-CHARTVIEW_MENU_POS_XR + 3*UI_PADDING_SIZE);
-			ds->uiElemPosY[uiElemInd] = CHARTVIEW_MENU_POS_Y + 3*UI_PADDING_SIZE + 2*CHARTVIEW_MENU_ITEM_SPACING;
-			ds->uiElemWidth[uiElemInd] = CHARTVIEW_MENU_WIDTH - 6*UI_PADDING_SIZE;
-			ds->uiElemHeight[uiElemInd] = CHARTVIEW_MENU_ITEM_SPACING - UI_PADDING_SIZE;
+			ds->uiElemPosX[uiElemInd] = (uint16_t)(ds->windowXRes-((CHARTVIEW_MENU_WIDTH+CHARTVIEW_MENU_POS_XR - 3*UI_PADDING_SIZE)*ds->uiUserScale));
+			ds->uiElemPosY[uiElemInd] = (uint16_t)((CHARTVIEW_MENU_POS_Y + 3*UI_PADDING_SIZE + 2*CHARTVIEW_MENU_ITEM_SPACING)*ds->uiUserScale);
+			ds->uiElemWidth[uiElemInd] = (uint16_t)((CHARTVIEW_MENU_WIDTH - 6*UI_PADDING_SIZE)*ds->uiUserScale);
+			ds->uiElemHeight[uiElemInd] = (uint16_t)((CHARTVIEW_MENU_ITEM_SPACING - UI_PADDING_SIZE)*ds->uiUserScale);
 			break;
 		case UIELEM_MSG_BOX:
-			ds->uiElemPosX[uiElemInd] = (uint16_t)((ds->windowXRes - MESSAGE_BOX_WIDTH)/2);
-			ds->uiElemPosY[uiElemInd] = (uint16_t)((ds->windowYRes - MESSAGE_BOX_HEIGHT)/2);
-			ds->uiElemWidth[uiElemInd] = MESSAGE_BOX_WIDTH;
-			ds->uiElemHeight[uiElemInd] = MESSAGE_BOX_HEIGHT;
+			ds->uiElemPosX[uiElemInd] = (uint16_t)((ds->windowXRes - MESSAGE_BOX_WIDTH*ds->uiUserScale)/2);
+			ds->uiElemPosY[uiElemInd] = (uint16_t)((ds->windowYRes - MESSAGE_BOX_HEIGHT*ds->uiUserScale)/2);
+			ds->uiElemWidth[uiElemInd] = (uint16_t)(MESSAGE_BOX_WIDTH*ds->uiUserScale);
+			ds->uiElemHeight[uiElemInd] = (uint16_t)(MESSAGE_BOX_HEIGHT*ds->uiUserScale);
 			break;
 		case UIELEM_MSG_BOX_OK_BUTTON:
 			ds->uiElemPosX[uiElemInd] = (uint16_t)((ds->windowXRes - MESSAGE_BOX_OK_BUTTON_WIDTH)/2);

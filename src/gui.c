@@ -378,7 +378,7 @@ void drawChartOfNuclides(const app_data *restrict dat, const app_state *restrict
   //SDL_Log("N range: [%0.2f %0.2f], Z range: [%0.2f %0.2f]\n",(double)minX,(double)maxX,(double)minY,(double)maxY);
 
   SDL_FRect rect, lowBoxRect;
-  float nuclBoxWidth = DEFAULT_NUCLBOX_DIM*state->ds.chartZoomScale*rdat->uiScale;
+  float nuclBoxWidth = DEFAULT_NUCLBOX_DIM*state->ds.chartZoomScale*state->ds.uiUserScale;
   float lowBoxPadding = DEFAULT_LOWBOX_PADDING*state->ds.chartZoomScale*rdat->uiScale;
   float boxLineLimit = powf(state->ds.chartZoomScale/MAX_CHART_ZOOM_SCALE,2.0f)*9.0f;
 
@@ -567,26 +567,26 @@ void drawChartOfNuclides(const app_data *restrict dat, const app_state *restrict
   }
 
   //draw x and y axes
-  rect.w = state->ds.windowXRenderRes;
-  rect.h = CHART_AXIS_DEPTH*rdat->uiScale;
+  rect.w = state->ds.windowXRes;
+  rect.h = CHART_AXIS_DEPTH*state->ds.uiUserScale;
   rect.x = 0;
-  rect.y = state->ds.windowYRenderRes - rect.h;
+  rect.y = state->ds.windowYRes - rect.h;
   drawFlatRect(rdat,rect,whiteTransparentCol);
   rect.w = rect.h;
   rect.h = rect.y;
   rect.y = 0;
   drawFlatRect(rdat,rect,whiteTransparentCol);
-  drawTextAligned(rdat,CHART_AXIS_DEPTH*0.5f,CHART_AXIS_DEPTH*0.5f,blackCol8Bit,FONTSIZE_LARGE,"Z",ALIGN_CENTER);
-  drawTextAligned(rdat,state->ds.windowXRes - CHART_AXIS_DEPTH*0.5f,state->ds.windowYRes - CHART_AXIS_DEPTH*0.5f,blackCol8Bit,FONTSIZE_LARGE,"N",ALIGN_CENTER);
+  drawTextAligned(rdat,CHART_AXIS_DEPTH*0.5f*state->ds.uiUserScale,CHART_AXIS_DEPTH*0.5f*state->ds.uiUserScale,blackCol8Bit,FONTSIZE_LARGE,"Z",ALIGN_CENTER);
+  drawTextAligned(rdat,state->ds.windowXRes - CHART_AXIS_DEPTH*0.5f*state->ds.uiUserScale,state->ds.windowYRes - CHART_AXIS_DEPTH*0.5f*state->ds.uiUserScale,blackCol8Bit,FONTSIZE_LARGE,"N",ALIGN_CENTER);
   //draw ticks
   char tmpStr[32];
-  rect.y = state->ds.windowYRes - CHART_AXIS_DEPTH*0.5f;
+  rect.y = state->ds.windowYRes - (CHART_AXIS_DEPTH*0.5f*state->ds.uiUserScale);
   float tickSpacing = getAxisTickSpacing(roundf(maxX - minX)); //round to remove jitter when panning the chart and the axis range is very close to an integer value
   for(float i=(minX-fmodf(minX,tickSpacing));i<maxX;i+=tickSpacing){
     if(i >= 0.0f){
       uint16_t numInd = (uint16_t)(SDL_floorf(i));
       if((i<MAX_MASS_NUM)&&(i<=MAX_NEUTRON_NUM)){
-        rect.x = (i + 0.5f - minX)*DEFAULT_NUCLBOX_DIM*state->ds.chartZoomScale;
+        rect.x = (i + 0.5f - minX)*DEFAULT_NUCLBOX_DIM*state->ds.chartZoomScale*state->ds.uiUserScale;
         if(rect.x < (state->ds.windowXRes - CHART_AXIS_DEPTH)){ //dodge axis label
           snprintf(tmpStr,32,"%u",numInd); //is this slow?
           drawTextAlignedSized(rdat,rect.x,rect.y,blackCol8Bit,FONTSIZE_NORMAL,255,tmpStr,ALIGN_CENTER,16384); //draw number label
@@ -594,13 +594,13 @@ void drawChartOfNuclides(const app_data *restrict dat, const app_state *restrict
       }
     }
   }
-  rect.x = CHART_AXIS_DEPTH*0.5f;
+  rect.x = CHART_AXIS_DEPTH*0.5f*state->ds.uiUserScale;
   tickSpacing = getAxisTickSpacing(maxY - minY);
   for(float i=(minY-fmodf(minY,tickSpacing));i<maxY;i+=tickSpacing){
     if(i >= 0.0f){
       uint16_t numInd = (uint16_t)(SDL_floorf(i));
       if((i<MAX_MASS_NUM)&&(i<MAX_PROTON_NUM)){
-        rect.y = (maxY - i + 0.5f)*DEFAULT_NUCLBOX_DIM*state->ds.chartZoomScale;
+        rect.y = (maxY - i + 0.5f)*DEFAULT_NUCLBOX_DIM*state->ds.chartZoomScale*state->ds.uiUserScale;
         if(rect.y > CHART_AXIS_DEPTH){ //dodge axis label
           snprintf(tmpStr,32,"%u",numInd); //is this slow?
           drawTextAlignedSized(rdat,rect.x,rect.y,blackCol8Bit,FONTSIZE_NORMAL,255,tmpStr,ALIGN_CENTER,16384); //draw number label
@@ -686,7 +686,7 @@ void drawNuclFullInfoBox(const app_data *restrict dat, const app_state *restrict
   char tmpStr[32];
   SDL_FRect rect;
   rect.x = 0.0f;
-  rect.w = state->ds.windowXRenderRes;
+  rect.w = state->ds.windowXRes;
   uint8_t drawMode = 0; //0=draw all columns, 1=skip multipolarity, 2=skip multipolarity, final spin
   float allColWidth = NUCL_FULLINFOBOX_ALLCOL_WIDTH;
   if(allColWidth > (state->ds.windowXRes - 4*UI_PADDING_SIZE)){
@@ -712,8 +712,8 @@ void drawNuclFullInfoBox(const app_data *restrict dat, const app_state *restrict
         //highlight isomers and stable states
         //first check that the lifetime is not an upper limit
         if((((dat->ndat.levels[lvlInd].halfLife.format >> 5U) & 15U) != VALUETYPE_LESSTHAN)&&(((dat->ndat.levels[lvlInd].halfLife.format >> 5U) & 15U) != VALUETYPE_LESSOREQUALTHAN)){
-          rect.h = NUCL_INFOBOX_SMALLLINE_HEIGHT*numLines*rdat->uiScale;
-          rect.y = drawYPos*rdat->uiScale;
+          rect.h = NUCL_INFOBOX_SMALLLINE_HEIGHT*numLines*state->ds.uiUserScale;
+          rect.y = drawYPos*state->ds.uiUserScale;
           SDL_FColor rectCol = getHalfLifeCol(hl);
           if(txtAlpha != 255){
             rectCol.a *= txtAlpha/255.0f;
@@ -787,8 +787,8 @@ void drawNuclFullInfoBox(const app_data *restrict dat, const app_state *restrict
   //rect to hide over-scrolled level info
   rect.x = 0.0f;
   rect.y = 0.0f;
-  rect.w = state->ds.windowXRenderRes;
-  rect.h = NUCL_FULLINFOBOX_LEVELLIST_POS_Y*rdat->uiScale;
+  rect.w = state->ds.windowXRes;
+  rect.h = NUCL_FULLINFOBOX_LEVELLIST_POS_Y*state->ds.uiUserScale;
   drawFlatRect(rdat,rect,dat->rules.themeRules.bgCol);
 
   //header
@@ -1116,10 +1116,10 @@ void drawChartViewMenu(const app_data *restrict dat, const app_state *restrict s
   
   //draw menu item highlight
   for(uint8_t i=1;i<=CHARTVIEW_ENUM_LENGTH;i++){
-    drawRect.x = state->ds.uiElemPosX[UIELEM_CHARTVIEW_MENU-i]*rdat->uiScale;
-    drawRect.y = (state->ds.uiElemPosY[UIELEM_CHARTVIEW_MENU-i] + yOffset)*rdat->uiScale;
-    drawRect.w = state->ds.uiElemWidth[UIELEM_CHARTVIEW_MENU-i]*rdat->uiScale;
-    drawRect.h = state->ds.uiElemHeight[UIELEM_CHARTVIEW_MENU-i]*rdat->uiScale;
+    drawRect.x = state->ds.uiElemPosX[UIELEM_CHARTVIEW_MENU-i]*state->ds.uiUserScale;
+    drawRect.y = (state->ds.uiElemPosY[UIELEM_CHARTVIEW_MENU-i] + yOffset)*state->ds.uiUserScale;
+    drawRect.w = state->ds.uiElemWidth[UIELEM_CHARTVIEW_MENU-i]*state->ds.uiUserScale;
+    drawRect.h = state->ds.uiElemHeight[UIELEM_CHARTVIEW_MENU-i]*state->ds.uiUserScale;
     switch(getHighlightState(state,UIELEM_CHARTVIEW_MENU-i)){
       case HIGHLIGHT_SELECTED:
         drawFlatRect(rdat,drawRect,dat->rules.themeRules.modSelectedCol);
@@ -1176,10 +1176,10 @@ void drawPrimaryMenu(const app_data *restrict dat, const app_state *restrict sta
   
   //draw menu item highlight
   for(uint8_t i=1;i<=2;i++){
-    drawRect.x = state->ds.uiElemPosX[UIELEM_PRIMARY_MENU-i]*rdat->uiScale;
-    drawRect.y = (state->ds.uiElemPosY[UIELEM_PRIMARY_MENU-i] + yOffset)*rdat->uiScale;
-    drawRect.w = state->ds.uiElemWidth[UIELEM_PRIMARY_MENU-i]*rdat->uiScale;
-    drawRect.h = state->ds.uiElemHeight[UIELEM_PRIMARY_MENU-i]*rdat->uiScale;
+    drawRect.x = state->ds.uiElemPosX[UIELEM_PRIMARY_MENU-i]*state->ds.uiUserScale;
+    drawRect.y = (state->ds.uiElemPosY[UIELEM_PRIMARY_MENU-i] + yOffset)*state->ds.uiUserScale;
+    drawRect.w = state->ds.uiElemWidth[UIELEM_PRIMARY_MENU-i]*state->ds.uiUserScale;
+    drawRect.h = state->ds.uiElemHeight[UIELEM_PRIMARY_MENU-i]*state->ds.uiUserScale;
     switch(getHighlightState(state,UIELEM_PRIMARY_MENU-i)){
       case HIGHLIGHT_SELECTED:
         drawFlatRect(rdat,drawRect,dat->rules.themeRules.modSelectedCol);
