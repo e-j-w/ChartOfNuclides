@@ -37,6 +37,7 @@ which can be referenced by both the GUI draw code as well as the interaction cod
 
 #define UI_TILE_SIZE         32  //pixel size of a UI tile at 1x scaling
 #define UI_PADDING_SIZE      4   //pixel size of the default UI element padding
+#define PANEL_EDGE_SIZE      6   //pixel size of the unusable edge of a panel background (eg. the shadow section)
 //dimensions of the UI theme texture, in units of tiles
 #define UI_THEME_TEX_TILES_X 3
 #define UI_THEME_TEX_TILES_Y 12
@@ -68,7 +69,7 @@ static const uint16_t fontSizes[FONTSIZE_ENUM_LENGTH] = {13,15,19};
 #define PRIMARY_MENU_POS_XR        (MENU_BUTTON_POS_XR-4)   //in unscaled pixels
 #define PRIMARY_MENU_POS_Y         (UI_TILE_SIZE+UI_PADDING_SIZE)  //in unscaled pixels
 #define PRIMARY_MENU_WIDTH         200 //in unscaled pixels
-#define PRIMARY_MENU_HEIGHT        (2*PRIMARY_MENU_ITEM_SPACING + 5*UI_PADDING_SIZE) //in unscaled pixels
+#define PRIMARY_MENU_HEIGHT        (2*PRIMARY_MENU_ITEM_SPACING + 2*PANEL_EDGE_SIZE + 3*UI_PADDING_SIZE) //in unscaled pixels
 
 #define CHARTVIEW_BUTTON_POS_XR    (2*UI_PADDING_SIZE + MENU_BUTTON_WIDTH)   //in unscaled pixels
 #define CHARTVIEW_BUTTON_POS_Y     UI_PADDING_SIZE   //in unscaled pixels
@@ -78,7 +79,7 @@ static const uint16_t fontSizes[FONTSIZE_ENUM_LENGTH] = {13,15,19};
 #define CHARTVIEW_MENU_POS_XR        (CHARTVIEW_BUTTON_POS_XR-4)   //in unscaled pixels
 #define CHARTVIEW_MENU_POS_Y         (UI_TILE_SIZE+UI_PADDING_SIZE)  //in unscaled pixels
 #define CHARTVIEW_MENU_WIDTH         180 //in unscaled pixels
-#define CHARTVIEW_MENU_HEIGHT        ((CHARTVIEW_ENUM_LENGTH+1)*CHARTVIEW_MENU_ITEM_SPACING + 5*UI_PADDING_SIZE) //in unscaled pixels
+#define CHARTVIEW_MENU_HEIGHT        ((CHARTVIEW_ENUM_LENGTH+1)*CHARTVIEW_MENU_ITEM_SPACING + 2*PANEL_EDGE_SIZE + 4*UI_PADDING_SIZE) //in unscaled pixels
 
 #define DIMMER_OPACITY               0.20f
 

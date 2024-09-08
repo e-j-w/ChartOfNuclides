@@ -1531,40 +1531,40 @@ uint16_t getMaxNumLvlDispLines(const ndata *restrict nd, const app_state *restri
 }
 
 float mouseXPxToN(const drawing_state *restrict ds, const float mouseX){
-	return ds->chartPosX + ((mouseX - ds->windowXRes/2.0f)/(DEFAULT_NUCLBOX_DIM*ds->chartZoomScale));
+	return ds->chartPosX + ((mouseX - ds->windowXRes/(2.0f))/(DEFAULT_NUCLBOX_DIM*ds->chartZoomScale*ds->uiUserScale));
 }
 float mouseYPxToZ(const drawing_state *restrict ds, const float mouseY){
-	return ds->chartPosY - ((mouseY - ds->windowYRes/2.0f)/(DEFAULT_NUCLBOX_DIM*ds->chartZoomScale));
+	return ds->chartPosY - ((mouseY - ds->windowYRes/(2.0f))/(DEFAULT_NUCLBOX_DIM*ds->chartZoomScale*ds->uiUserScale));
 }
 float chartNtoXPx(const drawing_state *restrict ds, const float N){
-	return (ds->windowXRes/2.0f) + (N - ds->chartPosX)*DEFAULT_NUCLBOX_DIM*ds->chartZoomScale;
+	return (ds->windowXRes/(2.0f)) + (N - ds->chartPosX)*DEFAULT_NUCLBOX_DIM*ds->chartZoomScale*ds->uiUserScale;
 }
 float chartZtoYPx(const drawing_state *restrict ds, const float Z){
-	return (ds->windowYRes/2.0f) + (ds->chartPosY - Z)*DEFAULT_NUCLBOX_DIM*ds->chartZoomScale;
+	return (ds->windowYRes/(2.0f)) + (ds->chartPosY - Z)*DEFAULT_NUCLBOX_DIM*ds->chartZoomScale*ds->uiUserScale;
 }
 float getMinChartN(const drawing_state *restrict ds){
-	return ds->chartPosX - (ds->windowXRes)/(2.0f*DEFAULT_NUCLBOX_DIM*ds->chartZoomScale);
+	return ds->chartPosX - (ds->windowXRes/ds->uiUserScale)/(2.0f*DEFAULT_NUCLBOX_DIM*ds->chartZoomScale);
 }
 float getMaxChartN(const drawing_state *restrict ds){
-	return ds->chartPosX + (ds->windowXRes)/(2.0f*DEFAULT_NUCLBOX_DIM*ds->chartZoomScale);
+	return ds->chartPosX + (ds->windowXRes/ds->uiUserScale)/(2.0f*DEFAULT_NUCLBOX_DIM*ds->chartZoomScale);
 }
 float getMinChartZ(const drawing_state *restrict ds){
-	return ds->chartPosY - (ds->windowYRes)/(2.0f*DEFAULT_NUCLBOX_DIM*ds->chartZoomScale);
+	return ds->chartPosY - (ds->windowYRes/ds->uiUserScale)/(2.0f*DEFAULT_NUCLBOX_DIM*ds->chartZoomScale);
 }
 float getMaxChartZ(const drawing_state *restrict ds){
-	return ds->chartPosY + (ds->windowYRes)/(2.0f*DEFAULT_NUCLBOX_DIM*ds->chartZoomScale);
+	return ds->chartPosY + (ds->windowYRes/ds->uiUserScale)/(2.0f*DEFAULT_NUCLBOX_DIM*ds->chartZoomScale);
 }
 float getChartWidthN(const drawing_state *restrict ds){
-	return (ds->windowXRes/(DEFAULT_NUCLBOX_DIM*ds->chartZoomScale));
+	return (ds->windowXRes/(DEFAULT_NUCLBOX_DIM*ds->chartZoomScale*ds->uiUserScale));
 }
 float getChartHeightZ(const drawing_state *restrict ds){
-	return (ds->windowYRes/(DEFAULT_NUCLBOX_DIM*ds->chartZoomScale));
+	return (ds->windowYRes/(DEFAULT_NUCLBOX_DIM*ds->chartZoomScale*ds->uiUserScale));
 }
 float getChartWidthNAfterZoom(const drawing_state *restrict ds){
-	return (ds->windowXRes/(DEFAULT_NUCLBOX_DIM*ds->chartZoomToScale));
+	return (ds->windowXRes/(DEFAULT_NUCLBOX_DIM*ds->chartZoomToScale*ds->uiUserScale));
 }
 float getChartHeightZAfterZoom(const drawing_state *restrict ds){
-	return (ds->windowYRes/(DEFAULT_NUCLBOX_DIM*ds->chartZoomToScale));
+	return (ds->windowYRes/(DEFAULT_NUCLBOX_DIM*ds->chartZoomToScale*ds->uiUserScale));
 }
 
 //change the modal state of the UI, and update which UI elements are interactable
@@ -2013,15 +2013,15 @@ void updateSingleUIElemPosition(const app_data *restrict dat, drawing_state *res
 			ds->uiElemHeight[uiElemInd] = (uint16_t)(PRIMARY_MENU_HEIGHT*ds->uiUserScale);
 			break;
 		case UIELEM_PM_PREFS_BUTTON:
-			ds->uiElemPosX[uiElemInd] = (uint16_t)(ds->windowXRes-((PRIMARY_MENU_WIDTH+PRIMARY_MENU_POS_XR - 3*UI_PADDING_SIZE)*ds->uiUserScale));
-			ds->uiElemPosY[uiElemInd] = (uint16_t)((PRIMARY_MENU_POS_Y + 3*UI_PADDING_SIZE)*ds->uiUserScale);
-			ds->uiElemWidth[uiElemInd] = (uint16_t)((PRIMARY_MENU_WIDTH - 6*UI_PADDING_SIZE)*ds->uiUserScale);
+			ds->uiElemPosX[uiElemInd] = (uint16_t)(ds->windowXRes-((PRIMARY_MENU_WIDTH+PRIMARY_MENU_POS_XR - PANEL_EDGE_SIZE - 2*UI_PADDING_SIZE)*ds->uiUserScale));
+			ds->uiElemPosY[uiElemInd] = (uint16_t)((PRIMARY_MENU_POS_Y + PANEL_EDGE_SIZE + 2*UI_PADDING_SIZE)*ds->uiUserScale);
+			ds->uiElemWidth[uiElemInd] = (uint16_t)((PRIMARY_MENU_WIDTH - 2*PANEL_EDGE_SIZE - 4*UI_PADDING_SIZE)*ds->uiUserScale);
 			ds->uiElemHeight[uiElemInd] = (uint16_t)((PRIMARY_MENU_ITEM_SPACING - UI_PADDING_SIZE)*ds->uiUserScale);
 			break;
 		case UIELEM_PM_ABOUT_BUTTON:
-			ds->uiElemPosX[uiElemInd] = (uint16_t)(ds->windowXRes-((PRIMARY_MENU_WIDTH+PRIMARY_MENU_POS_XR - 3*UI_PADDING_SIZE)*ds->uiUserScale));
-			ds->uiElemPosY[uiElemInd] = (uint16_t)((PRIMARY_MENU_POS_Y + 3*UI_PADDING_SIZE + PRIMARY_MENU_ITEM_SPACING)*ds->uiUserScale);
-			ds->uiElemWidth[uiElemInd] = (uint16_t)((PRIMARY_MENU_WIDTH - 6*UI_PADDING_SIZE)*ds->uiUserScale);
+			ds->uiElemPosX[uiElemInd] = (uint16_t)(ds->windowXRes-((PRIMARY_MENU_WIDTH+PRIMARY_MENU_POS_XR - PANEL_EDGE_SIZE - 2*UI_PADDING_SIZE)*ds->uiUserScale));
+			ds->uiElemPosY[uiElemInd] = (uint16_t)((PRIMARY_MENU_POS_Y + PANEL_EDGE_SIZE + 2*UI_PADDING_SIZE + PRIMARY_MENU_ITEM_SPACING)*ds->uiUserScale);
+			ds->uiElemWidth[uiElemInd] = (uint16_t)((PRIMARY_MENU_WIDTH - 2*PANEL_EDGE_SIZE - 4*UI_PADDING_SIZE)*ds->uiUserScale);
 			ds->uiElemHeight[uiElemInd] = (uint16_t)((PRIMARY_MENU_ITEM_SPACING - UI_PADDING_SIZE)*ds->uiUserScale);
 			break;
 		case UIELEM_CHARTVIEW_MENU:
@@ -2031,15 +2031,15 @@ void updateSingleUIElemPosition(const app_data *restrict dat, drawing_state *res
 			ds->uiElemHeight[uiElemInd] = (uint16_t)(CHARTVIEW_MENU_HEIGHT*ds->uiUserScale);
 			break;
 		case UIELEM_CVM_HALFLIFE_BUTTON:
-			ds->uiElemPosX[uiElemInd] = (uint16_t)(ds->windowXRes-((CHARTVIEW_MENU_WIDTH+CHARTVIEW_MENU_POS_XR - 3*UI_PADDING_SIZE)*ds->uiUserScale));
-			ds->uiElemPosY[uiElemInd] = (uint16_t)((CHARTVIEW_MENU_POS_Y + 3*UI_PADDING_SIZE + CHARTVIEW_MENU_ITEM_SPACING)*ds->uiUserScale);
-			ds->uiElemWidth[uiElemInd] = (uint16_t)((CHARTVIEW_MENU_WIDTH - 6*UI_PADDING_SIZE)*ds->uiUserScale);
+			ds->uiElemPosX[uiElemInd] = (uint16_t)(ds->windowXRes-((CHARTVIEW_MENU_WIDTH+CHARTVIEW_MENU_POS_XR - PANEL_EDGE_SIZE - 2*UI_PADDING_SIZE)*ds->uiUserScale));
+			ds->uiElemPosY[uiElemInd] = (uint16_t)((CHARTVIEW_MENU_POS_Y + PANEL_EDGE_SIZE + 2*UI_PADDING_SIZE + CHARTVIEW_MENU_ITEM_SPACING)*ds->uiUserScale);
+			ds->uiElemWidth[uiElemInd] = (uint16_t)((CHARTVIEW_MENU_WIDTH - 2*PANEL_EDGE_SIZE - 4*UI_PADDING_SIZE)*ds->uiUserScale);
 			ds->uiElemHeight[uiElemInd] = (uint16_t)((CHARTVIEW_MENU_ITEM_SPACING - UI_PADDING_SIZE)*ds->uiUserScale);
 			break;
 		case UIELEM_CVM_2PLUS_BUTTON:
-			ds->uiElemPosX[uiElemInd] = (uint16_t)(ds->windowXRes-((CHARTVIEW_MENU_WIDTH+CHARTVIEW_MENU_POS_XR - 3*UI_PADDING_SIZE)*ds->uiUserScale));
-			ds->uiElemPosY[uiElemInd] = (uint16_t)((CHARTVIEW_MENU_POS_Y + 3*UI_PADDING_SIZE + 2*CHARTVIEW_MENU_ITEM_SPACING)*ds->uiUserScale);
-			ds->uiElemWidth[uiElemInd] = (uint16_t)((CHARTVIEW_MENU_WIDTH - 6*UI_PADDING_SIZE)*ds->uiUserScale);
+			ds->uiElemPosX[uiElemInd] = (uint16_t)(ds->windowXRes-((CHARTVIEW_MENU_WIDTH+CHARTVIEW_MENU_POS_XR - PANEL_EDGE_SIZE - 2*UI_PADDING_SIZE)*ds->uiUserScale));
+			ds->uiElemPosY[uiElemInd] = (uint16_t)((CHARTVIEW_MENU_POS_Y + PANEL_EDGE_SIZE + 2*UI_PADDING_SIZE + 2*CHARTVIEW_MENU_ITEM_SPACING)*ds->uiUserScale);
+			ds->uiElemWidth[uiElemInd] = (uint16_t)((CHARTVIEW_MENU_WIDTH - 2*PANEL_EDGE_SIZE - 4*UI_PADDING_SIZE)*ds->uiUserScale);
 			ds->uiElemHeight[uiElemInd] = (uint16_t)((CHARTVIEW_MENU_ITEM_SPACING - UI_PADDING_SIZE)*ds->uiUserScale);
 			break;
 		case UIELEM_MSG_BOX:

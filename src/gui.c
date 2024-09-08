@@ -286,8 +286,8 @@ void drawisomerBoxLabel(const app_data *restrict dat, const drawing_state *restr
 void drawNuclBoxLabel(const app_data *restrict dat, const drawing_state *restrict ds, resource_data *restrict rdat, const float xPos, const float yPos, const float boxWidth, const float boxHeight, SDL_Color col, const uint16_t nuclInd){
   char tmpStr[32];
   float drawXPos, drawYPos;
-  float labelMargin = NUCLBOX_LABEL_MARGIN*ds->chartZoomScale;
-  float labelSmallMargin = 2.0f*NUCLBOX_LABEL_SMALLMARGIN*ds->chartZoomScale;
+  float labelMargin = NUCLBOX_LABEL_MARGIN*ds->chartZoomScale*ds->uiUserScale;
+  float labelSmallMargin = 2.0f*NUCLBOX_LABEL_SMALLMARGIN*ds->chartZoomScale*ds->uiUserScale;
   Uint16 maxLblWidth = (Uint16)(boxWidth - 2.0f*labelMargin);
   uint16_t Z = (uint16_t)dat->ndat.nuclData[nuclInd].Z;
   if(ds->chartZoomScale >= 8.0f){
@@ -457,15 +457,15 @@ void drawChartOfNuclides(const app_data *restrict dat, const app_state *restrict
                 }
                 if(drawingLowBox){
                   if(state->chartView == CHARTVIEW_HALFLIFE){
-                    drawNuclBoxLabel(dat,&state->ds,rdat,rect.x/rdat->uiScale,rect.y/rdat->uiScale,rect.w/rdat->uiScale,(rect.h-lowBoxHeight-(2.0f*lowBoxPadding))/rdat->uiScale,(getNuclGSHalfLifeSeconds(&dat->ndat,(uint16_t)i) > 1.0E3) ? whiteCol8Bit : blackCol8Bit,(uint16_t)i);
+                    drawNuclBoxLabel(dat,&state->ds,rdat,rect.x/rdat->uiDPIScale,rect.y/rdat->uiDPIScale,rect.w/rdat->uiDPIScale,(rect.h-lowBoxHeight-(2.0f*lowBoxPadding))/rdat->uiDPIScale,(getNuclGSHalfLifeSeconds(&dat->ndat,(uint16_t)i) > 1.0E3) ? whiteCol8Bit : blackCol8Bit,(uint16_t)i);
                   }else if(state->chartView == CHARTVIEW_2PLUS){
-                    drawNuclBoxLabel(dat,&state->ds,rdat,rect.x/rdat->uiScale,rect.y/rdat->uiScale,rect.w/rdat->uiScale,(rect.h-lowBoxHeight-(2.0f*lowBoxPadding))/rdat->uiScale,(get2PlusEnergy(&dat->ndat,(uint16_t)i) >= 3000.0) ? whiteCol8Bit : blackCol8Bit,(uint16_t)i);
+                    drawNuclBoxLabel(dat,&state->ds,rdat,rect.x/rdat->uiDPIScale,rect.y/rdat->uiDPIScale,rect.w/rdat->uiDPIScale,(rect.h-lowBoxHeight-(2.0f*lowBoxPadding))/rdat->uiDPIScale,(get2PlusEnergy(&dat->ndat,(uint16_t)i) >= 3000.0) ? whiteCol8Bit : blackCol8Bit,(uint16_t)i);
                   }
                 }else{
                   if(state->chartView == CHARTVIEW_HALFLIFE){
-                    drawNuclBoxLabel(dat,&state->ds,rdat,rect.x/rdat->uiScale,rect.y/rdat->uiScale,rect.w/rdat->uiScale,rect.h/rdat->uiScale,(getNuclGSHalfLifeSeconds(&dat->ndat,(uint16_t)i) > 1.0E3) ? whiteCol8Bit : blackCol8Bit,(uint16_t)i);
+                    drawNuclBoxLabel(dat,&state->ds,rdat,rect.x/rdat->uiDPIScale,rect.y/rdat->uiDPIScale,rect.w/rdat->uiDPIScale,rect.h/rdat->uiDPIScale,(getNuclGSHalfLifeSeconds(&dat->ndat,(uint16_t)i) > 1.0E3) ? whiteCol8Bit : blackCol8Bit,(uint16_t)i);
                   }else if(state->chartView == CHARTVIEW_2PLUS){
-                    drawNuclBoxLabel(dat,&state->ds,rdat,rect.x/rdat->uiScale,rect.y/rdat->uiScale,rect.w/rdat->uiScale,rect.h/rdat->uiScale,(get2PlusEnergy(&dat->ndat,(uint16_t)i) >= 3000.0) ? whiteCol8Bit : blackCol8Bit,(uint16_t)i);
+                    drawNuclBoxLabel(dat,&state->ds,rdat,rect.x/rdat->uiDPIScale,rect.y/rdat->uiDPIScale,rect.w/rdat->uiDPIScale,rect.h/rdat->uiDPIScale,(get2PlusEnergy(&dat->ndat,(uint16_t)i) >= 3000.0) ? whiteCol8Bit : blackCol8Bit,(uint16_t)i);
                   }
                 }
               }
@@ -587,7 +587,7 @@ void drawChartOfNuclides(const app_data *restrict dat, const app_state *restrict
       uint16_t numInd = (uint16_t)(SDL_floorf(i));
       if((i<MAX_MASS_NUM)&&(i<=MAX_NEUTRON_NUM)){
         rect.x = (i + 0.5f - minX)*DEFAULT_NUCLBOX_DIM*state->ds.chartZoomScale*state->ds.uiUserScale;
-        if(rect.x < (state->ds.windowXRes - CHART_AXIS_DEPTH)){ //dodge axis label
+        if(rect.x < (state->ds.windowXRes - CHART_AXIS_DEPTH*state->ds.uiUserScale)){ //dodge axis label
           snprintf(tmpStr,32,"%u",numInd); //is this slow?
           drawTextAlignedSized(rdat,rect.x,rect.y,blackCol8Bit,FONTSIZE_NORMAL,255,tmpStr,ALIGN_CENTER,16384); //draw number label
         }
@@ -601,7 +601,7 @@ void drawChartOfNuclides(const app_data *restrict dat, const app_state *restrict
       uint16_t numInd = (uint16_t)(SDL_floorf(i));
       if((i<MAX_MASS_NUM)&&(i<MAX_PROTON_NUM)){
         rect.y = (maxY - i + 0.5f)*DEFAULT_NUCLBOX_DIM*state->ds.chartZoomScale*state->ds.uiUserScale;
-        if(rect.y > CHART_AXIS_DEPTH){ //dodge axis label
+        if(rect.y > CHART_AXIS_DEPTH*state->ds.uiUserScale){ //dodge axis label
           snprintf(tmpStr,32,"%u",numInd); //is this slow?
           drawTextAlignedSized(rdat,rect.x,rect.y,blackCol8Bit,FONTSIZE_NORMAL,255,tmpStr,ALIGN_CENTER,16384); //draw number label
         }
@@ -1134,21 +1134,21 @@ void drawChartViewMenu(const app_data *restrict dat, const app_state *restrict s
   }
 
   //draw menu item text
-  drawRect.x = state->ds.uiElemPosX[UIELEM_CHARTVIEW_MENU] + (UI_TILE_SIZE + 4*UI_PADDING_SIZE)*state->ds.uiUserScale;
-  drawRect.y = ((float)state->ds.uiElemPosY[UIELEM_CHARTVIEW_MENU] + yOffset);
+  drawRect.x = state->ds.uiElemPosX[UIELEM_CHARTVIEW_MENU] + (UI_TILE_SIZE + PANEL_EDGE_SIZE + 3*UI_PADDING_SIZE)*state->ds.uiUserScale;
+  drawRect.y = ((float)state->ds.uiElemPosY[UIELEM_CHARTVIEW_MENU] + PANEL_EDGE_SIZE*state->ds.uiUserScale + yOffset);
   drawRect.w = state->ds.uiElemWidth[UIELEM_CHARTVIEW_MENU];
   drawRect.h = state->ds.uiElemHeight[UIELEM_CHARTVIEW_MENU];
   Uint8 txtAlpha = (Uint8)(alpha*255.0f);
-  drawTextAlignedSized(rdat,state->ds.uiElemPosX[UIELEM_CHARTVIEW_MENU] + 4*UI_PADDING_SIZE*state->ds.uiUserScale,drawRect.y + 0.5f*CHARTVIEW_MENU_ITEM_SPACING*state->ds.uiUserScale + yOffset,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,dat->strings[LOCSTR_CHARTVIEW_MENUTITLE],ALIGN_LEFT,(Uint16)(drawRect.w - 8*UI_PADDING_SIZE*state->ds.uiUserScale));
+  drawTextAlignedSized(rdat,state->ds.uiElemPosX[UIELEM_CHARTVIEW_MENU] + (PANEL_EDGE_SIZE + 3*UI_PADDING_SIZE)*state->ds.uiUserScale,drawRect.y + 0.4f*CHARTVIEW_MENU_ITEM_SPACING*state->ds.uiUserScale + yOffset,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,dat->strings[LOCSTR_CHARTVIEW_MENUTITLE],ALIGN_LEFT,(Uint16)(drawRect.w - 8*UI_PADDING_SIZE*state->ds.uiUserScale));
   for(uint8_t i=0;i<CHARTVIEW_ENUM_LENGTH;i++){
     if(state->chartView == i){
       //draw checkmark icon
-      drawIcon(&dat->rules.themeRules,rdat,(uint16_t)(state->ds.uiElemPosX[UIELEM_CHARTVIEW_MENU] + 3*UI_PADDING_SIZE*state->ds.uiUserScale),(uint16_t)(drawRect.y + (1.35f + 1.0f*i)*CHARTVIEW_MENU_ITEM_SPACING*state->ds.uiUserScale + yOffset),UI_TILE_SIZE,HIGHLIGHT_NORMAL,txtAlpha,UIICON_CHECKBOX_CHECK);
+      drawIcon(&dat->rules.themeRules,rdat,(uint16_t)(state->ds.uiElemPosX[UIELEM_CHARTVIEW_MENU] + (PANEL_EDGE_SIZE + 3*UI_PADDING_SIZE)*state->ds.uiUserScale),(uint16_t)(drawRect.y + (1.25f + 1.0f*i)*CHARTVIEW_MENU_ITEM_SPACING*state->ds.uiUserScale + yOffset),UI_TILE_SIZE,HIGHLIGHT_NORMAL,txtAlpha,UIICON_CHECKBOX_CHECK);
     }
     if((i==0)&&(state->ds.useLifetimes)){
-      drawTextAlignedSized(rdat,drawRect.x,drawRect.y + (1.5f + 1.0f*i)*CHARTVIEW_MENU_ITEM_SPACING*state->ds.uiUserScale + yOffset,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,dat->strings[LOCSTR_CHARTVIEW_LIFETIME],ALIGN_LEFT,(Uint16)(drawRect.w - 8*UI_PADDING_SIZE*state->ds.uiUserScale));
+      drawTextAlignedSized(rdat,drawRect.x,drawRect.y + (1.4f + 1.0f*i)*CHARTVIEW_MENU_ITEM_SPACING*state->ds.uiUserScale + yOffset,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,dat->strings[LOCSTR_CHARTVIEW_LIFETIME],ALIGN_LEFT,(Uint16)(drawRect.w - 8*UI_PADDING_SIZE*state->ds.uiUserScale));
     }else{
-      drawTextAlignedSized(rdat,drawRect.x,drawRect.y + (1.5f + 1.0f*i)*CHARTVIEW_MENU_ITEM_SPACING*state->ds.uiUserScale + yOffset,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,dat->strings[LOCSTR_CHARTVIEW_HALFLIFE+i],ALIGN_LEFT,(Uint16)(drawRect.w - 8*UI_PADDING_SIZE*state->ds.uiUserScale));
+      drawTextAlignedSized(rdat,drawRect.x,drawRect.y + (1.4f + 1.0f*i)*CHARTVIEW_MENU_ITEM_SPACING*state->ds.uiUserScale + yOffset,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,dat->strings[LOCSTR_CHARTVIEW_HALFLIFE+i],ALIGN_LEFT,(Uint16)(drawRect.w - 8*UI_PADDING_SIZE*state->ds.uiUserScale));
     }
   }
 
@@ -1195,13 +1195,13 @@ void drawPrimaryMenu(const app_data *restrict dat, const app_state *restrict sta
   }
 
   //draw menu item text
-  drawRect.x = state->ds.uiElemPosX[UIELEM_PRIMARY_MENU];
-  drawRect.y = ((float)state->ds.uiElemPosY[UIELEM_PRIMARY_MENU] + yOffset);
+  drawRect.x = state->ds.uiElemPosX[UIELEM_PRIMARY_MENU] + (PANEL_EDGE_SIZE + 3*UI_PADDING_SIZE)*state->ds.uiUserScale;
+  drawRect.y = ((float)state->ds.uiElemPosY[UIELEM_PRIMARY_MENU] + PANEL_EDGE_SIZE*state->ds.uiUserScale + yOffset);
   drawRect.w = state->ds.uiElemWidth[UIELEM_PRIMARY_MENU];
   drawRect.h = state->ds.uiElemHeight[UIELEM_PRIMARY_MENU];
   Uint8 txtAlpha = (Uint8)(alpha*255.0f);
-  drawTextAlignedSized(rdat,drawRect.x + 4*UI_PADDING_SIZE*state->ds.uiUserScale,drawRect.y + 0.5f*PRIMARY_MENU_ITEM_SPACING*state->ds.uiUserScale + yOffset,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,dat->strings[LOCSTR_MENUITEM_PREFS],ALIGN_LEFT,(Uint16)(drawRect.w - 8*UI_PADDING_SIZE*state->ds.uiUserScale));
-  drawTextAlignedSized(rdat,drawRect.x + 4*UI_PADDING_SIZE*state->ds.uiUserScale,drawRect.y + 1.5f*PRIMARY_MENU_ITEM_SPACING*state->ds.uiUserScale + yOffset,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,dat->strings[LOCSTR_MENUITEM_ABOUT],ALIGN_LEFT,(Uint16)(drawRect.w - 8*UI_PADDING_SIZE*state->ds.uiUserScale));
+  drawTextAlignedSized(rdat,drawRect.x,drawRect.y + 0.4f*PRIMARY_MENU_ITEM_SPACING*state->ds.uiUserScale + yOffset,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,dat->strings[LOCSTR_MENUITEM_PREFS],ALIGN_LEFT,(Uint16)(drawRect.w - (PANEL_EDGE_SIZE + 6*UI_PADDING_SIZE)*state->ds.uiUserScale));
+  drawTextAlignedSized(rdat,drawRect.x,drawRect.y + 1.4f*PRIMARY_MENU_ITEM_SPACING*state->ds.uiUserScale + yOffset,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,dat->strings[LOCSTR_MENUITEM_ABOUT],ALIGN_LEFT,(Uint16)(drawRect.w - (PANEL_EDGE_SIZE + 6*UI_PADDING_SIZE)*state->ds.uiUserScale));
 
 }
 
