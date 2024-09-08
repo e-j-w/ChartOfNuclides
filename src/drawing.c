@@ -47,124 +47,14 @@ void drawPanelBG(resource_data *restrict rdat, const SDL_FRect panelRect, const 
       SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,"drawPanelBG - cannot set UI texture alpha - %s\n",SDL_GetError());
     }
   }
-  int32_t remainingWidth = (int32_t)panelRect.w;
-  int32_t remainingHeight = (int32_t)panelRect.h;
-  SDL_FRect srcRect, destRect;
-  destRect.x = rdat->uiScale*((float)panelRect.x);
-  destRect.y = rdat->uiScale*((float)panelRect.y);
-  if((remainingWidth > 2*UI_TILE_SIZE)&&(remainingHeight > 2*UI_TILE_SIZE)){
-    //draw the top row of the panel
-    destRect.w = (float)(UI_TILE_SIZE*rdat->uiScale);
-    destRect.h = destRect.w;
-    //draw the top left side of the panel
-    srcRect.x = UITHEME_PANELBG_TILE_X*UI_TILE_SIZE*rdat->uiThemeScale;
-    srcRect.y = UITHEME_PANELBG_TILE_Y*UI_TILE_SIZE*rdat->uiThemeScale;
-    srcRect.w = (float)(UI_TILE_SIZE*rdat->uiThemeScale);
-    srcRect.h = srcRect.w;
-    SDL_RenderTexture(rdat->renderer,rdat->uiThemeTex,&srcRect,&destRect);
-    remainingWidth -= UI_TILE_SIZE;
-    //draw the top middle of the panel
-    srcRect.x += srcRect.w;
-    while(remainingWidth > UI_TILE_SIZE){
-      int32_t tileWidth;
-      if((remainingWidth - UI_TILE_SIZE) >= UI_TILE_SIZE){
-        tileWidth = UI_TILE_SIZE; //panel wide enough to draw an entire middle tile
-      }else{
-        tileWidth = remainingWidth - UI_TILE_SIZE; //can only draw a partial UI tile
-      }
-      srcRect.w = (float)(tileWidth)*rdat->uiThemeScale;
-      destRect.x += destRect.w;
-      destRect.w = (float)(tileWidth)*rdat->uiScale;
-      SDL_RenderTexture(rdat->renderer,rdat->uiThemeTex,&srcRect,&destRect);
-      remainingWidth -= tileWidth;
-    }
-    //draw the top right side of the panel
-    srcRect.x += (float)(UI_TILE_SIZE*rdat->uiThemeScale);
-    srcRect.w = (float)(UI_TILE_SIZE*rdat->uiThemeScale);
-    destRect.x += destRect.w;
-    destRect.w = (float)(UI_TILE_SIZE*rdat->uiScale);
-    SDL_RenderTexture(rdat->renderer,rdat->uiThemeTex,&srcRect,&destRect);
-    remainingHeight -= UI_TILE_SIZE;
-    //draw the middle row(s) of the panel
-    while(remainingHeight > UI_TILE_SIZE){
-      remainingWidth = (int32_t)panelRect.w;
-      int32_t tileHeight;
-      if((remainingHeight - UI_TILE_SIZE) >= UI_TILE_SIZE){
-        tileHeight = UI_TILE_SIZE; //panel tall enough to draw an entire middle tile
-      }else{
-        tileHeight = remainingHeight - UI_TILE_SIZE; //can only draw a partial UI tile
-      }
-      srcRect.h = (float)(tileHeight)*rdat->uiThemeScale;
-      destRect.x = rdat->uiScale*((float)panelRect.x);
-      destRect.y += destRect.h;
-      destRect.h = (float)(tileHeight)*rdat->uiScale;
-      destRect.w = (float)(UI_TILE_SIZE*rdat->uiScale);
-      //draw the middle left side of the panel
-      srcRect.x = UITHEME_PANELBG_TILE_X*UI_TILE_SIZE*rdat->uiThemeScale;
-      srcRect.y = (UITHEME_PANELBG_TILE_Y+1)*UI_TILE_SIZE*rdat->uiThemeScale;
-      srcRect.w = (float)(UI_TILE_SIZE*rdat->uiThemeScale);
-      SDL_RenderTexture(rdat->renderer,rdat->uiThemeTex,&srcRect,&destRect);
-      remainingWidth -= UI_TILE_SIZE;
-      //draw the middle-middle of the panel
-      srcRect.x += srcRect.w;
-      while(remainingWidth > UI_TILE_SIZE){
-        int32_t tileWidth;
-        if((remainingWidth - UI_TILE_SIZE) >= UI_TILE_SIZE){
-          tileWidth = UI_TILE_SIZE; //panel wide enough to draw an entire middle tile
-        }else{
-          tileWidth = remainingWidth - UI_TILE_SIZE; //can only draw a partial UI tile
-        }
-        srcRect.w = (float)(tileWidth)*rdat->uiThemeScale;
-        destRect.x += destRect.w;
-        destRect.w = (float)(tileWidth)*rdat->uiScale;
-        SDL_RenderTexture(rdat->renderer,rdat->uiThemeTex,&srcRect,&destRect);
-        remainingWidth -= tileWidth;
-      }
-      //draw the middle right side of the panel
-      srcRect.x += (float)(UI_TILE_SIZE*rdat->uiThemeScale);
-      srcRect.w = (float)(UI_TILE_SIZE*rdat->uiThemeScale);
-      destRect.x += destRect.w;
-      destRect.w = (float)(UI_TILE_SIZE*rdat->uiScale);
-      SDL_RenderTexture(rdat->renderer,rdat->uiThemeTex,&srcRect,&destRect);
-      remainingHeight -= tileHeight;
-    }
-    //draw the bottom row of the panel
-    remainingWidth = (int32_t)panelRect.w;
-    srcRect.h = (float)(UI_TILE_SIZE*rdat->uiThemeScale);
-    destRect.x = rdat->uiScale*((float)panelRect.x);
-    destRect.y += destRect.h;
-    destRect.w = (float)(UI_TILE_SIZE*rdat->uiScale);
-    destRect.h = destRect.w;
-    //draw the bottom left side of the panel
-    srcRect.x = UITHEME_PANELBG_TILE_X*UI_TILE_SIZE*rdat->uiThemeScale;
-    srcRect.y = (UITHEME_PANELBG_TILE_Y+2)*UI_TILE_SIZE*rdat->uiThemeScale;
-    srcRect.w = (float)(UI_TILE_SIZE*rdat->uiThemeScale);
-    SDL_RenderTexture(rdat->renderer,rdat->uiThemeTex,&srcRect,&destRect);
-    remainingWidth -= UI_TILE_SIZE;
-    //draw the bottom-middle of the panel
-    srcRect.x += srcRect.w;
-    while(remainingWidth > UI_TILE_SIZE){
-      int32_t tileWidth;
-      if((remainingWidth - UI_TILE_SIZE) >= UI_TILE_SIZE){
-        tileWidth = UI_TILE_SIZE; //panel wide enough to draw an entire middle tile
-      }else{
-        tileWidth = remainingWidth - UI_TILE_SIZE; //can only draw a partial UI tile
-      }
-      srcRect.w = (float)(tileWidth)*rdat->uiThemeScale;
-      destRect.x += destRect.w;
-      destRect.w = (float)(tileWidth)*rdat->uiScale;
-      SDL_RenderTexture(rdat->renderer,rdat->uiThemeTex,&srcRect,&destRect);
-      remainingWidth -= tileWidth;
-    }
-    //draw the bottom right side of the panel
-    srcRect.x += (float)(UI_TILE_SIZE*rdat->uiThemeScale);
-    srcRect.w = (float)(UI_TILE_SIZE*rdat->uiThemeScale);
-    destRect.x += destRect.w;
-    destRect.w = (float)(UI_TILE_SIZE*rdat->uiScale);
-    SDL_RenderTexture(rdat->renderer,rdat->uiThemeTex,&srcRect,&destRect);
-  }else{
-    SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,"drawPanelBG - panel size too small.\n");
-  }
+  
+  SDL_FRect srcRect;
+  srcRect.x = UITHEME_PANELBG_TILE_X*UI_TILE_SIZE*rdat->uiThemeScale;
+  srcRect.y = UITHEME_PANELBG_TILE_Y*UI_TILE_SIZE*rdat->uiThemeScale;
+  srcRect.w = 3*UI_TILE_SIZE*rdat->uiThemeScale;
+  srcRect.h = srcRect.w;
+  float nineSliceSize = 0.5f*UI_TILE_SIZE*rdat->uiThemeScale;
+  SDL_RenderTexture9Grid(rdat->renderer,rdat->uiThemeTex,&srcRect,nineSliceSize,nineSliceSize,nineSliceSize,nineSliceSize,0.0f,&panelRect);
   
   if(alpha != 1.0f){
     if(SDL_SetTextureAlphaModFloat(rdat->uiThemeTex,1.0f)<0){

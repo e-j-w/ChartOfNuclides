@@ -58,6 +58,7 @@ static const uint16_t fontSizes[FONTSIZE_ENUM_LENGTH] = {13,15,19};
 
 /* UI LAYOUT CONSTANTS */
 /* see updateUIElemPositions in data_ops.c for how these values are assigned */
+/* make sure these are always fully enclosed by brackets, as they may be scaled by the code */
 
 #define MENU_BUTTON_POS_XR    UI_PADDING_SIZE   //in unscaled pixels
 #define MENU_BUTTON_POS_Y     UI_PADDING_SIZE   //in unscaled pixels
@@ -67,7 +68,7 @@ static const uint16_t fontSizes[FONTSIZE_ENUM_LENGTH] = {13,15,19};
 #define PRIMARY_MENU_POS_XR        (MENU_BUTTON_POS_XR-4)   //in unscaled pixels
 #define PRIMARY_MENU_POS_Y         (UI_TILE_SIZE+UI_PADDING_SIZE)  //in unscaled pixels
 #define PRIMARY_MENU_WIDTH         200 //in unscaled pixels
-#define PRIMARY_MENU_HEIGHT        2*PRIMARY_MENU_ITEM_SPACING + 5*UI_PADDING_SIZE //in unscaled pixels
+#define PRIMARY_MENU_HEIGHT        (2*PRIMARY_MENU_ITEM_SPACING + 5*UI_PADDING_SIZE) //in unscaled pixels
 
 #define CHARTVIEW_BUTTON_POS_XR    (2*UI_PADDING_SIZE + MENU_BUTTON_WIDTH)   //in unscaled pixels
 #define CHARTVIEW_BUTTON_POS_Y     UI_PADDING_SIZE   //in unscaled pixels
@@ -77,9 +78,9 @@ static const uint16_t fontSizes[FONTSIZE_ENUM_LENGTH] = {13,15,19};
 #define CHARTVIEW_MENU_POS_XR        (CHARTVIEW_BUTTON_POS_XR-4)   //in unscaled pixels
 #define CHARTVIEW_MENU_POS_Y         (UI_TILE_SIZE+UI_PADDING_SIZE)  //in unscaled pixels
 #define CHARTVIEW_MENU_WIDTH         180 //in unscaled pixels
-#define CHARTVIEW_MENU_HEIGHT        (CHARTVIEW_ENUM_LENGTH+1)*CHARTVIEW_MENU_ITEM_SPACING + 5*UI_PADDING_SIZE //in unscaled pixels
+#define CHARTVIEW_MENU_HEIGHT        ((CHARTVIEW_ENUM_LENGTH+1)*CHARTVIEW_MENU_ITEM_SPACING + 5*UI_PADDING_SIZE) //in unscaled pixels
 
-#define DIMMER_OPACITY        0.20f
+#define DIMMER_OPACITY               0.20f
 
 //message box (for errors/warnings)
 #define MESSAGE_BOX_WIDTH            360 //in unscaled pixels

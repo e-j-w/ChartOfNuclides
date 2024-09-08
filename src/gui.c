@@ -1099,10 +1099,10 @@ void drawChartViewMenu(const app_data *restrict dat, const app_state *restrict s
   float yOffset = 0;
   if(state->ds.uiAnimPlaying & (1U << UIANIM_CHARTVIEW_MENU_HIDE)){
     alpha = (float)(1.0f*juice_smoothStart2(state->ds.timeLeftInUIAnimation[UIANIM_CHARTVIEW_MENU_HIDE]/(UI_ANIM_LENGTH)));
-    yOffset = (-30.0f*juice_smoothStop2(1.0f - state->ds.timeLeftInUIAnimation[UIANIM_CHARTVIEW_MENU_HIDE]/UI_ANIM_LENGTH));
+    yOffset = (-30.0f*state->ds.uiUserScale*juice_smoothStop2(1.0f - state->ds.timeLeftInUIAnimation[UIANIM_CHARTVIEW_MENU_HIDE]/UI_ANIM_LENGTH));
   }else if(state->ds.uiAnimPlaying & (1U << UIANIM_CHARTVIEW_MENU_SHOW)){
     alpha = (float)(1.0f*juice_smoothStop2(1.0f - state->ds.timeLeftInUIAnimation[UIANIM_CHARTVIEW_MENU_SHOW]/UI_ANIM_LENGTH));
-    yOffset = (-30.0f*juice_smoothStart2(state->ds.timeLeftInUIAnimation[UIANIM_CHARTVIEW_MENU_SHOW]/(UI_ANIM_LENGTH)));
+    yOffset = (-30.0f*state->ds.uiUserScale*juice_smoothStart2(state->ds.timeLeftInUIAnimation[UIANIM_CHARTVIEW_MENU_SHOW]/(UI_ANIM_LENGTH)));
   }
   //SDL_Log("alpha: %f\n",(double)alpha);
   
@@ -1116,10 +1116,10 @@ void drawChartViewMenu(const app_data *restrict dat, const app_state *restrict s
   
   //draw menu item highlight
   for(uint8_t i=1;i<=CHARTVIEW_ENUM_LENGTH;i++){
-    drawRect.x = state->ds.uiElemPosX[UIELEM_CHARTVIEW_MENU-i]*state->ds.uiUserScale;
-    drawRect.y = (state->ds.uiElemPosY[UIELEM_CHARTVIEW_MENU-i] + yOffset)*state->ds.uiUserScale;
-    drawRect.w = state->ds.uiElemWidth[UIELEM_CHARTVIEW_MENU-i]*state->ds.uiUserScale;
-    drawRect.h = state->ds.uiElemHeight[UIELEM_CHARTVIEW_MENU-i]*state->ds.uiUserScale;
+    drawRect.x = state->ds.uiElemPosX[UIELEM_CHARTVIEW_MENU-i];
+    drawRect.y = (state->ds.uiElemPosY[UIELEM_CHARTVIEW_MENU-i] + yOffset);
+    drawRect.w = state->ds.uiElemWidth[UIELEM_CHARTVIEW_MENU-i];
+    drawRect.h = state->ds.uiElemHeight[UIELEM_CHARTVIEW_MENU-i];
     switch(getHighlightState(state,UIELEM_CHARTVIEW_MENU-i)){
       case HIGHLIGHT_SELECTED:
         drawFlatRect(rdat,drawRect,dat->rules.themeRules.modSelectedCol);
@@ -1134,20 +1134,21 @@ void drawChartViewMenu(const app_data *restrict dat, const app_state *restrict s
   }
 
   //draw menu item text
-  drawRect.x = state->ds.uiElemPosX[UIELEM_CHARTVIEW_MENU] + UI_TILE_SIZE + 4*UI_PADDING_SIZE;
+  drawRect.x = state->ds.uiElemPosX[UIELEM_CHARTVIEW_MENU] + (UI_TILE_SIZE + 4*UI_PADDING_SIZE)*state->ds.uiUserScale;
   drawRect.y = ((float)state->ds.uiElemPosY[UIELEM_CHARTVIEW_MENU] + yOffset);
   drawRect.w = state->ds.uiElemWidth[UIELEM_CHARTVIEW_MENU];
   drawRect.h = state->ds.uiElemHeight[UIELEM_CHARTVIEW_MENU];
   Uint8 txtAlpha = (Uint8)(alpha*255.0f);
-  drawTextAlignedSized(rdat,state->ds.uiElemPosX[UIELEM_CHARTVIEW_MENU] + 4*UI_PADDING_SIZE,drawRect.y + 0.5f*CHARTVIEW_MENU_ITEM_SPACING + yOffset,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,dat->strings[LOCSTR_CHARTVIEW_MENUTITLE],ALIGN_LEFT,(Uint16)(drawRect.w - 8*UI_PADDING_SIZE));
+  drawTextAlignedSized(rdat,state->ds.uiElemPosX[UIELEM_CHARTVIEW_MENU] + 4*UI_PADDING_SIZE*state->ds.uiUserScale,drawRect.y + 0.5f*CHARTVIEW_MENU_ITEM_SPACING*state->ds.uiUserScale + yOffset,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,dat->strings[LOCSTR_CHARTVIEW_MENUTITLE],ALIGN_LEFT,(Uint16)(drawRect.w - 8*UI_PADDING_SIZE*state->ds.uiUserScale));
   for(uint8_t i=0;i<CHARTVIEW_ENUM_LENGTH;i++){
     if(state->chartView == i){
-      drawIcon(&dat->rules.themeRules,rdat,(uint16_t)(state->ds.uiElemPosX[UIELEM_CHARTVIEW_MENU] + 3*UI_PADDING_SIZE),(uint16_t)(drawRect.y + (1.35f + 1.0f*i)*CHARTVIEW_MENU_ITEM_SPACING + yOffset),UI_TILE_SIZE,HIGHLIGHT_NORMAL,txtAlpha,UIICON_CHECKBOX_CHECK);
+      //draw checkmark icon
+      drawIcon(&dat->rules.themeRules,rdat,(uint16_t)(state->ds.uiElemPosX[UIELEM_CHARTVIEW_MENU] + 3*UI_PADDING_SIZE*state->ds.uiUserScale),(uint16_t)(drawRect.y + (1.35f + 1.0f*i)*CHARTVIEW_MENU_ITEM_SPACING*state->ds.uiUserScale + yOffset),UI_TILE_SIZE,HIGHLIGHT_NORMAL,txtAlpha,UIICON_CHECKBOX_CHECK);
     }
     if((i==0)&&(state->ds.useLifetimes)){
-      drawTextAlignedSized(rdat,drawRect.x,drawRect.y + (1.5f + 1.0f*i)*CHARTVIEW_MENU_ITEM_SPACING + yOffset,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,dat->strings[LOCSTR_CHARTVIEW_LIFETIME],ALIGN_LEFT,(Uint16)(drawRect.w - 8*UI_PADDING_SIZE));
+      drawTextAlignedSized(rdat,drawRect.x,drawRect.y + (1.5f + 1.0f*i)*CHARTVIEW_MENU_ITEM_SPACING*state->ds.uiUserScale + yOffset,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,dat->strings[LOCSTR_CHARTVIEW_LIFETIME],ALIGN_LEFT,(Uint16)(drawRect.w - 8*UI_PADDING_SIZE*state->ds.uiUserScale));
     }else{
-      drawTextAlignedSized(rdat,drawRect.x,drawRect.y + (1.5f + 1.0f*i)*CHARTVIEW_MENU_ITEM_SPACING + yOffset,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,dat->strings[LOCSTR_CHARTVIEW_HALFLIFE+i],ALIGN_LEFT,(Uint16)(drawRect.w - 8*UI_PADDING_SIZE));
+      drawTextAlignedSized(rdat,drawRect.x,drawRect.y + (1.5f + 1.0f*i)*CHARTVIEW_MENU_ITEM_SPACING*state->ds.uiUserScale + yOffset,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,dat->strings[LOCSTR_CHARTVIEW_HALFLIFE+i],ALIGN_LEFT,(Uint16)(drawRect.w - 8*UI_PADDING_SIZE*state->ds.uiUserScale));
     }
   }
 
@@ -1159,10 +1160,10 @@ void drawPrimaryMenu(const app_data *restrict dat, const app_state *restrict sta
   float yOffset = 0;
   if(state->ds.uiAnimPlaying & (1U << UIANIM_PRIMARY_MENU_HIDE)){
     alpha = (float)(1.0f*juice_smoothStart2(state->ds.timeLeftInUIAnimation[UIANIM_PRIMARY_MENU_HIDE]/(UI_ANIM_LENGTH)));
-    yOffset = (-30.0f*juice_smoothStop2(1.0f - state->ds.timeLeftInUIAnimation[UIANIM_PRIMARY_MENU_HIDE]/UI_ANIM_LENGTH));
+    yOffset = (-30.0f*state->ds.uiUserScale*juice_smoothStop2(1.0f - state->ds.timeLeftInUIAnimation[UIANIM_PRIMARY_MENU_HIDE]/UI_ANIM_LENGTH));
   }else if(state->ds.uiAnimPlaying & (1U << UIANIM_PRIMARY_MENU_SHOW)){
     alpha = (float)(1.0f*juice_smoothStop2(1.0f - state->ds.timeLeftInUIAnimation[UIANIM_PRIMARY_MENU_SHOW]/UI_ANIM_LENGTH));
-    yOffset = (-30.0f*juice_smoothStart2(state->ds.timeLeftInUIAnimation[UIANIM_PRIMARY_MENU_SHOW]/(UI_ANIM_LENGTH)));
+    yOffset = (-30.0f*state->ds.uiUserScale*juice_smoothStart2(state->ds.timeLeftInUIAnimation[UIANIM_PRIMARY_MENU_SHOW]/(UI_ANIM_LENGTH)));
   }
   //SDL_Log("alpha: %f\n",(double)alpha);
   
@@ -1176,10 +1177,10 @@ void drawPrimaryMenu(const app_data *restrict dat, const app_state *restrict sta
   
   //draw menu item highlight
   for(uint8_t i=1;i<=2;i++){
-    drawRect.x = state->ds.uiElemPosX[UIELEM_PRIMARY_MENU-i]*state->ds.uiUserScale;
-    drawRect.y = (state->ds.uiElemPosY[UIELEM_PRIMARY_MENU-i] + yOffset)*state->ds.uiUserScale;
-    drawRect.w = state->ds.uiElemWidth[UIELEM_PRIMARY_MENU-i]*state->ds.uiUserScale;
-    drawRect.h = state->ds.uiElemHeight[UIELEM_PRIMARY_MENU-i]*state->ds.uiUserScale;
+    drawRect.x = state->ds.uiElemPosX[UIELEM_PRIMARY_MENU-i];
+    drawRect.y = (state->ds.uiElemPosY[UIELEM_PRIMARY_MENU-i] + yOffset);
+    drawRect.w = state->ds.uiElemWidth[UIELEM_PRIMARY_MENU-i];
+    drawRect.h = state->ds.uiElemHeight[UIELEM_PRIMARY_MENU-i];
     switch(getHighlightState(state,UIELEM_PRIMARY_MENU-i)){
       case HIGHLIGHT_SELECTED:
         drawFlatRect(rdat,drawRect,dat->rules.themeRules.modSelectedCol);
@@ -1199,8 +1200,8 @@ void drawPrimaryMenu(const app_data *restrict dat, const app_state *restrict sta
   drawRect.w = state->ds.uiElemWidth[UIELEM_PRIMARY_MENU];
   drawRect.h = state->ds.uiElemHeight[UIELEM_PRIMARY_MENU];
   Uint8 txtAlpha = (Uint8)(alpha*255.0f);
-  drawTextAlignedSized(rdat,drawRect.x + 4*UI_PADDING_SIZE,drawRect.y + 0.5f*PRIMARY_MENU_ITEM_SPACING + yOffset,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,dat->strings[LOCSTR_MENUITEM_PREFS],ALIGN_LEFT,(Uint16)(drawRect.w - 8*UI_PADDING_SIZE));
-  drawTextAlignedSized(rdat,drawRect.x + 4*UI_PADDING_SIZE,drawRect.y + 1.5f*PRIMARY_MENU_ITEM_SPACING + yOffset,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,dat->strings[LOCSTR_MENUITEM_ABOUT],ALIGN_LEFT,(Uint16)(drawRect.w - 8*UI_PADDING_SIZE));
+  drawTextAlignedSized(rdat,drawRect.x + 4*UI_PADDING_SIZE*state->ds.uiUserScale,drawRect.y + 0.5f*PRIMARY_MENU_ITEM_SPACING*state->ds.uiUserScale + yOffset,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,dat->strings[LOCSTR_MENUITEM_PREFS],ALIGN_LEFT,(Uint16)(drawRect.w - 8*UI_PADDING_SIZE*state->ds.uiUserScale));
+  drawTextAlignedSized(rdat,drawRect.x + 4*UI_PADDING_SIZE*state->ds.uiUserScale,drawRect.y + 1.5f*PRIMARY_MENU_ITEM_SPACING*state->ds.uiUserScale + yOffset,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,dat->strings[LOCSTR_MENUITEM_ABOUT],ALIGN_LEFT,(Uint16)(drawRect.w - 8*UI_PADDING_SIZE*state->ds.uiUserScale));
 
 }
 
