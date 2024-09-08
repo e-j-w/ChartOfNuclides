@@ -2049,28 +2049,28 @@ void updateSingleUIElemPosition(const app_data *restrict dat, drawing_state *res
 			ds->uiElemHeight[uiElemInd] = (uint16_t)(MESSAGE_BOX_HEIGHT*ds->uiUserScale);
 			break;
 		case UIELEM_MSG_BOX_OK_BUTTON:
-			ds->uiElemPosX[uiElemInd] = (uint16_t)((ds->windowXRes - MESSAGE_BOX_OK_BUTTON_WIDTH)/2);
-			ds->uiElemPosY[uiElemInd] = (uint16_t)((ds->windowYRes + MESSAGE_BOX_HEIGHT)/2 - MESSAGE_BOX_OK_BUTTON_YB - UI_TILE_SIZE);
-			ds->uiElemWidth[uiElemInd] = MESSAGE_BOX_OK_BUTTON_WIDTH;
-			ds->uiElemHeight[uiElemInd] = UI_TILE_SIZE;
+			ds->uiElemPosX[uiElemInd] = (uint16_t)((ds->windowXRes - MESSAGE_BOX_OK_BUTTON_WIDTH*ds->uiUserScale)/2);
+			ds->uiElemPosY[uiElemInd] = (uint16_t)((ds->windowYRes + MESSAGE_BOX_HEIGHT*ds->uiUserScale)/2 - ((MESSAGE_BOX_OK_BUTTON_YB + UI_TILE_SIZE)*ds->uiUserScale));
+			ds->uiElemWidth[uiElemInd] = (uint16_t)(MESSAGE_BOX_OK_BUTTON_WIDTH*ds->uiUserScale);
+			ds->uiElemHeight[uiElemInd] = (uint16_t)(UI_TILE_SIZE*ds->uiUserScale);
 			break;
 		case UIELEM_ABOUT_BOX:
-			ds->uiElemPosX[uiElemInd] = (uint16_t)((ds->windowXRes - ABOUT_BOX_WIDTH)/2);
-			ds->uiElemPosY[uiElemInd] = (uint16_t)((ds->windowYRes - ABOUT_BOX_HEIGHT)/2);
-			ds->uiElemWidth[uiElemInd] = ABOUT_BOX_WIDTH;
-			ds->uiElemHeight[uiElemInd] = ABOUT_BOX_HEIGHT;
+			ds->uiElemPosX[uiElemInd] = (uint16_t)((ds->windowXRes - ABOUT_BOX_WIDTH*ds->uiUserScale)/2);
+			ds->uiElemPosY[uiElemInd] = (uint16_t)((ds->windowYRes - ABOUT_BOX_HEIGHT*ds->uiUserScale)/2);
+			ds->uiElemWidth[uiElemInd] = (uint16_t)(ABOUT_BOX_WIDTH*ds->uiUserScale);
+			ds->uiElemHeight[uiElemInd] = (uint16_t)(ABOUT_BOX_HEIGHT*ds->uiUserScale);
 			break;
 		case UIELEM_ABOUT_BOX_OK_BUTTON:
-			ds->uiElemPosX[uiElemInd] = (uint16_t)((ds->windowXRes - ABOUT_BOX_OK_BUTTON_WIDTH)/2);
-			ds->uiElemPosY[uiElemInd] = (uint16_t)((ds->windowYRes + ABOUT_BOX_HEIGHT)/2 - ABOUT_BOX_OK_BUTTON_YB - UI_TILE_SIZE);
-			ds->uiElemWidth[uiElemInd] = ABOUT_BOX_OK_BUTTON_WIDTH;
-			ds->uiElemHeight[uiElemInd] = UI_TILE_SIZE;
+			ds->uiElemPosX[uiElemInd] = (uint16_t)((ds->windowXRes - ABOUT_BOX_OK_BUTTON_WIDTH*ds->uiUserScale)/2);
+			ds->uiElemPosY[uiElemInd] = (uint16_t)((ds->windowYRes + ABOUT_BOX_HEIGHT*ds->uiUserScale)/2 - ((ABOUT_BOX_OK_BUTTON_YB + UI_TILE_SIZE)*ds->uiUserScale));
+			ds->uiElemWidth[uiElemInd] = (uint16_t)(ABOUT_BOX_OK_BUTTON_WIDTH*ds->uiUserScale);
+			ds->uiElemHeight[uiElemInd] = (uint16_t)(UI_TILE_SIZE*ds->uiUserScale);
 			break;
 		case UIELEM_PREFS_DIALOG:
-			ds->uiElemPosX[uiElemInd] = (uint16_t)((ds->windowXRes - PREFS_DIALOG_WIDTH)/2);
-			ds->uiElemPosY[uiElemInd] = (uint16_t)((ds->windowYRes - PREFS_DIALOG_HEIGHT)/2);
-			ds->uiElemWidth[uiElemInd] = PREFS_DIALOG_WIDTH;
-			ds->uiElemHeight[uiElemInd] = PREFS_DIALOG_HEIGHT;
+			ds->uiElemPosX[uiElemInd] = (uint16_t)((ds->windowXRes - PREFS_DIALOG_WIDTH*ds->uiUserScale)/2);
+			ds->uiElemPosY[uiElemInd] = (uint16_t)((ds->windowYRes - PREFS_DIALOG_HEIGHT*ds->uiUserScale)/2);
+			ds->uiElemWidth[uiElemInd] = (uint16_t)(PREFS_DIALOG_WIDTH*ds->uiUserScale);
+			ds->uiElemHeight[uiElemInd] = (uint16_t)(PREFS_DIALOG_HEIGHT*ds->uiUserScale);
 			//update child/dependant UI elements
 			updateSingleUIElemPosition(dat,ds,rdat,UIELEM_PREFS_DIALOG_CLOSEBUTTON);
 			updateSingleUIElemPosition(dat,ds,rdat,UIELEM_PREFS_DIALOG_SHELLCLOSURE_CHECKBOX);
@@ -2078,81 +2078,81 @@ void updateSingleUIElemPosition(const app_data *restrict dat, drawing_state *res
 			updateSingleUIElemPosition(dat,ds,rdat,UIELEM_PREFS_DIALOG_UIANIM_CHECKBOX);
 			break;
 		case UIELEM_PREFS_DIALOG_CLOSEBUTTON:
-			ds->uiElemWidth[UIELEM_PREFS_DIALOG_CLOSEBUTTON] = UI_TILE_SIZE;
+			ds->uiElemWidth[UIELEM_PREFS_DIALOG_CLOSEBUTTON] = (uint16_t)(UI_TILE_SIZE*ds->uiUserScale);
 			ds->uiElemHeight[UIELEM_PREFS_DIALOG_CLOSEBUTTON] = ds->uiElemWidth[UIELEM_PREFS_DIALOG_CLOSEBUTTON];
-			ds->uiElemPosX[UIELEM_PREFS_DIALOG_CLOSEBUTTON] = (uint16_t)(ds->uiElemPosX[UIELEM_PREFS_DIALOG] + ds->uiElemWidth[UIELEM_PREFS_DIALOG] - ds->uiElemWidth[UIELEM_PREFS_DIALOG_CLOSEBUTTON] - 4*UI_PADDING_SIZE);
-			ds->uiElemPosY[UIELEM_PREFS_DIALOG_CLOSEBUTTON] = ds->uiElemPosY[UIELEM_PREFS_DIALOG] + 4*UI_PADDING_SIZE;
+			ds->uiElemPosX[UIELEM_PREFS_DIALOG_CLOSEBUTTON] = (uint16_t)((float)(ds->uiElemPosX[UIELEM_PREFS_DIALOG] + ds->uiElemWidth[UIELEM_PREFS_DIALOG] - ds->uiElemWidth[UIELEM_PREFS_DIALOG_CLOSEBUTTON]) - 4*UI_PADDING_SIZE*ds->uiUserScale);
+			ds->uiElemPosY[UIELEM_PREFS_DIALOG_CLOSEBUTTON] = ds->uiElemPosY[UIELEM_PREFS_DIALOG] + (uint16_t)(4*UI_PADDING_SIZE*ds->uiUserScale);
 			break;
 		case UIELEM_PREFS_DIALOG_SHELLCLOSURE_CHECKBOX:
-			ds->uiElemWidth[UIELEM_PREFS_DIALOG_SHELLCLOSURE_CHECKBOX] = UI_TILE_SIZE;
+			ds->uiElemWidth[UIELEM_PREFS_DIALOG_SHELLCLOSURE_CHECKBOX] = (uint16_t)(UI_TILE_SIZE*ds->uiUserScale);
 			ds->uiElemHeight[UIELEM_PREFS_DIALOG_SHELLCLOSURE_CHECKBOX] = ds->uiElemWidth[UIELEM_PREFS_DIALOG_SHELLCLOSURE_CHECKBOX];
-			ds->uiElemPosX[UIELEM_PREFS_DIALOG_SHELLCLOSURE_CHECKBOX] = ds->uiElemPosX[UIELEM_PREFS_DIALOG] + PREFS_DIALOG_PREFCOL1_X;
-			ds->uiElemPosY[UIELEM_PREFS_DIALOG_SHELLCLOSURE_CHECKBOX] = ds->uiElemPosY[UIELEM_PREFS_DIALOG] + PREFS_DIALOG_PREFCOL1_Y;
-			ds->uiElemExtPlusX[UIELEM_PREFS_DIALOG_SHELLCLOSURE_CHECKBOX] = 2*UI_PADDING_SIZE + (uint16_t)(getTextWidth(rdat,FONTSIZE_NORMAL,dat->strings[dat->locStringIDs[LOCSTR_PREF_SHELLCLOSURE]])/rdat->uiScale); //so that checkbox can be toggled by clicking on adjacent text
+			ds->uiElemPosX[UIELEM_PREFS_DIALOG_SHELLCLOSURE_CHECKBOX] = ds->uiElemPosX[UIELEM_PREFS_DIALOG] + (uint16_t)(PREFS_DIALOG_PREFCOL1_X*ds->uiUserScale);
+			ds->uiElemPosY[UIELEM_PREFS_DIALOG_SHELLCLOSURE_CHECKBOX] = ds->uiElemPosY[UIELEM_PREFS_DIALOG] + (uint16_t)(PREFS_DIALOG_PREFCOL1_Y*ds->uiUserScale);
+			ds->uiElemExtPlusX[UIELEM_PREFS_DIALOG_SHELLCLOSURE_CHECKBOX] = (uint16_t)(2*UI_PADDING_SIZE*ds->uiUserScale) + (uint16_t)(getTextWidth(rdat,FONTSIZE_NORMAL,dat->strings[dat->locStringIDs[LOCSTR_PREF_SHELLCLOSURE]])/rdat->uiScale); //so that checkbox can be toggled by clicking on adjacent text
 			break;
 		case UIELEM_PREFS_DIALOG_LIFETIME_CHECKBOX:
-			ds->uiElemWidth[UIELEM_PREFS_DIALOG_LIFETIME_CHECKBOX] = UI_TILE_SIZE;
+			ds->uiElemWidth[UIELEM_PREFS_DIALOG_LIFETIME_CHECKBOX] = (uint16_t)(UI_TILE_SIZE*ds->uiUserScale);
 			ds->uiElemHeight[UIELEM_PREFS_DIALOG_LIFETIME_CHECKBOX] = ds->uiElemWidth[UIELEM_PREFS_DIALOG_LIFETIME_CHECKBOX];
-			ds->uiElemPosX[UIELEM_PREFS_DIALOG_LIFETIME_CHECKBOX] = ds->uiElemPosX[UIELEM_PREFS_DIALOG] + PREFS_DIALOG_PREFCOL1_X;
-			ds->uiElemPosY[UIELEM_PREFS_DIALOG_LIFETIME_CHECKBOX] = ds->uiElemPosY[UIELEM_PREFS_DIALOG] + PREFS_DIALOG_PREFCOL1_Y + PREFS_DIALOG_PREF_Y_SPACING;
-			ds->uiElemExtPlusX[UIELEM_PREFS_DIALOG_LIFETIME_CHECKBOX] = 2*UI_PADDING_SIZE + (uint16_t)(getTextWidth(rdat,FONTSIZE_NORMAL,dat->strings[dat->locStringIDs[LOCSTR_PREF_LIFETIME]])/rdat->uiScale); //so that checkbox can be toggled by clicking on adjacent text
+			ds->uiElemPosX[UIELEM_PREFS_DIALOG_LIFETIME_CHECKBOX] = ds->uiElemPosX[UIELEM_PREFS_DIALOG] + (uint16_t)(PREFS_DIALOG_PREFCOL1_X*ds->uiUserScale);
+			ds->uiElemPosY[UIELEM_PREFS_DIALOG_LIFETIME_CHECKBOX] = ds->uiElemPosY[UIELEM_PREFS_DIALOG] + (uint16_t)((PREFS_DIALOG_PREFCOL1_Y + PREFS_DIALOG_PREF_Y_SPACING)*ds->uiUserScale);
+			ds->uiElemExtPlusX[UIELEM_PREFS_DIALOG_LIFETIME_CHECKBOX] = (uint16_t)(2*UI_PADDING_SIZE*ds->uiUserScale) + (uint16_t)(getTextWidth(rdat,FONTSIZE_NORMAL,dat->strings[dat->locStringIDs[LOCSTR_PREF_LIFETIME]])/rdat->uiScale); //so that checkbox can be toggled by clicking on adjacent text
 			break;
 		case UIELEM_PREFS_DIALOG_UIANIM_CHECKBOX:
-			ds->uiElemWidth[UIELEM_PREFS_DIALOG_UIANIM_CHECKBOX] = UI_TILE_SIZE;
+			ds->uiElemWidth[UIELEM_PREFS_DIALOG_UIANIM_CHECKBOX] = (uint16_t)(UI_TILE_SIZE*ds->uiUserScale);
 			ds->uiElemHeight[UIELEM_PREFS_DIALOG_UIANIM_CHECKBOX] = ds->uiElemWidth[UIELEM_PREFS_DIALOG_UIANIM_CHECKBOX];
-			ds->uiElemPosX[UIELEM_PREFS_DIALOG_UIANIM_CHECKBOX] = ds->uiElemPosX[UIELEM_PREFS_DIALOG] + PREFS_DIALOG_PREFCOL1_X;
-			ds->uiElemPosY[UIELEM_PREFS_DIALOG_UIANIM_CHECKBOX] = ds->uiElemPosY[UIELEM_PREFS_DIALOG] + PREFS_DIALOG_PREFCOL1_Y + 2*PREFS_DIALOG_PREF_Y_SPACING;
-			ds->uiElemExtPlusX[UIELEM_PREFS_DIALOG_UIANIM_CHECKBOX] = 2*UI_PADDING_SIZE + (uint16_t)(getTextWidth(rdat,FONTSIZE_NORMAL,dat->strings[dat->locStringIDs[LOCSTR_PREF_UIANIM]])/rdat->uiScale); //so that checkbox can be toggled by clicking on adjacent text
+			ds->uiElemPosX[UIELEM_PREFS_DIALOG_UIANIM_CHECKBOX] = ds->uiElemPosX[UIELEM_PREFS_DIALOG] + (uint16_t)(PREFS_DIALOG_PREFCOL1_X*ds->uiUserScale);
+			ds->uiElemPosY[UIELEM_PREFS_DIALOG_UIANIM_CHECKBOX] = ds->uiElemPosY[UIELEM_PREFS_DIALOG] + (uint16_t)((PREFS_DIALOG_PREFCOL1_Y + 2*PREFS_DIALOG_PREF_Y_SPACING)*ds->uiUserScale);
+			ds->uiElemExtPlusX[UIELEM_PREFS_DIALOG_UIANIM_CHECKBOX] = (uint16_t)(2*UI_PADDING_SIZE*ds->uiUserScale) + (uint16_t)(getTextWidth(rdat,FONTSIZE_NORMAL,dat->strings[dat->locStringIDs[LOCSTR_PREF_UIANIM]])/rdat->uiScale); //so that checkbox can be toggled by clicking on adjacent text
 			break;
 		case UIELEM_NUCL_INFOBOX:
-			ds->uiElemPosX[uiElemInd] = (uint16_t)((ds->windowXRes - NUCL_INFOBOX_WIDTH)/2);
-			uint16_t freeXSpace = (uint16_t)(ds->windowXRes - NUCL_INFOBOX_WIDTH);
-			if(freeXSpace < 4*NUCL_INFOBOX_X_PADDING){
-				ds->uiElemPosX[uiElemInd] += (uint16_t)(NUCL_INFOBOX_X_PADDING - freeXSpace/4); //make sure info box doesn't bump up against y-axis
+			ds->uiElemPosX[uiElemInd] = (uint16_t)((ds->windowXRes - NUCL_INFOBOX_WIDTH*ds->uiUserScale)/2);
+			uint16_t freeXSpace = (uint16_t)(ds->windowXRes - NUCL_INFOBOX_WIDTH*ds->uiUserScale);
+			if(freeXSpace < 4*NUCL_INFOBOX_X_PADDING*ds->uiUserScale){
+				ds->uiElemPosX[uiElemInd] += (uint16_t)(NUCL_INFOBOX_X_PADDING*ds->uiUserScale - freeXSpace/4); //make sure info box doesn't bump up against y-axis
 			}
-			ds->uiElemHeight[uiElemInd] = (uint16_t)((float)NUCL_INFOBOX_MIN_HEIGHT + ds->infoBoxTableHeight);
-			ds->uiElemPosY[uiElemInd] = (uint16_t)(ds->windowYRes - ds->uiElemHeight[uiElemInd] - UI_PADDING_SIZE - (int32_t)CHART_AXIS_DEPTH);
-			ds->uiElemWidth[uiElemInd] = (uint16_t)(NUCL_INFOBOX_WIDTH);
+			ds->uiElemHeight[uiElemInd] = (uint16_t)(((float)NUCL_INFOBOX_MIN_HEIGHT + ds->infoBoxTableHeight)*ds->uiUserScale);
+			ds->uiElemPosY[uiElemInd] = (uint16_t)(ds->windowYRes - ds->uiElemHeight[uiElemInd] - (uint16_t)((UI_PADDING_SIZE + CHART_AXIS_DEPTH)*ds->uiUserScale));
+			ds->uiElemWidth[uiElemInd] = (uint16_t)(NUCL_INFOBOX_WIDTH*ds->uiUserScale);
 			//update child/dependant UI elements
 			updateSingleUIElemPosition(dat,ds,rdat,UIELEM_NUCL_INFOBOX_CLOSEBUTTON);
 			updateSingleUIElemPosition(dat,ds,rdat,UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON);
 			break;
 		case UIELEM_NUCL_INFOBOX_CLOSEBUTTON:
-			ds->uiElemWidth[UIELEM_NUCL_INFOBOX_CLOSEBUTTON] = UI_TILE_SIZE;
+			ds->uiElemWidth[UIELEM_NUCL_INFOBOX_CLOSEBUTTON] = (uint16_t)(UI_TILE_SIZE*ds->uiUserScale);
 			ds->uiElemHeight[UIELEM_NUCL_INFOBOX_CLOSEBUTTON] = ds->uiElemWidth[UIELEM_NUCL_INFOBOX_CLOSEBUTTON];
-			ds->uiElemPosX[UIELEM_NUCL_INFOBOX_CLOSEBUTTON] = (uint16_t)(ds->uiElemPosX[UIELEM_NUCL_INFOBOX] + ds->uiElemWidth[UIELEM_NUCL_INFOBOX] - ds->uiElemWidth[UIELEM_NUCL_INFOBOX_CLOSEBUTTON] - 4*UI_PADDING_SIZE);
-			ds->uiElemPosY[UIELEM_NUCL_INFOBOX_CLOSEBUTTON] = ds->uiElemPosY[UIELEM_NUCL_INFOBOX] + 4*UI_PADDING_SIZE;
+			ds->uiElemPosX[UIELEM_NUCL_INFOBOX_CLOSEBUTTON] = (uint16_t)(ds->uiElemPosX[UIELEM_NUCL_INFOBOX] + ds->uiElemWidth[UIELEM_NUCL_INFOBOX] - ds->uiElemWidth[UIELEM_NUCL_INFOBOX_CLOSEBUTTON] - (int32_t)(4*UI_PADDING_SIZE*ds->uiUserScale));
+			ds->uiElemPosY[UIELEM_NUCL_INFOBOX_CLOSEBUTTON] = ds->uiElemPosY[UIELEM_NUCL_INFOBOX] + (uint16_t)(4*UI_PADDING_SIZE*ds->uiUserScale);
 			break;
 		case UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON:
-			ds->uiElemWidth[UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON] = NUCL_INFOBOX_ALLLEVELS_BUTTON_WIDTH;
-			ds->uiElemHeight[UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON] = UI_TILE_SIZE;
+			ds->uiElemWidth[UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON] = (uint16_t)(NUCL_INFOBOX_ALLLEVELS_BUTTON_WIDTH*ds->uiUserScale);
+			ds->uiElemHeight[UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON] = (uint16_t)(UI_TILE_SIZE*ds->uiUserScale);
 			if(ds->uiAnimPlaying & (1U << UIANIM_NUCLINFOBOX_EXPAND)){
 				float animFrac = juice_smoothStop3(1.0f - ds->timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_EXPAND]/UI_ANIM_LENGTH);
-				uint16_t defaultPosX = (uint16_t)((ds->windowXRes - NUCL_INFOBOX_WIDTH)/2 + NUCL_INFOBOX_WIDTH - UI_TILE_SIZE - ds->uiElemWidth[UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON] - 7*UI_PADDING_SIZE);
-				uint16_t defaultPosY = (uint16_t)(ds->windowYRes - (uint16_t)((float)NUCL_INFOBOX_MIN_HEIGHT + ds->infoBoxTableHeight) - UI_PADDING_SIZE - (int32_t)CHART_AXIS_DEPTH + 4*UI_PADDING_SIZE);
-				uint16_t fullPosX = (uint16_t)(ds->windowXRes-NUCL_FULLINFOBOX_BACKBUTTON_WIDTH-NUCL_FULLINFOBOX_BACKBUTTON_POS_XR);
-				uint16_t fullPosY = NUCL_FULLINFOBOX_BACKBUTTON_POS_Y;
+				uint16_t defaultPosX = (uint16_t)((ds->windowXRes - NUCL_INFOBOX_WIDTH*ds->uiUserScale)/2 - ds->uiElemWidth[UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON] + (NUCL_INFOBOX_WIDTH - UI_TILE_SIZE - 7*UI_PADDING_SIZE)*ds->uiUserScale);
+				uint16_t defaultPosY = (uint16_t)(ds->windowYRes - (uint16_t)((((float)NUCL_INFOBOX_MIN_HEIGHT + ds->infoBoxTableHeight) - UI_PADDING_SIZE - (int32_t)CHART_AXIS_DEPTH + 4*UI_PADDING_SIZE)*ds->uiUserScale));
+				uint16_t fullPosX = (uint16_t)(ds->windowXRes-(NUCL_FULLINFOBOX_BACKBUTTON_WIDTH+NUCL_FULLINFOBOX_BACKBUTTON_POS_XR)*ds->uiUserScale);
+				uint16_t fullPosY = (uint16_t)(NUCL_FULLINFOBOX_BACKBUTTON_POS_Y*ds->uiUserScale);
 				ds->uiElemPosX[UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON] = (uint16_t)(defaultPosX + animFrac*(fullPosX - defaultPosX));
 				ds->uiElemPosY[UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON] = (uint16_t)(defaultPosY + animFrac*(fullPosY - defaultPosY));
 			}else if(ds->uiAnimPlaying & (1U << UIANIM_NUCLINFOBOX_CONTRACT)){
 				float animFrac = juice_smoothStart3(1.0f - ds->timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_CONTRACT]/UI_ANIM_LENGTH);
-				uint16_t defaultPosX = (uint16_t)((ds->windowXRes - NUCL_INFOBOX_WIDTH)/2 + NUCL_INFOBOX_WIDTH - UI_TILE_SIZE - ds->uiElemWidth[UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON] - 7*UI_PADDING_SIZE);
-				uint16_t defaultPosY = (uint16_t)(ds->windowYRes - (uint16_t)((float)NUCL_INFOBOX_MIN_HEIGHT + ds->infoBoxTableHeight) - UI_PADDING_SIZE - (int32_t)CHART_AXIS_DEPTH + 4*UI_PADDING_SIZE);
-				uint16_t fullPosX = (uint16_t)(ds->windowXRes-NUCL_FULLINFOBOX_BACKBUTTON_WIDTH-NUCL_FULLINFOBOX_BACKBUTTON_POS_XR);
-				uint16_t fullPosY = NUCL_FULLINFOBOX_BACKBUTTON_POS_Y;
+				uint16_t defaultPosX = (uint16_t)((ds->windowXRes - NUCL_INFOBOX_WIDTH*ds->uiUserScale)/2 - ds->uiElemWidth[UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON] + (NUCL_INFOBOX_WIDTH - UI_TILE_SIZE - 7*UI_PADDING_SIZE)*ds->uiUserScale);
+				uint16_t defaultPosY = (uint16_t)(ds->windowYRes - (uint16_t)((((float)NUCL_INFOBOX_MIN_HEIGHT + ds->infoBoxTableHeight) - UI_PADDING_SIZE - (int32_t)CHART_AXIS_DEPTH + 4*UI_PADDING_SIZE)*ds->uiUserScale));
+				uint16_t fullPosX = (uint16_t)(ds->windowXRes-(NUCL_FULLINFOBOX_BACKBUTTON_WIDTH+NUCL_FULLINFOBOX_BACKBUTTON_POS_XR)*ds->uiUserScale);
+				uint16_t fullPosY = (uint16_t)(NUCL_FULLINFOBOX_BACKBUTTON_POS_Y*ds->uiUserScale);
 				ds->uiElemPosX[UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON] = (uint16_t)(fullPosX + animFrac*(defaultPosX - fullPosX));
 				ds->uiElemPosY[UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON] = (uint16_t)(fullPosY + animFrac*(defaultPosY - fullPosY));
 			}else{
-				ds->uiElemPosX[UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON] = (uint16_t)(ds->uiElemPosX[UIELEM_NUCL_INFOBOX] + ds->uiElemWidth[UIELEM_NUCL_INFOBOX] - ds->uiElemWidth[UIELEM_NUCL_INFOBOX_CLOSEBUTTON] - ds->uiElemWidth[UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON] - 7*UI_PADDING_SIZE);
-				ds->uiElemPosY[UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON] = ds->uiElemPosY[UIELEM_NUCL_INFOBOX] + 4*UI_PADDING_SIZE;
+				ds->uiElemPosX[UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON] = (uint16_t)(ds->uiElemPosX[UIELEM_NUCL_INFOBOX] + ds->uiElemWidth[UIELEM_NUCL_INFOBOX] - ds->uiElemWidth[UIELEM_NUCL_INFOBOX_CLOSEBUTTON] - ds->uiElemWidth[UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON] - (int32_t)(7*UI_PADDING_SIZE*ds->uiUserScale));
+				ds->uiElemPosY[UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON] = ds->uiElemPosY[UIELEM_NUCL_INFOBOX] + (uint16_t)(4*UI_PADDING_SIZE*ds->uiUserScale);
 			}
 			//SDL_Log("x: %u, y: %u, w: %u, h: %u\n",ds->uiElemPosX[UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON],ds->uiElemPosY[UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON],ds->uiElemWidth[UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON],ds->uiElemHeight[UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON]);
 			break;
 		case UIELEM_NUCL_FULLINFOBOX_BACKBUTTON:
-			ds->uiElemPosX[UIELEM_NUCL_FULLINFOBOX_BACKBUTTON] = (uint16_t)(ds->windowXRes-NUCL_FULLINFOBOX_BACKBUTTON_WIDTH-NUCL_FULLINFOBOX_BACKBUTTON_POS_XR);
-			ds->uiElemPosY[UIELEM_NUCL_FULLINFOBOX_BACKBUTTON] = NUCL_FULLINFOBOX_BACKBUTTON_POS_Y;
-			ds->uiElemWidth[UIELEM_NUCL_FULLINFOBOX_BACKBUTTON] = NUCL_FULLINFOBOX_BACKBUTTON_WIDTH;
-			ds->uiElemHeight[UIELEM_NUCL_FULLINFOBOX_BACKBUTTON] = UI_TILE_SIZE;
+			ds->uiElemPosX[UIELEM_NUCL_FULLINFOBOX_BACKBUTTON] = (uint16_t)(ds->windowXRes-(NUCL_FULLINFOBOX_BACKBUTTON_WIDTH+NUCL_FULLINFOBOX_BACKBUTTON_POS_XR)*ds->uiUserScale);
+			ds->uiElemPosY[UIELEM_NUCL_FULLINFOBOX_BACKBUTTON] = (uint16_t)(NUCL_FULLINFOBOX_BACKBUTTON_POS_Y*ds->uiUserScale);
+			ds->uiElemWidth[UIELEM_NUCL_FULLINFOBOX_BACKBUTTON] = (uint16_t)(NUCL_FULLINFOBOX_BACKBUTTON_WIDTH*ds->uiUserScale);
+			ds->uiElemHeight[UIELEM_NUCL_FULLINFOBOX_BACKBUTTON] = (uint16_t)(UI_TILE_SIZE*ds->uiUserScale);
 			break;
 		default:
 			break;
