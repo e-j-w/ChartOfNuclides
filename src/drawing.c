@@ -148,7 +148,7 @@ void drawTextButton(const ui_theme_rules *restrict uirules, resource_data *restr
   //these should already fit a 1 tile height button well, with the default font size
   //(remember that the font size is scaled by the UI scale, during font import)
   float textX = (float)x + (float)(w)/2.0f;
-  float textY = (float)y + (float)(UI_TILE_SIZE)/2.0f;
+  float textY = (float)y + ((float)(UI_TILE_SIZE)/2.0f)*rdat->uiScale/rdat->uiDPIScale;
   drawTextAlignedSized(rdat,textX,textY,uirules->textColNormal,FONTSIZE_NORMAL,alpha,text,ALIGN_CENTER,(Uint16)w);
 }
 
@@ -223,7 +223,7 @@ void drawCheckbox(const ui_theme_rules *restrict uirules, resource_data *restric
 
 //draws a selection indicator with the position and size specified by the input SDL_Rect
 void drawSelectionRect(resource_data *restrict rdat, const SDL_FRect pos, const SDL_FColor col, const float thicknessPx){
-  float scaledThickness = thicknessPx*rdat->uiScale;
+  float scaledThickness = thicknessPx*rdat->uiDPIScale;
   SDL_SetRenderDrawColorFloat(rdat->renderer,col.r,col.g,col.b,col.a);
   SDL_FRect rect;
   rect.x = pos.x;

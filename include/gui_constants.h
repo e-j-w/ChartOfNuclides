@@ -24,7 +24,7 @@ which can be referenced by both the GUI draw code as well as the interaction cod
 
 /* GLOBAL GUI PARAMETERS */
 
-//minimum dimensions of the window
+//minimum dimensions of the window, assuming 1x UI scaling
 #define MIN_RENDER_WIDTH  800
 #define MIN_RENDER_HEIGHT 480
 

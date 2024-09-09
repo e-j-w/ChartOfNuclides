@@ -369,7 +369,7 @@ void drawChartOfNuclides(const app_data *restrict dat, const app_state *restrict
 
   SDL_FRect rect, lowBoxRect;
   float nuclBoxWidth = DEFAULT_NUCLBOX_DIM*state->ds.chartZoomScale*state->ds.uiUserScale;
-  float lowBoxPadding = DEFAULT_LOWBOX_PADDING*state->ds.chartZoomScale*rdat->uiScale;
+  float lowBoxPadding = DEFAULT_LOWBOX_PADDING*state->ds.chartZoomScale*state->ds.uiUserScale;
   float boxLineLimit = powf(state->ds.chartZoomScale/MAX_CHART_ZOOM_SCALE,2.0f)*9.0f;
 
   //calculate size of low box (extra info like isomers, 2+ energies etc.)
@@ -544,11 +544,11 @@ void drawChartOfNuclides(const app_data *restrict dat, const app_state *restrict
     SDL_FColor selectionCol = whiteCol;
     selectionCol.a = alpha;
     if(state->ds.chartZoomScale >= 2.0f){
-      rect.x = ((float)dat->ndat.nuclData[state->chartSelectedNucl].N - minX)*nuclBoxWidth - CHART_SHELLCLOSURELINE_THICKNESS;
-      rect.w =  nuclBoxWidth + 2.0f*CHART_SHELLCLOSURELINE_THICKNESS;
-      rect.y = (maxY - (float)dat->ndat.nuclData[state->chartSelectedNucl].Z)*nuclBoxWidth - CHART_SHELLCLOSURELINE_THICKNESS;
+      rect.x = ((float)dat->ndat.nuclData[state->chartSelectedNucl].N - minX)*nuclBoxWidth - CHART_SHELLCLOSURELINE_THICKNESS*state->ds.uiUserScale;
+      rect.w =  nuclBoxWidth + 2.0f*CHART_SHELLCLOSURELINE_THICKNESS*state->ds.uiUserScale;
+      rect.y = (maxY - (float)dat->ndat.nuclData[state->chartSelectedNucl].Z)*nuclBoxWidth - CHART_SHELLCLOSURELINE_THICKNESS*state->ds.uiUserScale;
       rect.h = rect.w;
-      drawSelectionRect(rdat,rect,selectionCol,2.0f*CHART_SHELLCLOSURELINE_THICKNESS);
+      drawSelectionRect(rdat,rect,selectionCol,2.0f*CHART_SHELLCLOSURELINE_THICKNESS*state->ds.uiUserScale);
     }else{
       rect.x = ((float)dat->ndat.nuclData[state->chartSelectedNucl].N - minX)*nuclBoxWidth;
       rect.y = (maxY - (float)dat->ndat.nuclData[state->chartSelectedNucl].Z)*nuclBoxWidth;
@@ -643,10 +643,10 @@ uint8_t getHighlightState(const app_state *restrict state, const uint8_t uiElem)
   }
 }
 
-void drawInfoBoxHeader(const app_data *restrict dat, resource_data *restrict rdat, const float x, const float y, const Uint8 alpha, const uint16_t nuclInd){
+void drawInfoBoxHeader(const app_data *restrict dat, const drawing_state *restrict ds, resource_data *restrict rdat, const float x, const float y, const Uint8 alpha, const uint16_t nuclInd){
   char tmpStr[32];
-  float drawXPos = (float)(x + 4*UI_PADDING_SIZE);
-  float drawYPos = (float)(y + 4*UI_PADDING_SIZE);
+  float drawXPos = (float)(x + (PANEL_EDGE_SIZE + 3*UI_PADDING_SIZE)*ds->uiUserScale);
+  float drawYPos = (float)(y + (PANEL_EDGE_SIZE + 3*UI_PADDING_SIZE)*ds->uiUserScale);
   uint16_t nucA = (uint16_t)(dat->ndat.nuclData[nuclInd].Z + dat->ndat.nuclData[nuclInd].N);
   snprintf(tmpStr,32,"%u",nucA);
   drawXPos += (drawTextAlignedSized(rdat,drawXPos,drawYPos,blackCol8Bit,FONTSIZE_SMALL,alpha,tmpStr,ALIGN_LEFT,16384)).w; //draw number label
@@ -657,7 +657,7 @@ void drawInfoBoxHeader(const app_data *restrict dat, resource_data *restrict rda
   }else{
     snprintf(tmpStr,32,"%s (%s-%u)",getElemStr((uint8_t)dat->ndat.nuclData[nuclInd].Z),getFullElemStr((uint8_t)dat->ndat.nuclData[nuclInd].Z,(uint8_t)dat->ndat.nuclData[nuclInd].N),nucA);
   }
-  drawTextAlignedSized(rdat,drawXPos+2.0f,drawYPos+6.0f,blackCol8Bit,FONTSIZE_LARGE,alpha,tmpStr,ALIGN_LEFT,16384); //draw element label
+  drawTextAlignedSized(rdat,drawXPos+(2.0f*ds->uiUserScale),drawYPos+(6.0f*ds->uiUserScale),blackCol8Bit,FONTSIZE_LARGE,alpha,tmpStr,ALIGN_LEFT,16384); //draw element label
 }
 
 void drawNuclFullInfoBox(const app_data *restrict dat, const app_state *restrict state, resource_data *restrict rdat, const uint16_t nuclInd){
@@ -665,10 +665,10 @@ void drawNuclFullInfoBox(const app_data *restrict dat, const app_state *restrict
   float txtYOffset = 0.0f;
   Uint8 txtAlpha = 255;
   if(state->ds.uiAnimPlaying & (1U << UIANIM_NUCLINFOBOX_TXTFADEOUT)){
-    txtYOffset = (20.0f*juice_smoothStop2(1.0f - state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_TXTFADEOUT]/SHORT_UI_ANIM_LENGTH));
+    txtYOffset = (20.0f*state->ds.uiUserScale*juice_smoothStop2(1.0f - state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_TXTFADEOUT]/SHORT_UI_ANIM_LENGTH));
     txtAlpha = (uint8_t)(255.0f*juice_smoothStop2(state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_TXTFADEOUT]/SHORT_UI_ANIM_LENGTH));
   }else if(state->ds.uiAnimPlaying & (1U << UIANIM_NUCLINFOBOX_TXTFADEIN)){
-    txtYOffset = (20.0f*juice_smoothStart2(state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_TXTFADEIN]/SHORT_UI_ANIM_LENGTH));
+    txtYOffset = (20.0f*state->ds.uiUserScale*juice_smoothStart2(state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_TXTFADEIN]/SHORT_UI_ANIM_LENGTH));
     txtAlpha = (uint8_t)(255.0f*juice_smoothStart2(1.0f - state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_TXTFADEIN]/SHORT_UI_ANIM_LENGTH));
   }
   
@@ -678,18 +678,18 @@ void drawNuclFullInfoBox(const app_data *restrict dat, const app_state *restrict
   rect.x = 0.0f;
   rect.w = state->ds.windowXRes;
   uint8_t drawMode = 0; //0=draw all columns, 1=skip multipolarity, 2=skip multipolarity, final spin
-  float allColWidth = NUCL_FULLINFOBOX_ALLCOL_WIDTH;
-  if(allColWidth > (state->ds.windowXRes - 4*UI_PADDING_SIZE)){
+  float allColWidth = NUCL_FULLINFOBOX_ALLCOL_WIDTH*state->ds.uiUserScale;
+  if(allColWidth > (state->ds.windowXRes - 4*UI_PADDING_SIZE*state->ds.uiUserScale)){
     drawMode = 1;
-    allColWidth = NUCL_FULLINFOBOX_ALLCOL_EXCLM_WIDTH;
-    if(allColWidth > (state->ds.windowXRes - 4*UI_PADDING_SIZE)){
+    allColWidth = NUCL_FULLINFOBOX_ALLCOL_EXCLM_WIDTH*state->ds.uiUserScale;
+    if(allColWidth > (state->ds.windowXRes - 4*UI_PADDING_SIZE*state->ds.uiUserScale)){
       drawMode = 2;
-      allColWidth = NUCL_FULLINFOBOX_ALLCOL_EXCLMJF_WIDTH;
+      allColWidth = NUCL_FULLINFOBOX_ALLCOL_EXCLMJF_WIDTH*state->ds.uiUserScale;
     }
   }
   float origDrawXPos = (state->ds.windowXRes - allColWidth)/2.0f;
   float drawXPos = origDrawXPos;
-  float drawYPos = NUCL_FULLINFOBOX_LEVELLIST_POS_Y - NUCL_INFOBOX_SMALLLINE_HEIGHT*(state->ds.nuclFullInfoScrollY) + txtYOffset;
+  float drawYPos = (NUCL_FULLINFOBOX_LEVELLIST_POS_Y - NUCL_INFOBOX_SMALLLINE_HEIGHT*(state->ds.nuclFullInfoScrollY))*state->ds.uiUserScale + txtYOffset;
   //SDL_Log("drawYPos: %f\n",(double)drawYPos);
   float levelStartDrawPos;
   for(uint32_t lvlInd = dat->ndat.nuclData[nuclInd].firstLevel; lvlInd<(dat->ndat.nuclData[nuclInd].firstLevel+dat->ndat.nuclData[nuclInd].numLevels); lvlInd++){
@@ -703,7 +703,7 @@ void drawNuclFullInfoBox(const app_data *restrict dat, const app_state *restrict
         //first check that the lifetime is not an upper limit
         if((((dat->ndat.levels[lvlInd].halfLife.format >> 5U) & 15U) != VALUETYPE_LESSTHAN)&&(((dat->ndat.levels[lvlInd].halfLife.format >> 5U) & 15U) != VALUETYPE_LESSOREQUALTHAN)){
           rect.h = NUCL_INFOBOX_SMALLLINE_HEIGHT*numLines*state->ds.uiUserScale;
-          rect.y = drawYPos*state->ds.uiUserScale;
+          rect.y = drawYPos;
           SDL_FColor rectCol = getHalfLifeCol(hl);
           if(txtAlpha != 255){
             rectCol.a *= txtAlpha/255.0f;
@@ -720,35 +720,35 @@ void drawNuclFullInfoBox(const app_data *restrict dat, const app_state *restrict
         getLvlEnergyStr(tmpStr,&dat->ndat,lvlInd,1);
       }
       drawTextAlignedSized(rdat,drawXPos,drawYPos,(hl > 1.0E3) ? whiteCol8Bit : blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_LEFT,16384);
-      drawXPos += NUCL_FULLINFOBOX_ENERGY_COL_WIDTH;
+      drawXPos += NUCL_FULLINFOBOX_ENERGY_COL_WIDTH*state->ds.uiUserScale;
       getSpinParStr(tmpStr,&dat->ndat,lvlInd);
       drawTextAlignedSized(rdat,drawXPos,drawYPos,(hl > 1.0E3) ? whiteCol8Bit : blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_LEFT,16384);
-      drawXPos += NUCL_FULLINFOBOX_JPI_COL_WIDTH;
+      drawXPos += NUCL_FULLINFOBOX_JPI_COL_WIDTH*state->ds.uiUserScale;
       getHalfLifeStr(tmpStr,&dat->ndat,lvlInd,1,0,state->ds.useLifetimes);
       drawTextAlignedSized(rdat,drawXPos,drawYPos,(hl > 1.0E3) ? whiteCol8Bit : blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_LEFT,16384);
       if(dat->ndat.levels[lvlInd].numDecModes > 0){
         for(int8_t i=0; i<dat->ndat.levels[lvlInd].numDecModes; i++){
-          drawYPos += NUCL_INFOBOX_SMALLLINE_HEIGHT;
+          drawYPos += NUCL_INFOBOX_SMALLLINE_HEIGHT*state->ds.uiUserScale;
           getDecayModeStr(tmpStr,&dat->ndat,dat->ndat.levels[lvlInd].firstDecMode + (uint32_t)i);
           //SDL_Log("%s\n",tmpStr);
-          drawTextAlignedSized(rdat,drawXPos+2*UI_PADDING_SIZE,drawYPos,(hl > 1.0E3) ? whiteCol8Bit : blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_LEFT,16384); //draw decay mode label
+          drawTextAlignedSized(rdat,drawXPos+(2*UI_PADDING_SIZE*state->ds.uiUserScale),drawYPos,(hl > 1.0E3) ? whiteCol8Bit : blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_LEFT,16384); //draw decay mode label
         }
       }
-      drawXPos += NUCL_FULLINFOBOX_HALFLIFE_COL_WIDTH;
+      drawXPos += NUCL_FULLINFOBOX_HALFLIFE_COL_WIDTH*state->ds.uiUserScale;
       if(dat->ndat.levels[lvlInd].numTran > 0){
         drawYPos = levelStartDrawPos;
         for(uint16_t i=0; i<dat->ndat.levels[lvlInd].numTran; i++){
           float drawXPosTran = drawXPos;
           getGammaEnergyStr(tmpStr,&dat->ndat,(uint32_t)(dat->ndat.levels[lvlInd].firstTran + i),1);
           drawTextAlignedSized(rdat,drawXPosTran,drawYPos,(hl > 1.0E3) ? whiteCol8Bit : blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_LEFT,16384); //draw transition energy label
-          drawXPosTran += NUCL_FULLINFOBOX_EGAMMA_COL_WIDTH;
+          drawXPosTran += NUCL_FULLINFOBOX_EGAMMA_COL_WIDTH*state->ds.uiUserScale;
           getGammaIntensityStr(tmpStr,&dat->ndat,(uint32_t)(dat->ndat.levels[lvlInd].firstTran + i),1);
           drawTextAlignedSized(rdat,drawXPosTran,drawYPos,(hl > 1.0E3) ? whiteCol8Bit : blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_LEFT,16384); //draw transition intensity label
-          drawXPosTran += NUCL_FULLINFOBOX_IGAMMA_COL_WIDTH;
+          drawXPosTran += NUCL_FULLINFOBOX_IGAMMA_COL_WIDTH*state->ds.uiUserScale;
           if(drawMode == 0){
             getGammaMultipolarityStr(tmpStr,&dat->ndat,(uint32_t)(dat->ndat.levels[lvlInd].firstTran + i));
             drawTextAlignedSized(rdat,drawXPosTran,drawYPos,(hl > 1.0E3) ? whiteCol8Bit : blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_LEFT,16384); //draw transition multipolarity label
-            drawXPosTran += NUCL_FULLINFOBOX_MGAMMA_COL_WIDTH;
+            drawXPosTran += NUCL_FULLINFOBOX_MGAMMA_COL_WIDTH*state->ds.uiUserScale;
           }
           if(dat->ndat.tran[(uint32_t)(dat->ndat.levels[lvlInd].firstTran + i)].finalLvlOffset != 0){
             float drawXPosFL = drawXPosTran;
@@ -756,21 +756,21 @@ void drawNuclFullInfoBox(const app_data *restrict dat, const app_state *restrict
             getLvlEnergyStr(tmpStr,&dat->ndat,finalLvlInd,0);
             drawTextAlignedSized(rdat,drawXPosFL,drawYPos,(hl > 1.0E3) ? whiteCol8Bit : blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_LEFT,16384); //draw final level energy label
             if(drawMode <= 1){
-              drawXPosFL += NUCL_FULLINFOBOX_FINALLEVEL_E_COL_WIDTH;
+              drawXPosFL += NUCL_FULLINFOBOX_FINALLEVEL_E_COL_WIDTH*state->ds.uiUserScale;
               getSpinParStr(tmpStr,&dat->ndat,finalLvlInd);
               drawTextAlignedSized(rdat,drawXPosFL,drawYPos,(hl > 1.0E3) ? whiteCol8Bit : blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_LEFT,16384); //draw final level spin-parity label
             }
           }
 
-          drawYPos += NUCL_INFOBOX_SMALLLINE_HEIGHT;
+          drawYPos += NUCL_INFOBOX_SMALLLINE_HEIGHT*state->ds.uiUserScale;
         }
       }
-      drawYPos = levelStartDrawPos + numLines*NUCL_INFOBOX_SMALLLINE_HEIGHT;
+      drawYPos = levelStartDrawPos + numLines*NUCL_INFOBOX_SMALLLINE_HEIGHT*state->ds.uiUserScale;
     }else{
       if(drawYPos > state->ds.windowYRes){
         break;
       }
-      drawYPos += numLines*NUCL_INFOBOX_SMALLLINE_HEIGHT;
+      drawYPos += numLines*NUCL_INFOBOX_SMALLLINE_HEIGHT*state->ds.uiUserScale;
     }
   }
 
@@ -782,29 +782,29 @@ void drawNuclFullInfoBox(const app_data *restrict dat, const app_state *restrict
   drawFlatRect(rdat,rect,dat->rules.themeRules.bgCol);
 
   //header
-  drawInfoBoxHeader(dat,rdat,0.0f,0.0f,255,nuclInd);
+  drawInfoBoxHeader(dat,&state->ds,rdat,0.0f,0.0f,255,nuclInd);
 
   //Q-values
   char qValStr[32];
-  drawXPos = NUCL_FULLINFOBOX_QVAL_POS_X;
-  drawYPos = NUCL_FULLINFOBOX_QVAL_POS_Y + txtYOffset;
+  drawXPos = NUCL_FULLINFOBOX_QVAL_POS_X*state->ds.uiUserScale;
+  drawYPos = NUCL_FULLINFOBOX_QVAL_POS_Y*state->ds.uiUserScale + txtYOffset;
   if(dat->ndat.nuclData[nuclInd].sn.val != 0.0f){
     getQValStr(qValStr,dat->ndat.nuclData[nuclInd].sn,1);
     SDL_snprintf(tmpStr,32,"%s=%s %s",dat->strings[LOCSTR_SN],qValStr,getValueUnitShortStr(dat->ndat.nuclData[nuclInd].sn.unit));
     rect = drawTextAlignedSized(rdat,drawXPos,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_LEFT,16384);
-    drawXPos += rect.w + 4*UI_PADDING_SIZE;
+    drawXPos += rect.w + 4*UI_PADDING_SIZE*state->ds.uiUserScale;
   }
   if(dat->ndat.nuclData[nuclInd].sp.val != 0.0f){
     getQValStr(qValStr,dat->ndat.nuclData[nuclInd].sp,1);
     SDL_snprintf(tmpStr,32,"%s=%s %s",dat->strings[LOCSTR_SP],qValStr,getValueUnitShortStr(dat->ndat.nuclData[nuclInd].sp.unit));
     rect = drawTextAlignedSized(rdat,drawXPos,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_LEFT,16384);
-    drawXPos += rect.w + 4*UI_PADDING_SIZE;
+    drawXPos += rect.w + 4*UI_PADDING_SIZE*state->ds.uiUserScale;
   }
   if(dat->ndat.nuclData[nuclInd].qalpha.val != 0.0f){
     getQValStr(qValStr,dat->ndat.nuclData[nuclInd].qalpha,1);
     SDL_snprintf(tmpStr,32,"%s=%s %s",dat->strings[LOCSTR_QALPHA],qValStr,getValueUnitShortStr(dat->ndat.nuclData[nuclInd].qalpha.unit));
     rect = drawTextAlignedSized(rdat,drawXPos,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_LEFT,16384);
-    drawXPos += rect.w + 4*UI_PADDING_SIZE;
+    drawXPos += rect.w + 4*UI_PADDING_SIZE*state->ds.uiUserScale;
   }
   if(dat->ndat.nuclData[nuclInd].qbeta.val != 0.0f){
     getQValStr(qValStr,dat->ndat.nuclData[nuclInd].qbeta,1);
@@ -814,26 +814,26 @@ void drawNuclFullInfoBox(const app_data *restrict dat, const app_state *restrict
 
   //draw column title strings
   drawXPos = origDrawXPos;
-  drawYPos = NUCL_FULLINFOBOX_LEVELLIST_HEADER_POS_Y + txtYOffset;
+  drawYPos = NUCL_FULLINFOBOX_LEVELLIST_HEADER_POS_Y*state->ds.uiUserScale + txtYOffset;
   drawTextAlignedSized(rdat,drawXPos,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,dat->strings[LOCSTR_LEVELINFO_HEADER],ALIGN_LEFT,16384);
-  drawYPos += NUCL_INFOBOX_BIGLINE_HEIGHT;
+  drawYPos += NUCL_INFOBOX_BIGLINE_HEIGHT*state->ds.uiUserScale;
   drawTextAlignedSized(rdat,drawXPos,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,dat->strings[LOCSTR_ENERGY_KEV],ALIGN_LEFT,16384);
-  drawXPos += NUCL_FULLINFOBOX_ENERGY_COL_WIDTH;
+  drawXPos += NUCL_FULLINFOBOX_ENERGY_COL_WIDTH*state->ds.uiUserScale;
   drawTextAlignedSized(rdat,drawXPos,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,dat->strings[LOCSTR_JPI],ALIGN_LEFT,16384);
-  drawXPos += NUCL_FULLINFOBOX_JPI_COL_WIDTH;
+  drawXPos += NUCL_FULLINFOBOX_JPI_COL_WIDTH*state->ds.uiUserScale;
   if(state->ds.useLifetimes){
     drawTextAlignedSized(rdat,drawXPos,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,dat->strings[LOCSTR_LIFETIME],ALIGN_LEFT,16384);
   }else{
     drawTextAlignedSized(rdat,drawXPos,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,dat->strings[LOCSTR_HALFLIFE],ALIGN_LEFT,16384);
   }
-  drawXPos += NUCL_FULLINFOBOX_HALFLIFE_COL_WIDTH;
+  drawXPos += NUCL_FULLINFOBOX_HALFLIFE_COL_WIDTH*state->ds.uiUserScale;
   drawTextAlignedSized(rdat,drawXPos,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,dat->strings[LOCSTR_ENERGY_GAMMA],ALIGN_LEFT,16384);
-  drawXPos += NUCL_FULLINFOBOX_EGAMMA_COL_WIDTH;
+  drawXPos += NUCL_FULLINFOBOX_EGAMMA_COL_WIDTH*state->ds.uiUserScale;
   drawTextAlignedSized(rdat,drawXPos,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,dat->strings[LOCSTR_INTENSITY_GAMMA],ALIGN_LEFT,16384);
-  drawXPos += NUCL_FULLINFOBOX_IGAMMA_COL_WIDTH;
+  drawXPos += NUCL_FULLINFOBOX_IGAMMA_COL_WIDTH*state->ds.uiUserScale;
   if(drawMode == 0){
     drawTextAlignedSized(rdat,drawXPos,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,dat->strings[LOCSTR_MULTIPOLARITY_GAMMA],ALIGN_LEFT,16384);
-    drawXPos += NUCL_FULLINFOBOX_MGAMMA_COL_WIDTH;
+    drawXPos += NUCL_FULLINFOBOX_MGAMMA_COL_WIDTH*state->ds.uiUserScale;
   }
   drawTextAlignedSized(rdat,drawXPos,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,dat->strings[LOCSTR_FINALLEVEL],ALIGN_LEFT,16384);
 
@@ -845,9 +845,9 @@ void drawNuclInfoBox(const app_data *restrict dat, app_state *restrict state, re
   
   uint16_t yOffset = 0;
   if(state->ds.uiAnimPlaying & (1U << UIANIM_NUCLINFOBOX_HIDE)){
-    yOffset = (uint16_t)(300.0f*juice_smoothStop2(1.0f - state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_HIDE]/UI_ANIM_LENGTH));
+    yOffset = (uint16_t)(300.0f*state->ds.uiUserScale*juice_smoothStop2(1.0f - state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_HIDE]/UI_ANIM_LENGTH));
   }else if(state->ds.uiAnimPlaying & (1U << UIANIM_NUCLINFOBOX_SHOW)){
-    yOffset = (uint16_t)(300.0f*juice_smoothStart2(state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_SHOW]/(UI_ANIM_LENGTH)));
+    yOffset = (uint16_t)(300.0f*state->ds.uiUserScale*juice_smoothStart2(state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_SHOW]/(UI_ANIM_LENGTH)));
   }
   Uint8 alpha = 255;
   if(state->ds.uiAnimPlaying & (1U << UIANIM_NUCLINFOBOX_CONTRACT)){
@@ -883,46 +883,46 @@ void drawNuclInfoBox(const app_data *restrict dat, app_state *restrict state, re
 
   //draw column title strings
   char tmpStr[32];
-  float drawXPos = (float)(infoBoxPanelRect.x + 4*UI_PADDING_SIZE);
-  float drawYPos = (float)(infoBoxPanelRect.y + 4*UI_PADDING_SIZE) + 40.0f;
+  float drawXPos = (float)(infoBoxPanelRect.x + (PANEL_EDGE_SIZE + 3*UI_PADDING_SIZE)*state->ds.uiUserScale);
+  float drawYPos = (float)(infoBoxPanelRect.y + (PANEL_EDGE_SIZE + 3*UI_PADDING_SIZE + 40.0f)*state->ds.uiUserScale);
   drawTextAlignedSized(rdat,drawXPos,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,alpha,dat->strings[LOCSTR_GM_STATE],ALIGN_LEFT,state->ds.uiElemWidth[UIELEM_NUCL_INFOBOX]);
-  drawYPos += NUCL_INFOBOX_BIGLINE_HEIGHT;
-  drawTextAlignedSized(rdat,drawXPos+NUCL_INFOBOX_ENERGY_COL_OFFSET,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,alpha,dat->strings[LOCSTR_ENERGY_KEV],ALIGN_LEFT,state->ds.uiElemWidth[UIELEM_NUCL_INFOBOX]);
-  drawTextAlignedSized(rdat,drawXPos+NUCL_INFOBOX_JPI_COL_OFFSET,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,alpha,dat->strings[LOCSTR_JPI],ALIGN_LEFT,state->ds.uiElemWidth[UIELEM_NUCL_INFOBOX]);
+  drawYPos += NUCL_INFOBOX_BIGLINE_HEIGHT*state->ds.uiUserScale;
+  drawTextAlignedSized(rdat,drawXPos+NUCL_INFOBOX_ENERGY_COL_OFFSET*state->ds.uiUserScale,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,alpha,dat->strings[LOCSTR_ENERGY_KEV],ALIGN_LEFT,state->ds.uiElemWidth[UIELEM_NUCL_INFOBOX]);
+  drawTextAlignedSized(rdat,drawXPos+NUCL_INFOBOX_JPI_COL_OFFSET*state->ds.uiUserScale,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,alpha,dat->strings[LOCSTR_JPI],ALIGN_LEFT,state->ds.uiElemWidth[UIELEM_NUCL_INFOBOX]);
   if(state->ds.useLifetimes){
-    drawTextAlignedSized(rdat,drawXPos+NUCL_INFOBOX_HALFLIFE_COL_OFFSET,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,alpha,dat->strings[LOCSTR_LIFETIME],ALIGN_LEFT,state->ds.uiElemWidth[UIELEM_NUCL_INFOBOX]);
+    drawTextAlignedSized(rdat,drawXPos+NUCL_INFOBOX_HALFLIFE_COL_OFFSET*state->ds.uiUserScale,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,alpha,dat->strings[LOCSTR_LIFETIME],ALIGN_LEFT,state->ds.uiElemWidth[UIELEM_NUCL_INFOBOX]);
   }else{
-    drawTextAlignedSized(rdat,drawXPos+NUCL_INFOBOX_HALFLIFE_COL_OFFSET,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,alpha,dat->strings[LOCSTR_HALFLIFE],ALIGN_LEFT,state->ds.uiElemWidth[UIELEM_NUCL_INFOBOX]);
+    drawTextAlignedSized(rdat,drawXPos+NUCL_INFOBOX_HALFLIFE_COL_OFFSET*state->ds.uiUserScale,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,alpha,dat->strings[LOCSTR_HALFLIFE],ALIGN_LEFT,state->ds.uiElemWidth[UIELEM_NUCL_INFOBOX]);
   }
-  drawTextAlignedSized(rdat,drawXPos+NUCL_INFOBOX_DECAYMODE_COL_OFFSET,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,alpha,dat->strings[LOCSTR_DECAYMODE],ALIGN_LEFT,state->ds.uiElemWidth[UIELEM_NUCL_INFOBOX]);
+  drawTextAlignedSized(rdat,drawXPos+NUCL_INFOBOX_DECAYMODE_COL_OFFSET*state->ds.uiUserScale,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,alpha,dat->strings[LOCSTR_DECAYMODE],ALIGN_LEFT,state->ds.uiElemWidth[UIELEM_NUCL_INFOBOX]);
 
   //ground state
-  drawYPos += NUCL_INFOBOX_BIGLINE_HEIGHT;
+  drawYPos += NUCL_INFOBOX_BIGLINE_HEIGHT*state->ds.uiUserScale;
   uint32_t lvlInd = dat->ndat.nuclData[nuclInd].firstLevel + dat->ndat.nuclData[nuclInd].gsLevel;
   getLvlEnergyStr(tmpStr,&dat->ndat,lvlInd,0);
-  drawTextAlignedSized(rdat,drawXPos+NUCL_INFOBOX_ENERGY_COL_OFFSET,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,alpha,tmpStr,ALIGN_LEFT,state->ds.uiElemWidth[UIELEM_NUCL_INFOBOX]);
+  drawTextAlignedSized(rdat,drawXPos+NUCL_INFOBOX_ENERGY_COL_OFFSET*state->ds.uiUserScale,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,alpha,tmpStr,ALIGN_LEFT,state->ds.uiElemWidth[UIELEM_NUCL_INFOBOX]);
   getSpinParStr(tmpStr,&dat->ndat,lvlInd);
-  drawTextAlignedSized(rdat,drawXPos+NUCL_INFOBOX_JPI_COL_OFFSET,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,alpha,tmpStr,ALIGN_LEFT,state->ds.uiElemWidth[UIELEM_NUCL_INFOBOX]);
+  drawTextAlignedSized(rdat,drawXPos+NUCL_INFOBOX_JPI_COL_OFFSET*state->ds.uiUserScale,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,alpha,tmpStr,ALIGN_LEFT,state->ds.uiElemWidth[UIELEM_NUCL_INFOBOX]);
   getHalfLifeStr(tmpStr,&dat->ndat,lvlInd,1,1,state->ds.useLifetimes);
-  drawTextAlignedSized(rdat,drawXPos+NUCL_INFOBOX_HALFLIFE_COL_OFFSET,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,alpha,tmpStr,ALIGN_LEFT,state->ds.uiElemWidth[UIELEM_NUCL_INFOBOX]);
+  drawTextAlignedSized(rdat,drawXPos+NUCL_INFOBOX_HALFLIFE_COL_OFFSET*state->ds.uiUserScale,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,alpha,tmpStr,ALIGN_LEFT,state->ds.uiElemWidth[UIELEM_NUCL_INFOBOX]);
   if(dat->ndat.levels[lvlInd].halfLife.unit == VALUE_UNIT_STABLE){
-    drawTextAlignedSized(rdat,drawXPos+NUCL_INFOBOX_DECAYMODE_COL_OFFSET,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,alpha,"N/A",ALIGN_LEFT,state->ds.uiElemWidth[UIELEM_NUCL_INFOBOX]); //draw no decay mode label
-    drawYPos += NUCL_INFOBOX_SMALLLINE_HEIGHT;
+    drawTextAlignedSized(rdat,drawXPos+NUCL_INFOBOX_DECAYMODE_COL_OFFSET*state->ds.uiUserScale,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,alpha,"N/A",ALIGN_LEFT,state->ds.uiElemWidth[UIELEM_NUCL_INFOBOX]); //draw no decay mode label
+    drawYPos += NUCL_INFOBOX_SMALLLINE_HEIGHT*state->ds.uiUserScale;
   }else{
     if(dat->ndat.levels[lvlInd].numDecModes > 0){
       for(int8_t i=0; i<dat->ndat.levels[lvlInd].numDecModes; i++){
         getDecayModeStr(tmpStr,&dat->ndat,dat->ndat.levels[lvlInd].firstDecMode + (uint32_t)i);
         //SDL_Log("%s\n",tmpStr);
         if(drawYPos < (float)(state->ds.uiElemPosY[UIELEM_NUCL_INFOBOX] + state->ds.uiElemHeight[UIELEM_NUCL_INFOBOX])){
-          drawTextAlignedSized(rdat,drawXPos+NUCL_INFOBOX_DECAYMODE_COL_OFFSET,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,alpha,tmpStr,ALIGN_LEFT,state->ds.uiElemWidth[UIELEM_NUCL_INFOBOX]); //draw decay mode label
-          drawYPos += NUCL_INFOBOX_SMALLLINE_HEIGHT;
+          drawTextAlignedSized(rdat,drawXPos+NUCL_INFOBOX_DECAYMODE_COL_OFFSET*state->ds.uiUserScale,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,alpha,tmpStr,ALIGN_LEFT,state->ds.uiElemWidth[UIELEM_NUCL_INFOBOX]); //draw decay mode label
+          drawYPos += NUCL_INFOBOX_SMALLLINE_HEIGHT*state->ds.uiUserScale;
         }else{
           break;
         }
       }
     }else{
-      drawTextAlignedSized(rdat,drawXPos+NUCL_INFOBOX_DECAYMODE_COL_OFFSET,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,alpha,"Unknown",ALIGN_LEFT,state->ds.uiElemWidth[UIELEM_NUCL_INFOBOX]); //draw decay mode label
-      drawYPos += NUCL_INFOBOX_SMALLLINE_HEIGHT;
+      drawTextAlignedSized(rdat,drawXPos+NUCL_INFOBOX_DECAYMODE_COL_OFFSET*state->ds.uiUserScale,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,alpha,"Unknown",ALIGN_LEFT,state->ds.uiElemWidth[UIELEM_NUCL_INFOBOX]); //draw decay mode label
+      drawYPos += NUCL_INFOBOX_SMALLLINE_HEIGHT*state->ds.uiUserScale;
     }
     
   }
@@ -931,22 +931,22 @@ void drawNuclInfoBox(const app_data *restrict dat, app_state *restrict state, re
   //SDL_Log("Isomer index: %u\n",dat->ndat.nuclData[nuclInd].longestIsomerLevel);
   lvlInd = dat->ndat.nuclData[nuclInd].longestIsomerLevel;
   if((lvlInd != MAXNUMLVLS)&&(lvlInd != (dat->ndat.nuclData[nuclInd].firstLevel + dat->ndat.nuclData[nuclInd].gsLevel))){
-    drawYPos += (NUCL_INFOBOX_BIGLINE_HEIGHT - NUCL_INFOBOX_SMALLLINE_HEIGHT);
+    drawYPos += ((NUCL_INFOBOX_BIGLINE_HEIGHT - NUCL_INFOBOX_SMALLLINE_HEIGHT)*state->ds.uiUserScale);
     getLvlEnergyStr(tmpStr,&dat->ndat,lvlInd,1);
-    drawTextAlignedSized(rdat,drawXPos+NUCL_INFOBOX_ENERGY_COL_OFFSET,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,alpha,tmpStr,ALIGN_LEFT,state->ds.uiElemWidth[UIELEM_NUCL_INFOBOX]);
+    drawTextAlignedSized(rdat,drawXPos+NUCL_INFOBOX_ENERGY_COL_OFFSET*state->ds.uiUserScale,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,alpha,tmpStr,ALIGN_LEFT,state->ds.uiElemWidth[UIELEM_NUCL_INFOBOX]);
     getSpinParStr(tmpStr,&dat->ndat,lvlInd);
-    drawTextAlignedSized(rdat,drawXPos+NUCL_INFOBOX_JPI_COL_OFFSET,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,alpha,tmpStr,ALIGN_LEFT,state->ds.uiElemWidth[UIELEM_NUCL_INFOBOX]);
+    drawTextAlignedSized(rdat,drawXPos+NUCL_INFOBOX_JPI_COL_OFFSET*state->ds.uiUserScale,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,alpha,tmpStr,ALIGN_LEFT,state->ds.uiElemWidth[UIELEM_NUCL_INFOBOX]);
     getHalfLifeStr(tmpStr,&dat->ndat,lvlInd,1,1,state->ds.useLifetimes);
-    drawTextAlignedSized(rdat,drawXPos+NUCL_INFOBOX_HALFLIFE_COL_OFFSET,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,alpha,tmpStr,ALIGN_LEFT,state->ds.uiElemWidth[UIELEM_NUCL_INFOBOX]);
+    drawTextAlignedSized(rdat,drawXPos+NUCL_INFOBOX_HALFLIFE_COL_OFFSET*state->ds.uiUserScale,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,alpha,tmpStr,ALIGN_LEFT,state->ds.uiElemWidth[UIELEM_NUCL_INFOBOX]);
     if(dat->ndat.levels[lvlInd].halfLife.unit == VALUE_UNIT_STABLE){
-      drawTextAlignedSized(rdat,drawXPos+NUCL_INFOBOX_DECAYMODE_COL_OFFSET,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,alpha,"N/A",ALIGN_LEFT,state->ds.uiElemWidth[UIELEM_NUCL_INFOBOX]); //draw no decay mode label
+      drawTextAlignedSized(rdat,drawXPos+NUCL_INFOBOX_DECAYMODE_COL_OFFSET*state->ds.uiUserScale,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,alpha,"N/A",ALIGN_LEFT,state->ds.uiElemWidth[UIELEM_NUCL_INFOBOX]); //draw no decay mode label
     }else{
       for(int8_t i=0; i<dat->ndat.levels[lvlInd].numDecModes; i++){
         getDecayModeStr(tmpStr,&dat->ndat,dat->ndat.levels[lvlInd].firstDecMode + (uint32_t)i);
         //SDL_Log("%s\n",tmpStr);
         if(drawYPos < (float)(state->ds.uiElemPosY[UIELEM_NUCL_INFOBOX] + state->ds.uiElemHeight[UIELEM_NUCL_INFOBOX])){
-          drawTextAlignedSized(rdat,drawXPos+NUCL_INFOBOX_DECAYMODE_COL_OFFSET,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,alpha,tmpStr,ALIGN_LEFT,state->ds.uiElemWidth[UIELEM_NUCL_INFOBOX]); //draw decay mode label
-          drawYPos += NUCL_INFOBOX_SMALLLINE_HEIGHT;
+          drawTextAlignedSized(rdat,drawXPos+NUCL_INFOBOX_DECAYMODE_COL_OFFSET*state->ds.uiUserScale,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,alpha,tmpStr,ALIGN_LEFT,state->ds.uiElemWidth[UIELEM_NUCL_INFOBOX]); //draw decay mode label
+          drawYPos += NUCL_INFOBOX_SMALLLINE_HEIGHT*state->ds.uiUserScale;
         }else{
           break;
         }
@@ -955,7 +955,7 @@ void drawNuclInfoBox(const app_data *restrict dat, app_state *restrict state, re
   }
 
   //header
-  drawInfoBoxHeader(dat,rdat,infoBoxPanelRect.x,infoBoxPanelRect.y,255,nuclInd);
+  drawInfoBoxHeader(dat,&state->ds,rdat,infoBoxPanelRect.x,infoBoxPanelRect.y,255,nuclInd);
 
   //all level info button
   updateSingleUIElemPosition(dat,&state->ds,rdat,UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON);
@@ -1021,12 +1021,12 @@ void drawAboutBox(const app_data *restrict dat, const app_state *restrict state,
     alpha = (float)(DIMMER_OPACITY*juice_smoothStart2(state->ds.timeLeftInUIAnimation[UIANIM_MODAL_BOX_HIDE]/UI_ANIM_LENGTH));
     drawScreenDimmer(&state->ds,rdat,alpha);
     alpha = (float)(1.0f*juice_smoothStart2(state->ds.timeLeftInUIAnimation[UIANIM_MODAL_BOX_HIDE]/(UI_ANIM_LENGTH)));
-    yOffset = (-100.0f*juice_smoothStop2(1.0f - state->ds.timeLeftInUIAnimation[UIANIM_MODAL_BOX_HIDE]/UI_ANIM_LENGTH));
+    yOffset = (-100.0f*state->ds.uiUserScale*juice_smoothStop2(1.0f - state->ds.timeLeftInUIAnimation[UIANIM_MODAL_BOX_HIDE]/UI_ANIM_LENGTH));
   }else if(state->ds.uiAnimPlaying & (1U << UIANIM_MODAL_BOX_SHOW)){
     alpha = (float)(DIMMER_OPACITY*juice_smoothStop2(1.0f - state->ds.timeLeftInUIAnimation[UIANIM_MODAL_BOX_SHOW]/UI_ANIM_LENGTH));
     drawScreenDimmer(&state->ds,rdat,alpha);
     alpha = (float)(1.0f*juice_smoothStop2(1.0f - state->ds.timeLeftInUIAnimation[UIANIM_MODAL_BOX_SHOW]/UI_ANIM_LENGTH));
-    yOffset = (100.0f*juice_smoothStart2(state->ds.timeLeftInUIAnimation[UIANIM_MODAL_BOX_SHOW]/(UI_ANIM_LENGTH)));
+    yOffset = (100.0f*state->ds.uiUserScale*juice_smoothStart2(state->ds.timeLeftInUIAnimation[UIANIM_MODAL_BOX_SHOW]/(UI_ANIM_LENGTH)));
   }else{
     drawScreenDimmer(&state->ds,rdat,DIMMER_OPACITY);
   }
@@ -1038,10 +1038,10 @@ void drawAboutBox(const app_data *restrict dat, const app_state *restrict state,
   aboutBoxPanelRect.h = state->ds.uiElemHeight[UIELEM_ABOUT_BOX];
   drawPanelBG(rdat,aboutBoxPanelRect,alpha);
 
-  drawTextAlignedSized(rdat,aboutBoxPanelRect.x+(aboutBoxPanelRect.w/2),aboutBoxPanelRect.y+ABOUT_BOX_HEADERTXT_Y,dat->rules.themeRules.textColNormal,FONTSIZE_LARGE,(uint8_t)SDL_floorf(alpha*255.0f),dat->rules.appName,ALIGN_CENTER,(Uint16)(aboutBoxPanelRect.w - 2*UI_PADDING_SIZE));
-  drawTextAlignedSized(rdat,aboutBoxPanelRect.x+(aboutBoxPanelRect.w/2),aboutBoxPanelRect.y+ABOUT_BOX_VERSION_Y,dat->rules.themeRules.textColNormal,FONTSIZE_SMALL,(uint8_t)SDL_floorf(alpha*255.0f),dat->strings[dat->locStringIDs[LOCSTR_ABOUTSTR_VERSION]],ALIGN_CENTER,16384);
-  drawTextAlignedSized(rdat,aboutBoxPanelRect.x+(aboutBoxPanelRect.w/2),aboutBoxPanelRect.y+ABOUT_BOX_STR1_Y,dat->rules.themeRules.textColNormal,FONTSIZE_NORMAL,(uint8_t)SDL_floorf(alpha*255.0f),dat->strings[dat->locStringIDs[LOCSTR_ABOUTSTR_1]],ALIGN_CENTER,(Uint16)(aboutBoxPanelRect.w - 12*UI_PADDING_SIZE));
-  drawTextAlignedSized(rdat,aboutBoxPanelRect.x+(aboutBoxPanelRect.w/2),aboutBoxPanelRect.y+ABOUT_BOX_STR2_Y,dat->rules.themeRules.textColNormal,FONTSIZE_NORMAL,(uint8_t)SDL_floorf(alpha*255.0f),dat->strings[dat->locStringIDs[LOCSTR_ABOUTSTR_2]],ALIGN_CENTER,(Uint16)(aboutBoxPanelRect.w - 12*UI_PADDING_SIZE));
+  drawTextAlignedSized(rdat,aboutBoxPanelRect.x+(aboutBoxPanelRect.w/2),aboutBoxPanelRect.y+ABOUT_BOX_HEADERTXT_Y*state->ds.uiUserScale,dat->rules.themeRules.textColNormal,FONTSIZE_LARGE,(uint8_t)SDL_floorf(alpha*255.0f),dat->rules.appName,ALIGN_CENTER,(Uint16)(aboutBoxPanelRect.w - 2*UI_PADDING_SIZE*state->ds.uiUserScale));
+  drawTextAlignedSized(rdat,aboutBoxPanelRect.x+(aboutBoxPanelRect.w/2),aboutBoxPanelRect.y+ABOUT_BOX_VERSION_Y*state->ds.uiUserScale,dat->rules.themeRules.textColNormal,FONTSIZE_SMALL,(uint8_t)SDL_floorf(alpha*255.0f),dat->strings[dat->locStringIDs[LOCSTR_ABOUTSTR_VERSION]],ALIGN_CENTER,16384);
+  drawTextAlignedSized(rdat,aboutBoxPanelRect.x+(aboutBoxPanelRect.w/2),aboutBoxPanelRect.y+ABOUT_BOX_STR1_Y*state->ds.uiUserScale,dat->rules.themeRules.textColNormal,FONTSIZE_NORMAL,(uint8_t)SDL_floorf(alpha*255.0f),dat->strings[dat->locStringIDs[LOCSTR_ABOUTSTR_1]],ALIGN_CENTER,(Uint16)(aboutBoxPanelRect.w - 12*UI_PADDING_SIZE*state->ds.uiUserScale));
+  drawTextAlignedSized(rdat,aboutBoxPanelRect.x+(aboutBoxPanelRect.w/2),aboutBoxPanelRect.y+ABOUT_BOX_STR2_Y*state->ds.uiUserScale,dat->rules.themeRules.textColNormal,FONTSIZE_NORMAL,(uint8_t)SDL_floorf(alpha*255.0f),dat->strings[dat->locStringIDs[LOCSTR_ABOUTSTR_2]],ALIGN_CENTER,(Uint16)(aboutBoxPanelRect.w - 12*UI_PADDING_SIZE*state->ds.uiUserScale));
   drawTextButton(&dat->rules.themeRules,rdat,state->ds.uiElemPosX[UIELEM_ABOUT_BOX_OK_BUTTON],(uint16_t)(state->ds.uiElemPosY[UIELEM_ABOUT_BOX_OK_BUTTON]+yOffset),state->ds.uiElemWidth[UIELEM_ABOUT_BOX_OK_BUTTON],getHighlightState(state,UIELEM_ABOUT_BOX_OK_BUTTON),(uint8_t)SDL_floorf(alpha*255.0f),dat->strings[dat->locStringIDs[LOCSTR_OK]]);
   //SDL_Log("%.3f %.3f alpha %u\n",(double)state->ds.timeLeftInUIAnimation[UIANIM_MODAL_BOX_SHOW],(double)state->ds.timeLeftInUIAnimation[UIANIM_MODAL_BOX_HIDE],alpha);
 }
@@ -1054,12 +1054,12 @@ void drawPrefsDialog(const app_data *restrict dat, const app_state *restrict sta
     alpha = (float)(DIMMER_OPACITY*juice_smoothStart2(state->ds.timeLeftInUIAnimation[UIANIM_MODAL_BOX_HIDE]/UI_ANIM_LENGTH));
     drawScreenDimmer(&state->ds,rdat,alpha);
     alpha = (float)(1.0f*juice_smoothStart2(state->ds.timeLeftInUIAnimation[UIANIM_MODAL_BOX_HIDE]/(UI_ANIM_LENGTH)));
-    yOffset = (-100.0f*juice_smoothStop2(1.0f - state->ds.timeLeftInUIAnimation[UIANIM_MODAL_BOX_HIDE]/UI_ANIM_LENGTH));
+    yOffset = (-100.0f*state->ds.uiUserScale*juice_smoothStop2(1.0f - state->ds.timeLeftInUIAnimation[UIANIM_MODAL_BOX_HIDE]/UI_ANIM_LENGTH));
   }else if(state->ds.uiAnimPlaying & (1U << UIANIM_MODAL_BOX_SHOW)){
     alpha = (float)(DIMMER_OPACITY*juice_smoothStop2(1.0f - state->ds.timeLeftInUIAnimation[UIANIM_MODAL_BOX_SHOW]/UI_ANIM_LENGTH));
     drawScreenDimmer(&state->ds,rdat,alpha);
     alpha = (float)(1.0f*juice_smoothStop2(1.0f - state->ds.timeLeftInUIAnimation[UIANIM_MODAL_BOX_SHOW]/UI_ANIM_LENGTH));
-    yOffset = (100.0f*juice_smoothStart2(state->ds.timeLeftInUIAnimation[UIANIM_MODAL_BOX_SHOW]/(UI_ANIM_LENGTH)));
+    yOffset = (100.0f*state->ds.uiUserScale*juice_smoothStart2(state->ds.timeLeftInUIAnimation[UIANIM_MODAL_BOX_SHOW]/(UI_ANIM_LENGTH)));
   }else{
     drawScreenDimmer(&state->ds,rdat,DIMMER_OPACITY);
   }
@@ -1072,10 +1072,10 @@ void drawPrefsDialog(const app_data *restrict dat, const app_state *restrict sta
   drawPanelBG(rdat,prefsDialogPanelRect,alpha);
 
   uint8_t alpha8 = (uint8_t)SDL_floorf(alpha*255.0f);
-  drawTextAlignedSized(rdat,prefsDialogPanelRect.x+PREFS_DIALOG_HEADERTXT_X,prefsDialogPanelRect.y+PREFS_DIALOG_HEADERTXT_Y,dat->rules.themeRules.textColNormal,FONTSIZE_LARGE,alpha8,dat->strings[dat->locStringIDs[LOCSTR_MENUITEM_PREFS]],ALIGN_LEFT,(Uint16)(prefsDialogPanelRect.w));
-  drawTextAlignedSized(rdat,prefsDialogPanelRect.x+PREFS_DIALOG_PREFCOL1_X+UI_TILE_SIZE+2*UI_PADDING_SIZE,prefsDialogPanelRect.y+PREFS_DIALOG_PREFCOL1_Y+7,dat->rules.themeRules.textColNormal,FONTSIZE_NORMAL,alpha8,dat->strings[dat->locStringIDs[LOCSTR_PREF_SHELLCLOSURE]],ALIGN_LEFT,(Uint16)(prefsDialogPanelRect.w));
-  drawTextAlignedSized(rdat,prefsDialogPanelRect.x+PREFS_DIALOG_PREFCOL1_X+UI_TILE_SIZE+2*UI_PADDING_SIZE,prefsDialogPanelRect.y+PREFS_DIALOG_PREFCOL1_Y+7+PREFS_DIALOG_PREF_Y_SPACING,dat->rules.themeRules.textColNormal,FONTSIZE_NORMAL,alpha8,dat->strings[dat->locStringIDs[LOCSTR_PREF_LIFETIME]],ALIGN_LEFT,(Uint16)(prefsDialogPanelRect.w));
-  drawTextAlignedSized(rdat,prefsDialogPanelRect.x+PREFS_DIALOG_PREFCOL1_X+UI_TILE_SIZE+2*UI_PADDING_SIZE,prefsDialogPanelRect.y+PREFS_DIALOG_PREFCOL1_Y+7+2*PREFS_DIALOG_PREF_Y_SPACING,dat->rules.themeRules.textColNormal,FONTSIZE_NORMAL,alpha8,dat->strings[dat->locStringIDs[LOCSTR_PREF_UIANIM]],ALIGN_LEFT,(Uint16)(prefsDialogPanelRect.w));
+  drawTextAlignedSized(rdat,prefsDialogPanelRect.x+PREFS_DIALOG_HEADERTXT_X*state->ds.uiUserScale,prefsDialogPanelRect.y+PREFS_DIALOG_HEADERTXT_Y*state->ds.uiUserScale,dat->rules.themeRules.textColNormal,FONTSIZE_LARGE,alpha8,dat->strings[dat->locStringIDs[LOCSTR_MENUITEM_PREFS]],ALIGN_LEFT,(Uint16)(prefsDialogPanelRect.w));
+  drawTextAlignedSized(rdat,prefsDialogPanelRect.x+(PREFS_DIALOG_PREFCOL1_X+UI_TILE_SIZE+2*UI_PADDING_SIZE)*state->ds.uiUserScale,prefsDialogPanelRect.y+(PREFS_DIALOG_PREFCOL1_Y+7.0f)*state->ds.uiUserScale,dat->rules.themeRules.textColNormal,FONTSIZE_NORMAL,alpha8,dat->strings[dat->locStringIDs[LOCSTR_PREF_SHELLCLOSURE]],ALIGN_LEFT,(Uint16)(prefsDialogPanelRect.w));
+  drawTextAlignedSized(rdat,prefsDialogPanelRect.x+(PREFS_DIALOG_PREFCOL1_X+UI_TILE_SIZE+2*UI_PADDING_SIZE)*state->ds.uiUserScale,prefsDialogPanelRect.y+(PREFS_DIALOG_PREFCOL1_Y+7.0f+PREFS_DIALOG_PREF_Y_SPACING)*state->ds.uiUserScale,dat->rules.themeRules.textColNormal,FONTSIZE_NORMAL,alpha8,dat->strings[dat->locStringIDs[LOCSTR_PREF_LIFETIME]],ALIGN_LEFT,(Uint16)(prefsDialogPanelRect.w));
+  drawTextAlignedSized(rdat,prefsDialogPanelRect.x+(PREFS_DIALOG_PREFCOL1_X+UI_TILE_SIZE+2*UI_PADDING_SIZE)*state->ds.uiUserScale,prefsDialogPanelRect.y+(PREFS_DIALOG_PREFCOL1_Y+7.0f+2*PREFS_DIALOG_PREF_Y_SPACING)*state->ds.uiUserScale,dat->rules.themeRules.textColNormal,FONTSIZE_NORMAL,alpha8,dat->strings[dat->locStringIDs[LOCSTR_PREF_UIANIM]],ALIGN_LEFT,(Uint16)(prefsDialogPanelRect.w));
   drawCheckbox(&dat->rules.themeRules,rdat,state->ds.uiElemPosX[UIELEM_PREFS_DIALOG_SHELLCLOSURE_CHECKBOX],(uint16_t)(state->ds.uiElemPosY[UIELEM_PREFS_DIALOG_SHELLCLOSURE_CHECKBOX]+yOffset),state->ds.uiElemWidth[UIELEM_PREFS_DIALOG_SHELLCLOSURE_CHECKBOX],getHighlightState(state,UIELEM_PREFS_DIALOG_SHELLCLOSURE_CHECKBOX),alpha8,state->ds.drawShellClosures);
   drawCheckbox(&dat->rules.themeRules,rdat,state->ds.uiElemPosX[UIELEM_PREFS_DIALOG_LIFETIME_CHECKBOX],(uint16_t)(state->ds.uiElemPosY[UIELEM_PREFS_DIALOG_LIFETIME_CHECKBOX]+yOffset),state->ds.uiElemWidth[UIELEM_PREFS_DIALOG_LIFETIME_CHECKBOX],getHighlightState(state,UIELEM_PREFS_DIALOG_LIFETIME_CHECKBOX),alpha8,state->ds.useLifetimes);
   drawCheckbox(&dat->rules.themeRules,rdat,state->ds.uiElemPosX[UIELEM_PREFS_DIALOG_UIANIM_CHECKBOX],(uint16_t)(state->ds.uiElemPosY[UIELEM_PREFS_DIALOG_UIANIM_CHECKBOX]+yOffset),state->ds.uiElemWidth[UIELEM_PREFS_DIALOG_UIANIM_CHECKBOX],getHighlightState(state,UIELEM_PREFS_DIALOG_UIANIM_CHECKBOX),alpha8,state->ds.useUIAnimations);
