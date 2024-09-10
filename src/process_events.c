@@ -532,18 +532,22 @@ void processSingleEvent(app_data *restrict dat, app_state *restrict state, resou
           break;
         case SDL_SCANCODE_F7:
           //scale UI down
-          state->ds.uiUserScale -= 0.5f;
-          if(state->ds.uiUserScale < 1.0f){
-            state->ds.uiUserScale = 1.0f;
+          if(state->ds.interfaceSizeInd > 0){
+            state->ds.interfaceSizeInd--;
+          }else{
+            state->ds.interfaceSizeInd = UISCALE_ENUM_LENGTH - 1;
           }
+          state->ds.uiUserScale = uiScales[state->ds.interfaceSizeInd];
           updateUIScale(dat,state,rdat);
           break;
         case SDL_SCANCODE_F8:
           //scale UI up
-          state->ds.uiUserScale += 0.5f;
-          if(state->ds.uiUserScale > 3.0f){
-            state->ds.uiUserScale = 3.0f;
+          if(state->ds.interfaceSizeInd < (UISCALE_ENUM_LENGTH - 1)){
+            state->ds.interfaceSizeInd++;
+          }else{
+            state->ds.interfaceSizeInd = 0;
           }
+          state->ds.uiUserScale = uiScales[state->ds.interfaceSizeInd];
           updateUIScale(dat,state,rdat);
           break;
         case SDL_SCANCODE_RETURN:

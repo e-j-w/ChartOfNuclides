@@ -180,6 +180,7 @@ typedef struct
   uint16_t uiElemPosX[UIELEM_ENUM_LENGTH], uiElemPosY[UIELEM_ENUM_LENGTH], uiElemWidth[UIELEM_ENUM_LENGTH], uiElemHeight[UIELEM_ENUM_LENGTH]; //UI element positioning, used both for drawing elements and calculating mouse interactions 
   uint16_t uiElemExtPlusX[UIELEM_ENUM_LENGTH], uiElemExtPlusY[UIELEM_ENUM_LENGTH], uiElemExtMinusX[UIELEM_ENUM_LENGTH], uiElemExtMinusY[UIELEM_ENUM_LENGTH]; //'extension' of each UI element, to allow mouse interactions outside of the visible area of the UI element (eg. so that checkbox text can be clicked as well as the checkbox itself)
   uint8_t texModR, texModG, texModB, texModA; //texture color and alpha modulation values
+  uint8_t interfaceSizeInd; //user preference for UI scaling, values from ui_scale_enum
   unsigned int fcScrollInProgress : 1;
   unsigned int fcScrollFinished : 1;
   unsigned int fcNuclChangeInProgress : 1;

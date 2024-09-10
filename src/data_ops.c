@@ -71,7 +71,7 @@ void initializeTempState(const app_data *restrict dat, app_state *restrict state
 	state->ds.fcScrollFinished = 0;
 	state->ds.fcScrollInProgress = 0;
 	state->ds.fcNuclChangeInProgress = 0;
-	state->ds.uiUserScale = 1.0f;
+	state->ds.interfaceSizeInd = UISCALE_NORMAL;
 	memset(state->ds.uiElemExtPlusX,0,sizeof(state->ds.uiElemExtPlusX));
 	memset(state->ds.uiElemExtPlusY,0,sizeof(state->ds.uiElemExtPlusY));
 	memset(state->ds.uiElemExtMinusX,0,sizeof(state->ds.uiElemExtMinusX));
@@ -2175,6 +2175,7 @@ float getUIthemeScale(const float uiScale){
 //updates the UI scaling, which requires the theme and 
 //font data to be reloaded from disk and re-scaled
 void updateUIScale(app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat){
+	state->ds.uiUserScale = uiScales[state->ds.interfaceSizeInd];
 	rdat->uiScale = rdat->uiDPIScale * state->ds.uiUserScale;
 	rdat->uiThemeScale = getUIthemeScale(rdat->uiScale);
 	if(rdat->font[0]){

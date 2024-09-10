@@ -31,3 +31,8 @@ chartview_menu_title|Select color scheme:
 chartview_lifetime|Lifetime
 chartview_halflife|Half-life
 chartview_2plus|E(2+)
+interface_size|Interface Size
+small|Small
+default|Default
+large|Large
+huge|Huge

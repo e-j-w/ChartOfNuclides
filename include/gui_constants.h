@@ -57,13 +57,16 @@ static const uint8_t UITHEME_ICON_TILE_Y[UIICON_ENUM_LENGTH] = {10,10,10,9,9,8,8
 //font sizes (assuming UI scale of 1)
 static const uint16_t fontSizes[FONTSIZE_ENUM_LENGTH] = {13,15,19};
 
+//user UI scaling factors
+static const float uiScales[UISCALE_ENUM_LENGTH] = {1.0f,1.20f,1.5f,1.75f};
+
 /* UI LAYOUT CONSTANTS */
 /* see updateUIElemPositions in data_ops.c for how these values are assigned */
 /* make sure these are always fully enclosed by brackets, as they may be scaled by the code */
 
-#define MENU_BUTTON_POS_XR    UI_PADDING_SIZE   //in unscaled pixels
-#define MENU_BUTTON_POS_Y     UI_PADDING_SIZE   //in unscaled pixels
-#define MENU_BUTTON_WIDTH     40 //in unscaled pixels
+#define MENU_BUTTON_POS_XR         UI_PADDING_SIZE   //in unscaled pixels
+#define MENU_BUTTON_POS_Y          UI_PADDING_SIZE   //in unscaled pixels
+#define MENU_BUTTON_WIDTH          40 //in unscaled pixels
 
 #define PRIMARY_MENU_ITEM_SPACING  40 //in unscaled pixels
 #define PRIMARY_MENU_POS_XR        (MENU_BUTTON_POS_XR-4)   //in unscaled pixels

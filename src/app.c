@@ -131,7 +131,7 @@ int main(int argc, char *argv[]){
   SDL_GetWindowSize(gdat->rdat.window, &wwidth, &wheight);
   SDL_GetWindowSizeInPixels(gdat->rdat.window, &rwidth, &rheight);
 	gdat->rdat.uiDPIScale = (float)rwidth/((float)wwidth);
-  gdat->rdat.uiScale = gdat->rdat.uiDPIScale * gdat->state.ds.uiUserScale;
+  updateUIScale(&gdat->dat,&gdat->state,&gdat->rdat);
   gdat->rdat.uiThemeScale = getUIthemeScale(gdat->rdat.uiScale);
   handleScreenGraphicsMode(&gdat->dat,&gdat->state,&gdat->rdat); //handle fullscreen
   gdat->state.ds.forceRedraw = 1; //force draw the first frame

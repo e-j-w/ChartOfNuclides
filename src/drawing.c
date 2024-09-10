@@ -48,13 +48,17 @@ void drawPanelBG(resource_data *restrict rdat, const SDL_FRect panelRect, const 
     }
   }
   
-  SDL_FRect srcRect;
+  SDL_FRect srcRect, destRect;
   srcRect.x = UITHEME_PANELBG_TILE_X*UI_TILE_SIZE*rdat->uiThemeScale;
   srcRect.y = UITHEME_PANELBG_TILE_Y*UI_TILE_SIZE*rdat->uiThemeScale;
   srcRect.w = 3*UI_TILE_SIZE*rdat->uiThemeScale;
   srcRect.h = srcRect.w;
+  destRect.x = panelRect.x*rdat->uiDPIScale;
+  destRect.y = panelRect.y*rdat->uiDPIScale;
+  destRect.w = panelRect.w*rdat->uiDPIScale;
+  destRect.h = panelRect.h*rdat->uiDPIScale;
   float nineSliceSize = 0.5f*UI_TILE_SIZE*rdat->uiThemeScale;
-  SDL_RenderTexture9Grid(rdat->renderer,rdat->uiThemeTex,&srcRect,nineSliceSize,nineSliceSize,nineSliceSize,nineSliceSize,0.0f,&panelRect);
+  SDL_RenderTexture9Grid(rdat->renderer,rdat->uiThemeTex,&srcRect,nineSliceSize,nineSliceSize,nineSliceSize,nineSliceSize,0.0f,&destRect);
   
   if(alpha != 1.0f){
     if(SDL_SetTextureAlphaModFloat(rdat->uiThemeTex,1.0f)<0){
@@ -179,7 +183,7 @@ void drawIcon(const ui_theme_rules *restrict uirules, resource_data *restrict rd
   srcRect.h = srcRect.w;
   drawPos.w = (float)(UI_TILE_SIZE*rdat->uiScale);
   drawPos.h = (float)(UI_TILE_SIZE*rdat->uiScale);
-  drawPos.x = (float)(x*rdat->uiDPIScale) + (float)(w*rdat->uiDPIScale)/2.0f - drawPos.w*rdat->uiDPIScale/2.0f;
+  drawPos.x = (float)(x*rdat->uiDPIScale) + (float)(w*rdat->uiDPIScale)/2.0f - drawPos.w/2.0f;
   drawPos.y = (float)(y*rdat->uiDPIScale) + (float)(UI_TILE_SIZE*rdat->uiScale)/2.0f - drawPos.h/2.0f;
   //printf("drawPos: %i %i %i %i\n",drawPos.x,drawPos.y,drawPos.w,drawPos.h);
   if(SDL_SetTextureAlphaMod(rdat->uiThemeTex,alpha)<0){
@@ -200,11 +204,11 @@ void drawIconButton(const ui_theme_rules *restrict uirules, resource_data *restr
 
 void drawIconAndTextButton(const ui_theme_rules *restrict uirules, resource_data *restrict rdat, const uint16_t x, const uint16_t y, const uint16_t w, const uint8_t highlightState, const uint8_t alpha, const uint8_t iconInd, const char *text){
   drawButton(uirules,rdat,x,y,w,highlightState,(float)(alpha/255.0f));
-  drawIcon(uirules,rdat,x+UI_PADDING_SIZE,y,(uint16_t)(UI_TILE_SIZE*rdat->uiScale),HIGHLIGHT_NORMAL,alpha,iconInd);
+  drawIcon(uirules,rdat,(uint16_t)(x+UI_PADDING_SIZE*rdat->uiScale/rdat->uiDPIScale),y,(uint16_t)(UI_TILE_SIZE*rdat->uiScale/rdat->uiDPIScale),HIGHLIGHT_NORMAL,alpha,iconInd);
   //get the text width and height
   //these should already fit a 1 tile height button well, with the default font size
   //(remember that the font size is scaled by the UI scale, during font import)
-  float textX = (float)x + (((float)(w + UI_TILE_SIZE*rdat->uiScale - 2*UI_PADDING_SIZE*rdat->uiScale)/2.0f)/rdat->uiDPIScale);
+  float textX = (float)x + (((float)(w*rdat->uiDPIScale + UI_TILE_SIZE*rdat->uiScale - 2*UI_PADDING_SIZE*rdat->uiScale)/2.0f)/rdat->uiDPIScale);
   float textY = (float)y + ((float)(UI_TILE_SIZE)/2.0f)*rdat->uiScale/rdat->uiDPIScale;
   //printf("text x: %f, y: %f\n",(double)textX,(double)textY);
   drawTextAlignedSized(rdat,textX,textY,uirules->textColNormal,FONTSIZE_NORMAL,255,text,ALIGN_CENTER,(Uint16)(w*rdat->uiScale));
@@ -226,19 +230,19 @@ void drawSelectionRect(resource_data *restrict rdat, const SDL_FRect pos, const 
   float scaledThickness = thicknessPx*rdat->uiDPIScale;
   SDL_SetRenderDrawColorFloat(rdat->renderer,col.r,col.g,col.b,col.a);
   SDL_FRect rect;
-  rect.x = pos.x;
-  rect.y = pos.y;
-  rect.w = pos.w;
+  rect.x = pos.x*rdat->uiDPIScale;
+  rect.y = pos.y*rdat->uiDPIScale;
+  rect.w = pos.w*rdat->uiDPIScale;
   rect.h = scaledThickness;
   SDL_RenderFillRect(rdat->renderer,&rect);
-  rect.y = pos.y + pos.h - scaledThickness;
+  rect.y = pos.y*rdat->uiDPIScale + pos.h*rdat->uiDPIScale - scaledThickness;
   SDL_RenderFillRect(rdat->renderer,&rect);
-  rect.x = pos.x;
-  rect.y = pos.y + scaledThickness;
+  rect.x = pos.x*rdat->uiDPIScale;
+  rect.y = pos.y*rdat->uiDPIScale + scaledThickness;
   rect.w = scaledThickness;
-  rect.h = pos.h - 2*scaledThickness;
+  rect.h = pos.h*rdat->uiDPIScale - 2*scaledThickness;
   SDL_RenderFillRect(rdat->renderer,&rect);
-  rect.x = pos.x + pos.w - scaledThickness;
+  rect.x = pos.x*rdat->uiDPIScale + pos.w*rdat->uiDPIScale - scaledThickness;
   SDL_RenderFillRect(rdat->renderer,&rect);
 }
 
