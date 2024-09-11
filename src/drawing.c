@@ -212,7 +212,18 @@ void drawIconAndTextButton(const ui_theme_rules *restrict uirules, resource_data
   float textY = (float)y + ((float)(UI_TILE_SIZE)/2.0f)*rdat->uiScale/rdat->uiDPIScale;
   //printf("text x: %f, y: %f\n",(double)textX,(double)textY);
   drawTextAlignedSized(rdat,textX,textY,uirules->textColNormal,FONTSIZE_NORMAL,255,text,ALIGN_CENTER,(Uint16)(w*rdat->uiScale));
-  
+}
+
+void drawDropDownTextButton(const ui_theme_rules *restrict uirules, resource_data *restrict rdat, const uint16_t x, const uint16_t y, const uint16_t w, const uint8_t highlightState, const uint8_t alpha, const char *text){
+  drawButton(uirules,rdat,x,y,w,highlightState,(float)(alpha/255.0f));
+  drawIcon(uirules,rdat,(uint16_t)(x+w-(UI_PADDING_SIZE+UI_TILE_SIZE)*rdat->uiScale/rdat->uiDPIScale),y,(uint16_t)(UI_TILE_SIZE*rdat->uiScale/rdat->uiDPIScale),HIGHLIGHT_NORMAL,alpha,UIICON_DROPDOWNARROW);
+  //get the text width and height
+  //these should already fit a 1 tile height button well, with the default font size
+  //(remember that the font size is scaled by the UI scale, during font import)
+  float textX = (float)x + (((float)(w*rdat->uiDPIScale - UI_TILE_SIZE*rdat->uiScale)/2.0f)/rdat->uiDPIScale);
+  float textY = (float)y + ((float)(UI_TILE_SIZE)/2.0f)*rdat->uiScale/rdat->uiDPIScale;
+  //printf("text x: %f, y: %f\n",(double)textX,(double)textY);
+  drawTextAlignedSized(rdat,textX,textY,uirules->textColNormal,FONTSIZE_NORMAL,255,text,ALIGN_CENTER,(Uint16)(w*rdat->uiScale));
 }
 
 void drawCheckbox(const ui_theme_rules *restrict uirules, resource_data *restrict rdat,const uint16_t x, const uint16_t y, const uint16_t w, const uint8_t highlightState, const uint8_t alpha, const uint8_t checked){

@@ -225,7 +225,7 @@ static int parseAppRules(app_data *restrict dat, asset_mapping *restrict stringI
 	dat->locStringIDs[LOCSTR_SMALL] = (uint16_t)nameToAssetID("small",stringIDmap);
 	dat->locStringIDs[LOCSTR_LARGE] = (uint16_t)nameToAssetID("large",stringIDmap);
 	dat->locStringIDs[LOCSTR_HUGE] = (uint16_t)nameToAssetID("huge",stringIDmap);
-
+	dat->locStringIDs[LOCSTR_DEFAULT] = (uint16_t)nameToAssetID("default",stringIDmap);
 
   return 0; //success
 

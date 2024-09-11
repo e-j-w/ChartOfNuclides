@@ -135,6 +135,9 @@ void stopUIAnimation(const app_data *restrict dat, app_state *restrict state, co
 		case UIANIM_CHARTVIEW_MENU_HIDE:
 			state->ds.shownElements &= (uint32_t)(~(1U << UIELEM_CHARTVIEW_MENU)); //close the menu
 			break;
+		case UIANIM_UISCALE_MENU_HIDE:
+			state->ds.shownElements &= (uint32_t)(~(1U << UIELEM_PREFS_UISCALE_MENU)); //close the menu
+			break;
     case UIANIM_MODAL_BOX_HIDE:
       state->ds.shownElements &= (uint32_t)(~(1U << UIELEM_MSG_BOX)); //close the message box
 			state->ds.shownElements &= (uint32_t)(~(1U << UIELEM_ABOUT_BOX)); //close the about box
@@ -1594,6 +1597,13 @@ void changeUIState(const app_data *restrict dat, app_state *restrict state, cons
 			state->interactableElement |= (uint32_t)(1U << UIELEM_PREFS_DIALOG_SHELLCLOSURE_CHECKBOX);
 			state->interactableElement |= (uint32_t)(1U << UIELEM_PREFS_DIALOG_LIFETIME_CHECKBOX);
 			state->interactableElement |= (uint32_t)(1U << UIELEM_PREFS_DIALOG_UIANIM_CHECKBOX);
+			state->interactableElement |= (uint32_t)(1U << UIELEM_PREFS_DIALOG_UISCALE_DROPDOWN);
+			if((state->ds.shownElements & (1U << UIELEM_PREFS_UISCALE_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_UISCALE_MENU_HIDE]==0.0f)){
+				state->interactableElement |= (uint32_t)(1U << UIELEM_UISM_SMALL_BUTTON);
+				state->interactableElement |= (uint32_t)(1U << UIELEM_UISM_DEFAULT_BUTTON);
+				state->interactableElement |= (uint32_t)(1U << UIELEM_UISM_LARGE_BUTTON);
+				state->interactableElement |= (uint32_t)(1U << UIELEM_UISM_HUGE_BUTTON);
+			}
 			break;
 		case UISTATE_FULLLEVELINFO:
 			state->ds.nuclFullInfoMaxScrollY = getMaxNumLvlDispLines(&dat->ndat,state); //find total number of lines displayable
@@ -1833,7 +1843,7 @@ void setSelectedNuclOnChartDirect(const app_data *restrict dat, app_state *restr
 }
 
 //take action after clicking a button or other UI element
-void uiElemClickAction(const app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat, const uint8_t doubleClick, const uint8_t uiElemID){
+void uiElemClickAction(app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat, const uint8_t doubleClick, const uint8_t uiElemID){
 
 	//SDL_Log("Clicked UI element %u\n",uiElemID);
   state->clickedUIElem = uiElemID;
@@ -1848,6 +1858,12 @@ void uiElemClickAction(const app_data *restrict dat, app_state *restrict state, 
 	if((uiElemID != UIELEM_CHARTVIEW_BUTTON)&&(uiElemID != UIELEM_CHARTVIEW_MENU)&&(uiElemID != UIELEM_CVM_HALFLIFE_BUTTON)&&(uiElemID != UIELEM_CVM_2PLUS_BUTTON)){
 		if((state->ds.shownElements & (1U << UIELEM_CHARTVIEW_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_CHARTVIEW_MENU_HIDE]==0.0f)){
 			startUIAnimation(dat,state,UIANIM_CHARTVIEW_MENU_HIDE); //menu will be closed after animation finishes
+			state->clickedUIElem = UIELEM_ENUM_LENGTH; //'unclick' the menu button
+		}
+	}
+	if((uiElemID != UIELEM_PREFS_DIALOG_UISCALE_DROPDOWN)&&(uiElemID != UIELEM_PREFS_UISCALE_MENU)&&(uiElemID != UIELEM_UISM_SMALL_BUTTON)&&(uiElemID != UIELEM_UISM_DEFAULT_BUTTON)&&(uiElemID != UIELEM_UISM_LARGE_BUTTON)&&(uiElemID != UIELEM_UISM_HUGE_BUTTON)){
+		if((state->ds.shownElements & (1U << UIELEM_PREFS_UISCALE_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_UISCALE_MENU_HIDE]==0.0f)){
+			startUIAnimation(dat,state,UIANIM_UISCALE_MENU_HIDE); //menu will be closed after animation finishes
 			state->clickedUIElem = UIELEM_ENUM_LENGTH; //'unclick' the menu button
 		}
 	}
@@ -1874,6 +1890,17 @@ void uiElemClickAction(const app_data *restrict dat, app_state *restrict state, 
 				startUIAnimation(dat,state,UIANIM_CHARTVIEW_MENU_SHOW);
 				changeUIState(dat,state,state->uiState);
 				state->clickedUIElem = UIELEM_CHARTVIEW_BUTTON;
+      }
+			break;
+		case UIELEM_PREFS_DIALOG_UISCALE_DROPDOWN:
+			if((state->ds.shownElements & (1U << UIELEM_PREFS_UISCALE_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_UISCALE_MENU_HIDE]==0.0f)){
+				startUIAnimation(dat,state,UIANIM_UISCALE_MENU_HIDE); //menu will be closed after animation finishes
+        state->clickedUIElem = UIELEM_ENUM_LENGTH; //'unclick' the menu button
+      }else if(state->ds.timeLeftInUIAnimation[UIANIM_UISCALE_MENU_SHOW]==0.0f){
+				state->ds.shownElements |= (1U << UIELEM_PREFS_UISCALE_MENU);
+				startUIAnimation(dat,state,UIANIM_UISCALE_MENU_SHOW);
+				changeUIState(dat,state,state->uiState);
+				state->clickedUIElem = UIELEM_PREFS_DIALOG_UISCALE_DROPDOWN;
       }
 			break;
     case UIELEM_MSG_BOX_OK_BUTTON:
@@ -1955,6 +1982,34 @@ void uiElemClickAction(const app_data *restrict dat, app_state *restrict state, 
 			//clicked on menu background, do nothing except keep the menu button selected
 			state->clickedUIElem = UIELEM_CHARTVIEW_BUTTON;
 			break;
+		case UIELEM_PREFS_UISCALE_MENU:
+			//clicked on menu background, do nothing except keep the menu button selected
+			state->clickedUIElem = UIELEM_PREFS_DIALOG_UISCALE_DROPDOWN;
+			break;
+		case UIELEM_UISM_SMALL_BUTTON:
+			startUIAnimation(dat,state,UIANIM_UISCALE_MENU_HIDE); //menu will be closed after animation finishes
+			state->clickedUIElem = UIELEM_ENUM_LENGTH; //'unclick' the menu button
+			state->ds.interfaceSizeInd = UISCALE_SMALL;
+			updateUIScale(dat,state,rdat);
+			break;
+		case UIELEM_UISM_DEFAULT_BUTTON:
+			startUIAnimation(dat,state,UIANIM_UISCALE_MENU_HIDE); //menu will be closed after animation finishes
+			state->clickedUIElem = UIELEM_ENUM_LENGTH; //'unclick' the menu button
+			state->ds.interfaceSizeInd = UISCALE_NORMAL;
+			updateUIScale(dat,state,rdat);
+			break;
+		case UIELEM_UISM_LARGE_BUTTON:
+			startUIAnimation(dat,state,UIANIM_UISCALE_MENU_HIDE); //menu will be closed after animation finishes
+			state->clickedUIElem = UIELEM_ENUM_LENGTH; //'unclick' the menu button
+			state->ds.interfaceSizeInd = UISCALE_LARGE;
+			updateUIScale(dat,state,rdat);
+			break;
+		case UIELEM_UISM_HUGE_BUTTON:
+			startUIAnimation(dat,state,UIANIM_UISCALE_MENU_HIDE); //menu will be closed after animation finishes
+			state->clickedUIElem = UIELEM_ENUM_LENGTH; //'unclick' the menu button
+			state->ds.interfaceSizeInd = UISCALE_HUGE;
+			updateUIScale(dat,state,rdat);
+			break;
 		case UIELEM_ENUM_LENGTH:
     default:
 			//clicked outside of a button or UI element
@@ -1975,6 +2030,10 @@ void uiElemClickAction(const app_data *restrict dat, app_state *restrict state, 
 					}
 					if((state->ds.shownElements & (1U << UIELEM_CHARTVIEW_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_CHARTVIEW_MENU_HIDE]==0.0f)){
 						startUIAnimation(dat,state,UIANIM_CHARTVIEW_MENU_HIDE); //menu will be closed after animation finishes
+						state->clickedUIElem = UIELEM_ENUM_LENGTH; //'unclick' the menu button
+					}
+					if((state->ds.shownElements & (1U << UIELEM_PREFS_UISCALE_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_UISCALE_MENU_HIDE]==0.0f)){
+						startUIAnimation(dat,state,UIANIM_UISCALE_MENU_HIDE); //menu will be closed after animation finishes
 						state->clickedUIElem = UIELEM_ENUM_LENGTH; //'unclick' the menu button
 					}
 					if((state->ds.shownElements & (1U << UIELEM_NUCL_INFOBOX))&&(state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_HIDE]==0.0f)){
@@ -2076,6 +2135,12 @@ void updateSingleUIElemPosition(const app_data *restrict dat, drawing_state *res
 			updateSingleUIElemPosition(dat,ds,rdat,UIELEM_PREFS_DIALOG_SHELLCLOSURE_CHECKBOX);
 			updateSingleUIElemPosition(dat,ds,rdat,UIELEM_PREFS_DIALOG_LIFETIME_CHECKBOX);
 			updateSingleUIElemPosition(dat,ds,rdat,UIELEM_PREFS_DIALOG_UIANIM_CHECKBOX);
+			updateSingleUIElemPosition(dat,ds,rdat,UIELEM_PREFS_DIALOG_UISCALE_DROPDOWN);
+			updateSingleUIElemPosition(dat,ds,rdat,UIELEM_PREFS_UISCALE_MENU);
+			updateSingleUIElemPosition(dat,ds,rdat,UIELEM_UISM_SMALL_BUTTON);
+			updateSingleUIElemPosition(dat,ds,rdat,UIELEM_UISM_DEFAULT_BUTTON);
+			updateSingleUIElemPosition(dat,ds,rdat,UIELEM_UISM_LARGE_BUTTON);
+			updateSingleUIElemPosition(dat,ds,rdat,UIELEM_UISM_HUGE_BUTTON);
 			break;
 		case UIELEM_PREFS_DIALOG_CLOSEBUTTON:
 			ds->uiElemWidth[UIELEM_PREFS_DIALOG_CLOSEBUTTON] = (uint16_t)(UI_TILE_SIZE*ds->uiUserScale);
@@ -2103,6 +2168,42 @@ void updateSingleUIElemPosition(const app_data *restrict dat, drawing_state *res
 			ds->uiElemPosX[UIELEM_PREFS_DIALOG_UIANIM_CHECKBOX] = ds->uiElemPosX[UIELEM_PREFS_DIALOG] + (uint16_t)(PREFS_DIALOG_PREFCOL1_X*ds->uiUserScale);
 			ds->uiElemPosY[UIELEM_PREFS_DIALOG_UIANIM_CHECKBOX] = ds->uiElemPosY[UIELEM_PREFS_DIALOG] + (uint16_t)((PREFS_DIALOG_PREFCOL1_Y + 2*PREFS_DIALOG_PREF_Y_SPACING)*ds->uiUserScale);
 			ds->uiElemExtPlusX[UIELEM_PREFS_DIALOG_UIANIM_CHECKBOX] = (uint16_t)(2*UI_PADDING_SIZE*ds->uiUserScale) + (uint16_t)(getTextWidth(rdat,FONTSIZE_NORMAL,dat->strings[dat->locStringIDs[LOCSTR_PREF_UIANIM]])/rdat->uiDPIScale); //so that checkbox can be toggled by clicking on adjacent text
+			break;
+		case UIELEM_PREFS_DIALOG_UISCALE_DROPDOWN:
+			ds->uiElemWidth[UIELEM_PREFS_DIALOG_UISCALE_DROPDOWN] = (uint16_t)(PREFS_DIALOG_UISCALE_BUTTON_WIDTH*ds->uiUserScale);
+			ds->uiElemHeight[UIELEM_PREFS_DIALOG_UISCALE_DROPDOWN] = (uint16_t)(UI_TILE_SIZE*ds->uiUserScale);
+			ds->uiElemPosX[UIELEM_PREFS_DIALOG_UISCALE_DROPDOWN] = (uint16_t)(ds->uiElemPosX[UIELEM_PREFS_DIALOG] + (uint16_t)((PREFS_DIALOG_PREFCOL1_X+3*UI_PADDING_SIZE)*ds->uiUserScale) + (uint16_t)(getTextWidth(rdat,FONTSIZE_NORMAL,dat->strings[dat->locStringIDs[LOCSTR_PREF_UISCALE]])/rdat->uiDPIScale));
+			ds->uiElemPosY[UIELEM_PREFS_DIALOG_UISCALE_DROPDOWN] = ds->uiElemPosY[UIELEM_PREFS_DIALOG] + (uint16_t)((PREFS_DIALOG_PREFCOL1_Y + 3*PREFS_DIALOG_PREF_Y_SPACING)*ds->uiUserScale);
+			break;
+		case UIELEM_PREFS_UISCALE_MENU:
+			ds->uiElemPosX[UIELEM_PREFS_UISCALE_MENU] = ds->uiElemPosX[UIELEM_PREFS_DIALOG_UISCALE_DROPDOWN];
+			ds->uiElemPosY[UIELEM_PREFS_UISCALE_MENU] = (uint16_t)(ds->uiElemPosY[UIELEM_PREFS_DIALOG_UISCALE_DROPDOWN] + ds->uiElemHeight[UIELEM_PREFS_DIALOG_UISCALE_DROPDOWN] + UI_PADDING_SIZE*ds->uiUserScale);
+			ds->uiElemWidth[UIELEM_PREFS_UISCALE_MENU] = (uint16_t)(PREFS_DIALOG_UISCALE_MENU_WIDTH*ds->uiUserScale);
+			ds->uiElemHeight[UIELEM_PREFS_UISCALE_MENU] = (uint16_t)(((PREFS_DIALOG_UISCALE_MENU_ITEM_SPACING + UI_PADDING_SIZE)*UISCALE_ENUM_LENGTH + 2*PANEL_EDGE_SIZE)*ds->uiUserScale);
+			break;
+		case UIELEM_UISM_SMALL_BUTTON:
+			ds->uiElemPosX[UIELEM_UISM_SMALL_BUTTON] = ds->uiElemPosX[UIELEM_PREFS_UISCALE_MENU] + (uint16_t)((PANEL_EDGE_SIZE + 2*UI_PADDING_SIZE)*ds->uiUserScale);
+			ds->uiElemPosY[UIELEM_UISM_SMALL_BUTTON] =  ds->uiElemPosY[UIELEM_PREFS_UISCALE_MENU] + (uint16_t)((PANEL_EDGE_SIZE + 2*UI_PADDING_SIZE)*ds->uiUserScale);
+			ds->uiElemWidth[UIELEM_UISM_SMALL_BUTTON] = ds->uiElemWidth[UIELEM_PREFS_UISCALE_MENU] - (uint16_t)((2*PANEL_EDGE_SIZE + 4*UI_PADDING_SIZE)*ds->uiUserScale);
+			ds->uiElemHeight[UIELEM_UISM_SMALL_BUTTON] = (uint16_t)((PREFS_DIALOG_UISCALE_MENU_ITEM_SPACING - UI_PADDING_SIZE)*ds->uiUserScale);
+			break;
+		case UIELEM_UISM_DEFAULT_BUTTON:
+			ds->uiElemPosX[UIELEM_UISM_DEFAULT_BUTTON] = ds->uiElemPosX[UIELEM_PREFS_UISCALE_MENU] + (uint16_t)((PANEL_EDGE_SIZE + 2*UI_PADDING_SIZE)*ds->uiUserScale);
+			ds->uiElemPosY[UIELEM_UISM_DEFAULT_BUTTON] =  ds->uiElemPosY[UIELEM_PREFS_UISCALE_MENU] + (uint16_t)((PANEL_EDGE_SIZE + 2*UI_PADDING_SIZE + PREFS_DIALOG_UISCALE_MENU_ITEM_SPACING)*ds->uiUserScale);
+			ds->uiElemWidth[UIELEM_UISM_DEFAULT_BUTTON] = ds->uiElemWidth[UIELEM_PREFS_UISCALE_MENU] - (uint16_t)((2*PANEL_EDGE_SIZE + 4*UI_PADDING_SIZE)*ds->uiUserScale);
+			ds->uiElemHeight[UIELEM_UISM_DEFAULT_BUTTON] = (uint16_t)((PREFS_DIALOG_UISCALE_MENU_ITEM_SPACING - UI_PADDING_SIZE)*ds->uiUserScale);
+			break;
+		case UIELEM_UISM_LARGE_BUTTON:
+			ds->uiElemPosX[UIELEM_UISM_LARGE_BUTTON] = ds->uiElemPosX[UIELEM_PREFS_UISCALE_MENU] + (uint16_t)((PANEL_EDGE_SIZE + 2*UI_PADDING_SIZE)*ds->uiUserScale);
+			ds->uiElemPosY[UIELEM_UISM_LARGE_BUTTON] =  ds->uiElemPosY[UIELEM_PREFS_UISCALE_MENU] + (uint16_t)((PANEL_EDGE_SIZE + 2*UI_PADDING_SIZE + 2*PREFS_DIALOG_UISCALE_MENU_ITEM_SPACING)*ds->uiUserScale);
+			ds->uiElemWidth[UIELEM_UISM_LARGE_BUTTON] = ds->uiElemWidth[UIELEM_PREFS_UISCALE_MENU] - (uint16_t)((2*PANEL_EDGE_SIZE + 4*UI_PADDING_SIZE)*ds->uiUserScale);
+			ds->uiElemHeight[UIELEM_UISM_LARGE_BUTTON] = (uint16_t)((PREFS_DIALOG_UISCALE_MENU_ITEM_SPACING - UI_PADDING_SIZE)*ds->uiUserScale);
+			break;
+		case UIELEM_UISM_HUGE_BUTTON:
+			ds->uiElemPosX[UIELEM_UISM_HUGE_BUTTON] = ds->uiElemPosX[UIELEM_PREFS_UISCALE_MENU] + (uint16_t)((PANEL_EDGE_SIZE + 2*UI_PADDING_SIZE)*ds->uiUserScale);
+			ds->uiElemPosY[UIELEM_UISM_HUGE_BUTTON] =  ds->uiElemPosY[UIELEM_PREFS_UISCALE_MENU] + (uint16_t)((PANEL_EDGE_SIZE + 2*UI_PADDING_SIZE + 3*PREFS_DIALOG_UISCALE_MENU_ITEM_SPACING)*ds->uiUserScale);
+			ds->uiElemWidth[UIELEM_UISM_HUGE_BUTTON] = ds->uiElemWidth[UIELEM_PREFS_UISCALE_MENU] - (uint16_t)((2*PANEL_EDGE_SIZE + 4*UI_PADDING_SIZE)*ds->uiUserScale);
+			ds->uiElemHeight[UIELEM_UISM_HUGE_BUTTON] = (uint16_t)((PREFS_DIALOG_UISCALE_MENU_ITEM_SPACING - UI_PADDING_SIZE)*ds->uiUserScale);
 			break;
 		case UIELEM_NUCL_INFOBOX:
 			ds->uiElemPosX[uiElemInd] = (uint16_t)((ds->windowXRes - NUCL_INFOBOX_WIDTH*ds->uiUserScale)/2);
@@ -2165,11 +2266,8 @@ void updateUIElemPositions(const app_data *restrict dat, drawing_state *restrict
 }
 
 float getUIthemeScale(const float uiScale){
-	if(fabsf(uiScale - 1.0f) < 0.001f){
-		return uiScale;
-	}else{
-		return roundf(2.0f*uiScale); //super-sample UI elements, hack to prevent scaling artifacts
-	}
+	//return roundf(2.0f*uiScale); //super-samples the UI texture, but results in odd spacing of text on panels
+	return roundf(uiScale); //seems to work, don't question it
 }
 
 //updates the UI scaling, which requires the theme and 
