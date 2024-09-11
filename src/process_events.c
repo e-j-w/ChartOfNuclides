@@ -215,6 +215,9 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
     if((state->ds.shownElements & (1U << UIELEM_ABOUT_BOX))&&(state->ds.timeLeftInUIAnimation[UIANIM_MODAL_BOX_HIDE]==0.0f)){
       changeUIState(dat,state,state->lastUIState); //restore previous interactable elements
       startUIAnimation(dat,state,UIANIM_MODAL_BOX_HIDE); //hide the about/message box, see stopUIAnimation()
+    }else if((state->ds.shownElements & (1U << UIELEM_PREFS_UISCALE_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_UISCALE_MENU_HIDE]==0.0f)){
+      //close the UI scale menu
+      uiElemClickAction(dat,state,rdat,0,UIELEM_PREFS_DIALOG_UISCALE_DROPDOWN);
     }else if((state->ds.shownElements & (1U << UIELEM_PREFS_DIALOG))&&(state->ds.timeLeftInUIAnimation[UIANIM_MODAL_BOX_HIDE]==0.0f)){
       changeUIState(dat,state,state->lastUIState); //restore previous interactable elements
       startUIAnimation(dat,state,UIANIM_MODAL_BOX_HIDE); //hide the about/message box, see stopUIAnimation()
@@ -226,6 +229,9 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
     }else if((state->ds.shownElements & (1U << UIELEM_PRIMARY_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_PRIMARY_MENU_HIDE]==0.0f)){
       //close the primary menu
       uiElemClickAction(dat,state,rdat,0,UIELEM_MENU_BUTTON);
+    }else if((state->ds.shownElements & (1U << UIELEM_CHARTVIEW_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_CHARTVIEW_MENU_HIDE]==0.0f)){
+      //close the chart view menu
+      uiElemClickAction(dat,state,rdat,0,UIELEM_CHARTVIEW_BUTTON);
     }else if(state->ds.windowFullscreenMode){
       //exit fullscreen
       state->ds.windowFullscreenMode = 0;
@@ -294,6 +300,13 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
     if(state->mouseClickPosXPx >= 0.0f){
       //clicked outside of interactable items on the full level info screen
       uiElemClickAction(dat,state,rdat,0,UIELEM_ENUM_LENGTH);
+    }
+  }else if(state->uiState == UISTATE_PREFS_DIALOG){
+    if(state->mouseClickPosXPx >= 0.0f){
+      if((state->ds.shownElements & (1U << UIELEM_PREFS_UISCALE_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_UISCALE_MENU_HIDE]==0.0f)){
+        //close the UI scale menu
+        uiElemClickAction(dat,state,rdat,0,UIELEM_PREFS_DIALOG_UISCALE_DROPDOWN);
+      }
     }
   }
 

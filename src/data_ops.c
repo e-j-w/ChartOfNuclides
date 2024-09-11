@@ -137,11 +137,13 @@ void stopUIAnimation(const app_data *restrict dat, app_state *restrict state, co
 			break;
 		case UIANIM_UISCALE_MENU_HIDE:
 			state->ds.shownElements &= (uint32_t)(~(1U << UIELEM_PREFS_UISCALE_MENU)); //close the menu
+			changeUIState(dat,state,UISTATE_PREFS_DIALOG);
 			break;
     case UIANIM_MODAL_BOX_HIDE:
       state->ds.shownElements &= (uint32_t)(~(1U << UIELEM_MSG_BOX)); //close the message box
 			state->ds.shownElements &= (uint32_t)(~(1U << UIELEM_ABOUT_BOX)); //close the about box
 			state->ds.shownElements &= (uint32_t)(~(1U << UIELEM_PREFS_DIALOG)); //close the preferences dialog
+			changeUIState(dat,state,UISTATE_DEFAULT); //update interactable UI elements
       break;
 		case UIANIM_NUCLINFOBOX_HIDE:
 			state->ds.shownElements &= (uint32_t)(~(1U << UIELEM_NUCL_INFOBOX)); //close the info box
@@ -1432,7 +1434,7 @@ double get2PlusEnergy(const ndata *restrict nd, const uint16_t nuclInd){
 	if(lvlInd != MAXNUMLVLS){
 		return getLevelEnergykeV(nd,lvlInd);
 	}
-	return -1.0f; //no 2+ state, or not even-even
+	return -1.0; //no 2+ state, or not even-even
 }
 
 double getLevelHalfLifeSeconds(const ndata *restrict nd, const uint32_t levelInd){
@@ -1603,6 +1605,7 @@ void changeUIState(const app_data *restrict dat, app_state *restrict state, cons
 				state->interactableElement |= (uint32_t)(1U << UIELEM_UISM_DEFAULT_BUTTON);
 				state->interactableElement |= (uint32_t)(1U << UIELEM_UISM_LARGE_BUTTON);
 				state->interactableElement |= (uint32_t)(1U << UIELEM_UISM_HUGE_BUTTON);
+				state->interactableElement |= (uint32_t)(1U << UIELEM_PREFS_UISCALE_MENU);
 			}
 			break;
 		case UISTATE_FULLLEVELINFO:
@@ -2177,7 +2180,7 @@ void updateSingleUIElemPosition(const app_data *restrict dat, drawing_state *res
 			break;
 		case UIELEM_PREFS_UISCALE_MENU:
 			ds->uiElemPosX[UIELEM_PREFS_UISCALE_MENU] = ds->uiElemPosX[UIELEM_PREFS_DIALOG_UISCALE_DROPDOWN];
-			ds->uiElemPosY[UIELEM_PREFS_UISCALE_MENU] = (uint16_t)(ds->uiElemPosY[UIELEM_PREFS_DIALOG_UISCALE_DROPDOWN] + ds->uiElemHeight[UIELEM_PREFS_DIALOG_UISCALE_DROPDOWN] + UI_PADDING_SIZE*ds->uiUserScale);
+			ds->uiElemPosY[UIELEM_PREFS_UISCALE_MENU] = (uint16_t)(ds->uiElemPosY[UIELEM_PREFS_DIALOG_UISCALE_DROPDOWN] + ds->uiElemHeight[UIELEM_PREFS_DIALOG_UISCALE_DROPDOWN]);
 			ds->uiElemWidth[UIELEM_PREFS_UISCALE_MENU] = (uint16_t)(PREFS_DIALOG_UISCALE_MENU_WIDTH*ds->uiUserScale);
 			ds->uiElemHeight[UIELEM_PREFS_UISCALE_MENU] = (uint16_t)(((PREFS_DIALOG_UISCALE_MENU_ITEM_SPACING + UI_PADDING_SIZE)*UISCALE_ENUM_LENGTH + 2*PANEL_EDGE_SIZE)*ds->uiUserScale);
 			break;

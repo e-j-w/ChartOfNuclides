@@ -211,7 +211,7 @@ void drawIconAndTextButton(const ui_theme_rules *restrict uirules, resource_data
   float textX = (float)x + (((float)(w*rdat->uiDPIScale + UI_TILE_SIZE*rdat->uiScale - 2*UI_PADDING_SIZE*rdat->uiScale)/2.0f)/rdat->uiDPIScale);
   float textY = (float)y + ((float)(UI_TILE_SIZE)/2.0f)*rdat->uiScale/rdat->uiDPIScale;
   //printf("text x: %f, y: %f\n",(double)textX,(double)textY);
-  drawTextAlignedSized(rdat,textX,textY,uirules->textColNormal,FONTSIZE_NORMAL,255,text,ALIGN_CENTER,(Uint16)(w*rdat->uiScale));
+  drawTextAlignedSized(rdat,textX,textY,uirules->textColNormal,FONTSIZE_NORMAL,alpha,text,ALIGN_CENTER,(Uint16)(w*rdat->uiScale));
 }
 
 void drawDropDownTextButton(const ui_theme_rules *restrict uirules, resource_data *restrict rdat, const uint16_t x, const uint16_t y, const uint16_t w, const uint8_t highlightState, const uint8_t alpha, const char *text){
@@ -223,7 +223,7 @@ void drawDropDownTextButton(const ui_theme_rules *restrict uirules, resource_dat
   float textX = (float)x + (((float)(w*rdat->uiDPIScale - UI_TILE_SIZE*rdat->uiScale)/2.0f)/rdat->uiDPIScale);
   float textY = (float)y + ((float)(UI_TILE_SIZE)/2.0f)*rdat->uiScale/rdat->uiDPIScale;
   //printf("text x: %f, y: %f\n",(double)textX,(double)textY);
-  drawTextAlignedSized(rdat,textX,textY,uirules->textColNormal,FONTSIZE_NORMAL,255,text,ALIGN_CENTER,(Uint16)(w*rdat->uiScale));
+  drawTextAlignedSized(rdat,textX,textY,uirules->textColNormal,FONTSIZE_NORMAL,alpha,text,ALIGN_CENTER,(Uint16)(w*rdat->uiScale));
 }
 
 void drawCheckbox(const ui_theme_rules *restrict uirules, resource_data *restrict rdat,const uint16_t x, const uint16_t y, const uint16_t w, const uint8_t highlightState, const uint8_t alpha, const uint8_t checked){
@@ -233,7 +233,6 @@ void drawCheckbox(const ui_theme_rules *restrict uirules, resource_data *restric
   }else{
     drawIcon(uirules,rdat,x,y,w,highlightState,alpha,UIICON_CHECKBOX_OUTLINE);
   }
-  
 }
 
 //draws a selection indicator with the position and size specified by the input SDL_Rect
