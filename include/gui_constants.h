@@ -104,8 +104,8 @@ static const float uiScales[UISCALE_ENUM_LENGTH] = {1.0f,1.20f,1.5f,1.75f};
 #define ABOUT_BOX_OK_BUTTON_YB     (4*UI_PADDING_SIZE)
 
 //preferences dialog
-#define PREFS_DIALOG_WIDTH                      600 //in unscaled pixels
-#define PREFS_DIALOG_HEIGHT                     400 //in unscaled pixels
+#define PREFS_DIALOG_WIDTH                      340 //in unscaled pixels
+#define PREFS_DIALOG_HEIGHT                     260 //in unscaled pixels
 #define PREFS_DIALOG_HEADERTXT_X                (6*UI_PADDING_SIZE)
 #define PREFS_DIALOG_HEADERTXT_Y                (6*UI_PADDING_SIZE)
 #define PREFS_DIALOG_PREF_Y_SPACING             36 //in unscaled pixels

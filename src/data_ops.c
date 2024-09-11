@@ -2173,7 +2173,7 @@ void updateSingleUIElemPosition(const app_data *restrict dat, drawing_state *res
 			ds->uiElemWidth[UIELEM_PREFS_DIALOG_UISCALE_DROPDOWN] = (uint16_t)(PREFS_DIALOG_UISCALE_BUTTON_WIDTH*ds->uiUserScale);
 			ds->uiElemHeight[UIELEM_PREFS_DIALOG_UISCALE_DROPDOWN] = (uint16_t)(UI_TILE_SIZE*ds->uiUserScale);
 			ds->uiElemPosX[UIELEM_PREFS_DIALOG_UISCALE_DROPDOWN] = (uint16_t)(ds->uiElemPosX[UIELEM_PREFS_DIALOG] + (uint16_t)((PREFS_DIALOG_PREFCOL1_X+3*UI_PADDING_SIZE)*ds->uiUserScale) + (uint16_t)(getTextWidth(rdat,FONTSIZE_NORMAL,dat->strings[dat->locStringIDs[LOCSTR_PREF_UISCALE]])/rdat->uiDPIScale));
-			ds->uiElemPosY[UIELEM_PREFS_DIALOG_UISCALE_DROPDOWN] = ds->uiElemPosY[UIELEM_PREFS_DIALOG] + (uint16_t)((PREFS_DIALOG_PREFCOL1_Y + 3*PREFS_DIALOG_PREF_Y_SPACING)*ds->uiUserScale);
+			ds->uiElemPosY[UIELEM_PREFS_DIALOG_UISCALE_DROPDOWN] = ds->uiElemPosY[UIELEM_PREFS_DIALOG] + (uint16_t)((PREFS_DIALOG_PREFCOL1_Y + 3*PREFS_DIALOG_PREF_Y_SPACING + 2*UI_PADDING_SIZE)*ds->uiUserScale);
 			break;
 		case UIELEM_PREFS_UISCALE_MENU:
 			ds->uiElemPosX[UIELEM_PREFS_UISCALE_MENU] = ds->uiElemPosX[UIELEM_PREFS_DIALOG_UISCALE_DROPDOWN];
