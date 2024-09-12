@@ -1,0 +1,81 @@
+id: io.github.e_j_w.ChartOfNuclides
+runtime: org.freedesktop.Platform
+runtime-version: '24.08'
+sdk: org.freedesktop.Sdk
+command: con
+finish-args:
+  # X11 + XShm access
+  - --share=ipc
+  - --socket=fallback-x11
+  # Wayland access
+  - --socket=wayland
+  # GPU acceleration if needed
+  - --device=dri
+modules:
+  - name: SDL3
+    buildsystem: cmake-ninja
+    builddir: true
+    sources:
+      - type: git
+        url: https://github.com/libsdl-org/SDL.git
+        commit: fe5dcf79be0c00d7220ea0a8fdecf1306d2c90d9
+    cleanup:
+      - '/bin/sdl3-config'
+      - '/include'
+      - '/lib/libSDL3.la'
+      - '/lib/libSDL3main.a'
+      - '/lib/libSDL3main.la'
+      - '/lib/libSDL3_test.a'
+      - '/lib/libSDL3_test.la'
+      - '/lib/cmake'
+      - '/share/aclocal'
+      - '/lib/pkgconfig'
+    modules:
+      - name: libdecor
+        buildsystem: meson
+        config-opts:
+          - -Ddemo=false
+        sources:
+          - type: git
+            url: https://gitlab.freedesktop.org/libdecor/libdecor.git
+  - name: SDL_ttf
+    buildsystem: cmake-ninja
+    builddir: true
+    sources:
+      - type: git
+        url: https://github.com/libsdl-org/SDL_ttf.git
+        commit: 22347419ee08e49d77411c680f15e314ef870ab7
+    cleanup:
+      - '/include'
+      - '/lib/cmake'
+      - '/share/aclocal'
+      - '/lib/pkgconfig'
+  - name: SDL_image
+    buildsystem: cmake-ninja
+    builddir: true
+    sources:
+      - type: git
+        url: https://github.com/libsdl-org/SDL_image.git
+        commit: 39c8ebb0e912d072005771dc4f2317930c51c081
+    cleanup:
+      - '/include'
+      - '/lib/cmake'
+      - '/share/aclocal'
+      - '/lib/pkgconfig'
+  - name: con
+    buildsystem: simple
+    build-commands:
+      - make all -j ${FLATPAK_BUILDER_N_JOBS}
+      - install -Dm755 con -t ${FLATPAK_DEST}/bin
+      - install -Dm644 con.dat -t ${FLATPAK_DEST}/share/con
+      - install -Dm644 data/icon.svg -t ${FLATPAK_DEST}/share/icons/hicolor/scalable/apps/io.github.e_j_w.ChartOfNuclides.svg
+      - install -Dm644 data/con.desktop -t ${FLATPAK_DEST}/share/applications/io.github.e_j_w.ChartOfNuclides.desktop
+    sources:
+      - type: git
+        url: https://github.com/e-j-w/ChartOfNuclides.git
+        # commit: 86fbb170978139a6723300747c372a1920ecd54c
+      - type: file
+        url: file:///home/jono/Documents/Code/LevelUp-gui/con.dat
+        sha256: 2846702cb3cc600ba8f7c15444b04cc369cea80760aee101692566a6bdda696c
+    cleanup:
+      - '*.o'

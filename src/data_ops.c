@@ -143,7 +143,7 @@ void stopUIAnimation(const app_data *restrict dat, app_state *restrict state, co
       state->ds.shownElements &= (uint32_t)(~(1U << UIELEM_MSG_BOX)); //close the message box
 			state->ds.shownElements &= (uint32_t)(~(1U << UIELEM_ABOUT_BOX)); //close the about box
 			state->ds.shownElements &= (uint32_t)(~(1U << UIELEM_PREFS_DIALOG)); //close the preferences dialog
-			changeUIState(dat,state,UISTATE_DEFAULT); //update interactable UI elements
+			//changeUIState(dat,state,UISTATE_DEFAULT); //update interactable UI elements, messes up all level view when exiting preferences/about
       break;
 		case UIANIM_NUCLINFOBOX_HIDE:
 			state->ds.shownElements &= (uint32_t)(~(1U << UIELEM_NUCL_INFOBOX)); //close the info box
