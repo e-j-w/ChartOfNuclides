@@ -234,16 +234,22 @@ void draw2PlusEnergyBoxLabel(const app_data *restrict dat, const drawing_state *
   float drawXPos, drawYPos;
   float labelMargin = NUCLBOX_LABEL_SMALLMARGIN*ds->chartZoomScale*ds->uiUserScale;
   if(boxHeight > 38.0f){
-    drawXPos = xPos + labelMargin + getTextWidth(rdat,FONTSIZE_LARGE,"2");
-    float totalLblHeight = (getTextHeight(rdat,FONTSIZE_SMALL,"+") + getTextHeight(rdat,FONTSIZE_LARGE,"2"))/rdat->uiDPIScale;
+    drawXPos = xPos + labelMargin + (2.0f*ds->uiUserScale);
+    float totalLblHeight = getTextHeight(rdat,FONTSIZE_LARGE,dat->strings[dat->locStringIDs[LOCSTR_CHARTVIEW_2PLUS]])/rdat->uiDPIScale;
     drawYPos = yPos+boxHeight*0.5f - totalLblHeight*0.5f + 4.0f*ds->uiUserScale;
-    drawXPos -= (drawTextAlignedSized(rdat,drawXPos,drawYPos,col,FONTSIZE_SMALL,255,"+",ALIGN_LEFT,16384)).w; //draw parity label
-    drawTextAlignedSized(rdat,drawXPos-(2.0f*ds->uiUserScale),drawYPos+10.0f,col,FONTSIZE_LARGE,255,"2",ALIGN_LEFT,16384); //draw spin label
+    drawTextAlignedSized(rdat,drawXPos,drawYPos,col,FONTSIZE_LARGE,255,dat->strings[dat->locStringIDs[LOCSTR_CHARTVIEW_2PLUS]],ALIGN_LEFT,16384); //draw spin label
     //handle energy label
     drawXPos = xPos + boxWidth - labelMargin;
     getLvlEnergyStr(tmpStr,&dat->ndat,lvlInd,1);
     strcat(tmpStr," keV");
-    drawTextAlignedSized(rdat,drawXPos,drawYPos+(8.0f*ds->uiUserScale),col,FONTSIZE_NORMAL,255,tmpStr,ALIGN_RIGHT,16384); //draw energy label
+    float drawSpace = boxWidth  - getTextWidth(rdat,FONTSIZE_LARGE,dat->strings[dat->locStringIDs[LOCSTR_CHARTVIEW_2PLUS]])/rdat->uiDPIScale;
+    //SDL_Log("remaining space: %f, width: %f\n",(double)drawSpace,(double)getTextWidth(rdat,FONTSIZE_LARGE,tmpStr));
+    if(drawSpace > getTextWidth(rdat,FONTSIZE_LARGE,tmpStr)/rdat->uiDPIScale){
+      drawTextAlignedSized(rdat,drawXPos,drawYPos+(2.5f*ds->uiUserScale),col,FONTSIZE_NORMAL,255,tmpStr,ALIGN_RIGHT,16384); //draw energy label
+    }else{
+      drawTextAlignedSized(rdat,drawXPos,drawYPos+(2.5f*ds->uiUserScale),col,FONTSIZE_NORMAL,255,"(...)",ALIGN_RIGHT,16384);
+    }
+    
   }
 }
 
@@ -1182,21 +1188,23 @@ void drawChartViewMenu(const app_data *restrict dat, const app_state *restrict s
   drawPanelBG(rdat,drawRect,alpha);
   
   //draw menu item highlight
-  for(uint8_t i=1;i<=CHARTVIEW_ENUM_LENGTH;i++){
-    drawRect.x = state->ds.uiElemPosX[UIELEM_CHARTVIEW_MENU-i];
-    drawRect.y = (state->ds.uiElemPosY[UIELEM_CHARTVIEW_MENU-i] + yOffset);
-    drawRect.w = state->ds.uiElemWidth[UIELEM_CHARTVIEW_MENU-i];
-    drawRect.h = state->ds.uiElemHeight[UIELEM_CHARTVIEW_MENU-i];
-    switch(getHighlightState(state,UIELEM_CHARTVIEW_MENU-i)){
-      case HIGHLIGHT_SELECTED:
-        drawFlatRect(rdat,drawRect,dat->rules.themeRules.modSelectedCol);
-        break;
-      case HIGHLIGHT_MOUSEOVER:
-        drawFlatRect(rdat,drawRect,dat->rules.themeRules.modMouseOverCol);
-        break;
-      case HIGHLIGHT_NORMAL:
-      default:
-        break;
+  if(state->ds.timeLeftInUIAnimation[UIANIM_CHARTVIEW_MENU_HIDE]==0.0f){
+    for(uint8_t i=1;i<=CHARTVIEW_ENUM_LENGTH;i++){
+      drawRect.x = state->ds.uiElemPosX[UIELEM_CHARTVIEW_MENU-i];
+      drawRect.y = (state->ds.uiElemPosY[UIELEM_CHARTVIEW_MENU-i] + yOffset);
+      drawRect.w = state->ds.uiElemWidth[UIELEM_CHARTVIEW_MENU-i];
+      drawRect.h = state->ds.uiElemHeight[UIELEM_CHARTVIEW_MENU-i];
+      switch(getHighlightState(state,UIELEM_CHARTVIEW_MENU-i)){
+        case HIGHLIGHT_SELECTED:
+          drawFlatRect(rdat,drawRect,dat->rules.themeRules.modSelectedCol);
+          break;
+        case HIGHLIGHT_MOUSEOVER:
+          drawFlatRect(rdat,drawRect,dat->rules.themeRules.modMouseOverCol);
+          break;
+        case HIGHLIGHT_NORMAL:
+        default:
+          break;
+      }
     }
   }
 

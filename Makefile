@@ -20,8 +20,8 @@ install-linux: con
 		cp con /usr/bin ; \
 		mkdir /usr/share/con ; \
 		cp con.dat /usr/share/con ; \
-		cp data/icon.svg /usr/share/icons/hicolor/scalable/apps/con-application-icon.svg ; \
-		cp data/con.desktop /usr/share/applications ; \
+		cp data/io.github.e_j_w.ChartOfNuclides.svg /usr/share/icons/hicolor/scalable/apps ; \
+		cp data/io.github.e_j_w.ChartOfNuclides.desktop /usr/share/applications ; \
 		update-desktop-database /usr/share/applications ; \
 		gtk-update-icon-cache -f -t /usr/share/icons/hicolor ; \
 		echo "Done!" ; \
@@ -35,8 +35,8 @@ uninstall-linux:
 		rm /usr/bin/con ; \
 		rm /usr/share/con/con.dat ; \
 		rmdir /usr/share/con ; \
-		rm /usr/share/icons/hicolor/scalable/apps/con-application-icon.svg ; \
-		rm /usr/share/applications/con.desktop ; \
+		rm /usr/share/icons/hicolor/scalable/apps/io.github.e_j_w.ChartOfNuclides.svg ; \
+		rm /usr/share/applications/io.github.e_j_w.ChartOfNuclides.desktop ; \
 		update-desktop-database /usr/share/applications ; \
 		echo "Done!" ; \
 	fi

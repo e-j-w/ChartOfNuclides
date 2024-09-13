@@ -24,7 +24,50 @@ The goal is to develop a simple, performant, and multiplatform tool that will be
 
 The current version has been tested under Arch Linux and Debian 12 as of August 2024. In principle most other recent Linux distros should work as well. The plan is to eventually support other platforms (Windows especially) once a stable SDL3 release is available.
 
-### Build dependencies
+### Flatpak
+
+Makes a sandboxed [Flatpak](https://flatpak.org/) package. This is the preferred method for most users, as the Flatpak builder should automatically resolve all dependencies and download all neccessary data files. Developers may prefer to [build manually](#manual-build) to avoid messing with the Flatpak sandbox, or to avoid installing Flatpak.
+
+#### Build dependencies
+
+On Arch Linux:
+
+```
+sudo pacman -Syu flatpak flatpak-builder git
+```
+
+On Debian:
+
+```
+sudo apt install flatpak flatpak-builder build-essential
+```
+
+#### Build and install
+
+```
+flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
+mkdir flatpak_build
+git clone https://github.com/e-j-w/ChartOfNuclides-flatpak
+cd ChartOfNuclides-flatpak
+flatpak-builder --user --install-deps-from=flathub --install --force-clean flatpak_build/ io.github.e_j_w.ChartOfNuclides.yml
+rm -rf flatpak_build .flatpak-builder
+```
+
+To run the application (it should also be available in menus or application search in your desktop environment, same as other Flatpak applications):
+
+```
+flatpak run io.github.e_j_w.ChartOfNuclides
+```
+
+To uninstall the application:
+
+```
+flatpak uninstall io.github.e_j_w.ChartOfNuclides
+```
+
+### Manual build
+
+#### Build dependencies
 
 * C compiler: gcc (or clang)
 * GNU make
@@ -33,7 +76,7 @@ The current version has been tested under Arch Linux and Debian 12 as of August 
 
 For now you'll probably have to manually compile SDL3 and its libraries, as they aren't (yet) packaged for major Linux distros.
 
-### Build the application
+#### Build the application
 
 Install all build dependencies listed above, then build the application binaries using `make` (from the source tree root directory):
 
@@ -59,7 +102,7 @@ sudo make install-linux
 Have fun!
 
 
-### Build data files
+#### Build data files
 
 In order for the application to run, it requires a data file (`con.dat`) containing the nuclear structure database and graphics/font resources.  The application will look for the data file in any of the following locations (in order of preference):
 

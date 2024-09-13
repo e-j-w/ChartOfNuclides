@@ -74,7 +74,7 @@ int main(int argc, char *argv[]){
   setbuf(stdout,NULL); //needed to show printf output on Windows
   #endif
 
-  if(SDL_Init(SDL_INIT_VIDEO) != 0){
+  if(SDL_Init(0) != 0){
     SDL_Log("Cannot initialize SDL: %s\n",SDL_GetError());
     return 0;
   }
@@ -100,7 +100,7 @@ int main(int argc, char *argv[]){
   if(out!=NULL){
     SDL_WriteIO(out,&headerStr[0],sizeof(headerStr)); //write header
     SDL_WriteIO(out,&version,sizeof(uint8_t));
-    writeAsset(out,"data/icon.svg",appBasePath);
+    writeAsset(out,"data/io.github.e_j_w.ChartOfNuclides.svg",appBasePath);
     int64_t dataSize = (int64_t)sizeof(app_data);
     //SDL_Log("Data size: %li\n",dataSize);
     SDL_WriteIO(out,&dataSize,sizeof(int64_t));
