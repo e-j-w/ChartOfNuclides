@@ -1,14 +1,14 @@
-<div align = center><img src="https://raw.githubusercontent.com/e-j-w/ChartOfNuclides/master/data/io.github.e_j_w.ChartOfNuclides.svg" width="150" height="150" alt="icon">
+<div align = center><img src="https://raw.githubusercontent.com/e-j-w/ChartOfNuclides/master/data/io.github.e_j_w.ChartOfNuclides.svg" width="96" height="96" alt="icon">
 
 </div>
 
 <h1 align="center">Chart of Nuclides</h1>
 
-**NOTE: This is early in development, expect some issues...**
+An offline viewer of isotope and nuclear structure data, presented in the familiar [Chart of Nuclides / Segrè chart](https://en.wikipedia.org/wiki/Table_of_nuclides) format. Uses nuclear structure data from [ENSDF](https://www.nndc.bnl.gov/ensdf/about.jsp) and isotopic abundance data from [NIST](https://www.nist.gov/pml/atomic-weights-and-isotopic-compositions-relative-atomic-masses). The UI is implemented in [SDL](https://github.com/libsdl-org/SDL) (so you can browse nuclear half-lives using some of the same code that powers [Half-Life](https://www.pcgamingwiki.com/wiki/Half-Life#Middleware)). The goal is to develop a simple, performant, and multiplatform tool that will be useful in both professional (nuclear structure research) and educational contexts.
 
-An offline viewer of isotope and nuclear structure data, presented in the familiar [Chart of Nuclides / Segrè chart](https://en.wikipedia.org/wiki/Table_of_nuclides) format.  The data comes from various sources, most notably [ENSDF](https://www.nndc.bnl.gov/ensdf/about.jsp).  The UI is implemented in [SDL](https://github.com/libsdl-org/SDL) (so you can browse nuclear half-lives using some of the same code that powers [Half-Life](https://www.pcgamingwiki.com/wiki/Half-Life#Middleware)).
+## Screenshots
 
-The goal is to develop a simple, performant, and multiplatform tool that will be useful in both professional (nuclear structure research) and educational contexts.
+<div align = center><img src="https://github.com/e-j-w/ChartOfNuclides-flatpak/blob/5984c26073853c21183738be02e5ae6bc506e74d/assets/con_screenshot.png?raw=true" width="602" height="396" alt="main interface"><img src="https://github.com/e-j-w/ChartOfNuclides-flatpak/blob/5984c26073853c21183738be02e5ae6bc506e74d/assets/con_screenshot2.png?raw=true" width="602" height="396" alt="zoomed in interface"></div>
 
 ## Features
 
@@ -22,13 +22,13 @@ The goal is to develop a simple, performant, and multiplatform tool that will be
 
 ## Building and installing from source
 
-The current version has been tested under Arch Linux and Debian 12 as of September 2024. In principle most other recent Linux distros should work as well. The plan is to eventually support other platforms (Windows especially) once a stable SDL3 release is available.
+The current version has been tested under Arch Linux and Debian 12 as of September 2024, though most recent Linux distros should work as well. The plan is to eventually support other platforms (Windows especially) once a stable SDL3 release is available.
 
-### Flatpak
+### Using Flatpak
 
-Makes a sandboxed [Flatpak](https://flatpak.org/) package. This is the recommended method for most users, as the Flatpak builder should automatically resolve all dependencies and download all neccessary data files. Developers may prefer to [build manually](#manual-build) to avoid messing with the Flatpak sandbox, or to avoid installing Flatpak.
+This will build and install a sandboxed [Flatpak](https://flatpak.org/) package. This is the recommended method for most users, as the Flatpak builder should automatically resolve all dependencies and download all neccessary data files. If you want to avoid installing or using Flatpak, you can do a [manual build](#manual-build) instead.
 
-#### Build dependencies
+#### Flatpak build dependencies
 
 On Arch Linux:
 
@@ -59,7 +59,7 @@ Build and install the application:
 flatpak-builder --user --install-deps-from=flathub --install --force-clean flatpak_build/ io.github.e_j_w.ChartOfNuclides.yml
 ```
 
-Clean up the build:
+Clean up the build to save disk space (optional):
 
 ```
 rm -rf flatpak_build .flatpak-builder
@@ -71,13 +71,15 @@ To run the application (depending on your desktop environment, it should also be
 flatpak run io.github.e_j_w.ChartOfNuclides
 ```
 
-To uninstall the application:
+Have fun! To uninstall the application:
 
 ```
 flatpak uninstall io.github.e_j_w.ChartOfNuclides
 ```
 
 ### Manual build
+
+For those who don't want to use Flatpak.
 
 #### Build dependencies
 
@@ -111,8 +113,11 @@ To install the application for all users, on a Linux system:
 sudo make install-linux
 ```
 
-Have fun!
+To uninstall:
 
+```
+sudo make uninstall-linux
+```
 
 #### Build data files
 
