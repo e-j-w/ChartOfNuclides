@@ -2239,7 +2239,7 @@ void updateSingleUIElemPosition(const app_data *restrict dat, drawing_state *res
 				ds->uiElemPosX[UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON] = (uint16_t)(defaultPosX + animFrac*(fullPosX - defaultPosX));
 				ds->uiElemPosY[UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON] = (uint16_t)(defaultPosY + animFrac*(fullPosY - defaultPosY));
 			}else if(ds->uiAnimPlaying & (1U << UIANIM_NUCLINFOBOX_CONTRACT)){
-				float animFrac = juice_smoothStart3(1.0f - ds->timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_CONTRACT]/UI_ANIM_LENGTH);
+				float animFrac = juice_smoothStop3(1.0f - ds->timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_CONTRACT]/UI_ANIM_LENGTH);
 				uint16_t defaultPosX = (uint16_t)((ds->windowXRes - NUCL_INFOBOX_WIDTH*ds->uiUserScale)/2 - ds->uiElemWidth[UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON] + (NUCL_INFOBOX_WIDTH - UI_TILE_SIZE - 7*UI_PADDING_SIZE)*ds->uiUserScale);
 				uint16_t defaultPosY = (uint16_t)(ds->windowYRes - (uint16_t)((((float)NUCL_INFOBOX_MIN_HEIGHT + ds->infoBoxTableHeight) - UI_PADDING_SIZE - (int32_t)CHART_AXIS_DEPTH + 4*UI_PADDING_SIZE)*ds->uiUserScale));
 				uint16_t fullPosX = (uint16_t)(ds->windowXRes-(NUCL_FULLINFOBOX_BACKBUTTON_WIDTH+NUCL_FULLINFOBOX_BACKBUTTON_POS_XR)*ds->uiUserScale);

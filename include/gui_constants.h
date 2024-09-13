@@ -168,6 +168,7 @@ static const float uiScales[UISCALE_ENUM_LENGTH] = {1.0f,1.20f,1.5f,1.75f};
 //colors for drawing
 static const SDL_FColor blackCol = {0.0f,0.0f,0.0f,1.0f};
 static const SDL_FColor grayCol = {0.5f,0.5f,0.5f,1.0f};
+static const SDL_FColor darkGrayCol = {0.2f,0.2f,0.2f,1.0f};
 static const SDL_FColor redCol = {1.0f,0.0f,0.0f,1.0f};
 static const SDL_FColor whiteCol = {1.0f,1.0f,1.0f,1.0f};
 static const SDL_FColor whiteTransparentCol = {1.0f,1.0f,1.0f,0.7f};

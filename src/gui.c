@@ -475,8 +475,8 @@ void drawChartOfNuclides(const app_data *restrict dat, const app_state *restrict
   //draw shell closure lines
   //some fudging of line positions was needed to fix alignment with fractional scaling
   if(state->ds.drawShellClosures){
-    SDL_FColor scCol = blackCol;
-    scCol.a = (state->ds.chartZoomScale/2.0f) - 0.25f;
+    SDL_FColor scCol = darkGrayCol;
+    scCol.a = (state->ds.chartZoomScale/0.5f) - 3.0f;
     if(scCol.a > 0.0f){
       if(scCol.a > 1.0f){
         scCol.a = 1.0f;
@@ -857,7 +857,7 @@ void drawNuclInfoBox(const app_data *restrict dat, app_state *restrict state, re
   }
   Uint8 alpha = 255;
   if(state->ds.uiAnimPlaying & (1U << UIANIM_NUCLINFOBOX_CONTRACT)){
-    alpha = (uint8_t)(255.0f*juice_smoothStart2(1.0f - state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_CONTRACT]/UI_ANIM_LENGTH));
+    alpha = (uint8_t)(255.0f*juice_smoothStop2(1.0f - state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_CONTRACT]/UI_ANIM_LENGTH));
   }else if(state->ds.uiAnimPlaying & (1U << UIANIM_NUCLINFOBOX_EXPAND)){
     alpha = (uint8_t)(255.0f*juice_smoothStart2(state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_EXPAND]/UI_ANIM_LENGTH));
   }
@@ -873,7 +873,7 @@ void drawNuclInfoBox(const app_data *restrict dat, app_state *restrict state, re
     infoBoxPanelRect.h = state->ds.uiElemHeight[UIELEM_NUCL_INFOBOX] + animFrac*(state->ds.windowYRes - state->ds.uiElemHeight[UIELEM_NUCL_INFOBOX]);
   }else if(state->ds.uiAnimPlaying & (1U << UIANIM_NUCLINFOBOX_CONTRACT)){
     //contract from full screen to normal size
-    float animFrac = juice_smoothStart3(1.0f - state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_CONTRACT]/UI_ANIM_LENGTH);
+    float animFrac = juice_smoothStop3(1.0f - state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_CONTRACT]/UI_ANIM_LENGTH);
     infoBoxPanelRect.x = 0.0f + animFrac*(state->ds.uiElemPosX[UIELEM_NUCL_INFOBOX]);
     infoBoxPanelRect.y = 0.0f + animFrac*(state->ds.uiElemPosY[UIELEM_NUCL_INFOBOX] + yOffset);
     infoBoxPanelRect.w = state->ds.windowXRes + animFrac*(state->ds.uiElemWidth[UIELEM_NUCL_INFOBOX] - state->ds.windowXRes);

@@ -1,6 +1,4 @@
-<div align = center><img src="https://raw.githubusercontent.com/e-j-w/ChartOfNuclides/master/data/io.github.e_j_w.ChartOfNuclides.svg" width="96" height="96" alt="icon">
-
-</div>
+<div align = center><img src="https://raw.githubusercontent.com/e-j-w/ChartOfNuclides/master/data/io.github.e_j_w.ChartOfNuclides.svg" width="96" height="96" alt="icon"></div>
 
 <h1 align="center">Chart of Nuclides</h1>
 
@@ -8,7 +6,7 @@ An offline viewer of isotope and nuclear structure data, presented in the famili
 
 ## Screenshots
 
-<div align = center><img src="https://github.com/e-j-w/ChartOfNuclides-flatpak/blob/5984c26073853c21183738be02e5ae6bc506e74d/assets/con_screenshot.png?raw=true" width="602" height="396" alt="main interface"><img src="https://github.com/e-j-w/ChartOfNuclides-flatpak/blob/5984c26073853c21183738be02e5ae6bc506e74d/assets/con_screenshot2.png?raw=true" width="602" height="396" alt="zoomed in interface"></div>
+<div align = center><img src="https://github.com/e-j-w/ChartOfNuclides-flatpak/blob/5984c26073853c21183738be02e5ae6bc506e74d/assets/con_screenshot.png?raw=true" width="376" height="248" alt="main interface"><img src="https://github.com/e-j-w/ChartOfNuclides-flatpak/blob/5984c26073853c21183738be02e5ae6bc506e74d/assets/con_screenshot2.png?raw=true" width="376" height="248" alt="zoomed in interface"></div>
 
 ## Features
 
