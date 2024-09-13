@@ -36,7 +36,7 @@ On Arch Linux:
 sudo pacman -Syu flatpak flatpak-builder git
 ```
 
-On Debian:
+On Debian/Ubuntu:
 
 ```
 sudo apt install flatpak flatpak-builder build-essential
@@ -44,16 +44,28 @@ sudo apt install flatpak flatpak-builder build-essential
 
 #### Build and install
 
+Setup `flatpak` with the Flathub repo and get the build metadata (from [this](https://github.com/e-j-w/ChartOfNuclides-flatpak) repo):
+
 ```
 flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
-mkdir flatpak_build
 git clone https://github.com/e-j-w/ChartOfNuclides-flatpak
 cd ChartOfNuclides-flatpak
+mkdir flatpak_build
+```
+
+Build and install the application:
+
+```
 flatpak-builder --user --install-deps-from=flathub --install --force-clean flatpak_build/ io.github.e_j_w.ChartOfNuclides.yml
+```
+
+Clean up the build:
+
+```
 rm -rf flatpak_build .flatpak-builder
 ```
 
-To run the application (it should also be available in menus or application search in your desktop environment, same as other Flatpak applications):
+To run the application (depending on your desktop environment, it should also be available in the application menu and/or via the application search interface, same as other Flatpak applications):
 
 ```
 flatpak run io.github.e_j_w.ChartOfNuclides
