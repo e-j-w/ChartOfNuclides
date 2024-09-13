@@ -22,11 +22,11 @@ The goal is to develop a simple, performant, and multiplatform tool that will be
 
 ## Building and installing from source
 
-The current version has been tested under Arch Linux and Debian 12 as of August 2024. In principle most other recent Linux distros should work as well. The plan is to eventually support other platforms (Windows especially) once a stable SDL3 release is available.
+The current version has been tested under Arch Linux and Debian 12 as of September 2024. In principle most other recent Linux distros should work as well. The plan is to eventually support other platforms (Windows especially) once a stable SDL3 release is available.
 
 ### Flatpak
 
-Makes a sandboxed [Flatpak](https://flatpak.org/) package. This is the preferred method for most users, as the Flatpak builder should automatically resolve all dependencies and download all neccessary data files. Developers may prefer to [build manually](#manual-build) to avoid messing with the Flatpak sandbox, or to avoid installing Flatpak.
+Makes a sandboxed [Flatpak](https://flatpak.org/) package. This is the recommended method for most users, as the Flatpak builder should automatically resolve all dependencies and download all neccessary data files. Developers may prefer to [build manually](#manual-build) to avoid messing with the Flatpak sandbox, or to avoid installing Flatpak.
 
 #### Build dependencies
 
@@ -84,7 +84,7 @@ flatpak uninstall io.github.e_j_w.ChartOfNuclides
 * C compiler: gcc (or clang)
 * GNU make
 * SDL3, SDL3_image, SDL3_ttf
-  * SDL3 should be built with `libdecor` on Linux when using GNOME Wayland, as discussed [below](#the-application-window-has-no-titlebar-on-linux).
+  * SDL3 should be built with `libdecor` on Linux when using GNOME Wayland, otherwise window decorations won't be present.
 
 For now you'll probably have to manually compile SDL3 and its libraries, as they aren't (yet) packaged for major Linux distros.
 
@@ -159,16 +159,6 @@ Zoom and pan with the mouse, the controls are basically identical to Google Maps
 | Escape / backspace | Exit out of open menus, cancel selection, etc. |
 | F11                | Toggle fullscreen mode |
 | P                  | Toggle performance stats debug overlay |
-
-## Troubleshooting
-
-#### The application window has no titlebar on Linux
-
-You're probably running the application on GNOME Wayland without `libdecor` support. GNOME won't automatically draw window decorations for apps and mandates that they draw their own decorations instead, perhaps because they enjoy making life more difficult for their app developers and users. You'll have to either install `libdecor` (`libdecor-0-dev` on Debian) and rebuild SDL3, or run the application in X11 mode (at the cost of potential input and display latency) by setting the environment variable:
-
-```
-SDL_VIDEO_DRIVER=x11
-```
 
 ## Disclaimer
 
