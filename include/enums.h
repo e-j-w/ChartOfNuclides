@@ -242,6 +242,11 @@ VALUETYPE_PLUSX, //for values relative to another value X
 VALUETYPE_UNKNOWN,
 VALUETYPE_ENUM_LENGTH
 };
+enum kbd_mod_enum{
+KBD_MOD_NONE,
+KBD_MOD_CTRL,
+KBD_MOD_ENUM_LENGTH
+};
 enum thread_state_enum{
 THREADSTATE_IDLE,
 THREADSTATE_KILL,

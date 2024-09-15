@@ -273,9 +273,6 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
       state->ds.chartDragStartMouseX = state->mouseXPx;
       state->ds.chartDragStartMouseY = state->mouseYPx;
       state->ds.dragInProgress = 1;
-      if(state->lastInputType == INPUT_TYPE_MOUSE){
-        SDL_SetCursor(rdat->dragCursor); //set mouse cursor
-      }
       //SDL_Log("start drag\n");
     }
   }
@@ -577,6 +574,16 @@ void processSingleEvent(app_data *restrict dat, app_state *restrict state, resou
         case SDL_SCANCODE_F11:
           state->ds.windowFullscreenMode = !state->ds.windowFullscreenMode;
           handleScreenGraphicsMode(dat,state,rdat);
+          break;
+        case SDL_SCANCODE_Q:
+          if(state->kbdModVal == KBD_MOD_CTRL){
+            state->quitAppFlag = 1; //quit the app
+          }
+          break;
+        case SDL_SCANCODE_LCTRL:
+        case SDL_SCANCODE_RCTRL:
+          state->kbdModVal = KBD_MOD_CTRL;
+          break;
         default:
           break;
       }
@@ -608,6 +615,10 @@ void processSingleEvent(app_data *restrict dat, app_state *restrict state, resou
           break;
         case SDL_SCANCODE_S:
           state->inputFlags &= ~(1U << INPUT_ALTDOWN);
+          break;
+        case SDL_SCANCODE_LCTRL:
+        case SDL_SCANCODE_RCTRL:
+          state->kbdModVal = KBD_MOD_NONE;
           break;
         default:
           break;

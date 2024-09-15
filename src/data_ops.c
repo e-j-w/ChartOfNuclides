@@ -37,6 +37,7 @@ void initializeTempState(const app_data *restrict dat, app_state *restrict state
   state->lastAxisValY = 0;
   state->activeAxis = 0; //the last used axis
   state->lastInputType = INPUT_TYPE_KEYBOARD; //default input type
+	state->kbdModVal = KBD_MOD_NONE;
 	state->mouseoverElement = UIELEM_ENUM_LENGTH;
 	state->scrollSpeedMultiplier = 16.0f;
 	state->inputFlags = 0;
@@ -227,6 +228,9 @@ void updateDrawingState(const app_data *restrict dat, app_state *restrict state,
 		//SDL_Log("zoom scale: %0.4f\n",(double)state->ds.chartZoomScale);
 	}
 	if(state->ds.dragInProgress){
+		if((state->lastInputType == INPUT_TYPE_MOUSE)&&((state->ds.chartPosX != state->ds.chartDragStartX)||(state->ds.chartPosY != state->ds.chartDragStartY))){
+      SDL_SetCursor(rdat->dragCursor); //set mouse cursor
+    }
 		state->ds.chartPosX = state->ds.chartDragStartX + ((state->ds.chartDragStartMouseX - state->mouseXPx)/(DEFAULT_NUCLBOX_DIM*state->ds.chartZoomScale*state->ds.uiUserScale));
 		state->ds.chartPosY = state->ds.chartDragStartY - ((state->ds.chartDragStartMouseY - state->mouseYPx)/(DEFAULT_NUCLBOX_DIM*state->ds.chartZoomScale*state->ds.uiUserScale));
 	}

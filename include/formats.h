@@ -222,6 +222,7 @@ typedef struct
   uint8_t uiState, lastUIState; //modal state of the UI, values from ui_state_enum
   uint16_t chartSelectedNucl; //nucleus selected on the chart, =MAXNUMNUCL if none selected
   uint32_t interactableElement; //bit pattern describing which UI elements are interactable, values from ui_element_enum
+  unsigned int kbdModVal : 2; //values from kbd_mod_enum
   unsigned int lastInputType : 2; //0=keyboard, 1=apppad, 2=mouse
   unsigned int gamepadDisabled : 1; //1=gamepad/apppad disabled
   unsigned int quitAppFlag : 1; //0=take no action, 1=quit app

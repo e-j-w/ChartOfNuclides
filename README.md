@@ -160,6 +160,7 @@ Zoom and pan with the mouse, the controls are basically identical to Google Maps
 | Escape / backspace | Exit out of open menus, cancel selection, etc. |
 | F11                | Toggle fullscreen mode |
 | P                  | Toggle performance stats debug overlay |
+| Ctrl+Q             | Quit application |
 
 ## Disclaimer
 
