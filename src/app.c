@@ -135,6 +135,11 @@ int main(int argc, char *argv[]){
   gdat->rdat.uiThemeScale = getUIthemeScale(gdat->rdat.uiScale);
   handleScreenGraphicsMode(&gdat->dat,&gdat->state,&gdat->rdat); //handle fullscreen
   gdat->state.ds.forceRedraw = 1; //force draw the first frame
+
+  //cursors
+  gdat->rdat.defaultCursor = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_DEFAULT);
+  gdat->rdat.dragCursor = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_MOVE);
+  SDL_SetCursor(gdat->rdat.defaultCursor);
   
   //setup splash screen
   gdat->dat.rules.themeRules.bgCol.r = 255;
@@ -183,7 +188,7 @@ int main(int argc, char *argv[]){
 
     updateUIAnimationTimes(&gdat->dat,&gdat->state,deltaTime);
 
-    updateDrawingState(&gdat->dat,&gdat->state,deltaTime);
+    updateDrawingState(&gdat->dat,&gdat->state,&gdat->rdat,deltaTime);
 
     processFrameEvents(&gdat->dat,&gdat->state,&gdat->rdat); //can block the main thread to save CPU, see process_events.h
     

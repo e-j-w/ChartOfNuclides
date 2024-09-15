@@ -14,7 +14,7 @@ void startUIAnimation(const app_data *restrict dat, app_state *restrict state, c
 void stopUIAnimation(const app_data *restrict dat, app_state *restrict state, const uint8_t uiAnim);
 void updateUIAnimationTimes(const app_data *restrict dat, app_state *restrict state, const float deltaTime);
 
-void updateDrawingState(const app_data *restrict dat, app_state *restrict state, const float deltaTime);
+void updateDrawingState(const app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat, const float deltaTime);
 
 const char* getFullElemStr(const uint8_t Z, const uint8_t N);
 const char* getElemStr(const uint8_t Z);

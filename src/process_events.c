@@ -273,6 +273,9 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
       state->ds.chartDragStartMouseX = state->mouseXPx;
       state->ds.chartDragStartMouseY = state->mouseYPx;
       state->ds.dragInProgress = 1;
+      if(state->lastInputType == INPUT_TYPE_MOUSE){
+        SDL_SetCursor(rdat->dragCursor); //set mouse cursor
+      }
       //SDL_Log("start drag\n");
     }
   }

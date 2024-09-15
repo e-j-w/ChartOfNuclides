@@ -1,5 +1,3 @@
-<div align = center><img src="https://raw.githubusercontent.com/e-j-w/ChartOfNuclides/master/data/io.github.e_j_w.ChartOfNuclides.svg" width="96" height="96" alt="icon"></div>
-
 <h1 align="center">Chart of Nuclides</h1>
 
 An offline viewer of isotope and nuclear structure data, presented in the familiar [Chart of Nuclides / Segrè chart](https://en.wikipedia.org/wiki/Table_of_nuclides) format. Uses nuclear structure data from [ENSDF](https://www.nndc.bnl.gov/ensdf/about.jsp) and isotopic abundance data from [NIST](https://www.nist.gov/pml/atomic-weights-and-isotopic-compositions-relative-atomic-masses). The UI is implemented in [SDL](https://github.com/libsdl-org/SDL) (so you can browse nuclear half-lives using some of the same code that powers [Half-Life](https://www.pcgamingwiki.com/wiki/Half-Life#Middleware)). The goal is to develop a simple, performant, and multiplatform tool that will be useful in both professional (nuclear structure research) and educational contexts.

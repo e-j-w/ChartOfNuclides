@@ -184,7 +184,7 @@ void updateUIAnimationTimes(const app_data *restrict dat, app_state *restrict st
 }
 
 //called once per frame
-void updateDrawingState(const app_data *restrict dat, app_state *restrict state, const float deltaTime){
+void updateDrawingState(const app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat, const float deltaTime){
 	if(state->ds.zoomFinished){
 		//we want the zooming flag to persist for 1 frame beyond the
 		//end of the zoom, to force the UI to redraw
@@ -195,6 +195,7 @@ void updateDrawingState(const app_data *restrict dat, app_state *restrict state,
 	if(state->ds.dragFinished){
 		state->ds.dragInProgress = 0;
 		state->ds.dragFinished = 0; //reset flag
+		SDL_SetCursor(rdat->defaultCursor); //set cursor back to default
 	}
 	if(state->ds.panFinished){
 		state->ds.panInProgress = 0;
@@ -226,8 +227,8 @@ void updateDrawingState(const app_data *restrict dat, app_state *restrict state,
 		//SDL_Log("zoom scale: %0.4f\n",(double)state->ds.chartZoomScale);
 	}
 	if(state->ds.dragInProgress){
-		state->ds.chartPosX = state->ds.chartDragStartX + ((state->ds.chartDragStartMouseX - state->mouseXPx)/(DEFAULT_NUCLBOX_DIM*state->ds.chartZoomScale));
-		state->ds.chartPosY = state->ds.chartDragStartY - ((state->ds.chartDragStartMouseY - state->mouseYPx)/(DEFAULT_NUCLBOX_DIM*state->ds.chartZoomScale));
+		state->ds.chartPosX = state->ds.chartDragStartX + ((state->ds.chartDragStartMouseX - state->mouseXPx)/(DEFAULT_NUCLBOX_DIM*state->ds.chartZoomScale*state->ds.uiUserScale));
+		state->ds.chartPosY = state->ds.chartDragStartY - ((state->ds.chartDragStartMouseY - state->mouseYPx)/(DEFAULT_NUCLBOX_DIM*state->ds.chartZoomScale*state->ds.uiUserScale));
 	}
 	if(state->ds.panInProgress){
 		state->ds.timeSincePanStart += deltaTime;
