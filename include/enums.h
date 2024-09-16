@@ -37,6 +37,7 @@ LOCSTR_PREF_UIANIM,LOCSTR_PREF_UISCALE,LOCSTR_SMALL,LOCSTR_DEFAULT,LOCSTR_LARGE,
 LOCSTR_CHARTVIEW_MENUTITLE,LOCSTR_CHARTVIEW_LIFETIME,
 LOCSTR_CHARTVIEW_HALFLIFE, //GUI code expects menu item strings to be defined in order here
 LOCSTR_CHARTVIEW_2PLUS,
+LOCSTR_CHARTVIEW_R42,
 LOCSTR_ENUM_LENGTH
 }; //localization srings
 enum draw_opt_enum{
@@ -85,6 +86,7 @@ UIELEM_MENU_BUTTON,
 UIELEM_CHARTVIEW_BUTTON,
 UIELEM_CVM_HALFLIFE_BUTTON,
 UIELEM_CVM_2PLUS_BUTTON,
+UIELEM_CVM_R42_BUTTON,
 UIELEM_CHARTVIEW_MENU, //buttons in chart view menu should be defined in the entries directly preceding this, in top to bottom order
 UIELEM_PM_PREFS_BUTTON,
 UIELEM_PM_ABOUT_BUTTON,
@@ -155,6 +157,7 @@ UISCALE_ENUM_LENGTH
 enum chart_view_enum{
 CHARTVIEW_HALFLIFE, //colors on chart of nuclides correspond to half-lives
 CHARTVIEW_2PLUS,
+CHARTVIEW_R42,
 CHARTVIEW_ENUM_LENGTH
 };
 enum value_unit_enum{

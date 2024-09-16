@@ -214,6 +214,92 @@ SDL_FColor get2PlusCol(const double e2PlusKeV){
   return col;
 }
 
+SDL_FColor getR42Col(const double r42){
+  SDL_FColor col;
+  col.r = 1.0f;
+  col.g = 1.0f;
+  col.b = 1.0f;
+  col.a = 1.0f;
+  if(r42 >= 5.0){
+    col.r = 0.0f;
+    col.g = 0.0f;
+    col.b = 0.0f;
+  }else if(r42 >= 3.8){
+    col.r = 0.0f;
+    col.g = 0.1f;
+    col.b = 0.4f;
+  }else if(r42 >= 3.5){
+    col.r = 0.1f;
+    col.g = 0.2f;
+    col.b = 0.5f;
+  }else if(r42 >= 3.4){
+    col.r = 0.1f;
+    col.g = 0.3f;
+    col.b = 0.7f;
+  }else if(r42 >= 3.3){
+    col.r = 0.2f;
+    col.g = 0.4f;
+    col.b = 0.8f;
+  }else if(r42 >= 3.2){
+    col.r = 0.3f;
+    col.g = 0.5f;
+    col.b = 0.8f;
+  }else if(r42 >= 3.1){
+    col.r = 0.3f;
+    col.g = 0.7f;
+    col.b = 0.7f;
+  }else if(r42 >= 2.8){
+    col.r = 0.3f;
+    col.g = 0.9f;
+    col.b = 0.7f;
+  }else if(r42 >= 2.5){
+    col.r = 0.5f;
+    col.g = 1.0f;
+    col.b = 0.7f;
+  }else if(r42 >= 2.2){
+    col.r = 0.7f;
+    col.g = 0.9f;
+    col.b = 0.5f;
+  }else if(r42 >= 2.1){
+    col.r = 0.9f;
+    col.g = 0.9f;
+    col.b = 0.4f;
+  }else if(r42 >= 2.0){
+    col.r = 1.0f;
+    col.g = 1.0f;
+    col.b = 0.2f;
+  }else if(r42 >= 1.9){
+    col.r = 1.0f;
+    col.g = 0.8f;
+    col.b = 0.4f;
+  }else if(r42 >= 1.8){
+    col.r = 1.0f;
+    col.g = 0.7f;
+    col.b = 0.5f;
+  }else if(r42 >= 1.4){
+    col.r = 1.0f;
+    col.g = 0.6f;
+    col.b = 0.6f;
+  }else if(r42 >= 1.3){
+    col.r = 1.0f;
+    col.g = 0.6f;
+    col.b = 0.7f;
+  }else if(r42 >= 1.2){
+    col.r = 1.0f;
+    col.g = 0.7f;
+    col.b = 0.8f;
+  }else if(r42 >= 1.0){
+    col.r = 1.0f;
+    col.g = 0.8f;
+    col.b = 0.9f;
+  }else if(r42 > 0.0){
+    col.r = 1.0f;
+    col.g = 0.8f;
+    col.b = 0.9f;
+  }
+  return col;
+}
+
 uint8_t getNuclBoxLabelNumLines(const app_data *restrict dat, const uint16_t nuclInd){
   uint8_t numLines = 2;
   if(dat->ndat.nuclData[nuclInd].abundance.unit == VALUE_UNIT_PERCENT){
@@ -226,6 +312,31 @@ uint8_t getNuclBoxLabelNumLines(const app_data *restrict dat, const uint16_t nuc
     }
   }
   return numLines;
+}
+
+//draws label for the R42 energy box
+void drawR42BoxLabel(const app_data *restrict dat, const drawing_state *restrict ds, resource_data *restrict rdat, const float xPos, const float yPos, const float boxWidth, const float boxHeight, SDL_Color col, const double r42){
+  if(r42 >= 0.0){
+    char tmpStr[32];
+    float drawXPos, drawYPos;
+    float labelMargin = NUCLBOX_LABEL_SMALLMARGIN*ds->chartZoomScale*ds->uiUserScale;
+    if(boxHeight > 38.0f){
+      drawXPos = xPos + labelMargin + (2.0f*ds->uiUserScale);
+      float totalLblHeight = getTextHeight(rdat,FONTSIZE_LARGE,dat->strings[dat->locStringIDs[LOCSTR_CHARTVIEW_R42]])/rdat->uiDPIScale;
+      drawYPos = yPos+boxHeight*0.5f - totalLblHeight*0.5f + 4.0f*ds->uiUserScale;
+      drawTextAlignedSized(rdat,drawXPos,drawYPos,col,FONTSIZE_LARGE,255,dat->strings[dat->locStringIDs[LOCSTR_CHARTVIEW_R42]],ALIGN_LEFT,16384); //draw spin label
+      //handle energy label
+      drawXPos = xPos + boxWidth - labelMargin;
+      snprintf(tmpStr,32,"%0.2f",r42);
+      float drawSpace = boxWidth  - getTextWidth(rdat,FONTSIZE_LARGE,dat->strings[dat->locStringIDs[LOCSTR_CHARTVIEW_R42]])/rdat->uiDPIScale;
+      //SDL_Log("remaining space: %f, width: %f\n",(double)drawSpace,(double)getTextWidth(rdat,FONTSIZE_LARGE,tmpStr));
+      if(drawSpace > getTextWidth(rdat,FONTSIZE_LARGE,tmpStr)/rdat->uiDPIScale){
+        drawTextAlignedSized(rdat,drawXPos,drawYPos+(2.5f*ds->uiUserScale),col,FONTSIZE_NORMAL,255,tmpStr,ALIGN_RIGHT,16384); //draw energy label
+      }else{
+        drawTextAlignedSized(rdat,drawXPos,drawYPos+(2.5f*ds->uiUserScale),col,FONTSIZE_NORMAL,255,"(...)",ALIGN_RIGHT,16384);
+      }
+    }
+  }
 }
 
 //draws label for the 2+ energy box
@@ -249,7 +360,6 @@ void draw2PlusEnergyBoxLabel(const app_data *restrict dat, const drawing_state *
     }else{
       drawTextAlignedSized(rdat,drawXPos,drawYPos+(2.5f*ds->uiUserScale),col,FONTSIZE_NORMAL,255,"(...)",ALIGN_RIGHT,16384);
     }
-    
   }
 }
 
@@ -410,6 +520,8 @@ void drawChartOfNuclides(const app_data *restrict dat, const app_state *restrict
                 drawFlatRect(rdat,rect,getHalfLifeCol(getNuclGSHalfLifeSeconds(&dat->ndat,(uint16_t)i)));
               }else if(state->chartView == CHARTVIEW_2PLUS){
                 drawFlatRect(rdat,rect,get2PlusCol(get2PlusEnergy(&dat->ndat,(uint16_t)i)));
+              }else if(state->chartView == CHARTVIEW_R42){
+                drawFlatRect(rdat,rect,getR42Col(getR42(&dat->ndat,(uint16_t)i)));
               }
               
               if(state->ds.chartZoomScale >= 4.0f){
@@ -449,6 +561,19 @@ void drawChartOfNuclides(const app_data *restrict dat, const app_state *restrict
                       drawFlatRect(rdat,lowBoxRect,boxCol);
                       draw2PlusEnergyBoxLabel(dat,&state->ds,rdat,lowBoxRect.x,lowBoxRect.y,lowBoxRect.w,lowBoxRect.h,blackCol8Bit,get2PlusLvlInd(&dat->ndat,i));
                     }
+                  }else if(state->chartView == CHARTVIEW_R42){
+                    //draw R42 energy box
+                    double r42 = getR42(&dat->ndat,(uint16_t)i);
+                    if(r42 >= 0.0){
+                      drawingLowBox = 1;
+                      SDL_FColor boxCol = whiteCol;
+                      if(state->ds.chartZoomScale < 9.0f){
+                        //handle fading in of R42 boxes
+                        boxCol.a =  1.0f - (9.0f-state->ds.chartZoomScale);
+                      }
+                      drawFlatRect(rdat,lowBoxRect,boxCol);
+                      drawR42BoxLabel(dat,&state->ds,rdat,lowBoxRect.x,lowBoxRect.y,lowBoxRect.w,lowBoxRect.h,blackCol8Bit,r42);
+                    }
                   }
                 }
                 if(drawingLowBox){
@@ -456,12 +581,16 @@ void drawChartOfNuclides(const app_data *restrict dat, const app_state *restrict
                     drawNuclBoxLabel(dat,&state->ds,rdat,rect.x,rect.y,rect.w,(rect.h-lowBoxHeight-(2.0f*lowBoxPadding)),(getNuclGSHalfLifeSeconds(&dat->ndat,(uint16_t)i) > 1.0E3) ? whiteCol8Bit : blackCol8Bit,(uint16_t)i);
                   }else if(state->chartView == CHARTVIEW_2PLUS){
                     drawNuclBoxLabel(dat,&state->ds,rdat,rect.x,rect.y,rect.w,(rect.h-lowBoxHeight-(2.0f*lowBoxPadding)),(get2PlusEnergy(&dat->ndat,(uint16_t)i) >= 3000.0) ? whiteCol8Bit : blackCol8Bit,(uint16_t)i);
+                  }else if(state->chartView == CHARTVIEW_R42){
+                    drawNuclBoxLabel(dat,&state->ds,rdat,rect.x,rect.y,rect.w,(rect.h-lowBoxHeight-(2.0f*lowBoxPadding)),(getR42(&dat->ndat,(uint16_t)i) >= 3.2) ? whiteCol8Bit : blackCol8Bit,(uint16_t)i);
                   }
                 }else{
                   if(state->chartView == CHARTVIEW_HALFLIFE){
                     drawNuclBoxLabel(dat,&state->ds,rdat,rect.x,rect.y,rect.w,rect.h,(getNuclGSHalfLifeSeconds(&dat->ndat,(uint16_t)i) > 1.0E3) ? whiteCol8Bit : blackCol8Bit,(uint16_t)i);
                   }else if(state->chartView == CHARTVIEW_2PLUS){
                     drawNuclBoxLabel(dat,&state->ds,rdat,rect.x,rect.y,rect.w,rect.h,(get2PlusEnergy(&dat->ndat,(uint16_t)i) >= 3000.0) ? whiteCol8Bit : blackCol8Bit,(uint16_t)i);
+                  }else if(state->chartView == CHARTVIEW_R42){
+                    drawNuclBoxLabel(dat,&state->ds,rdat,rect.x,rect.y,rect.w,rect.h,(getR42(&dat->ndat,(uint16_t)i) >= 3.2) ? whiteCol8Bit : blackCol8Bit,(uint16_t)i);
                   }
                 }
               }
@@ -1297,6 +1426,8 @@ void drawUI(const app_data *restrict dat, app_state *restrict state, resource_da
       }
     }else if(state->chartView == CHARTVIEW_2PLUS){
       drawIconAndTextButton(&dat->rules.themeRules,rdat,state->ds.uiElemPosX[UIELEM_CHARTVIEW_BUTTON],state->ds.uiElemPosY[UIELEM_CHARTVIEW_BUTTON],state->ds.uiElemWidth[UIELEM_CHARTVIEW_BUTTON],getHighlightState(state,UIELEM_CHARTVIEW_BUTTON),255,UIICON_CHARTVIEW,dat->strings[dat->locStringIDs[LOCSTR_CHARTVIEW_2PLUS]]);
+    }else if(state->chartView == CHARTVIEW_R42){
+      drawIconAndTextButton(&dat->rules.themeRules,rdat,state->ds.uiElemPosX[UIELEM_CHARTVIEW_BUTTON],state->ds.uiElemPosY[UIELEM_CHARTVIEW_BUTTON],state->ds.uiElemWidth[UIELEM_CHARTVIEW_BUTTON],getHighlightState(state,UIELEM_CHARTVIEW_BUTTON),255,UIICON_CHARTVIEW,dat->strings[dat->locStringIDs[LOCSTR_CHARTVIEW_R42]]);
     }
   }
   

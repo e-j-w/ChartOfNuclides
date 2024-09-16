@@ -1409,14 +1409,38 @@ double getLevelEnergykeV(const ndata *restrict nd, const uint32_t levelInd){
 	}
 }
 
+uint32_t get4PlusLvlInd(const ndata *restrict nd, const uint16_t nuclInd){
+	if((nd->nuclData[nuclInd].N + nd->nuclData[nuclInd].Z) > 0){
+		if((nd->nuclData[nuclInd].N % 2)==0){
+			if((nd->nuclData[nuclInd].Z % 2)==0){
+				for(uint16_t i=0; i<nd->nuclData[nuclInd].numLevels; i++){
+					if(nd->levels[nd->nuclData[nuclInd].firstLevel + (uint32_t)i].numSpinParVals == 1){
+						if(nd->levels[nd->nuclData[nuclInd].firstLevel + (uint32_t)i].spval[0].spinVal == 4){
+							if(nd->levels[nd->nuclData[nuclInd].firstLevel + (uint32_t)i].spval[0].parVal == 1){
+								//one of the spin-parity values is 4+
+								uint8_t eValueType = (uint8_t)((nd->levels[nd->nuclData[nuclInd].firstLevel + (uint32_t)i].energy.format >> 5U) & 15U);
+								if(eValueType == VALUETYPE_NUMBER){
+									//not some weird offset or variable energy, use this level
+									return (uint32_t)(nd->nuclData[nuclInd].firstLevel + (uint32_t)i);
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	return MAXNUMLVLS;
+}
+
 uint32_t get2PlusLvlInd(const ndata *restrict nd, const uint16_t nuclInd){
 	if((nd->nuclData[nuclInd].N + nd->nuclData[nuclInd].Z) > 0){
 		if((nd->nuclData[nuclInd].N % 2)==0){
 			if((nd->nuclData[nuclInd].Z % 2)==0){
 				for(uint16_t i=0; i<nd->nuclData[nuclInd].numLevels; i++){
-					for(int16_t j=0; j<nd->levels[nd->nuclData[nuclInd].firstLevel + (uint32_t)i].numSpinParVals; j++){
-						if(nd->levels[nd->nuclData[nuclInd].firstLevel + (uint32_t)i].spval[j].spinVal == 2){
-							if(nd->levels[nd->nuclData[nuclInd].firstLevel + (uint32_t)i].spval[j].parVal == 1){
+					if(nd->levels[nd->nuclData[nuclInd].firstLevel + (uint32_t)i].numSpinParVals == 1){
+						if(nd->levels[nd->nuclData[nuclInd].firstLevel + (uint32_t)i].spval[0].spinVal == 2){
+							if(nd->levels[nd->nuclData[nuclInd].firstLevel + (uint32_t)i].spval[0].parVal == 1){
 								//one of the spin-parity values is 2+
 								uint8_t eValueType = (uint8_t)((nd->levels[nd->nuclData[nuclInd].firstLevel + (uint32_t)i].energy.format >> 5U) & 15U);
 								if(eValueType == VALUETYPE_NUMBER){
@@ -1431,6 +1455,16 @@ uint32_t get2PlusLvlInd(const ndata *restrict nd, const uint16_t nuclInd){
 		}
 	}
 	return MAXNUMLVLS;
+}
+
+//get the energy ratio of the first 4+ state to the first 2+ state, for even-even nuclei
+double getR42(const ndata *restrict nd, const uint16_t nuclInd){
+	uint32_t lvlInd2 = get2PlusLvlInd(nd,nuclInd);
+	uint32_t lvlInd4 = get4PlusLvlInd(nd,nuclInd);
+	if((lvlInd2 != MAXNUMLVLS)&&(lvlInd4 != MAXNUMLVLS)){
+		return (getLevelEnergykeV(nd,lvlInd4)/getLevelEnergykeV(nd,lvlInd2));
+	}
+	return -1.0; //no 2+ state, or not even-even
 }
 
 //get the energy of the first 2+ state, for even-even nuclei
@@ -1641,6 +1675,7 @@ void changeUIState(const app_data *restrict dat, app_state *restrict state, cons
 			if((state->ds.shownElements & (1U << UIELEM_CHARTVIEW_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_CHARTVIEW_MENU_HIDE]==0.0f)){
 				state->interactableElement |= (uint32_t)(1U << UIELEM_CVM_HALFLIFE_BUTTON);
 				state->interactableElement |= (uint32_t)(1U << UIELEM_CVM_2PLUS_BUTTON);
+				state->interactableElement |= (uint32_t)(1U << UIELEM_CVM_R42_BUTTON);
 				state->interactableElement |= (uint32_t)(1U << UIELEM_CHARTVIEW_MENU);
 			}
       break;
@@ -1863,7 +1898,7 @@ void uiElemClickAction(app_data *restrict dat, app_state *restrict state, resour
 			state->clickedUIElem = UIELEM_ENUM_LENGTH; //'unclick' the menu button
 		}
 	}
-	if((uiElemID != UIELEM_CHARTVIEW_BUTTON)&&(uiElemID != UIELEM_CHARTVIEW_MENU)&&(uiElemID != UIELEM_CVM_HALFLIFE_BUTTON)&&(uiElemID != UIELEM_CVM_2PLUS_BUTTON)){
+	if((uiElemID != UIELEM_CHARTVIEW_BUTTON)&&(uiElemID != UIELEM_CHARTVIEW_MENU)&&(uiElemID != UIELEM_CVM_HALFLIFE_BUTTON)&&(uiElemID != UIELEM_CVM_2PLUS_BUTTON)&&(uiElemID != UIELEM_CVM_R42_BUTTON)){
 		if((state->ds.shownElements & (1U << UIELEM_CHARTVIEW_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_CHARTVIEW_MENU_HIDE]==0.0f)){
 			startUIAnimation(dat,state,UIANIM_CHARTVIEW_MENU_HIDE); //menu will be closed after animation finishes
 			state->clickedUIElem = UIELEM_ENUM_LENGTH; //'unclick' the menu button
@@ -1980,6 +2015,12 @@ void uiElemClickAction(app_data *restrict dat, app_state *restrict state, resour
 			startUIAnimation(dat,state,UIANIM_CHARTVIEW_MENU_HIDE); //menu will be closed after animation finishes
 			state->clickedUIElem = UIELEM_ENUM_LENGTH; //'unclick' the menu button
 			state->chartView = CHARTVIEW_2PLUS;
+			changeUIState(dat,state,UISTATE_DEFAULT); //prevents mouseover from still highlighting buttons while the menu closes
+			break;
+		case UIELEM_CVM_R42_BUTTON:
+			startUIAnimation(dat,state,UIANIM_CHARTVIEW_MENU_HIDE); //menu will be closed after animation finishes
+			state->clickedUIElem = UIELEM_ENUM_LENGTH; //'unclick' the menu button
+			state->chartView = CHARTVIEW_R42;
 			changeUIState(dat,state,UISTATE_DEFAULT); //prevents mouseover from still highlighting buttons while the menu closes
 			break;
 		case UIELEM_PRIMARY_MENU:
@@ -2106,6 +2147,12 @@ void updateSingleUIElemPosition(const app_data *restrict dat, drawing_state *res
 		case UIELEM_CVM_2PLUS_BUTTON:
 			ds->uiElemPosX[uiElemInd] = (uint16_t)(ds->windowXRes-((CHARTVIEW_MENU_WIDTH+CHARTVIEW_MENU_POS_XR - PANEL_EDGE_SIZE - 2*UI_PADDING_SIZE)*ds->uiUserScale));
 			ds->uiElemPosY[uiElemInd] = (uint16_t)((CHARTVIEW_MENU_POS_Y + PANEL_EDGE_SIZE + 2*UI_PADDING_SIZE + 2*CHARTVIEW_MENU_ITEM_SPACING)*ds->uiUserScale);
+			ds->uiElemWidth[uiElemInd] = (uint16_t)((CHARTVIEW_MENU_WIDTH - 2*PANEL_EDGE_SIZE - 4*UI_PADDING_SIZE)*ds->uiUserScale);
+			ds->uiElemHeight[uiElemInd] = (uint16_t)((CHARTVIEW_MENU_ITEM_SPACING - UI_PADDING_SIZE)*ds->uiUserScale);
+			break;
+		case UIELEM_CVM_R42_BUTTON:
+			ds->uiElemPosX[uiElemInd] = (uint16_t)(ds->windowXRes-((CHARTVIEW_MENU_WIDTH+CHARTVIEW_MENU_POS_XR - PANEL_EDGE_SIZE - 2*UI_PADDING_SIZE)*ds->uiUserScale));
+			ds->uiElemPosY[uiElemInd] = (uint16_t)((CHARTVIEW_MENU_POS_Y + PANEL_EDGE_SIZE + 2*UI_PADDING_SIZE + 3*CHARTVIEW_MENU_ITEM_SPACING)*ds->uiUserScale);
 			ds->uiElemWidth[uiElemInd] = (uint16_t)((CHARTVIEW_MENU_WIDTH - 2*PANEL_EDGE_SIZE - 4*UI_PADDING_SIZE)*ds->uiUserScale);
 			ds->uiElemHeight[uiElemInd] = (uint16_t)((CHARTVIEW_MENU_ITEM_SPACING - UI_PADDING_SIZE)*ds->uiUserScale);
 			break;

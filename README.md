@@ -1,6 +1,6 @@
 <h1 align="center">Chart of Nuclides</h1>
 
-An offline viewer of isotope and nuclear structure data, presented in the familiar [Chart of Nuclides / Segrè chart](https://en.wikipedia.org/wiki/Table_of_nuclides) format. Uses nuclear structure data from [ENSDF](https://www.nndc.bnl.gov/ensdf/about.jsp) and isotopic abundance data from [NIST](https://www.nist.gov/pml/atomic-weights-and-isotopic-compositions-relative-atomic-masses). The UI is implemented in [SDL](https://github.com/libsdl-org/SDL) (so you can browse nuclear half-lives using some of the same code that powers [Half-Life](https://www.pcgamingwiki.com/wiki/Half-Life#Middleware)). The goal is to develop a simple, performant, and multiplatform tool that will be useful in both professional (nuclear structure research) and educational contexts.
+An offline viewer of isotope and nuclear structure data, presented in the familiar [Chart of Nuclides / Segrè chart](https://en.wikipedia.org/wiki/Table_of_nuclides) format. Uses nuclear structure data from [ENSDF](https://www.nndc.bnl.gov/ensdf/about.jsp) and isotopic abundance data from [NIST](https://www.nist.gov/pml/atomic-weights-and-isotopic-compositions-relative-atomic-masses). The goal is to make a simple, performant, and multiplatform tool that will be useful in both professional (nuclear structure research) and educational contexts.
 
 ## Screenshots
 
@@ -8,12 +8,12 @@ An offline viewer of isotope and nuclear structure data, presented in the famili
 
 ## Features
 
-- Display nuclear chart with various color schemes: half-life/lifetime, E(2+)...
+- Display nuclear chart with various color schemes: half-life/lifetime, E(2+), E(4+)/E(2+) ...
 - Select individual nuclides to browse ground and excited state data, including:
-  - Level energies, half-lives/lifetimes, decay modes, spin-parities...
-  - Gamma energies, branching fractions, multipolarities...
+  - Level energies, half-lives/lifetimes, decay modes, spin-parities ...
+  - Gamma energies, branching fractions, multipolarities ...
 - Runs locally, with no network connection needed.
-- Fast hardware accelerated rendering using `SDL_Renderer`, HI-DPI scaling support. 
+- Written in [C99](https://en.wikipedia.org/wiki/C99) using [SDL](https://github.com/libsdl-org/SDL) (so you can browse nuclear half-lives using some of the same code that powers [Half-Life](https://www.pcgamingwiki.com/wiki/Half-Life#Middleware)). Fast hardware accelerated rendering using `SDL_Renderer`, HI-DPI scaling support. 
 - More to come...
 
 ## Building and installing from source
