@@ -29,13 +29,13 @@ This will build and install a sandboxed [Flatpak](https://flatpak.org/) package.
 On Arch Linux:
 
 ```
-sudo pacman -Syu flatpak flatpak-builder git
+sudo pacman -Syu flatpak git
 ```
 
 On Debian/Ubuntu:
 
 ```
-sudo apt install flatpak flatpak-builder build-essential
+sudo apt install flatpak build-essential
 ```
 
 #### Build and install
@@ -44,6 +44,7 @@ Setup `flatpak` with the Flathub repo and get the build metadata (from [this](ht
 
 ```
 flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
+sudo flatpak install -y flathub org.flatpak.Builder
 git clone https://github.com/e-j-w/ChartOfNuclides-flatpak
 cd ChartOfNuclides-flatpak
 mkdir flatpak_build
@@ -52,7 +53,7 @@ mkdir flatpak_build
 Build and install the application:
 
 ```
-flatpak-builder --user --install-deps-from=flathub --install --force-clean flatpak_build/ io.github.e_j_w.ChartOfNuclides.yml
+flatpak run org.flatpak.Builder --force-clean --sandbox --user --install --install-deps-from=flathub --ccache --repo=repo flatpak_build io.github.e_j_w.ChartOfNuclides.yml
 ```
 
 Clean up the build to save disk space (optional):
