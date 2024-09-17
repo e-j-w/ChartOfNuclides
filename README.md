@@ -35,7 +35,7 @@ sudo pacman -Syu flatpak git
 On Debian/Ubuntu:
 
 ```
-sudo apt install flatpak build-essential
+sudo apt install flatpak git
 ```
 
 #### Build and install
@@ -43,7 +43,7 @@ sudo apt install flatpak build-essential
 Setup `flatpak` with the Flathub repo and get the build metadata (from [this](https://github.com/e-j-w/ChartOfNuclides-flatpak) repo):
 
 ```
-flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
+flatpak remote-add --if-not-exists --user flathub https://dl.flathub.org/repo/flathub.flatpakrepo
 sudo flatpak install -y flathub org.flatpak.Builder
 git clone https://github.com/e-j-w/ChartOfNuclides-flatpak
 cd ChartOfNuclides-flatpak
