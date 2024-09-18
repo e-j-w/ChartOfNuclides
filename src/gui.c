@@ -910,11 +910,19 @@ void drawNuclFullInfoBox(const app_data *restrict dat, const app_state *restrict
   }
 
   //scroll bar
-  rect.x = (float)(state->ds.windowYRes - 5*UI_PADDING_SIZE*state->ds.uiUserScale);
-  rect.y = NUCL_FULLINFOBOX_LEVELLIST_POS_Y*state->ds.uiUserScale;
-  rect.w = 0.5f*UI_TILE_SIZE*state->ds.uiUserScale;
-  rect.h = (float)(state->ds.windowYRes) - rect.y;
-  drawScrollBar(rdat,rect,(float)(txtAlpha/255.0f),state->ds.nuclFullInfoScrollY/state->ds.nuclFullInfoMaxScrollY, const float sbViewSize);
+  if(state->ds.nuclFullInfoMaxScrollY > 0){
+    rect.x = (float)(state->ds.windowXRes - 5*UI_PADDING_SIZE*state->ds.uiUserScale);
+    rect.y = (NUCL_FULLINFOBOX_LEVELLIST_POS_Y + UI_PADDING_SIZE)*state->ds.uiUserScale;
+    rect.w = 0.5f*UI_TILE_SIZE*state->ds.uiUserScale;
+    rect.h = (float)(state->ds.windowYRes) - rect.y - 2*UI_PADDING_SIZE*state->ds.uiUserScale;
+    float sbPos = state->ds.nuclFullInfoScrollY/state->ds.nuclFullInfoMaxScrollY;
+    float sbViewSize = (float)(getNumScreenLvlDispLines(&state->ds))/(float)(getNumTotalLvlDispLines(&dat->ndat,state));
+    float sbAlpha = (float)(txtAlpha/255.0f);
+    //SDL_Log("x: %f, y: %f, w: %f. h: %f\n",(double)rect.x,(double)rect.y,(double)rect.w,(double)rect.h);
+    //SDL_Log("pos: %f, view size: %f, alpha: %f\n",(double)sbPos,(double)sbViewSize,(double)sbAlpha);
+    drawScrollBar(rdat,rect,sbAlpha,sbPos,sbViewSize);
+  }
+  
 
   //rect to hide over-scrolled level info
   rect.x = 0.0f;

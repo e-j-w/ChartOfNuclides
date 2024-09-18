@@ -49,8 +49,8 @@ which can be referenced by both the GUI draw code as well as the interaction cod
 #define UITHEME_PANELBG_TILE_Y 5
 #define UITHEME_HIGHLIGHT_TILE_X 0
 #define UITHEME_HIGHLIGHT_TILE_Y 2
-#define UITHEME_SCROLLBAR_TILE_X 3
-#define UITHEME_SCROLLBAR_TILE_Y 0
+#define UITHEME_SCROLLBAR_TILE_X 0
+#define UITHEME_SCROLLBAR_TILE_Y 3
 
 //UI theme icons
 static const uint8_t UITHEME_ICON_TILE_X[UIICON_ENUM_LENGTH] = {0,1,2,1,2,0,1,0,1};

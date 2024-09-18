@@ -1548,6 +1548,17 @@ uint16_t getNuclInd(const ndata *restrict nd, const int16_t N, const int16_t Z){
 	return MAXNUMNUCL;
 }
 
+uint16_t getNumScreenLvlDispLines(const drawing_state *restrict ds){
+	return (uint16_t)(SDL_floorf((ds->windowYRes - NUCL_FULLINFOBOX_LEVELLIST_POS_Y)/(NUCL_INFOBOX_SMALLLINE_HEIGHT*ds->uiUserScale) - 2*ds->uiUserScale)); //somewhat hacky, to make sure all levels are visible on all UI scales
+}
+uint16_t getNumTotalLvlDispLines(const ndata *restrict nd, const app_state *restrict state){
+	uint16_t numLines = 0;
+	for(uint32_t lvlInd = nd->nuclData[state->chartSelectedNucl].firstLevel; lvlInd<(nd->nuclData[state->chartSelectedNucl].firstLevel + nd->nuclData[state->chartSelectedNucl].numLevels); lvlInd++){
+		numLines += getNumDispLinesForLvl(nd,lvlInd);
+	}
+	return numLines;
+}
+
 uint16_t getNumDispLinesForLvl(const ndata *restrict nd, const uint32_t lvlInd){
   uint16_t levelNumLines = 1;
   if(nd->levels[lvlInd].numDecModes > 0){
@@ -1561,11 +1572,8 @@ uint16_t getNumDispLinesForLvl(const ndata *restrict nd, const uint32_t lvlInd){
 
 uint16_t getMaxNumLvlDispLines(const ndata *restrict nd, const app_state *restrict state){
 	//find total number of lines displayable
-	uint16_t numLines = 0;
-	for(uint32_t lvlInd = nd->nuclData[state->chartSelectedNucl].firstLevel; lvlInd<(nd->nuclData[state->chartSelectedNucl].firstLevel + nd->nuclData[state->chartSelectedNucl].numLevels); lvlInd++){
-		numLines += getNumDispLinesForLvl(nd,lvlInd);
-	}
-	const uint16_t numScreenLines = (uint16_t)(SDL_floorf((state->ds.windowYRes - NUCL_FULLINFOBOX_LEVELLIST_POS_Y)/(NUCL_INFOBOX_SMALLLINE_HEIGHT*state->ds.uiUserScale) - 2*state->ds.uiUserScale)); //somewhat hacky, to make sure all levels are visible on all UI scales
+	uint16_t numLines = getNumTotalLvlDispLines(nd,state);
+	const uint16_t numScreenLines = getNumScreenLvlDispLines(&state->ds);
 	if(numLines > numScreenLines){
 		numLines -= numScreenLines;
 	}else{

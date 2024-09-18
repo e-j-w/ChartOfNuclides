@@ -48,6 +48,8 @@ uint32_t getFinalLvlInd(const ndata *restrict nd, const uint32_t initialLevel, c
 
 uint16_t getNuclInd(const ndata *restrict nd, const int16_t N, const int16_t Z);
 
+uint16_t getNumScreenLvlDispLines(const drawing_state *restrict ds);
+uint16_t getNumTotalLvlDispLines(const ndata *restrict nd, const app_state *restrict state);
 uint16_t getNumDispLinesForLvl(const ndata *restrict nd, const uint32_t lvlInd);
 
 float mouseXtoN(const drawing_state *restrict ds, const float mouseX);
