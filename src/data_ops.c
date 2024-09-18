@@ -1565,12 +1565,13 @@ uint16_t getMaxNumLvlDispLines(const ndata *restrict nd, const app_state *restri
 	for(uint32_t lvlInd = nd->nuclData[state->chartSelectedNucl].firstLevel; lvlInd<(nd->nuclData[state->chartSelectedNucl].firstLevel + nd->nuclData[state->chartSelectedNucl].numLevels); lvlInd++){
 		numLines += getNumDispLinesForLvl(nd,lvlInd);
 	}
-	uint16_t numScreenLines = (uint16_t)(SDL_floorf((state->ds.windowYRes - NUCL_FULLINFOBOX_LEVELLIST_POS_Y)/NUCL_INFOBOX_SMALLLINE_HEIGHT));
+	const uint16_t numScreenLines = (uint16_t)(SDL_floorf((state->ds.windowYRes - NUCL_FULLINFOBOX_LEVELLIST_POS_Y)/(NUCL_INFOBOX_SMALLLINE_HEIGHT*state->ds.uiUserScale) - 2*state->ds.uiUserScale)); //somewhat hacky, to make sure all levels are visible on all UI scales
 	if(numLines > numScreenLines){
 		numLines -= numScreenLines;
 	}else{
 		numLines = 0;
 	}
+	//SDL_Log("max line: %u, screen lines: %u\n",numLines,numScreenLines);
 	return numLines;
 }
 
@@ -2335,6 +2336,7 @@ void updateUIScale(app_data *restrict dat, app_state *restrict state, resource_d
 		//rescale font and UI theme as well, this requires loading them from the app data file
 		regenerateThemeAndFontCache(dat,rdat); //load_data.c
 	}
+	state->ds.nuclFullInfoMaxScrollY = getMaxNumLvlDispLines(&dat->ndat,state);
 	updateUIElemPositions(dat,&state->ds,rdat); //UI element positions
 	SDL_SetWindowMinimumSize(rdat->window,(int)(MIN_RENDER_WIDTH*state->ds.uiUserScale),(int)(MIN_RENDER_HEIGHT*state->ds.uiUserScale));
 	state->ds.forceRedraw = 1;
