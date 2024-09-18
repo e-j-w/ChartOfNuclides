@@ -38,7 +38,44 @@ void setUITexColAlpha(resource_data *restrict rdat, const float r, const float g
   }
 }
 
-//draw a panel background with an arrow
+//draw a scrollbar
+//sbPos: position of the scrollbar 'handle', between 0 and 1
+//sbViewSize: fraction (between 0 and 1) of the view controlled by the scrollbar that is visible, used to set the 'handle' size
+void drawScrollBar(resource_data *restrict rdat, const SDL_FRect sbRect, const float alpha, const float sbPos, const float sbViewSize){
+
+  if(alpha != 1.0f){
+    if(SDL_SetTextureAlphaModFloat(rdat->uiThemeTex,alpha)<0){
+      SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,"drawScrollBar - cannot set UI texture alpha - %s\n",SDL_GetError());
+    }
+  }
+  
+  SDL_FRect srcRect, destRect;
+  const float nineSliceSize = 0.25f*UI_TILE_SIZE*rdat->uiThemeScale;
+  //scrollbar background
+  srcRect.x = (0.5f + UITHEME_SCROLLBAR_TILE_X)*UI_TILE_SIZE*rdat->uiThemeScale;
+  srcRect.y = UITHEME_SCROLLBAR_TILE_Y*UI_TILE_SIZE*rdat->uiThemeScale;
+  srcRect.w = 0.5f*UI_TILE_SIZE*rdat->uiThemeScale;
+  srcRect.h = UI_TILE_SIZE*rdat->uiThemeScale;
+  destRect.x = sbRect.x*rdat->uiDPIScale;
+  destRect.y = sbRect.y*rdat->uiDPIScale;
+  destRect.w = sbRect.w*rdat->uiDPIScale;
+  destRect.h = sbRect.h*rdat->uiDPIScale;
+  SDL_RenderTexture9Grid(rdat->renderer,rdat->uiThemeTex,&srcRect,0.0f,0.0f,nineSliceSize,nineSliceSize,0.0f,&destRect);
+  //scrollbar handle
+  srcRect.x = UITHEME_SCROLLBAR_TILE_X*UI_TILE_SIZE*rdat->uiThemeScale;
+  srcRect.y = UITHEME_SCROLLBAR_TILE_Y*UI_TILE_SIZE*rdat->uiThemeScale;
+  destRect.h = sbViewSize*sbRect.h*rdat->uiDPIScale; //handle size
+  destRect.y = (sbRect.y + sbPos*(sbRect.h - destRect.h))*rdat->uiDPIScale;
+  SDL_RenderTexture9Grid(rdat->renderer,rdat->uiThemeTex,&srcRect,0.0f,0.0f,nineSliceSize,nineSliceSize,0.0f,&destRect);
+  
+  if(alpha != 1.0f){
+    if(SDL_SetTextureAlphaModFloat(rdat->uiThemeTex,1.0f)<0){
+      SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,"drawScrollBar - cannot reset UI texture alpha - %s\n",SDL_GetError());
+    }
+  }
+}
+
+//draw a panel background
 //panelRect: dimensions and position of the panel, in unscaled pixels
 void drawPanelBG(resource_data *restrict rdat, const SDL_FRect panelRect, const float alpha){
 
@@ -49,6 +86,7 @@ void drawPanelBG(resource_data *restrict rdat, const SDL_FRect panelRect, const 
   }
   
   SDL_FRect srcRect, destRect;
+  const float nineSliceSize = 0.5f*UI_TILE_SIZE*rdat->uiThemeScale;
   srcRect.x = UITHEME_PANELBG_TILE_X*UI_TILE_SIZE*rdat->uiThemeScale;
   srcRect.y = UITHEME_PANELBG_TILE_Y*UI_TILE_SIZE*rdat->uiThemeScale;
   srcRect.w = 3*UI_TILE_SIZE*rdat->uiThemeScale;
@@ -57,7 +95,6 @@ void drawPanelBG(resource_data *restrict rdat, const SDL_FRect panelRect, const 
   destRect.y = panelRect.y*rdat->uiDPIScale;
   destRect.w = panelRect.w*rdat->uiDPIScale;
   destRect.h = panelRect.h*rdat->uiDPIScale;
-  float nineSliceSize = 0.5f*UI_TILE_SIZE*rdat->uiThemeScale;
   SDL_RenderTexture9Grid(rdat->renderer,rdat->uiThemeTex,&srcRect,nineSliceSize,nineSliceSize,nineSliceSize,nineSliceSize,0.0f,&destRect);
   
   if(alpha != 1.0f){

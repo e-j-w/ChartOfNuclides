@@ -909,6 +909,13 @@ void drawNuclFullInfoBox(const app_data *restrict dat, const app_state *restrict
     }
   }
 
+  //scroll bar
+  rect.x = (float)(state->ds.windowYRes - 5*UI_PADDING_SIZE*state->ds.uiUserScale);
+  rect.y = NUCL_FULLINFOBOX_LEVELLIST_POS_Y*state->ds.uiUserScale;
+  rect.w = 0.5f*UI_TILE_SIZE*state->ds.uiUserScale;
+  rect.h = (float)(state->ds.windowYRes) - rect.y;
+  drawScrollBar(rdat,rect,(float)(txtAlpha/255.0f),state->ds.nuclFullInfoScrollY/state->ds.nuclFullInfoMaxScrollY, const float sbViewSize);
+
   //rect to hide over-scrolled level info
   rect.x = 0.0f;
   rect.y = 0.0f;
