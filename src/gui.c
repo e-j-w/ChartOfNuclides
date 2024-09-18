@@ -824,13 +824,13 @@ void drawNuclFullInfoBox(const app_data *restrict dat, const app_state *restrict
   }
   float origDrawXPos = (state->ds.windowXRes - allColWidth)/2.0f;
   float drawXPos = origDrawXPos;
-  float drawYPos = (NUCL_FULLINFOBOX_LEVELLIST_POS_Y - NUCL_INFOBOX_SMALLLINE_HEIGHT*(state->ds.nuclFullInfoScrollY))*state->ds.uiUserScale + txtYOffset;
+  float drawYPos = (NUCL_FULLINFOBOX_LEVELLIST_POS_Y - NUCL_INFOBOX_SMALLLINE_HEIGHT*state->ds.nuclFullInfoScrollY)*state->ds.uiUserScale + txtYOffset;
   //SDL_Log("drawYPos: %f\n",(double)drawYPos);
   float levelStartDrawPos;
   for(uint32_t lvlInd = dat->ndat.nuclData[nuclInd].firstLevel; lvlInd<(dat->ndat.nuclData[nuclInd].firstLevel+dat->ndat.nuclData[nuclInd].numLevels); lvlInd++){
     drawXPos = origDrawXPos;
     uint16_t numLines = getNumDispLinesForLvl(&dat->ndat,lvlInd);
-    if(((drawYPos + NUCL_INFOBOX_SMALLLINE_HEIGHT*numLines) >= NUCL_FULLINFOBOX_LEVELLIST_POS_Y)&&(drawYPos <= state->ds.windowYRes)){
+    if(((drawYPos + NUCL_INFOBOX_SMALLLINE_HEIGHT*state->ds.uiUserScale*numLines) >= NUCL_FULLINFOBOX_LEVELLIST_POS_Y)&&(drawYPos <= state->ds.windowYRes)){
       
       const double hl = getLevelHalfLifeSeconds(&dat->ndat,lvlInd);
       if(hl > 1.0E-9){

@@ -47,10 +47,9 @@ flatpak remote-add --if-not-exists --user flathub https://dl.flathub.org/repo/fl
 sudo flatpak install -y flathub org.flatpak.Builder
 git clone https://github.com/e-j-w/ChartOfNuclides-flatpak
 cd ChartOfNuclides-flatpak
-mkdir flatpak_build
 ```
 
-Build and install the application:
+Build and install the application (if this command fails with a free disk space error, run `ostree --repo=repo config set core.min-free-space-percent 0` and then try again):
 
 ```
 flatpak run org.flatpak.Builder --force-clean --sandbox --user --install --install-deps-from=flathub --ccache --repo=repo flatpak_build io.github.e_j_w.ChartOfNuclides.yml
