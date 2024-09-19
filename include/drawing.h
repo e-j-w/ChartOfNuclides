@@ -27,7 +27,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //function prototypes
 void setAtlTexColAlpha(drawing_state *restrict ds, resource_data *restrict rdat, const uint8_t r, const uint8_t g, const uint8_t b, const uint8_t alpha);
 
-void drawScrollBar(resource_data *restrict rdat, const SDL_FRect sbRect, const float alpha, const float sbPos, const float sbViewSize);
+void drawScrollBar(const ui_theme_rules *restrict uirules, resource_data *restrict rdat, const SDL_FRect sbRect, const uint8_t highlightState, const float alpha, const float sbPos, const float sbViewSize);
 
 void drawPanelBG(resource_data *restrict rdat, const SDL_FRect menuRect, const float alpha);
 

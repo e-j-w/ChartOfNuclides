@@ -1661,6 +1661,7 @@ void changeUIState(const app_data *restrict dat, app_state *restrict state, cons
 			state->interactableElement |= (uint32_t)(1U << UIELEM_MENU_BUTTON);
 			state->interactableElement |= (uint32_t)(1U << UIELEM_NUCL_FULLINFOBOX);
 			state->interactableElement |= (uint32_t)(1U << UIELEM_NUCL_FULLINFOBOX_BACKBUTTON);
+			state->interactableElement |= (uint32_t)(1U << UIELEM_NUCL_FULLINFOBOX_SCROLLBAR);
 			if((state->ds.shownElements & (1U << UIELEM_PRIMARY_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_PRIMARY_MENU_HIDE]==0.0f)){
 				state->interactableElement |= (uint32_t)(1U << UIELEM_PM_PREFS_BUTTON);
 				state->interactableElement |= (uint32_t)(1U << UIELEM_PM_ABOUT_BUTTON);
@@ -1894,6 +1895,25 @@ void setSelectedNuclOnChartDirect(const app_data *restrict dat, app_state *restr
 	}
 }
 
+void uiElemHoldAction(const app_data *restrict dat, app_state *restrict state, const uint8_t uiElemID){
+	switch(uiElemID){
+		case UIELEM_NUCL_FULLINFOBOX_SCROLLBAR:
+			; //empty statement to suppress -Wpedantic warning 
+			const float sbViewSize = (float)(getNumScreenLvlDispLines(&state->ds))/(float)(getNumTotalLvlDispLines(&dat->ndat,state));
+			//SDL_Log("view size: %f\n",(double)sbViewSize);
+			state->ds.nuclFullInfoScrollY = state->ds.nuclFullInfoMaxScrollY*(state->mouseYPx - state->ds.uiElemPosY[UIELEM_NUCL_FULLINFOBOX_SCROLLBAR])/((float)state->ds.uiElemHeight[UIELEM_NUCL_FULLINFOBOX_SCROLLBAR]*(1.0f - sbViewSize));
+			state->ds.nuclFullInfoScrollY -= state->ds.nuclFullInfoMaxScrollY*0.5f*sbViewSize; //hack to approximately center scrollbar on mouse
+			if(state->ds.nuclFullInfoScrollY < 0.0f){
+				state->ds.nuclFullInfoScrollY = 0.0f;
+			}else if(state->ds.nuclFullInfoScrollY > state->ds.nuclFullInfoMaxScrollY){
+				state->ds.nuclFullInfoScrollY = state->ds.nuclFullInfoMaxScrollY;
+			}
+			break;
+		default:
+			break;
+	}
+}
+
 //take action after clicking a button or other UI element
 void uiElemClickAction(app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat, const uint8_t doubleClick, const uint8_t uiElemID){
 
@@ -1997,6 +2017,9 @@ void uiElemClickAction(app_data *restrict dat, app_state *restrict state, resour
 			break;
 		case UIELEM_NUCL_FULLINFOBOX_BACKBUTTON:
 			startUIAnimation(dat,state,UIANIM_NUCLINFOBOX_TXTFADEOUT); //menu will be closed after animation finishes
+			break;
+		case UIELEM_NUCL_FULLINFOBOX_SCROLLBAR:
+			state->clickedUIElem = UIELEM_ENUM_LENGTH; //'unclick' the scrollbar when the mouse is released
 			break;
 		case UIELEM_PM_PREFS_BUTTON:
 			//SDL_Log("Clicked prefs button.\n");
@@ -2319,6 +2342,12 @@ void updateSingleUIElemPosition(const app_data *restrict dat, drawing_state *res
 			ds->uiElemWidth[UIELEM_NUCL_FULLINFOBOX_BACKBUTTON] = (uint16_t)(NUCL_FULLINFOBOX_BACKBUTTON_WIDTH*ds->uiUserScale);
 			ds->uiElemHeight[UIELEM_NUCL_FULLINFOBOX_BACKBUTTON] = (uint16_t)(UI_TILE_SIZE*ds->uiUserScale);
 			break;
+		case UIELEM_NUCL_FULLINFOBOX_SCROLLBAR:
+			ds->uiElemPosX[UIELEM_NUCL_FULLINFOBOX_SCROLLBAR] = (uint16_t)(ds->windowXRes - NUCL_FULLINFOBOX_SCROLLBAR_POS_XR*ds->uiUserScale);
+			ds->uiElemPosY[UIELEM_NUCL_FULLINFOBOX_SCROLLBAR] = (uint16_t)((NUCL_FULLINFOBOX_LEVELLIST_POS_Y + UI_PADDING_SIZE)*ds->uiUserScale);
+			ds->uiElemWidth[UIELEM_NUCL_FULLINFOBOX_SCROLLBAR] = (uint16_t)(0.5f*UI_TILE_SIZE*ds->uiUserScale);
+			ds->uiElemHeight[UIELEM_NUCL_FULLINFOBOX_SCROLLBAR] = (uint16_t)(ds->windowYRes - ds->uiElemPosY[UIELEM_NUCL_FULLINFOBOX_SCROLLBAR] - 2*UI_PADDING_SIZE*ds->uiUserScale);
+			ds->uiElemExtPlusX[UIELEM_PREFS_DIALOG_LIFETIME_CHECKBOX] = (uint16_t)(NUCL_FULLINFOBOX_SCROLLBAR_POS_XR*ds->uiUserScale); //so that scrollbar can be interacted with up to the screen edge
 		default:
 			break;
 	}

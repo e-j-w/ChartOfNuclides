@@ -252,13 +252,16 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
       if(state->interactableElement & (uint32_t)(1U << i)){
         if((state->mouseHoldStartPosXPx >= (state->ds.uiElemPosX[i]-state->ds.uiElemExtMinusX[i]))&&(state->mouseHoldStartPosXPx < (state->ds.uiElemPosX[i]+state->ds.uiElemWidth[i]+state->ds.uiElemExtPlusX[i]))&&(state->mouseHoldStartPosYPx >= (state->ds.uiElemPosY[i]-state->ds.uiElemExtMinusY[i]))&&(state->mouseHoldStartPosYPx < (state->ds.uiElemPosY[i]+state->ds.uiElemHeight[i]+state->ds.uiElemExtPlusY[i]))){
           state->mouseholdElement = i;
+          //SDL_Log("Holding element %u\n",i);
+          uiElemHoldAction(dat,state,state->mouseholdElement);
         }
         if((state->mouseXPx >= (state->ds.uiElemPosX[i]-state->ds.uiElemExtMinusX[i]))&&(state->mouseXPx < (state->ds.uiElemPosX[i]+state->ds.uiElemWidth[i]+state->ds.uiElemExtPlusX[i]))&&(state->mouseYPx >= (state->ds.uiElemPosY[i]-state->ds.uiElemExtMinusY[i]))&&(state->mouseYPx < (state->ds.uiElemPosY[i]+state->ds.uiElemHeight[i]+state->ds.uiElemExtPlusY[i]))){
           state->mouseoverElement = i;
           //SDL_Log("mouseover element: %u\n",i);
           if((state->mouseClickPosXPx >= (state->ds.uiElemPosX[i]-state->ds.uiElemExtMinusX[i]))&&(state->mouseClickPosXPx < (state->ds.uiElemPosX[i]+state->ds.uiElemWidth[i]+state->ds.uiElemExtPlusX[i]))&&(state->mouseClickPosYPx >= (state->ds.uiElemPosY[i]-state->ds.uiElemExtMinusY[i]))&&(state->mouseClickPosYPx < (state->ds.uiElemPosY[i]+state->ds.uiElemHeight[i]+state->ds.uiElemExtPlusY[i]))){
             //take action
-            uiElemClickAction(dat,state,rdat,0,i);
+            uiElemClickAction(dat,state,rdat,0,i); //data_ops.c
+            //SDL_Log("Clicked element %u\n",i);
             return;
           }
           break;
@@ -279,6 +282,7 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
 
   //check for mouse release
   if(state->mouseHoldStartPosXPx < 0.0f){
+    //SDL_Log("Mouse released.\n");
     state->ds.dragFinished = 1;
   }
 

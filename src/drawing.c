@@ -41,16 +41,30 @@ void setUITexColAlpha(resource_data *restrict rdat, const float r, const float g
 //draw a scrollbar
 //sbPos: position of the scrollbar 'handle', between 0 and 1
 //sbViewSize: fraction (between 0 and 1) of the view controlled by the scrollbar that is visible, used to set the 'handle' size
-void drawScrollBar(resource_data *restrict rdat, const SDL_FRect sbRect, const float alpha, const float sbPos, const float sbViewSize){
+void drawScrollBar(const ui_theme_rules *restrict uirules, resource_data *restrict rdat, const SDL_FRect sbRect, const uint8_t highlightState, const float alpha, const float sbPos, const float sbViewSize){
 
-  if(alpha != 1.0f){
-    if(SDL_SetTextureAlphaModFloat(rdat->uiThemeTex,alpha)<0){
-      SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,"drawScrollBar - cannot set UI texture alpha - %s\n",SDL_GetError());
-    }
+  switch(highlightState){
+    case HIGHLIGHT_NORMAL:
+    default:
+      setUITexColAlpha(rdat,uirules->modNormalCol.r,uirules->modNormalCol.g,uirules->modNormalCol.b,alpha);
+      break;
+    case HIGHLIGHT_MOUSEOVER:
+      setUITexColAlpha(rdat,uirules->modMouseOverCol.r,uirules->modMouseOverCol.g,uirules->modMouseOverCol.b,alpha);
+      break;
+    case HIGHLIGHT_SELECTED:
+      setUITexColAlpha(rdat,uirules->modSelectedCol.r,uirules->modSelectedCol.g,uirules->modSelectedCol.b,alpha);
+      break;
+  }
+
+  float clampedSBPos = sbPos;
+  if(clampedSBPos > 1.0f){
+    clampedSBPos = 1.0f;
+  }else if(clampedSBPos < 0.0f){
+    clampedSBPos = 0.0f;
   }
   
   SDL_FRect srcRect, destRect;
-  const float nineSliceSize = 0.25f*UI_TILE_SIZE*rdat->uiThemeScale;
+  const float nineSliceSize = 0.15f*UI_TILE_SIZE*rdat->uiThemeScale;
   //scrollbar background
   srcRect.x = (0.5f + UITHEME_SCROLLBAR_TILE_X)*UI_TILE_SIZE*rdat->uiThemeScale;
   srcRect.y = UITHEME_SCROLLBAR_TILE_Y*UI_TILE_SIZE*rdat->uiThemeScale;
@@ -65,14 +79,11 @@ void drawScrollBar(resource_data *restrict rdat, const SDL_FRect sbRect, const f
   srcRect.x = UITHEME_SCROLLBAR_TILE_X*UI_TILE_SIZE*rdat->uiThemeScale;
   srcRect.y = UITHEME_SCROLLBAR_TILE_Y*UI_TILE_SIZE*rdat->uiThemeScale;
   destRect.h = sbViewSize*sbRect.h*rdat->uiDPIScale; //handle size
-  destRect.y = (sbRect.y + sbPos*(sbRect.h - destRect.h))*rdat->uiDPIScale;
+  destRect.y = (sbRect.y + clampedSBPos*(sbRect.h - destRect.h/rdat->uiDPIScale))*rdat->uiDPIScale;
   SDL_RenderTexture9Grid(rdat->renderer,rdat->uiThemeTex,&srcRect,0.0f,0.0f,nineSliceSize,nineSliceSize,0.0f,&destRect);
   
-  if(alpha != 1.0f){
-    if(SDL_SetTextureAlphaModFloat(rdat->uiThemeTex,1.0f)<0){
-      SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,"drawScrollBar - cannot reset UI texture alpha - %s\n",SDL_GetError());
-    }
-  }
+  //reset the color modulation
+  setUITexColAlpha(rdat,1.0f,1.0f,1.0f,1.0f);
 }
 
 //draw a panel background

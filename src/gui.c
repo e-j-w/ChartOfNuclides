@@ -774,6 +774,9 @@ uint8_t getHighlightState(const app_state *restrict state, const uint8_t uiElem)
       return HIGHLIGHT_MOUSEOVER;
     }
   }else{
+    if(state->mouseholdElement==uiElem){
+      return HIGHLIGHT_SELECTED;
+    }
     return HIGHLIGHT_NORMAL;
   }
 }
@@ -911,16 +914,16 @@ void drawNuclFullInfoBox(const app_data *restrict dat, const app_state *restrict
 
   //scroll bar
   if(state->ds.nuclFullInfoMaxScrollY > 0){
-    rect.x = (float)(state->ds.windowXRes - 5*UI_PADDING_SIZE*state->ds.uiUserScale);
-    rect.y = (NUCL_FULLINFOBOX_LEVELLIST_POS_Y + UI_PADDING_SIZE)*state->ds.uiUserScale;
-    rect.w = 0.5f*UI_TILE_SIZE*state->ds.uiUserScale;
-    rect.h = (float)(state->ds.windowYRes) - rect.y - 2*UI_PADDING_SIZE*state->ds.uiUserScale;
-    float sbPos = state->ds.nuclFullInfoScrollY/state->ds.nuclFullInfoMaxScrollY;
-    float sbViewSize = (float)(getNumScreenLvlDispLines(&state->ds))/(float)(getNumTotalLvlDispLines(&dat->ndat,state));
-    float sbAlpha = (float)(txtAlpha/255.0f);
+    rect.x = (float)(state->ds.uiElemPosX[UIELEM_NUCL_FULLINFOBOX_SCROLLBAR]);
+    rect.y = (float)(state->ds.uiElemPosY[UIELEM_NUCL_FULLINFOBOX_SCROLLBAR]);
+    rect.w = (float)(state->ds.uiElemWidth[UIELEM_NUCL_FULLINFOBOX_SCROLLBAR]);
+    rect.h = (float)(state->ds.uiElemHeight[UIELEM_NUCL_FULLINFOBOX_SCROLLBAR]);
+    const float sbPos = state->ds.nuclFullInfoScrollY/state->ds.nuclFullInfoMaxScrollY;
+    const float sbViewSize = (float)(getNumScreenLvlDispLines(&state->ds))/(float)(getNumTotalLvlDispLines(&dat->ndat,state));
+    const float sbAlpha = (float)(txtAlpha/255.0f);
     //SDL_Log("x: %f, y: %f, w: %f. h: %f\n",(double)rect.x,(double)rect.y,(double)rect.w,(double)rect.h);
     //SDL_Log("pos: %f, view size: %f, alpha: %f\n",(double)sbPos,(double)sbViewSize,(double)sbAlpha);
-    drawScrollBar(rdat,rect,sbAlpha,sbPos,sbViewSize);
+    drawScrollBar(&dat->rules.themeRules,rdat,rect,getHighlightState(state,UIELEM_NUCL_FULLINFOBOX_SCROLLBAR),sbAlpha,sbPos,sbViewSize);
   }
   
 
