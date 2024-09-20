@@ -1807,6 +1807,7 @@ void setSelectedNuclOnLevelList(const app_data *restrict dat, app_state *restric
 	if((selNucl < MAXNUMNUCL)&&(selNucl != state->chartSelectedNucl)){
 		state->chartSelectedNucl = selNucl;
 		state->ds.nuclFullInfoScrollY = 0.0f;
+		state->ds.nuclFullInfoMaxScrollY = getMaxNumLvlDispLines(&dat->ndat,state);
 		state->ds.timeSinceFCScollStart = 0.0f;
 		state->ds.fcScrollInProgress = 0;
 		state->ds.fcScrollFinished = 1;
