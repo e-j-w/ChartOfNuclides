@@ -1899,11 +1899,10 @@ void setSelectedNuclOnChartDirect(const app_data *restrict dat, app_state *restr
 void uiElemHoldAction(const app_data *restrict dat, app_state *restrict state, const uint8_t uiElemID){
 	switch(uiElemID){
 		case UIELEM_NUCL_FULLINFOBOX_SCROLLBAR:
-			; //empty statement to suppress -Wpedantic warning 
-			const float sbViewSize = (float)(getNumScreenLvlDispLines(&state->ds))/(float)(getNumTotalLvlDispLines(&dat->ndat,state));
-			//SDL_Log("view size: %f\n",(double)sbViewSize);
-			state->ds.nuclFullInfoScrollY = state->ds.nuclFullInfoMaxScrollY*(state->mouseYPx - state->ds.uiElemPosY[UIELEM_NUCL_FULLINFOBOX_SCROLLBAR])/((float)state->ds.uiElemHeight[UIELEM_NUCL_FULLINFOBOX_SCROLLBAR]*(1.0f - sbViewSize));
-			state->ds.nuclFullInfoScrollY -= state->ds.nuclFullInfoMaxScrollY*0.5f*sbViewSize; //hack to approximately center scrollbar on mouse
+			; //empty statement to suppress -Wpedantic warning
+			const float screenNumLines = (float)(getNumScreenLvlDispLines(&state->ds));
+			state->ds.nuclFullInfoScrollY = state->ds.nuclFullInfoMaxScrollY*(state->mouseYPx - state->ds.uiElemPosY[UIELEM_NUCL_FULLINFOBOX_SCROLLBAR])/((float)state->ds.uiElemHeight[UIELEM_NUCL_FULLINFOBOX_SCROLLBAR]*(1.0f - screenNumLines/(float)(getNumTotalLvlDispLines(&dat->ndat,state))));
+			state->ds.nuclFullInfoScrollY -=  screenNumLines*0.5f; //center scrollbar on mouse 9moving the scrollbar by half its length scrolls the view by half the number of lines visible on screen)
 			if(state->ds.nuclFullInfoScrollY < 0.0f){
 				state->ds.nuclFullInfoScrollY = 0.0f;
 			}else if(state->ds.nuclFullInfoScrollY > state->ds.nuclFullInfoMaxScrollY){
