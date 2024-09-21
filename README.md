@@ -52,7 +52,7 @@ cd ChartOfNuclides-flatpak
 Build and install the application (if this command fails with a free disk space error, run `ostree --repo=repo config set core.min-free-space-percent 0` and then try again):
 
 ```
-flatpak run org.flatpak.Builder --force-clean --sandbox --user --install --install-deps-from=flathub --ccache --repo=repo flatpak_build io.github.e_j_w.ChartOfNuclides.yml
+flatpak run org.flatpak.Builder --force-clean --sandbox --user --install --install-deps-from=flathub --disable-rofiles-fuse --ccache --repo=repo flatpak_build io.github.e_j_w.ChartOfNuclides.yml
 ```
 
 Clean up the build to save disk space (optional):
@@ -84,7 +84,7 @@ For those who don't want to use Flatpak.
 * SDL3, SDL3_image, SDL3_ttf
   * SDL3 should be built with `libdecor` on Linux when using GNOME Wayland, otherwise window decorations won't be present.
 
-For now you'll probably have to manually compile SDL3 and its libraries, as they aren't (yet) packaged for major Linux distros.
+For now you'll probably have to manually compile SDL3 and its libraries, as they aren't (yet) packaged for major Linux distros. Specific commits of the SDL3 pre-release libraries that this code has been tested against are listed in the [Flatpak manifest](https://github.com/e-j-w/ChartOfNuclides-flatpak/blob/master/io.github.e_j_w.ChartOfNuclides.yml).
 
 #### Build the application
 

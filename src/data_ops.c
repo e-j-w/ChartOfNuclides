@@ -2361,7 +2361,6 @@ void updateSingleUIElemPosition(const app_data *restrict dat, drawing_state *res
 			ds->uiElemPosY[UIELEM_NUCL_FULLINFOBOX_SCROLLBAR] = (uint16_t)((NUCL_FULLINFOBOX_LEVELLIST_POS_Y + UI_PADDING_SIZE)*ds->uiUserScale);
 			ds->uiElemWidth[UIELEM_NUCL_FULLINFOBOX_SCROLLBAR] = (uint16_t)(0.5f*UI_TILE_SIZE*ds->uiUserScale);
 			ds->uiElemHeight[UIELEM_NUCL_FULLINFOBOX_SCROLLBAR] = (uint16_t)(ds->windowYRes - ds->uiElemPosY[UIELEM_NUCL_FULLINFOBOX_SCROLLBAR] - 2*UI_PADDING_SIZE*ds->uiUserScale);
-			ds->uiElemExtPlusX[UIELEM_PREFS_DIALOG_LIFETIME_CHECKBOX] = (uint16_t)(NUCL_FULLINFOBOX_SCROLLBAR_POS_XR*ds->uiUserScale); //so that scrollbar can be interacted with up to the screen edge
 		default:
 			break;
 	}
