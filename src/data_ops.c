@@ -1801,11 +1801,30 @@ uint16_t getNearestNuclInd(const app_data *restrict dat, const int16_t N, const 
 	return nuclInd;
 }
 
-void setSelectedNuclOnLevelList(const app_data *restrict dat, app_state *restrict state, const uint16_t N, const uint16_t Z){
+void setInfoBoxTableHeight(const app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat, const uint16_t selNucl){
+	//calculate the number of unscaled pixels needed to show the ground and isomeric state info
+	state->ds.infoBoxTableHeight = NUCL_INFOBOX_BIGLINE_HEIGHT;
+	if(dat->ndat.levels[dat->ndat.nuclData[selNucl].firstLevel + dat->ndat.nuclData[selNucl].gsLevel].numDecModes > 1){
+		state->ds.infoBoxTableHeight += NUCL_INFOBOX_SMALLLINE_HEIGHT*(dat->ndat.levels[dat->ndat.nuclData[selNucl].firstLevel + dat->ndat.nuclData[selNucl].gsLevel].numDecModes - 1);
+	}
+	if(dat->ndat.nuclData[selNucl].longestIsomerLevel != MAXNUMLVLS){
+		if(dat->ndat.nuclData[selNucl].longestIsomerLevel != (dat->ndat.nuclData[selNucl].firstLevel + dat->ndat.nuclData[selNucl].gsLevel)){
+			state->ds.infoBoxTableHeight += NUCL_INFOBOX_BIGLINE_HEIGHT;
+			if(dat->ndat.levels[dat->ndat.nuclData[selNucl].longestIsomerLevel].numDecModes > 1){
+				state->ds.infoBoxTableHeight += NUCL_INFOBOX_SMALLLINE_HEIGHT*(dat->ndat.levels[dat->ndat.nuclData[selNucl].longestIsomerLevel].numDecModes - 1);
+			}
+		}
+	}
+	updateSingleUIElemPosition(dat,&state->ds,rdat,UIELEM_NUCL_INFOBOX);
+	updateSingleUIElemPosition(dat,&state->ds,rdat,UIELEM_NUCL_INFOBOX_CLOSEBUTTON);
+}
+
+void setSelectedNuclOnLevelList(const app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat, const uint16_t N, const uint16_t Z){
 	uint16_t selNucl = getNuclInd(&dat->ndat,(int16_t)N,(int16_t)Z);
 	//SDL_Log("Selected nucleus: %u\n",state->chartSelectedNucl);
 	if((selNucl < MAXNUMNUCL)&&(selNucl != state->chartSelectedNucl)){
 		state->chartSelectedNucl = selNucl;
+		setInfoBoxTableHeight(dat,state,rdat,selNucl);
 		state->ds.nuclFullInfoScrollY = 0.0f;
 		state->ds.nuclFullInfoMaxScrollY = getMaxNumLvlDispLines(&dat->ndat,state);
 		state->ds.timeSinceFCScollStart = 0.0f;
@@ -1833,21 +1852,7 @@ void setSelectedNuclOnChart(const app_data *restrict dat, app_state *restrict st
 	//SDL_Log("Selected nucleus: %u\n",state->chartSelectedNucl);
 	if((selNucl < MAXNUMNUCL)&&(selNucl != state->chartSelectedNucl)){
 		state->chartSelectedNucl = selNucl;
-		//calculate the number of unscaled pixels needed to show the ground and isomeric state info
-		state->ds.infoBoxTableHeight = NUCL_INFOBOX_BIGLINE_HEIGHT;
-		if(dat->ndat.levels[dat->ndat.nuclData[selNucl].firstLevel + dat->ndat.nuclData[selNucl].gsLevel].numDecModes > 1){
-			state->ds.infoBoxTableHeight += NUCL_INFOBOX_SMALLLINE_HEIGHT*(dat->ndat.levels[dat->ndat.nuclData[selNucl].firstLevel + dat->ndat.nuclData[selNucl].gsLevel].numDecModes - 1);
-		}
-		if(dat->ndat.nuclData[selNucl].longestIsomerLevel != MAXNUMLVLS){
-			if(dat->ndat.nuclData[selNucl].longestIsomerLevel != (dat->ndat.nuclData[selNucl].firstLevel + dat->ndat.nuclData[selNucl].gsLevel)){
-				state->ds.infoBoxTableHeight += NUCL_INFOBOX_BIGLINE_HEIGHT;
-				if(dat->ndat.levels[dat->ndat.nuclData[selNucl].longestIsomerLevel].numDecModes > 1){
-					state->ds.infoBoxTableHeight += NUCL_INFOBOX_SMALLLINE_HEIGHT*(dat->ndat.levels[dat->ndat.nuclData[selNucl].longestIsomerLevel].numDecModes - 1);
-				}
-			}
-		}
-		updateSingleUIElemPosition(dat,&state->ds,rdat,UIELEM_NUCL_INFOBOX);
-		updateSingleUIElemPosition(dat,&state->ds,rdat,UIELEM_NUCL_INFOBOX_CLOSEBUTTON);
+		setInfoBoxTableHeight(dat,state,rdat,selNucl);
 		if(!(state->ds.shownElements & (1U << UIELEM_NUCL_INFOBOX))){
 			state->ds.shownElements |= (1U << UIELEM_NUCL_INFOBOX);
 			changeUIState(dat,state,UISTATE_DEFAULT); //make info box interactable

@@ -176,7 +176,7 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
         for(uint8_t i=1; i<10; i++){ //skip empty entries in the chart if they exist
           uint16_t selNucl = getNuclInd(&dat->ndat,(int16_t)(dat->ndat.nuclData[state->chartSelectedNucl].N-i),(int16_t)(dat->ndat.nuclData[state->chartSelectedNucl].Z));
           if(selNucl != MAXNUMNUCL){
-            setSelectedNuclOnLevelList(dat,state,(uint16_t)(dat->ndat.nuclData[state->chartSelectedNucl].N-i),(uint16_t)(dat->ndat.nuclData[state->chartSelectedNucl].Z));
+            setSelectedNuclOnLevelList(dat,state,rdat,(uint16_t)(dat->ndat.nuclData[state->chartSelectedNucl].N-i),(uint16_t)(dat->ndat.nuclData[state->chartSelectedNucl].Z));
             break;
           }
         }
@@ -184,7 +184,7 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
         for(uint8_t i=1; i<10; i++){ //skip empty entries in the chart if they exist
           uint16_t selNucl = getNuclInd(&dat->ndat,(int16_t)(dat->ndat.nuclData[state->chartSelectedNucl].N+i),(int16_t)(dat->ndat.nuclData[state->chartSelectedNucl].Z));
           if(selNucl != MAXNUMNUCL){
-            setSelectedNuclOnLevelList(dat,state,(uint16_t)(dat->ndat.nuclData[state->chartSelectedNucl].N+i),(uint16_t)(dat->ndat.nuclData[state->chartSelectedNucl].Z));
+            setSelectedNuclOnLevelList(dat,state,rdat,(uint16_t)(dat->ndat.nuclData[state->chartSelectedNucl].N+i),(uint16_t)(dat->ndat.nuclData[state->chartSelectedNucl].Z));
             break;
           }
         }
@@ -193,7 +193,7 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
         for(uint8_t i=1; i<10; i++){ //skip empty entries in the chart if they exist
           uint16_t selNucl = getNuclInd(&dat->ndat,(int16_t)(dat->ndat.nuclData[state->chartSelectedNucl].N),(int16_t)(dat->ndat.nuclData[state->chartSelectedNucl].Z+i));
           if(selNucl != MAXNUMNUCL){
-            setSelectedNuclOnLevelList(dat,state,(uint16_t)(dat->ndat.nuclData[state->chartSelectedNucl].N),(uint16_t)(dat->ndat.nuclData[state->chartSelectedNucl].Z+i));
+            setSelectedNuclOnLevelList(dat,state,rdat,(uint16_t)(dat->ndat.nuclData[state->chartSelectedNucl].N),(uint16_t)(dat->ndat.nuclData[state->chartSelectedNucl].Z+i));
             break;
           }
         }
@@ -201,7 +201,7 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
         for(uint8_t i=1; i<10; i++){ //skip empty entries in the chart if they exist
           uint16_t selNucl = getNuclInd(&dat->ndat,(int16_t)(dat->ndat.nuclData[state->chartSelectedNucl].N),(int16_t)(dat->ndat.nuclData[state->chartSelectedNucl].Z-i));
           if(selNucl != MAXNUMNUCL){
-            setSelectedNuclOnLevelList(dat,state,(uint16_t)(dat->ndat.nuclData[state->chartSelectedNucl].N),(uint16_t)(dat->ndat.nuclData[state->chartSelectedNucl].Z-i));
+            setSelectedNuclOnLevelList(dat,state,rdat,(uint16_t)(dat->ndat.nuclData[state->chartSelectedNucl].N),(uint16_t)(dat->ndat.nuclData[state->chartSelectedNucl].Z-i));
             break;
           }
         }
