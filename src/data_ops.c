@@ -1623,6 +1623,7 @@ float getChartHeightZAfterZoom(const drawing_state *restrict ds){
 //change the modal state of the UI, and update which UI elements are interactable
 void changeUIState(const app_data *restrict dat, app_state *restrict state, const uint8_t newState){
   
+	const uint8_t prevMouseover = state->mouseoverElement;
   state->interactableElement = 0;
   state->mouseoverElement = UIELEM_ENUM_LENGTH; //by default, no element is moused over
   state->clickedUIElem = UIELEM_ENUM_LENGTH; //'unclick' any buttons
@@ -1654,6 +1655,20 @@ void changeUIState(const app_data *restrict dat, app_state *restrict state, cons
 				state->interactableElement |= (uint32_t)(1U << UIELEM_UISM_LARGE_BUTTON);
 				state->interactableElement |= (uint32_t)(1U << UIELEM_UISM_HUGE_BUTTON);
 				state->interactableElement |= (uint32_t)(1U << UIELEM_PREFS_UISCALE_MENU);
+				if(state->lastInputType != INPUT_TYPE_MOUSE){
+					//keyboard/gamepad navigation of the menu
+					state->mouseoverElement = (uint8_t)(UIELEM_PREFS_UISCALE_MENU - UISCALE_ENUM_LENGTH); //select the first menu item
+				}
+			}else{
+				if(state->lastInputType != INPUT_TYPE_MOUSE){
+					//keyboard/gamepad navigation of the menu
+					if((prevMouseover < UIELEM_PREFS_UISCALE_MENU)&&(prevMouseover >= (UIELEM_PREFS_UISCALE_MENU-UISCALE_ENUM_LENGTH))){
+						//was just in the UI scale dropdown
+						state->mouseoverElement = (uint8_t)(UIELEM_PREFS_DIALOG_UISCALE_DROPDOWN);
+					}else{
+						state->mouseoverElement = (uint8_t)(UIELEM_PREFS_DIALOG - PREFS_DIALOG_NUM_UIELEMENTS); //select the first menu item
+					}
+				}
 			}
 			break;
 		case UISTATE_FULLLEVELINFO:
@@ -1682,8 +1697,8 @@ void changeUIState(const app_data *restrict dat, app_state *restrict state, cons
 				state->interactableElement |= (uint32_t)(1U << UIELEM_PM_ABOUT_BUTTON);
 				state->interactableElement |= (uint32_t)(1U << UIELEM_PRIMARY_MENU);
 				if(state->lastInputType != INPUT_TYPE_MOUSE){
-					//keyboard/gampad navigation of the menu
-					state->mouseoverElement = (uint8_t)(UIELEM_PRIMARY_MENU - PRIMARYMENU_ENUM_LENGTH); //select the first menu item
+					//keyboard/gamepad navigation of the menu
+					state->mouseoverElement = (uint8_t)(UIELEM_PRIMARY_MENU - PRIMARY_MENU_NUM_UIELEMENTS); //select the first menu item
 				}
 			}
 			if((state->ds.shownElements & (1U << UIELEM_CHARTVIEW_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_CHARTVIEW_MENU_HIDE]==0.0f)){
@@ -1692,7 +1707,7 @@ void changeUIState(const app_data *restrict dat, app_state *restrict state, cons
 				state->interactableElement |= (uint32_t)(1U << UIELEM_CVM_R42_BUTTON);
 				state->interactableElement |= (uint32_t)(1U << UIELEM_CHARTVIEW_MENU);
 				if(state->lastInputType != INPUT_TYPE_MOUSE){
-					//keyboard/gampad navigation of the menu
+					//keyboard/gamepad navigation of the menu
 					state->mouseoverElement = (uint8_t)(UIELEM_CHARTVIEW_MENU - CHARTVIEW_ENUM_LENGTH); //select the first menu item
 				}
 			}

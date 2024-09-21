@@ -59,14 +59,14 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
     if(left || right || up || down){
       if(state->clickedUIElem == UIELEM_MENU_BUTTON){
         //primary menu navigation using arrow keys
-        if((state->mouseoverElement >= UIELEM_PRIMARY_MENU)||(state->mouseoverElement < (UIELEM_PRIMARY_MENU-PRIMARYMENU_ENUM_LENGTH))){
+        if((state->mouseoverElement >= UIELEM_PRIMARY_MENU)||(state->mouseoverElement < (UIELEM_PRIMARY_MENU-PRIMARY_MENU_NUM_UIELEMENTS))){
           //no menu item was selected with the keyboard or highlighted with the mouse previously
           //select the first menu item
-          state->mouseoverElement = (uint8_t)(UIELEM_PRIMARY_MENU-PRIMARYMENU_ENUM_LENGTH);
+          state->mouseoverElement = (uint8_t)(UIELEM_PRIMARY_MENU-PRIMARY_MENU_NUM_UIELEMENTS);
         }else{
-          uint8_t selMenuElem = PRIMARYMENU_ENUM_LENGTH - (UIELEM_PRIMARY_MENU - state->mouseoverElement);
-          if(selMenuElem >= PRIMARYMENU_ENUM_LENGTH){
-            state->mouseoverElement = (uint8_t)(UIELEM_PRIMARY_MENU-PRIMARYMENU_ENUM_LENGTH);
+          uint8_t selMenuElem = PRIMARY_MENU_NUM_UIELEMENTS - (UIELEM_PRIMARY_MENU - state->mouseoverElement);
+          if(selMenuElem >= PRIMARY_MENU_NUM_UIELEMENTS){
+            state->mouseoverElement = (uint8_t)(UIELEM_PRIMARY_MENU-PRIMARY_MENU_NUM_UIELEMENTS);
           }
           if(up && !down){
             if(selMenuElem > 0){
@@ -75,10 +75,10 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
               state->mouseoverElement = (uint8_t)(UIELEM_PRIMARY_MENU-1);
             }
           }else if(down && !up){
-            if(selMenuElem < (PRIMARYMENU_ENUM_LENGTH-1)){
+            if(selMenuElem < (PRIMARY_MENU_NUM_UIELEMENTS-1)){
               state->mouseoverElement++;
             }else{
-              state->mouseoverElement = (uint8_t)(UIELEM_PRIMARY_MENU-PRIMARYMENU_ENUM_LENGTH);
+              state->mouseoverElement = (uint8_t)(UIELEM_PRIMARY_MENU-PRIMARY_MENU_NUM_UIELEMENTS);
             }
           }else if((left && !right)||(right && !left)){
             if((state->ds.shownElements & (1U << UIELEM_PRIMARY_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_PRIMARY_MENU_SHOW]==0.0f)){
@@ -277,12 +277,75 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
         }
       }
     }
-
+  }else if(state->uiState == UISTATE_PREFS_DIALOG){
+    if(left || right || up || down){
+      if((state->ds.shownElements & (1U << UIELEM_PREFS_UISCALE_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_UISCALE_MENU_HIDE]==0.0f)){
+        //UI scale dropdown navigation using arrow keys
+        state->mouseholdElement = UIELEM_ENUM_LENGTH; //remove any previous selection highlight
+        if((state->mouseoverElement >= UIELEM_PREFS_UISCALE_MENU)||(state->mouseoverElement < (UIELEM_PREFS_UISCALE_MENU-UISCALE_ENUM_LENGTH))){
+          //no menu item was selected with the keyboard or highlighted with the mouse previously
+          //select the first menu item
+          state->mouseoverElement = (uint8_t)(UIELEM_PREFS_UISCALE_MENU-UISCALE_ENUM_LENGTH);
+        }else{
+          uint8_t selMenuElem = UISCALE_ENUM_LENGTH - (UIELEM_PREFS_UISCALE_MENU - state->mouseoverElement);
+          if(selMenuElem >= UISCALE_ENUM_LENGTH){
+            state->mouseoverElement = (uint8_t)(UIELEM_PREFS_UISCALE_MENU-UISCALE_ENUM_LENGTH);
+          }
+          if(up && !down){
+            if(selMenuElem > 0){
+              state->mouseoverElement--;
+            }else{
+              state->mouseoverElement = (uint8_t)(UIELEM_PREFS_UISCALE_MENU-1);
+            }
+          }else if(down && !up){
+            if(selMenuElem < (UISCALE_ENUM_LENGTH-1)){
+              state->mouseoverElement++;
+            }else{
+              state->mouseoverElement = (uint8_t)(UIELEM_PREFS_UISCALE_MENU-UISCALE_ENUM_LENGTH);
+            }
+          }
+        }
+      }else{
+        //pref menu navigation using arrow keys
+        state->mouseholdElement = UIELEM_ENUM_LENGTH; //remove any previous selection highlight
+        if((state->mouseoverElement >= UIELEM_PREFS_DIALOG)||(state->mouseoverElement < (UIELEM_PREFS_DIALOG-PREFS_DIALOG_NUM_UIELEMENTS))){
+          //no menu item was selected with the keyboard or highlighted with the mouse previously
+          //select the first menu item
+          state->mouseoverElement = (uint8_t)(UIELEM_PREFS_DIALOG-PREFS_DIALOG_NUM_UIELEMENTS);
+        }else{
+          uint8_t selMenuElem = PREFS_DIALOG_NUM_UIELEMENTS - (UIELEM_PREFS_DIALOG - state->mouseoverElement);
+          if(selMenuElem >= PREFS_DIALOG_NUM_UIELEMENTS){
+            state->mouseoverElement = (uint8_t)(UIELEM_PREFS_DIALOG-PREFS_DIALOG_NUM_UIELEMENTS);
+          }
+          if(up && !down){
+            if(selMenuElem > 0){
+              state->mouseoverElement--;
+            }else{
+              state->mouseoverElement = (uint8_t)(UIELEM_PREFS_DIALOG-1);
+            }
+          }else if(down && !up){
+            if(selMenuElem < (PREFS_DIALOG_NUM_UIELEMENTS-1)){
+              state->mouseoverElement++;
+            }else{
+              state->mouseoverElement = (uint8_t)(UIELEM_PREFS_DIALOG-PREFS_DIALOG_NUM_UIELEMENTS);
+            }
+          }else if((left && !right)||(right && !left)){
+            if(state->mouseoverElement == UIELEM_PREFS_DIALOG_CLOSEBUTTON){
+              state->mouseoverElement = (uint8_t)(UIELEM_PREFS_DIALOG-PREFS_DIALOG_NUM_UIELEMENTS);
+            }else{
+              state->mouseoverElement = UIELEM_PREFS_DIALOG_CLOSEBUTTON;
+            }
+          }
+        }
+      }
+    }
   }
+
+
   if(state->inputFlags & (1U << INPUT_SELECT)){
     if((state->ds.shownElements & (1U << UIELEM_PRIMARY_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_PRIMARY_MENU_HIDE]==0.0f)){
       //select primary menu button
-      if((state->mouseoverElement < UIELEM_PRIMARY_MENU)&&(state->mouseoverElement >= (UIELEM_PRIMARY_MENU-PRIMARYMENU_ENUM_LENGTH))){
+      if((state->mouseoverElement < UIELEM_PRIMARY_MENU)&&(state->mouseoverElement >= (UIELEM_PRIMARY_MENU-PRIMARY_MENU_NUM_UIELEMENTS))){
         state->mouseholdElement = state->mouseoverElement;
         uiElemClickAction(dat,state,rdat,0,state->mouseoverElement);
       }
@@ -292,21 +355,36 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
         state->mouseholdElement = state->mouseoverElement;
         uiElemClickAction(dat,state,rdat,0,state->mouseoverElement);
       }
+    }else if((state->ds.shownElements & (1U << UIELEM_PREFS_UISCALE_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_UISCALE_MENU_HIDE]==0.0f)){
+      //select UI scale dropdown menu button
+      if((state->mouseoverElement < UIELEM_PREFS_UISCALE_MENU)&&(state->mouseoverElement >= (UIELEM_PREFS_UISCALE_MENU-UISCALE_ENUM_LENGTH))){
+        state->mouseholdElement = state->mouseoverElement;
+        uiElemClickAction(dat,state,rdat,0,state->mouseoverElement);
+      }
+    }else if((state->ds.shownElements & (1U << UIELEM_PREFS_DIALOG))&&(state->ds.timeLeftInUIAnimation[UIANIM_MODAL_BOX_HIDE]==0.0f)){
+      //select pref menu button
+      //only get here if the UI scale dropdown isn't open 
+      if((state->mouseoverElement < UIELEM_PREFS_DIALOG)&&(state->mouseoverElement >= (UIELEM_PREFS_DIALOG-PREFS_DIALOG_NUM_UIELEMENTS))){
+        state->mouseholdElement = state->mouseoverElement;
+        uiElemClickAction(dat,state,rdat,0,state->mouseoverElement);
+      }
     }else if((state->ds.shownElements & (1U << UIELEM_NUCL_INFOBOX))&&(state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_SHOW]==0.0f)&&(state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_EXPAND]==0.0f)){
+      state->mouseholdElement = UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON;
       uiElemClickAction(dat,state,rdat,0,UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON);
     }
   }else if(state->inputFlags & (1U << INPUT_BACK)){
     //escape open menus
     //handle modal dialogs first
     if((state->ds.shownElements & (1U << UIELEM_ABOUT_BOX))&&(state->ds.timeLeftInUIAnimation[UIANIM_MODAL_BOX_HIDE]==0.0f)){
-      changeUIState(dat,state,state->lastUIState); //restore previous interactable elements
-      startUIAnimation(dat,state,UIANIM_MODAL_BOX_HIDE); //hide the about/message box, see stopUIAnimation()
+      //close the prefs menu
+      state->mouseholdElement = UIELEM_ABOUT_BOX_OK_BUTTON;
+      uiElemClickAction(dat,state,rdat,0,UIELEM_ABOUT_BOX_OK_BUTTON);
     }else if((state->ds.shownElements & (1U << UIELEM_PREFS_UISCALE_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_UISCALE_MENU_HIDE]==0.0f)){
       //close the UI scale menu
       uiElemClickAction(dat,state,rdat,0,UIELEM_PREFS_DIALOG_UISCALE_DROPDOWN);
     }else if((state->ds.shownElements & (1U << UIELEM_PREFS_DIALOG))&&(state->ds.timeLeftInUIAnimation[UIANIM_MODAL_BOX_HIDE]==0.0f)){
-      changeUIState(dat,state,state->lastUIState); //restore previous interactable elements
-      startUIAnimation(dat,state,UIANIM_MODAL_BOX_HIDE); //hide the about/message box, see stopUIAnimation()
+      state->mouseholdElement = UIELEM_PREFS_DIALOG_CLOSEBUTTON;
+      uiElemClickAction(dat,state,rdat,0,UIELEM_PREFS_DIALOG_CLOSEBUTTON);
     }else if((state->ds.shownElements & (1U << UIELEM_NUCL_INFOBOX))&&(state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_HIDE]==0.0f)){
       startUIAnimation(dat,state,UIANIM_NUCLINFOBOX_HIDE); //hide the info box, see stopUIAnimation() for info box hiding action
       startUIAnimation(dat,state,UIANIM_NUCLHIGHLIGHT_HIDE);

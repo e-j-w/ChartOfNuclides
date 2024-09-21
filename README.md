@@ -151,12 +151,12 @@ Zoom and pan with the mouse, the controls are basically identical to Google Maps
 
 | Key                | Action |
 | :----------------- | :----- |
-| Arrow keys         | Pan chart view |
+| Arrow keys         | Pan chart view, navigate menus |
 | W / A / S / D      | Pan selected nuclide (in chart and level list views) |
 | + / -              | Zoom in/out on chart |
 | ] / [              | Cycle between view modes for the chart (half-life, 2+ energy, etc.) |
 | F7 / F8            | Adjust user interface size |
-| Enter              | Show full list of levels/gammas for selected nuclide |
+| Enter              | Select menu items |
 | Escape / backspace | Exit out of open menus, cancel selection, etc. |
 | F11                | Toggle fullscreen mode |
 | P                  | Toggle performance stats debug overlay |
