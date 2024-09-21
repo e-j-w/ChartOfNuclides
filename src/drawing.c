@@ -79,6 +79,9 @@ void drawScrollBar(const ui_theme_rules *restrict uirules, resource_data *restri
   srcRect.x = UITHEME_SCROLLBAR_TILE_X*UI_TILE_SIZE*rdat->uiThemeScale;
   srcRect.y = UITHEME_SCROLLBAR_TILE_Y*UI_TILE_SIZE*rdat->uiThemeScale;
   destRect.h = sbViewSize*sbRect.h*rdat->uiDPIScale; //handle size
+  if(destRect.h < 2*nineSliceSize){
+    destRect.h = 2*nineSliceSize; //prevent artifacts from drawing very small handles
+  }
   destRect.y = (sbRect.y + clampedSBPos*(sbRect.h - destRect.h/rdat->uiDPIScale))*rdat->uiDPIScale;
   SDL_RenderTexture9Grid(rdat->renderer,rdat->uiThemeTex,&srcRect,0.0f,0.0f,nineSliceSize,nineSliceSize,0.0f,&destRect);
   
