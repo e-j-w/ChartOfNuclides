@@ -1681,15 +1681,24 @@ void changeUIState(const app_data *restrict dat, app_state *restrict state, cons
 				state->interactableElement |= (uint32_t)(1U << UIELEM_PM_PREFS_BUTTON);
 				state->interactableElement |= (uint32_t)(1U << UIELEM_PM_ABOUT_BUTTON);
 				state->interactableElement |= (uint32_t)(1U << UIELEM_PRIMARY_MENU);
+				if(state->lastInputType != INPUT_TYPE_MOUSE){
+					//keyboard/gampad navigation of the menu
+					state->mouseoverElement = (uint8_t)(UIELEM_PRIMARY_MENU - PRIMARYMENU_ENUM_LENGTH); //select the first menu item
+				}
 			}
 			if((state->ds.shownElements & (1U << UIELEM_CHARTVIEW_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_CHARTVIEW_MENU_HIDE]==0.0f)){
 				state->interactableElement |= (uint32_t)(1U << UIELEM_CVM_HALFLIFE_BUTTON);
 				state->interactableElement |= (uint32_t)(1U << UIELEM_CVM_2PLUS_BUTTON);
 				state->interactableElement |= (uint32_t)(1U << UIELEM_CVM_R42_BUTTON);
 				state->interactableElement |= (uint32_t)(1U << UIELEM_CHARTVIEW_MENU);
+				if(state->lastInputType != INPUT_TYPE_MOUSE){
+					//keyboard/gampad navigation of the menu
+					state->mouseoverElement = (uint8_t)(UIELEM_CHARTVIEW_MENU - CHARTVIEW_ENUM_LENGTH); //select the first menu item
+				}
 			}
       break;
   }
+	//SDL_Log("Mouseover element: %u\n",state->mouseoverElement);
 }
 
 void panChartToPos(const app_data *restrict dat, drawing_state *restrict ds, const uint16_t posN, const uint16_t posZ, float panTime){

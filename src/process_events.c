@@ -54,68 +54,138 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
     //in main chart view, handle chart panning
     
     //SDL_Log("dir: [%u %u %u %u]\n",!(up==0),!(down==0),!(left==0),!(right==0));
+    //SDL_Log("Processing input, mouseover element: %u\n",state->mouseoverElement);
     
     if(left || right || up || down){
-      if(left && !right){
-        state->ds.chartPanStartX = state->ds.chartPosX;
-        state->ds.chartPanStartY = state->ds.chartPosY;
-        state->ds.chartPanToX = state->ds.chartPosX - (CHART_PAN_DIST/state->ds.chartZoomScale);
-        if(state->ds.panInProgress == 0){
-          state->ds.chartPanToY = state->ds.chartPosY;
+      if(state->clickedUIElem == UIELEM_MENU_BUTTON){
+        //primary menu navigation using arrow keys
+        if((state->mouseoverElement >= UIELEM_PRIMARY_MENU)||(state->mouseoverElement < (UIELEM_PRIMARY_MENU-PRIMARYMENU_ENUM_LENGTH))){
+          //no menu item was selected with the keyboard or highlighted with the mouse previously
+          //select the first menu item
+          state->mouseoverElement = (uint8_t)(UIELEM_PRIMARY_MENU-PRIMARYMENU_ENUM_LENGTH);
+        }else{
+          uint8_t selMenuElem = PRIMARYMENU_ENUM_LENGTH - (UIELEM_PRIMARY_MENU - state->mouseoverElement);
+          if(selMenuElem >= PRIMARYMENU_ENUM_LENGTH){
+            state->mouseoverElement = (uint8_t)(UIELEM_PRIMARY_MENU-PRIMARYMENU_ENUM_LENGTH);
+          }
+          if(up && !down){
+            if(selMenuElem > 0){
+              state->mouseoverElement--;
+            }else{
+              state->mouseoverElement = (uint8_t)(UIELEM_PRIMARY_MENU-1);
+            }
+          }else if(down && !up){
+            if(selMenuElem < (PRIMARYMENU_ENUM_LENGTH-1)){
+              state->mouseoverElement++;
+            }else{
+              state->mouseoverElement = (uint8_t)(UIELEM_PRIMARY_MENU-PRIMARYMENU_ENUM_LENGTH);
+            }
+          }else if((left && !right)||(right && !left)){
+            if((state->ds.shownElements & (1U << UIELEM_PRIMARY_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_PRIMARY_MENU_SHOW]==0.0f)){
+              uiElemClickAction(dat,state,rdat,0,UIELEM_CHARTVIEW_BUTTON); //open the chart view menu
+            }
+          }
         }
-        if(state->ds.chartPanToX <= (-0.25f*getChartWidthN(&state->ds))){
-          state->ds.chartPanToX = (-0.25f*getChartWidthN(&state->ds));
+      }else if(state->clickedUIElem == UIELEM_CHARTVIEW_BUTTON){
+        //chart view menu navigation using arrow keys
+        if((state->mouseoverElement >= UIELEM_CHARTVIEW_MENU)||(state->mouseoverElement < (UIELEM_CHARTVIEW_MENU-CHARTVIEW_ENUM_LENGTH))){
+          //no menu item was selected with the keyboard or highlighted with the mouse previously
+          //select the first menu item
+          state->mouseoverElement = (uint8_t)(UIELEM_CHARTVIEW_MENU-CHARTVIEW_ENUM_LENGTH);
+        }else{
+          uint8_t selMenuElem = CHARTVIEW_ENUM_LENGTH - (UIELEM_CHARTVIEW_MENU - state->mouseoverElement);
+          if(selMenuElem >= CHARTVIEW_ENUM_LENGTH){
+            state->mouseoverElement = (uint8_t)(UIELEM_CHARTVIEW_MENU-CHARTVIEW_ENUM_LENGTH);
+          }
+          if(up && !down){
+            if(selMenuElem > 0){
+              state->mouseoverElement--;
+            }else{
+              state->mouseoverElement = (uint8_t)(UIELEM_CHARTVIEW_MENU-1);
+            }
+          }else if(down && !up){
+            if(selMenuElem < (CHARTVIEW_ENUM_LENGTH-1)){
+              state->mouseoverElement++;
+            }else{
+              state->mouseoverElement = (uint8_t)(UIELEM_CHARTVIEW_MENU-CHARTVIEW_ENUM_LENGTH);
+            }
+          }else if((left && !right)||(right && !left)){
+            if((state->ds.shownElements & (1U << UIELEM_CHARTVIEW_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_CHARTVIEW_MENU_SHOW]==0.0f)){
+              uiElemClickAction(dat,state,rdat,0,UIELEM_MENU_BUTTON); //open the primary menu
+            }
+          }
         }
-        state->ds.timeSincePanStart = 0.0f;
-        state->ds.totalPanTime = CHART_KEY_PAN_TIME;
-        state->ds.panInProgress = 1;
-        state->ds.panFinished = 0;
-      }else if(right && !left){
-        state->ds.chartPanStartX = state->ds.chartPosX;
-        state->ds.chartPanStartY = state->ds.chartPosY;
-        state->ds.chartPanToX = state->ds.chartPosX + (CHART_PAN_DIST/state->ds.chartZoomScale);
-        if(state->ds.panInProgress == 0){
-          state->ds.chartPanToY = state->ds.chartPosY;
+      }else{
+        if(left && !right){
+          state->ds.chartPanStartX = state->ds.chartPosX;
+          state->ds.chartPanStartY = state->ds.chartPosY;
+          state->ds.chartPanToX = state->ds.chartPosX - (CHART_PAN_DIST/state->ds.chartZoomScale);
+          if(state->ds.panInProgress == 0){
+            state->ds.chartPanToY = state->ds.chartPosY;
+          }
+          if(state->ds.chartPanToX <= (-0.25f*getChartWidthN(&state->ds))){
+            state->ds.chartPanToX = (-0.25f*getChartWidthN(&state->ds));
+          }
+          state->ds.timeSincePanStart = 0.0f;
+          state->ds.totalPanTime = CHART_KEY_PAN_TIME;
+          state->ds.panInProgress = 1;
+          state->ds.panFinished = 0;
+        }else if(right && !left){
+          state->ds.chartPanStartX = state->ds.chartPosX;
+          state->ds.chartPanStartY = state->ds.chartPosY;
+          state->ds.chartPanToX = state->ds.chartPosX + (CHART_PAN_DIST/state->ds.chartZoomScale);
+          if(state->ds.panInProgress == 0){
+            state->ds.chartPanToY = state->ds.chartPosY;
+          }
+          if(state->ds.chartPanToX >= (dat->ndat.maxN+(0.25f*getChartWidthN(&state->ds)))){
+            state->ds.chartPanToX = dat->ndat.maxN+(0.25f*getChartWidthN(&state->ds));
+          }
+          state->ds.timeSincePanStart = 0.0f;
+          state->ds.totalPanTime = CHART_KEY_PAN_TIME;
+          state->ds.panInProgress = 1;
+          state->ds.panFinished = 0;
         }
-        if(state->ds.chartPanToX >= (dat->ndat.maxN+(0.25f*getChartWidthN(&state->ds)))){
-          state->ds.chartPanToX = dat->ndat.maxN+(0.25f*getChartWidthN(&state->ds));
+        if(up && !down){
+          state->ds.chartPanStartX = state->ds.chartPosX;
+          state->ds.chartPanStartY = state->ds.chartPosY;
+          if(state->ds.panInProgress == 0){
+            state->ds.chartPanToX = state->ds.chartPosX;
+          }
+          state->ds.chartPanToY = state->ds.chartPosY + (CHART_PAN_DIST/state->ds.chartZoomScale);
+          if(state->ds.chartPanToY >= (dat->ndat.maxZ+(0.25f*getChartHeightZ(&state->ds)))){
+            state->ds.chartPanToY = dat->ndat.maxZ+(0.25f*getChartHeightZ(&state->ds));
+          }
+          state->ds.timeSincePanStart = 0.0f;
+          state->ds.totalPanTime = CHART_KEY_PAN_TIME;
+          state->ds.panInProgress = 1;
+          state->ds.panFinished = 0;
+          //SDL_Log("pan start: [%0.2f %0.2f], pan to: [%0.2f %0.2f]\n",(double)state->ds.chartPanStartX,(double)state->ds.chartPanStartY,(double)state->ds.chartPanToX,(double)state->ds.chartPanToY);
+        }else if(down && !up){
+          state->ds.chartPanStartX = state->ds.chartPosX;
+          state->ds.chartPanStartY = state->ds.chartPosY;
+          if(state->ds.panInProgress == 0){
+            state->ds.chartPanToX = state->ds.chartPosX;
+          }
+          state->ds.chartPanToY = state->ds.chartPosY - (CHART_PAN_DIST/state->ds.chartZoomScale);
+          if(state->ds.chartPanToY <= (-0.25f*getChartHeightZ(&state->ds))){
+            state->ds.chartPanToY = (-0.25f*getChartHeightZ(&state->ds));
+          }
+          state->ds.timeSincePanStart = 0.0f;
+          state->ds.totalPanTime = CHART_KEY_PAN_TIME;
+          state->ds.panInProgress = 1;
+          state->ds.panFinished = 0;
         }
-        state->ds.timeSincePanStart = 0.0f;
-        state->ds.totalPanTime = CHART_KEY_PAN_TIME;
-        state->ds.panInProgress = 1;
-        state->ds.panFinished = 0;
-      }
-      if(up && !down){
-        state->ds.chartPanStartX = state->ds.chartPosX;
-        state->ds.chartPanStartY = state->ds.chartPosY;
-        if(state->ds.panInProgress == 0){
-          state->ds.chartPanToX = state->ds.chartPosX;
-        }
-        state->ds.chartPanToY = state->ds.chartPosY + (CHART_PAN_DIST/state->ds.chartZoomScale);
-        if(state->ds.chartPanToY >= (dat->ndat.maxZ+(0.25f*getChartHeightZ(&state->ds)))){
-          state->ds.chartPanToY = dat->ndat.maxZ+(0.25f*getChartHeightZ(&state->ds));
-        }
-        state->ds.timeSincePanStart = 0.0f;
-        state->ds.totalPanTime = CHART_KEY_PAN_TIME;
-        state->ds.panInProgress = 1;
-        state->ds.panFinished = 0;
-        //SDL_Log("pan start: [%0.2f %0.2f], pan to: [%0.2f %0.2f]\n",(double)state->ds.chartPanStartX,(double)state->ds.chartPanStartY,(double)state->ds.chartPanToX,(double)state->ds.chartPanToY);
-      }else if(down && !up){
-        state->ds.chartPanStartX = state->ds.chartPosX;
-        state->ds.chartPanStartY = state->ds.chartPosY;
-        if(state->ds.panInProgress == 0){
-          state->ds.chartPanToX = state->ds.chartPosX;
-        }
-        state->ds.chartPanToY = state->ds.chartPosY - (CHART_PAN_DIST/state->ds.chartZoomScale);
-        if(state->ds.chartPanToY <= (-0.25f*getChartHeightZ(&state->ds))){
-          state->ds.chartPanToY = (-0.25f*getChartHeightZ(&state->ds));
-        }
-        state->ds.timeSincePanStart = 0.0f;
-        state->ds.totalPanTime = CHART_KEY_PAN_TIME;
-        state->ds.panInProgress = 1;
-        state->ds.panFinished = 0;
       }
     }else if(altleft || altright || altup || altdown){
+
+      //close any menus
+      if((state->ds.shownElements & (1U << UIELEM_PRIMARY_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_PRIMARY_MENU_HIDE]==0.0f)){
+        //close the primary menu
+        uiElemClickAction(dat,state,rdat,0,UIELEM_MENU_BUTTON);
+      }else if((state->ds.shownElements & (1U << UIELEM_CHARTVIEW_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_CHARTVIEW_MENU_HIDE]==0.0f)){
+        //close the chart view menu
+        uiElemClickAction(dat,state,rdat,0,UIELEM_CHARTVIEW_BUTTON);
+      }
       
       if(state->chartSelectedNucl == MAXNUMNUCL){
         //select nucleus
@@ -209,7 +279,23 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
     }
 
   }
-  if(state->inputFlags & (1U << INPUT_BACK)){
+  if(state->inputFlags & (1U << INPUT_SELECT)){
+    if((state->ds.shownElements & (1U << UIELEM_PRIMARY_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_PRIMARY_MENU_HIDE]==0.0f)){
+      //select primary menu button
+      if((state->mouseoverElement < UIELEM_PRIMARY_MENU)&&(state->mouseoverElement >= (UIELEM_PRIMARY_MENU-PRIMARYMENU_ENUM_LENGTH))){
+        state->mouseholdElement = state->mouseoverElement;
+        uiElemClickAction(dat,state,rdat,0,state->mouseoverElement);
+      }
+    }else if((state->ds.shownElements & (1U << UIELEM_CHARTVIEW_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_CHARTVIEW_MENU_HIDE]==0.0f)){
+      //select chart view menu button
+      if((state->mouseoverElement < UIELEM_CHARTVIEW_MENU)&&(state->mouseoverElement >= (UIELEM_CHARTVIEW_MENU-CHARTVIEW_ENUM_LENGTH))){
+        state->mouseholdElement = state->mouseoverElement;
+        uiElemClickAction(dat,state,rdat,0,state->mouseoverElement);
+      }
+    }else if((state->ds.shownElements & (1U << UIELEM_NUCL_INFOBOX))&&(state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_SHOW]==0.0f)&&(state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_EXPAND]==0.0f)){
+      uiElemClickAction(dat,state,rdat,0,UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON);
+    }
+  }else if(state->inputFlags & (1U << INPUT_BACK)){
     //escape open menus
     //handle modal dialogs first
     if((state->ds.shownElements & (1U << UIELEM_ABOUT_BOX))&&(state->ds.timeLeftInUIAnimation[UIANIM_MODAL_BOX_HIDE]==0.0f)){
@@ -239,80 +325,84 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
     }else if((state->uiState == UISTATE_DEFAULT)&&(state->ds.timeLeftInUIAnimation[UIANIM_PRIMARY_MENU_SHOW]==0.0f)){
       //if nothing else is going on, open the primary menu
       uiElemClickAction(dat,state,rdat,0,UIELEM_MENU_BUTTON);
+      state->mouseholdElement = UIELEM_ENUM_LENGTH; //remove any previous selection highlight
     }
   }
 
   /* Handle mouse input */
+  if(state->lastInputType == INPUT_TYPE_MOUSE){
 
-  state->mouseoverElement = UIELEM_ENUM_LENGTH; //by default, no element is moused over
-  state->mouseholdElement = UIELEM_ENUM_LENGTH;
+    state->mouseoverElement = UIELEM_ENUM_LENGTH; //by default, no element is moused over
+    state->mouseholdElement = UIELEM_ENUM_LENGTH;
 
-  if(state->ds.dragInProgress == 0){
-    for(uint8_t i=0; i<UIELEM_ENUM_LENGTH; i++){ //ordering in ui_element_enum defines order in which UI elements receive input
-      if(state->interactableElement & (uint32_t)(1U << i)){
-        if((state->mouseHoldStartPosXPx >= (state->ds.uiElemPosX[i]-state->ds.uiElemExtMinusX[i]))&&(state->mouseHoldStartPosXPx < (state->ds.uiElemPosX[i]+state->ds.uiElemWidth[i]+state->ds.uiElemExtPlusX[i]))&&(state->mouseHoldStartPosYPx >= (state->ds.uiElemPosY[i]-state->ds.uiElemExtMinusY[i]))&&(state->mouseHoldStartPosYPx < (state->ds.uiElemPosY[i]+state->ds.uiElemHeight[i]+state->ds.uiElemExtPlusY[i]))){
-          state->mouseholdElement = i;
-          //SDL_Log("Holding element %u\n",i);
-          uiElemHoldAction(dat,state,state->mouseholdElement);
-        }
-        if((state->mouseXPx >= (state->ds.uiElemPosX[i]-state->ds.uiElemExtMinusX[i]))&&(state->mouseXPx < (state->ds.uiElemPosX[i]+state->ds.uiElemWidth[i]+state->ds.uiElemExtPlusX[i]))&&(state->mouseYPx >= (state->ds.uiElemPosY[i]-state->ds.uiElemExtMinusY[i]))&&(state->mouseYPx < (state->ds.uiElemPosY[i]+state->ds.uiElemHeight[i]+state->ds.uiElemExtPlusY[i]))){
-          state->mouseoverElement = i;
-          //SDL_Log("mouseover element: %u\n",i);
-          if((state->mouseClickPosXPx >= (state->ds.uiElemPosX[i]-state->ds.uiElemExtMinusX[i]))&&(state->mouseClickPosXPx < (state->ds.uiElemPosX[i]+state->ds.uiElemWidth[i]+state->ds.uiElemExtPlusX[i]))&&(state->mouseClickPosYPx >= (state->ds.uiElemPosY[i]-state->ds.uiElemExtMinusY[i]))&&(state->mouseClickPosYPx < (state->ds.uiElemPosY[i]+state->ds.uiElemHeight[i]+state->ds.uiElemExtPlusY[i]))){
-            //take action
-            uiElemClickAction(dat,state,rdat,0,i); //data_ops.c
-            //SDL_Log("Clicked element %u\n",i);
-            return;
+    if(state->ds.dragInProgress == 0){
+      for(uint8_t i=0; i<UIELEM_ENUM_LENGTH; i++){ //ordering in ui_element_enum defines order in which UI elements receive input
+        if(state->interactableElement & (uint32_t)(1U << i)){
+          if((state->mouseHoldStartPosXPx >= (state->ds.uiElemPosX[i]-state->ds.uiElemExtMinusX[i]))&&(state->mouseHoldStartPosXPx < (state->ds.uiElemPosX[i]+state->ds.uiElemWidth[i]+state->ds.uiElemExtPlusX[i]))&&(state->mouseHoldStartPosYPx >= (state->ds.uiElemPosY[i]-state->ds.uiElemExtMinusY[i]))&&(state->mouseHoldStartPosYPx < (state->ds.uiElemPosY[i]+state->ds.uiElemHeight[i]+state->ds.uiElemExtPlusY[i]))){
+            state->mouseholdElement = i;
+            //SDL_Log("Holding element %u\n",i);
+            uiElemHoldAction(dat,state,state->mouseholdElement);
           }
-          break;
+          if((state->mouseXPx >= (state->ds.uiElemPosX[i]-state->ds.uiElemExtMinusX[i]))&&(state->mouseXPx < (state->ds.uiElemPosX[i]+state->ds.uiElemWidth[i]+state->ds.uiElemExtPlusX[i]))&&(state->mouseYPx >= (state->ds.uiElemPosY[i]-state->ds.uiElemExtMinusY[i]))&&(state->mouseYPx < (state->ds.uiElemPosY[i]+state->ds.uiElemHeight[i]+state->ds.uiElemExtPlusY[i]))){
+            state->mouseoverElement = i;
+            //SDL_Log("mouseover element: %u\n",i);
+            if((state->mouseClickPosXPx >= (state->ds.uiElemPosX[i]-state->ds.uiElemExtMinusX[i]))&&(state->mouseClickPosXPx < (state->ds.uiElemPosX[i]+state->ds.uiElemWidth[i]+state->ds.uiElemExtPlusX[i]))&&(state->mouseClickPosYPx >= (state->ds.uiElemPosY[i]-state->ds.uiElemExtMinusY[i]))&&(state->mouseClickPosYPx < (state->ds.uiElemPosY[i]+state->ds.uiElemHeight[i]+state->ds.uiElemExtPlusY[i]))){
+              //take action
+              uiElemClickAction(dat,state,rdat,0,i); //data_ops.c
+              //SDL_Log("Clicked element %u\n",i);
+              return;
+            }
+            break;
+          }
         }
+      }
+
+      //handle click and drag on the chart of nuclides
+      if((state->uiState == UISTATE_DEFAULT)&&(state->mouseholdElement == UIELEM_ENUM_LENGTH)&&(state->mouseHoldStartPosXPx >= 0.0f)){
+        state->ds.chartDragStartX = state->ds.chartPosX;
+        state->ds.chartDragStartY = state->ds.chartPosY;
+        state->ds.chartDragStartMouseX = state->mouseXPx;
+        state->ds.chartDragStartMouseY = state->mouseYPx;
+        state->ds.dragInProgress = 1;
+        //SDL_Log("start drag\n");
       }
     }
 
-    //handle click and drag on the chart of nuclides
-    if((state->uiState == UISTATE_DEFAULT)&&(state->mouseholdElement == UIELEM_ENUM_LENGTH)&&(state->mouseHoldStartPosXPx >= 0.0f)){
-      state->ds.chartDragStartX = state->ds.chartPosX;
-      state->ds.chartDragStartY = state->ds.chartPosY;
-      state->ds.chartDragStartMouseX = state->mouseXPx;
-      state->ds.chartDragStartMouseY = state->mouseYPx;
-      state->ds.dragInProgress = 1;
-      //SDL_Log("start drag\n");
+    //check for mouse release
+    if(state->mouseHoldStartPosXPx < 0.0f){
+      //SDL_Log("Mouse released.\n");
+      state->ds.dragFinished = 1;
     }
-  }
 
-  //check for mouse release
-  if(state->mouseHoldStartPosXPx < 0.0f){
-    //SDL_Log("Mouse released.\n");
-    state->ds.dragFinished = 1;
-  }
+    uint32_t doubleClick = (state->inputFlags & (1U << INPUT_DOUBLECLICK));
 
-  uint32_t doubleClick = (state->inputFlags & (1U << INPUT_DOUBLECLICK));
-
-  //only get here if no button was clicked
-  //check if a click was made outside of any button
-  //SDL_Log("click pos x: %f, drag start: [%f %f]\n",(double)state->mouseClickPosXPx,(double)state->ds.chartDragStartMouseX,(double)state->ds.chartDragStartMouseY);
-  if(state->uiState == UISTATE_DEFAULT){
-    if((state->mouseClickPosXPx >= 0.0f) && (fabsf(state->ds.chartDragStartMouseX - state->mouseXPx) < 5.0f) && (fabsf(state->ds.chartDragStartMouseY - state->mouseYPx) < 5.0f) ){
-      //unclick (or click on chart view)
-      if(doubleClick){
-        uiElemClickAction(dat,state,rdat,1,UIELEM_ENUM_LENGTH);
-      }else{
+    //only get here if no button was clicked
+    //check if a click was made outside of any button
+    //SDL_Log("click pos x: %f, drag start: [%f %f]\n",(double)state->mouseClickPosXPx,(double)state->ds.chartDragStartMouseX,(double)state->ds.chartDragStartMouseY);
+    if(state->uiState == UISTATE_DEFAULT){
+      if((state->mouseClickPosXPx >= 0.0f) && (fabsf(state->ds.chartDragStartMouseX - state->mouseXPx) < 5.0f) && (fabsf(state->ds.chartDragStartMouseY - state->mouseYPx) < 5.0f) ){
+        //unclick (or click on chart view)
+        if(doubleClick){
+          uiElemClickAction(dat,state,rdat,1,UIELEM_ENUM_LENGTH);
+        }else{
+          uiElemClickAction(dat,state,rdat,0,UIELEM_ENUM_LENGTH);
+        }
+      }
+    }else if(state->uiState == UISTATE_FULLLEVELINFO){
+      if(state->mouseClickPosXPx >= 0.0f){
+        //clicked outside of interactable items on the full level info screen
         uiElemClickAction(dat,state,rdat,0,UIELEM_ENUM_LENGTH);
       }
-    }
-  }else if(state->uiState == UISTATE_FULLLEVELINFO){
-    if(state->mouseClickPosXPx >= 0.0f){
-      //clicked outside of interactable items on the full level info screen
-      uiElemClickAction(dat,state,rdat,0,UIELEM_ENUM_LENGTH);
-    }
-  }else if(state->uiState == UISTATE_PREFS_DIALOG){
-    if(state->mouseClickPosXPx >= 0.0f){
-      if((state->ds.shownElements & (1U << UIELEM_PREFS_UISCALE_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_UISCALE_MENU_HIDE]==0.0f)){
-        //close the UI scale menu
-        uiElemClickAction(dat,state,rdat,0,UIELEM_PREFS_DIALOG_UISCALE_DROPDOWN);
+    }else if(state->uiState == UISTATE_PREFS_DIALOG){
+      if(state->mouseClickPosXPx >= 0.0f){
+        if((state->ds.shownElements & (1U << UIELEM_PREFS_UISCALE_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_UISCALE_MENU_HIDE]==0.0f)){
+          //close the UI scale menu
+          uiElemClickAction(dat,state,rdat,0,UIELEM_PREFS_DIALOG_UISCALE_DROPDOWN);
+        }
       }
     }
   }
+  
 
   /* Handle zoom input */
   if((state->inputFlags & (1U << INPUT_ZOOM))&&(fabsf(state->zoomDeltaVal)>0.05f)){
@@ -568,9 +658,7 @@ void processSingleEvent(app_data *restrict dat, app_state *restrict state, resou
           updateUIScale(dat,state,rdat);
           break;
         case SDL_SCANCODE_RETURN:
-          if((state->ds.shownElements & (1U << UIELEM_NUCL_INFOBOX))&&(state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_SHOW]==0.0f)&&(state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_EXPAND]==0.0f)){
-            uiElemClickAction(dat,state,rdat,0,UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON);
-          }
+          state->inputFlags |= (1U << INPUT_SELECT);
           break;
         case SDL_SCANCODE_P:
           state->ds.drawPerformanceStats = !state->ds.drawPerformanceStats;
@@ -695,6 +783,7 @@ void processFrameEvents(app_data *restrict dat, app_state *restrict state, resou
     state->mouseClickPosXPx = -1.0f;
     state->mouseClickPosYPx = -1.0f;
     state->inputFlags &= ~(1U << INPUT_ZOOM);
+    state->inputFlags &= ~(1U << INPUT_SELECT);
     state->inputFlags &= ~(1U << INPUT_BACK);
     if(state->inputFlags & (1U << INPUT_DOUBLECLICK)){
       state->inputFlags &= ~(1U << INPUT_DOUBLECLICK);

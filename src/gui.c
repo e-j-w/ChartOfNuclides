@@ -1327,6 +1327,7 @@ void drawChartViewMenu(const app_data *restrict dat, const app_state *restrict s
   drawPanelBG(rdat,drawRect,alpha);
   
   //draw menu item highlight
+  SDL_FColor highlightCol;
   if(state->ds.timeLeftInUIAnimation[UIANIM_CHARTVIEW_MENU_HIDE]==0.0f){
     for(uint8_t i=1;i<=CHARTVIEW_ENUM_LENGTH;i++){
       drawRect.x = state->ds.uiElemPosX[UIELEM_CHARTVIEW_MENU-i];
@@ -1335,10 +1336,14 @@ void drawChartViewMenu(const app_data *restrict dat, const app_state *restrict s
       drawRect.h = state->ds.uiElemHeight[UIELEM_CHARTVIEW_MENU-i];
       switch(getHighlightState(state,UIELEM_CHARTVIEW_MENU-i)){
         case HIGHLIGHT_SELECTED:
-          drawFlatRect(rdat,drawRect,dat->rules.themeRules.modSelectedCol);
+          highlightCol = dat->rules.themeRules.modSelectedCol;
+          highlightCol.a = alpha;
+          drawFlatRect(rdat,drawRect,highlightCol);
           break;
         case HIGHLIGHT_MOUSEOVER:
-          drawFlatRect(rdat,drawRect,dat->rules.themeRules.modMouseOverCol);
+          highlightCol = dat->rules.themeRules.modMouseOverCol;
+          highlightCol.a = alpha;
+          drawFlatRect(rdat,drawRect,highlightCol);
           break;
         case HIGHLIGHT_NORMAL:
         default:
@@ -1390,6 +1395,7 @@ void drawPrimaryMenu(const app_data *restrict dat, const app_state *restrict sta
   drawPanelBG(rdat,drawRect,alpha);
   
   //draw menu item highlight
+  SDL_FColor highlightCol;
   for(uint8_t i=1;i<=2;i++){
     drawRect.x = state->ds.uiElemPosX[UIELEM_PRIMARY_MENU-i];
     drawRect.y = (state->ds.uiElemPosY[UIELEM_PRIMARY_MENU-i] + yOffset);
@@ -1397,10 +1403,14 @@ void drawPrimaryMenu(const app_data *restrict dat, const app_state *restrict sta
     drawRect.h = state->ds.uiElemHeight[UIELEM_PRIMARY_MENU-i];
     switch(getHighlightState(state,UIELEM_PRIMARY_MENU-i)){
       case HIGHLIGHT_SELECTED:
-        drawFlatRect(rdat,drawRect,dat->rules.themeRules.modSelectedCol);
+        highlightCol = dat->rules.themeRules.modSelectedCol;
+        highlightCol.a = alpha;
+        drawFlatRect(rdat,drawRect,highlightCol);
         break;
       case HIGHLIGHT_MOUSEOVER:
-        drawFlatRect(rdat,drawRect,dat->rules.themeRules.modMouseOverCol);
+        highlightCol = dat->rules.themeRules.modMouseOverCol;
+        highlightCol.a = alpha;
+        drawFlatRect(rdat,drawRect,highlightCol);
         break;
       case HIGHLIGHT_NORMAL:
       default:
