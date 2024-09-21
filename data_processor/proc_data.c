@@ -74,7 +74,7 @@ int main(int argc, char *argv[]){
   setbuf(stdout,NULL); //needed to show printf output on Windows
   #endif
 
-  if(SDL_Init(0) != 0){
+  if(SDL_Init(0)==0){
     SDL_Log("Cannot initialize SDL: %s\n",SDL_GetError());
     return 0;
   }
@@ -118,7 +118,7 @@ int main(int argc, char *argv[]){
 
   SDL_Log("Asset writing complete.\n");
   
-  if(SDL_CloseIO(out)!=0){
+  if(SDL_CloseIO(out)==0){
     SDL_Log("ERROR: cannot close output data file - %s.\n",SDL_GetError());
   }
 

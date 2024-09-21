@@ -332,6 +332,8 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
   /* Handle mouse input */
   if(state->lastInputType == INPUT_TYPE_MOUSE){
 
+    SDL_ShowCursor();
+
     state->mouseoverElement = UIELEM_ENUM_LENGTH; //by default, no element is moused over
     state->mouseholdElement = UIELEM_ENUM_LENGTH;
 
@@ -401,6 +403,8 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
         }
       }
     }
+  }else{
+    SDL_HideCursor();
   }
   
 

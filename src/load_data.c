@@ -160,7 +160,7 @@ int importAppData(app_data *restrict dat, resource_data *restrict rdat){
   SDL_SetSurfaceRLE(surface, 1); //enable RLE acceleration
   //upload texture atlas into GPU memory
   rdat->uiThemeTex = SDL_CreateTextureFromSurface(rdat->renderer,surface);
-  SDL_SetTextureScaleMode(rdat->uiThemeTex,SDL_SCALEMODE_BEST);
+  SDL_SetTextureScaleMode(rdat->uiThemeTex,SDL_SCALEMODE_LINEAR);
   SDL_DestroySurface(surface);
   
   //load font
@@ -205,7 +205,7 @@ int importAppData(app_data *restrict dat, resource_data *restrict rdat){
     return -1;
   }
   
-  if(SDL_CloseIO(inp)!=0){
+  if(SDL_CloseIO(inp)==0){
     SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,"Error","App data file I/O error.",rdat->window);
     SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"importAppData - failed to close data file %s\n",rdat->appDataFilepath);
     return -1;
@@ -275,7 +275,7 @@ int regenerateThemeAndFontCache(app_data *restrict dat, resource_data *restrict 
   SDL_SetSurfaceRLE(surface, 1); //enable RLE acceleration
   //upload texture atlas into GPU memory
   rdat->uiThemeTex = SDL_CreateTextureFromSurface(rdat->renderer,surface);
-  SDL_SetTextureScaleMode(rdat->uiThemeTex,SDL_SCALEMODE_BEST);
+  SDL_SetTextureScaleMode(rdat->uiThemeTex,SDL_SCALEMODE_LINEAR);
   SDL_DestroySurface(surface);
 
   //load font
@@ -307,7 +307,7 @@ int regenerateThemeAndFontCache(app_data *restrict dat, resource_data *restrict 
     }
   }
 
-  if(SDL_CloseIO(inp)!=0){
+  if(SDL_CloseIO(inp)==0){
     SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,"Error","App data file I/O error.",rdat->window);
     SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"regenerateFontCache - failed to close data file %s\n",rdat->appDataFilepath);
     return -1;

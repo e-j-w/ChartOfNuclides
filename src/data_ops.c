@@ -2424,13 +2424,13 @@ void handleScreenGraphicsMode(app_data *restrict dat, app_state *restrict state,
   SDL_SetRenderVSync(rdat->renderer,1); //vsync always enabled
 
   if(state->ds.windowFullscreenMode){
-    if(SDL_SetWindowFullscreen(rdat->window,SDL_TRUE) != 0){
+    if(SDL_SetWindowFullscreen(rdat->window,1) == 0){
       SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,"cannot set fullscreen mode - %s\n",SDL_GetError());
     }
     updateWindowRes(dat,state,rdat);
     //SDL_Log("Full screen display mode.  Window resolution: %u x %u.\n",state->ds.windowXRes,state->ds.windowYRes);
   }else{
-    if(SDL_SetWindowFullscreen(rdat->window,0) != 0){
+    if(SDL_SetWindowFullscreen(rdat->window,0) == 0){
       SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,"cannot set windowed mode - %s\n",SDL_GetError());
     }
     updateWindowRes(dat,state,rdat);

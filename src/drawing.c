@@ -30,10 +30,10 @@ void setUITexColAlpha(resource_data *restrict rdat, const float r, const float g
   /*if((r!=255)||(g!=255)||(b!=255)){
     printf("Color mod: %u %u %u\n",r,g,b);
   }*/
-  if(SDL_SetTextureAlphaModFloat(rdat->uiThemeTex,alpha)<0){
+  if(SDL_SetTextureAlphaModFloat(rdat->uiThemeTex,alpha)==0){
     SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,"setUITexColAlpha - cannot set UI texture alpha - %s\n",SDL_GetError());
   }
-  if(SDL_SetTextureColorModFloat(rdat->uiThemeTex,r,g,b)<0){
+  if(SDL_SetTextureColorModFloat(rdat->uiThemeTex,r,g,b)==0){
     SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,"setUITexColAlpha - cannot set UI texture color modulation - %s\n",SDL_GetError());
   }
 }
@@ -94,7 +94,7 @@ void drawScrollBar(const ui_theme_rules *restrict uirules, resource_data *restri
 void drawPanelBG(resource_data *restrict rdat, const SDL_FRect panelRect, const float alpha){
 
   if(alpha != 1.0f){
-    if(SDL_SetTextureAlphaModFloat(rdat->uiThemeTex,alpha)<0){
+    if(SDL_SetTextureAlphaModFloat(rdat->uiThemeTex,alpha)==false){
       SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,"drawPanelBG - cannot set UI texture alpha - %s\n",SDL_GetError());
     }
   }
@@ -112,7 +112,7 @@ void drawPanelBG(resource_data *restrict rdat, const SDL_FRect panelRect, const 
   SDL_RenderTexture9Grid(rdat->renderer,rdat->uiThemeTex,&srcRect,nineSliceSize,nineSliceSize,nineSliceSize,nineSliceSize,0.0f,&destRect);
   
   if(alpha != 1.0f){
-    if(SDL_SetTextureAlphaModFloat(rdat->uiThemeTex,1.0f)<0){
+    if(SDL_SetTextureAlphaModFloat(rdat->uiThemeTex,1.0f)==0){
       SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,"drawPanelBG - cannot reset UI texture alpha - %s\n",SDL_GetError());
     }
   }
@@ -237,7 +237,7 @@ void drawIcon(const ui_theme_rules *restrict uirules, resource_data *restrict rd
   drawPos.x = (float)(x*rdat->uiDPIScale) + (float)(w*rdat->uiDPIScale)/2.0f - drawPos.w/2.0f;
   drawPos.y = (float)(y*rdat->uiDPIScale) + (float)(UI_TILE_SIZE*rdat->uiScale)/2.0f - drawPos.h/2.0f;
   //printf("drawPos: %i %i %i %i\n",drawPos.x,drawPos.y,drawPos.w,drawPos.h);
-  if(SDL_SetTextureAlphaMod(rdat->uiThemeTex,alpha)<0){
+  if(SDL_SetTextureAlphaMod(rdat->uiThemeTex,alpha)==0){
     SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,"drawIcon - cannot set texture alpha - %s\n",SDL_GetError());
   }
   SDL_RenderTexture(rdat->renderer,rdat->uiThemeTex,&srcRect,&drawPos);

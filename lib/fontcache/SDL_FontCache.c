@@ -1147,9 +1147,9 @@ Uint8 FC_LoadFont_RW(FC_Font* font, FC_Target* renderer, SDL_IOStream* file_iost
     if(font == NULL)
         return 0;
 
-    if(!TTF_WasInit() && TTF_Init() < 0)
+    if(!TTF_WasInit() && TTF_Init() == false)
     {
-        FC_Log("Unable to initialize SDL_ttf: %s \n", TTF_GetError());
+        FC_Log("Unable to initialize SDL_ttf: %s \n", SDL_GetError());
         if(own_rwops)
             SDL_CloseIO(file_iostream_ttf);
         return 0;
@@ -1159,7 +1159,7 @@ Uint8 FC_LoadFont_RW(FC_Font* font, FC_Target* renderer, SDL_IOStream* file_iost
 
     if(ttf == NULL)
     {
-        FC_Log("Unable to load TrueType font: %s \n", TTF_GetError());
+        FC_Log("Unable to load TrueType font: %s \n", SDL_GetError());
         if(own_rwops)
             SDL_CloseIO(file_iostream_ttf);
         return 0;
