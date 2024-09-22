@@ -33,9 +33,12 @@ void initializeTempState(const app_data *restrict dat, app_state *restrict state
   state->mouseYPx = -1;
   state->mouseHoldStartPosXPx = -1;
   state->mouseHoldStartPosYPx = -1;
-  state->lastAxisValX = 0;
-  state->lastAxisValY = 0;
-  state->activeAxis = 0; //the last used axis
+  state->lastAxisValLX = 0;
+  state->lastAxisValLY = 0;
+	state->lastAxisValRX = 0;
+  state->lastAxisValRY = 0;
+  state->activeAxisX = 0;
+	state->activeAxisY = 0;
   state->lastInputType = INPUT_TYPE_KEYBOARD; //default input type
 	state->kbdModVal = KBD_MOD_NONE;
 	state->mouseoverElement = UIELEM_ENUM_LENGTH;

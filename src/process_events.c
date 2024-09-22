@@ -637,8 +637,6 @@ void processSingleEvent(app_data *restrict dat, app_state *restrict state, resou
           if(state->uiState == UISTATE_CHARTONLY){
             //open menu
             state->inputFlags |= (1U << INPUT_BACK);
-          }else{
-            state->inputFlags |= (1U << INPUT_SELECT);
           }
           break;
         case SDL_GAMEPAD_BUTTON_NORTH:
@@ -652,7 +650,9 @@ void processSingleEvent(app_data *restrict dat, app_state *restrict state, resou
           break;
         case SDL_GAMEPAD_BUTTON_BACK:
         case SDL_GAMEPAD_BUTTON_SOUTH:
-          state->inputFlags |= (1U << INPUT_BACK);
+          if(state->uiState != UISTATE_CHARTONLY){
+            state->inputFlags |= (1U << INPUT_BACK);
+          }
           break;
         default:
           break;
@@ -885,51 +885,99 @@ void processSingleEvent(app_data *restrict dat, app_state *restrict state, resou
       //evtCnt++;
       switch(evt.gaxis.axis){
         case SDL_GAMEPAD_AXIS_LEFTX:
-        case SDL_GAMEPAD_AXIS_RIGHTX:
           if(evt.gaxis.value > state->gamepadDeadzone){
-            if(state->lastAxisValX==0){
+            if(state->lastAxisValLX==0){
               //SDL_Log("Gamepad right once.\n");
               state->lastInputType = INPUT_TYPE_GAMEPAD; //set gamepad input
               state->inputFlags |= (1U << INPUT_RIGHT);
             }
-            state->lastAxisValX = evt.gaxis.value;
-            state->activeAxis = evt.gaxis.axis;
+            state->lastAxisValLX = evt.gaxis.value;
+            state->activeAxisX = evt.gaxis.axis;
           }else if(evt.gaxis.value < -1*state->gamepadDeadzone){
-            if(state->lastAxisValX==0){
+            if(state->lastAxisValLX==0){
               //SDL_Log("Gamepad left once.\n");
               state->lastInputType = INPUT_TYPE_GAMEPAD; //set gamepad input
               state->inputFlags |= (1U << INPUT_LEFT);
             }
-            state->lastAxisValX = evt.gaxis.value;
-            state->activeAxis = evt.gaxis.axis;
-          }else if(state->lastInputType == INPUT_TYPE_GAMEPAD){
+            state->lastAxisValLX = evt.gaxis.value;
+            state->activeAxisX = evt.gaxis.axis;
+          }else if((state->lastInputType == INPUT_TYPE_GAMEPAD)&&(state->activeAxisX == evt.gaxis.axis)){
             //SDL_Log("Stopped gamepad horizontal axis.\n");
-            state->lastAxisValX = 0;
+            state->lastAxisValLX = 0;
+            state->inputFlags &= ~(1U << INPUT_LEFT);
+            state->inputFlags &= ~(1U << INPUT_RIGHT);
+          }
+          break;
+        case SDL_GAMEPAD_AXIS_RIGHTX:
+          //SDL_Log("LR axis val: %i\n",evt.gaxis.value);
+          if(evt.gaxis.value > state->gamepadDeadzone){
+            if(state->lastAxisValRX==0){
+              //SDL_Log("Gamepad right once.\n");
+              state->lastInputType = INPUT_TYPE_GAMEPAD; //set gamepad input
+              state->inputFlags |= (1U << INPUT_RIGHT);
+            }
+            state->lastAxisValRX = evt.gaxis.value;
+            state->activeAxisX = evt.gaxis.axis;
+          }else if(evt.gaxis.value < -1*state->gamepadDeadzone){
+            if(state->lastAxisValRX==0){
+              //SDL_Log("Gamepad left once.\n");
+              state->lastInputType = INPUT_TYPE_GAMEPAD; //set gamepad input
+              state->inputFlags |= (1U << INPUT_LEFT);
+            }
+            state->lastAxisValRX = evt.gaxis.value;
+            state->activeAxisX = evt.gaxis.axis;
+          }else if((state->lastInputType == INPUT_TYPE_GAMEPAD)&&(state->activeAxisX == evt.gaxis.axis)){
+            //SDL_Log("Stopped gamepad horizontal axis.\n");
+            state->lastAxisValRX = 0;
             state->inputFlags &= ~(1U << INPUT_LEFT);
             state->inputFlags &= ~(1U << INPUT_RIGHT);
           }
           break;
         case SDL_GAMEPAD_AXIS_LEFTY:
-        case SDL_GAMEPAD_AXIS_RIGHTY:
           if(evt.gaxis.value > state->gamepadDeadzone){
-            if(state->lastAxisValY==0){
+            if(state->lastAxisValLY==0){
               //SDL_Log("Gamepad down once.\n");
               state->lastInputType = INPUT_TYPE_GAMEPAD; //set gamepad input
               state->inputFlags |= (1U << INPUT_DOWN);
             }
-            state->lastAxisValY = evt.gaxis.value;
-            state->activeAxis = evt.gaxis.axis;
+            state->lastAxisValLY = evt.gaxis.value;
+            state->activeAxisY = evt.gaxis.axis;
           }else if(evt.gaxis.value < -1*state->gamepadDeadzone){
-            if(state->lastAxisValY==0){
+            if(state->lastAxisValLY==0){
               //SDL_Log("Gamepad up once.\n");
               state->lastInputType = INPUT_TYPE_GAMEPAD; //set gamepad input
               state->inputFlags |= (1U << INPUT_UP);
             }
-            state->lastAxisValY = evt.gaxis.value;
-            state->activeAxis = evt.gaxis.axis;
-          }else if(state->lastInputType == INPUT_TYPE_GAMEPAD){
+            state->lastAxisValLY = evt.gaxis.value;
+            state->activeAxisY = evt.gaxis.axis;
+          }else if((state->lastInputType == INPUT_TYPE_GAMEPAD)&&(state->activeAxisY == evt.gaxis.axis)){
             //SDL_Log("Stopped gamepad vertical axis.\n");
-            state->lastAxisValY = 0;
+            state->lastAxisValLY = 0;
+            state->inputFlags &= ~(1U << INPUT_UP);
+            state->inputFlags &= ~(1U << INPUT_DOWN);
+          }
+          break;
+        case SDL_GAMEPAD_AXIS_RIGHTY:
+          //SDL_Log("UD axis val: %i\n",evt.gaxis.value);
+          if(evt.gaxis.value > state->gamepadDeadzone){
+            if(state->lastAxisValRY==0){
+              //SDL_Log("Gamepad down once.\n");
+              state->lastInputType = INPUT_TYPE_GAMEPAD; //set gamepad input
+              state->inputFlags |= (1U << INPUT_DOWN);
+            }
+            state->lastAxisValRY = evt.gaxis.value;
+            state->activeAxisY = evt.gaxis.axis;
+          }else if(evt.gaxis.value < -1*state->gamepadDeadzone){
+            if(state->lastAxisValRY==0){
+              //SDL_Log("Gamepad up once.\n");
+              state->lastInputType = INPUT_TYPE_GAMEPAD; //set gamepad input
+              state->inputFlags |= (1U << INPUT_UP);
+            }
+            state->lastAxisValRY = evt.gaxis.value;
+            state->activeAxisY = evt.gaxis.axis;
+          }else if((state->lastInputType == INPUT_TYPE_GAMEPAD)&&(state->activeAxisY == evt.gaxis.axis)){
+            //SDL_Log("Stopped gamepad vertical axis.\n");
+            state->lastAxisValRY = 0;
             state->inputFlags &= ~(1U << INPUT_UP);
             state->inputFlags &= ~(1U << INPUT_DOWN);
           }
