@@ -138,7 +138,13 @@ void stopUIAnimation(const app_data *restrict dat, app_state *restrict state, co
 			if(!(state->ds.shownElements & (1U << UIELEM_PREFS_DIALOG))){
 				if(!(state->ds.shownElements & (1U << UIELEM_ABOUT_BOX))){
 					if(!(state->ds.shownElements & (1U << UIELEM_CHARTVIEW_MENU))){
-						changeUIState(dat,state,UISTATE_CHARTONLY);
+						if(state->ds.shownElements & (1U << UIELEM_NUCL_INFOBOX)){
+							changeUIState(dat,state,UISTATE_INFOBOX);
+						}else if(state->ds.shownElements & (1U << UIELEM_NUCL_FULLINFOBOX)){
+							changeUIState(dat,state,UISTATE_FULLLEVELINFO);
+						}else{
+							changeUIState(dat,state,UISTATE_CHARTONLY);
+						}
 					}
 				}
 			}
@@ -146,7 +152,13 @@ void stopUIAnimation(const app_data *restrict dat, app_state *restrict state, co
 		case UIANIM_CHARTVIEW_MENU_HIDE:
 			state->ds.shownElements &= (uint32_t)(~(1U << UIELEM_CHARTVIEW_MENU)); //close the menu
 			if(!(state->ds.shownElements & (1U << UIELEM_PRIMARY_MENU))){
-				changeUIState(dat,state,UISTATE_CHARTONLY);
+				if(state->ds.shownElements & (1U << UIELEM_NUCL_INFOBOX)){
+					changeUIState(dat,state,UISTATE_INFOBOX);
+				}else if(state->ds.shownElements & (1U << UIELEM_NUCL_FULLINFOBOX)){
+					changeUIState(dat,state,UISTATE_FULLLEVELINFO);
+				}else{
+					changeUIState(dat,state,UISTATE_CHARTONLY);
+				}
 			}
 			break;
 		case UIANIM_UISCALE_MENU_HIDE:

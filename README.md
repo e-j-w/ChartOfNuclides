@@ -25,7 +25,7 @@ The current version has been tested under Arch Linux and Debian 12 as of Septemb
 
 This will build and install a sandboxed [Flatpak](https://flatpak.org/) package. This is the recommended method for most users, as the Flatpak builder should automatically resolve all dependencies and download all neccessary data files. If you want to avoid installing or using Flatpak, you can do a [manual build](#manual-build) instead.
 
-#### Flatpak build dependencies
+#### Get Flatpak build dependencies
 
 On Arch Linux:
 
@@ -62,17 +62,19 @@ Clean up the build to save disk space (optional):
 rm -rf flatpak_build .flatpak-builder
 ```
 
-To run the application (depending on your desktop environment, it should also be available in the application menu and/or via the application search interface, same as other Flatpak applications):
+The "Chart of Nuclides" application should now be available in your application menu and/or via the application search interface (depending on your desktop environment). Or you can run the application directly from the terminal:
 
 ```
 flatpak run io.github.e_j_w.ChartOfNuclides
 ```
 
-Have fun! To uninstall the application:
+To uninstall the application, run:
 
 ```
 flatpak uninstall io.github.e_j_w.ChartOfNuclides
 ```
+
+Have fun!
 
 ### Manual build
 

@@ -51,131 +51,71 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
   
   const uint8_t chartMovable = ((state->uiState == UISTATE_CHARTONLY)||(state->uiState == UISTATE_CHARTWITHMENU)||(state->uiState == UISTATE_INFOBOX));
 
-  if(chartMovable){
+  if((state->uiState == UISTATE_CHARTONLY)||(state->uiState == UISTATE_INFOBOX)){
 
     //in main chart view, handle chart panning
     //SDL_Log("Processing input, mouseover element: %u\n",state->mouseoverElement);
     
     if(left || right || up || down){
       //SDL_Log("dir: [%u %u %u %u]\n",!(up==0),!(down==0),!(left==0),!(right==0));
-      if(state->clickedUIElem == UIELEM_MENU_BUTTON){
-        //primary menu navigation using arrow keys
-        if((state->mouseoverElement >= UIELEM_PRIMARY_MENU)||(state->mouseoverElement < (UIELEM_PRIMARY_MENU-PRIMARY_MENU_NUM_UIELEMENTS))){
-          //no menu item was selected with the keyboard or highlighted with the mouse previously
-          //select the first menu item
-          state->mouseoverElement = (uint8_t)(UIELEM_PRIMARY_MENU-PRIMARY_MENU_NUM_UIELEMENTS);
-        }else{
-          uint8_t selMenuElem = PRIMARY_MENU_NUM_UIELEMENTS - (UIELEM_PRIMARY_MENU - state->mouseoverElement);
-          if(selMenuElem >= PRIMARY_MENU_NUM_UIELEMENTS){
-            state->mouseoverElement = (uint8_t)(UIELEM_PRIMARY_MENU-PRIMARY_MENU_NUM_UIELEMENTS);
-          }
-          if(up && !down){
-            if(selMenuElem > 0){
-              state->mouseoverElement--;
-            }else{
-              state->mouseoverElement = (uint8_t)(UIELEM_PRIMARY_MENU-1);
-            }
-          }else if(down && !up){
-            if(selMenuElem < (PRIMARY_MENU_NUM_UIELEMENTS-1)){
-              state->mouseoverElement++;
-            }else{
-              state->mouseoverElement = (uint8_t)(UIELEM_PRIMARY_MENU-PRIMARY_MENU_NUM_UIELEMENTS);
-            }
-          }else if((left && !right)||(right && !left)){
-            if((state->ds.shownElements & (1U << UIELEM_PRIMARY_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_PRIMARY_MENU_SHOW]==0.0f)){
-              uiElemClickAction(dat,state,rdat,0,UIELEM_CHARTVIEW_BUTTON); //open the chart view menu
-            }
-          }
+      if(left && !right){
+        state->ds.chartPanStartX = state->ds.chartPosX;
+        state->ds.chartPanStartY = state->ds.chartPosY;
+        state->ds.chartPanToX = state->ds.chartPosX - (CHART_PAN_DIST/state->ds.chartZoomScale);
+        if(state->ds.panInProgress == 0){
+          state->ds.chartPanToY = state->ds.chartPosY;
         }
-      }else if(state->clickedUIElem == UIELEM_CHARTVIEW_BUTTON){
-        //chart view menu navigation using arrow keys
-        if((state->mouseoverElement >= UIELEM_CHARTVIEW_MENU)||(state->mouseoverElement < (UIELEM_CHARTVIEW_MENU-CHARTVIEW_ENUM_LENGTH))){
-          //no menu item was selected with the keyboard or highlighted with the mouse previously
-          //select the first menu item
-          state->mouseoverElement = (uint8_t)(UIELEM_CHARTVIEW_MENU-CHARTVIEW_ENUM_LENGTH);
-        }else{
-          uint8_t selMenuElem = CHARTVIEW_ENUM_LENGTH - (UIELEM_CHARTVIEW_MENU - state->mouseoverElement);
-          if(selMenuElem >= CHARTVIEW_ENUM_LENGTH){
-            state->mouseoverElement = (uint8_t)(UIELEM_CHARTVIEW_MENU-CHARTVIEW_ENUM_LENGTH);
-          }
-          if(up && !down){
-            if(selMenuElem > 0){
-              state->mouseoverElement--;
-            }else{
-              state->mouseoverElement = (uint8_t)(UIELEM_CHARTVIEW_MENU-1);
-            }
-          }else if(down && !up){
-            if(selMenuElem < (CHARTVIEW_ENUM_LENGTH-1)){
-              state->mouseoverElement++;
-            }else{
-              state->mouseoverElement = (uint8_t)(UIELEM_CHARTVIEW_MENU-CHARTVIEW_ENUM_LENGTH);
-            }
-          }else if((left && !right)||(right && !left)){
-            if((state->ds.shownElements & (1U << UIELEM_CHARTVIEW_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_CHARTVIEW_MENU_SHOW]==0.0f)){
-              uiElemClickAction(dat,state,rdat,0,UIELEM_MENU_BUTTON); //open the primary menu
-            }
-          }
+        if(state->ds.chartPanToX <= (-0.25f*getChartWidthN(&state->ds))){
+          state->ds.chartPanToX = (-0.25f*getChartWidthN(&state->ds));
         }
-      }else{
-        if(left && !right){
-          state->ds.chartPanStartX = state->ds.chartPosX;
-          state->ds.chartPanStartY = state->ds.chartPosY;
-          state->ds.chartPanToX = state->ds.chartPosX - (CHART_PAN_DIST/state->ds.chartZoomScale);
-          if(state->ds.panInProgress == 0){
-            state->ds.chartPanToY = state->ds.chartPosY;
-          }
-          if(state->ds.chartPanToX <= (-0.25f*getChartWidthN(&state->ds))){
-            state->ds.chartPanToX = (-0.25f*getChartWidthN(&state->ds));
-          }
-          state->ds.timeSincePanStart = 0.0f;
-          state->ds.totalPanTime = CHART_KEY_PAN_TIME;
-          state->ds.panInProgress = 1;
-          state->ds.panFinished = 0;
-        }else if(right && !left){
-          state->ds.chartPanStartX = state->ds.chartPosX;
-          state->ds.chartPanStartY = state->ds.chartPosY;
-          state->ds.chartPanToX = state->ds.chartPosX + (CHART_PAN_DIST/state->ds.chartZoomScale);
-          if(state->ds.panInProgress == 0){
-            state->ds.chartPanToY = state->ds.chartPosY;
-          }
-          if(state->ds.chartPanToX >= (dat->ndat.maxN+(0.25f*getChartWidthN(&state->ds)))){
-            state->ds.chartPanToX = dat->ndat.maxN+(0.25f*getChartWidthN(&state->ds));
-          }
-          state->ds.timeSincePanStart = 0.0f;
-          state->ds.totalPanTime = CHART_KEY_PAN_TIME;
-          state->ds.panInProgress = 1;
-          state->ds.panFinished = 0;
+        state->ds.timeSincePanStart = 0.0f;
+        state->ds.totalPanTime = CHART_KEY_PAN_TIME;
+        state->ds.panInProgress = 1;
+        state->ds.panFinished = 0;
+      }else if(right && !left){
+        state->ds.chartPanStartX = state->ds.chartPosX;
+        state->ds.chartPanStartY = state->ds.chartPosY;
+        state->ds.chartPanToX = state->ds.chartPosX + (CHART_PAN_DIST/state->ds.chartZoomScale);
+        if(state->ds.panInProgress == 0){
+          state->ds.chartPanToY = state->ds.chartPosY;
         }
-        if(up && !down){
-          state->ds.chartPanStartX = state->ds.chartPosX;
-          state->ds.chartPanStartY = state->ds.chartPosY;
-          if(state->ds.panInProgress == 0){
-            state->ds.chartPanToX = state->ds.chartPosX;
-          }
-          state->ds.chartPanToY = state->ds.chartPosY + (CHART_PAN_DIST/state->ds.chartZoomScale);
-          if(state->ds.chartPanToY >= (dat->ndat.maxZ+(0.25f*getChartHeightZ(&state->ds)))){
-            state->ds.chartPanToY = dat->ndat.maxZ+(0.25f*getChartHeightZ(&state->ds));
-          }
-          state->ds.timeSincePanStart = 0.0f;
-          state->ds.totalPanTime = CHART_KEY_PAN_TIME;
-          state->ds.panInProgress = 1;
-          state->ds.panFinished = 0;
-          //SDL_Log("pan start: [%0.2f %0.2f], pan to: [%0.2f %0.2f]\n",(double)state->ds.chartPanStartX,(double)state->ds.chartPanStartY,(double)state->ds.chartPanToX,(double)state->ds.chartPanToY);
-        }else if(down && !up){
-          state->ds.chartPanStartX = state->ds.chartPosX;
-          state->ds.chartPanStartY = state->ds.chartPosY;
-          if(state->ds.panInProgress == 0){
-            state->ds.chartPanToX = state->ds.chartPosX;
-          }
-          state->ds.chartPanToY = state->ds.chartPosY - (CHART_PAN_DIST/state->ds.chartZoomScale);
-          if(state->ds.chartPanToY <= (-0.25f*getChartHeightZ(&state->ds))){
-            state->ds.chartPanToY = (-0.25f*getChartHeightZ(&state->ds));
-          }
-          state->ds.timeSincePanStart = 0.0f;
-          state->ds.totalPanTime = CHART_KEY_PAN_TIME;
-          state->ds.panInProgress = 1;
-          state->ds.panFinished = 0;
+        if(state->ds.chartPanToX >= (dat->ndat.maxN+(0.25f*getChartWidthN(&state->ds)))){
+          state->ds.chartPanToX = dat->ndat.maxN+(0.25f*getChartWidthN(&state->ds));
         }
+        state->ds.timeSincePanStart = 0.0f;
+        state->ds.totalPanTime = CHART_KEY_PAN_TIME;
+        state->ds.panInProgress = 1;
+        state->ds.panFinished = 0;
+      }
+      if(up && !down){
+        state->ds.chartPanStartX = state->ds.chartPosX;
+        state->ds.chartPanStartY = state->ds.chartPosY;
+        if(state->ds.panInProgress == 0){
+          state->ds.chartPanToX = state->ds.chartPosX;
+        }
+        state->ds.chartPanToY = state->ds.chartPosY + (CHART_PAN_DIST/state->ds.chartZoomScale);
+        if(state->ds.chartPanToY >= (dat->ndat.maxZ+(0.25f*getChartHeightZ(&state->ds)))){
+          state->ds.chartPanToY = dat->ndat.maxZ+(0.25f*getChartHeightZ(&state->ds));
+        }
+        state->ds.timeSincePanStart = 0.0f;
+        state->ds.totalPanTime = CHART_KEY_PAN_TIME;
+        state->ds.panInProgress = 1;
+        state->ds.panFinished = 0;
+        //SDL_Log("pan start: [%0.2f %0.2f], pan to: [%0.2f %0.2f]\n",(double)state->ds.chartPanStartX,(double)state->ds.chartPanStartY,(double)state->ds.chartPanToX,(double)state->ds.chartPanToY);
+      }else if(down && !up){
+        state->ds.chartPanStartX = state->ds.chartPosX;
+        state->ds.chartPanStartY = state->ds.chartPosY;
+        if(state->ds.panInProgress == 0){
+          state->ds.chartPanToX = state->ds.chartPosX;
+        }
+        state->ds.chartPanToY = state->ds.chartPosY - (CHART_PAN_DIST/state->ds.chartZoomScale);
+        if(state->ds.chartPanToY <= (-0.25f*getChartHeightZ(&state->ds))){
+          state->ds.chartPanToY = (-0.25f*getChartHeightZ(&state->ds));
+        }
+        state->ds.timeSincePanStart = 0.0f;
+        state->ds.totalPanTime = CHART_KEY_PAN_TIME;
+        state->ds.panInProgress = 1;
+        state->ds.panFinished = 0;
       }
     }else if(altleft || altright || altup || altdown){
 
@@ -233,7 +173,70 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
           }
         }
       }
-      
+    }
+  }else if(state->uiState == UISTATE_CHARTWITHMENU){
+    if(left || right || up || down){
+      if(state->clickedUIElem == UIELEM_MENU_BUTTON){
+        //primary menu navigation using arrow keys
+        if((state->mouseoverElement >= UIELEM_PRIMARY_MENU)||(state->mouseoverElement < (UIELEM_PRIMARY_MENU-PRIMARY_MENU_NUM_UIELEMENTS))){
+          //no menu item was selected with the keyboard or highlighted with the mouse previously
+          //select the first menu item
+          state->mouseoverElement = (uint8_t)(UIELEM_PRIMARY_MENU-PRIMARY_MENU_NUM_UIELEMENTS);
+        }else{
+          uint8_t selMenuElem = PRIMARY_MENU_NUM_UIELEMENTS - (UIELEM_PRIMARY_MENU - state->mouseoverElement);
+          if(selMenuElem >= PRIMARY_MENU_NUM_UIELEMENTS){
+            state->mouseoverElement = (uint8_t)(UIELEM_PRIMARY_MENU-PRIMARY_MENU_NUM_UIELEMENTS);
+          }
+          if(up && !down){
+            if(selMenuElem > 0){
+              state->mouseoverElement--;
+            }else{
+              state->mouseoverElement = (uint8_t)(UIELEM_PRIMARY_MENU-1);
+            }
+          }else if(down && !up){
+            if(selMenuElem < (PRIMARY_MENU_NUM_UIELEMENTS-1)){
+              state->mouseoverElement++;
+            }else{
+              state->mouseoverElement = (uint8_t)(UIELEM_PRIMARY_MENU-PRIMARY_MENU_NUM_UIELEMENTS);
+            }
+          }else if((left && !right)||(right && !left)){
+            if(!(state->ds.shownElements & (1U << UIELEM_NUCL_FULLINFOBOX))){
+              if((state->ds.shownElements & (1U << UIELEM_PRIMARY_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_PRIMARY_MENU_SHOW]==0.0f)){
+                uiElemClickAction(dat,state,rdat,0,UIELEM_CHARTVIEW_BUTTON); //open the chart view menu
+              }
+            }
+          }
+        }
+      }else if(state->clickedUIElem == UIELEM_CHARTVIEW_BUTTON){
+        //chart view menu navigation using arrow keys
+        if((state->mouseoverElement >= UIELEM_CHARTVIEW_MENU)||(state->mouseoverElement < (UIELEM_CHARTVIEW_MENU-CHARTVIEW_ENUM_LENGTH))){
+          //no menu item was selected with the keyboard or highlighted with the mouse previously
+          //select the first menu item
+          state->mouseoverElement = (uint8_t)(UIELEM_CHARTVIEW_MENU-CHARTVIEW_ENUM_LENGTH);
+        }else{
+          uint8_t selMenuElem = CHARTVIEW_ENUM_LENGTH - (UIELEM_CHARTVIEW_MENU - state->mouseoverElement);
+          if(selMenuElem >= CHARTVIEW_ENUM_LENGTH){
+            state->mouseoverElement = (uint8_t)(UIELEM_CHARTVIEW_MENU-CHARTVIEW_ENUM_LENGTH);
+          }
+          if(up && !down){
+            if(selMenuElem > 0){
+              state->mouseoverElement--;
+            }else{
+              state->mouseoverElement = (uint8_t)(UIELEM_CHARTVIEW_MENU-1);
+            }
+          }else if(down && !up){
+            if(selMenuElem < (CHARTVIEW_ENUM_LENGTH-1)){
+              state->mouseoverElement++;
+            }else{
+              state->mouseoverElement = (uint8_t)(UIELEM_CHARTVIEW_MENU-CHARTVIEW_ENUM_LENGTH);
+            }
+          }else if((left && !right)||(right && !left)){
+            if((state->ds.shownElements & (1U << UIELEM_CHARTVIEW_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_CHARTVIEW_MENU_SHOW]==0.0f)){
+              uiElemClickAction(dat,state,rdat,0,UIELEM_MENU_BUTTON); //open the primary menu
+            }
+          }
+        }
+      }
     }
   }else if(state->uiState == UISTATE_FULLLEVELINFO){
 
@@ -387,27 +390,27 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
     }else if((state->ds.shownElements & (1U << UIELEM_PREFS_DIALOG))&&(state->ds.timeLeftInUIAnimation[UIANIM_MODAL_BOX_HIDE]==0.0f)){
       state->mouseholdElement = UIELEM_PREFS_DIALOG_CLOSEBUTTON;
       uiElemClickAction(dat,state,rdat,0,UIELEM_PREFS_DIALOG_CLOSEBUTTON);
-    }else if((state->ds.shownElements & (1U << UIELEM_NUCL_INFOBOX))&&(state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_HIDE]==0.0f)){
-      startUIAnimation(dat,state,UIANIM_NUCLINFOBOX_HIDE); //hide the info box, see stopUIAnimation() for info box hiding action
-      startUIAnimation(dat,state,UIANIM_NUCLHIGHLIGHT_HIDE);
-    }else if((state->uiState == UISTATE_FULLLEVELINFO)&&(state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_EXPAND]==0.0f)){
-      uiElemClickAction(dat,state,rdat,0,UIELEM_NUCL_FULLINFOBOX_BACKBUTTON); //go back to the main chart
-      state->mouseholdElement = UIELEM_ENUM_LENGTH;
     }else if((state->ds.shownElements & (1U << UIELEM_PRIMARY_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_PRIMARY_MENU_HIDE]==0.0f)){
       //close the primary menu
       uiElemClickAction(dat,state,rdat,0,UIELEM_MENU_BUTTON);
     }else if((state->ds.shownElements & (1U << UIELEM_CHARTVIEW_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_CHARTVIEW_MENU_HIDE]==0.0f)){
       //close the chart view menu
       uiElemClickAction(dat,state,rdat,0,UIELEM_CHARTVIEW_BUTTON);
+    }else if((state->ds.shownElements & (1U << UIELEM_NUCL_INFOBOX))&&(state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_HIDE]==0.0f)){
+      startUIAnimation(dat,state,UIANIM_NUCLINFOBOX_HIDE); //hide the info box, see stopUIAnimation() for info box hiding action
+      startUIAnimation(dat,state,UIANIM_NUCLHIGHLIGHT_HIDE);
+    }else if((state->uiState == UISTATE_FULLLEVELINFO)&&(state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_EXPAND]==0.0f)){
+      uiElemClickAction(dat,state,rdat,0,UIELEM_NUCL_FULLINFOBOX_BACKBUTTON); //go back to the main chart
+      state->mouseholdElement = UIELEM_ENUM_LENGTH;
     }else if(state->ds.windowFullscreenMode){
       //exit fullscreen
       state->ds.windowFullscreenMode = 0;
       handleScreenGraphicsMode(dat,state,rdat); 
-    }else if((chartMovable)&&(state->ds.timeLeftInUIAnimation[UIANIM_PRIMARY_MENU_SHOW]==0.0f)){
-      //if nothing else is going on, open the primary menu
-      uiElemClickAction(dat,state,rdat,0,UIELEM_MENU_BUTTON);
-      state->mouseholdElement = UIELEM_ENUM_LENGTH; //remove any previous selection highlight
     }
+  }else if(state->inputFlags & (1U << INPUT_MENU)){
+    //open the primary menu
+    uiElemClickAction(dat,state,rdat,0,UIELEM_MENU_BUTTON);
+    state->mouseholdElement = UIELEM_ENUM_LENGTH; //remove any previous selection highlight
   }
 
   /* Handle mouse input */
@@ -634,15 +637,10 @@ void processSingleEvent(app_data *restrict dat, app_state *restrict state, resou
           state->inputFlags |= (1U << INPUT_ZOOM);
           break;
         case SDL_GAMEPAD_BUTTON_START:
-          if(state->uiState == UISTATE_CHARTONLY){
-            //open menu
-            state->inputFlags |= (1U << INPUT_BACK);
-          }
-          break;
         case SDL_GAMEPAD_BUTTON_NORTH:
-          if(state->uiState == UISTATE_CHARTONLY){
+          if((state->uiState == UISTATE_CHARTONLY)||(state->uiState == UISTATE_INFOBOX)||(state->uiState == UISTATE_FULLLEVELINFO)){
             //open menu
-            state->inputFlags |= (1U << INPUT_BACK);
+            state->inputFlags |= (1U << INPUT_MENU);
           }
           break;
         case SDL_GAMEPAD_BUTTON_EAST:
@@ -653,6 +651,10 @@ void processSingleEvent(app_data *restrict dat, app_state *restrict state, resou
           if(state->uiState != UISTATE_CHARTONLY){
             state->inputFlags |= (1U << INPUT_BACK);
           }
+          break;
+        case SDL_GAMEPAD_BUTTON_GUIDE:
+          state->ds.windowFullscreenMode = !state->ds.windowFullscreenMode;
+          handleScreenGraphicsMode(dat,state,rdat);
           break;
         default:
           break;
@@ -759,7 +761,11 @@ void processSingleEvent(app_data *restrict dat, app_state *restrict state, resou
           break;
         case SDL_SCANCODE_ESCAPE:
         case SDL_SCANCODE_BACKSPACE:
-          state->inputFlags |= (1U << INPUT_BACK);
+          if(state->uiState == UISTATE_CHARTONLY){
+            state->inputFlags |= (1U << INPUT_MENU);
+          }else{
+            state->inputFlags |= (1U << INPUT_BACK);
+          }
           break;
         case SDL_SCANCODE_EQUALS:
           state->zoomDeltaVal = 1.0f;
@@ -783,7 +789,7 @@ void processSingleEvent(app_data *restrict dat, app_state *restrict state, resou
             state->chartView++;
           }
           break;
-        case SDL_SCANCODE_F7:
+        /*case SDL_SCANCODE_F7:
           //scale UI down
           if(state->ds.interfaceSizeInd > 0){
             state->ds.interfaceSizeInd--;
@@ -802,7 +808,7 @@ void processSingleEvent(app_data *restrict dat, app_state *restrict state, resou
           }
           state->ds.uiUserScale = uiScales[state->ds.interfaceSizeInd];
           updateUIScale(dat,state,rdat);
-          break;
+          break;*/
         case SDL_SCANCODE_RETURN:
           state->inputFlags |= (1U << INPUT_SELECT);
           break;
@@ -1002,6 +1008,7 @@ void processFrameEvents(app_data *restrict dat, app_state *restrict state, resou
     state->inputFlags &= ~(1U << INPUT_ZOOM);
     state->inputFlags &= ~(1U << INPUT_SELECT);
     state->inputFlags &= ~(1U << INPUT_BACK);
+    state->inputFlags &= ~(1U << INPUT_MENU);
     //whenever the directional inputs are not used for continuous actions such as chart navigation,
     //make sure that they don't persist across frames (keys will still repeat, just want to avoid
     //case where the input flag is not reset)
