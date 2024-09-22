@@ -56,6 +56,7 @@ void initializeTempState(const app_data *restrict dat, app_state *restrict state
 	state->lastUIState = UISTATE_CHARTONLY;
   changeUIState(dat,state,UISTATE_CHARTONLY);
   state->clickedUIElem = UIELEM_ENUM_LENGTH; //no selected UI element
+	state->lastOpenedMenu = UIELEM_ENUM_LENGTH; //no previously selected menu
   state->ds.shownElements = 0; //no UI elements being shown
 	state->ds.shownElements |= (1U << UIELEM_CHARTOFNUCLIDES);
   state->ds.uiAnimPlaying = 0; //no UI animations playing
@@ -2015,6 +2016,7 @@ void uiElemClickAction(app_data *restrict dat, app_state *restrict state, resour
         state->clickedUIElem = UIELEM_ENUM_LENGTH; //'unclick' the menu button
       }else if(state->ds.timeLeftInUIAnimation[UIANIM_PRIMARY_MENU_SHOW]==0.0f){
 				state->ds.shownElements |= (1U << UIELEM_PRIMARY_MENU);
+				state->lastOpenedMenu = UIELEM_PRIMARY_MENU;
 				startUIAnimation(dat,state,UIANIM_PRIMARY_MENU_SHOW);
 				if(state->ds.shownElements & (1U << UIELEM_NUCL_FULLINFOBOX)){
 					changeUIState(dat,state,UISTATE_FULLLEVELINFOWITHMENU);
@@ -2030,6 +2032,7 @@ void uiElemClickAction(app_data *restrict dat, app_state *restrict state, resour
         state->clickedUIElem = UIELEM_ENUM_LENGTH; //'unclick' the menu button
       }else if(state->ds.timeLeftInUIAnimation[UIANIM_CHARTVIEW_MENU_SHOW]==0.0f){
 				state->ds.shownElements |= (1U << UIELEM_CHARTVIEW_MENU);
+				state->lastOpenedMenu = UIELEM_CHARTVIEW_MENU;
 				startUIAnimation(dat,state,UIANIM_CHARTVIEW_MENU_SHOW);
 				changeUIState(dat,state,UISTATE_CHARTWITHMENU);
 				state->clickedUIElem = UIELEM_CHARTVIEW_BUTTON;

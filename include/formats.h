@@ -216,6 +216,7 @@ typedef struct
   uint8_t activeAxisX, activeAxisY; //the last used analog stick axis
   uint8_t chartView; //values from chart_view_enum
   uint8_t clickedUIElem; //which UI element was last clicked, values from ui_element_enum
+  uint8_t lastOpenedMenu; //values from ui_element_enum
   float timeSinceLastSec; //used to track play time, the amount of seconds that have passed since the last tick
   float mouseHoldTime; //amount of time the mouse button has been held down for
   uint8_t mouseoverElement; //which UI element is moused over, =UIELEM_ENUM_LENGTH if none are moused over

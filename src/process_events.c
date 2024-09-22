@@ -349,7 +349,11 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
 
 
   if(state->inputFlags & (1U << INPUT_SELECT)){
-    if((state->ds.shownElements & (1U << UIELEM_PRIMARY_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_PRIMARY_MENU_HIDE]==0.0f)){
+    if((state->ds.shownElements & (1U << UIELEM_ABOUT_BOX))&&(state->ds.timeLeftInUIAnimation[UIANIM_MODAL_BOX_HIDE]==0.0f)){
+      //close the about box
+      state->mouseholdElement = UIELEM_ABOUT_BOX_OK_BUTTON;
+      uiElemClickAction(dat,state,rdat,0,UIELEM_ABOUT_BOX_OK_BUTTON);
+    }else if((state->ds.shownElements & (1U << UIELEM_PRIMARY_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_PRIMARY_MENU_HIDE]==0.0f)){
       //select primary menu button
       if((state->mouseoverElement < UIELEM_PRIMARY_MENU)&&(state->mouseoverElement >= (UIELEM_PRIMARY_MENU-PRIMARY_MENU_NUM_UIELEMENTS))){
         state->mouseholdElement = state->mouseoverElement;
@@ -377,12 +381,20 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
     }else if((state->ds.shownElements & (1U << UIELEM_NUCL_INFOBOX))&&(state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_SHOW]==0.0f)&&(state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_EXPAND]==0.0f)){
       state->mouseholdElement = UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON;
       uiElemClickAction(dat,state,rdat,0,UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON);
+    }else if(state->uiState == UISTATE_CHARTONLY){
+      if(state->chartSelectedNucl == MAXNUMNUCL){
+        //select the center-screen nuclide on the chart
+        int16_t selectedN = (int16_t)(state->ds.chartPosX - 0.5f);
+        int16_t selectedZ = (int16_t)(state->ds.chartPosY + 0.5f + (16.0f/state->ds.chartZoomScale));
+        uint16_t selNucl = getNearestNuclInd(dat,selectedN,selectedZ);
+        setSelectedNuclOnChartDirect(dat,state,rdat,selNucl,2);
+      }
     }
   }else if(state->inputFlags & (1U << INPUT_BACK)){
     //escape open menus
     //handle modal dialogs first
     if((state->ds.shownElements & (1U << UIELEM_ABOUT_BOX))&&(state->ds.timeLeftInUIAnimation[UIANIM_MODAL_BOX_HIDE]==0.0f)){
-      //close the prefs menu
+      //close the about box
       state->mouseholdElement = UIELEM_ABOUT_BOX_OK_BUTTON;
       uiElemClickAction(dat,state,rdat,0,UIELEM_ABOUT_BOX_OK_BUTTON);
     }else if((state->ds.shownElements & (1U << UIELEM_PREFS_UISCALE_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_UISCALE_MENU_HIDE]==0.0f)){
@@ -410,7 +422,20 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
     }
   }else if(state->inputFlags & (1U << INPUT_MENU)){
     //open the primary menu
-    uiElemClickAction(dat,state,rdat,0,UIELEM_MENU_BUTTON);
+    switch(state->lastOpenedMenu){
+      case UIELEM_CHARTVIEW_MENU:
+        if((state->uiState == UISTATE_CHARTONLY)||(state->uiState == UISTATE_CHARTWITHMENU)||(state->uiState == UISTATE_INFOBOX)){
+          //cannot open this menu from the full level info screen
+          uiElemClickAction(dat,state,rdat,0,UIELEM_CHARTVIEW_BUTTON);
+        }else{
+          uiElemClickAction(dat,state,rdat,0,UIELEM_MENU_BUTTON);
+        }
+        break;
+      case UIELEM_PRIMARY_MENU:
+      default:
+        uiElemClickAction(dat,state,rdat,0,UIELEM_MENU_BUTTON);
+        break;
+    }
     state->mouseholdElement = UIELEM_ENUM_LENGTH; //remove any previous selection highlight
   }
 
