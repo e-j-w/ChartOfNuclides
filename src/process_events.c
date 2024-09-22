@@ -49,9 +49,10 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
   altleft = (state->inputFlags & (1U << INPUT_ALTLEFT));
   altright = (state->inputFlags & (1U << INPUT_ALTRIGHT));
   
-  const uint8_t chartMovable = ((state->uiState == UISTATE_CHARTONLY)||(state->uiState == UISTATE_CHARTWITHMENU)||(state->uiState == UISTATE_INFOBOX));
+  const uint8_t chartDraggable = ((state->uiState == UISTATE_CHARTONLY)||(state->uiState == UISTATE_CHARTWITHMENU)||(state->uiState == UISTATE_INFOBOX));
+  const uint8_t chartPannable =  ((state->uiState == UISTATE_CHARTONLY)||(state->uiState == UISTATE_INFOBOX));
 
-  if((state->uiState == UISTATE_CHARTONLY)||(state->uiState == UISTATE_INFOBOX)){
+  if(chartPannable){
 
     //in main chart view, handle chart panning
     //SDL_Log("Processing input, mouseover element: %u\n",state->mouseoverElement);
@@ -174,7 +175,7 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
         }
       }
     }
-  }else if(state->uiState == UISTATE_CHARTWITHMENU){
+  }else if((state->uiState == UISTATE_CHARTWITHMENU)||(state->uiState == UISTATE_FULLLEVELINFOWITHMENU)){
     if(left || right || up || down){
       if(state->clickedUIElem == UIELEM_MENU_BUTTON){
         //primary menu navigation using arrow keys
@@ -444,7 +445,7 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
       }
 
       //handle click and drag on the chart of nuclides
-      if((chartMovable)&&(state->mouseholdElement == UIELEM_ENUM_LENGTH)&&(state->mouseHoldStartPosXPx >= 0.0f)){
+      if((chartDraggable)&&(state->mouseholdElement == UIELEM_ENUM_LENGTH)&&(state->mouseHoldStartPosXPx >= 0.0f)){
         state->ds.chartDragStartX = state->ds.chartPosX;
         state->ds.chartDragStartY = state->ds.chartPosY;
         state->ds.chartDragStartMouseX = state->mouseXPx;
@@ -465,7 +466,7 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
     //only get here if no button was clicked
     //check if a click was made outside of any button
     //SDL_Log("click pos x: %f, drag start: [%f %f]\n",(double)state->mouseClickPosXPx,(double)state->ds.chartDragStartMouseX,(double)state->ds.chartDragStartMouseY);
-    if(chartMovable){
+    if(chartDraggable){
       if((state->mouseClickPosXPx >= 0.0f) && (fabsf(state->ds.chartDragStartMouseX - state->mouseXPx) < 5.0f) && (fabsf(state->ds.chartDragStartMouseY - state->mouseYPx) < 5.0f) ){
         //unclick (or click on chart view)
         if(doubleClick){
@@ -474,7 +475,7 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
           uiElemClickAction(dat,state,rdat,0,UIELEM_ENUM_LENGTH);
         }
       }
-    }else if(state->uiState == UISTATE_FULLLEVELINFO){
+    }else if((state->uiState == UISTATE_FULLLEVELINFO)||(state->uiState == UISTATE_FULLLEVELINFOWITHMENU)){
       if(state->mouseClickPosXPx >= 0.0f){
         //clicked outside of interactable items on the full level info screen
         uiElemClickAction(dat,state,rdat,0,UIELEM_ENUM_LENGTH);
@@ -494,7 +495,7 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
 
   /* Handle zoom input */
   if((state->inputFlags & (1U << INPUT_ZOOM))&&(fabsf(state->zoomDeltaVal)>0.05f)){
-    if(chartMovable){
+    if(chartDraggable){
       if(state->zoomDeltaVal != 0.0f){
         state->ds.chartZoomStartScale = state->ds.chartZoomScale;
         if(state->zoomDeltaVal > 0){

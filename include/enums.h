@@ -107,6 +107,7 @@ UISTATE_CHARTONLY, //no menus open
 UISTATE_CHARTWITHMENU, //primary menu, chart view menu, etc.
 UISTATE_INFOBOX, //small nuclide info box
 UISTATE_FULLLEVELINFO, //full nuclide level listing
+UISTATE_FULLLEVELINFOWITHMENU,
 UISTATE_MSG_BOX,
 UISTATE_ABOUT_BOX,
 UISTATE_PREFS_DIALOG,

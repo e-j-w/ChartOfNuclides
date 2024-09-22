@@ -138,7 +138,9 @@ void stopUIAnimation(const app_data *restrict dat, app_state *restrict state, co
 			if(!(state->ds.shownElements & (1U << UIELEM_PREFS_DIALOG))){
 				if(!(state->ds.shownElements & (1U << UIELEM_ABOUT_BOX))){
 					if(!(state->ds.shownElements & (1U << UIELEM_CHARTVIEW_MENU))){
-						if(state->ds.shownElements & (1U << UIELEM_NUCL_INFOBOX)){
+						if(state->ds.shownElements & (1U << UIELEM_NUCL_FULLINFOBOX)){
+							changeUIState(dat,state,UISTATE_FULLLEVELINFO);
+						}else if(state->ds.shownElements & (1U << UIELEM_NUCL_INFOBOX)){
 							changeUIState(dat,state,UISTATE_INFOBOX);
 						}else if(state->ds.shownElements & (1U << UIELEM_NUCL_FULLINFOBOX)){
 							changeUIState(dat,state,UISTATE_FULLLEVELINFO);
@@ -1701,6 +1703,7 @@ void changeUIState(const app_data *restrict dat, app_state *restrict state, cons
 			}
 			break;
 		case UISTATE_FULLLEVELINFO:
+		case UISTATE_FULLLEVELINFOWITHMENU:
 			state->ds.nuclFullInfoMaxScrollY = getMaxNumLvlDispLines(&dat->ndat,state); //find total number of lines displayable
 			state->interactableElement |= (uint32_t)(1U << UIELEM_MENU_BUTTON);
 			state->interactableElement |= (uint32_t)(1U << UIELEM_NUCL_FULLINFOBOX);
@@ -2013,7 +2016,11 @@ void uiElemClickAction(app_data *restrict dat, app_state *restrict state, resour
       }else if(state->ds.timeLeftInUIAnimation[UIANIM_PRIMARY_MENU_SHOW]==0.0f){
 				state->ds.shownElements |= (1U << UIELEM_PRIMARY_MENU);
 				startUIAnimation(dat,state,UIANIM_PRIMARY_MENU_SHOW);
-				changeUIState(dat,state,UISTATE_CHARTWITHMENU);
+				if(state->ds.shownElements & (1U << UIELEM_NUCL_FULLINFOBOX)){
+					changeUIState(dat,state,UISTATE_FULLLEVELINFOWITHMENU);
+				}else{
+					changeUIState(dat,state,UISTATE_CHARTWITHMENU);
+				}
 				state->clickedUIElem = UIELEM_MENU_BUTTON;
       }
       break;
@@ -2158,7 +2165,7 @@ void uiElemClickAction(app_data *restrict dat, app_state *restrict state, resour
 		case UIELEM_ENUM_LENGTH:
     default:
 			//clicked outside of a button or UI element
-      if((state->uiState == UISTATE_CHARTONLY)||(state->uiState == UISTATE_CHARTWITHMENU)||(state->uiState == UISTATE_INFOBOX)){
+      if((state->uiState == UISTATE_CHARTONLY)||(state->uiState == UISTATE_CHARTWITHMENU)||(state->uiState == UISTATE_INFOBOX)||(state->uiState == UISTATE_FULLLEVELINFOWITHMENU)){
 				if(((state->ds.shownElements) == (uint32_t)(1U << UIELEM_CHARTOFNUCLIDES))||((state->ds.shownElements >> (UIELEM_CHARTOFNUCLIDES+1)) == (1U << (UIELEM_NUCL_INFOBOX-1)))){
 					//only the chart of nuclides and/or info box are open
 					//clicked on the chart view
@@ -2185,7 +2192,9 @@ void uiElemClickAction(app_data *restrict dat, app_state *restrict state, resour
 						startUIAnimation(dat,state,UIANIM_NUCLINFOBOX_HIDE); //hide the info box, see stopUIAnimation() for info box hiding action
 						startUIAnimation(dat,state,UIANIM_NUCLHIGHLIGHT_HIDE);
 					}
-					state->ds.shownElements |= (1U << UIELEM_CHARTOFNUCLIDES);
+					if((state->uiState == UISTATE_CHARTONLY)||(state->uiState == UISTATE_CHARTWITHMENU)||(state->uiState == UISTATE_INFOBOX)){
+						state->ds.shownElements |= (1U << UIELEM_CHARTOFNUCLIDES);
+					}
 				}
       }
       break;
