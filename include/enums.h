@@ -103,9 +103,10 @@ UIELEM_ENUM_LENGTH
 //order in which they receive input, if they overlap 
 //(eariler entries in the enum receive input first)
 enum ui_state_enum{
-UISTATE_DEFAULT, //no menus open
-UISTATE_FULLLEVELINFO,
-UISTATE_UNINTERACTABLE,
+UISTATE_CHARTONLY, //no menus open
+UISTATE_CHARTWITHMENU, //primary menu, chart view menu, etc.
+UISTATE_INFOBOX, //small nuclide info box
+UISTATE_FULLLEVELINFO, //full nuclide level listing
 UISTATE_MSG_BOX,
 UISTATE_ABOUT_BOX,
 UISTATE_PREFS_DIALOG,

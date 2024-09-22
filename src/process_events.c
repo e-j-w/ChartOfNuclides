@@ -49,14 +49,15 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
   altleft = (state->inputFlags & (1U << INPUT_ALTLEFT));
   altright = (state->inputFlags & (1U << INPUT_ALTRIGHT));
   
-  if(state->uiState == UISTATE_DEFAULT){
+  const uint8_t chartMovable = ((state->uiState == UISTATE_CHARTONLY)||(state->uiState == UISTATE_CHARTWITHMENU)||(state->uiState == UISTATE_INFOBOX));
+
+  if(chartMovable){
 
     //in main chart view, handle chart panning
-    
-    //SDL_Log("dir: [%u %u %u %u]\n",!(up==0),!(down==0),!(left==0),!(right==0));
     //SDL_Log("Processing input, mouseover element: %u\n",state->mouseoverElement);
     
     if(left || right || up || down){
+      //SDL_Log("dir: [%u %u %u %u]\n",!(up==0),!(down==0),!(left==0),!(right==0));
       if(state->clickedUIElem == UIELEM_MENU_BUTTON){
         //primary menu navigation using arrow keys
         if((state->mouseoverElement >= UIELEM_PRIMARY_MENU)||(state->mouseoverElement < (UIELEM_PRIMARY_MENU-PRIMARY_MENU_NUM_UIELEMENTS))){
@@ -279,6 +280,7 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
     }
   }else if(state->uiState == UISTATE_PREFS_DIALOG){
     if(left || right || up || down){
+      //SDL_Log("dir: [%u %u %u %u]\n",!(up==0),!(down==0),!(left==0),!(right==0));
       if((state->ds.shownElements & (1U << UIELEM_PREFS_UISCALE_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_UISCALE_MENU_HIDE]==0.0f)){
         //UI scale dropdown navigation using arrow keys
         state->mouseholdElement = UIELEM_ENUM_LENGTH; //remove any previous selection highlight
@@ -390,6 +392,7 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
       startUIAnimation(dat,state,UIANIM_NUCLHIGHLIGHT_HIDE);
     }else if((state->uiState == UISTATE_FULLLEVELINFO)&&(state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_EXPAND]==0.0f)){
       uiElemClickAction(dat,state,rdat,0,UIELEM_NUCL_FULLINFOBOX_BACKBUTTON); //go back to the main chart
+      state->mouseholdElement = UIELEM_ENUM_LENGTH;
     }else if((state->ds.shownElements & (1U << UIELEM_PRIMARY_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_PRIMARY_MENU_HIDE]==0.0f)){
       //close the primary menu
       uiElemClickAction(dat,state,rdat,0,UIELEM_MENU_BUTTON);
@@ -400,7 +403,7 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
       //exit fullscreen
       state->ds.windowFullscreenMode = 0;
       handleScreenGraphicsMode(dat,state,rdat); 
-    }else if((state->uiState == UISTATE_DEFAULT)&&(state->ds.timeLeftInUIAnimation[UIANIM_PRIMARY_MENU_SHOW]==0.0f)){
+    }else if((chartMovable)&&(state->ds.timeLeftInUIAnimation[UIANIM_PRIMARY_MENU_SHOW]==0.0f)){
       //if nothing else is going on, open the primary menu
       uiElemClickAction(dat,state,rdat,0,UIELEM_MENU_BUTTON);
       state->mouseholdElement = UIELEM_ENUM_LENGTH; //remove any previous selection highlight
@@ -438,7 +441,7 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
       }
 
       //handle click and drag on the chart of nuclides
-      if((state->uiState == UISTATE_DEFAULT)&&(state->mouseholdElement == UIELEM_ENUM_LENGTH)&&(state->mouseHoldStartPosXPx >= 0.0f)){
+      if((chartMovable)&&(state->mouseholdElement == UIELEM_ENUM_LENGTH)&&(state->mouseHoldStartPosXPx >= 0.0f)){
         state->ds.chartDragStartX = state->ds.chartPosX;
         state->ds.chartDragStartY = state->ds.chartPosY;
         state->ds.chartDragStartMouseX = state->mouseXPx;
@@ -459,7 +462,7 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
     //only get here if no button was clicked
     //check if a click was made outside of any button
     //SDL_Log("click pos x: %f, drag start: [%f %f]\n",(double)state->mouseClickPosXPx,(double)state->ds.chartDragStartMouseX,(double)state->ds.chartDragStartMouseY);
-    if(state->uiState == UISTATE_DEFAULT){
+    if(chartMovable){
       if((state->mouseClickPosXPx >= 0.0f) && (fabsf(state->ds.chartDragStartMouseX - state->mouseXPx) < 5.0f) && (fabsf(state->ds.chartDragStartMouseY - state->mouseYPx) < 5.0f) ){
         //unclick (or click on chart view)
         if(doubleClick){
@@ -488,7 +491,7 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
 
   /* Handle zoom input */
   if((state->inputFlags & (1U << INPUT_ZOOM))&&(fabsf(state->zoomDeltaVal)>0.05f)){
-    if(state->uiState == UISTATE_DEFAULT){
+    if(chartMovable){
       if(state->zoomDeltaVal != 0.0f){
         state->ds.chartZoomStartScale = state->ds.chartZoomScale;
         if(state->zoomDeltaVal > 0){
@@ -593,6 +596,67 @@ void processSingleEvent(app_data *restrict dat, app_state *restrict state, resou
       break;
     case SDL_EVENT_GAMEPAD_BUTTON_DOWN:
       state->lastInputType = INPUT_TYPE_GAMEPAD; //set gamepad input
+      switch(evt.gbutton.button){
+        case SDL_GAMEPAD_BUTTON_DPAD_UP:
+          if((state->uiState == UISTATE_CHARTONLY)||(state->uiState == UISTATE_INFOBOX)||(state->uiState == UISTATE_FULLLEVELINFO)){
+            state->inputFlags |= (1U << INPUT_ALTUP);
+          }else{
+            state->inputFlags |= (1U << INPUT_UP);
+          }
+          break;
+        case SDL_GAMEPAD_BUTTON_DPAD_DOWN:
+          if((state->uiState == UISTATE_CHARTONLY)||(state->uiState == UISTATE_INFOBOX)||(state->uiState == UISTATE_FULLLEVELINFO)){
+            state->inputFlags |= (1U << INPUT_ALTDOWN);
+          }else{
+            state->inputFlags |= (1U << INPUT_DOWN);
+          }
+          break;
+        case SDL_GAMEPAD_BUTTON_DPAD_LEFT:
+          if((state->uiState == UISTATE_CHARTONLY)||(state->uiState == UISTATE_INFOBOX)||(state->uiState == UISTATE_FULLLEVELINFO)){
+            state->inputFlags |= (1U << INPUT_ALTLEFT);
+          }else{
+            state->inputFlags |= (1U << INPUT_LEFT);
+          }
+          break;
+        case SDL_GAMEPAD_BUTTON_DPAD_RIGHT:
+          if((state->uiState == UISTATE_CHARTONLY)||(state->uiState == UISTATE_INFOBOX)||(state->uiState == UISTATE_FULLLEVELINFO)){
+            state->inputFlags |= (1U << INPUT_ALTRIGHT);
+          }else{
+            state->inputFlags |= (1U << INPUT_RIGHT);
+          }
+          break;
+        case SDL_GAMEPAD_BUTTON_LEFT_SHOULDER:
+          state->zoomDeltaVal = -1.0f;
+          state->inputFlags |= (1U << INPUT_ZOOM);
+          break;
+        case SDL_GAMEPAD_BUTTON_RIGHT_SHOULDER:
+          state->zoomDeltaVal = 1.0f;
+          state->inputFlags |= (1U << INPUT_ZOOM);
+          break;
+        case SDL_GAMEPAD_BUTTON_START:
+          if(state->uiState == UISTATE_CHARTONLY){
+            //open menu
+            state->inputFlags |= (1U << INPUT_BACK);
+          }else{
+            state->inputFlags |= (1U << INPUT_SELECT);
+          }
+          break;
+        case SDL_GAMEPAD_BUTTON_NORTH:
+          if(state->uiState == UISTATE_CHARTONLY){
+            //open menu
+            state->inputFlags |= (1U << INPUT_BACK);
+          }
+          break;
+        case SDL_GAMEPAD_BUTTON_EAST:
+          state->inputFlags |= (1U << INPUT_SELECT);
+          break;
+        case SDL_GAMEPAD_BUTTON_BACK:
+        case SDL_GAMEPAD_BUTTON_SOUTH:
+          state->inputFlags |= (1U << INPUT_BACK);
+          break;
+        default:
+          break;
+      }
       break;
     case SDL_EVENT_MOUSE_MOTION:
       SDL_GetMouseState(&state->mouseXPx,&state->mouseYPx); //update mouse position
@@ -762,7 +826,24 @@ void processSingleEvent(app_data *restrict dat, app_state *restrict state, resou
           break;
       }
       break;
-    case SDL_EVENT_GAMEPAD_BUTTON_UP:
+    case SDL_EVENT_GAMEPAD_BUTTON_UP: //released button
+      state->lastInputType = INPUT_TYPE_GAMEPAD; //set gamepad input
+      switch(evt.gbutton.button){
+        case SDL_GAMEPAD_BUTTON_DPAD_UP:
+          state->inputFlags &= ~(1U << INPUT_ALTUP);
+          break;
+        case SDL_GAMEPAD_BUTTON_DPAD_DOWN:
+          state->inputFlags &= ~(1U << INPUT_ALTDOWN);
+          break;
+        case SDL_GAMEPAD_BUTTON_DPAD_LEFT:
+          state->inputFlags &= ~(1U << INPUT_ALTLEFT);
+          break;
+        case SDL_GAMEPAD_BUTTON_DPAD_RIGHT:
+          state->inputFlags &= ~(1U << INPUT_ALTRIGHT);
+          break;
+        default:
+          break;
+      }
       break;
     case SDL_EVENT_KEY_UP: //released key
       switch(evt.key.scancode){
@@ -806,45 +887,51 @@ void processSingleEvent(app_data *restrict dat, app_state *restrict state, resou
         case SDL_GAMEPAD_AXIS_LEFTX:
         case SDL_GAMEPAD_AXIS_RIGHTX:
           if(evt.gaxis.value > state->gamepadDeadzone){
-            state->lastInputType = INPUT_TYPE_GAMEPAD; //set gamepad input
-            SDL_Log("Gamepad right.\n");
             if(state->lastAxisValX==0){
-              SDL_Log("Gamepad right once.\n");
+              //SDL_Log("Gamepad right once.\n");
+              state->lastInputType = INPUT_TYPE_GAMEPAD; //set gamepad input
+              state->inputFlags |= (1U << INPUT_RIGHT);
             }
             state->lastAxisValX = evt.gaxis.value;
             state->activeAxis = evt.gaxis.axis;
           }else if(evt.gaxis.value < -1*state->gamepadDeadzone){
-            state->lastInputType = INPUT_TYPE_GAMEPAD; //set gamepad input
-            SDL_Log("Gamepad left.\n");
             if(state->lastAxisValX==0){
-              SDL_Log("Gamepad left once.\n");
+              //SDL_Log("Gamepad left once.\n");
+              state->lastInputType = INPUT_TYPE_GAMEPAD; //set gamepad input
+              state->inputFlags |= (1U << INPUT_LEFT);
             }
             state->lastAxisValX = evt.gaxis.value;
             state->activeAxis = evt.gaxis.axis;
-          }else if((state->lastAxisValX!=0)&&(state->activeAxis==evt.gaxis.axis)){
+          }else if(state->lastInputType == INPUT_TYPE_GAMEPAD){
+            //SDL_Log("Stopped gamepad horizontal axis.\n");
             state->lastAxisValX = 0;
+            state->inputFlags &= ~(1U << INPUT_LEFT);
+            state->inputFlags &= ~(1U << INPUT_RIGHT);
           }
           break;
         case SDL_GAMEPAD_AXIS_LEFTY:
         case SDL_GAMEPAD_AXIS_RIGHTY:
           if(evt.gaxis.value > state->gamepadDeadzone){
-            state->lastInputType = INPUT_TYPE_GAMEPAD; //set gamepad input
-            SDL_Log("Gamepad down.\n");
             if(state->lastAxisValY==0){
-              SDL_Log("Gamepad down once.\n");
+              //SDL_Log("Gamepad down once.\n");
+              state->lastInputType = INPUT_TYPE_GAMEPAD; //set gamepad input
+              state->inputFlags |= (1U << INPUT_DOWN);
             }
             state->lastAxisValY = evt.gaxis.value;
             state->activeAxis = evt.gaxis.axis;
           }else if(evt.gaxis.value < -1*state->gamepadDeadzone){
-            state->lastInputType = INPUT_TYPE_GAMEPAD; //set gamepad input
-            SDL_Log("Gamepad up.\n");
             if(state->lastAxisValY==0){
-              SDL_Log("Gamepad up once.\n");
+              //SDL_Log("Gamepad up once.\n");
+              state->lastInputType = INPUT_TYPE_GAMEPAD; //set gamepad input
+              state->inputFlags |= (1U << INPUT_UP);
             }
             state->lastAxisValY = evt.gaxis.value;
             state->activeAxis = evt.gaxis.axis;
-          }else if((state->lastAxisValY!=0)&&(state->activeAxis==evt.gaxis.axis)){
+          }else if(state->lastInputType == INPUT_TYPE_GAMEPAD){
+            //SDL_Log("Stopped gamepad vertical axis.\n");
             state->lastAxisValY = 0;
+            state->inputFlags &= ~(1U << INPUT_UP);
+            state->inputFlags &= ~(1U << INPUT_DOWN);
           }
           break;
         default:
@@ -867,6 +954,15 @@ void processFrameEvents(app_data *restrict dat, app_state *restrict state, resou
     state->inputFlags &= ~(1U << INPUT_ZOOM);
     state->inputFlags &= ~(1U << INPUT_SELECT);
     state->inputFlags &= ~(1U << INPUT_BACK);
+    //whenever the directional inputs are not used for continuous actions such as chart navigation,
+    //make sure that they don't persist across frames (keys will still repeat, just want to avoid
+    //case where the input flag is not reset)
+    if((state->uiState != UISTATE_CHARTONLY)&&(state->uiState != UISTATE_INFOBOX)&&(state->uiState != UISTATE_FULLLEVELINFO)){
+      state->inputFlags &= ~(1U << INPUT_UP);
+      state->inputFlags &= ~(1U << INPUT_DOWN);
+      state->inputFlags &= ~(1U << INPUT_LEFT);
+      state->inputFlags &= ~(1U << INPUT_RIGHT);
+    }
     if(state->inputFlags & (1U << INPUT_DOUBLECLICK)){
       state->inputFlags &= ~(1U << INPUT_DOUBLECLICK);
     }

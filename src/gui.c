@@ -737,7 +737,7 @@ void drawChartOfNuclides(const app_data *restrict dat, const app_state *restrict
 }
 
 //draw some stats, ie. FPS overlay and further diagnostic info
-void drawPerformanceStats(const ui_theme_rules *restrict uirules, drawing_state *restrict ds, resource_data *restrict rdat, const float deltaTime){
+void drawPerformanceStats(const ui_theme_rules *restrict uirules, const app_state *restrict state, resource_data *restrict rdat, const float deltaTime){
 
   //draw background
   SDL_FRect perfOvRect;
@@ -753,14 +753,14 @@ void drawPerformanceStats(const ui_theme_rules *restrict uirules, drawing_state 
   char txtStr[256];
   SDL_snprintf(txtStr,256,"Performance stats (press <P> to toggle this display)");
   drawDefaultText(uirules,rdat,PERF_OVERLAY_BUTTON_X_ANCHOR,PERF_OVERLAY_BUTTON_Y_ANCHOR,txtStr);
-  SDL_snprintf(txtStr,256,"UI scale: %0.2f, DPI scale: %0.2f, Resolution: %u x %u (logical), %u x %u (actual)",(double)rdat->uiScale,(double)rdat->uiDPIScale,ds->windowXRes,ds->windowYRes,ds->windowXRenderRes,ds->windowYRenderRes);
-  drawDefaultText(uirules,rdat,PERF_OVERLAY_BUTTON_X_ANCHOR,PERF_OVERLAY_BUTTON_Y_ANCHOR+PERF_OVERLAY_Y_SPACING*ds->uiUserScale,txtStr);
-  SDL_snprintf(txtStr,256,"Zoom scale: %4.1f",(double)ds->chartZoomScale);
-  drawDefaultText(uirules,rdat,PERF_OVERLAY_BUTTON_X_ANCHOR,PERF_OVERLAY_BUTTON_Y_ANCHOR+2*PERF_OVERLAY_Y_SPACING*ds->uiUserScale,txtStr);
+  SDL_snprintf(txtStr,256,"UI scale: %0.2f, DPI scale: %0.2f, Resolution: %u x %u (logical), %u x %u (actual)",(double)rdat->uiScale,(double)rdat->uiDPIScale,state->ds.windowXRes,state->ds.windowYRes,state->ds.windowXRenderRes,state->ds.windowYRenderRes);
+  drawDefaultText(uirules,rdat,PERF_OVERLAY_BUTTON_X_ANCHOR,PERF_OVERLAY_BUTTON_Y_ANCHOR+PERF_OVERLAY_Y_SPACING*state->ds.uiUserScale,txtStr);
+  SDL_snprintf(txtStr,256,"Zoom scale: %4.1f, UI state: %u",(double)state->ds.chartZoomScale,state->uiState);
+  drawDefaultText(uirules,rdat,PERF_OVERLAY_BUTTON_X_ANCHOR,PERF_OVERLAY_BUTTON_Y_ANCHOR+2*PERF_OVERLAY_Y_SPACING*state->ds.uiUserScale,txtStr);
   SDL_snprintf(txtStr,256,"FPS: %4.1f",1.0/((double)deltaTime));
-  drawDefaultText(uirules,rdat,PERF_OVERLAY_BUTTON_X_ANCHOR,PERF_OVERLAY_BUTTON_Y_ANCHOR+3*PERF_OVERLAY_Y_SPACING*ds->uiUserScale,txtStr);
+  drawDefaultText(uirules,rdat,PERF_OVERLAY_BUTTON_X_ANCHOR,PERF_OVERLAY_BUTTON_Y_ANCHOR+3*PERF_OVERLAY_Y_SPACING*state->ds.uiUserScale,txtStr);
   SDL_snprintf(txtStr,256,"Frame time (ms): %4.3f",(double)(deltaTime*1000.0f));
-  drawDefaultText(uirules,rdat,PERF_OVERLAY_BUTTON_X_ANCHOR,PERF_OVERLAY_BUTTON_Y_ANCHOR+4*PERF_OVERLAY_Y_SPACING*ds->uiUserScale,txtStr);
+  drawDefaultText(uirules,rdat,PERF_OVERLAY_BUTTON_X_ANCHOR,PERF_OVERLAY_BUTTON_Y_ANCHOR+4*PERF_OVERLAY_Y_SPACING*state->ds.uiUserScale,txtStr);
 }
 
 uint8_t getHighlightState(const app_state *restrict state, const uint8_t uiElem){
