@@ -1188,50 +1188,50 @@ void getLvlEnergyStr(char strOut[32], const ndata *restrict nd, const uint32_t l
 	
 }
 
-void getHalfLifeStr(char strOut[32], const ndata *restrict nd, const uint32_t lvlInd, const uint8_t showErr, const uint8_t showUnknown, const uint8_t useLifetime){
-	if(lvlInd < nd->numLvls){
-		if(nd->levels[lvlInd].halfLife.unit == VALUE_UNIT_STABLE){
+void getHalfLifeStr(char strOut[32], const app_data *restrict dat, const uint32_t lvlInd, const uint8_t showErr, const uint8_t showUnknown, const uint8_t useLifetime){
+	if(lvlInd < dat->ndat.numLvls){
+		if(dat->ndat.levels[lvlInd].halfLife.unit == VALUE_UNIT_STABLE){
 			SDL_snprintf(strOut,32,"STABLE");
-		}else if(nd->levels[lvlInd].halfLife.unit == VALUE_UNIT_NOVAL){
+		}else if(dat->ndat.levels[lvlInd].halfLife.unit == VALUE_UNIT_NOVAL){
 			if(showUnknown){
-				SDL_snprintf(strOut,32,"Unknown");
+				SDL_snprintf(strOut,32,"%s",dat->strings[dat->locStringIDs[LOCSTR_UNKNOWN]]);
 			}else{
 				SDL_snprintf(strOut,32," ");
 			}
-		}else if(nd->levels[lvlInd].halfLife.val > 0.0f){
-			double hlVal = (double)(nd->levels[lvlInd].halfLife.val);
+		}else if(dat->ndat.levels[lvlInd].halfLife.val > 0.0f){
+			double hlVal = (double)(dat->ndat.levels[lvlInd].halfLife.val);
 			if(useLifetime){
 				hlVal *= 1.4427; //convert half-life to lifetime
 			} 
-			uint8_t hlPrecision = (uint8_t)(nd->levels[lvlInd].halfLife.format & 15U);
-			uint8_t hlExponent = (uint8_t)((nd->levels[lvlInd].halfLife.format >> 4U) & 1U);
-			uint8_t hlValueType = (uint8_t)((nd->levels[lvlInd].halfLife.format >> 5U) & 15U);
-			uint8_t hlErr = nd->levels[lvlInd].halfLife.err;
+			uint8_t hlPrecision = (uint8_t)(dat->ndat.levels[lvlInd].halfLife.format & 15U);
+			uint8_t hlExponent = (uint8_t)((dat->ndat.levels[lvlInd].halfLife.format >> 4U) & 1U);
+			uint8_t hlValueType = (uint8_t)((dat->ndat.levels[lvlInd].halfLife.format >> 5U) & 15U);
+			uint8_t hlErr = dat->ndat.levels[lvlInd].halfLife.err;
 			if(useLifetime){
 				hlErr = (uint8_t)(SDL_ceil((double)hlErr * 1.4427)); //convert half-life error to lifetime error
 			}
 			if(hlValueType == VALUETYPE_ASYMERROR){
-				uint8_t negErr = (uint8_t)((nd->levels[lvlInd].halfLife.format >> 9U) & 127U);
+				uint8_t negErr = (uint8_t)((dat->ndat.levels[lvlInd].halfLife.format >> 9U) & 127U);
 				if(useLifetime){
 					negErr = (uint8_t)(SDL_ceil((double)negErr * 1.4427)); //convert half-life error to lifetime error
 				}
 				if(hlExponent == 0){
-					SDL_snprintf(strOut,32,"%.*f(+%u-%u) %s",hlPrecision,hlVal,hlErr,negErr,getValueUnitShortStr(nd->levels[lvlInd].halfLife.unit));
+					SDL_snprintf(strOut,32,"%.*f(+%u-%u) %s",hlPrecision,hlVal,hlErr,negErr,getValueUnitShortStr(dat->ndat.levels[lvlInd].halfLife.unit));
 				}else{
-					SDL_snprintf(strOut,32,"%.*f(+%u-%u)E%i %s",hlPrecision,hlVal,hlErr,negErr,nd->levels[lvlInd].halfLife.exponent,getValueUnitShortStr(nd->levels[lvlInd].halfLife.unit));
+					SDL_snprintf(strOut,32,"%.*f(+%u-%u)E%i %s",hlPrecision,hlVal,hlErr,negErr,dat->ndat.levels[lvlInd].halfLife.exponent,getValueUnitShortStr(dat->ndat.levels[lvlInd].halfLife.unit));
 				}
 			}else{
 				if((showErr == 0)||(hlErr == 0)){
 					if(hlExponent == 0){
-						SDL_snprintf(strOut,32,"%s%.*f %s",getValueTypeShortStr(hlValueType),hlPrecision,hlVal,getValueUnitShortStr(nd->levels[lvlInd].halfLife.unit));
+						SDL_snprintf(strOut,32,"%s%.*f %s",getValueTypeShortStr(hlValueType),hlPrecision,hlVal,getValueUnitShortStr(dat->ndat.levels[lvlInd].halfLife.unit));
 					}else{
-						SDL_snprintf(strOut,32,"%s%.*fE%i %s",getValueTypeShortStr(hlValueType),hlPrecision,hlVal,nd->levels[lvlInd].halfLife.exponent,getValueUnitShortStr(nd->levels[lvlInd].halfLife.unit));
+						SDL_snprintf(strOut,32,"%s%.*fE%i %s",getValueTypeShortStr(hlValueType),hlPrecision,hlVal,dat->ndat.levels[lvlInd].halfLife.exponent,getValueUnitShortStr(dat->ndat.levels[lvlInd].halfLife.unit));
 					}
 				}else{
 					if(hlExponent == 0){
-						SDL_snprintf(strOut,32,"%s%.*f(%u) %s",getValueTypeShortStr(hlValueType),hlPrecision,hlVal,hlErr,getValueUnitShortStr(nd->levels[lvlInd].halfLife.unit));
+						SDL_snprintf(strOut,32,"%s%.*f(%u) %s",getValueTypeShortStr(hlValueType),hlPrecision,hlVal,hlErr,getValueUnitShortStr(dat->ndat.levels[lvlInd].halfLife.unit));
 					}else{
-						SDL_snprintf(strOut,32,"%s%.*f(%u)E%i %s",getValueTypeShortStr(hlValueType),hlPrecision,hlVal,hlErr,nd->levels[lvlInd].halfLife.exponent,getValueUnitShortStr(nd->levels[lvlInd].halfLife.unit));
+						SDL_snprintf(strOut,32,"%s%.*f(%u)E%i %s",getValueTypeShortStr(hlValueType),hlPrecision,hlVal,hlErr,dat->ndat.levels[lvlInd].halfLife.exponent,getValueUnitShortStr(dat->ndat.levels[lvlInd].halfLife.unit));
 					}
 				}
 			}
@@ -1240,17 +1240,17 @@ void getHalfLifeStr(char strOut[32], const ndata *restrict nd, const uint32_t lv
 		}
 	}else{
 		if(showUnknown){
-			SDL_snprintf(strOut,32,"Unknown");
+			SDL_snprintf(strOut,32,"%s",dat->strings[dat->locStringIDs[LOCSTR_UNKNOWN]]);
 		}else{
 			SDL_snprintf(strOut,32," ");
 		}
 	}
 }
-void getGSHalfLifeStr(char strOut[32], const ndata *restrict nd, const uint16_t nuclInd, const uint8_t useLifetime){
-	if(nd->nuclData[nuclInd].numLevels > 0){
-		getHalfLifeStr(strOut,nd,nd->nuclData[nuclInd].firstLevel + nd->nuclData[nuclInd].gsLevel,1,1,useLifetime);
+void getGSHalfLifeStr(char strOut[32], const app_data *restrict dat, const uint16_t nuclInd, const uint8_t useLifetime){
+	if(dat->ndat.nuclData[nuclInd].numLevels > 0){
+		getHalfLifeStr(strOut,dat,dat->ndat.nuclData[nuclInd].firstLevel + dat->ndat.nuclData[nuclInd].gsLevel,1,1,useLifetime);
 	}else{
-		SDL_snprintf(strOut,32,"Unknown");
+		SDL_snprintf(strOut,32,"%s",dat->strings[dat->locStringIDs[LOCSTR_UNKNOWN]]);
 	}
 }
 

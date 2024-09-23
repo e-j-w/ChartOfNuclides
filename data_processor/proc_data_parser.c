@@ -197,6 +197,7 @@ static int parseAppRules(app_data *restrict dat, asset_mapping *restrict stringI
 	dat->locStringIDs[LOCSTR_QBETAMNUS] = (uint16_t)nameToAssetID("q_betaminus",stringIDmap);
 	dat->locStringIDs[LOCSTR_SP] = (uint16_t)nameToAssetID("protonsep_energy",stringIDmap);
 	dat->locStringIDs[LOCSTR_SN] = (uint16_t)nameToAssetID("neutronsep_energy",stringIDmap);
+	dat->locStringIDs[LOCSTR_UNKNOWN] = (uint16_t)nameToAssetID("unknown",stringIDmap);
 	dat->locStringIDs[LOCSTR_LEVELINFO_HEADER] = (uint16_t)nameToAssetID("level_info_header",stringIDmap);
 	dat->locStringIDs[LOCSTR_ENERGY_KEV] = (uint16_t)nameToAssetID("energy_kev",stringIDmap);
 	dat->locStringIDs[LOCSTR_JPI] = (uint16_t)nameToAssetID("jpi",stringIDmap);

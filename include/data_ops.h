@@ -26,8 +26,8 @@ void getGammaEnergyStr(char strOut[32], const ndata *restrict nd, const uint32_t
 void getGammaIntensityStr(char strOut[32], const ndata *restrict nd, const uint32_t tranInd, const uint8_t showErr);
 void getGammaMultipolarityStr(char strOut[32], const ndata *restrict nd, const uint32_t tranInd);
 void getLvlEnergyStr(char strOut[32], const ndata *restrict nd, const uint32_t lvlInd, const uint8_t showErr);
-void getHalfLifeStr(char strOut[32], const ndata *restrict nd, const uint32_t lvlInd, const uint8_t showErr, const uint8_t showUnknown, const uint8_t useLifetime);
-void getGSHalfLifeStr(char strOut[32], const ndata *restrict nd, const uint16_t nuclInd, const uint8_t useLifetime);
+void getHalfLifeStr(char strOut[32], const app_data *restrict dat, const uint32_t lvlInd, const uint8_t showErr, const uint8_t showUnknown, const uint8_t useLifetime);
+void getGSHalfLifeStr(char strOut[32], const app_data *restrict dat, const uint16_t nuclInd, const uint8_t useLifetime);
 void getDecayModeStr(char strOut[32], const ndata *restrict nd, const uint32_t dcyModeInd);
 void getAbundanceStr(char strOut[32], const ndata *restrict nd, const uint16_t nuclInd);
 void getSpinParStr(char strOut[32], const ndata *restrict nd, const uint32_t lvlInd);
