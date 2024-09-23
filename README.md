@@ -8,13 +8,13 @@ An offline viewer of isotope and nuclear structure data, presented in the famili
 
 ## Features
 
-- Display nuclear chart with various color schemes: half-life/lifetime, E(2+), E(4+)/E(2+) ...
+- Display nuclear chart with various color schemes: half-life/lifetime, decay mode, E(2+), E(4+) / E(2+) ...
 - Select individual nuclides to browse ground and excited state data, including:
   - Level energies, half-lives/lifetimes, decay modes, spin-parities ...
   - Gamma energies, branching fractions, multipolarities ...
 - Runs locally, with no network connection needed.
 - Mouse, keyboard, and gamepad (!) support.
-- Written in [C99](https://en.wikipedia.org/wiki/C99) using [SDL](https://github.com/libsdl-org/SDL) (so you can browse nuclear half-lives using some of the same code that powers [Half-Life](https://www.pcgamingwiki.com/wiki/Half-Life#Middleware)). Fast hardware accelerated rendering using `SDL_Renderer`, HI-DPI scaling support. 
+- Written using [SDL](https://github.com/libsdl-org/SDL) (so you can browse nuclear half-lives using some of the same code that powers [Half-Life](https://www.pcgamingwiki.com/wiki/Half-Life#Middleware)). Fast hardware accelerated rendering using `SDL_Renderer`, native HI-DPI scaling support. 
 - More to come...
 
 ## Building and installing from source
@@ -158,7 +158,6 @@ Zoom and pan with the mouse, the controls are basically identical to Google Maps
 | W / A / S / D      | Pan selected nuclide (in chart and level list views) |
 | + / -              | Zoom in/out on chart |
 | ] / [              | Cycle between view modes for the chart (half-life, 2+ energy, etc.) |
-| F7 / F8            | Adjust user interface size |
 | Enter              | Select menu items |
 | Escape / backspace | Exit out of open menus, cancel selection, etc. |
 | F11                | Toggle fullscreen mode |

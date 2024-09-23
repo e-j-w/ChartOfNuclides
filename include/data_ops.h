@@ -20,6 +20,7 @@ const char* getFullElemStr(const uint8_t Z, const uint8_t N);
 const char* getElemStr(const uint8_t Z);
 const char* getValueUnitShortStr(const uint8_t unit);
 const char* getValueTypeShortStr(const uint8_t type);
+const char* getDecayTypeShortStr(const uint8_t type);
 void getQValStr(char strOut[32], const valWithErr qVal, const uint8_t showErr);
 void getGammaEnergyStr(char strOut[32], const ndata *restrict nd, const uint32_t tranInd, const uint8_t showErr);
 void getGammaIntensityStr(char strOut[32], const ndata *restrict nd, const uint32_t tranInd, const uint8_t showErr);
@@ -43,6 +44,8 @@ double get2PlusEnergy(const ndata *restrict nd, const uint16_t nuclInd);
 double getLevelHalfLifeSeconds(const ndata *restrict nd, const uint32_t levelInd);
 double getNuclLevelHalfLifeSeconds(const ndata *restrict nd, const uint16_t nuclInd, const uint16_t nuclLevel);
 double getNuclGSHalfLifeSeconds(const ndata *restrict nd, const uint16_t nuclInd);
+
+uint8_t getNuclGSMostProbableDcyMode(const ndata *restrict nd, const uint16_t nuclInd);
 
 uint32_t getFinalLvlInd(const ndata *restrict nd, const uint32_t initialLevel, const uint32_t tran);
 

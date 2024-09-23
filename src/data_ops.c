@@ -1565,6 +1565,39 @@ double getNuclGSHalfLifeSeconds(const ndata *restrict nd, const uint16_t nuclInd
 	return getNuclLevelHalfLifeSeconds(nd,nuclInd,nd->nuclData[nuclInd].gsLevel);
 }
 
+uint8_t getNuclLevelMostProbableDcyMode(const ndata *restrict nd, const uint16_t nuclInd, const uint16_t nuclLevel){
+	
+	uint8_t hlUnit = nd->levels[nd->nuclData[nuclInd].firstLevel + (uint32_t)nuclLevel].halfLife.unit;
+	if(hlUnit == VALUE_UNIT_STABLE){
+		return (DECAYMODE_ENUM_LENGTH+1); //stable
+	}
+
+	double maxProb = -1.0;
+	int8_t maxProbInd = -1;
+	for(int8_t i=0; i<nd->levels[nd->nuclData[nuclInd].firstLevel + (uint32_t)nuclLevel].numDecModes; i++){
+		uint32_t dcyModeInd = nd->levels[nd->nuclData[nuclInd].firstLevel + (uint32_t)nuclLevel].firstDecMode + (uint32_t)i;
+		uint8_t decUnitType = nd->dcyMode[dcyModeInd].prob.unit;
+		if(decUnitType < VALUETYPE_ENUM_LENGTH){
+			double prob = getRawValFromDB(&nd->dcyMode[dcyModeInd].prob);
+			if(prob > maxProb){
+				maxProb = prob;
+				maxProbInd = i;
+			}
+		}		
+	}
+
+	if(maxProbInd >= 0){
+		return nd->dcyMode[nd->levels[nd->nuclData[nuclInd].firstLevel + (uint32_t)nuclLevel].firstDecMode + (uint32_t)maxProbInd].type;
+	}
+
+	return DECAYMODE_ENUM_LENGTH; //no decay mode found
+}
+
+uint8_t getNuclGSMostProbableDcyMode(const ndata *restrict nd, const uint16_t nuclInd){
+	return getNuclLevelMostProbableDcyMode(nd,nuclInd,nd->nuclData[nuclInd].gsLevel);
+}
+
+
 uint32_t getFinalLvlInd(const ndata *restrict nd, const uint32_t initialLevel, const uint32_t tran){
 	return (uint32_t)(initialLevel - nd->tran[tran].finalLvlOffset);
 }
@@ -1737,6 +1770,7 @@ void changeUIState(const app_data *restrict dat, app_state *restrict state, cons
 			}
 			if((state->ds.shownElements & (1U << UIELEM_CHARTVIEW_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_CHARTVIEW_MENU_HIDE]==0.0f)){
 				state->interactableElement |= (uint32_t)(1U << UIELEM_CVM_HALFLIFE_BUTTON);
+				state->interactableElement |= (uint32_t)(1U << UIELEM_CVM_DECAYMODE_BUTTON);
 				state->interactableElement |= (uint32_t)(1U << UIELEM_CVM_2PLUS_BUTTON);
 				state->interactableElement |= (uint32_t)(1U << UIELEM_CVM_R42_BUTTON);
 				state->interactableElement |= (uint32_t)(1U << UIELEM_CHARTVIEW_MENU);
@@ -1995,7 +2029,7 @@ void uiElemClickAction(app_data *restrict dat, app_state *restrict state, resour
 			state->clickedUIElem = UIELEM_ENUM_LENGTH; //'unclick' the menu button
 		}
 	}
-	if((uiElemID != UIELEM_CHARTVIEW_BUTTON)&&(uiElemID != UIELEM_CHARTVIEW_MENU)&&(uiElemID != UIELEM_CVM_HALFLIFE_BUTTON)&&(uiElemID != UIELEM_CVM_2PLUS_BUTTON)&&(uiElemID != UIELEM_CVM_R42_BUTTON)){
+	if((uiElemID != UIELEM_CHARTVIEW_BUTTON)&&(uiElemID != UIELEM_CHARTVIEW_MENU)&&(uiElemID != UIELEM_CVM_HALFLIFE_BUTTON)&&(uiElemID != UIELEM_CVM_DECAYMODE_BUTTON)&&(uiElemID != UIELEM_CVM_2PLUS_BUTTON)&&(uiElemID != UIELEM_CVM_R42_BUTTON)){
 		if((state->ds.shownElements & (1U << UIELEM_CHARTVIEW_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_CHARTVIEW_MENU_HIDE]==0.0f)){
 			startUIAnimation(dat,state,UIANIM_CHARTVIEW_MENU_HIDE); //menu will be closed after animation finishes
 			state->clickedUIElem = UIELEM_ENUM_LENGTH; //'unclick' the menu button
@@ -2115,6 +2149,12 @@ void uiElemClickAction(app_data *restrict dat, app_state *restrict state, resour
 			startUIAnimation(dat,state,UIANIM_CHARTVIEW_MENU_HIDE); //menu will be closed after animation finishes
 			state->clickedUIElem = UIELEM_ENUM_LENGTH; //'unclick' the menu button
 			state->chartView = CHARTVIEW_HALFLIFE;
+			changeUIState(dat,state,UISTATE_CHARTONLY); //prevents mouseover from still highlighting buttons while the menu closes
+			break;
+		case UIELEM_CVM_DECAYMODE_BUTTON:
+			startUIAnimation(dat,state,UIANIM_CHARTVIEW_MENU_HIDE); //menu will be closed after animation finishes
+			state->clickedUIElem = UIELEM_ENUM_LENGTH; //'unclick' the menu button
+			state->chartView = CHARTVIEW_DECAYMODE;
 			changeUIState(dat,state,UISTATE_CHARTONLY); //prevents mouseover from still highlighting buttons while the menu closes
 			break;
 		case UIELEM_CVM_2PLUS_BUTTON:
@@ -2252,15 +2292,21 @@ void updateSingleUIElemPosition(const app_data *restrict dat, drawing_state *res
 			ds->uiElemWidth[uiElemInd] = (uint16_t)((CHARTVIEW_MENU_WIDTH - 2*PANEL_EDGE_SIZE - 4*UI_PADDING_SIZE)*ds->uiUserScale);
 			ds->uiElemHeight[uiElemInd] = (uint16_t)((CHARTVIEW_MENU_ITEM_SPACING - UI_PADDING_SIZE)*ds->uiUserScale);
 			break;
-		case UIELEM_CVM_2PLUS_BUTTON:
+		case UIELEM_CVM_DECAYMODE_BUTTON:
 			ds->uiElemPosX[uiElemInd] = (uint16_t)(ds->windowXRes-((CHARTVIEW_MENU_WIDTH+CHARTVIEW_MENU_POS_XR - PANEL_EDGE_SIZE - 2*UI_PADDING_SIZE)*ds->uiUserScale));
 			ds->uiElemPosY[uiElemInd] = (uint16_t)((CHARTVIEW_MENU_POS_Y + PANEL_EDGE_SIZE + 2*UI_PADDING_SIZE + 2*CHARTVIEW_MENU_ITEM_SPACING)*ds->uiUserScale);
 			ds->uiElemWidth[uiElemInd] = (uint16_t)((CHARTVIEW_MENU_WIDTH - 2*PANEL_EDGE_SIZE - 4*UI_PADDING_SIZE)*ds->uiUserScale);
 			ds->uiElemHeight[uiElemInd] = (uint16_t)((CHARTVIEW_MENU_ITEM_SPACING - UI_PADDING_SIZE)*ds->uiUserScale);
 			break;
-		case UIELEM_CVM_R42_BUTTON:
+		case UIELEM_CVM_2PLUS_BUTTON:
 			ds->uiElemPosX[uiElemInd] = (uint16_t)(ds->windowXRes-((CHARTVIEW_MENU_WIDTH+CHARTVIEW_MENU_POS_XR - PANEL_EDGE_SIZE - 2*UI_PADDING_SIZE)*ds->uiUserScale));
 			ds->uiElemPosY[uiElemInd] = (uint16_t)((CHARTVIEW_MENU_POS_Y + PANEL_EDGE_SIZE + 2*UI_PADDING_SIZE + 3*CHARTVIEW_MENU_ITEM_SPACING)*ds->uiUserScale);
+			ds->uiElemWidth[uiElemInd] = (uint16_t)((CHARTVIEW_MENU_WIDTH - 2*PANEL_EDGE_SIZE - 4*UI_PADDING_SIZE)*ds->uiUserScale);
+			ds->uiElemHeight[uiElemInd] = (uint16_t)((CHARTVIEW_MENU_ITEM_SPACING - UI_PADDING_SIZE)*ds->uiUserScale);
+			break;
+		case UIELEM_CVM_R42_BUTTON:
+			ds->uiElemPosX[uiElemInd] = (uint16_t)(ds->windowXRes-((CHARTVIEW_MENU_WIDTH+CHARTVIEW_MENU_POS_XR - PANEL_EDGE_SIZE - 2*UI_PADDING_SIZE)*ds->uiUserScale));
+			ds->uiElemPosY[uiElemInd] = (uint16_t)((CHARTVIEW_MENU_POS_Y + PANEL_EDGE_SIZE + 2*UI_PADDING_SIZE + 4*CHARTVIEW_MENU_ITEM_SPACING)*ds->uiUserScale);
 			ds->uiElemWidth[uiElemInd] = (uint16_t)((CHARTVIEW_MENU_WIDTH - 2*PANEL_EDGE_SIZE - 4*UI_PADDING_SIZE)*ds->uiUserScale);
 			ds->uiElemHeight[uiElemInd] = (uint16_t)((CHARTVIEW_MENU_ITEM_SPACING - UI_PADDING_SIZE)*ds->uiUserScale);
 			break;

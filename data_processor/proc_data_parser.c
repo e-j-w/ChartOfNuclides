@@ -220,6 +220,7 @@ static int parseAppRules(app_data *restrict dat, asset_mapping *restrict stringI
 	dat->locStringIDs[LOCSTR_CHARTVIEW_MENUTITLE] = (uint16_t)nameToAssetID("chartview_menu_title",stringIDmap);
 	dat->locStringIDs[LOCSTR_CHARTVIEW_LIFETIME] = (uint16_t)nameToAssetID("chartview_lifetime",stringIDmap);
 	dat->locStringIDs[LOCSTR_CHARTVIEW_HALFLIFE] = (uint16_t)nameToAssetID("chartview_halflife",stringIDmap);
+	dat->locStringIDs[LOCSTR_CHARTVIEW_DECAYMODE] = (uint16_t)nameToAssetID("chartview_decaymode",stringIDmap);
 	dat->locStringIDs[LOCSTR_CHARTVIEW_2PLUS] = (uint16_t)nameToAssetID("chartview_2plus",stringIDmap);
 	dat->locStringIDs[LOCSTR_CHARTVIEW_R42] = (uint16_t)nameToAssetID("chartview_r42",stringIDmap);
 	dat->locStringIDs[LOCSTR_PREF_UISCALE] = (uint16_t)nameToAssetID("interface_size",stringIDmap);

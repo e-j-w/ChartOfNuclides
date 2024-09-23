@@ -79,7 +79,7 @@ static const float uiScales[UISCALE_ENUM_LENGTH] = {1.0f,1.20f,1.5f,1.75f};
 
 #define CHARTVIEW_BUTTON_POS_XR    (2*UI_PADDING_SIZE + MENU_BUTTON_WIDTH)   //in unscaled pixels
 #define CHARTVIEW_BUTTON_POS_Y     UI_PADDING_SIZE   //in unscaled pixels
-#define CHARTVIEW_BUTTON_WIDTH     120 //in unscaled pixels
+#define CHARTVIEW_BUTTON_WIDTH     140 //in unscaled pixels
 
 #define CHARTVIEW_MENU_ITEM_SPACING  40 //in unscaled pixels
 #define CHARTVIEW_MENU_POS_XR        (CHARTVIEW_BUTTON_POS_XR)   //in unscaled pixels
