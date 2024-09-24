@@ -1118,6 +1118,10 @@ uint8_t getDcyModeFromENSDFSubstr(const char *substr){
 		return DECAYMODE_BETAPLUS;
 	}else if(strcmp(substr,"%|e+%|b{++}")==0){
 		return DECAYMODE_ECANDBETAPLUS;
+	}else if(strcmp(substr,"%|e")==0){
+		return DECAYMODE_EC;
+	}else if(strcmp(substr,"%|a")==0){
+		return DECAYMODE_ALPHA;
 	}else{
 		return DECAYMODE_ENUM_LENGTH;
 	}
@@ -1290,6 +1294,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
   int tokPos;//position when tokenizing
   int firstQLine = 1; //flag to specify whether Q values have been read in for a specific nucleus
 	uint8_t qValDecModeFlag = 0; //flag specifying whether a Q-value was parsed as a decay mode
+	uint8_t decModeLineParsed = 0; //flag specifying whether a decay mode line has already been parsed
 	uint8_t qValDecModeType = DECAYMODE_ENUM_LENGTH; //the specific decay mode specified by Q-value
 	double longestIsomerHl = 0.0; //longest isomeric state half-life for a given nucleus
 	uint8_t isomerMValInNucl = 0;
@@ -1362,6 +1367,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 					longestIsomerHl = 0.0;
 					isomerMValInNucl = 0;
 					qValDecModeFlag = 0;
+					decModeLineParsed = 0;
 					qValDecModeType = DECAYMODE_ENUM_LENGTH;
 					nd->nuclData[nd->numNucl].numIsomerMVals = 0;
 					nd->nuclData[nd->numNucl].longestIsomerLevel = MAXNUMLVLS;
@@ -1649,7 +1655,13 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 			if(nd->numNucl>=0){ //check that indices are valid
 				if(nd->nuclData[nd->numNucl].numLevels>0){ //check that indices are valid
 					if(subSec==0){ //adopted levels subsection
-						if((strcmp(typebuff+1," L")==0)||(strcmp(typebuff+1,"cL")==0)){
+						//can parse multiple 'L' lines, but only one 'cL' (comment) line
+						//logic here is that if there are many known decay modes, they will be
+						//listed across several 'L' lines, but if decay modes are tentative, 
+						//they are usually listed per-measurement in 'cL' lines (so they can 
+						//repeat if there are multiple measurements), with the best values
+						//being at the top
+						if((strcmp(typebuff+1," L")==0)||((strcmp(typebuff+1,"cL")==0)&&(decModeLineParsed == 0))){
 							//parse decay mode info
 							//search for first decay string
 							//SDL_Log("%s\n",line);
@@ -1668,11 +1680,12 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 								memcpy(dmBuffOrig, &line[decStrStart], 127-decStrStart);
 								dmBuffOrig[127-decStrStart] = '\0';
 								//SDL_Log("Original decay mode buffer: %s\n",dmBuffOrig);
-								tok = strtok(dmBuffOrig,"$,");
+								tok = strtok(dmBuffOrig,"$,;");
 								while(tok!=NULL){
 									//SDL_Log("tok: %s\n",tok);
 									strcpy(dmBuff,tok);
 									if(parseDcyModeSubstr(nd,nd->numDecModes,dmBuff)==1){
+										decModeLineParsed = 1;
 										nd->levels[nd->numLvls-1].numDecModes++;
 										nd->numDecModes++;
 										if(nd->numDecModes > MAXNUMDECAYMODES){
@@ -1683,11 +1696,11 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 										memcpy(dmBuffOrig, &line[decStrStart], 127-decStrStart);
 										dmBuffOrig[127-decStrStart] = '\0';
 										//SDL_Log("Decay mode buffer after: %s\n",dmBuffOrig);
-										tok = strtok(dmBuffOrig,"$,");
+										tok = strtok(dmBuffOrig,"$,;");
 										if(tok!=NULL){
 											for(uint8_t i=0;i<nd->levels[nd->numLvls-1].numDecModes;i++){
 												if(tok!=NULL){
-													tok = strtok(NULL,"$,");
+													tok = strtok(NULL,"$,;");
 												}else{
 													break;
 												}
