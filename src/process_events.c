@@ -23,8 +23,9 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 void fcScrollAction(app_state *restrict state, const float deltaVal){
   //SDL_Log("scroll delta: %f\n",(double)deltaVal);
+  const float screenNumLines = (float)(getNumScreenLvlDispLines(&state->ds));
   state->ds.nuclFullInfoScrollStartY = state->ds.nuclFullInfoScrollY;
-  state->ds.nuclFullInfoScrollToY = state->ds.nuclFullInfoScrollY - 1.0f*state->scrollSpeedMultiplier*deltaVal;
+  state->ds.nuclFullInfoScrollToY = state->ds.nuclFullInfoScrollY - 0.25f*state->scrollSpeedMultiplier*screenNumLines*deltaVal;
   if(state->ds.nuclFullInfoScrollToY < 0.0f){
     state->ds.nuclFullInfoScrollToY = 0.0f;
   }else if(state->ds.nuclFullInfoScrollToY > state->ds.nuclFullInfoMaxScrollY){
@@ -242,9 +243,9 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
   }else if(state->uiState == UISTATE_FULLLEVELINFO){
 
     if(up && !down){
-      fcScrollAction(state,0.5f);
+      fcScrollAction(state,1.0f);
     }else if(down && !up){
-      fcScrollAction(state,-0.5f);
+      fcScrollAction(state,-1.0f);
     }else if(state->ds.fcNuclChangeInProgress == 0){
       //change selected nucleus
       if(altleft && !altright){

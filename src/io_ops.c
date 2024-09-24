@@ -82,7 +82,7 @@ static int readConfigFile(FILE *file, app_state *restrict state){
           state->scrollSpeedMultiplier = ss;
         }else{
           SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,"invalid scroll speed (%f) in config file, setting to default.\n",(double)ss);
-          state->scrollSpeedMultiplier = 16.0f;
+          state->scrollSpeedMultiplier = 1.0f;
         }
       }else if(strcmp(par,"chart_pos_x") == 0){
         float posx = (float)atof(val);

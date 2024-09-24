@@ -42,7 +42,7 @@ void initializeTempState(const app_data *restrict dat, app_state *restrict state
   state->lastInputType = INPUT_TYPE_KEYBOARD; //default input type
 	state->kbdModVal = KBD_MOD_NONE;
 	state->mouseoverElement = UIELEM_ENUM_LENGTH;
-	state->scrollSpeedMultiplier = 16.0f;
+	state->scrollSpeedMultiplier = 1.0f;
 	state->inputFlags = 0;
   //app state
 	state->chartSelectedNucl = MAXNUMNUCL;
