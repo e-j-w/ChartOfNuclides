@@ -1055,8 +1055,198 @@ void getNuclNZ(nucl *nuc, const char *nucName){
 	
 }
 
+uint8_t getDcyModeFromENSDFSubstr(const char *substr){
+	if(strcmp(substr,"%IT")==0){
+		return DECAYMODE_IT;
+	}else if(strcmp(substr,"%B-")==0){
+		return DECAYMODE_BETAMINUS;
+	}else if(strcmp(substr,"%B+")==0){
+		return DECAYMODE_BETAPLUS;
+	}else if(strcmp(substr,"%EC")==0){
+		return DECAYMODE_EC;
+	}else if(strcmp(substr,"%EC+%B+")==0){
+		return DECAYMODE_ECANDBETAPLUS;
+	}else if(strcmp(substr,"%B-N")==0){
+		return DECAYMODE_BETAMINUS_NEUTRON;
+	}else if(strcmp(substr,"%B+P")==0){
+		return DECAYMODE_BETAPLUS_PROTON;
+	}else if(strcmp(substr,"%B+2P")==0){
+		return DECAYMODE_BETAPLUS_TWOPROTON;
+	}else if(strcmp(substr,"%ECP")==0){
+		return DECAYMODE_EC_PROTON;
+	}else if(strcmp(substr,"%P")==0){
+		return DECAYMODE_PROTON;
+	}else if(strcmp(substr,"%2P")==0){
+		return DECAYMODE_TWOPROTON;
+	}else if(strcmp(substr,"%N")==0){
+		return DECAYMODE_NEUTRON;
+	}else if(strcmp(substr,"%2N")==0){
+		return DECAYMODE_TWONEUTRON;
+	}else if(strcmp(substr,"%D")==0){
+		return DECAYMODE_DEUTERON;
+	}else if(strcmp(substr,"%3HE")==0){
+		return DECAYMODE_3HE;
+	}else if(strcmp(substr,"%A")==0){
+		return DECAYMODE_ALPHA;
+	}else if(strcmp(substr,"%B-A")==0){
+		return DECAYMODE_BETAMINUS_ALPHA;
+	}else if(strcmp(substr,"%SF")==0){
+		return DECAYMODE_SPONTANEOUSFISSION;
+	}else if(strcmp(substr,"%B-SF")==0){
+		return DECAYMODE_BETAMINUS_SPONTANEOUSFISSION;
+	}else if(strcmp(substr,"%2B-")==0){
+		return DECAYMODE_2BETAMINUS;
+	}else if(strcmp(substr,"%2B+")==0){
+		return DECAYMODE_2BETAPLUS;
+	}else if(strcmp(substr,"%2EC")==0){
+		return DECAYMODE_2EC;
+	}else if(strcmp(substr,"%14C")==0){
+		return DECAYMODE_14C;
+	}else if(strcmp(substr,"%{+20}Ne")==0){
+		return DECAYMODE_20NE;
+	}else if(strcmp(substr,"%{+25}Ne")==0){
+		return DECAYMODE_25NE;
+	}else if(strcmp(substr,"%{+28}Mg")==0){
+		return DECAYMODE_28MG;
+	}else if(strcmp(substr,"%34SI")==0){
+		return DECAYMODE_34SI;
+	}else if(strcmp(substr,"%|b{+-}")==0){
+		return DECAYMODE_BETAMINUS;
+	}else if(strcmp(substr,"%|b{++}")==0){
+		return DECAYMODE_BETAPLUS;
+	}else if(strcmp(substr,"%|b{++}")==0){
+		return DECAYMODE_BETAPLUS;
+	}else if(strcmp(substr,"%|e+%|b{++}")==0){
+		return DECAYMODE_ECANDBETAPLUS;
+	}else{
+		return DECAYMODE_ENUM_LENGTH;
+	}
+}
+
+//parses a substring containing info on a single decay mode
+//eg. '%EC+%B+>99.87'
+//returns 1 if successful
+uint8_t parseDcyModeSubstr(ndata *nd, const uint16_t dcyModeInd, const char *substr){
+	
+	char *tok, *tok2;
+	char substrCpy[128], valBuff[16];
+
+	//SDL_Log("Parsing decay mode substring: %s\n",substr);
+	strcpy(substrCpy,substr);
+	tok = strtok(substrCpy," =><");
+	if(tok!=NULL){
+		uint8_t dcyMode = getDcyModeFromENSDFSubstr(tok);
+		if(dcyMode != DECAYMODE_ENUM_LENGTH){
+			nd->dcyMode[dcyModeInd].type = dcyMode;
+			nd->dcyMode[dcyModeInd].prob.unit = VALUETYPE_NUMBER; //default
+		}else{
+			return 0;
+		}
+		//check for decay modes using '>' or '<'
+		strcpy(substrCpy,substr);
+		tok = strtok(substrCpy,">");
+		tok = strtok(NULL,"$ ,");
+		if(tok!=NULL){
+			//SDL_Log("Parsing decay mode with '>'.\n");
+			nd->dcyMode[dcyModeInd].prob.unit = VALUETYPE_GREATERTHAN;
+		}else{
+			strcpy(substrCpy,substr);
+			tok = strtok(substrCpy,"<");
+			tok = strtok(NULL,"$ ,");
+			if(tok!=NULL){
+				//SDL_Log("Parsing decay mode with '<'.\n");
+				nd->dcyMode[dcyModeInd].prob.unit = VALUETYPE_LESSTHAN;
+			}
+		}
+		strcpy(substrCpy,substr);
+		tok = strtok(substrCpy," =><");
+		tok = strtok(NULL,"$ ,");
+		if(tok!=NULL){
+			//SDL_Log("tok: %s\n",tok);
+			strncpy(valBuff,tok,15);
+			tok2 = strtok(valBuff," ");
+			if(tok2 != NULL){
+				//SDL_Log("tok2: %s\n",tok2);
+				if(strcmp(tok2,"GT")==0){
+					nd->dcyMode[dcyModeInd].prob.unit = VALUETYPE_GREATERTHAN;
+					tok2 = strtok(NULL," ");
+				}else if(strcmp(tok2,"GE")==0){
+					nd->dcyMode[dcyModeInd].prob.unit = VALUETYPE_GREATEROREQUALTHAN;
+					tok2 = strtok(NULL," ");
+				}else if(strcmp(tok2,"LT")==0){
+					nd->dcyMode[dcyModeInd].prob.unit = VALUETYPE_LESSTHAN;
+					tok2 = strtok(NULL," ");
+				}else if(strcmp(tok2,"LE")==0){
+					nd->dcyMode[dcyModeInd].prob.unit = VALUETYPE_LESSOREQUALTHAN;
+					tok2 = strtok(NULL," ");
+				}else if(strcmp(tok2,"AP")==0){
+					nd->dcyMode[dcyModeInd].prob.unit = VALUETYPE_APPROX;
+					tok2 = strtok(NULL," ");
+				}else if(strcmp(tok2,"?")==0){
+					nd->dcyMode[dcyModeInd].prob.unit = VALUETYPE_UNKNOWN;
+					tok2 = strtok(NULL," ");
+				}
+				if(tok2!=NULL){
+					nd->dcyMode[dcyModeInd].prob.format = 0;
+					char value[16];
+					strncpy(value,tok2,15);
+					//SDL_Log("%s\n",tok2);
+					nd->dcyMode[dcyModeInd].prob.val = (float)atof(tok2);
+					
+					//quick consistency check - if the probability is exactly zero,
+					//then there's probably something wrong with the parsing
+					//(likely an improperly formatted string)
+					if((nd->dcyMode[dcyModeInd].prob.val == 0.0f)&&(nd->dcyMode[dcyModeInd].prob.unit == VALUETYPE_NUMBER)){
+						return 0;
+					}
+					
+					tok2 = strtok(NULL,""); //get the rest of the string
+					if(tok2 != NULL){
+						//SDL_Log("%s\n",tok2);
+						if(tok2[0]=='+'){
+							//asymmetric errors
+							//SDL_Log("err: %s\n",tok2);
+							char errVal[16];
+							strncpy(errVal,tok2,15);
+							tok2 = strtok(errVal, "-");
+							if(tok2 != NULL){
+								//SDL_Log("pos err: %s\n",tok2);
+								nd->dcyMode[dcyModeInd].prob.err = (uint8_t)atoi(tok2); //positive error
+								tok2 = strtok(NULL, ""); //get rest of the string
+								if(tok2 != NULL){
+									uint16_t negErr = ((uint16_t)atoi(tok2) & 127U); //negative error
+									//SDL_Log("neg err: %u\n",negErr);
+									nd->dcyMode[dcyModeInd].prob.format |= (uint16_t)(VALUETYPE_ASYMERROR << 5);
+									nd->dcyMode[dcyModeInd].prob.format |= (uint16_t)(negErr << 9);
+								}
+							}
+						}else{
+							nd->dcyMode[dcyModeInd].prob.err = (uint8_t)atoi(tok2);
+						}
+					}
+					tok2 = strtok(value,".");
+					if(tok2!=NULL){
+						//SDL_Log("tok2: %s\n",tok2);
+						tok2 = strtok(NULL,"");
+						if(tok2!=NULL){
+							//SDL_Log("tok2: %s\n",tok2);
+							uint8_t sigFigs = (uint8_t)(strlen(tok2) & 15U); //only 4 bits available for precision
+							nd->dcyMode[dcyModeInd].prob.format |= sigFigs;
+						}
+						//SDL_Log("format: %u\n",nd->dcyMode[dcyModeInd].prob.format);
+					}
+				}
+			}
+			
+			//SDL_Log("Found decay with type %u and probability: %f %u (type %u)\n",nd->dcyMode[dcyModeInd].type,(double)nd->dcyMode[dcyModeInd].prob.val,nd->dcyMode[dcyModeInd].prob.err,nd->dcyMode[dcyModeInd].prob.unit);
+			return 1;
+		}
+	}
+	return 0;
+}
+
 //set initial databae values prior to importing data
-void initialize_database(ndata * nd){
+void initialize_database(ndata *nd){
 	
 	memset(nd,0,sizeof(ndata));
 	
@@ -1093,7 +1283,7 @@ int isEmpty(const char *str){
 int parseENSDFFile(const char * filePath, ndata * nd){
 
   FILE *efile;
-  char *tok, *tok2;
+  char *tok;
   char str[256];//string to be read from file (will be tokenized)
   char nuclNameStr[10];
   char line[256],val[MAXNUMPARSERVALS][256];
@@ -1159,6 +1349,10 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 						nd->dcyMode[nd->numDecModes].prob.format = 0;
 						//SDL_Log("Assigned decay mode %u\n",nd->dcyMode[nd->numDecModes].type);
 						nd->numDecModes++;
+						if(nd->numDecModes > MAXNUMDECAYMODES){
+							SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"Maximum number of decay modes (%i) exceeded!\n",MAXNUMDECAYMODES);
+							return -1;
+						}
 					}
 				}
 
@@ -1470,166 +1664,41 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 							if(line[decStrStart]=='%'){
 								//line contains decay mode info
 								//SDL_Log("dec mode found: %s\n",line);
-								uint8_t decModCtr = 0;
-								char dmBuff[128], valBuff[16];
-								memcpy(dmBuff, &line[decStrStart], 127-decStrStart);
-								dmBuff[127-decStrStart] = '\0';
-								tok = strtok(dmBuff," =");
+								char dmBuffOrig[128], dmBuff[128];
+								memcpy(dmBuffOrig, &line[decStrStart], 127-decStrStart);
+								dmBuffOrig[127-decStrStart] = '\0';
+								//SDL_Log("Original decay mode buffer: %s\n",dmBuffOrig);
+								tok = strtok(dmBuffOrig,"$,");
 								while(tok!=NULL){
-									//SDL_Log("tok at start: %s\n",tok);
-									if(strcmp(tok,"%IT")==0){
-										nd->dcyMode[nd->numDecModes].type = DECAYMODE_IT;
-									}else if(strcmp(tok,"%B-")==0){
-										nd->dcyMode[nd->numDecModes].type = DECAYMODE_BETAMINUS;
-									}else if(strcmp(tok,"%B+")==0){
-										nd->dcyMode[nd->numDecModes].type = DECAYMODE_BETAPLUS;
-									}else if(strcmp(tok,"%EC")==0){
-										nd->dcyMode[nd->numDecModes].type = DECAYMODE_EC;
-									}else if(strcmp(tok,"%EC+%B+")==0){
-										nd->dcyMode[nd->numDecModes].type = DECAYMODE_ECANDBETAPLUS;
-									}else if(strcmp(tok,"%B-N")==0){
-										nd->dcyMode[nd->numDecModes].type = DECAYMODE_BETAMINUS_NEUTRON;
-									}else if(strcmp(tok,"%B+P")==0){
-										nd->dcyMode[nd->numDecModes].type = DECAYMODE_BETAPLUS_PROTON;
-									}else if(strcmp(tok,"%B+2P")==0){
-										nd->dcyMode[nd->numDecModes].type = DECAYMODE_BETAPLUS_TWOPROTON;
-									}else if(strcmp(tok,"%ECP")==0){
-										nd->dcyMode[nd->numDecModes].type = DECAYMODE_EC_PROTON;
-									}else if(strcmp(tok,"%P")==0){
-										nd->dcyMode[nd->numDecModes].type = DECAYMODE_PROTON;
-									}else if(strcmp(tok,"%2P")==0){
-										nd->dcyMode[nd->numDecModes].type = DECAYMODE_TWOPROTON;
-									}else if(strcmp(tok,"%N")==0){
-										nd->dcyMode[nd->numDecModes].type = DECAYMODE_NEUTRON;
-									}else if(strcmp(tok,"%2N")==0){
-										nd->dcyMode[nd->numDecModes].type = DECAYMODE_TWONEUTRON;
-									}else if(strcmp(tok,"%D")==0){
-										nd->dcyMode[nd->numDecModes].type = DECAYMODE_DEUTERON;
-									}else if(strcmp(tok,"%3HE")==0){
-										nd->dcyMode[nd->numDecModes].type = DECAYMODE_3HE;
-									}else if(strcmp(tok,"%A")==0){
-										nd->dcyMode[nd->numDecModes].type = DECAYMODE_ALPHA;
-									}else if(strcmp(tok,"%B-A")==0){
-										nd->dcyMode[nd->numDecModes].type = DECAYMODE_BETAMINUS_ALPHA;
-									}else if(strcmp(tok,"%SF")==0){
-										nd->dcyMode[nd->numDecModes].type = DECAYMODE_SPONTANEOUSFISSION;
-									}else if(strcmp(tok,"%B-SF")==0){
-										nd->dcyMode[nd->numDecModes].type = DECAYMODE_BETAMINUS_SPONTANEOUSFISSION;
-									}else if(strcmp(tok,"%2B-")==0){
-										nd->dcyMode[nd->numDecModes].type = DECAYMODE_2BETAMINUS;
-									}else if(strcmp(tok,"%2B+")==0){
-										nd->dcyMode[nd->numDecModes].type = DECAYMODE_2BETAPLUS;
-									}else if(strcmp(tok,"%2EC")==0){
-										nd->dcyMode[nd->numDecModes].type = DECAYMODE_2EC;
-									}else if(strcmp(tok,"%14C")==0){
-										nd->dcyMode[nd->numDecModes].type = DECAYMODE_14C;
-									}else if(strcmp(tok,"%{+20}Ne")==0){
-										nd->dcyMode[nd->numDecModes].type = DECAYMODE_20NE;
-									}else if(strcmp(tok,"%{+25}Ne")==0){
-										nd->dcyMode[nd->numDecModes].type = DECAYMODE_25NE;
-									}else if(strcmp(tok,"%{+28}Mg")==0){
-										nd->dcyMode[nd->numDecModes].type = DECAYMODE_28MG;
-									}else if(strcmp(tok,"%34SI")==0){
-										nd->dcyMode[nd->numDecModes].type = DECAYMODE_34SI;
-									}else if(strcmp(tok,"%|b{+-}")==0){
-										nd->dcyMode[nd->numDecModes].type = DECAYMODE_BETAMINUS;
-									}else if(strcmp(tok,"%|b{++}")==0){
-										nd->dcyMode[nd->numDecModes].type = DECAYMODE_BETAPLUS;
-									}else if(strcmp(tok,"%|b{++}")==0){
-										nd->dcyMode[nd->numDecModes].type = DECAYMODE_BETAPLUS;
-									}else if(strcmp(tok,"%|e+%|b{++}")==0){
-										nd->dcyMode[nd->numDecModes].type = DECAYMODE_ECANDBETAPLUS;
-									}else{
-										break;
-									}
-									tok = strtok(NULL,"$ ,");
-									if(tok!=NULL){
-										//SDL_Log("tok: %s\n",tok);
-										strncpy(valBuff,tok,15);
-										tok2 = strtok(valBuff," ");
-										if(tok2 != NULL){
-											//SDL_Log("tok2: %s\n",tok2);
-											if(strcmp(tok2,"GT")==0){
-												nd->dcyMode[nd->numDecModes].prob.unit = VALUETYPE_GREATERTHAN;
-												tok2 = strtok(NULL," ");
-											}else if(strcmp(tok2,"GE")==0){
-												nd->dcyMode[nd->numDecModes].prob.unit = VALUETYPE_GREATEROREQUALTHAN;
-												tok2 = strtok(NULL," ");
-											}else if(strcmp(tok2,"LT")==0){
-												nd->dcyMode[nd->numDecModes].prob.unit = VALUETYPE_LESSTHAN;
-												tok2 = strtok(NULL," ");
-											}else if(strcmp(tok2,"LE")==0){
-												nd->dcyMode[nd->numDecModes].prob.unit = VALUETYPE_LESSOREQUALTHAN;
-												tok2 = strtok(NULL," ");
-											}else if(strcmp(tok2,"AP")==0){
-												nd->dcyMode[nd->numDecModes].prob.unit = VALUETYPE_APPROX;
-												tok2 = strtok(NULL," ");
-											}else if(strcmp(tok2,"?")==0){
-												nd->dcyMode[nd->numDecModes].prob.unit = VALUETYPE_UNKNOWN;
-												tok2 = strtok(NULL," ");
-											}
-											if(tok2!=NULL){
-												nd->dcyMode[nd->numDecModes].prob.format = 0;
-												char value[16];
-												strncpy(value,tok2,15);
-												//SDL_Log("%s\n",tok2);
-												nd->dcyMode[nd->numDecModes].prob.val = (float)atof(tok2);
-												tok2 = strtok(NULL,""); //get the rest of the string
-												if(tok2 != NULL){
-													//SDL_Log("%s\n",tok2);
-													if(tok2[0]=='+'){
-														//asymmetric errors
-														//SDL_Log("err: %s\n",tok2);
-														char errVal[16];
-														strncpy(errVal,tok2,15);
-														tok2 = strtok(errVal, "-");
-														if(tok2 != NULL){
-															//SDL_Log("pos err: %s\n",tok2);
-															nd->dcyMode[nd->numDecModes].prob.err = (uint8_t)atoi(tok2); //positive error
-															tok2 = strtok(NULL, ""); //get rest of the string
-															if(tok2 != NULL){
-																uint16_t negErr = ((uint16_t)atoi(tok2) & 127U); //negative error
-																//SDL_Log("neg err: %u\n",negErr);
-																nd->dcyMode[nd->numDecModes].prob.format |= (uint16_t)(VALUETYPE_ASYMERROR << 5);
-																nd->dcyMode[nd->numDecModes].prob.format |= (uint16_t)(negErr << 9);
-															}
-														}
-													}else{
-														nd->dcyMode[nd->numDecModes].prob.err = (uint8_t)atoi(tok2);
-													}
-												}
-												tok2 = strtok(value,".");
-												if(tok2!=NULL){
-													//SDL_Log("tok2: %s\n",tok2);
-													tok2 = strtok(NULL,"");
-													if(tok2!=NULL){
-														//SDL_Log("tok2: %s\n",tok2);
-														uint8_t sigFigs = (uint8_t)(strlen(tok2) & 15U); //only 4 bits available for precision
-														nd->dcyMode[nd->numDecModes].prob.format |= sigFigs;
-													}
-													//SDL_Log("format: %u\n",nd->dcyMode[nd->numDecModes].prob.format);
-												}
-											}
-										}
-										
-										//SDL_Log("Found decay with type %u and probability: %f %u (type %u)\n",nd->dcyMode[nd->numDecModes].type,(double)nd->dcyMode[nd->numDecModes].prob,nd->dcyMode[nd->numDecModes].prob.err,nd->dcyMode[nd->numDecModes].prob.unit);
+									//SDL_Log("tok: %s\n",tok);
+									strcpy(dmBuff,tok);
+									if(parseDcyModeSubstr(nd,nd->numDecModes,dmBuff)==1){
 										nd->levels[nd->numLvls-1].numDecModes++;
 										nd->numDecModes++;
-										decModCtr++;
-										//go to the next decay mode
-										memcpy(dmBuff, &line[decStrStart], 127-decStrStart);
-										dmBuff[127-decStrStart] = '\0';
-										tok = strtok(dmBuff,"$,");
-										for(uint8_t i=0;i<(decModCtr-1);i++){
-											if(tok!=NULL){
-												//SDL_Log("tok %u: %s\n",i,tok);
-												tok = strtok(NULL,"$,");
+										if(nd->numDecModes > MAXNUMDECAYMODES){
+											SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"Maximum number of decay modes (%i) exceeded!\n",MAXNUMDECAYMODES);
+											return -1;
+										}
+										//reconstitute buffer
+										memcpy(dmBuffOrig, &line[decStrStart], 127-decStrStart);
+										dmBuffOrig[127-decStrStart] = '\0';
+										//SDL_Log("Decay mode buffer after: %s\n",dmBuffOrig);
+										tok = strtok(dmBuffOrig,"$,");
+										if(tok!=NULL){
+											for(uint8_t i=0;i<nd->levels[nd->numLvls-1].numDecModes;i++){
+												if(tok!=NULL){
+													tok = strtok(NULL,"$,");
+												}else{
+													break;
+												}
 											}
 										}
-										if(tok!=NULL){
-											//SDL_Log("tok at end: %s\n",tok);
-											tok = strtok(NULL," =");
+										//SDL_Log("tok after: %s\n",tok);
+										if((tok==NULL)||(isEmpty(tok))){
+											break; //no need to process empty substring at end
 										}
+									}else{
+										break;
 									}
 								}
 								//getc(stdin);
