@@ -1567,15 +1567,18 @@ double getNuclGSHalfLifeSeconds(const ndata *restrict nd, const uint16_t nuclInd
 
 uint8_t getNuclLevelMostProbableDcyMode(const ndata *restrict nd, const uint16_t nuclInd, const uint16_t nuclLevel){
 	
-	uint8_t hlUnit = nd->levels[nd->nuclData[nuclInd].firstLevel + (uint32_t)nuclLevel].halfLife.unit;
+	uint32_t lvlInd = nd->nuclData[nuclInd].firstLevel + (uint32_t)nuclLevel;
+	uint8_t hlUnit = nd->levels[lvlInd].halfLife.unit;
 	if(hlUnit == VALUE_UNIT_STABLE){
 		return (DECAYMODE_ENUM_LENGTH+1); //stable
+	}else if((nd->levels[lvlInd].numDecModes == 0)&&(getLevelHalfLifeSeconds(nd,lvlInd)>1.0E15)){
+		return (DECAYMODE_ENUM_LENGTH+1); //roughly stable
 	}
 
 	double maxProb = -1.0;
 	int8_t maxProbInd = -1;
-	for(int8_t i=0; i<nd->levels[nd->nuclData[nuclInd].firstLevel + (uint32_t)nuclLevel].numDecModes; i++){
-		uint32_t dcyModeInd = nd->levels[nd->nuclData[nuclInd].firstLevel + (uint32_t)nuclLevel].firstDecMode + (uint32_t)i;
+	for(int8_t i=0; i<nd->levels[lvlInd].numDecModes; i++){
+		uint32_t dcyModeInd = nd->levels[lvlInd].firstDecMode + (uint32_t)i;
 		uint8_t decUnitType = nd->dcyMode[dcyModeInd].prob.unit;
 		if(decUnitType < VALUETYPE_ENUM_LENGTH){
 			double prob = getRawValFromDB(&nd->dcyMode[dcyModeInd].prob);
@@ -1594,7 +1597,32 @@ uint8_t getNuclLevelMostProbableDcyMode(const ndata *restrict nd, const uint16_t
 }
 
 uint8_t getNuclGSMostProbableDcyMode(const ndata *restrict nd, const uint16_t nuclInd){
-	return getNuclLevelMostProbableDcyMode(nd,nuclInd,nd->nuclData[nuclInd].gsLevel);
+	uint8_t dcyMode = getNuclLevelMostProbableDcyMode(nd,nuclInd,nd->nuclData[nuclInd].gsLevel);
+	if((dcyMode != DECAYMODE_ENUM_LENGTH)&&(dcyMode != DECAYMODE_IT)){
+		return dcyMode;
+	}else{
+		//check for decay modes in the first few levels instead
+		for(uint16_t i=0; i<10; i++){
+			if(i<nd->nuclData[nuclInd].numLevels){
+				dcyMode = getNuclLevelMostProbableDcyMode(nd,nuclInd,i);
+				if((dcyMode != DECAYMODE_ENUM_LENGTH)&&(dcyMode != DECAYMODE_IT)){
+					return dcyMode;
+				}
+			}else{
+				break;
+			}
+		}
+	}
+
+	//if no decay mode is listed, maybe we can infer one from the GS Q-values
+	if((nd->nuclData[nuclInd].qbeta.val > 0.0f)&&(nd->nuclData[nuclInd].qalpha.val < 0.0f)){
+		return DECAYMODE_BETAMINUS;
+	}else if((nd->nuclData[nuclInd].qbeta.val < 0.0f)&&(nd->nuclData[nuclInd].qalpha.val < 0.0f)){
+		return DECAYMODE_ECANDBETAPLUS;
+	}
+
+	return DECAYMODE_ENUM_LENGTH;
+	
 }
 
 

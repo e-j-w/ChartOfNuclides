@@ -1099,6 +1099,8 @@ int parseENSDFFile(const char * filePath, ndata * nd){
   char line[256],val[MAXNUMPARSERVALS][256];
   int tokPos;//position when tokenizing
   int firstQLine = 1; //flag to specify whether Q values have been read in for a specific nucleus
+	uint8_t qValDecModeFlag = 0; //flag specifying whether a Q-value was parsed as a decay mode
+	uint8_t qValDecModeType = DECAYMODE_ENUM_LENGTH; //the specific decay mode specified by Q-value
 	double longestIsomerHl = 0.0; //longest isomeric state half-life for a given nucleus
 	uint8_t isomerMValInNucl = 0;
 	sp_var_data varDat;
@@ -1144,11 +1146,29 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 			memcpy(hbuff, &line[9], 14);
 			hbuff[14] = '\0';
 			if(strcmp(hbuff,"ADOPTED LEVELS")==0){
+				//new nuclide
+
+				//first handle any business arising from the previous nuclide
+				if(qValDecModeFlag){
+					if(nd->levels[nd->nuclData[nd->numNucl].firstLevel].numDecModes == 0){
+						nd->levels[nd->nuclData[nd->numNucl].firstLevel].numDecModes = 1;
+						nd->levels[nd->nuclData[nd->numNucl].firstLevel].firstDecMode = nd->numDecModes;
+						nd->dcyMode[nd->numDecModes].type = qValDecModeType;
+						nd->dcyMode[nd->numDecModes].prob.val = 100.0f;
+						nd->dcyMode[nd->numDecModes].prob.err = 0;
+						nd->dcyMode[nd->numDecModes].prob.format = 0;
+						//SDL_Log("Assigned decay mode %u\n",nd->dcyMode[nd->numDecModes].type);
+						nd->numDecModes++;
+					}
+				}
+
 				if(nd->numNucl<MAXNUMNUCL){
 					nd->numNucl++;
 					subSec=0; //we're at the beginning of the entry for this nucleus
 					longestIsomerHl = 0.0;
 					isomerMValInNucl = 0;
+					qValDecModeFlag = 0;
+					qValDecModeType = DECAYMODE_ENUM_LENGTH;
 					nd->nuclData[nd->numNucl].numIsomerMVals = 0;
 					nd->nuclData[nd->numNucl].longestIsomerLevel = MAXNUMLVLS;
 					nd->nuclData[nd->numNucl].abundance.unit = VALUE_UNIT_NOVAL; //default
@@ -1392,18 +1412,20 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 							//SDL_Log("%s\n",hlBuff);
 							parseHalfLife(&nd->levels[nd->numLvls-1],hlBuff);
 							//check isomerism
+							uint8_t eValueType = (uint8_t)((nd->levels[nd->numLvls-1].energy.format >> 5U) & 15U);
 							double en = getLevelEnergykeV(nd,nd->numLvls-1);
-							if(en > 0.0){
+							if((en > 0.0)||((nd->nuclData[nd->numNucl].numLevels > 1) && (eValueType == VALUETYPE_PLUSX))){
 								uint8_t hlValueType = (uint8_t)((nd->levels[nd->numLvls-1].halfLife.format >> 5U) & 15U);
 								if(!((hlValueType == VALUETYPE_LESSTHAN)||(hlValueType == VALUETYPE_LESSOREQUALTHAN))){
 									double hl = getLevelHalfLifeSeconds(nd,nd->numLvls-1);
-									//SDL_Log("hl: %f\n",hl);
 									if(hl >= 10.0E-9){
+										//SDL_Log("E: %f, hl: %f\n",en,hl);
 										if(hl >= 1E-3){
 											isomerMValInNucl++; //m-values are somewhat informal but are generally only assigned for longer-lived isomers
 											nd->nuclData[nd->numNucl].numIsomerMVals++;
 										}
 										if(hl > longestIsomerHl){
+											//SDL_Log("Longest lived isomer found with m-val %u\n",isomerMValInNucl);
 											longestIsomerHl = hl;
 											nd->nuclData[nd->numNucl].longestIsomerLevel = nd->numLvls-1;
 											nd->nuclData[nd->numNucl].longestIsomerMVal = isomerMValInNucl;
@@ -1433,7 +1455,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 			if(nd->numNucl>=0){ //check that indices are valid
 				if(nd->nuclData[nd->numNucl].numLevels>0){ //check that indices are valid
 					if(subSec==0){ //adopted levels subsection
-						if(strcmp(typebuff+1," L")==0){
+						if((strcmp(typebuff+1," L")==0)||(strcmp(typebuff+1,"cL")==0)){
 							//parse decay mode info
 							//search for first decay string
 							//SDL_Log("%s\n",line);
@@ -1444,6 +1466,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 									break;
 								}
 							}
+							//SDL_Log("decStrStart: %u\n",decStrStart);
 							if(line[decStrStart]=='%'){
 								//line contains decay mode info
 								//SDL_Log("dec mode found: %s\n",line);
@@ -1508,10 +1531,18 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 										nd->dcyMode[nd->numDecModes].type = DECAYMODE_28MG;
 									}else if(strcmp(tok,"%34SI")==0){
 										nd->dcyMode[nd->numDecModes].type = DECAYMODE_34SI;
+									}else if(strcmp(tok,"%|b{+-}")==0){
+										nd->dcyMode[nd->numDecModes].type = DECAYMODE_BETAMINUS;
+									}else if(strcmp(tok,"%|b{++}")==0){
+										nd->dcyMode[nd->numDecModes].type = DECAYMODE_BETAPLUS;
+									}else if(strcmp(tok,"%|b{++}")==0){
+										nd->dcyMode[nd->numDecModes].type = DECAYMODE_BETAPLUS;
+									}else if(strcmp(tok,"%|e+%|b{++}")==0){
+										nd->dcyMode[nd->numDecModes].type = DECAYMODE_ECANDBETAPLUS;
 									}else{
 										break;
 									}
-									tok = strtok(NULL,"$");
+									tok = strtok(NULL,"$ ,");
 									if(tok!=NULL){
 										//SDL_Log("tok: %s\n",tok);
 										strncpy(valBuff,tok,15);
@@ -1588,20 +1619,62 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 										//go to the next decay mode
 										memcpy(dmBuff, &line[decStrStart], 127-decStrStart);
 										dmBuff[127-decStrStart] = '\0';
-										tok = strtok(dmBuff,"$");
+										tok = strtok(dmBuff,"$,");
 										for(uint8_t i=0;i<(decModCtr-1);i++){
 											if(tok!=NULL){
 												//SDL_Log("tok %u: %s\n",i,tok);
-												tok = strtok(NULL,"$");
+												tok = strtok(NULL,"$,");
 											}
 										}
 										if(tok!=NULL){
-											//SDL_Log("tok: %s\n",tok);
+											//SDL_Log("tok at end: %s\n",tok);
 											tok = strtok(NULL," =");
 										}
 									}
 								}
 								//getc(stdin);
+							}
+						}
+					}
+				}
+			}
+			if(nd->numNucl>=0){ //check that indices are valid
+				if(subSec==0){ //adopted levels subsection
+					//SDL_Log("line: %s\n",line);
+					if(strcmp(typebuff+1,"cQ")==0){
+						//some GS decays are only specified as Q-values
+						//before any of the other level info
+						//if there are no other decay modes specified,
+						//but a Q-value is present, assume 100% branching
+						//to that decay mode
+						if(nd->nuclData[nd->numNucl].numLevels == 0){
+							//SDL_Log("line: %s\n",line);
+							char dmBuff[128];
+							memcpy(dmBuff, &line[9], 118);
+							dmBuff[118] = '\0';
+							//SDL_Log("dmBuff: %s\n",dmBuff);
+							tok = strtok(dmBuff," =");
+							if(tok!=NULL){
+								//SDL_Log("tok: %s\n",tok);
+								if(strcmp(tok,"$Q(2|b{+-})")==0){
+									tok = strtok(NULL," ;");
+									if(tok!=NULL){
+										if(atof(tok) > 0.0){
+											//positive Q-value
+											qValDecModeFlag = 1;
+											qValDecModeType = DECAYMODE_2BETAMINUS;
+										}
+									}
+								}else if(strcmp(tok,"$Q(2|b{++})")==0){
+									tok = strtok(NULL," ;");
+									if(tok!=NULL){
+										if(atof(tok) > 0.0){
+											//positive Q-value
+											qValDecModeFlag = 1;
+											qValDecModeType = DECAYMODE_2BETAPLUS;
+										}
+									}
+								}
 							}
 						}
 					}
@@ -1614,7 +1687,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 					if(subSec==0){ //adopted levels subsection
 						if(nd->levels[nd->numLvls-1].numTran<MAXGAMMASPERLEVEL){
 							if(strcmp(typebuff,"  G")==0){
-
+								//SDL_Log("%s\n",line);
 								if(nd->levels[nd->numLvls-1].numTran == 0){
 									nd->levels[nd->numLvls-1].firstTran = nd->numTran;
 								}
@@ -1636,7 +1709,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 								memcpy(eeBuff, &line[19], 2);
 								eeBuff[2] = '\0';
 								uint8_t gammaEerr = (uint8_t)atoi(eeBuff);
-
+								
 								uint32_t tranInd = nd->levels[nd->numLvls-1].firstTran + (uint32_t)(nd->levels[nd->numLvls-1].numTran);
 
 								//process gamma energy
@@ -1697,43 +1770,46 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 								float minEDiff = 1000.0f;
 								nd->tran[tranInd].finalLvlOffset = 0;
 								uint8_t lvlValType = ((nd->levels[nd->numLvls-1].energy.format >> 5U) & 15U);
-								for(uint32_t lvlInd = (nd->numLvls-2); lvlInd >= nd->nuclData[nd->numNucl].firstLevel; lvlInd--){
-									
-									//handle variable level energies (ie. number+X, Y+number...)
-									//transitions cannot link between levels defined by different variables
-									uint8_t prevLvlValType = ((nd->levels[lvlInd].energy.format >> 5U) & 15U);
-									if((lvlValType == VALUETYPE_X)||(lvlValType == VALUETYPE_PLUSX)){
-										if((prevLvlValType != VALUETYPE_X)&&(prevLvlValType != VALUETYPE_PLUSX)){
-											continue; //skip
+								if(nd->numLvls >= 2){
+									for(uint32_t lvlInd = (nd->numLvls-2); lvlInd >= nd->nuclData[nd->numNucl].firstLevel; lvlInd--){
+										//handle variable level energies (ie. number+X, Y+number...)
+										//transitions cannot link between levels defined by different variables
+										uint8_t prevLvlValType = ((nd->levels[lvlInd].energy.format >> 5U) & 15U);
+										if((lvlValType == VALUETYPE_X)||(lvlValType == VALUETYPE_PLUSX)){
+											if((prevLvlValType != VALUETYPE_X)&&(prevLvlValType != VALUETYPE_PLUSX)){
+												continue; //skip
+											}else{
+												//check that the variables are the same
+												uint8_t var = (uint8_t)((nd->levels[nd->numLvls-1].energy.format >> 9U) & 127U);
+												uint8_t prevVar = (uint8_t)((nd->levels[lvlInd].energy.format >> 9U) & 127U);
+												if(var != prevVar){
+													continue; //variables don't match, skip
+												}
+											}
 										}else{
-											//check that the variables are the same
-											uint8_t var = (uint8_t)((nd->levels[nd->numLvls-1].energy.format >> 9U) & 127U);
-											uint8_t prevVar = (uint8_t)((nd->levels[lvlInd].energy.format >> 9U) & 127U);
-											if(var != prevVar){
-												continue; //variables don't match, skip
+											if((prevLvlValType == VALUETYPE_X)||(prevLvlValType == VALUETYPE_PLUSX)){
+												continue; //skip
 											}
 										}
-									}else{
-										if((prevLvlValType == VALUETYPE_X)||(prevLvlValType == VALUETYPE_PLUSX)){
-											continue; //skip
+
+										float fudgeFactor = (float)getRawErrFromDB(&nd->tran[tranInd].energy);
+										if(fudgeFactor < 0.01f){
+											fudgeFactor = 1.0f; //default assumed energy resolution, when no error is reported 
 										}
-									}
-									
-									
-									float fudgeFactor = (float)getRawErrFromDB(&nd->tran[tranInd].energy);
-									if(fudgeFactor < 0.01f){
-										fudgeFactor = 1.0f; //default assumed energy resolution, when no error is reported 
-									}
-									float eDiff = fabsf((nd->levels[nd->numLvls-1].energy.val - gammaE) - nd->levels[lvlInd].energy.val);
-									if(eDiff <= fudgeFactor){
-										if(eDiff < minEDiff){
-											minEDiff = eDiff;
-											nd->tran[tranInd].finalLvlOffset = (uint8_t)((nd->numLvls-1) - lvlInd);
+										float eDiff = fabsf((nd->levels[nd->numLvls-1].energy.val - gammaE) - nd->levels[lvlInd].energy.val);
+										if(eDiff <= fudgeFactor){
+											if(eDiff < minEDiff){
+												minEDiff = eDiff;
+												nd->tran[tranInd].finalLvlOffset = (uint8_t)((nd->numLvls-1) - lvlInd);
+											}
+											//SDL_Log("finalLvlOffset: %u\n",nd->tran[tranInd].finalLvlOffset);
 										}
-										//SDL_Log("finalLvlOffset: %u\n",nd->tran[tranInd].finalLvlOffset);
+										if(lvlInd == 0){
+											break; //handle rare integer overflow case
+										}
 									}
 								}
-
+								
 								//gamma intensity
 								float gammaI = (float)atof(iBuff);
 								//get the number of sig figs
@@ -1870,6 +1946,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 					}
 				}
 			}
+			
 			//add Q-values and separation energies
 			if(nd->numNucl>=0){ //check that indices are valid
 				if(subSec==0){ //adopted levels subsection
@@ -2107,6 +2184,17 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 
 		}
 	}
+	//handle any business arising from the last nuclide
+	if(qValDecModeFlag){
+		if(nd->levels[nd->nuclData[nd->numNucl].firstLevel].numDecModes == 0){
+			nd->levels[nd->nuclData[nd->numNucl].firstLevel].numDecModes = 1;
+			nd->levels[nd->nuclData[nd->numNucl].firstLevel].firstDecMode = nd->numDecModes;
+			nd->dcyMode[nd->numDecModes].type = qValDecModeType;
+			nd->dcyMode[nd->numDecModes].prob.val = 100.0f;
+			nd->dcyMode[nd->numDecModes].prob.err = 0;
+			nd->dcyMode[nd->numDecModes].prob.format = 0;
+		}
+	}
 	fclose(efile);
 	
 	if(nd->numNucl>=MAXNUMNUCL){
@@ -2240,19 +2328,33 @@ int buildDatabase(const char *appBasePath, ndata *nd){
   //post-process the data
   //find ground state level
   for(uint16_t i=0;i<nd->numNucl;i++){
+		uint8_t firstLvlWithHl = 255;
+		nd->nuclData[i].gsLevel = 0;
     for(uint16_t j=0; j<nd->nuclData[i].numLevels; j++){
       double hl = getNuclLevelHalfLifeSeconds(nd,i,j);
       if(hl >= -1.0){
-        //if(j!=0) SDL_Log("GS ind for nucleus %u: %u\n",i,j);
-        if(j>255){
-          SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,"GS level index for nuclide %u is too high (%u).\n",i,j);
-          nd->nuclData[i].gsLevel = 0;
-        }else{
-          nd->nuclData[i].gsLevel = (uint8_t)j;
-        }
-        break;
+				if((firstLvlWithHl==255)&&(j<255)){
+					firstLvlWithHl=(uint8_t)j;
+				}
+				uint8_t eValueType = (uint8_t)((nd->levels[nd->nuclData[i].firstLevel + (uint32_t)j].energy.format >> 5U) & 15U);
+				uint8_t isVariableE = ((eValueType == VALUETYPE_X)||(eValueType == VALUETYPE_PLUSX));
+				if(!isVariableE){
+					//if(j!=0) SDL_Log("GS ind for nucleus %u: %u\n",i,j);
+					if(j>=255){
+						SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,"GS level index for nuclide %u is too high (%u).\n",i,j);
+						nd->nuclData[i].gsLevel = 0;
+					}else{
+						nd->nuclData[i].gsLevel = (uint8_t)j;
+					}
+					break;
+				}
       }
     }
+		if((nd->nuclData[i].gsLevel == 0)&&(firstLvlWithHl != 255)){
+			//could have searched through all the levels but didn't find a ground state
+			//maybe it had variable energy or was excluded for some other reason
+			nd->nuclData[i].gsLevel = firstLvlWithHl;
+		}
   }
 
 	//write the database to disk
