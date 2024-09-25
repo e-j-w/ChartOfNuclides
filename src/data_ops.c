@@ -68,6 +68,11 @@ void initializeTempState(const app_data *restrict dat, app_state *restrict state
 	state->ds.chartZoomScale = 0.5f;
 	state->ds.chartZoomToScale = state->ds.chartZoomScale;
 	state->ds.chartZoomStartScale = state->ds.chartZoomScale;
+	state->ds.infoBoxTableHeight = NUCL_INFOBOX_BIGLINE_HEIGHT;
+	state->ds.infoBoxEColOffset = NUCL_INFOBOX_ENERGY_COL_MIN_OFFSET;
+	state->ds.infoBoxJpiColOffset = NUCL_INFOBOX_JPI_COL_MIN_OFFSET;
+	state->ds.infoBoxHlColOffset = NUCL_INFOBOX_HALFLIFE_COL_MIN_OFFSET;
+	state->ds.infoBoxDcyModeColOffset = NUCL_INFOBOX_DECAYMODE_COL_MIN_OFFSET;
 	state->ds.totalPanTime = CHART_KEY_PAN_TIME;
 	state->ds.zoomFinished = 0;
 	state->ds.zoomInProgress = 0;
@@ -1942,7 +1947,7 @@ uint16_t getNearestNuclInd(const app_data *restrict dat, const int16_t N, const 
 	return nuclInd;
 }
 
-void setInfoBoxTableHeight(const app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat, const uint16_t selNucl){
+void setInfoBoxDimensions(const app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat, const uint16_t selNucl){
 	//calculate the number of unscaled pixels needed to show the ground and isomeric state info
 	state->ds.infoBoxTableHeight = NUCL_INFOBOX_BIGLINE_HEIGHT;
 	if(dat->ndat.levels[dat->ndat.nuclData[selNucl].firstLevel + dat->ndat.nuclData[selNucl].gsLevel].numDecModes > 1){
@@ -1956,6 +1961,78 @@ void setInfoBoxTableHeight(const app_data *restrict dat, app_state *restrict sta
 			}
 		}
 	}
+
+	//calculate the widths of each column and therefore the info box itself
+	uint8_t useIsomer = 0;
+	float calcOffset = 0.0f;
+	uint32_t gsLvlInd = dat->ndat.nuclData[selNucl].firstLevel + dat->ndat.nuclData[selNucl].gsLevel;
+	uint32_t isomerLvlInd = dat->ndat.nuclData[selNucl].longestIsomerLevel;
+	if((isomerLvlInd != MAXNUMLVLS)&&(isomerLvlInd != gsLvlInd)){
+		useIsomer = 1;
+	}
+	char tmpStr[32];
+	state->ds.infoBoxEColOffset = NUCL_INFOBOX_ENERGY_COL_MIN_OFFSET;
+  //width of level energy text
+	getLvlEnergyStr(tmpStr,&dat->ndat,gsLvlInd,0);
+	state->ds.infoBoxJpiColOffset = getTextWidth(rdat,FONTSIZE_NORMAL,tmpStr) + UI_PADDING_SIZE + state->ds.infoBoxEColOffset;
+  if(useIsomer){
+    getLvlEnergyStr(tmpStr,&dat->ndat,isomerLvlInd,1);
+		calcOffset = getTextWidth(rdat,FONTSIZE_NORMAL,tmpStr) + UI_PADDING_SIZE + state->ds.infoBoxEColOffset;
+		if(calcOffset > state->ds.infoBoxJpiColOffset){
+			state->ds.infoBoxJpiColOffset = calcOffset;
+		}
+	}
+	if(state->ds.infoBoxJpiColOffset < NUCL_INFOBOX_JPI_COL_MIN_OFFSET){
+		state->ds.infoBoxJpiColOffset = NUCL_INFOBOX_JPI_COL_MIN_OFFSET;
+	}
+	//width of Jpi text
+	getSpinParStr(tmpStr,&dat->ndat,gsLvlInd);
+	state->ds.infoBoxHlColOffset = getTextWidth(rdat,FONTSIZE_NORMAL,tmpStr) + UI_PADDING_SIZE + state->ds.infoBoxJpiColOffset;
+	if(useIsomer){
+    getSpinParStr(tmpStr,&dat->ndat,isomerLvlInd);
+		calcOffset = getTextWidth(rdat,FONTSIZE_NORMAL,tmpStr) + UI_PADDING_SIZE + state->ds.infoBoxJpiColOffset;
+		if(calcOffset > state->ds.infoBoxHlColOffset){
+			state->ds.infoBoxHlColOffset = calcOffset;
+		}
+	}
+	if(state->ds.infoBoxHlColOffset < NUCL_INFOBOX_HALFLIFE_COL_MIN_OFFSET){
+		state->ds.infoBoxHlColOffset = NUCL_INFOBOX_HALFLIFE_COL_MIN_OFFSET;
+	}
+	//width of t1/2 text
+	getHalfLifeStr(tmpStr,dat,gsLvlInd,1,1,state->ds.useLifetimes);
+	state->ds.infoBoxDcyModeColOffset = getTextWidth(rdat,FONTSIZE_NORMAL,tmpStr) + UI_PADDING_SIZE + state->ds.infoBoxHlColOffset;
+	if(useIsomer){
+    getHalfLifeStr(tmpStr,dat,isomerLvlInd,1,1,state->ds.useLifetimes);
+		calcOffset = getTextWidth(rdat,FONTSIZE_NORMAL,tmpStr) + UI_PADDING_SIZE + state->ds.infoBoxHlColOffset;
+		if(calcOffset > state->ds.infoBoxDcyModeColOffset){
+			state->ds.infoBoxDcyModeColOffset = calcOffset;
+		}
+	}
+	if(state->ds.infoBoxDcyModeColOffset < NUCL_INFOBOX_DECAYMODE_COL_MIN_OFFSET){
+		state->ds.infoBoxDcyModeColOffset = NUCL_INFOBOX_DECAYMODE_COL_MIN_OFFSET;
+	}
+	//width of decay mode text
+	state->ds.infoBoxWidth = state->ds.infoBoxDcyModeColOffset;
+	for(int8_t i=0; i<dat->ndat.levels[gsLvlInd].numDecModes; i++){
+		getDecayModeStr(tmpStr,&dat->ndat,dat->ndat.levels[gsLvlInd].firstDecMode + (uint32_t)i);
+		calcOffset = getTextWidth(rdat,FONTSIZE_NORMAL,tmpStr) + 2*PANEL_EDGE_SIZE + state->ds.infoBoxDcyModeColOffset;
+		if(calcOffset > state->ds.infoBoxWidth){
+			state->ds.infoBoxWidth = calcOffset;
+		}
+	}
+	if(useIsomer){
+		for(int8_t i=0; i<dat->ndat.levels[isomerLvlInd].numDecModes; i++){
+			getDecayModeStr(tmpStr,&dat->ndat,dat->ndat.levels[isomerLvlInd].firstDecMode + (uint32_t)i);
+			calcOffset = getTextWidth(rdat,FONTSIZE_NORMAL,tmpStr) + 2*PANEL_EDGE_SIZE + state->ds.infoBoxDcyModeColOffset;
+			if(calcOffset > state->ds.infoBoxWidth){
+				state->ds.infoBoxWidth = calcOffset;
+			}
+		}
+	}
+	if(state->ds.infoBoxWidth < NUCL_INFOBOX_MIN_WIDTH){
+		state->ds.infoBoxWidth = NUCL_INFOBOX_MIN_WIDTH;
+	}
+
 	updateSingleUIElemPosition(dat,&state->ds,rdat,UIELEM_NUCL_INFOBOX);
 	updateSingleUIElemPosition(dat,&state->ds,rdat,UIELEM_NUCL_INFOBOX_CLOSEBUTTON);
 }
@@ -1965,7 +2042,7 @@ void setSelectedNuclOnLevelList(const app_data *restrict dat, app_state *restric
 	//SDL_Log("Selected nucleus: %u\n",state->chartSelectedNucl);
 	if((selNucl < MAXNUMNUCL)&&(selNucl != state->chartSelectedNucl)){
 		state->chartSelectedNucl = selNucl;
-		setInfoBoxTableHeight(dat,state,rdat,selNucl);
+		setInfoBoxDimensions(dat,state,rdat,selNucl);
 		state->ds.nuclFullInfoScrollY = 0.0f;
 		state->ds.nuclFullInfoMaxScrollY = getMaxNumLvlDispLines(&dat->ndat,state);
 		state->ds.timeSinceFCScollStart = 0.0f;
@@ -1993,7 +2070,7 @@ void setSelectedNuclOnChart(const app_data *restrict dat, app_state *restrict st
 	//SDL_Log("Selected nucleus: %u\n",state->chartSelectedNucl);
 	if((selNucl < MAXNUMNUCL)&&(selNucl != state->chartSelectedNucl)){
 		state->chartSelectedNucl = selNucl;
-		setInfoBoxTableHeight(dat,state,rdat,selNucl);
+		setInfoBoxDimensions(dat,state,rdat,selNucl);
 		if(!(state->ds.shownElements & (1U << UIELEM_NUCL_INFOBOX))){
 			state->ds.shownElements |= (1U << UIELEM_NUCL_INFOBOX);
 			changeUIState(dat,state,UISTATE_INFOBOX); //make info box interactable
@@ -2459,14 +2536,14 @@ void updateSingleUIElemPosition(const app_data *restrict dat, drawing_state *res
 			ds->uiElemHeight[UIELEM_UISM_HUGE_BUTTON] = (uint16_t)((PREFS_DIALOG_UISCALE_MENU_ITEM_SPACING - UI_PADDING_SIZE)*ds->uiUserScale);
 			break;
 		case UIELEM_NUCL_INFOBOX:
-			ds->uiElemPosX[uiElemInd] = (uint16_t)((ds->windowXRes - NUCL_INFOBOX_WIDTH*ds->uiUserScale)/2);
-			uint16_t freeXSpace = (uint16_t)(ds->windowXRes - NUCL_INFOBOX_WIDTH*ds->uiUserScale);
+			ds->uiElemPosX[uiElemInd] = (uint16_t)((ds->windowXRes - ds->infoBoxWidth*ds->uiUserScale)/2);
+			uint16_t freeXSpace = (uint16_t)(ds->windowXRes - ds->infoBoxWidth*ds->uiUserScale);
 			if(freeXSpace < 4*NUCL_INFOBOX_X_PADDING*ds->uiUserScale){
 				ds->uiElemPosX[uiElemInd] += (uint16_t)(NUCL_INFOBOX_X_PADDING*ds->uiUserScale - freeXSpace/4); //make sure info box doesn't bump up against y-axis
 			}
 			ds->uiElemHeight[uiElemInd] = (uint16_t)(((float)NUCL_INFOBOX_MIN_HEIGHT + ds->infoBoxTableHeight + 2*PANEL_EDGE_SIZE)*ds->uiUserScale);
 			ds->uiElemPosY[uiElemInd] = (uint16_t)(ds->windowYRes - ds->uiElemHeight[uiElemInd] - (uint16_t)((UI_PADDING_SIZE + CHART_AXIS_DEPTH)*ds->uiUserScale));
-			ds->uiElemWidth[uiElemInd] = (uint16_t)(NUCL_INFOBOX_WIDTH*ds->uiUserScale);
+			ds->uiElemWidth[uiElemInd] = (uint16_t)(ds->infoBoxWidth*ds->uiUserScale);
 			//update child/dependant UI elements
 			updateSingleUIElemPosition(dat,ds,rdat,UIELEM_NUCL_INFOBOX_CLOSEBUTTON);
 			updateSingleUIElemPosition(dat,ds,rdat,UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON);

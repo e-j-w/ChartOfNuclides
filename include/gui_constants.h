@@ -133,17 +133,19 @@ static const float uiScales[UISCALE_ENUM_LENGTH] = {1.0f,1.20f,1.5f,1.75f};
 #define CHART_AXIS_DEPTH                   40.0f //in scaled pixels
 #define CHART_SHELLCLOSURELINE_THICKNESS   3.0f
 
-#define NUCL_INFOBOX_X_PADDING              (UI_PADDING_SIZE+CHART_AXIS_DEPTH) //in unscaled pixels
-#define NUCL_INFOBOX_WIDTH                  500 //in unscaled pixels
-#define NUCL_INFOBOX_MIN_HEIGHT             120 //in unscaled pixels
-#define NUCL_INFOBOX_BIGLINE_HEIGHT         30.0f //in unscaled pixels
-#define NUCL_INFOBOX_SMALLLINE_HEIGHT       20.0f //in unscaled pixels
-#define NUCL_INFOBOX_ENERGY_COL_OFFSET      0.0f //in unscaled pixels
-#define NUCL_INFOBOX_JPI_COL_OFFSET         140.0f //in unscaled pixels
-#define NUCL_INFOBOX_HALFLIFE_COL_OFFSET    220.0f //in unscaled pixels
-#define NUCL_INFOBOX_DECAYMODE_COL_OFFSET   350.0f //in unscaled pixels
-#define NUCL_INFOBOX_ALLLEVELS_BUTTON_WIDTH 170 //in unscaled pixels
+//info box
+#define NUCL_INFOBOX_X_PADDING                  (UI_PADDING_SIZE+CHART_AXIS_DEPTH) //in unscaled pixels
+#define NUCL_INFOBOX_MIN_WIDTH                  470 //in unscaled pixels
+#define NUCL_INFOBOX_MIN_HEIGHT                 120 //in unscaled pixels
+#define NUCL_INFOBOX_BIGLINE_HEIGHT             30.0f //in unscaled pixels
+#define NUCL_INFOBOX_SMALLLINE_HEIGHT           20.0f //in unscaled pixels
+#define NUCL_INFOBOX_ENERGY_COL_MIN_OFFSET      0.0f //in unscaled pixels
+#define NUCL_INFOBOX_JPI_COL_MIN_OFFSET         130.0f //in unscaled pixels
+#define NUCL_INFOBOX_HALFLIFE_COL_MIN_OFFSET    220.0f //in unscaled pixels
+#define NUCL_INFOBOX_DECAYMODE_COL_MIN_OFFSET   340.0f //in unscaled pixels
+#define NUCL_INFOBOX_ALLLEVELS_BUTTON_WIDTH     170 //in unscaled pixels
 
+//full info box (level list)
 #define NUCL_FULLINFOBOX_SCROLL_TIME                0.1f //time (in seconds) for the list scroll animation to finish
 #define NUCL_FULLINFOBOX_BACKBUTTON_POS_XR          (2*MENU_BUTTON_POS_XR + MENU_BUTTON_WIDTH)
 #define NUCL_FULLINFOBOX_BACKBUTTON_POS_Y           MENU_BUTTON_POS_Y
