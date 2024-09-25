@@ -171,6 +171,9 @@ typedef struct
   float timeSinceZoomStart, timeSincePanStart, totalPanTime, timeSinceFCScollStart, timeSinceFCNuclChangeStart;
   float infoBoxTableHeight; //the height in unscaled pixels needed to show the info box ground and isomeric state info
   float infoBoxWidth, infoBoxEColOffset, infoBoxJpiColOffset, infoBoxHlColOffset, infoBoxDcyModeColOffset;
+  float fullInfoElevelColWidth, fullInfoJpiColWidth, fullInfoHlColWidth, fullInfoEgammaColWidth, fullInfoIgammaColWidth;
+  float fullInfoMgammaColWidth, fullInfoFinalElevelColWidth, fullInfoFinalJpiColWidth;
+  float fullInfoAllColWidth, fullInfoAllColWidthExclM, fullInfoAllColWidthExcluMFinalJpi;
   float nuclFullInfoScrollStartY, nuclFullInfoScrollToY, nuclFullInfoScrollY; //full level info view: number of lines scrolled in the y-direction
   uint16_t nuclFullInfoMaxScrollY; //maximum scroll position, in lines
   uint32_t shownElements; //bit pattern describing which UI elements are being shown, values from ui_element_enum

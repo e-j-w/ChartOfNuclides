@@ -1947,6 +1947,80 @@ uint16_t getNearestNuclInd(const app_data *restrict dat, const int16_t N, const 
 	return nuclInd;
 }
 
+void setFullLevelInfoDimensions(const app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat, const uint16_t selNucl){
+	
+	char tmpStr[32];
+	float tmpWidth = 0.0f;
+	state->ds.fullInfoElevelColWidth = NUCL_FULLINFOBOX_ENERGY_COL_MIN_WIDTH;
+	state->ds.fullInfoJpiColWidth = NUCL_FULLINFOBOX_JPI_COL_MIN_WIDTH;
+	state->ds.fullInfoHlColWidth = NUCL_FULLINFOBOX_HALFLIFE_COL_MIN_WIDTH;
+	state->ds.fullInfoEgammaColWidth = NUCL_FULLINFOBOX_EGAMMA_COL_MIN_WIDTH;
+	state->ds.fullInfoIgammaColWidth = NUCL_FULLINFOBOX_IGAMMA_COL_MIN_WIDTH;
+	state->ds.fullInfoMgammaColWidth = NUCL_FULLINFOBOX_MGAMMA_COL_MIN_WIDTH;
+	state->ds.fullInfoFinalElevelColWidth = NUCL_FULLINFOBOX_FINALLEVEL_E_COL_MIN_WIDTH;
+	state->ds.fullInfoFinalJpiColWidth = NUCL_FULLINFOBOX_FINALLEVEL_JPI_COL_MIN_WIDTH;
+
+	for(uint32_t lvlInd = dat->ndat.nuclData[selNucl].firstLevel; lvlInd<(dat->ndat.nuclData[selNucl].firstLevel+dat->ndat.nuclData[selNucl].numLevels); lvlInd++){
+		getLvlEnergyStr(tmpStr,&dat->ndat,lvlInd,1);
+		tmpWidth = getTextWidth(rdat,FONTSIZE_NORMAL,tmpStr) + UI_PADDING_SIZE;
+		if(tmpWidth > state->ds.fullInfoElevelColWidth){
+			state->ds.fullInfoElevelColWidth = tmpWidth;
+		}
+		getSpinParStr(tmpStr,&dat->ndat,lvlInd);
+		tmpWidth = getTextWidth(rdat,FONTSIZE_NORMAL,tmpStr) + UI_PADDING_SIZE;
+		if(tmpWidth > state->ds.fullInfoJpiColWidth){
+			state->ds.fullInfoJpiColWidth = tmpWidth;
+		}
+		getHalfLifeStr(tmpStr,dat,lvlInd,1,0,state->ds.useLifetimes);
+		tmpWidth = getTextWidth(rdat,FONTSIZE_NORMAL,tmpStr) + UI_PADDING_SIZE;
+		if(tmpWidth > state->ds.fullInfoHlColWidth){
+			state->ds.fullInfoHlColWidth = tmpWidth;
+		}
+		if(dat->ndat.levels[lvlInd].numDecModes > 0){
+			for(int8_t i=0; i<dat->ndat.levels[lvlInd].numDecModes; i++){
+				getDecayModeStr(tmpStr,&dat->ndat,dat->ndat.levels[lvlInd].firstDecMode + (uint32_t)i);
+				tmpWidth = getTextWidth(rdat,FONTSIZE_NORMAL,tmpStr) + 3*UI_PADDING_SIZE;
+				if(tmpWidth > state->ds.fullInfoHlColWidth){
+					state->ds.fullInfoHlColWidth = tmpWidth;
+				}
+			}
+		}
+		for(uint16_t i=0; i<dat->ndat.levels[lvlInd].numTran; i++){
+      getGammaEnergyStr(tmpStr,&dat->ndat,(uint32_t)(dat->ndat.levels[lvlInd].firstTran + i),1);
+			tmpWidth = getTextWidth(rdat,FONTSIZE_NORMAL,tmpStr) + UI_PADDING_SIZE;
+			if(tmpWidth > state->ds.fullInfoEgammaColWidth){
+				state->ds.fullInfoEgammaColWidth = tmpWidth;
+			}
+			getGammaIntensityStr(tmpStr,&dat->ndat,(uint32_t)(dat->ndat.levels[lvlInd].firstTran + i),1);
+			tmpWidth = getTextWidth(rdat,FONTSIZE_NORMAL,tmpStr) + UI_PADDING_SIZE;
+			if(tmpWidth > state->ds.fullInfoIgammaColWidth){
+				state->ds.fullInfoIgammaColWidth = tmpWidth;
+			}
+			getGammaMultipolarityStr(tmpStr,&dat->ndat,(uint32_t)(dat->ndat.levels[lvlInd].firstTran + i));
+			tmpWidth = getTextWidth(rdat,FONTSIZE_NORMAL,tmpStr) + UI_PADDING_SIZE;
+			if(tmpWidth > state->ds.fullInfoMgammaColWidth){
+				state->ds.fullInfoMgammaColWidth = tmpWidth;
+			}
+			uint32_t finalLvlInd = getFinalLvlInd(&dat->ndat,lvlInd,(uint32_t)(dat->ndat.levels[lvlInd].firstTran + i));
+      getLvlEnergyStr(tmpStr,&dat->ndat,finalLvlInd,0);
+			tmpWidth = getTextWidth(rdat,FONTSIZE_NORMAL,tmpStr) + UI_PADDING_SIZE;
+			if(tmpWidth > state->ds.fullInfoFinalElevelColWidth){
+				state->ds.fullInfoFinalElevelColWidth = tmpWidth;
+			}
+			getSpinParStr(tmpStr,&dat->ndat,finalLvlInd);
+			tmpWidth = getTextWidth(rdat,FONTSIZE_NORMAL,tmpStr) + UI_PADDING_SIZE;
+			if(tmpWidth > state->ds.fullInfoFinalJpiColWidth){
+				state->ds.fullInfoFinalJpiColWidth = tmpWidth;
+			}
+		}
+	}
+	
+	state->ds.fullInfoAllColWidth = state->ds.fullInfoElevelColWidth + state->ds.fullInfoJpiColWidth + state->ds.fullInfoHlColWidth + state->ds.fullInfoEgammaColWidth + state->ds.fullInfoIgammaColWidth + state->ds.fullInfoMgammaColWidth + state->ds.fullInfoFinalElevelColWidth + state->ds.fullInfoFinalJpiColWidth;
+	state->ds.fullInfoAllColWidthExclM = state->ds.fullInfoElevelColWidth + state->ds.fullInfoJpiColWidth + state->ds.fullInfoHlColWidth + state->ds.fullInfoEgammaColWidth + state->ds.fullInfoIgammaColWidth + state->ds.fullInfoFinalElevelColWidth + state->ds.fullInfoFinalJpiColWidth;
+	state->ds.fullInfoAllColWidthExcluMFinalJpi = state->ds.fullInfoElevelColWidth + state->ds.fullInfoJpiColWidth + state->ds.fullInfoHlColWidth + state->ds.fullInfoEgammaColWidth + state->ds.fullInfoIgammaColWidth + state->ds.fullInfoFinalElevelColWidth;
+
+}
+
 void setInfoBoxDimensions(const app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat, const uint16_t selNucl){
 	//calculate the number of unscaled pixels needed to show the ground and isomeric state info
 	state->ds.infoBoxTableHeight = NUCL_INFOBOX_BIGLINE_HEIGHT;
@@ -2042,6 +2116,7 @@ void setSelectedNuclOnLevelList(const app_data *restrict dat, app_state *restric
 	//SDL_Log("Selected nucleus: %u\n",state->chartSelectedNucl);
 	if((selNucl < MAXNUMNUCL)&&(selNucl != state->chartSelectedNucl)){
 		state->chartSelectedNucl = selNucl;
+		setFullLevelInfoDimensions(dat,state,rdat,selNucl);
 		setInfoBoxDimensions(dat,state,rdat,selNucl);
 		state->ds.nuclFullInfoScrollY = 0.0f;
 		state->ds.nuclFullInfoMaxScrollY = getMaxNumLvlDispLines(&dat->ndat,state);
@@ -2243,6 +2318,7 @@ void uiElemClickAction(app_data *restrict dat, app_state *restrict state, resour
 		case UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON:
 				state->ds.nuclFullInfoScrollY = 0.0f;
 				startUIAnimation(dat,state,UIANIM_NUCLINFOBOX_EXPAND);
+				setFullLevelInfoDimensions(dat,state,rdat,state->chartSelectedNucl);
 			break;
 		case UIELEM_NUCL_FULLINFOBOX_BACKBUTTON:
 			startUIAnimation(dat,state,UIANIM_NUCLINFOBOX_TXTFADEOUT); //menu will be closed after animation finishes
