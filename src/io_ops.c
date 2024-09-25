@@ -78,7 +78,7 @@ static int readConfigFile(FILE *file, app_state *restrict state){
         }
       }else if(strcmp(par,"scroll_speed") == 0){
         float ss = (float)atof(val);
-        if(fabsf(ss)<=32.0f){
+        if((fabsf(ss)<=2.0f)&&((fabsf(ss)>=0.1f))){
           state->scrollSpeedMultiplier = ss;
         }else{
           SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,"invalid scroll speed (%f) in config file, setting to default.\n",(double)ss);

@@ -98,11 +98,13 @@ static const float uiScales[UISCALE_ENUM_LENGTH] = {1.0f,1.20f,1.5f,1.75f};
 
 //about box (credits etc.)
 #define ABOUT_BOX_WIDTH            420 //in unscaled pixels
-#define ABOUT_BOX_HEIGHT           300 //in unscaled pixels
+#define ABOUT_BOX_HEIGHT           420 //in unscaled pixels
 #define ABOUT_BOX_HEADERTXT_Y      (8*UI_PADDING_SIZE)
 #define ABOUT_BOX_VERSION_Y        (14*UI_PADDING_SIZE)
-#define ABOUT_BOX_STR1_Y           110 //in unscaled pixels
-#define ABOUT_BOX_STR2_Y           166 //in unscaled pixels
+#define ABOUT_BOX_STR1_Y           106 //in unscaled pixels
+#define ABOUT_BOX_STR2_Y           156 //in unscaled pixels
+#define ABOUT_BOX_STR3_Y           206 //in unscaled pixels
+#define ABOUT_BOX_STR4_Y           280 //in unscaled pixels
 #define ABOUT_BOX_OK_BUTTON_WIDTH  120
 #define ABOUT_BOX_OK_BUTTON_YB     (4*UI_PADDING_SIZE)
 
