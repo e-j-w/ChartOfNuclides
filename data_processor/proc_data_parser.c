@@ -1133,7 +1133,7 @@ uint8_t getDcyModeFromENSDFSubstr(const char *substr){
 uint8_t parseDcyModeSubstr(ndata *nd, const uint16_t dcyModeInd, const char *substr){
 	
 	char *tok, *tok2;
-	char substrCpy[128], valBuff[16];
+	char substrCpy[128], valBuff[16], errBuff[16];
 
 	//SDL_Log("Parsing decay mode substring: %s\n",substr);
 	strcpy(substrCpy,substr);
@@ -1166,8 +1166,13 @@ uint8_t parseDcyModeSubstr(ndata *nd, const uint16_t dcyModeInd, const char *sub
 		tok = strtok(substrCpy," =><");
 		tok = strtok(NULL,"$ ,");
 		if(tok!=NULL){
-			//SDL_Log("tok: %s\n",tok);
-			strncpy(valBuff,tok,15);
+			//SDL_Log("value tok: %s\n",tok);
+			strncpy(valBuff,tok,15); //value
+			tok = strtok(NULL,""); //get the rest of the string
+			if(tok!=NULL){
+				//SDL_Log("err tok: %s\n",tok);
+				strncpy(errBuff,tok,15); //error on value
+			}
 			tok2 = strtok(valBuff," ");
 			if(tok2 != NULL){
 				//SDL_Log("tok2: %s\n",tok2);
@@ -1192,10 +1197,63 @@ uint8_t parseDcyModeSubstr(ndata *nd, const uint16_t dcyModeInd, const char *sub
 				}
 				if(tok2!=NULL){
 					nd->dcyMode[dcyModeInd].prob.format = 0;
-					char value[16];
-					strncpy(value,tok2,15);
+					char valueCpy[16];
+					strncpy(valueCpy,tok2,15);
+					strcpy(valBuff,valueCpy);
 					//SDL_Log("%s\n",tok2);
-					nd->dcyMode[dcyModeInd].prob.val = (float)atof(tok2);
+					float probVal = (float)atof(tok2);
+
+					if(probVal >= 0.0f){
+						//get the number of sig figs in the decay probability
+						//SDL_Log("valBuff: %s\n",valBuff);
+						tok2 = strtok(valBuff,".");
+						if(tok2!=NULL){
+							//SDL_Log("%s\n",tok2);
+							tok2 = strtok(NULL,"E+"); //some decay probabilites are specified with exponents
+							if(tok2!=NULL){
+								
+									//SDL_Log("%s\n",tok2);
+									uint16_t len = (uint16_t)strlen(tok2);
+									//check for trailing empty spaces
+									for(uint16_t i=0;i<len;i++){
+										if(isspace(tok2[i])){
+											len = i;
+											break;
+										}
+									}
+									nd->dcyMode[dcyModeInd].prob.format |= (uint16_t)(len & 15U);
+									//SDL_Log("format: %u\n",nd->dcyMode[dcyModeInd].prob.format);
+									if(((nd->dcyMode[dcyModeInd].prob.format >> 5U) & 15U) != VALUETYPE_PLUSX){
+										tok2 = strtok(NULL,""); //get the remaining part of the string (only get past here if the value was expressed in exponent form)
+										if(tok2!=NULL){
+											//SDL_Log("decay probability in exponent form: %s\n",valueCpy);
+											//value was in exponent format
+											nd->dcyMode[dcyModeInd].prob.exponent = (int8_t)atoi(tok2);
+											probVal = probVal / powf(10.0f,(float)(nd->dcyMode[dcyModeInd].prob.exponent));
+											nd->dcyMode[dcyModeInd].prob.format |= (uint16_t)(1U << 4); //exponent flag
+										}
+									}
+							}else{
+								//potentially an exponent form value with no decimal place
+								strcpy(valBuff,valueCpy);
+								tok2 = strtok(valBuff,"E");
+								if(tok2!=NULL){
+									tok2 = strtok(NULL,""); //get the remaining part of the string (only get past here if the value was expressed in exponent form)
+									if(tok2!=NULL){
+										//SDL_Log("%s\n",tok2);
+										//value was in exponent format
+										nd->dcyMode[dcyModeInd].prob.exponent = (int8_t)atoi(tok2);
+										probVal = probVal / powf(10.0f,(float)(nd->dcyMode[dcyModeInd].prob.exponent));
+										nd->dcyMode[dcyModeInd].prob.format |= (uint16_t)(1U << 4); //exponent flag
+									}
+								}
+							}
+						}
+						
+					}
+
+					nd->dcyMode[dcyModeInd].prob.val = probVal;
+					//SDL_Log("prob val: %f\n",(double)nd->dcyMode[dcyModeInd].prob.val);
 					
 					//quick consistency check - if the probability is exactly zero,
 					//then there's probably something wrong with the parsing
@@ -1204,15 +1262,12 @@ uint8_t parseDcyModeSubstr(ndata *nd, const uint16_t dcyModeInd, const char *sub
 						return 0;
 					}
 					
-					tok2 = strtok(NULL,""); //get the rest of the string
-					if(tok2 != NULL){
-						//SDL_Log("%s\n",tok2);
-						if(tok2[0]=='+'){
+					//handle errors
+					if(tok != NULL){ //error string was valid, so errBuff was defined earlier
+						if(errBuff[0]=='+'){
 							//asymmetric errors
-							//SDL_Log("err: %s\n",tok2);
-							char errVal[16];
-							strncpy(errVal,tok2,15);
-							tok2 = strtok(errVal, "-");
+							//SDL_Log("err: %s\n",errBuff);
+							tok2 = strtok(errBuff, "-");
 							if(tok2 != NULL){
 								//SDL_Log("pos err: %s\n",tok2);
 								nd->dcyMode[dcyModeInd].prob.err = (uint8_t)atoi(tok2); //positive error
@@ -1225,20 +1280,64 @@ uint8_t parseDcyModeSubstr(ndata *nd, const uint16_t dcyModeInd, const char *sub
 								}
 							}
 						}else{
-							nd->dcyMode[dcyModeInd].prob.err = (uint8_t)atoi(tok2);
+							nd->dcyMode[dcyModeInd].prob.err = (uint8_t)atoi(errBuff);
+							//SDL_Log("err: %u\n",nd->dcyMode[dcyModeInd].prob.err);
 						}
 					}
-					tok2 = strtok(value,".");
+				}else if(tok != NULL){
+					//error string was valid, so errBuff was defined earlier
+					//in this case, we have a string like '%SF LE 12.5',
+					//where '12.5' was put into errBuff
+					char valueCpy[16];
+					strcpy(valueCpy,errBuff);
+					float probVal = (float)atof(errBuff);
+					
+					//count sig figs
+					tok2 = strtok(errBuff,".");
 					if(tok2!=NULL){
-						//SDL_Log("tok2: %s\n",tok2);
-						tok2 = strtok(NULL,"");
+						//SDL_Log("%s\n",tok2);
+						tok2 = strtok(NULL,"E+"); //some decay probabilites are specified with exponents
 						if(tok2!=NULL){
-							//SDL_Log("tok2: %s\n",tok2);
-							uint8_t sigFigs = (uint8_t)(strlen(tok2) & 15U); //only 4 bits available for precision
-							nd->dcyMode[dcyModeInd].prob.format |= sigFigs;
+							
+								//SDL_Log("%s\n",tok2);
+								uint16_t len = (uint16_t)strlen(tok2);
+								//check for trailing empty spaces
+								for(uint16_t i=0;i<len;i++){
+									if(isspace(tok2[i])){
+										len = i;
+										break;
+									}
+								}
+								nd->dcyMode[dcyModeInd].prob.format |= (uint16_t)(len & 15U);
+								//SDL_Log("format: %u\n",nd->dcyMode[dcyModeInd].prob.format);
+								if(((nd->dcyMode[dcyModeInd].prob.format >> 5U) & 15U) != VALUETYPE_PLUSX){
+									tok2 = strtok(NULL,""); //get the remaining part of the string (only get past here if the value was expressed in exponent form)
+									if(tok2!=NULL){
+										//SDL_Log("decay probability in exponent form: %s\n",valueCpy);
+										//value was in exponent format
+										nd->dcyMode[dcyModeInd].prob.exponent = (int8_t)atoi(tok2);
+										probVal = probVal / powf(10.0f,(float)(nd->dcyMode[dcyModeInd].prob.exponent));
+										nd->dcyMode[dcyModeInd].prob.format |= (uint16_t)(1U << 4); //exponent flag
+									}
+								}
+						}else{
+							//potentially an exponent form value with no decimal place
+							strcpy(errBuff,valueCpy);
+							tok2 = strtok(errBuff,"E");
+							if(tok2!=NULL){
+								tok2 = strtok(NULL,""); //get the remaining part of the string (only get past here if the value was expressed in exponent form)
+								if(tok2!=NULL){
+									//SDL_Log("%s\n",tok2);
+									//value was in exponent format
+									nd->dcyMode[dcyModeInd].prob.exponent = (int8_t)atoi(tok2);
+									probVal = probVal / powf(10.0f,(float)(nd->dcyMode[dcyModeInd].prob.exponent));
+									nd->dcyMode[dcyModeInd].prob.format |= (uint16_t)(1U << 4); //exponent flag
+								}
+							}
 						}
-						//SDL_Log("format: %u\n",nd->dcyMode[dcyModeInd].prob.format);
 					}
+
+					nd->dcyMode[dcyModeInd].prob.val = probVal;
 				}
 			}
 			
