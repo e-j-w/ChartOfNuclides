@@ -340,28 +340,52 @@ void setupMessageBox(const app_data *restrict dat, app_state *restrict state, co
   changeUIState(dat,state,UISTATE_MSG_BOX);
 }
 
+//gets strings that denote 'special' levels in certain nuclides
+const char* getSpecialLvlStr(const uint8_t specialLvlInd){
+	switch(specialLvlInd){
+		case SPECIALLEVEL_HOYLE:
+			return "Hoyle state";
+		case SPECIALLEVEL_NATURALLYOCCURINGISOMER:
+			return "Naturally occuring isomer";
+		case SPECIALLEVEL_CLOCKISOMER:
+			return "Nuclear clock isomer";
+			break;
+		default:
+			return " ";
+	}
+}
+
 //returns a string with element names corresponding to Z values
+//N=255 causes special names to not be used
 const char* getFullElemStr(const uint8_t Z, const uint8_t N){
 	switch(Z){
 		case 0:
-			//different names depending on N
-			if(N==2){
-				return "Dineutron";
-			}else if(N==3){
-				return "Trineutron";
-			}else if(N==4){
-				return "Tetraneutron";
-			}else if(N==5){
-				return "Pentaneutron";
+			if(N != 255){
+				//different names depending on N
+				if(N==2){
+					return "Dineutron";
+				}else if(N==3){
+					return "Trineutron";
+				}else if(N==4){
+					return "Tetraneutron";
+				}else if(N==5){
+					return "Pentaneutron";
+				}else{
+					return "Neutron";
+				}
 			}else{
 				return "Neutron";
 			}
 		case 1:
-			//different names depending on N
-			if(N==1){
-				return "Deuterium";
-			}else if(N==2){
-				return "Tritium";
+			if(N != 255){
+				//different names depending on N
+				if(N==1){
+					return "Deuterium";
+				}else if(N==2){
+					return "Tritium";
+				}else{
+					return "Hydrogen";
+				}
 			}else{
 				return "Hydrogen";
 			}
@@ -1378,7 +1402,7 @@ void getSpinParStr(char strOut[32], const ndata *restrict nd, const uint32_t lvl
 
 			if((!spinIsVar)||(nd->levels[lvlInd].spval[i].spinVal > 0)){
 				if(nd->levels[lvlInd].spval[i].spinVal < 255){
-					if(nd->levels[lvlInd].halfInt == 1){
+					if((nd->levels[lvlInd].format & 1U) == 1){
 						sprintf(val,"%i/2",nd->levels[lvlInd].spval[i].spinVal);
 					}else{
 						sprintf(val,"%i",nd->levels[lvlInd].spval[i].spinVal);
@@ -1684,6 +1708,12 @@ uint16_t getNumDispLinesForLvl(const ndata *restrict nd, const uint32_t lvlInd){
   if(nd->levels[lvlInd].numTran > levelNumLines){
     levelNumLines = (uint16_t)(nd->levels[lvlInd].numTran);
   }
+	if(levelNumLines < 2){
+		uint8_t slInd = (uint8_t)((nd->levels[lvlInd].format >> 1U) & 127U);
+		if(slInd > 0){
+			levelNumLines++;
+		}
+	}
   return levelNumLines;
 }
 
@@ -1962,24 +1992,31 @@ void setFullLevelInfoDimensions(const app_data *restrict dat, app_state *restric
 
 	for(uint32_t lvlInd = dat->ndat.nuclData[selNucl].firstLevel; lvlInd<(dat->ndat.nuclData[selNucl].firstLevel+dat->ndat.nuclData[selNucl].numLevels); lvlInd++){
 		getLvlEnergyStr(tmpStr,&dat->ndat,lvlInd,1);
-		tmpWidth = getTextWidth(rdat,FONTSIZE_NORMAL,tmpStr) + UI_PADDING_SIZE;
+		tmpWidth = getTextWidthScaleIndependent(rdat,FONTSIZE_NORMAL,tmpStr) + 2*UI_PADDING_SIZE;
 		if(tmpWidth > state->ds.fullInfoElevelColWidth){
 			state->ds.fullInfoElevelColWidth = tmpWidth;
 		}
+		uint8_t slInd = (uint8_t)((dat->ndat.levels[lvlInd].format >> 1U) & 127U);
+		if(slInd > 0){
+			tmpWidth = getTextWidthScaleIndependent(rdat,FONTSIZE_NORMAL,getSpecialLvlStr(slInd)) + 6*UI_PADDING_SIZE;
+			if(tmpWidth > state->ds.fullInfoElevelColWidth){
+				state->ds.fullInfoElevelColWidth = tmpWidth;
+			}
+		}
 		getSpinParStr(tmpStr,&dat->ndat,lvlInd);
-		tmpWidth = getTextWidth(rdat,FONTSIZE_NORMAL,tmpStr) + UI_PADDING_SIZE;
+		tmpWidth = getTextWidthScaleIndependent(rdat,FONTSIZE_NORMAL,tmpStr) + 2*UI_PADDING_SIZE;
 		if(tmpWidth > state->ds.fullInfoJpiColWidth){
 			state->ds.fullInfoJpiColWidth = tmpWidth;
 		}
 		getHalfLifeStr(tmpStr,dat,lvlInd,1,0,state->ds.useLifetimes);
-		tmpWidth = getTextWidth(rdat,FONTSIZE_NORMAL,tmpStr) + UI_PADDING_SIZE;
+		tmpWidth = getTextWidthScaleIndependent(rdat,FONTSIZE_NORMAL,tmpStr) + 2*UI_PADDING_SIZE;
 		if(tmpWidth > state->ds.fullInfoHlColWidth){
 			state->ds.fullInfoHlColWidth = tmpWidth;
 		}
 		if(dat->ndat.levels[lvlInd].numDecModes > 0){
 			for(int8_t i=0; i<dat->ndat.levels[lvlInd].numDecModes; i++){
 				getDecayModeStr(tmpStr,&dat->ndat,dat->ndat.levels[lvlInd].firstDecMode + (uint32_t)i);
-				tmpWidth = getTextWidth(rdat,FONTSIZE_NORMAL,tmpStr) + 3*UI_PADDING_SIZE;
+				tmpWidth = getTextWidthScaleIndependent(rdat,FONTSIZE_NORMAL,tmpStr) + 5*UI_PADDING_SIZE;
 				if(tmpWidth > state->ds.fullInfoHlColWidth){
 					state->ds.fullInfoHlColWidth = tmpWidth;
 				}
@@ -1987,28 +2024,28 @@ void setFullLevelInfoDimensions(const app_data *restrict dat, app_state *restric
 		}
 		for(uint16_t i=0; i<dat->ndat.levels[lvlInd].numTran; i++){
       getGammaEnergyStr(tmpStr,&dat->ndat,(uint32_t)(dat->ndat.levels[lvlInd].firstTran + i),1);
-			tmpWidth = getTextWidth(rdat,FONTSIZE_NORMAL,tmpStr) + UI_PADDING_SIZE;
+			tmpWidth = getTextWidthScaleIndependent(rdat,FONTSIZE_NORMAL,tmpStr) + 2*UI_PADDING_SIZE;
 			if(tmpWidth > state->ds.fullInfoEgammaColWidth){
 				state->ds.fullInfoEgammaColWidth = tmpWidth;
 			}
 			getGammaIntensityStr(tmpStr,&dat->ndat,(uint32_t)(dat->ndat.levels[lvlInd].firstTran + i),1);
-			tmpWidth = getTextWidth(rdat,FONTSIZE_NORMAL,tmpStr) + UI_PADDING_SIZE;
+			tmpWidth = getTextWidthScaleIndependent(rdat,FONTSIZE_NORMAL,tmpStr) + 2*UI_PADDING_SIZE;
 			if(tmpWidth > state->ds.fullInfoIgammaColWidth){
 				state->ds.fullInfoIgammaColWidth = tmpWidth;
 			}
 			getGammaMultipolarityStr(tmpStr,&dat->ndat,(uint32_t)(dat->ndat.levels[lvlInd].firstTran + i));
-			tmpWidth = getTextWidth(rdat,FONTSIZE_NORMAL,tmpStr) + UI_PADDING_SIZE;
+			tmpWidth = getTextWidthScaleIndependent(rdat,FONTSIZE_NORMAL,tmpStr) + 2*UI_PADDING_SIZE;
 			if(tmpWidth > state->ds.fullInfoMgammaColWidth){
 				state->ds.fullInfoMgammaColWidth = tmpWidth;
 			}
 			uint32_t finalLvlInd = getFinalLvlInd(&dat->ndat,lvlInd,(uint32_t)(dat->ndat.levels[lvlInd].firstTran + i));
       getLvlEnergyStr(tmpStr,&dat->ndat,finalLvlInd,0);
-			tmpWidth = getTextWidth(rdat,FONTSIZE_NORMAL,tmpStr) + UI_PADDING_SIZE;
+			tmpWidth = getTextWidthScaleIndependent(rdat,FONTSIZE_NORMAL,tmpStr) + 2*UI_PADDING_SIZE;
 			if(tmpWidth > state->ds.fullInfoFinalElevelColWidth){
 				state->ds.fullInfoFinalElevelColWidth = tmpWidth;
 			}
 			getSpinParStr(tmpStr,&dat->ndat,finalLvlInd);
-			tmpWidth = getTextWidth(rdat,FONTSIZE_NORMAL,tmpStr) + UI_PADDING_SIZE;
+			tmpWidth = getTextWidthScaleIndependent(rdat,FONTSIZE_NORMAL,tmpStr) + 2*UI_PADDING_SIZE;
 			if(tmpWidth > state->ds.fullInfoFinalJpiColWidth){
 				state->ds.fullInfoFinalJpiColWidth = tmpWidth;
 			}
@@ -2036,6 +2073,10 @@ void setInfoBoxDimensions(const app_data *restrict dat, app_state *restrict stat
 		}
 	}
 
+	if( dat->ndat.nuclData[selNucl].abundance.val > 0.0f){
+		state->ds.infoBoxTableHeight += NUCL_INFOBOX_ABUNDANCE_LINE_HEIGHT;
+	}
+
 	//calculate the widths of each column and therefore the info box itself
 	uint8_t useIsomer = 0;
 	float calcOffset = 0.0f;
@@ -2048,10 +2089,10 @@ void setInfoBoxDimensions(const app_data *restrict dat, app_state *restrict stat
 	state->ds.infoBoxEColOffset = NUCL_INFOBOX_ENERGY_COL_MIN_OFFSET;
   //width of level energy text
 	getLvlEnergyStr(tmpStr,&dat->ndat,gsLvlInd,0);
-	state->ds.infoBoxJpiColOffset = getTextWidth(rdat,FONTSIZE_NORMAL,tmpStr) + UI_PADDING_SIZE + state->ds.infoBoxEColOffset;
+	state->ds.infoBoxJpiColOffset = getTextWidthScaleIndependent(rdat,FONTSIZE_NORMAL,tmpStr) + UI_PADDING_SIZE + state->ds.infoBoxEColOffset;
   if(useIsomer){
     getLvlEnergyStr(tmpStr,&dat->ndat,isomerLvlInd,1);
-		calcOffset = getTextWidth(rdat,FONTSIZE_NORMAL,tmpStr) + UI_PADDING_SIZE + state->ds.infoBoxEColOffset;
+		calcOffset = getTextWidthScaleIndependent(rdat,FONTSIZE_NORMAL,tmpStr) + UI_PADDING_SIZE + state->ds.infoBoxEColOffset;
 		if(calcOffset > state->ds.infoBoxJpiColOffset){
 			state->ds.infoBoxJpiColOffset = calcOffset;
 		}
@@ -2061,10 +2102,10 @@ void setInfoBoxDimensions(const app_data *restrict dat, app_state *restrict stat
 	}
 	//width of Jpi text
 	getSpinParStr(tmpStr,&dat->ndat,gsLvlInd);
-	state->ds.infoBoxHlColOffset = getTextWidth(rdat,FONTSIZE_NORMAL,tmpStr) + UI_PADDING_SIZE + state->ds.infoBoxJpiColOffset;
+	state->ds.infoBoxHlColOffset = getTextWidthScaleIndependent(rdat,FONTSIZE_NORMAL,tmpStr) + UI_PADDING_SIZE + state->ds.infoBoxJpiColOffset;
 	if(useIsomer){
     getSpinParStr(tmpStr,&dat->ndat,isomerLvlInd);
-		calcOffset = getTextWidth(rdat,FONTSIZE_NORMAL,tmpStr) + UI_PADDING_SIZE + state->ds.infoBoxJpiColOffset;
+		calcOffset = getTextWidthScaleIndependent(rdat,FONTSIZE_NORMAL,tmpStr) + UI_PADDING_SIZE + state->ds.infoBoxJpiColOffset;
 		if(calcOffset > state->ds.infoBoxHlColOffset){
 			state->ds.infoBoxHlColOffset = calcOffset;
 		}
@@ -2074,10 +2115,10 @@ void setInfoBoxDimensions(const app_data *restrict dat, app_state *restrict stat
 	}
 	//width of t1/2 text
 	getHalfLifeStr(tmpStr,dat,gsLvlInd,1,1,state->ds.useLifetimes);
-	state->ds.infoBoxDcyModeColOffset = getTextWidth(rdat,FONTSIZE_NORMAL,tmpStr) + UI_PADDING_SIZE + state->ds.infoBoxHlColOffset;
+	state->ds.infoBoxDcyModeColOffset = getTextWidthScaleIndependent(rdat,FONTSIZE_NORMAL,tmpStr) + UI_PADDING_SIZE + state->ds.infoBoxHlColOffset;
 	if(useIsomer){
     getHalfLifeStr(tmpStr,dat,isomerLvlInd,1,1,state->ds.useLifetimes);
-		calcOffset = getTextWidth(rdat,FONTSIZE_NORMAL,tmpStr) + UI_PADDING_SIZE + state->ds.infoBoxHlColOffset;
+		calcOffset = getTextWidthScaleIndependent(rdat,FONTSIZE_NORMAL,tmpStr) + UI_PADDING_SIZE + state->ds.infoBoxHlColOffset;
 		if(calcOffset > state->ds.infoBoxDcyModeColOffset){
 			state->ds.infoBoxDcyModeColOffset = calcOffset;
 		}
@@ -2089,7 +2130,7 @@ void setInfoBoxDimensions(const app_data *restrict dat, app_state *restrict stat
 	state->ds.infoBoxWidth = state->ds.infoBoxDcyModeColOffset;
 	for(int8_t i=0; i<dat->ndat.levels[gsLvlInd].numDecModes; i++){
 		getDecayModeStr(tmpStr,&dat->ndat,dat->ndat.levels[gsLvlInd].firstDecMode + (uint32_t)i);
-		calcOffset = getTextWidth(rdat,FONTSIZE_NORMAL,tmpStr) + 2*PANEL_EDGE_SIZE + state->ds.infoBoxDcyModeColOffset;
+		calcOffset = getTextWidthScaleIndependent(rdat,FONTSIZE_NORMAL,tmpStr) + 2*state->ds.infoBoxEColOffset + state->ds.infoBoxDcyModeColOffset;
 		if(calcOffset > state->ds.infoBoxWidth){
 			state->ds.infoBoxWidth = calcOffset;
 		}
@@ -2097,7 +2138,7 @@ void setInfoBoxDimensions(const app_data *restrict dat, app_state *restrict stat
 	if(useIsomer){
 		for(int8_t i=0; i<dat->ndat.levels[isomerLvlInd].numDecModes; i++){
 			getDecayModeStr(tmpStr,&dat->ndat,dat->ndat.levels[isomerLvlInd].firstDecMode + (uint32_t)i);
-			calcOffset = getTextWidth(rdat,FONTSIZE_NORMAL,tmpStr) + 2*PANEL_EDGE_SIZE + state->ds.infoBoxDcyModeColOffset;
+			calcOffset = getTextWidthScaleIndependent(rdat,FONTSIZE_NORMAL,tmpStr) + 2*state->ds.infoBoxEColOffset + state->ds.infoBoxDcyModeColOffset;
 			if(calcOffset > state->ds.infoBoxWidth){
 				state->ds.infoBoxWidth = calcOffset;
 			}
@@ -2692,6 +2733,8 @@ void updateUIScale(app_data *restrict dat, app_state *restrict state, resource_d
 		regenerateThemeAndFontCache(dat,rdat); //load_data.c
 	}
 	state->ds.nuclFullInfoMaxScrollY = getMaxNumLvlDispLines(&dat->ndat,state);
+	setFullLevelInfoDimensions(dat,state,rdat,state->chartSelectedNucl);
+	setInfoBoxDimensions(dat,state,rdat,state->chartSelectedNucl);
 	updateUIElemPositions(dat,&state->ds,rdat); //UI element positions
 	SDL_SetWindowMinimumSize(rdat->window,(int)(MIN_RENDER_WIDTH*state->ds.uiUserScale),(int)(MIN_RENDER_HEIGHT*state->ds.uiUserScale));
 	state->ds.forceRedraw = 1;

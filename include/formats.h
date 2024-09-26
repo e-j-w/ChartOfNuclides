@@ -99,12 +99,14 @@ typedef struct
   valWithErr halfLife;
   int16_t numSpinParVals; //number of assigned spin parity values
   spinparval spval[MAXSPPERLEVEL]; //assinged spin parity value(s) 
-  uint8_t halfInt; //if spin-parity values are half integer (1=true, in this case spinVal is multiplied by 0.5)
+  
   uint16_t numTran; //number of gamma rays in this level
   uint32_t firstTran; //index of first transition from this level
   int8_t numDecModes; //-1 by default for no decay modes specified (assume 100% IT in that case)
   uint16_t firstDecMode;
   float decayProb[DECAYMODE_ENUM_LENGTH]; //% probability of each decay mode for this level
+  uint8_t format; //bit 0: whether spin-parity values are half integer (if set, then spinVal is multiplied by 0.5)
+  //bits 1-7: labels for special levels (see special_level_enum)
 }level; //an individual excited level
 
 typedef struct

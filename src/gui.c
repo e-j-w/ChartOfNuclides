@@ -1004,6 +1004,16 @@ void drawNuclFullInfoBox(const app_data *restrict dat, const app_state *restrict
         getLvlEnergyStr(tmpStr,&dat->ndat,lvlInd,1);
       }
       drawTextAlignedSized(rdat,drawXPos,drawYPos,(hl > 1.0E3) ? whiteCol8Bit : blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_LEFT,16384);
+      //handle special level info
+      uint8_t slInd = (uint8_t)((dat->ndat.levels[lvlInd].format >> 1U) & 127U);
+      if(slInd > 0){
+        drawYPos += NUCL_INFOBOX_SMALLLINE_HEIGHT*state->ds.uiUserScale;
+        char slStr[64];
+        SDL_snprintf(slStr,64,"  (%s)",getSpecialLvlStr(slInd));
+        //SDL_Log("%s\n",tmpStr);
+        drawTextAlignedSized(rdat,drawXPos,drawYPos,(hl > 1.0E3) ? whiteCol8Bit : blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,slStr,ALIGN_LEFT,16384);
+        drawYPos = levelStartDrawPos;
+      }
       drawXPos += state->ds.fullInfoElevelColWidth*state->ds.uiUserScale;
       getSpinParStr(tmpStr,&dat->ndat,lvlInd);
       drawTextAlignedSized(rdat,drawXPos,drawYPos,(hl > 1.0E3) ? whiteCol8Bit : blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_LEFT,16384);
@@ -1182,11 +1192,20 @@ void drawNuclInfoBox(const app_data *restrict dat, app_state *restrict state, re
 
   //draw column title strings
   char tmpStr[32];
-  float drawXPos = (float)(infoBoxPanelRect.x + (PANEL_EDGE_SIZE + 3*UI_PADDING_SIZE)*state->ds.uiUserScale);
-  float drawYPos = (float)(infoBoxPanelRect.y + (PANEL_EDGE_SIZE + 3*UI_PADDING_SIZE + 40.0f)*state->ds.uiUserScale);
+  float drawXPos = (float)(infoBoxPanelRect.x + (state->ds.infoBoxEColOffset)*state->ds.uiUserScale);
+  float drawYPos = (float)(infoBoxPanelRect.y + (state->ds.infoBoxEColOffset + 34.0f)*state->ds.uiUserScale);
+  if(dat->ndat.nuclData[nuclInd].abundance.val > 0.0f){
+    char abundanceStr[64];
+    getAbundanceStr(tmpStr,&dat->ndat,nuclInd);
+    SDL_snprintf(abundanceStr,64,"...is %s of %s on Earth.",tmpStr,getFullElemStr((uint8_t)dat->ndat.nuclData[nuclInd].Z,255));
+    drawTextAlignedSized(rdat,drawXPos,drawYPos,blackCol8Bit,FONTSIZE_SMALL,alpha,abundanceStr,ALIGN_LEFT,state->ds.uiElemWidth[UIELEM_NUCL_INFOBOX]);
+		drawYPos += NUCL_INFOBOX_ABUNDANCE_LINE_HEIGHT*state->ds.uiUserScale;
+	}else{
+    drawYPos += 6.0f*state->ds.uiUserScale;
+  }
   drawTextAlignedSized(rdat,drawXPos,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,alpha,dat->strings[dat->locStringIDs[LOCSTR_GM_STATE]],ALIGN_LEFT,state->ds.uiElemWidth[UIELEM_NUCL_INFOBOX]);
   drawYPos += NUCL_INFOBOX_BIGLINE_HEIGHT*state->ds.uiUserScale;
-  drawTextAlignedSized(rdat,drawXPos+state->ds.infoBoxEColOffset*state->ds.uiUserScale,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,alpha,dat->strings[dat->locStringIDs[LOCSTR_ENERGY_KEV]],ALIGN_LEFT,state->ds.uiElemWidth[UIELEM_NUCL_INFOBOX]);
+  drawTextAlignedSized(rdat,drawXPos,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,alpha,dat->strings[dat->locStringIDs[LOCSTR_ENERGY_KEV]],ALIGN_LEFT,state->ds.uiElemWidth[UIELEM_NUCL_INFOBOX]);
   drawTextAlignedSized(rdat,drawXPos+state->ds.infoBoxJpiColOffset*state->ds.uiUserScale,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,alpha,dat->strings[dat->locStringIDs[LOCSTR_JPI]],ALIGN_LEFT,state->ds.uiElemWidth[UIELEM_NUCL_INFOBOX]);
   if(state->ds.useLifetimes){
     drawTextAlignedSized(rdat,drawXPos+state->ds.infoBoxHlColOffset*state->ds.uiUserScale,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,alpha,dat->strings[dat->locStringIDs[LOCSTR_LIFETIME]],ALIGN_LEFT,state->ds.uiElemWidth[UIELEM_NUCL_INFOBOX]);
@@ -1199,7 +1218,7 @@ void drawNuclInfoBox(const app_data *restrict dat, app_state *restrict state, re
   drawYPos += NUCL_INFOBOX_BIGLINE_HEIGHT*state->ds.uiUserScale;
   uint32_t lvlInd = dat->ndat.nuclData[nuclInd].firstLevel + dat->ndat.nuclData[nuclInd].gsLevel;
   getLvlEnergyStr(tmpStr,&dat->ndat,lvlInd,0);
-  drawTextAlignedSized(rdat,drawXPos+state->ds.infoBoxEColOffset*state->ds.uiUserScale,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,alpha,tmpStr,ALIGN_LEFT,state->ds.uiElemWidth[UIELEM_NUCL_INFOBOX]);
+  drawTextAlignedSized(rdat,drawXPos,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,alpha,tmpStr,ALIGN_LEFT,state->ds.uiElemWidth[UIELEM_NUCL_INFOBOX]);
   getSpinParStr(tmpStr,&dat->ndat,lvlInd);
   drawTextAlignedSized(rdat,drawXPos+state->ds.infoBoxJpiColOffset*state->ds.uiUserScale,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,alpha,tmpStr,ALIGN_LEFT,state->ds.uiElemWidth[UIELEM_NUCL_INFOBOX]);
   getHalfLifeStr(tmpStr,dat,lvlInd,1,1,state->ds.useLifetimes);
@@ -1228,7 +1247,7 @@ void drawNuclInfoBox(const app_data *restrict dat, app_state *restrict state, re
   if((lvlInd != MAXNUMLVLS)&&(lvlInd != (dat->ndat.nuclData[nuclInd].firstLevel + dat->ndat.nuclData[nuclInd].gsLevel))){
     drawYPos += ((NUCL_INFOBOX_BIGLINE_HEIGHT - NUCL_INFOBOX_SMALLLINE_HEIGHT)*state->ds.uiUserScale);
     getLvlEnergyStr(tmpStr,&dat->ndat,lvlInd,1);
-    drawTextAlignedSized(rdat,drawXPos+state->ds.infoBoxEColOffset*state->ds.uiUserScale,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,alpha,tmpStr,ALIGN_LEFT,state->ds.uiElemWidth[UIELEM_NUCL_INFOBOX]);
+    drawTextAlignedSized(rdat,drawXPos,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,alpha,tmpStr,ALIGN_LEFT,state->ds.uiElemWidth[UIELEM_NUCL_INFOBOX]);
     getSpinParStr(tmpStr,&dat->ndat,lvlInd);
     drawTextAlignedSized(rdat,drawXPos+state->ds.infoBoxJpiColOffset*state->ds.uiUserScale,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,alpha,tmpStr,ALIGN_LEFT,state->ds.uiElemWidth[UIELEM_NUCL_INFOBOX]);
     getHalfLifeStr(tmpStr,dat,lvlInd,1,1,state->ds.useLifetimes);

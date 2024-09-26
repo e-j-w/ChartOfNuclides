@@ -45,6 +45,8 @@ void drawScreenDimmer(const drawing_state *restrict ds, resource_data *restrict 
 
 float getTextHeight(resource_data *restrict rdat, const uint8_t fontSizeInd, const char *str);
 float getTextWidth(resource_data *restrict rdat, const uint8_t fontSizeInd, const char *str);
+float getTextHeightScaleIndependent(resource_data *restrict rdat, const uint8_t fontSizeInd, const char *str);
+float getTextWidthScaleIndependent(resource_data *restrict rdat, const uint8_t fontSizeInd, const char *str);
 
 SDL_FRect drawTextAlignedSized(resource_data *restrict rdat, const float xPos, const float yPos, const SDL_Color textColor, const uint8_t fontSizeInd, const Uint8 alpha, const char *txt, const uint8_t alignment, const Uint16 maxWidth);
 void drawTextAligned(resource_data *restrict rdat, const float xPos, const float yPos, const SDL_Color textColor, const uint8_t fontSizeInd, const char *txt, const uint8_t alignment);

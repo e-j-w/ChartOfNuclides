@@ -166,7 +166,7 @@ Zoom and pan with the mouse, the controls are basically identical to Google Maps
 
 ## Disclaimer
 
-The author(s) make no guarantee of the accuracy or completeness of the information provided.  As stated in the [license](COPYING.md), this program is provided without any warranty.  Please file a bug report if you spot any inaccuracies (eg. the data reported by the program differs from the source ENSDF/NIST data).  Some inaccuracies are likely, since the program remains in active development.
+The author(s) cannot guarantee the accuracy or completeness of the information provided.  As stated in the [license](COPYING.md), this program is provided without any warranty.  Please file a bug report if you spot any inaccuracies (eg. the data reported by the program differs from the source ENSDF/NIST data).  Some inaccuracies are likely, since the program remains in active development.
 
 ## Credits
 

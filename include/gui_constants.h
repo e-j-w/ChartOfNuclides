@@ -138,10 +138,11 @@ static const float uiScales[UISCALE_ENUM_LENGTH] = {1.0f,1.20f,1.5f,1.75f};
 //info box
 #define NUCL_INFOBOX_X_PADDING                  (UI_PADDING_SIZE+CHART_AXIS_DEPTH) //in unscaled pixels
 #define NUCL_INFOBOX_MIN_WIDTH                  470 //in unscaled pixels
-#define NUCL_INFOBOX_MIN_HEIGHT                 120 //in unscaled pixels
+#define NUCL_INFOBOX_MIN_HEIGHT                 114 //in unscaled pixels
+#define NUCL_INFOBOX_ABUNDANCE_LINE_HEIGHT      28 //in unscaled pixels
 #define NUCL_INFOBOX_BIGLINE_HEIGHT             30.0f //in unscaled pixels
 #define NUCL_INFOBOX_SMALLLINE_HEIGHT           20.0f //in unscaled pixels
-#define NUCL_INFOBOX_ENERGY_COL_MIN_OFFSET      0.0f //in unscaled pixels
+#define NUCL_INFOBOX_ENERGY_COL_MIN_OFFSET      (PANEL_EDGE_SIZE + 3*UI_PADDING_SIZE) //in unscaled pixels
 #define NUCL_INFOBOX_JPI_COL_MIN_OFFSET         130.0f //in unscaled pixels
 #define NUCL_INFOBOX_HALFLIFE_COL_MIN_OFFSET    220.0f //in unscaled pixels
 #define NUCL_INFOBOX_DECAYMODE_COL_MIN_OFFSET   340.0f //in unscaled pixels
@@ -154,14 +155,14 @@ static const float uiScales[UISCALE_ENUM_LENGTH] = {1.0f,1.20f,1.5f,1.75f};
 #define NUCL_FULLINFOBOX_BACKBUTTON_WIDTH               NUCL_INFOBOX_ALLLEVELS_BUTTON_WIDTH
 #define NUCL_FULLINFOBOX_QVAL_POS_X                     (6*UI_PADDING_SIZE) //in unscaled pixels
 #define NUCL_FULLINFOBOX_QVAL_POS_Y                     60.0f //in unscaled pixels
-#define NUCL_FULLINFOBOX_ENERGY_COL_MIN_WIDTH           140.0f //in unscaled pixels
-#define NUCL_FULLINFOBOX_JPI_COL_MIN_WIDTH              120.0f //in unscaled pixels
+#define NUCL_FULLINFOBOX_ENERGY_COL_MIN_WIDTH           120.0f //in unscaled pixels
+#define NUCL_FULLINFOBOX_JPI_COL_MIN_WIDTH              60.0f //in unscaled pixels
 #define NUCL_FULLINFOBOX_HALFLIFE_COL_MIN_WIDTH         130.0f //in unscaled pixels
 #define NUCL_FULLINFOBOX_EGAMMA_COL_MIN_WIDTH           120.0f //in unscaled pixels
-#define NUCL_FULLINFOBOX_IGAMMA_COL_MIN_WIDTH           100.0f //in unscaled pixels
-#define NUCL_FULLINFOBOX_MGAMMA_COL_MIN_WIDTH           100.0f //in unscaled pixels
+#define NUCL_FULLINFOBOX_IGAMMA_COL_MIN_WIDTH           90.0f //in unscaled pixels
+#define NUCL_FULLINFOBOX_MGAMMA_COL_MIN_WIDTH           70.0f //in unscaled pixels
 #define NUCL_FULLINFOBOX_FINALLEVEL_E_COL_MIN_WIDTH     100.0f //in unscaled pixels
-#define NUCL_FULLINFOBOX_FINALLEVEL_JPI_COL_MIN_WIDTH   120.0f //in unscaled pixels
+#define NUCL_FULLINFOBOX_FINALLEVEL_JPI_COL_MIN_WIDTH   60.0f //in unscaled pixels
 #define NUCL_FULLINFOBOX_LEVELLIST_HEADER_POS_Y         92.0f //in unscaled pixels
 #define NUCL_FULLINFOBOX_LEVELLIST_POS_Y                (NUCL_FULLINFOBOX_LEVELLIST_HEADER_POS_Y + 58.0f) //in unscaled pixels
 #define NUCL_FULLINFOBOX_SCROLLBAR_POS_XR               (4*UI_PADDING_SIZE)

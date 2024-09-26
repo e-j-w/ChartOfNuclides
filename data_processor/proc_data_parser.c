@@ -558,7 +558,7 @@ void parseSpinPar(level * lev, sp_var_data * varDat, char * spstring){
 				}
 				if(varSpin){
 					//J or J+number variable spin value
-					lev->halfInt = 0;
+					lev->format = 0;
 					//SDL_Log("%s\n",val[i]);
 					if(val[i][0] == '('){
 						lsBrak = 1;
@@ -777,7 +777,7 @@ void parseSpinPar(level * lev, sp_var_data * varDat, char * spstring){
 				lev->spval[lev->numSpinParVals].format |= ((tentative & 7U) << 9U);
 				lev->numSpinParVals++;
 
-				//SDL_Log("%f keV Entry %i: spin %i (half-int %i), parity %i, tentative %i\n",lev->energy,lev->numSpinParVals,lev->spval[lev->numSpinParVals-1].spinVal,lev->spval[lev->numSpinParVals-1].halfInt,lev->spval[lev->numSpinParVals-1].parVal,lev->spval[lev->numSpinParVals-1].tentative);
+				//SDL_Log("%f keV Entry %i: spin %i (half-int %i), parity %i, tentative %i\n",lev->energy,lev->numSpinParVals,lev->spval[lev->numSpinParVals-1].spinVal,lev->spval[lev->numSpinParVals-1].format,lev->spval[lev->numSpinParVals-1].parVal,lev->spval[lev->numSpinParVals-1].tentative);
 			}
 		}
 		//SDL_Log("number of spin vals: %i\n",lev->numSpinParVals);
@@ -1697,7 +1697,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 								halfInt = 1; //odd mass nucleus, half-integer spins
 							}
 
-							nd->levels[nd->numLvls-1].halfInt = halfInt;
+							nd->levels[nd->numLvls-1].format |= halfInt;
 							nd->levels[nd->numLvls-1].numDecModes = 0;
 							nd->levels[nd->numLvls-1].firstDecMode = nd->numDecModes;
 							//parse the level spin and parity
@@ -1744,6 +1744,28 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 											nd->nuclData[nd->numNucl].longestIsomerMVal = isomerMValInNucl;
 										}
 									}
+								}
+							}
+
+							//check whether the level is 'special'
+							if((nd->nuclData[nd->numNucl].Z == 6)&&(nd->nuclData[nd->numNucl].N == 6)){
+								//12C
+								if((en > 7650.0)&&(en < 7660.0)){
+									//Hoyle state
+									//SDL_Log("Found Hoyle state.\n");
+									nd->levels[nd->numLvls-1].format |= (uint8_t)(SPECIALLEVEL_HOYLE << 1U);
+								}
+							}else if((nd->nuclData[nd->numNucl].Z == 73)&&(nd->nuclData[nd->numNucl].N == 107)){
+								//180Ta
+								if((en > 77.0)&&(en < 78.0)){
+									//Naturally occuring isomer in 180Ta
+									nd->levels[nd->numLvls-1].format |= (uint8_t)(SPECIALLEVEL_NATURALLYOCCURINGISOMER << 1U);
+								}
+							}else if((nd->nuclData[nd->numNucl].Z == 90)&&(nd->nuclData[nd->numNucl].N == 139)){
+								//229Th
+								if((en > 0.000005)&&(en < 1.0)){
+									//Nuclear clock isomer in 229Th
+									nd->levels[nd->numLvls-1].format |= (uint8_t)(SPECIALLEVEL_CLOCKISOMER << 1U);
 								}
 							}
 							

@@ -326,6 +326,12 @@ float getTextHeight(resource_data *restrict rdat, const uint8_t fontSizeInd, con
 float getTextWidth(resource_data *restrict rdat, const uint8_t fontSizeInd, const char *str){
   return FC_GetWidth(rdat->font[fontSizeInd],str);
 }
+float getTextHeightScaleIndependent(resource_data *restrict rdat, const uint8_t fontSizeInd, const char *str){
+  return getTextHeight(rdat,fontSizeInd,str)/rdat->uiScale;
+}
+float getTextWidthScaleIndependent(resource_data *restrict rdat, const uint8_t fontSizeInd, const char *str){
+  return getTextWidth(rdat,fontSizeInd,str)/rdat->uiScale;
+}
 
 //returns a rect containing dimensions of the drawn text (can be used for alignment purposes)
 //fontSizeInd: values from font_size_enum
