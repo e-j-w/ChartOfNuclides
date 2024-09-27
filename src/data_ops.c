@@ -37,8 +37,8 @@ void initializeTempState(const app_data *restrict dat, app_state *restrict state
   state->lastAxisValLY = 0;
 	state->lastAxisValRX = 0;
   state->lastAxisValRY = 0;
-  state->activeAxisX = 0;
-	state->activeAxisY = 0;
+  state->activeAxisX = 255;
+	state->activeAxisY = 255;
   state->lastInputType = INPUT_TYPE_KEYBOARD; //default input type
 	state->kbdModVal = KBD_MOD_NONE;
 	state->mouseoverElement = UIELEM_ENUM_LENGTH;
@@ -341,15 +341,14 @@ void setupMessageBox(const app_data *restrict dat, app_state *restrict state, co
 }
 
 //gets strings that denote 'special' levels in certain nuclides
-const char* getSpecialLvlStr(const uint8_t specialLvlInd){
+const char* getSpecialLvlStr(const app_data *restrict dat, const uint8_t specialLvlInd){
 	switch(specialLvlInd){
 		case SPECIALLEVEL_HOYLE:
-			return "Hoyle state";
+			return dat->strings[dat->locStringIDs[LOCSTR_SL_HOYLE]];
 		case SPECIALLEVEL_NATURALLYOCCURINGISOMER:
-			return "Naturally occuring isomer";
+			return dat->strings[dat->locStringIDs[LOCSTR_SL_NATURALLYOCCURINGISOMER]];
 		case SPECIALLEVEL_CLOCKISOMER:
-			return "Nuclear clock isomer";
-			break;
+			return dat->strings[dat->locStringIDs[LOCSTR_SL_CLOCKISOMER]];
 		default:
 			return " ";
 	}
@@ -1998,7 +1997,7 @@ void setFullLevelInfoDimensions(const app_data *restrict dat, app_state *restric
 		}
 		uint8_t slInd = (uint8_t)((dat->ndat.levels[lvlInd].format >> 1U) & 127U);
 		if(slInd > 0){
-			tmpWidth = getTextWidthScaleIndependent(rdat,FONTSIZE_NORMAL,getSpecialLvlStr(slInd)) + 6*UI_PADDING_SIZE;
+			tmpWidth = getTextWidthScaleIndependent(rdat,FONTSIZE_NORMAL,getSpecialLvlStr(dat,slInd)) + 6*UI_PADDING_SIZE;
 			if(tmpWidth > state->ds.fullInfoElevelColWidth){
 				state->ds.fullInfoElevelColWidth = tmpWidth;
 			}

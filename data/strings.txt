@@ -27,6 +27,9 @@ about_string_1|Developed by Jonathan Williams
 about_string_2|Nuclear structure data is sourced from ENSDF (https://www.nndc.bnl.gov/ensdf/).
 about_string_3|Isotope abundance data is sourced from NIST (https://www.nist.gov/pml/atomic-weights- and-isotopic-compositions-relative-atomic-masses)
 about_string_4|This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, version 3 or later.
+sl_hoyle|Hoyle state
+sl_naturallyoccuringisomer|Naturally occuring isomer
+sl_clockisomer|Nuclear clock isomer
 pref_shellclosure|Show shell closures on chart
 pref_lifetime|Show lifetimes instead of half-lives
 pref_ui_animations|Show UI animations

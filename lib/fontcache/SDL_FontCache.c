@@ -819,7 +819,7 @@ static Uint8 FC_GrowGlyphCache(FC_Font* font)
             prev_clip = get_clip(font->renderer);
         SDL_GetRenderViewport(font->renderer, &prev_viewport);
         SDL_GetRenderScale(font->renderer, &prev_scalex, &prev_scaley);
-        SDL_GetRenderLogicalPresentation(font->renderer, &prev_logicalw, &prev_logicalh, NULL, NULL);
+        SDL_GetRenderLogicalPresentation(font->renderer, &prev_logicalw, &prev_logicalh, SDL_LOGICAL_PRESENTATION_DISABLED);
     }
     SDL_SetTextureBlendMode(new_level, SDL_BLENDMODE_BLEND);
     SDL_SetRenderTarget(font->renderer, new_level);
@@ -836,8 +836,7 @@ static Uint8 FC_GrowGlyphCache(FC_Font* font)
                 font->renderer,
                 prev_logicalw, 
                 prev_logicalh,
-                SDL_LOGICAL_PRESENTATION_DISABLED,
-                SDL_SCALEMODE_LINEAR);
+                SDL_LOGICAL_PRESENTATION_DISABLED);
         else {
             SDL_SetRenderViewport(font->renderer, &prev_viewport);
             SDL_SetRenderScale(font->renderer, prev_scalex, prev_scaley);
@@ -874,7 +873,7 @@ Uint8 FC_UploadGlyphCache(FC_Font* font, int cache_level, SDL_Surface* data_surf
                 prev_clip = get_clip(renderer);
             SDL_GetRenderViewport(renderer, &prev_viewport);
             SDL_GetRenderScale(renderer, &prev_scalex, &prev_scaley);
-            SDL_GetRenderLogicalPresentation(renderer, &prev_logicalw, &prev_logicalh, NULL, NULL);
+            SDL_GetRenderLogicalPresentation(renderer, &prev_logicalw, &prev_logicalh, SDL_LOGICAL_PRESENTATION_DISABLED);
         }
         SDL_SetTextureBlendMode(temp, SDL_BLENDMODE_NONE);
         SDL_SetRenderTarget(renderer, new_level);
@@ -890,8 +889,7 @@ Uint8 FC_UploadGlyphCache(FC_Font* font, int cache_level, SDL_Surface* data_surf
                 set_clip(renderer, &prev_clip);
             if (prev_logicalw && prev_logicalh)
                 SDL_SetRenderLogicalPresentation(renderer, prev_logicalw, prev_logicalh,
-                    SDL_LOGICAL_PRESENTATION_DISABLED,
-                    SDL_SCALEMODE_LINEAR);
+                    SDL_LOGICAL_PRESENTATION_DISABLED);
             else {
                 SDL_SetRenderViewport(renderer, &prev_viewport);
                 SDL_SetRenderScale(renderer, prev_scalex, prev_scaley);
@@ -1064,7 +1062,7 @@ Uint8 FC_LoadFontFromTTF(FC_Font* font, SDL_Renderer* renderer, TTF_Font* ttf, S
             memset(buff, 0, 5);
             if(!U8_charcpy(buff, source_string, 5))
                 continue;
-            glyph_surf = TTF_RenderUTF8_Blended(ttf, buff, white);
+            glyph_surf = TTF_RenderText_Blended(ttf, buff, 0, white);
             if(glyph_surf == NULL)
                 continue;
 
@@ -1313,7 +1311,7 @@ Uint8 FC_AddGlyphToCache(FC_Font* font, SDL_Surface* glyph_surface)
             prev_clip = get_clip(renderer);
         SDL_GetRenderViewport(renderer, &prev_viewport);
         SDL_GetRenderScale(renderer, &prev_scalex, &prev_scaley);
-        SDL_GetRenderLogicalPresentation(renderer, &prev_logicalw, &prev_logicalh, NULL, NULL);
+        SDL_GetRenderLogicalPresentation(renderer, &prev_logicalw, &prev_logicalh, SDL_LOGICAL_PRESENTATION_DISABLED);
     }
 
     img = SDL_CreateTextureFromSurface(renderer, glyph_surface);
@@ -1331,8 +1329,7 @@ Uint8 FC_AddGlyphToCache(FC_Font* font, SDL_Surface* glyph_surface)
             set_clip(renderer, &prev_clip);
         if (prev_logicalw && prev_logicalh)
             SDL_SetRenderLogicalPresentation(renderer, prev_logicalw, prev_logicalh,
-                SDL_LOGICAL_PRESENTATION_DISABLED,
-                SDL_SCALEMODE_LINEAR);
+                SDL_LOGICAL_PRESENTATION_DISABLED);
         else {
             SDL_SetRenderViewport(renderer, &prev_viewport);
             SDL_SetRenderScale(renderer, prev_scalex, prev_scaley);
@@ -1414,7 +1411,7 @@ Uint8 FC_GetGlyphData(FC_Font* font, FC_GlyphData* result, Uint32 codepoint)
 
         SDL_GetTextureSize(cache_image, &w, &h);
 
-        surf = TTF_RenderUTF8_Blended(font->ttf_source, buff, white);
+        surf = TTF_RenderText_Blended(font->ttf_source, buff, 0, white);
         if(surf == NULL)
         {
             return 0;

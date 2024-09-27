@@ -1009,7 +1009,7 @@ void drawNuclFullInfoBox(const app_data *restrict dat, const app_state *restrict
       if(slInd > 0){
         drawYPos += NUCL_INFOBOX_SMALLLINE_HEIGHT*state->ds.uiUserScale;
         char slStr[64];
-        SDL_snprintf(slStr,64,"  (%s)",getSpecialLvlStr(slInd));
+        SDL_snprintf(slStr,64,"  (%s)",getSpecialLvlStr(dat,slInd));
         //SDL_Log("%s\n",tmpStr);
         drawTextAlignedSized(rdat,drawXPos,drawYPos,(hl > 1.0E3) ? whiteCol8Bit : blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,slStr,ALIGN_LEFT,16384);
         drawYPos = levelStartDrawPos;

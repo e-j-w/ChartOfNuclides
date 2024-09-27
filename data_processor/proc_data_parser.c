@@ -217,6 +217,9 @@ static int parseAppRules(app_data *restrict dat, asset_mapping *restrict stringI
 	dat->locStringIDs[LOCSTR_ABOUTSTR_2] = (uint16_t)nameToAssetID("about_string_2",stringIDmap);
 	dat->locStringIDs[LOCSTR_ABOUTSTR_3] = (uint16_t)nameToAssetID("about_string_3",stringIDmap);
 	dat->locStringIDs[LOCSTR_ABOUTSTR_4] = (uint16_t)nameToAssetID("about_string_4",stringIDmap);
+	dat->locStringIDs[LOCSTR_SL_HOYLE] = (uint16_t)nameToAssetID("sl_hoyle",stringIDmap);
+	dat->locStringIDs[LOCSTR_SL_NATURALLYOCCURINGISOMER] = (uint16_t)nameToAssetID("sl_naturallyoccuringisomer",stringIDmap);
+	dat->locStringIDs[LOCSTR_SL_CLOCKISOMER] = (uint16_t)nameToAssetID("sl_clockisomer",stringIDmap);
 	dat->locStringIDs[LOCSTR_PREF_SHELLCLOSURE] = (uint16_t)nameToAssetID("pref_shellclosure",stringIDmap);
 	dat->locStringIDs[LOCSTR_PREF_LIFETIME] = (uint16_t)nameToAssetID("pref_lifetime",stringIDmap);
 	dat->locStringIDs[LOCSTR_PREF_UIANIM] = (uint16_t)nameToAssetID("pref_ui_animations",stringIDmap);
