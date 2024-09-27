@@ -46,9 +46,14 @@ int findAndLoadAppDataFile(SDL_IOStream **inp, resource_data *restrict rdat, con
       }
       *inp = SDL_IOFromFile(rdat->appDataFilepath, "rb");
       if(*inp==NULL){
-        SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,"Error","App data file (con.dat) doesn't exist or is unreadable.",rdat->window);
-        SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"importAppData - couldn't read data package file %s.\n",rdat->appDataFilepath);
-        return -1;
+        //check Flatpak data location
+        SDL_snprintf(rdat->appDataFilepath,270,"%scon.dat",SDL_getenv("XDG_DATA_HOME"));
+        *inp = SDL_IOFromFile(rdat->appDataFilepath, "rb");
+        if(*inp==NULL){
+          SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,"Error","App data file (con.dat) doesn't exist or is unreadable.",rdat->window);
+          SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"importAppData - couldn't read data package file %s.\n",rdat->appDataFilepath);
+          return -1;
+        }
       }
     }
   }
