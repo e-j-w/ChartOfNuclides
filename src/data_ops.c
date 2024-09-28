@@ -2213,7 +2213,7 @@ void setSelectedNuclOnChart(const app_data *restrict dat, app_state *restrict st
 			}
 		}	
 	}else{
-		if((forcePan==1) && (state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_HIDE]==0.0f)){
+		if((forcePan==1) && (state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_HIDE]==0.0f) && (selNucl < MAXNUMNUCL)){
 			//pan chart to nuclide that is clicked
 			//SDL_Log("starting pan to: %f %f\n",(double)mouseX,(double)mouseY);
 			panChartToPos(dat,&state->ds,N,Z,CHART_DOUBLECLICK_PAN_TIME);
@@ -2491,13 +2491,17 @@ void updateSingleUIElemPosition(const app_data *restrict dat, drawing_state *res
 			ds->uiElemPosY[uiElemInd] = (uint16_t)(MENU_BUTTON_POS_Y*ds->uiUserScale);
 			ds->uiElemWidth[uiElemInd] = (uint16_t)(MENU_BUTTON_WIDTH*ds->uiUserScale);
 			ds->uiElemHeight[uiElemInd] = (uint16_t)(UI_TILE_SIZE*ds->uiUserScale);
+			ds->uiElemExtPlusX[uiElemInd] = (uint16_t)(MENU_BUTTON_POS_XR*ds->uiUserScale); //prevent clicking chart 'in between' buttons
+			ds->uiElemExtMinusY[uiElemInd] = (uint16_t)(MENU_BUTTON_POS_Y*ds->uiUserScale); //prevent clicking chart 'in between' buttons
 			//SDL_Log("res: [%u %u]\nx: %u, y: %u, w: %u, h: %u\n",ds->windowXRes,ds->windowYRes,ds->uiElemPosX[uiElemInd],ds->uiElemPosY[uiElemInd],ds->uiElemWidth[uiElemInd],ds->uiElemHeight[uiElemInd]);
 			break;
 		case UIELEM_CHARTVIEW_BUTTON:
-			ds->uiElemPosX[uiElemInd] = (uint16_t)(ds->windowXRes-((CHARTVIEW_BUTTON_WIDTH+CHARTVIEW_BUTTON_POS_XR)*ds->uiUserScale));
+			ds->uiElemPosX[uiElemInd] = (uint16_t)(ds->windowXRes-((CHARTVIEW_BUTTON_WIDTH+CHARTVIEW_BUTTON_POS_XR+MENU_BUTTON_WIDTH)*ds->uiUserScale));
 			ds->uiElemPosY[uiElemInd] = (uint16_t)(CHARTVIEW_BUTTON_POS_Y*ds->uiUserScale);
 			ds->uiElemWidth[uiElemInd] = (uint16_t)(CHARTVIEW_BUTTON_WIDTH*ds->uiUserScale);
 			ds->uiElemHeight[uiElemInd] = (uint16_t)(UI_TILE_SIZE*ds->uiUserScale);
+			ds->uiElemExtPlusX[uiElemInd] = (uint16_t)(CHARTVIEW_BUTTON_POS_XR*ds->uiUserScale); //prevent clicking chart 'in between' buttons
+			ds->uiElemExtMinusY[uiElemInd] = (uint16_t)(CHARTVIEW_BUTTON_POS_Y*ds->uiUserScale); //prevent clicking chart 'in between' buttons
 			break;
 		case UIELEM_PRIMARY_MENU:
 			ds->uiElemPosX[uiElemInd] = (uint16_t)(ds->windowXRes-((PRIMARY_MENU_WIDTH+PRIMARY_MENU_POS_XR)*ds->uiUserScale));
