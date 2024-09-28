@@ -413,11 +413,11 @@ void drawFlatBG(const drawing_state *restrict ds, resource_data *restrict rdat, 
 void drawLine(resource_data *restrict rdat, const float x1, const float y1, const float x2, const float y2, const float thickness, const SDL_FColor col1, const SDL_FColor col2){
   
   //scale coordinates
-  float x1s = SDL_floorf(x1*rdat->uiScale); //floorf prevents flickering of moving elements when fractional scaling
-  float x2s = SDL_floorf(x2*rdat->uiScale);
-  float y1s = SDL_floorf(y1*rdat->uiScale);
-  float y2s = SDL_floorf(y2*rdat->uiScale);
-  float ths = thickness*rdat->uiScale;
+  float x1s = SDL_floorf(x1*rdat->uiDPIScale); //floorf prevents flickering of moving elements when fractional scaling
+  float x2s = SDL_floorf(x2*rdat->uiDPIScale);
+  float y1s = SDL_floorf(y1*rdat->uiDPIScale);
+  float y2s = SDL_floorf(y2*rdat->uiDPIScale);
+  float ths = thickness*rdat->uiDPIScale;
   
   /*//use built-in function for single pixel width lines
   if((thickness <= 1.0f)&&(col1.r == col2.r)&&(col1.g == col2.g)&&(col1.b == col2.b)&&(col1.a == col2.a)){

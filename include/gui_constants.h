@@ -160,9 +160,10 @@ static const float uiScales[UISCALE_ENUM_LENGTH] = {1.0f,1.20f,1.5f,1.75f};
 #define NUCL_FULLINFOBOX_HALFLIFE_COL_MIN_WIDTH         130.0f //in unscaled pixels
 #define NUCL_FULLINFOBOX_EGAMMA_COL_MIN_WIDTH           120.0f //in unscaled pixels
 #define NUCL_FULLINFOBOX_IGAMMA_COL_MIN_WIDTH           90.0f //in unscaled pixels
-#define NUCL_FULLINFOBOX_MGAMMA_COL_MIN_WIDTH           70.0f //in unscaled pixels
-#define NUCL_FULLINFOBOX_FINALLEVEL_E_COL_MIN_WIDTH     100.0f //in unscaled pixels
-#define NUCL_FULLINFOBOX_FINALLEVEL_JPI_COL_MIN_WIDTH   60.0f //in unscaled pixels
+#define NUCL_FULLINFOBOX_MGAMMA_COL_MIN_WIDTH           80.0f //in unscaled pixels
+#define NUCL_FULLINFOBOX_DIVIDER_LINE_THICKNESS         1.0f //in unscaled pixels
+#define NUCL_FULLINFOBOX_FINALLEVEL_E_COL_MIN_WIDTH     60.0f //in unscaled pixels
+#define NUCL_FULLINFOBOX_FINALLEVEL_JPI_COL_MIN_WIDTH   40.0f //in unscaled pixels
 #define NUCL_FULLINFOBOX_LEVELLIST_HEADER_POS_Y         92.0f //in unscaled pixels
 #define NUCL_FULLINFOBOX_LEVELLIST_POS_Y                (NUCL_FULLINFOBOX_LEVELLIST_HEADER_POS_Y + 58.0f) //in unscaled pixels
 #define NUCL_FULLINFOBOX_SCROLLBAR_POS_XR               (4*UI_PADDING_SIZE)
@@ -174,6 +175,7 @@ static const float uiScales[UISCALE_ENUM_LENGTH] = {1.0f,1.20f,1.5f,1.75f};
 
 //colors for drawing
 static const SDL_FColor blackCol = {0.0f,0.0f,0.0f,1.0f};
+static const SDL_FColor lightGrayCol = {0.8f,0.8f,0.8f,1.0f};
 static const SDL_FColor grayCol = {0.5f,0.5f,0.5f,1.0f};
 static const SDL_FColor darkGrayCol = {0.2f,0.2f,0.2f,1.0f};
 static const SDL_FColor redCol = {1.0f,0.0f,0.0f,1.0f};

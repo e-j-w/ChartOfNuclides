@@ -819,7 +819,7 @@ static Uint8 FC_GrowGlyphCache(FC_Font* font)
             prev_clip = get_clip(font->renderer);
         SDL_GetRenderViewport(font->renderer, &prev_viewport);
         SDL_GetRenderScale(font->renderer, &prev_scalex, &prev_scaley);
-        SDL_GetRenderLogicalPresentation(font->renderer, &prev_logicalw, &prev_logicalh, SDL_LOGICAL_PRESENTATION_DISABLED);
+        SDL_GetRenderLogicalPresentation(font->renderer, &prev_logicalw, &prev_logicalh, NULL);
     }
     SDL_SetTextureBlendMode(new_level, SDL_BLENDMODE_BLEND);
     SDL_SetRenderTarget(font->renderer, new_level);
@@ -873,7 +873,7 @@ Uint8 FC_UploadGlyphCache(FC_Font* font, int cache_level, SDL_Surface* data_surf
                 prev_clip = get_clip(renderer);
             SDL_GetRenderViewport(renderer, &prev_viewport);
             SDL_GetRenderScale(renderer, &prev_scalex, &prev_scaley);
-            SDL_GetRenderLogicalPresentation(renderer, &prev_logicalw, &prev_logicalh, SDL_LOGICAL_PRESENTATION_DISABLED);
+            SDL_GetRenderLogicalPresentation(renderer, &prev_logicalw, &prev_logicalh, NULL);
         }
         SDL_SetTextureBlendMode(temp, SDL_BLENDMODE_NONE);
         SDL_SetRenderTarget(renderer, new_level);
@@ -1023,9 +1023,9 @@ Uint8 FC_LoadFontFromTTF(FC_Font* font, SDL_Renderer* renderer, TTF_Font* ttf, S
     font->ttf_source = ttf;
 
     //font->line_height = TTF_FontLineSkip(ttf);
-    font->height = (Uint16)TTF_FontHeight(ttf);
-    font->ascent = (float)TTF_FontAscent(ttf);
-    font->descent = (float)(-TTF_FontDescent(ttf));
+    font->height = (Uint16)TTF_GetFontHeight(ttf);
+    font->ascent = (float)TTF_GetFontAscent(ttf);
+    font->descent = (float)(-TTF_GetFontDescent(ttf));
 
     // Some bug for certain fonts can result in an incorrect height.
     if(font->height < font->ascent - font->descent)
@@ -1153,7 +1153,7 @@ Uint8 FC_LoadFont_RW(FC_Font* font, FC_Target* renderer, SDL_IOStream* file_iost
         return 0;
     }
 
-    ttf = TTF_OpenFontIO(file_iostream_ttf, own_rwops, (int)pointSize);
+    ttf = TTF_OpenFontIO(file_iostream_ttf, own_rwops, (float)pointSize);
 
     if(ttf == NULL)
     {
@@ -1311,7 +1311,7 @@ Uint8 FC_AddGlyphToCache(FC_Font* font, SDL_Surface* glyph_surface)
             prev_clip = get_clip(renderer);
         SDL_GetRenderViewport(renderer, &prev_viewport);
         SDL_GetRenderScale(renderer, &prev_scalex, &prev_scaley);
-        SDL_GetRenderLogicalPresentation(renderer, &prev_logicalw, &prev_logicalh, SDL_LOGICAL_PRESENTATION_DISABLED);
+        SDL_GetRenderLogicalPresentation(renderer, &prev_logicalw, &prev_logicalh, NULL);
     }
 
     img = SDL_CreateTextureFromSurface(renderer, glyph_surface);
