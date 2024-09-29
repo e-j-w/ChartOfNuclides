@@ -27,11 +27,11 @@
      inkscape:deskcolor="#d1d1d1"
      inkscape:document-units="px"
      showgrid="true"
-     inkscape:zoom="3.3681471"
-     inkscape:cx="-2.9689915"
-     inkscape:cy="99.164315"
+     inkscape:zoom="4.7632793"
+     inkscape:cx="97.83176"
+     inkscape:cy="118.8257"
      inkscape:window-width="1920"
-     inkscape:window-height="1043"
+     inkscape:window-height="1011"
      inkscape:window-x="0"
      inkscape:window-y="0"
      inkscape:window-maximized="1"
@@ -438,6 +438,15 @@
        ry="3.6466963"
        rx="3.6545298" />
     <rect
+       style="opacity:0.99;fill:#cbcbcb;fill-opacity:1;stroke:none;stroke-width:0.529167;stroke-linecap:round;stroke-dasharray:none;stroke-opacity:1"
+       id="rect1-9-6"
+       width="6.3499999"
+       height="6.3499994"
+       x="17.991667"
+       y="26.458334"
+       ry="3.1749997"
+       rx="3.175" />
+    <rect
        style="opacity:0.99;fill:#000000;fill-opacity:1;stroke:#000000;stroke-width:0.0969327;stroke-linecap:round;stroke-dasharray:none;stroke-opacity:1"
        id="rect1-62"
        width="2.2843173"
@@ -673,6 +682,24 @@
        rx="0.52916789"
        ry="0.52916664"
        transform="rotate(90)" />
+    <path
+       style="fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.2;stroke-opacity:1"
+       d="m 19.579167,29.368749 h 1.322916 v -1.322917 h 0.529167 v 1.322917 h 1.322917 v 0.529166 H 21.43125 v 1.322917 h -0.529167 v -1.322917 h -1.334356 z"
+       id="path6" />
+    <rect
+       style="opacity:0.99;fill:#cbcbcb;fill-opacity:1;stroke:none;stroke-width:0.529167;stroke-linecap:round;stroke-dasharray:none;stroke-opacity:1"
+       id="rect1-9-6-2"
+       width="6.3500004"
+       height="6.3499994"
+       x="9.5249996"
+       y="26.458334"
+       ry="3.1202257"
+       rx="3.1514864" />
+    <path
+       style="fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.2;stroke-opacity:1"
+       d="m 11.006091,29.36875 h 1.322916 0.529167 1.322917 v 0.529166 h -1.322917 -0.529167 -1.334356 z"
+       id="path6-7"
+       sodipodi:nodetypes="ccccccccc" />
   </g>
   <metadata
      id="metadata1">

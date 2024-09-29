@@ -88,8 +88,8 @@ void initializeTempState(const app_data *restrict dat, app_state *restrict state
 	memset(state->ds.uiElemExtMinusY,0,sizeof(state->ds.uiElemExtMinusY));
 
   //check that constants are valid
-  if(UIELEM_ENUM_LENGTH > /* DISABLES CODE */ (32)){
-    SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"ui_element_enum is too long, cannot be indexed by a uint32_t bit pattern (ds->shownElements, state->interactableElement)!\n");
+  if(UIELEM_ENUM_LENGTH > /* DISABLES CODE */ (64)){
+    SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"ui_element_enum is too long, cannot be indexed by a uint64_t bit pattern (ds->shownElements, state->interactableElement)!\n");
     exit(-1);
   }
   if(UIANIM_ENUM_LENGTH > /* DISABLES CODE */ (32)){
@@ -140,7 +140,7 @@ void stopUIAnimation(const app_data *restrict dat, app_state *restrict state, co
   //take action at the end of the animation
   switch(uiAnim){
 		case UIANIM_PRIMARY_MENU_HIDE:
-			state->ds.shownElements &= (uint32_t)(~(1U << UIELEM_PRIMARY_MENU)); //close the menu
+			state->ds.shownElements &= (uint64_t)(~(1U << UIELEM_PRIMARY_MENU)); //close the menu
 			if(!(state->ds.shownElements & (1U << UIELEM_PREFS_DIALOG))){
 				if(!(state->ds.shownElements & (1U << UIELEM_ABOUT_BOX))){
 					if(!(state->ds.shownElements & (1U << UIELEM_CHARTVIEW_MENU))){
@@ -158,7 +158,7 @@ void stopUIAnimation(const app_data *restrict dat, app_state *restrict state, co
 			}
 			break;
 		case UIANIM_CHARTVIEW_MENU_HIDE:
-			state->ds.shownElements &= (uint32_t)(~(1U << UIELEM_CHARTVIEW_MENU)); //close the menu
+			state->ds.shownElements &= (uint64_t)(~(1U << UIELEM_CHARTVIEW_MENU)); //close the menu
 			if(!(state->ds.shownElements & (1U << UIELEM_PRIMARY_MENU))){
 				if(state->ds.shownElements & (1U << UIELEM_NUCL_INFOBOX)){
 					changeUIState(dat,state,UISTATE_INFOBOX);
@@ -174,9 +174,9 @@ void stopUIAnimation(const app_data *restrict dat, app_state *restrict state, co
 			changeUIState(dat,state,UISTATE_PREFS_DIALOG);
 			break;
     case UIANIM_MODAL_BOX_HIDE:
-      state->ds.shownElements &= (uint32_t)(~(1U << UIELEM_MSG_BOX)); //close the message box
-			state->ds.shownElements &= (uint32_t)(~(1U << UIELEM_ABOUT_BOX)); //close the about box
-			state->ds.shownElements &= (uint32_t)(~(1U << UIELEM_PREFS_DIALOG)); //close the preferences dialog
+      state->ds.shownElements &= (uint64_t)(~(1U << UIELEM_MSG_BOX)); //close the message box
+			state->ds.shownElements &= (uint64_t)(~(1U << UIELEM_ABOUT_BOX)); //close the about box
+			state->ds.shownElements &= (uint64_t)(~(1U << UIELEM_PREFS_DIALOG)); //close the preferences dialog
 			if(state->ds.shownElements & (1U << UIELEM_NUCL_FULLINFOBOX)){
 				changeUIState(dat,state,UISTATE_FULLLEVELINFO);
 			}else if(state->ds.shownElements & (1U << UIELEM_NUCL_INFOBOX)){
@@ -198,7 +198,7 @@ void stopUIAnimation(const app_data *restrict dat, app_state *restrict state, co
 			changeUIState(dat,state,UISTATE_FULLLEVELINFO); //update UI state now that the full info box is visible
 			break;
 		case UIANIM_NUCLINFOBOX_TXTFADEOUT:
-			state->ds.shownElements &= (uint32_t)(~(1U << UIELEM_NUCL_FULLINFOBOX)); //close the full info box
+			state->ds.shownElements &= (uint64_t)(~(1U << UIELEM_NUCL_FULLINFOBOX)); //close the full info box
 			state->ds.shownElements |= (1U << UIELEM_NUCL_INFOBOX); //show the info box
 			state->ds.shownElements |= (1U << UIELEM_CHARTOFNUCLIDES); //show the chart
 			startUIAnimation(dat,state,UIANIM_NUCLINFOBOX_CONTRACT);
@@ -232,6 +232,7 @@ void updateDrawingState(const app_data *restrict dat, app_state *restrict state,
 		//SDL_Log("Finished zoom.\n");
 		state->ds.zoomInProgress = 0;
 		state->ds.zoomFinished = 0; //reset flag
+		changeUIState(dat,state,state->uiState); //update interactable elements (specifically zoom buttons)
 	}
 	if(state->ds.dragFinished){
 		state->ds.dragInProgress = 0;
@@ -264,6 +265,7 @@ void updateDrawingState(const app_data *restrict dat, app_state *restrict state,
 			state->ds.chartPosX = state->ds.chartZoomToX;
 			state->ds.chartPosY = state->ds.chartZoomToY;
 			state->ds.zoomFinished = 1;
+			state->mouseholdElement = UIELEM_ENUM_LENGTH; //remove highlight from zoom buttons
 		}
 		//SDL_Log("zoom scale: %0.4f\n",(double)state->ds.chartZoomScale);
 	}
@@ -335,7 +337,7 @@ void updateDrawingState(const app_data *restrict dat, app_state *restrict state,
 void setupMessageBox(const app_data *restrict dat, app_state *restrict state, const char *headerTxt, const char *msgTxt){
   strncpy(state->msgBoxHeaderTxt,headerTxt,31);
   strncpy(state->msgBoxTxt,msgTxt,255);
-  state->ds.shownElements |= (uint32_t)(1U << UIELEM_MSG_BOX);
+  state->ds.shownElements |= (uint64_t)(1LU << UIELEM_MSG_BOX);
   startUIAnimation(dat,state,UIANIM_MODAL_BOX_SHOW);
   changeUIState(dat,state,UISTATE_MSG_BOX);
 }
@@ -1808,23 +1810,23 @@ void changeUIState(const app_data *restrict dat, app_state *restrict state, cons
   
   switch(state->uiState){
     case UISTATE_MSG_BOX:
-      state->interactableElement |= (uint32_t)(1U << UIELEM_MSG_BOX_OK_BUTTON);
+      state->interactableElement |= (uint64_t)(1LU << UIELEM_MSG_BOX_OK_BUTTON);
       break;
 		case UISTATE_ABOUT_BOX:
-			state->interactableElement |= (uint32_t)(1U << UIELEM_ABOUT_BOX_OK_BUTTON);
+			state->interactableElement |= (uint64_t)(1LU << UIELEM_ABOUT_BOX_OK_BUTTON);
 			break;
 		case UISTATE_PREFS_DIALOG:
-			state->interactableElement |= (uint32_t)(1U << UIELEM_PREFS_DIALOG_CLOSEBUTTON);
-			state->interactableElement |= (uint32_t)(1U << UIELEM_PREFS_DIALOG_SHELLCLOSURE_CHECKBOX);
-			state->interactableElement |= (uint32_t)(1U << UIELEM_PREFS_DIALOG_LIFETIME_CHECKBOX);
-			state->interactableElement |= (uint32_t)(1U << UIELEM_PREFS_DIALOG_UIANIM_CHECKBOX);
-			state->interactableElement |= (uint32_t)(1U << UIELEM_PREFS_DIALOG_UISCALE_DROPDOWN);
+			state->interactableElement |= (uint64_t)(1LU << UIELEM_PREFS_DIALOG_CLOSEBUTTON);
+			state->interactableElement |= (uint64_t)(1LU << UIELEM_PREFS_DIALOG_SHELLCLOSURE_CHECKBOX);
+			state->interactableElement |= (uint64_t)(1LU << UIELEM_PREFS_DIALOG_LIFETIME_CHECKBOX);
+			state->interactableElement |= (uint64_t)(1LU << UIELEM_PREFS_DIALOG_UIANIM_CHECKBOX);
+			state->interactableElement |= (uint64_t)(1LU << UIELEM_PREFS_DIALOG_UISCALE_DROPDOWN);
 			if((state->ds.shownElements & (1U << UIELEM_PREFS_UISCALE_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_UISCALE_MENU_HIDE]==0.0f)){
-				state->interactableElement |= (uint32_t)(1U << UIELEM_UISM_SMALL_BUTTON);
-				state->interactableElement |= (uint32_t)(1U << UIELEM_UISM_DEFAULT_BUTTON);
-				state->interactableElement |= (uint32_t)(1U << UIELEM_UISM_LARGE_BUTTON);
-				state->interactableElement |= (uint32_t)(1U << UIELEM_UISM_HUGE_BUTTON);
-				state->interactableElement |= (uint32_t)(1U << UIELEM_PREFS_UISCALE_MENU);
+				state->interactableElement |= (uint64_t)(1LU << UIELEM_UISM_SMALL_BUTTON);
+				state->interactableElement |= (uint64_t)(1LU << UIELEM_UISM_DEFAULT_BUTTON);
+				state->interactableElement |= (uint64_t)(1LU << UIELEM_UISM_LARGE_BUTTON);
+				state->interactableElement |= (uint64_t)(1LU << UIELEM_UISM_HUGE_BUTTON);
+				state->interactableElement |= (uint64_t)(1LU << UIELEM_PREFS_UISCALE_MENU);
 				if(state->lastInputType != INPUT_TYPE_MOUSE){
 					//keyboard/gamepad navigation of the menu
 					state->mouseoverElement = (uint8_t)(UIELEM_PREFS_UISCALE_MENU - UISCALE_ENUM_LENGTH); //select the first menu item
@@ -1844,41 +1846,47 @@ void changeUIState(const app_data *restrict dat, app_state *restrict state, cons
 		case UISTATE_FULLLEVELINFO:
 		case UISTATE_FULLLEVELINFOWITHMENU:
 			state->ds.nuclFullInfoMaxScrollY = getMaxNumLvlDispLines(&dat->ndat,state); //find total number of lines displayable
-			state->interactableElement |= (uint32_t)(1U << UIELEM_MENU_BUTTON);
-			state->interactableElement |= (uint32_t)(1U << UIELEM_NUCL_FULLINFOBOX);
-			state->interactableElement |= (uint32_t)(1U << UIELEM_NUCL_FULLINFOBOX_BACKBUTTON);
-			state->interactableElement |= (uint32_t)(1U << UIELEM_NUCL_FULLINFOBOX_SCROLLBAR);
+			state->interactableElement |= (uint64_t)(1LU << UIELEM_MENU_BUTTON);
+			state->interactableElement |= (uint64_t)(1LU << UIELEM_NUCL_FULLINFOBOX);
+			state->interactableElement |= (uint64_t)(1LU << UIELEM_NUCL_FULLINFOBOX_BACKBUTTON);
+			state->interactableElement |= (uint64_t)(1LU << UIELEM_NUCL_FULLINFOBOX_SCROLLBAR);
 			if((state->ds.shownElements & (1U << UIELEM_PRIMARY_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_PRIMARY_MENU_HIDE]==0.0f)){
-				state->interactableElement |= (uint32_t)(1U << UIELEM_PM_PREFS_BUTTON);
-				state->interactableElement |= (uint32_t)(1U << UIELEM_PM_ABOUT_BUTTON);
-				state->interactableElement |= (uint32_t)(1U << UIELEM_PRIMARY_MENU);
+				state->interactableElement |= (uint64_t)(1LU << UIELEM_PM_PREFS_BUTTON);
+				state->interactableElement |= (uint64_t)(1LU << UIELEM_PM_ABOUT_BUTTON);
+				state->interactableElement |= (uint64_t)(1LU << UIELEM_PRIMARY_MENU);
 			}
 			break;
 		case UISTATE_INFOBOX:
-			state->interactableElement |= (uint32_t)(1U << UIELEM_MENU_BUTTON);
-			state->interactableElement |= (uint32_t)(1U << UIELEM_CHARTVIEW_BUTTON);
-			state->interactableElement |= (uint32_t)(1U << UIELEM_NUCL_INFOBOX);
-			state->interactableElement |= (uint32_t)(1U << UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON);
-			state->interactableElement |= (uint32_t)(1U << UIELEM_NUCL_INFOBOX_CLOSEBUTTON);
+			state->interactableElement |= (uint64_t)(1LU << UIELEM_MENU_BUTTON);
+			state->interactableElement |= (uint64_t)(1LU << UIELEM_CHARTVIEW_BUTTON);
+			state->interactableElement |= (uint64_t)(1LU << UIELEM_NUCL_INFOBOX);
+			state->interactableElement |= (uint64_t)(1LU << UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON);
+			state->interactableElement |= (uint64_t)(1LU << UIELEM_NUCL_INFOBOX_CLOSEBUTTON);
+			if(state->ds.chartZoomToScale > MIN_CHART_ZOOM_SCALE){
+				state->interactableElement |= (uint64_t)(1LU << UIELEM_ZOOMOUT_BUTTON);
+			}
+			if(state->ds.chartZoomToScale < MAX_CHART_ZOOM_SCALE){
+				state->interactableElement |= (uint64_t)(1LU << UIELEM_ZOOMIN_BUTTON);
+			}
 			break;
 		case UISTATE_CHARTWITHMENU:
-			state->interactableElement |= (uint32_t)(1U << UIELEM_MENU_BUTTON);
-			state->interactableElement |= (uint32_t)(1U << UIELEM_CHARTVIEW_BUTTON);
+			state->interactableElement |= (uint64_t)(1LU << UIELEM_MENU_BUTTON);
+			state->interactableElement |= (uint64_t)(1LU << UIELEM_CHARTVIEW_BUTTON);
 			if((state->ds.shownElements & (1U << UIELEM_PRIMARY_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_PRIMARY_MENU_HIDE]==0.0f)){
-				state->interactableElement |= (uint32_t)(1U << UIELEM_PM_PREFS_BUTTON);
-				state->interactableElement |= (uint32_t)(1U << UIELEM_PM_ABOUT_BUTTON);
-				state->interactableElement |= (uint32_t)(1U << UIELEM_PRIMARY_MENU);
+				state->interactableElement |= (uint64_t)(1LU << UIELEM_PM_PREFS_BUTTON);
+				state->interactableElement |= (uint64_t)(1LU << UIELEM_PM_ABOUT_BUTTON);
+				state->interactableElement |= (uint64_t)(1LU << UIELEM_PRIMARY_MENU);
 				if(state->lastInputType != INPUT_TYPE_MOUSE){
 					//keyboard/gamepad navigation of the menu
 					state->mouseoverElement = (uint8_t)(UIELEM_PRIMARY_MENU - PRIMARY_MENU_NUM_UIELEMENTS); //select the first menu item
 				}
 			}
 			if((state->ds.shownElements & (1U << UIELEM_CHARTVIEW_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_CHARTVIEW_MENU_HIDE]==0.0f)){
-				state->interactableElement |= (uint32_t)(1U << UIELEM_CVM_HALFLIFE_BUTTON);
-				state->interactableElement |= (uint32_t)(1U << UIELEM_CVM_DECAYMODE_BUTTON);
-				state->interactableElement |= (uint32_t)(1U << UIELEM_CVM_2PLUS_BUTTON);
-				state->interactableElement |= (uint32_t)(1U << UIELEM_CVM_R42_BUTTON);
-				state->interactableElement |= (uint32_t)(1U << UIELEM_CHARTVIEW_MENU);
+				state->interactableElement |= (uint64_t)(1LU << UIELEM_CVM_HALFLIFE_BUTTON);
+				state->interactableElement |= (uint64_t)(1LU << UIELEM_CVM_DECAYMODE_BUTTON);
+				state->interactableElement |= (uint64_t)(1LU << UIELEM_CVM_2PLUS_BUTTON);
+				state->interactableElement |= (uint64_t)(1LU << UIELEM_CVM_R42_BUTTON);
+				state->interactableElement |= (uint64_t)(1LU << UIELEM_CHARTVIEW_MENU);
 				if(state->lastInputType != INPUT_TYPE_MOUSE){
 					//keyboard/gamepad navigation of the menu
 					state->mouseoverElement = (uint8_t)(UIELEM_CHARTVIEW_MENU - CHARTVIEW_ENUM_LENGTH); //select the first menu item
@@ -1887,8 +1895,14 @@ void changeUIState(const app_data *restrict dat, app_state *restrict state, cons
 			break;
     case UISTATE_CHARTONLY:
     default:
-      state->interactableElement |= (uint32_t)(1U << UIELEM_MENU_BUTTON);
-			state->interactableElement |= (uint32_t)(1U << UIELEM_CHARTVIEW_BUTTON);
+      state->interactableElement |= (uint64_t)(1LU << UIELEM_MENU_BUTTON);
+			state->interactableElement |= (uint64_t)(1LU << UIELEM_CHARTVIEW_BUTTON);
+			if(state->ds.chartZoomToScale > MIN_CHART_ZOOM_SCALE){
+				state->interactableElement |= (uint64_t)(1LU << UIELEM_ZOOMOUT_BUTTON);
+			}
+			if(state->ds.chartZoomToScale < MAX_CHART_ZOOM_SCALE){
+				state->interactableElement |= (uint64_t)(1LU << UIELEM_ZOOMIN_BUTTON);
+			}
       break;
   }
 	//SDL_Log("Mouseover element: %u\n",state->mouseoverElement);
@@ -2397,7 +2411,7 @@ void uiElemClickAction(app_data *restrict dat, app_state *restrict state, resour
 			//SDL_Log("Clicked prefs button.\n");
 			startUIAnimation(dat,state,UIANIM_PRIMARY_MENU_HIDE); //menu will be closed after animation finishes
       state->clickedUIElem = UIELEM_ENUM_LENGTH; //'unclick' the menu button
-			state->ds.shownElements |= (uint32_t)(1U << UIELEM_PREFS_DIALOG);
+			state->ds.shownElements |= (uint64_t)(1LU << UIELEM_PREFS_DIALOG);
 			startUIAnimation(dat,state,UIANIM_MODAL_BOX_SHOW);
 			changeUIState(dat,state,UISTATE_PREFS_DIALOG);
 			break;
@@ -2405,7 +2419,7 @@ void uiElemClickAction(app_data *restrict dat, app_state *restrict state, resour
 			//SDL_Log("Clicked about button.\n");
 			startUIAnimation(dat,state,UIANIM_PRIMARY_MENU_HIDE); //menu will be closed after animation finishes
       state->clickedUIElem = UIELEM_ENUM_LENGTH; //'unclick' the menu button
-			state->ds.shownElements |= (uint32_t)(1U << UIELEM_ABOUT_BOX);
+			state->ds.shownElements |= (uint64_t)(1LU << UIELEM_ABOUT_BOX);
 			startUIAnimation(dat,state,UIANIM_MODAL_BOX_SHOW);
 			changeUIState(dat,state,UISTATE_ABOUT_BOX);
 			break;
@@ -2469,6 +2483,96 @@ void uiElemClickAction(app_data *restrict dat, app_state *restrict state, resour
 			state->ds.interfaceSizeInd = UISCALE_HUGE;
 			updateUIScale(dat,state,rdat);
 			break;
+		case UIELEM_ZOOMIN_BUTTON:
+			//zoom in
+			state->ds.chartZoomStartScale = state->ds.chartZoomScale;
+			state->ds.chartZoomToScale += state->ds.chartZoomToScale*1.0f;
+			if(state->ds.chartZoomToScale > MAX_CHART_ZOOM_SCALE){
+				state->ds.chartZoomToScale = MAX_CHART_ZOOM_SCALE;
+			}
+			if(state->ds.zoomInProgress == 0){
+				//zoom to center of screen
+				state->ds.chartZoomStartMouseX = state->ds.chartPosX;
+				if(state->chartSelectedNucl != MAXNUMNUCL){
+					state->ds.chartZoomStartMouseY = state->ds.chartPosY + (16.0f/state->ds.chartZoomScale); //corrected for position of selected nuclide
+				}else{
+					state->ds.chartZoomStartMouseY = state->ds.chartPosY; //centred on screen
+				}
+				if(state->ds.chartZoomStartMouseX > (dat->ndat.maxN+(0.25f*getChartWidthNAfterZoom(&state->ds)))){
+					state->ds.chartZoomStartMouseX = (float)dat->ndat.maxN+(0.25f*getChartWidthNAfterZoom(&state->ds));
+				}else if(state->ds.chartZoomStartMouseX < (-0.25f*getChartWidthNAfterZoom(&state->ds))){
+					state->ds.chartZoomStartMouseX = (-0.25f*getChartWidthNAfterZoom(&state->ds));
+				}
+				if(state->ds.chartZoomStartMouseY > (dat->ndat.maxZ+(0.25f*getChartHeightZAfterZoom(&state->ds)))){
+					state->ds.chartZoomStartMouseY = (float)dat->ndat.maxZ+(0.25f*getChartHeightZAfterZoom(&state->ds));
+				}else if(state->ds.chartZoomStartMouseY < (-0.25f*getChartHeightZAfterZoom(&state->ds))){
+					state->ds.chartZoomStartMouseY = (-0.25f*getChartHeightZAfterZoom(&state->ds));
+				}
+			}
+			state->ds.chartZoomStartMouseXFrac = (state->ds.chartZoomStartMouseX - getMinChartN(&state->ds))/getChartWidthN(&state->ds);
+			state->ds.chartZoomToX = state->ds.chartZoomStartMouseX - getChartWidthNAfterZoom(&state->ds)*state->ds.chartZoomStartMouseXFrac + getChartWidthNAfterZoom(&state->ds)*0.5f;
+			state->ds.chartZoomStartMouseYFrac = (state->ds.chartZoomStartMouseY - getMinChartZ(&state->ds))/getChartHeightZ(&state->ds);
+			state->ds.chartZoomToY = state->ds.chartZoomStartMouseY - getChartHeightZAfterZoom(&state->ds)*state->ds.chartZoomStartMouseYFrac + getChartHeightZAfterZoom(&state->ds)*0.5f;
+			if(state->ds.chartZoomToX > (dat->ndat.maxN+(0.25f*getChartWidthNAfterZoom(&state->ds)))){
+				state->ds.chartZoomToX = (float)dat->ndat.maxN+(0.25f*getChartWidthNAfterZoom(&state->ds));
+			}else if(state->ds.chartZoomToX < (-0.25f*getChartWidthNAfterZoom(&state->ds))){
+				state->ds.chartZoomToX = (-0.25f*getChartWidthNAfterZoom(&state->ds));
+			}
+			if(state->ds.chartZoomToY > (dat->ndat.maxZ+(0.25f*getChartHeightZAfterZoom(&state->ds)))){
+				state->ds.chartZoomToY = (float)dat->ndat.maxZ+(0.25f*getChartHeightZAfterZoom(&state->ds));
+			}else if(state->ds.chartZoomToY < (-0.25f*getChartHeightZAfterZoom(&state->ds))){
+				state->ds.chartZoomToY = (-0.25f*getChartHeightZAfterZoom(&state->ds));
+			}
+			state->ds.timeSinceZoomStart = 0.0f;
+			state->ds.zoomInProgress = 1;
+			state->ds.zoomFinished = 0;
+			state->clickedUIElem = UIELEM_ENUM_LENGTH; //'unclick' the zoom button
+			break;
+		case UIELEM_ZOOMOUT_BUTTON:
+			//zoom out
+			state->ds.chartZoomStartScale = state->ds.chartZoomScale;
+			state->ds.chartZoomToScale -= state->ds.chartZoomToScale*0.5f;
+			if(state->ds.chartZoomToScale < MIN_CHART_ZOOM_SCALE){
+				state->ds.chartZoomToScale = MIN_CHART_ZOOM_SCALE;
+			}
+			if(state->ds.zoomInProgress == 0){
+				//zoom to center of screen
+				state->ds.chartZoomStartMouseX = state->ds.chartPosX;
+				if(state->chartSelectedNucl != MAXNUMNUCL){
+					state->ds.chartZoomStartMouseY = state->ds.chartPosY + (16.0f/state->ds.chartZoomScale); //corrected for position of selected nuclide
+				}else{
+					state->ds.chartZoomStartMouseY = state->ds.chartPosY; //centred on screen
+				}
+				if(state->ds.chartZoomStartMouseX > (dat->ndat.maxN+(0.25f*getChartWidthNAfterZoom(&state->ds)))){
+					state->ds.chartZoomStartMouseX = (float)dat->ndat.maxN+(0.25f*getChartWidthNAfterZoom(&state->ds));
+				}else if(state->ds.chartZoomStartMouseX < (-0.25f*getChartWidthNAfterZoom(&state->ds))){
+					state->ds.chartZoomStartMouseX = (-0.25f*getChartWidthNAfterZoom(&state->ds));
+				}
+				if(state->ds.chartZoomStartMouseY > (dat->ndat.maxZ+(0.25f*getChartHeightZAfterZoom(&state->ds)))){
+					state->ds.chartZoomStartMouseY = (float)dat->ndat.maxZ+(0.25f*getChartHeightZAfterZoom(&state->ds));
+				}else if(state->ds.chartZoomStartMouseY < (-0.25f*getChartHeightZAfterZoom(&state->ds))){
+					state->ds.chartZoomStartMouseY = (-0.25f*getChartHeightZAfterZoom(&state->ds));
+				}
+			}
+			state->ds.chartZoomStartMouseXFrac = (state->ds.chartZoomStartMouseX - getMinChartN(&state->ds))/getChartWidthN(&state->ds);
+			state->ds.chartZoomToX = state->ds.chartZoomStartMouseX - getChartWidthNAfterZoom(&state->ds)*state->ds.chartZoomStartMouseXFrac + getChartWidthNAfterZoom(&state->ds)*0.5f;
+			state->ds.chartZoomStartMouseYFrac = (state->ds.chartZoomStartMouseY - getMinChartZ(&state->ds))/getChartHeightZ(&state->ds);
+			state->ds.chartZoomToY = state->ds.chartZoomStartMouseY - getChartHeightZAfterZoom(&state->ds)*state->ds.chartZoomStartMouseYFrac + getChartHeightZAfterZoom(&state->ds)*0.5f;
+			if(state->ds.chartZoomToX > (dat->ndat.maxN+(0.25f*getChartWidthNAfterZoom(&state->ds)))){
+				state->ds.chartZoomToX = (float)dat->ndat.maxN+(0.25f*getChartWidthNAfterZoom(&state->ds));
+			}else if(state->ds.chartZoomToX < (-0.25f*getChartWidthNAfterZoom(&state->ds))){
+				state->ds.chartZoomToX = (-0.25f*getChartWidthNAfterZoom(&state->ds));
+			}
+			if(state->ds.chartZoomToY > (dat->ndat.maxZ+(0.25f*getChartHeightZAfterZoom(&state->ds)))){
+				state->ds.chartZoomToY = (float)dat->ndat.maxZ+(0.25f*getChartHeightZAfterZoom(&state->ds));
+			}else if(state->ds.chartZoomToY < (-0.25f*getChartHeightZAfterZoom(&state->ds))){
+				state->ds.chartZoomToY = (-0.25f*getChartHeightZAfterZoom(&state->ds));
+			}
+			state->ds.timeSinceZoomStart = 0.0f;
+			state->ds.zoomInProgress = 1;
+			state->ds.zoomFinished = 0;
+			state->clickedUIElem = UIELEM_ENUM_LENGTH; //'unclick' the zoom button
+			break;
 		case UIELEM_ENUM_LENGTH:
     default:
 			//clicked outside of a button or UI element
@@ -2476,6 +2580,16 @@ void uiElemClickAction(app_data *restrict dat, app_state *restrict state, resour
 				if(((state->ds.shownElements) == (uint32_t)(1U << UIELEM_CHARTOFNUCLIDES))||((state->ds.shownElements >> (UIELEM_CHARTOFNUCLIDES+1)) == (1U << (UIELEM_NUCL_INFOBOX-1)))){
 					//only the chart of nuclides and/or info box are open
 					//clicked on the chart view
+					if((state->mouseXPx > state->ds.uiElemPosX[UIELEM_ZOOMOUT_BUTTON])&&(state->mouseYPx > state->ds.uiElemPosY[UIELEM_ZOOMOUT_BUTTON])){
+						//clicked on zoom buttons, don't select the chart behind them
+						return;
+					}else if(state->mouseXPx < CHART_AXIS_DEPTH*state->ds.uiUserScale){
+						//clicked on the y axis, don't select the chart behind it
+						return;
+					}else if(state->mouseYPx > (state->ds.windowYRes-CHART_AXIS_DEPTH*state->ds.uiUserScale)){
+						//clicked on the x axis, don't select the chart behind it
+						return;
+					}
 					uint16_t mouseX = (uint16_t)mouseXPxToN(&state->ds,state->mouseXPx);
     			uint16_t mouseY = (uint16_t)SDL_ceilf(mouseYPxToZ(&state->ds,state->mouseYPx));
 					//select nucleus
@@ -2737,6 +2851,24 @@ void updateSingleUIElemPosition(const app_data *restrict dat, drawing_state *res
 			ds->uiElemPosY[UIELEM_NUCL_FULLINFOBOX_SCROLLBAR] = (uint16_t)((NUCL_FULLINFOBOX_LEVELLIST_POS_Y + UI_PADDING_SIZE)*ds->uiUserScale);
 			ds->uiElemWidth[UIELEM_NUCL_FULLINFOBOX_SCROLLBAR] = (uint16_t)(0.5f*UI_TILE_SIZE*ds->uiUserScale);
 			ds->uiElemHeight[UIELEM_NUCL_FULLINFOBOX_SCROLLBAR] = (uint16_t)(ds->windowYRes - ds->uiElemPosY[UIELEM_NUCL_FULLINFOBOX_SCROLLBAR] - 2*UI_PADDING_SIZE*ds->uiUserScale);
+			break;
+		case UIELEM_ZOOMIN_BUTTON:
+			ds->uiElemPosX[uiElemInd] = (uint16_t)(ds->windowXRes-((UI_TILE_SIZE+ZOOM_BUTTON_POS_XR)*ds->uiUserScale));
+			ds->uiElemPosY[uiElemInd] = (uint16_t)(ds->windowYRes-((UI_TILE_SIZE+ZOOM_BUTTON_POS_YB+CHART_AXIS_DEPTH)*ds->uiUserScale));
+			ds->uiElemWidth[uiElemInd] = (uint16_t)(UI_TILE_SIZE*ds->uiUserScale);
+			ds->uiElemHeight[uiElemInd] = (uint16_t)(UI_TILE_SIZE*ds->uiUserScale);
+			ds->uiElemExtPlusX[uiElemInd] = (uint16_t)(ZOOM_BUTTON_POS_XR*ds->uiUserScale); //prevent clicking chart 'in between' buttons
+			ds->uiElemExtPlusY[uiElemInd] = (uint16_t)(ZOOM_BUTTON_POS_YB*ds->uiUserScale); //prevent clicking chart 'in between' buttons
+			ds->uiElemExtMinusX[uiElemInd] = (uint16_t)(0.5f*ZOOM_BUTTON_POS_XR*ds->uiUserScale); //prevent clicking chart 'in between' buttons
+			break;
+		case UIELEM_ZOOMOUT_BUTTON:
+			ds->uiElemPosX[uiElemInd] = (uint16_t)(ds->windowXRes-((2*(UI_TILE_SIZE+ZOOM_BUTTON_POS_XR))*ds->uiUserScale));
+			ds->uiElemPosY[uiElemInd] = (uint16_t)(ds->windowYRes-((UI_TILE_SIZE+ZOOM_BUTTON_POS_YB+CHART_AXIS_DEPTH)*ds->uiUserScale));
+			ds->uiElemWidth[uiElemInd] = (uint16_t)(UI_TILE_SIZE*ds->uiUserScale);
+			ds->uiElemHeight[uiElemInd] = (uint16_t)(UI_TILE_SIZE*ds->uiUserScale);
+			ds->uiElemExtPlusX[uiElemInd] = (uint16_t)(ZOOM_BUTTON_POS_XR*ds->uiUserScale); //prevent clicking chart 'in between' buttons
+			ds->uiElemExtPlusY[uiElemInd] = (uint16_t)(ZOOM_BUTTON_POS_YB*ds->uiUserScale); //prevent clicking chart 'in between' buttons
+			break;
 		default:
 			break;
 	}

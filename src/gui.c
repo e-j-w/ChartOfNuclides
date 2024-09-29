@@ -1622,6 +1622,8 @@ void drawUI(const app_data *restrict dat, app_state *restrict state, resource_da
     }else if(state->chartView == CHARTVIEW_R42){
       drawIconAndTextButton(&dat->rules.themeRules,rdat,state->ds.uiElemPosX[UIELEM_CHARTVIEW_BUTTON],state->ds.uiElemPosY[UIELEM_CHARTVIEW_BUTTON],state->ds.uiElemWidth[UIELEM_CHARTVIEW_BUTTON],getHighlightState(state,UIELEM_CHARTVIEW_BUTTON),255,UIICON_CHARTVIEW,dat->strings[dat->locStringIDs[LOCSTR_CHARTVIEW_R42]]);
     }
+    drawIcon(&dat->rules.themeRules,rdat,state->ds.uiElemPosX[UIELEM_ZOOMIN_BUTTON],state->ds.uiElemPosY[UIELEM_ZOOMIN_BUTTON],state->ds.uiElemWidth[UIELEM_ZOOMIN_BUTTON],getHighlightState(state,UIELEM_ZOOMIN_BUTTON),255,UIICON_ZOOMIN);
+    drawIcon(&dat->rules.themeRules,rdat,state->ds.uiElemPosX[UIELEM_ZOOMOUT_BUTTON],state->ds.uiElemPosY[UIELEM_ZOOMOUT_BUTTON],state->ds.uiElemWidth[UIELEM_ZOOMOUT_BUTTON],getHighlightState(state,UIELEM_ZOOMOUT_BUTTON),255,UIICON_ZOOMOUT);
   }
   
   //draw menus/panels etc.

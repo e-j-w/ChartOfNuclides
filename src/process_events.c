@@ -450,7 +450,7 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
 
     if(state->ds.dragInProgress == 0){
       for(uint8_t i=0; i<UIELEM_ENUM_LENGTH; i++){ //ordering in ui_element_enum defines order in which UI elements receive input
-        if(state->interactableElement & (uint32_t)(1U << i)){
+        if(state->interactableElement & (uint64_t)(1LU << i)){
           if((state->mouseHoldStartPosXPx >= (state->ds.uiElemPosX[i]-state->ds.uiElemExtMinusX[i]))&&(state->mouseHoldStartPosXPx < (state->ds.uiElemPosX[i]+state->ds.uiElemWidth[i]+state->ds.uiElemExtPlusX[i]))&&(state->mouseHoldStartPosYPx >= (state->ds.uiElemPosY[i]-state->ds.uiElemExtMinusY[i]))&&(state->mouseHoldStartPosYPx < (state->ds.uiElemPosY[i]+state->ds.uiElemHeight[i]+state->ds.uiElemExtPlusY[i]))){
             state->mouseholdElement = i;
             //SDL_Log("Holding element %u\n",i);
@@ -538,19 +538,11 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
           }
         }
         if(state->ds.zoomInProgress == 0){
-          if(state->lastInputType == INPUT_TYPE_MOUSE){
-            //zoom using mouse wheel/touchpad, zoom to cursor location
-            state->ds.chartZoomStartMouseX = mouseXPxToN(&state->ds,state->mouseXPx);
-            state->ds.chartZoomStartMouseY = mouseYPxToZ(&state->ds,state->mouseYPx);
-          }else{
-            //zoom using keyboard or gamepad, zoom to center of screen
-            state->ds.chartZoomStartMouseX = state->ds.chartPosX;
-            if(state->chartSelectedNucl != MAXNUMNUCL){
-              state->ds.chartZoomStartMouseY = state->ds.chartPosY + (16.0f/state->ds.chartZoomScale); //corrected for position of selected nuclide
-            }else{
-              state->ds.chartZoomStartMouseY = state->ds.chartPosY; //centred on screen
-            }
-          }
+          //zoom using mouse wheel/touchpad, zoom to cursor location
+          //(other input methods just call the zoom button interaction code in data_ops.c)
+          state->ds.chartZoomStartMouseX = mouseXPxToN(&state->ds,state->mouseXPx);
+          state->ds.chartZoomStartMouseY = mouseYPxToZ(&state->ds,state->mouseYPx);
+
           if(state->ds.chartZoomStartMouseX > (dat->ndat.maxN+(0.25f*getChartWidthNAfterZoom(&state->ds)))){
             state->ds.chartZoomStartMouseX = (float)dat->ndat.maxN+(0.25f*getChartWidthNAfterZoom(&state->ds));
           }else if(state->ds.chartZoomStartMouseX < (-0.25f*getChartWidthNAfterZoom(&state->ds))){
@@ -656,12 +648,12 @@ void processSingleEvent(app_data *restrict dat, app_state *restrict state, resou
           }
           break;
         case SDL_GAMEPAD_BUTTON_LEFT_SHOULDER:
-          state->zoomDeltaVal = -1.0f;
-          state->inputFlags |= (1U << INPUT_ZOOM);
+          state->mouseholdElement = UIELEM_ZOOMOUT_BUTTON;
+          uiElemClickAction(dat,state,rdat,0,UIELEM_ZOOMOUT_BUTTON);
           break;
         case SDL_GAMEPAD_BUTTON_RIGHT_SHOULDER:
-          state->zoomDeltaVal = 1.0f;
-          state->inputFlags |= (1U << INPUT_ZOOM);
+          state->mouseholdElement = UIELEM_ZOOMIN_BUTTON;
+          uiElemClickAction(dat,state,rdat,0,UIELEM_ZOOMIN_BUTTON);
           break;
         case SDL_GAMEPAD_BUTTON_START:
         case SDL_GAMEPAD_BUTTON_NORTH:
@@ -795,12 +787,12 @@ void processSingleEvent(app_data *restrict dat, app_state *restrict state, resou
           }
           break;
         case SDL_SCANCODE_EQUALS:
-          state->zoomDeltaVal = 1.0f;
-          state->inputFlags |= (1U << INPUT_ZOOM);
+          state->mouseholdElement = UIELEM_ZOOMIN_BUTTON;
+          uiElemClickAction(dat,state,rdat,0,UIELEM_ZOOMIN_BUTTON);
           break;
         case SDL_SCANCODE_MINUS:
-          state->zoomDeltaVal = -1.0f;
-          state->inputFlags |= (1U << INPUT_ZOOM);
+          state->mouseholdElement = UIELEM_ZOOMOUT_BUTTON;
+          uiElemClickAction(dat,state,rdat,0,UIELEM_ZOOMOUT_BUTTON);
           break;
         case SDL_SCANCODE_LEFTBRACKET:
           if(state->chartView == 0){

@@ -178,7 +178,7 @@ typedef struct
   float fullInfoAllColWidth, fullInfoAllColWidthExclM, fullInfoAllColWidthExcluMFinalJpi;
   float nuclFullInfoScrollStartY, nuclFullInfoScrollToY, nuclFullInfoScrollY; //full level info view: number of lines scrolled in the y-direction
   uint16_t nuclFullInfoMaxScrollY; //maximum scroll position, in lines
-  uint32_t shownElements; //bit pattern describing which UI elements are being shown, values from ui_element_enum
+  uint64_t shownElements; //bit pattern describing which UI elements are being shown, values from ui_element_enum
   uint32_t uiAnimPlaying; //bit pattern describing which UI animations are playing
   float timeLeftInUIAnimation[UIANIM_ENUM_LENGTH]; //time left in each UI animation
   uint16_t windowXRes, windowYRes; //resolution of the window
@@ -229,7 +229,7 @@ typedef struct
   uint8_t mouseholdElement; //which UI element is the mouse button being held over, =UIELEM_ENUM_LENGTH if none
   uint8_t uiState, lastUIState; //modal state of the UI, values from ui_state_enum
   uint16_t chartSelectedNucl; //nucleus selected on the chart, =MAXNUMNUCL if none selected
-  uint32_t interactableElement; //bit pattern describing which UI elements are interactable, values from ui_element_enum
+  uint64_t interactableElement; //bit pattern describing which UI elements are interactable, values from ui_element_enum
   unsigned int kbdModVal : 2; //values from kbd_mod_enum
   unsigned int lastInputType : 2; //0=keyboard, 1=apppad, 2=mouse
   unsigned int gamepadDisabled : 1; //1=gamepad/apppad disabled
