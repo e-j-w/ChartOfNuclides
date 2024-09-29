@@ -1379,7 +1379,9 @@ void getSpinParStr(char strOut[32], const ndata *restrict nd, const uint32_t lvl
 			}
 
 			if(spinIsVar){
-				strcat(strOut,getValueTypeShortStr(spinValType));
+				if(spinValType != VALUETYPE_NUMBER){
+					strcat(strOut,getValueTypeShortStr(spinValType));
+				}
 				if(nd->levels[lvlInd].spval[i].spinVal == 0){
 					//variable only
 					if(spinVarInd == 0){
@@ -1400,6 +1402,9 @@ void getSpinParStr(char strOut[32], const ndata *restrict nd, const uint32_t lvl
 			}
 
 			if((!spinIsVar)||(nd->levels[lvlInd].spval[i].spinVal > 0)){
+				if(spinValType != VALUETYPE_NUMBER){
+					strcat(strOut,getValueTypeShortStr(spinValType));
+				}
 				if(nd->levels[lvlInd].spval[i].spinVal < 255){
 					if((nd->levels[lvlInd].format & 1U) == 1){
 						sprintf(val,"%i/2",nd->levels[lvlInd].spval[i].spinVal);
@@ -1409,19 +1414,35 @@ void getSpinParStr(char strOut[32], const ndata *restrict nd, const uint32_t lvl
 					strcat(strOut,val);
 				}
 			}
-			if(nd->levels[lvlInd].spval[i].parVal == -1){
-				strcat(strOut,"-");
-			}else if(nd->levels[lvlInd].spval[i].parVal == 1){
-				strcat(strOut,"+");
+			if(tentative != TENTATIVESP_SPINONLY){
+				if(nd->levels[lvlInd].spval[i].parVal == -1){
+					strcat(strOut,"-");
+				}else if(nd->levels[lvlInd].spval[i].parVal == 1){
+					strcat(strOut,"+");
+				}
 			}
 			if((tentative == TENTATIVESP_SPINANDPARITY)||(tentative == TENTATIVESP_SPINONLY)){
 				if(i==nd->levels[lvlInd].numSpinParVals-1){
 					strcat(strOut,")");
+					if(tentative == TENTATIVESP_SPINONLY){
+						if(nd->levels[lvlInd].spval[i].parVal == -1){
+							strcat(strOut,"-");
+						}else if(nd->levels[lvlInd].spval[i].parVal == 1){
+							strcat(strOut,"+");
+						}
+					}
 				}else if(i<nd->levels[lvlInd].numSpinParVals-1){
 					if(nextTentative != TENTATIVESP_RANGE){
 						if(nextTentative != TENTATIVESP_SPINANDPARITY){
 							if(nextTentative != TENTATIVESP_SPINONLY){
 								strcat(strOut,")");
+								if(tentative == TENTATIVESP_SPINONLY){
+									if(nd->levels[lvlInd].spval[i].parVal == -1){
+										strcat(strOut,"-");
+									}else if(nd->levels[lvlInd].spval[i].parVal == 1){
+										strcat(strOut,"+");
+									}
+								}
 							}
 						}
 					}

@@ -451,8 +451,10 @@ void parseSpinPar(level * lev, sp_var_data * varDat, char * spstring){
 	char *tok;
 	char str[256], tmpstr[256], tmpstr2[256], val[MAXNUMPARSERVALS][256];
 	int numTok=0;
+	uint8_t origLevFormat = lev->format;
 
 	lev->numSpinParVals=0;
+	memset(lev->spval,0,sizeof(lev->spval));
 	//SDL_Log("--------\nstring: %s\n",spstring);
 
 	//check for invalid strings
@@ -504,14 +506,12 @@ void parseSpinPar(level * lev, sp_var_data * varDat, char * spstring){
 	if(numTok<=0){
 		return;
 	}else if((strcmp(val[0],"+")==0)&&(numTok==1)){
-		lev->spval[lev->numSpinParVals].format = 0;
 		lev->spval[lev->numSpinParVals].parVal = 1;
 		lev->spval[lev->numSpinParVals].spinVal = 255;
 		lev->spval[lev->numSpinParVals].format |= ((TENTATIVESP_NOSPIN & 7U) << 9U);
 		lev->numSpinParVals=1;
 		return;
 	}else if((strcmp(val[0],"-")==0)&&(numTok==1)){
-		lev->spval[lev->numSpinParVals].format = 0;
 		lev->spval[lev->numSpinParVals].parVal = -1;
 		lev->spval[lev->numSpinParVals].spinVal = 255;
 		lev->spval[lev->numSpinParVals].format |= ((TENTATIVESP_NOSPIN & 7U) << 9U);
@@ -521,7 +521,6 @@ void parseSpinPar(level * lev, sp_var_data * varDat, char * spstring){
 		for(int i=0;i<numTok;i++){
 			if(i<MAXSPPERLEVEL){
 
-				lev->spval[lev->numSpinParVals].format = 0;
 				uint8_t lsBrak = 0; //temp var for bracket checking
 				uint8_t rsBrak = 0; //temp var for bracket checking
 				uint8_t spVarNum = 255; //temp var for spin variable assignment
@@ -561,8 +560,9 @@ void parseSpinPar(level * lev, sp_var_data * varDat, char * spstring){
 				}
 				if(varSpin){
 					//J or J+number variable spin value
+					//SDL_Log("Variable spin string: %s\n",spstring);
 					lev->format = 0;
-					//SDL_Log("%s\n",val[i]);
+					//SDL_Log("val: %s\n",val[i]);
 					if(val[i][0] == '('){
 						lsBrak = 1;
 					}
@@ -633,6 +633,7 @@ void parseSpinPar(level * lev, sp_var_data * varDat, char * spstring){
 									break;
 								}
 							}
+							//SDL_Log("varValTypePos: %u\n",varValTypePos);
 							if(varValTypePos == 255){
 								//just a variable name
 								//SDL_Log("variable name (no offset, default value type): %s\n",tmpstr2);
@@ -683,13 +684,62 @@ void parseSpinPar(level * lev, sp_var_data * varDat, char * spstring){
 										}
 									}
 								}
+							}else{
+								//just a variable value type followed by a spin value
+								//so not a variable spin
+								//SDL_Log("non-variable spin string: %s, tmpstr2: %s\n",spstring,tmpstr2);
+								lev->spval[lev->numSpinParVals].format = (uint16_t)(lev->spval[lev->numSpinParVals].format & ~(1U)); //remove variable spin flag
+								lev->format = origLevFormat; //restore original level format (including whether spins should be half-integer)
+								if(strlen(tmpstr2) == 2){
+									//only have the variable value type, the spin value was separated into the next value
+									//i++;
+								}
+								//SDL_Log("val: %s\n",val[i]);
 							}
 						}
 					}
-					//SDL_Log("%s\n",val[i]);
+					//SDL_Log("val: %s\n",val[i]);
 				}else{
 					//not a variable spin value
 					lev->spval[lev->numSpinParVals].format |= (VALUETYPE_NUMBER << 1U);
+				}
+
+				//check for cases where the spin-parity value is separated by a space
+				if(strcmp(val[i],"(LE")==0){
+					lev->spval[lev->numSpinParVals].format |= (VALUETYPE_LESSOREQUALTHAN << 1U);
+					lsBrak = 1;
+					continue;
+				}else if(strcmp(val[i],"LE")==0){
+					lev->spval[lev->numSpinParVals].format |= (VALUETYPE_LESSOREQUALTHAN << 1U);
+					continue;
+				}else if(strcmp(val[i],"(LT")==0){
+					lev->spval[lev->numSpinParVals].format |= (VALUETYPE_LESSTHAN << 1U);
+					lsBrak = 1;
+					continue;
+				}else if(strcmp(val[i],"LT")==0){
+					lev->spval[lev->numSpinParVals].format |= (VALUETYPE_LESSTHAN << 1U);
+					continue;
+				}else if(strcmp(val[i],"(GE")==0){
+					lev->spval[lev->numSpinParVals].format |= (VALUETYPE_GREATEROREQUALTHAN << 1U);
+					lsBrak = 1;
+					continue;
+				}else if(strcmp(val[i],"GE")==0){
+					lev->spval[lev->numSpinParVals].format |= (VALUETYPE_GREATEROREQUALTHAN << 1U);
+					continue;
+				}else if(strcmp(val[i],"(GT")==0){
+					lev->spval[lev->numSpinParVals].format |= (VALUETYPE_GREATERTHAN << 1U);
+					lsBrak = 1;
+					continue;
+				}else if(strcmp(val[i],"GT")==0){
+					lev->spval[lev->numSpinParVals].format |= (VALUETYPE_GREATERTHAN << 1U);
+					continue;
+				}else if(strcmp(val[i],"(AP")==0){
+					lev->spval[lev->numSpinParVals].format |= (VALUETYPE_APPROX << 1U);
+					lsBrak = 1;
+					continue;
+				}else if(strcmp(val[i],"AP")==0){
+					lev->spval[lev->numSpinParVals].format |= (VALUETYPE_APPROX << 1U);
+					continue;
 				}
 
 				//check for brackets
@@ -733,25 +783,33 @@ void parseSpinPar(level * lev, sp_var_data * varDat, char * spstring){
 				tok=strtok(tmpstr,"+-");
 				if(tok!=NULL){
 					if(strcmp(tok,val[i])!=0){
-						//SDL_Log("setting parity marker...\n");
+						//SDL_Log("setting parity marker, tok: %s, val: %s\n",tok,val[i]);
 						//contains parity info
 						tok=strtok(val[i],"/(0123456789, ");
+						//SDL_Log("tok: %s\n",tok);
 						if((strcmp(tok,"+")==0)||(strcmp(tok,"+)")==0)){
 							lev->spval[lev->numSpinParVals].parVal = 1;
 						}else if((strcmp(tok,"-")==0)||(strcmp(tok,"-)")==0)){
 							lev->spval[lev->numSpinParVals].parVal = -1;
 						}else if(strcmp(tok,")-")==0){
 							//all spin values negative parity
-							for(int j=0;j<=lev->numSpinParVals;j++){
+							for(int j=0;j<lev->numSpinParVals;j++){
 								lev->spval[j].parVal = -1;
-								tentative = TENTATIVESP_SPINONLY; //only spin is tentative
+								lev->spval[j].format = (uint16_t)(lev->spval[j].format & ~(7U << 9U)); //unset tentative type for previous spin-parity values
+								lev->spval[j].format |= ((TENTATIVESP_SPINONLY & 7U) << 9U); //only spin is tentative
 							}
+							lev->spval[lev->numSpinParVals].parVal = -1;
+							tentative = TENTATIVESP_SPINONLY; //only spin is tentative
 						}else if(strcmp(tok,")+")==0){
 							//all spin values positive parity
-							for(int j=0;j<=lev->numSpinParVals;j++){
+							//SDL_Log("Setting all spin values to +ve parity.\n");
+							for(int j=0;j<lev->numSpinParVals;j++){
 								lev->spval[j].parVal = 1;
-								tentative = TENTATIVESP_SPINONLY; //only spin is tentative
+								lev->spval[j].format = (uint16_t)(lev->spval[j].format & ~(7U << 9U)); //unset tentative type for previous spin-parity values
+								lev->spval[j].format |= ((TENTATIVESP_SPINONLY & 7U) << 9U); //only spin is tentative
 							}
+							lev->spval[lev->numSpinParVals].parVal = 1;
+							tentative = TENTATIVESP_SPINONLY; //only spin is tentative
 						}
 					}
 				}
@@ -759,7 +817,7 @@ void parseSpinPar(level * lev, sp_var_data * varDat, char * spstring){
 				//extract spin
 				lev->spval[lev->numSpinParVals].spinVal = 255; //default to unknown spin
 				strcpy(tmpstr,val[i]);
-				tok=strtok(tmpstr,"()+-, ");
+				tok=strtok(tmpstr,"()+-, GELTAP");
 				if(tok!=NULL){
 					strcpy(tmpstr2,tok);
 					tok=strtok(tok,"/");
@@ -769,11 +827,13 @@ void parseSpinPar(level * lev, sp_var_data * varDat, char * spstring){
 							SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,"high spin value: %i/2\n",atoi(tok));
 						}
 						lev->spval[lev->numSpinParVals].spinVal=(uint8_t)atoi(tok);
+						//SDL_Log("Spin detected: %u/2\n",lev->spval[lev->numSpinParVals].spinVal);
 					}else{
 						if(atoi(tmpstr2) >= 255){
 							SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,"high spin value: %i\n",atoi(tmpstr2));
 						}
 						lev->spval[lev->numSpinParVals].spinVal=(uint8_t)atoi(tmpstr2);
+						//SDL_Log("Spin detected: %u\n",lev->spval[lev->numSpinParVals].spinVal);
 					}
 				}
 
@@ -2567,7 +2627,7 @@ int buildDatabase(const char *appBasePath, ndata *nd){
 
 	//write the database to disk
 	if(nd->numNucl<=0){
-    SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"no valid ENSDF data was found.\nPlease check that ENSDF files exist in the directory under the ENDSF environment variable.\n");
+    SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"no valid ENSDF data was found.\nPlease check that ENSDF files exist in the data/ensdf directory.\n");
     return -1;
   }
 	SDL_Log("Database build finished.\n");
