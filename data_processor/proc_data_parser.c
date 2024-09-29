@@ -452,6 +452,7 @@ void parseSpinPar(level * lev, sp_var_data * varDat, char * spstring){
 	char str[256], tmpstr[256], tmpstr2[256], val[MAXNUMPARSERVALS][256];
 	int numTok=0;
 	uint8_t origLevFormat = lev->format;
+	uint16_t lsBrakStart = 0;
 
 	lev->numSpinParVals=0;
 	memset(lev->spval,0,sizeof(lev->spval));
@@ -565,6 +566,7 @@ void parseSpinPar(level * lev, sp_var_data * varDat, char * spstring){
 					//SDL_Log("val: %s\n",val[i]);
 					if(val[i][0] == '('){
 						lsBrak = 1;
+						lsBrakStart = (uint16_t)lev->numSpinParVals;
 					}
 					int len = (int)strlen(val[i]);
 					if(val[i][len-1]==')'){
@@ -708,6 +710,7 @@ void parseSpinPar(level * lev, sp_var_data * varDat, char * spstring){
 				if(strcmp(val[i],"(LE")==0){
 					lev->spval[lev->numSpinParVals].format |= (VALUETYPE_LESSOREQUALTHAN << 1U);
 					lsBrak = 1;
+					lsBrakStart = (uint16_t)lev->numSpinParVals;
 					continue;
 				}else if(strcmp(val[i],"LE")==0){
 					lev->spval[lev->numSpinParVals].format |= (VALUETYPE_LESSOREQUALTHAN << 1U);
@@ -715,6 +718,7 @@ void parseSpinPar(level * lev, sp_var_data * varDat, char * spstring){
 				}else if(strcmp(val[i],"(LT")==0){
 					lev->spval[lev->numSpinParVals].format |= (VALUETYPE_LESSTHAN << 1U);
 					lsBrak = 1;
+					lsBrakStart = (uint16_t)lev->numSpinParVals;
 					continue;
 				}else if(strcmp(val[i],"LT")==0){
 					lev->spval[lev->numSpinParVals].format |= (VALUETYPE_LESSTHAN << 1U);
@@ -722,6 +726,7 @@ void parseSpinPar(level * lev, sp_var_data * varDat, char * spstring){
 				}else if(strcmp(val[i],"(GE")==0){
 					lev->spval[lev->numSpinParVals].format |= (VALUETYPE_GREATEROREQUALTHAN << 1U);
 					lsBrak = 1;
+					lsBrakStart = (uint16_t)lev->numSpinParVals;
 					continue;
 				}else if(strcmp(val[i],"GE")==0){
 					lev->spval[lev->numSpinParVals].format |= (VALUETYPE_GREATEROREQUALTHAN << 1U);
@@ -729,6 +734,7 @@ void parseSpinPar(level * lev, sp_var_data * varDat, char * spstring){
 				}else if(strcmp(val[i],"(GT")==0){
 					lev->spval[lev->numSpinParVals].format |= (VALUETYPE_GREATERTHAN << 1U);
 					lsBrak = 1;
+					lsBrakStart = (uint16_t)lev->numSpinParVals;
 					continue;
 				}else if(strcmp(val[i],"GT")==0){
 					lev->spval[lev->numSpinParVals].format |= (VALUETYPE_GREATERTHAN << 1U);
@@ -736,6 +742,7 @@ void parseSpinPar(level * lev, sp_var_data * varDat, char * spstring){
 				}else if(strcmp(val[i],"(AP")==0){
 					lev->spval[lev->numSpinParVals].format |= (VALUETYPE_APPROX << 1U);
 					lsBrak = 1;
+					lsBrakStart = (uint16_t)lev->numSpinParVals;
 					continue;
 				}else if(strcmp(val[i],"AP")==0){
 					lev->spval[lev->numSpinParVals].format |= (VALUETYPE_APPROX << 1U);
@@ -749,6 +756,7 @@ void parseSpinPar(level * lev, sp_var_data * varDat, char * spstring){
 					if(strcmp(tok,val[i])!=0){
 						//bracket exists on left side
 						lsBrak = 1;
+						lsBrakStart = (uint16_t)lev->numSpinParVals;
 					}
 				}
 				strcpy(tmpstr,val[i]);
@@ -791,22 +799,34 @@ void parseSpinPar(level * lev, sp_var_data * varDat, char * spstring){
 							lev->spval[lev->numSpinParVals].parVal = 1;
 						}else if((strcmp(tok,"-")==0)||(strcmp(tok,"-)")==0)){
 							lev->spval[lev->numSpinParVals].parVal = -1;
+						}else if(strcmp(tok,"(+)")==0){
+							lev->spval[lev->numSpinParVals].parVal = 1;
+							lev->spval[lev->numSpinParVals].format |= ((TENTATIVESP_PARITYONLY & 7U) << 9U); //only parity is tentative
+						}else if(strcmp(tok,"(-)")==0){
+							lev->spval[lev->numSpinParVals].parVal = -1;
+							lev->spval[lev->numSpinParVals].format |= ((TENTATIVESP_PARITYONLY & 7U) << 9U); //only parity is tentative
 						}else if(strcmp(tok,")-")==0){
 							//all spin values negative parity
-							for(int j=0;j<lev->numSpinParVals;j++){
+							for(int j=lsBrakStart;j<lev->numSpinParVals;j++){
 								lev->spval[j].parVal = -1;
-								lev->spval[j].format = (uint16_t)(lev->spval[j].format & ~(7U << 9U)); //unset tentative type for previous spin-parity values
-								lev->spval[j].format |= ((TENTATIVESP_SPINONLY & 7U) << 9U); //only spin is tentative
+								uint8_t prevTentative = (uint8_t)((uint16_t)(lev->spval[j].format >> 9U) & 7U);
+								if(prevTentative != TENTATIVESP_RANGE){
+									lev->spval[j].format = (uint16_t)(lev->spval[j].format & ~(7U << 9U)); //unset tentative type for previous spin-parity values
+									lev->spval[j].format |= ((TENTATIVESP_SPINONLY & 7U) << 9U); //only spin is tentative
+								}
 							}
 							lev->spval[lev->numSpinParVals].parVal = -1;
 							tentative = TENTATIVESP_SPINONLY; //only spin is tentative
 						}else if(strcmp(tok,")+")==0){
 							//all spin values positive parity
 							//SDL_Log("Setting all spin values to +ve parity.\n");
-							for(int j=0;j<lev->numSpinParVals;j++){
+							for(int j=lsBrakStart;j<lev->numSpinParVals;j++){
 								lev->spval[j].parVal = 1;
-								lev->spval[j].format = (uint16_t)(lev->spval[j].format & ~(7U << 9U)); //unset tentative type for previous spin-parity values
-								lev->spval[j].format |= ((TENTATIVESP_SPINONLY & 7U) << 9U); //only spin is tentative
+								uint8_t prevTentative = (uint8_t)((uint16_t)(lev->spval[j].format >> 9U) & 7U);
+								if(prevTentative != TENTATIVESP_RANGE){
+									lev->spval[j].format = (uint16_t)(lev->spval[j].format & ~(7U << 9U)); //unset tentative type for previous spin-parity values
+									lev->spval[j].format |= ((TENTATIVESP_SPINONLY & 7U) << 9U); //only spin is tentative
+								}
 							}
 							lev->spval[lev->numSpinParVals].parVal = 1;
 							tentative = TENTATIVESP_SPINONLY; //only spin is tentative
