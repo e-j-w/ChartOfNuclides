@@ -4,7 +4,7 @@ An offline viewer of isotope and nuclear structure data, presented in the famili
 
 ## Screenshots
 
-<div align = center><img src="https://github.com/e-j-w/ChartOfNuclides-flatpak/blob/5984c26073853c21183738be02e5ae6bc506e74d/assets/con_screenshot.png?raw=true" width="376" height="248" alt="main interface"><img src="https://github.com/e-j-w/ChartOfNuclides-flatpak/blob/5984c26073853c21183738be02e5ae6bc506e74d/assets/con_screenshot2.png?raw=true" width="376" height="248" alt="zoomed in interface"></div>
+<div align = center><img src="https://github.com/e-j-w/ChartOfNuclides-flatpak/blob/c122e49e3a156790324ef900b19753d8a443f0b4/assets/con_screenshot.png?raw=true" width="376" height="248" alt="main interface"><img src="https://github.com/e-j-w/ChartOfNuclides-flatpak/blob/c122e49e3a156790324ef900b19753d8a443f0b4/assets/con_screenshot2.png?raw=true" width="376" height="248" alt="zoomed in interface"></div>
 
 ## Features
 
