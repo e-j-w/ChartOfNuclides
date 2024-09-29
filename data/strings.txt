@@ -24,8 +24,8 @@ menuitem_preferences|Preferences
 menuitem_about|About Chart of Nuclides
 about_string_version|Version 0.1.0 - "There Is No Hope In This Building"
 about_string_1|Developed by Jonathan Williams
-about_string_2|Nuclear structure data is sourced from ENSDF (https://www.nndc.bnl.gov/ensdf/).
-about_string_3|Isotope abundance data is sourced from NIST (https://www.nist.gov/pml/atomic-weights- and-isotopic-compositions-relative-atomic-masses)
+about_string_2|Nuclear structure data is sourced from ENSDF (https://www.nndc.bnl.gov/ensdf/). Isotope abundance data is sourced from NIST (https://www.nist.gov/pml/atomic-weights- and-isotopic-compositions-relative-atomic-masses).
+about_string_3|This program is not endorsed by or developed under either of the above entities. Its developer(s) cannot guarantee the accuracy or completeness of the information provided.
 about_string_4|This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, version 3 or later.
 sl_hoyle|Hoyle state
 sl_naturallyoccuringisomer|Naturally occuring isomer
