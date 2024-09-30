@@ -1,21 +1,10 @@
 <h1 align="center">Chart of Nuclides</h1>
 
-An offline viewer of isotope and nuclear structure data, presented in the familiar [Chart of Nuclides / Segrè chart](https://en.wikipedia.org/wiki/Table_of_nuclides) format. Uses nuclear structure data from [ENSDF](https://www.nndc.bnl.gov/ensdf/about.jsp) and isotopic abundance data from [NIST](https://www.nist.gov/pml/atomic-weights-and-isotopic-compositions-relative-atomic-masses). The goal is to make a simple, performant, and multiplatform tool that will be useful in both professional (nuclear structure research) and educational contexts.
+An offline viewer of isotope and nuclear structure data in the familiar [Chart of Nuclides / Segrè chart](https://en.wikipedia.org/wiki/Table_of_nuclides) format. Uses nuclear structure data from [ENSDF](https://www.nndc.bnl.gov/ensdf/about.jsp) and isotopic abundance data from [NIST](https://www.nist.gov/pml/atomic-weights-and-isotopic-compositions-relative-atomic-masses). A full list of features is [here](doc/FEATURES.md).
 
 ## Screenshots
 
 <div align = center><img src="https://github.com/e-j-w/ChartOfNuclides-flatpak/blob/c122e49e3a156790324ef900b19753d8a443f0b4/assets/con_screenshot.png?raw=true" width="376" height="248" alt="main interface"><img src="https://github.com/e-j-w/ChartOfNuclides-flatpak/blob/c122e49e3a156790324ef900b19753d8a443f0b4/assets/con_screenshot2.png?raw=true" width="376" height="248" alt="zoomed in interface"></div>
-
-## Features
-
-- Display nuclear chart with various color schemes: half-life / lifetime, decay mode, E(2+) ...
-- Select individual nuclides to browse ground and excited state data, including:
-  - Level energies, half-lives/lifetimes, decay modes, spin-parities ...
-  - Gamma energies, branching fractions, multipolarities ...
-- Runs locally, with no network connection needed.
-- Mouse, keyboard, and gamepad (!) support.
-- Written using [SDL](https://github.com/libsdl-org/SDL) (so you can browse nuclear half-lives using some of the same code that powers [Half-Life](https://www.pcgamingwiki.com/wiki/Half-Life#Middleware)). Fast hardware accelerated rendering using `SDL_Renderer`, native HI-DPI scaling support. 
-- More to come ...
 
 ## Quick installation
 
@@ -23,7 +12,7 @@ Get the latest [release](https://github.com/e-j-w/ChartOfNuclides/releases) and 
 
 ## Building from source
 
-Detailed instrcutions for building from source are [here](BUILDING.md).
+Detailed instructions for building from source are [here](doc/BUILDING.md).
 
 ## Using the program
 
