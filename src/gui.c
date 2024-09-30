@@ -866,7 +866,7 @@ void drawChartOfNuclides(const app_data *restrict dat, const app_state *restrict
     }
   }
   rect.x = CHART_AXIS_DEPTH*0.5f*state->ds.uiUserScale;
-  tickSpacing = getAxisTickSpacing(maxY - minY);
+  tickSpacing = getAxisTickSpacing(roundf(maxY - minY));
   for(float i=(minY-fmodf(minY,tickSpacing));i<maxY;i+=tickSpacing){
     if(i >= 0.0f){
       uint16_t numInd = (uint16_t)(SDL_floorf(i));
