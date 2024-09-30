@@ -70,11 +70,11 @@ modules:
     build-commands:
       - unzip ensdf_240901.zip -d data/ensdf/
       - make all -j ${FLATPAK_BUILDER_N_JOBS}
-      - install -Dm755 con -t ${FLATPAK_DEST}/bin
-      - install -Dm644 con.dat -t ${FLATPAK_DEST}/share
-      - install -Dm644 data/io.github.e_j_w.ChartOfNuclides.metainfo.xml ${FLATPAK_DEST}/share/metainfo
-      - install -Dm644 data/io.github.e_j_w.ChartOfNuclides.svg -t ${FLATPAK_DEST}/share/icons/hicolor/scalable/apps
-      - install -Dm644 data/io.github.e_j_w.ChartOfNuclides.desktop -t ${FLATPAK_DEST}/share/applications
+      - install -Dm755 con -t /app/bin
+      - install -Dm644 con.dat -t /app/share
+      - install -Dm644 data/io.github.e_j_w.ChartOfNuclides.metainfo.xml -t /app/share/metainfo
+      - install -Dm644 data/io.github.e_j_w.ChartOfNuclides.svg -t /app/share/icons/hicolor/scalable/apps
+      - install -Dm644 data/io.github.e_j_w.ChartOfNuclides.desktop -t /app/share/applications
     sources:
       - type: git
         url: https://github.com/e-j-w/ChartOfNuclides.git
