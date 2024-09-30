@@ -53,7 +53,7 @@ cd ChartOfNuclides-flatpak
 Build and install the application (if this command fails with a free disk space error, run `ostree --repo=repo config set core.min-free-space-percent 0` and then try again):
 
 ```
-flatpak run org.flatpak.Builder --force-clean --sandbox --user --install --install-deps-from=flathub --disable-rofiles-fuse --ccache --repo=repo flatpak_build io.github.e_j_w.ChartOfNuclides.yml
+flatpak run org.flatpak.Builder --force-clean --sandbox --user --install --install-deps-from=flathub --disable-rofiles-fuse --ccache --repo=repo flatpak_build io.github.e_j_w.ChartOfNuclides-master.yml
 ```
 
 Clean up the build to save disk space (optional):

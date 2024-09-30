@@ -1,0 +1,85 @@
+id: io.github.e_j_w.ChartOfNuclides
+runtime: org.freedesktop.Platform
+runtime-version: '24.08'
+sdk: org.freedesktop.Sdk
+command: con
+finish-args:
+  # X11 + XShm access
+  - --share=ipc
+  - --socket=fallback-x11
+  # Wayland access
+  - --socket=wayland
+  # GPU acceleration
+  - --device=dri
+  # Gamepad support (apparently can be replaced by --device=input on recent Flatpak versions)
+  - --device=all
+modules:
+  - name: SDL3
+    buildsystem: cmake-ninja
+    builddir: true
+    sources:
+      - type: git
+        url: https://github.com/libsdl-org/SDL.git
+        commit: 06e122103c31c5b5b13a6e078c949cda99bfc59e
+    cleanup:
+      - '/bin/sdl3-config'
+      - '/include'
+      - '/lib/libSDL3.la'
+      - '/lib/libSDL3main.a'
+      - '/lib/libSDL3main.la'
+      - '/lib/libSDL3_test.a'
+      - '/lib/libSDL3_test.la'
+      - '/lib/cmake'
+      - '/share/aclocal'
+      - '/lib/pkgconfig'
+    modules:
+      - name: libdecor
+        buildsystem: meson
+        config-opts:
+          - -Ddemo=false
+        sources:
+          - type: git
+            url: https://gitlab.freedesktop.org/libdecor/libdecor.git
+            tag: 0.2.2
+  - name: SDL_ttf
+    buildsystem: cmake-ninja
+    builddir: true
+    sources:
+      - type: git
+        url: https://github.com/libsdl-org/SDL_ttf.git
+        commit: 41342890704ef3cac661a0d301f3dd122d96a039
+    cleanup:
+      - '/include'
+      - '/lib/cmake'
+      - '/share/aclocal'
+      - '/lib/pkgconfig'
+  - name: SDL_image
+    buildsystem: cmake-ninja
+    builddir: true
+    sources:
+      - type: git
+        url: https://github.com/libsdl-org/SDL_image.git
+        commit: 6f4584340b9b78542d11bf0232a1a0862de1f0a9
+    cleanup:
+      - '/include'
+      - '/lib/cmake'
+      - '/share/aclocal'
+      - '/lib/pkgconfig'
+  - name: con
+    buildsystem: simple
+    build-commands:
+      - unzip ensdf_240901.zip -d data/ensdf/
+      - make all -j ${FLATPAK_BUILDER_N_JOBS}
+      - install -Dm755 con -t ${FLATPAK_DEST}/bin
+      - install -Dm644 con.dat -t ${FLATPAK_DEST}/share
+      - install -Dm644 data/io.github.e_j_w.ChartOfNuclides.metainfo.xml ${FLATPAK_DEST}/share/metainfo
+      - install -Dm644 data/io.github.e_j_w.ChartOfNuclides.svg -t ${FLATPAK_DEST}/share/icons/hicolor/scalable/apps
+      - install -Dm644 data/io.github.e_j_w.ChartOfNuclides.desktop -t ${FLATPAK_DEST}/share/applications
+    sources:
+      - type: git
+        url: https://github.com/e-j-w/ChartOfNuclides.git
+      # Latest ENSDF dataset (website: https://www.nndc.bnl.gov/ensdfarchivals/)
+      # Redistribution: public domain, as a work of the US federal government (DOE Office of Science)
+      - type: file
+        url: https://www.nndc.bnl.gov/ensdfarchivals/distributions/dist24/ensdf_240901.zip
+        sha256: 2887f8ee04c15695d7340ed498773d3b1d24a429897286084f93beffcf946dbd
