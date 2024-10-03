@@ -927,6 +927,7 @@ uint8_t getHighlightState(const app_state *restrict state, const uint8_t uiElem)
   }
 }
 
+//return value: width of header text
 void drawInfoBoxHeader(const app_data *restrict dat, const drawing_state *restrict ds, resource_data *restrict rdat, const float x, const float y, const Uint8 alpha, const uint16_t nuclInd){
   char tmpStr[32];
   float drawXPos = (float)(x + (PANEL_EDGE_SIZE + 3*UI_PADDING_SIZE)*ds->uiUserScale);
@@ -1093,37 +1094,56 @@ void drawNuclFullInfoBox(const app_data *restrict dat, const app_state *restrict
   rect.w = state->ds.windowXRes;
   rect.h = NUCL_FULLINFOBOX_LEVELLIST_POS_Y*state->ds.uiUserScale;
   drawFlatRect(rdat,rect,dat->rules.themeRules.bgCol);
+  //rect underneath column titles
+  SDL_FColor tableHeaderRectCol = {0.92f,0.92f,0.92f,txtAlpha/255.0f};
+  rect.y = (NUCL_FULLINFOBOX_LEVELLIST_HEADER_POS_Y - 2*UI_PADDING_SIZE)*state->ds.uiUserScale + txtYOffset;
+  rect.h = (NUCL_FULLINFOBOX_LEVELLIST_POS_Y - NUCL_FULLINFOBOX_LEVELLIST_HEADER_POS_Y + 2*UI_PADDING_SIZE)*state->ds.uiUserScale;
+  drawFlatRect(rdat,rect,tableHeaderRectCol);
 
   //header
+  char descStr[64];
   drawInfoBoxHeader(dat,&state->ds,rdat,0.0f,0.0f,255,nuclInd);
-
-  //Q-values
-  char qValStr[32];
-  drawXPos = NUCL_FULLINFOBOX_QVAL_POS_X*state->ds.uiUserScale;
-  drawYPos = NUCL_FULLINFOBOX_QVAL_POS_Y*state->ds.uiUserScale + txtYOffset;
-  if(dat->ndat.nuclData[nuclInd].sn.val != 0.0f){
-    getQValStr(qValStr,dat->ndat.nuclData[nuclInd].sn,1);
-    SDL_snprintf(tmpStr,32,"%s=%s %s",dat->strings[dat->locStringIDs[LOCSTR_SN]],qValStr,getValueUnitShortStr(dat->ndat.nuclData[nuclInd].sn.unit));
-    rect = drawTextAlignedSized(rdat,drawXPos,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_LEFT,16384);
-    drawXPos += rect.w + 4*UI_PADDING_SIZE*state->ds.uiUserScale;
+  //proton and neutron numbers, abundance
+  drawYPos = NUCL_FULLINFOBOX_NZVALS_POS_Y*state->ds.uiUserScale + txtYOffset;
+  SDL_snprintf(descStr,64,"%s: %3i, %s: %3i",dat->strings[dat->locStringIDs[LOCSTR_PROTONSDESC]],dat->ndat.nuclData[nuclInd].Z,dat->strings[dat->locStringIDs[LOCSTR_NEUTRONSDESC]],dat->ndat.nuclData[nuclInd].N);
+  drawTextAlignedSized(rdat,NUCL_FULLINFOBOX_NZVALS_POS_X*state->ds.uiUserScale,drawYPos,blackCol8Bit,FONTSIZE_SMALL,txtAlpha,descStr,ALIGN_LEFT,16384);
+  drawYPos += 18.0f*state->ds.uiUserScale;
+  if(dat->ndat.nuclData[nuclInd].abundance.val > 0.0f){
+    getAbundanceStr(tmpStr,&dat->ndat,nuclInd);
+    SDL_snprintf(descStr,64,"%s of %s on Earth",tmpStr,getFullElemStr((uint8_t)dat->ndat.nuclData[nuclInd].Z,255));
+    drawTextAlignedSized(rdat,NUCL_FULLINFOBOX_NZVALS_POS_X*state->ds.uiUserScale,drawYPos,blackCol8Bit,FONTSIZE_SMALL,txtAlpha,descStr,ALIGN_LEFT,16384);
+  }else{
+    drawTextAlignedSized(rdat,NUCL_FULLINFOBOX_NZVALS_POS_X*state->ds.uiUserScale,drawYPos,blackCol8Bit,FONTSIZE_SMALL,txtAlpha,dat->strings[dat->locStringIDs[LOCSTR_NOTNATURAL]],ALIGN_LEFT,16384);
   }
+  
+  //Q-values
+  drawXPos = state->ds.windowXRes - NUCL_FULLINFOBOX_QVAL_POS_XR*state->ds.uiUserScale;
+  drawYPos = NUCL_FULLINFOBOX_QVAL_POS_Y*state->ds.uiUserScale + txtYOffset;
   if(dat->ndat.nuclData[nuclInd].sp.val != 0.0f){
-    getQValStr(qValStr,dat->ndat.nuclData[nuclInd].sp,1);
-    SDL_snprintf(tmpStr,32,"%s=%s %s",dat->strings[dat->locStringIDs[LOCSTR_SP]],qValStr,getValueUnitShortStr(dat->ndat.nuclData[nuclInd].sp.unit));
-    rect = drawTextAlignedSized(rdat,drawXPos,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_LEFT,16384);
-    drawXPos += rect.w + 4*UI_PADDING_SIZE*state->ds.uiUserScale;
+    getQValStr(descStr,dat->ndat.nuclData[nuclInd].sp,1);
+    SDL_snprintf(tmpStr,32,"%s=%s %s",dat->strings[dat->locStringIDs[LOCSTR_SP]],descStr,getValueUnitShortStr(dat->ndat.nuclData[nuclInd].sp.unit));
+    rect = drawTextAlignedSized(rdat,drawXPos,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_RIGHT,16384);
+    drawXPos -= rect.w + 4*UI_PADDING_SIZE*state->ds.uiUserScale;
+  }
+  if(dat->ndat.nuclData[nuclInd].sn.val != 0.0f){
+    getQValStr(descStr,dat->ndat.nuclData[nuclInd].sn,1);
+    SDL_snprintf(tmpStr,32,"%s=%s %s",dat->strings[dat->locStringIDs[LOCSTR_SN]],descStr,getValueUnitShortStr(dat->ndat.nuclData[nuclInd].sn.unit));
+    drawTextAlignedSized(rdat,drawXPos,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_RIGHT,16384);
+  }
+  drawXPos = state->ds.windowXRes - NUCL_FULLINFOBOX_QVAL_POS_XR*state->ds.uiUserScale;
+  drawYPos += 20.0f*state->ds.uiUserScale;
+  if(dat->ndat.nuclData[nuclInd].qbeta.val != 0.0f){
+    getQValStr(descStr,dat->ndat.nuclData[nuclInd].qbeta,1);
+    SDL_snprintf(tmpStr,32,"%s=%s %s",dat->strings[dat->locStringIDs[LOCSTR_QBETAMNUS]],descStr,getValueUnitShortStr(dat->ndat.nuclData[nuclInd].qbeta.unit));
+    rect = drawTextAlignedSized(rdat,drawXPos,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_RIGHT,16384);
+    drawXPos -= rect.w + 4*UI_PADDING_SIZE*state->ds.uiUserScale;
   }
   if(dat->ndat.nuclData[nuclInd].qalpha.val != 0.0f){
-    getQValStr(qValStr,dat->ndat.nuclData[nuclInd].qalpha,1);
-    SDL_snprintf(tmpStr,32,"%s=%s %s",dat->strings[dat->locStringIDs[LOCSTR_QALPHA]],qValStr,getValueUnitShortStr(dat->ndat.nuclData[nuclInd].qalpha.unit));
-    rect = drawTextAlignedSized(rdat,drawXPos,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_LEFT,16384);
-    drawXPos += rect.w + 4*UI_PADDING_SIZE*state->ds.uiUserScale;
+    getQValStr(descStr,dat->ndat.nuclData[nuclInd].qalpha,1);
+    SDL_snprintf(tmpStr,32,"%s=%s %s",dat->strings[dat->locStringIDs[LOCSTR_QALPHA]],descStr,getValueUnitShortStr(dat->ndat.nuclData[nuclInd].qalpha.unit));
+    drawTextAlignedSized(rdat,drawXPos,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_RIGHT,16384);
   }
-  if(dat->ndat.nuclData[nuclInd].qbeta.val != 0.0f){
-    getQValStr(qValStr,dat->ndat.nuclData[nuclInd].qbeta,1);
-    SDL_snprintf(tmpStr,32,"%s=%s %s",dat->strings[dat->locStringIDs[LOCSTR_QBETAMNUS]],qValStr,getValueUnitShortStr(dat->ndat.nuclData[nuclInd].qbeta.unit));
-    drawTextAlignedSized(rdat,drawXPos,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_LEFT,16384);
-  }
+  
 
   //draw column title strings
   drawXPos = origDrawXPos;
