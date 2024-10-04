@@ -32,8 +32,8 @@ which can be referenced by both the GUI draw code as well as the interaction cod
 #define MAX_RENDER_WIDTH  16384
 #define MAX_RENDER_HEIGHT 16384
 
-#define UI_ANIM_LENGTH        0.2f //length of UI animations, in seconds
-#define SHORT_UI_ANIM_LENGTH  0.1f
+#define UI_ANIM_LENGTH            0.2f //length of UI animations, in seconds
+#define SHORT_UI_ANIM_LENGTH      0.1f
 
 #define UI_TILE_SIZE         32  //pixel size of a UI tile at 1x scaling
 #define UI_PADDING_SIZE      4   //pixel size of the default UI element padding
@@ -134,6 +134,7 @@ static const float uiScales[UISCALE_ENUM_LENGTH] = {1.0f,1.20f,1.5f,1.75f};
 #define NUCLBOX_LABEL_MARGIN               1.0f //in scaled pixels
 #define NUCLBOX_LABEL_SMALLMARGIN          0.25f //in scaled pixels
 #define CHART_KEY_PAN_TIME                 0.1f //time (in seconds) for the pan animation to finish (keyboard)
+#define PAN_SPRINT_MULTIPLIER              0.33f
 #define CHART_DOUBLECLICK_PAN_TIME         0.3f //time (in seconds) for the pan animation to finish (double click)
 #define CHART_PAN_DIST                     10.0f //in tiles (scaled by zoom factor)
 #define CHART_AXIS_DEPTH                   40.0f //in scaled pixels

@@ -831,6 +831,10 @@ void processSingleEvent(app_data *restrict dat, app_state *restrict state, resou
         case SDL_SCANCODE_RETURN:
           state->inputFlags |= (1U << INPUT_SELECT);
           break;
+        case SDL_SCANCODE_LSHIFT:
+        case SDL_SCANCODE_RSHIFT:
+          state->kbdModVal = KBD_MOD_SHIFT;
+          break;
         case SDL_SCANCODE_P:
           state->ds.drawPerformanceStats = !state->ds.drawPerformanceStats;
           break;
@@ -898,6 +902,10 @@ void processSingleEvent(app_data *restrict dat, app_state *restrict state, resou
           break;
         case SDL_SCANCODE_LCTRL:
         case SDL_SCANCODE_RCTRL:
+          state->kbdModVal = KBD_MOD_NONE;
+          break;
+        case SDL_SCANCODE_LSHIFT:
+        case SDL_SCANCODE_RSHIFT:
           state->kbdModVal = KBD_MOD_NONE;
           break;
         default:

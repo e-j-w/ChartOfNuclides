@@ -4,7 +4,7 @@ The current code has been tested under Arch Linux and Debian 12 as of October 20
 
 ## Using Flatpak
 
-This will build and install a sandboxed [Flatpak](https://flatpak.org/) package. This is the recommended method for most users, as the Flatpak builder should automatically resolve all dependencies and download all neccessary data files. If you want to avoid installing or using Flatpak, you can do a [manual build](#manual-build) instead.
+This will build a sandboxed [Flatpak](https://flatpak.org/) package, which can then be installed on any Linux machine which already has `flatpak` (this is the way the [official releases](https://github.com/e-j-w/ChartOfNuclides/releases) are built). This is the recommended method for most users since the Flatpak builder should resolve all dependencies and download all neccessary data files, however the automatic build process can take some time. If you want to avoid that, you can do a [manual build](#manual-build) instead.
 
 ### Get Flatpak build dependencies
 
@@ -31,10 +31,22 @@ git clone https://github.com/e-j-w/ChartOfNuclides-flatpak
 cd ChartOfNuclides-flatpak
 ```
 
-Build and install the application (if this command fails with a free disk space error, run `ostree --repo=repo config set core.min-free-space-percent 0` and then try again):
+Build the application (if this command fails with a free disk space error, run `ostree --repo=repo config set core.min-free-space-percent 0` and then try again):
 
 ```
-flatpak run org.flatpak.Builder --force-clean --sandbox --user --install --install-deps-from=flathub --disable-rofiles-fuse --ccache --repo=repo flatpak_build io.github.e_j_w.ChartOfNuclides-master.yml
+flatpak run org.flatpak.Builder --force-clean --sandbox --user --install-deps-from=flathub --disable-rofiles-fuse --ccache --repo=repo flatpak_build io.github.e_j_w.ChartOfNuclides-master.yml
+```
+
+Then package the application into a [single file bundle](https://docs.flatpak.org/en/latest/single-file-bundles.html):
+
+```
+flatpak build-bundle repo ChartOfNuclides.flatpak io.github.e_j_w.ChartOfNuclides
+```
+
+The `ChartOfNuclides.flatpak` bundle produced here can be used to install the application on any Linux machine with `flatpak`.  To install, run:
+
+```
+flatpak install ChartOfNuclides.flatpak
 ```
 
 Clean up the build to save disk space (optional):
@@ -56,16 +68,6 @@ flatpak uninstall io.github.e_j_w.ChartOfNuclides
 ```
 
 Have fun!
-
-### Building a single file bundle
-
-After building the application, a [single file bundle](https://docs.flatpak.org/en/latest/single-file-bundles.html) can be built using:
-
-```
-flatpak build-bundle repo ChartOfNuclides.flatpak io.github.e_j_w.ChartOfNuclides
-```
-
-This is useful for distributing the application in a semi-portable manner (note that the runtime dependencies will still need to be installed, so this is not suitable for offline installations).
 
 ## Manual build
 

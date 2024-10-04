@@ -17,7 +17,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "proc_data.h" //definitions and global variables
 
-static void writeAsset(SDL_IOStream *out, const char *assetPath, const char *basePath){
+static int writeAsset(SDL_IOStream *out, const char *assetPath, const char *basePath){
 
   SDL_IOStream *asset;
   char filePath[270];
@@ -30,7 +30,7 @@ static void writeAsset(SDL_IOStream *out, const char *assetPath, const char *bas
     if(fileSize>0){
       if(SDL_WriteIO(out,&fileSize,sizeof(int64_t))!=sizeof(int64_t)){
         SDL_Log("ERROR: writeAsset - couldn't write filesize of file %s to output file - %s.\n",filePath,SDL_GetError());
-        exit(-1);
+        return -1;
       }
       SDL_Log("   Writing asset: %s, %li bytes\n",filePath,(long int)fileSize);
       //allocate memory and read in data from the source asset file
@@ -38,45 +38,43 @@ static void writeAsset(SDL_IOStream *out, const char *assetPath, const char *bas
       void *assetData=(void*)SDL_calloc(1,(size_t)fileSize);
       if(assetData==NULL){
         SDL_Log("ERROR: writeAsset - couldn't allocate memory.\n");
-        exit(-1);
+        return -1;
       }
       if(SDL_ReadIO(asset,assetData,(size_t)fileSize)!=(size_t)fileSize){
         SDL_Log("ERROR: writeAsset - couldn't read data from file %s - %s.\n",filePath,SDL_GetError());
-        exit(-1);
+        return -1;
       }
       SDL_CloseIO(asset);
       //write asset data
       if(SDL_WriteIO(out,assetData,(size_t)fileSize)!=(size_t)fileSize){
         SDL_Log("ERROR: writeAsset - couldn't write data to output file - %s.\n",SDL_GetError());
-        exit(-1);
+        return -1;
       }
       //clean up
       SDL_free(assetData);
     }else{
       SDL_Log("ERROR: writeAsset - couldn't determine length of file %s\n",filePath);
-      exit(-1);
+      return -1;
     }
   }else{
     SDL_Log("ERROR: writeAsset - couldn't open asset with file path %s\n",filePath);
-    exit(-1);
+    return -1;
   }
+
+  return 0;
 
 }
 
 
-int main(int argc, char *argv[]){
+SDL_AppResult SDL_AppInit(void **appstate, int argc, char **argv){
 
-  (void)argc; (void)argv; //required main function parameters are unused
+  (void)appstate; (void)argc; (void)argv; //required main function parameters are unused
   
   setlocale(LC_ALL, "en_ca.UTF-8");
 
-  #ifdef __MINGW32__
-  setbuf(stdout,NULL); //needed to show printf output on Windows
-  #endif
-
   if(SDL_Init(0)==0){
     SDL_Log("Cannot initialize SDL: %s\n",SDL_GetError());
-    return 0;
+    return SDL_APP_FAILURE;
   }
   
   const char *appBasePath = SDL_GetBasePath();
@@ -90,8 +88,7 @@ int main(int argc, char *argv[]){
   if(parseAppData(dat,appBasePath)==-1){
     SDL_Log("ERROR: failed to parse app data.\n");
     SDL_free(dat);
-    SDL_Quit();
-    return 0;
+    return SDL_APP_FAILURE;
   }
 
   SDL_Log("Writing assets to asset bundle...\n");
@@ -100,32 +97,42 @@ int main(int argc, char *argv[]){
   if(out!=NULL){
     SDL_WriteIO(out,&headerStr[0],sizeof(headerStr)); //write header
     SDL_WriteIO(out,&version,sizeof(uint8_t));
-    writeAsset(out,"data/io.github.e_j_w.ChartOfNuclides.svg",appBasePath);
+    if(writeAsset(out,"data/io.github.e_j_w.ChartOfNuclides.svg",appBasePath)==-1){return SDL_APP_FAILURE;}
     int64_t dataSize = (int64_t)sizeof(app_data);
     //SDL_Log("Data size: %li\n",dataSize);
     SDL_WriteIO(out,&dataSize,sizeof(int64_t));
     if(SDL_WriteIO(out,dat,sizeof(app_data))!=sizeof(app_data)){
       SDL_Log("ERROR: data write error - %s.\n",SDL_GetError());
-      exit(-1);
+      return SDL_APP_FAILURE;
     }
-    writeAsset(out,"data/theme.svg",appBasePath);
-    writeAsset(out,"data/font.ttf",appBasePath);
+    if(writeAsset(out,"data/theme.svg",appBasePath)==-1){return SDL_APP_FAILURE;}
+    if(writeAsset(out,"data/font.ttf",appBasePath)==-1){return SDL_APP_FAILURE;}
     SDL_WriteIO(out,&headerStr[0],sizeof(headerStr)); //write footer
   }else{
     SDL_Log("ERROR: cannot open output data file.\n");
-    exit(-1);
+    return SDL_APP_FAILURE;
   }
 
   SDL_Log("Asset writing complete.\n");
   
   if(SDL_CloseIO(out)==0){
     SDL_Log("ERROR: cannot close output data file - %s.\n",SDL_GetError());
+    return SDL_APP_FAILURE;
   }
 
   SDL_Log("Bundled app data written to file: %s\n",fileName);
-
   SDL_free(dat);
-  SDL_Quit();
-  return 0;
+  return SDL_APP_SUCCESS;
 }
 
+SDL_AppResult SDL_AppIterate(void *appstate){
+  (void)appstate;
+  return SDL_APP_SUCCESS;
+}
+SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event){
+  (void)appstate; (void)event;
+  return SDL_APP_SUCCESS;
+}
+void SDL_AppQuit(void *appstate){
+  (void)appstate;
+}

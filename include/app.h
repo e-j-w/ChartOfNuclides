@@ -29,4 +29,6 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include "process_events.h"
 #include "data_ops.h"
 
+#include <SDL3/SDL_main.h>
+
 #endif

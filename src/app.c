@@ -43,10 +43,6 @@ int main(int argc, char *argv[]){
 
   setlocale(LC_ALL, "en_ca.UTF-8");
 
-  #ifdef __MINGW32__
-  setbuf(stdout,NULL); //needed to show printf output on Windows
-  #endif
-
   //parse command line arguments
   uint8_t cliArgs = 0;
   for(int i=1; i<argc; i++){

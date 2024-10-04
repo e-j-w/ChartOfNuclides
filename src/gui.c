@@ -960,6 +960,8 @@ void drawNuclFullInfoBox(const app_data *restrict dat, const app_state *restrict
   //level and gamma data
   char tmpStr[32];
   SDL_FRect rect;
+  SDL_FColor dividerLineCol = lightGrayCol;
+  dividerLineCol.a = txtAlpha/255.0f;
   uint8_t drawMode = 0; //0=draw all columns, 1=skip multipolarity, 2=skip multipolarity, final spin
   float allColWidth = state->ds.fullInfoAllColWidth*state->ds.uiUserScale;
   if(allColWidth > (state->ds.windowXRes - 4*UI_PADDING_SIZE*state->ds.uiUserScale)){
@@ -1069,7 +1071,7 @@ void drawNuclFullInfoBox(const app_data *restrict dat, const app_state *restrict
       drawYPos += numLines*NUCL_INFOBOX_SMALLLINE_HEIGHT*state->ds.uiUserScale;
     }
     //draw divider line
-    drawLine(rdat,rect.x,drawYPos,rect.x+rect.w,drawYPos,NUCL_FULLINFOBOX_DIVIDER_LINE_THICKNESS*state->ds.uiUserScale,lightGrayCol,lightGrayCol);
+    drawLine(rdat,rect.x,drawYPos,rect.x+rect.w,drawYPos,NUCL_FULLINFOBOX_DIVIDER_LINE_THICKNESS*state->ds.uiUserScale,dividerLineCol,dividerLineCol);
     
   }
 

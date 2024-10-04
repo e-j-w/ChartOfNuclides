@@ -298,8 +298,14 @@ void updateDrawingState(const app_data *restrict dat, app_state *restrict state,
 	}
 	if(state->ds.fcNuclChangeInProgress){
 		state->ds.timeSinceFCNuclChangeStart += deltaTime;
-		if(state->ds.timeSinceFCNuclChangeStart >= NUCL_FULLINFOBOX_SCROLL_TIME){
-			state->ds.fcNuclChangeFinished = 1;
+		if(state->kbdModVal == KBD_MOD_SHIFT){
+			if(state->ds.timeSinceFCNuclChangeStart >= NUCL_FULLINFOBOX_SCROLL_TIME*PAN_SPRINT_MULTIPLIER){
+				state->ds.fcNuclChangeFinished = 1;
+			}
+		}else{
+			if(state->ds.timeSinceFCNuclChangeStart >= NUCL_FULLINFOBOX_SCROLL_TIME){
+				state->ds.fcNuclChangeFinished = 1;
+			}
 		}
 		//SDL_Log("scroll t: %0.3f, pos: %f\n",(double)state->ds.timeSinceFCScollStart,(double)state->ds.nuclFullInfoScrollY);
 	}
@@ -2236,7 +2242,12 @@ void setSelectedNuclOnChart(const app_data *restrict dat, app_state *restrict st
 		if(forcePan==1){
 			panChartToPos(dat,&state->ds,N,Z,CHART_DOUBLECLICK_PAN_TIME);
 		}else if(forcePan==2){
-			panChartToPos(dat,&state->ds,N,Z,CHART_KEY_PAN_TIME);
+			if(state->kbdModVal == KBD_MOD_SHIFT){
+				panChartToPos(dat,&state->ds,N,Z,CHART_KEY_PAN_TIME*PAN_SPRINT_MULTIPLIER);
+			}else{
+				panChartToPos(dat,&state->ds,N,Z,CHART_KEY_PAN_TIME);
+			}
+			
 		}else{
 			//check occlusion by info box
 			float xOcclLeft = chartNtoXPx(&state->ds,(float)(N+1));
@@ -2246,7 +2257,11 @@ void setSelectedNuclOnChart(const app_data *restrict dat, app_state *restrict st
 				if(yOcclTop >= state->ds.uiElemPosY[UIELEM_NUCL_INFOBOX]){
 					//always pan chart to dodge occlusion
 					if(forcePan==2){
-						panChartToPos(dat,&state->ds,N,Z,CHART_KEY_PAN_TIME);
+						if(state->kbdModVal == KBD_MOD_SHIFT){
+							panChartToPos(dat,&state->ds,N,Z,CHART_KEY_PAN_TIME*PAN_SPRINT_MULTIPLIER);
+						}else{
+							panChartToPos(dat,&state->ds,N,Z,CHART_KEY_PAN_TIME);
+						}
 					}else{
 						panChartToPos(dat,&state->ds,N,Z,CHART_DOUBLECLICK_PAN_TIME);
 					}

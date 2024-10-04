@@ -50,7 +50,7 @@ extern "C" {
 #define FC_Rect SDL_FRect
 #define FC_Target SDL_Renderer
 #define FC_Image SDL_Texture
-#define FC_Log printf
+#define FC_Log SDL_Log
 
 // SDL_FontCache types
 
