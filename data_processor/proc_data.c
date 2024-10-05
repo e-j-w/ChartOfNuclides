@@ -133,6 +133,6 @@ SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event){
   (void)appstate; (void)event;
   return SDL_APP_SUCCESS;
 }
-void SDL_AppQuit(void *appstate){
-  (void)appstate;
+void SDL_AppQuit(void *appstate, SDL_AppResult result){
+  (void)appstate; (void)result;
 }
