@@ -1300,7 +1300,7 @@ void drawNuclInfoBox(const app_data *restrict dat, app_state *restrict state, re
   drawInfoBoxHeader(dat,&state->ds,rdat,infoBoxPanelRect.x,infoBoxPanelRect.y,255,nuclInd);
 
   //all level info button
-  updateSingleUIElemPosition(dat,&state->ds,rdat,UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON);
+  updateSingleUIElemPosition(dat,state,rdat,UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON);
   if((state->ds.uiAnimPlaying & (1U << UIANIM_NUCLINFOBOX_EXPAND))||(state->ds.uiAnimPlaying & (1U << UIANIM_NUCLINFOBOX_CONTRACT))){ 
     drawIconAndTextButton(&dat->rules.themeRules,rdat,state->ds.uiElemPosX[UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON],state->ds.uiElemPosY[UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON],state->ds.uiElemWidth[UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON],getHighlightState(state,UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON),255,UIICON_UPARROWS,dat->strings[dat->locStringIDs[LOCSTR_ALLLEVELS]]);
   }else{
@@ -1504,6 +1504,29 @@ void drawUIScaleMenu(const app_data *restrict dat, const app_state *restrict sta
 
 }
 
+void drawSearchMenu(const app_data *restrict dat, const app_state *restrict state, resource_data *restrict rdat){
+  
+  float alpha = 1.0f;
+  float yOffset = 0;
+  if(state->ds.uiAnimPlaying & (1U << UIANIM_SEARCH_MENU_HIDE)){
+    alpha = (float)(1.0f*juice_smoothStart2(state->ds.timeLeftInUIAnimation[UIANIM_SEARCH_MENU_HIDE]/(UI_ANIM_LENGTH)));
+    yOffset = (-30.0f*state->ds.uiUserScale*juice_smoothStop2(1.0f - state->ds.timeLeftInUIAnimation[UIANIM_SEARCH_MENU_HIDE]/UI_ANIM_LENGTH));
+  }else if(state->ds.uiAnimPlaying & (1U << UIANIM_SEARCH_MENU_SHOW)){
+    alpha = (float)(1.0f*juice_smoothStop2(1.0f - state->ds.timeLeftInUIAnimation[UIANIM_SEARCH_MENU_SHOW]/UI_ANIM_LENGTH));
+    yOffset = (-30.0f*state->ds.uiUserScale*juice_smoothStart2(state->ds.timeLeftInUIAnimation[UIANIM_SEARCH_MENU_SHOW]/(UI_ANIM_LENGTH)));
+  }
+  //SDL_Log("alpha: %f\n",(double)alpha);
+  
+  //draw menu background
+  SDL_FRect drawRect;
+  drawRect.x = state->ds.uiElemPosX[UIELEM_SEARCH_MENU];
+  drawRect.y = ((float)state->ds.uiElemPosY[UIELEM_SEARCH_MENU] + yOffset);
+  drawRect.w = state->ds.uiElemWidth[UIELEM_SEARCH_MENU];
+  drawRect.h = state->ds.uiElemHeight[UIELEM_SEARCH_MENU];
+  drawPanelBG(rdat,drawRect,alpha);
+
+}
+
 void drawChartViewMenu(const app_data *restrict dat, const app_state *restrict state, resource_data *restrict rdat){
   
   float alpha = 1.0f;
@@ -1666,6 +1689,9 @@ void drawUI(const app_data *restrict dat, app_state *restrict state, resource_da
   }
   if(state->ds.shownElements & (1UL << UIELEM_CHARTVIEW_MENU)){
     drawChartViewMenu(dat,state,rdat);
+  }
+  if(state->ds.shownElements & (1UL << UIELEM_SEARCH_MENU)){
+    drawSearchMenu(dat,state,rdat);
   }
 
   //draw persistent button(s)

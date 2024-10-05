@@ -95,6 +95,7 @@ UIELEM_CHARTVIEW_MENU, //buttons in chart view menu should be defined in the ent
 UIELEM_PM_PREFS_BUTTON,
 UIELEM_PM_ABOUT_BUTTON,
 UIELEM_PRIMARY_MENU, //buttons in primary menu should be defined in the entries directly preceding this, in top to bottom order
+UIELEM_SEARCH_MENU,
 UIELEM_MENU_BUTTON,
 UIELEM_CHARTVIEW_BUTTON,
 UIELEM_SEARCH_BUTTON,
@@ -141,6 +142,8 @@ UIANIM_PRIMARY_MENU_SHOW,
 UIANIM_PRIMARY_MENU_HIDE,
 UIANIM_CHARTVIEW_MENU_SHOW,
 UIANIM_CHARTVIEW_MENU_HIDE,
+UIANIM_SEARCH_MENU_SHOW,
+UIANIM_SEARCH_MENU_HIDE,
 UIANIM_UISCALE_MENU_SHOW,
 UIANIM_UISCALE_MENU_HIDE,
 UIANIM_MODAL_BOX_SHOW, //applies to all modals, including: message box, about box, prefs dialog...

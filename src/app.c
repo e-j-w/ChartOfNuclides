@@ -152,7 +152,7 @@ int main(int argc, char *argv[]){
   }
   SDL_SetWindowIcon(gdat->rdat.window,gdat->rdat.iconSurface);
   SDL_SetWindowTitle(gdat->rdat.window,gdat->dat.rules.appName);
-  updateUIElemPositions(&gdat->dat,&gdat->state.ds,&gdat->rdat); //some UI element positions depend on info only available after importAppData(), like font sizes
+  updateUIElemPositions(&gdat->dat,&gdat->state,&gdat->rdat); //some UI element positions depend on info only available after importAppData(), like font sizes
 
   //timing
   uint64_t timeNow = SDL_GetPerformanceCounter();

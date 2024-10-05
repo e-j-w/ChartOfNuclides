@@ -79,8 +79,8 @@ void setSelectedNuclOnChartDirect(const app_data *restrict dat, app_state *restr
 void uiElemHoldAction(const app_data *restrict dat, app_state *restrict state, const uint8_t uiElemID);
 void uiElemClickAction(app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat, const uint8_t doubleClick, const uint8_t uiElemID);
 
-void updateSingleUIElemPosition(const app_data *restrict dat, drawing_state *restrict ds, resource_data *restrict rdat, const uint8_t uiElemInd);
-void updateUIElemPositions(const app_data *restrict dat, drawing_state *restrict ds, resource_data *restrict rdat);
+void updateSingleUIElemPosition(const app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat, const uint8_t uiElemInd);
+void updateUIElemPositions(const app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat);
 
 float getUIthemeScale(const float uiScale);
 void updateUIScale(app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat);

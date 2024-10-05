@@ -169,6 +169,18 @@ void stopUIAnimation(const app_data *restrict dat, app_state *restrict state, co
 				}
 			}
 			break;
+		case UIANIM_SEARCH_MENU_HIDE:
+			state->ds.shownElements &= (uint64_t)(~(1UL << UIELEM_SEARCH_MENU)); //close the menu
+			if(!(state->ds.shownElements & (1UL << UIELEM_PRIMARY_MENU))){
+				if(state->ds.shownElements & (1UL << UIELEM_NUCL_INFOBOX)){
+					changeUIState(dat,state,UISTATE_INFOBOX);
+				}else if(state->ds.shownElements & (1UL << UIELEM_NUCL_FULLINFOBOX)){
+					changeUIState(dat,state,UISTATE_FULLLEVELINFO);
+				}else{
+					changeUIState(dat,state,UISTATE_CHARTONLY);
+				}
+			}
+			break;
 		case UIANIM_UISCALE_MENU_HIDE:
 			state->ds.shownElements &= (uint32_t)(~(1U << UIELEM_PREFS_UISCALE_MENU)); //close the menu
 			changeUIState(dat,state,UISTATE_PREFS_DIALOG);
@@ -2197,8 +2209,8 @@ void setInfoBoxDimensions(const app_data *restrict dat, app_state *restrict stat
 		state->ds.infoBoxWidth = NUCL_INFOBOX_MIN_WIDTH;
 	}
 
-	updateSingleUIElemPosition(dat,&state->ds,rdat,UIELEM_NUCL_INFOBOX);
-	updateSingleUIElemPosition(dat,&state->ds,rdat,UIELEM_NUCL_INFOBOX_CLOSEBUTTON);
+	updateSingleUIElemPosition(dat,state,rdat,UIELEM_NUCL_INFOBOX);
+	updateSingleUIElemPosition(dat,state,rdat,UIELEM_NUCL_INFOBOX_CLOSEBUTTON);
 }
 
 void setSelectedNuclOnLevelList(const app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat, const uint16_t N, const uint16_t Z){
@@ -2330,6 +2342,12 @@ void uiElemClickAction(app_data *restrict dat, app_state *restrict state, resour
 			state->clickedUIElem = UIELEM_ENUM_LENGTH; //'unclick' the menu button
 		}
 	}
+	if((uiElemID != UIELEM_SEARCH_BUTTON)&&(uiElemID != UIELEM_SEARCH_MENU)){
+		if((state->ds.shownElements & (1UL << UIELEM_SEARCH_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_SEARCH_MENU_HIDE]==0.0f)){
+			startUIAnimation(dat,state,UIANIM_SEARCH_MENU_HIDE); //menu will be closed after animation finishes
+			state->clickedUIElem = UIELEM_ENUM_LENGTH; //'unclick' the menu button
+		}
+	}
 	if((uiElemID != UIELEM_PREFS_DIALOG_UISCALE_DROPDOWN)&&(uiElemID != UIELEM_PREFS_UISCALE_MENU)&&(uiElemID != UIELEM_UISM_SMALL_BUTTON)&&(uiElemID != UIELEM_UISM_DEFAULT_BUTTON)&&(uiElemID != UIELEM_UISM_LARGE_BUTTON)&&(uiElemID != UIELEM_UISM_HUGE_BUTTON)){
 		if((state->ds.shownElements & (1UL << UIELEM_PREFS_UISCALE_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_UISCALE_MENU_HIDE]==0.0f)){
 			startUIAnimation(dat,state,UIANIM_UISCALE_MENU_HIDE); //menu will be closed after animation finishes
@@ -2368,7 +2386,17 @@ void uiElemClickAction(app_data *restrict dat, app_state *restrict state, resour
       }
 			break;
 		case UIELEM_SEARCH_BUTTON:
-			//not implemented yet
+			if((state->ds.shownElements & (1UL << UIELEM_SEARCH_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_SEARCH_MENU_HIDE]==0.0f)){
+				startUIAnimation(dat,state,UIANIM_SEARCH_MENU_HIDE); //menu will be closed after animation finishes
+        state->clickedUIElem = UIELEM_ENUM_LENGTH; //'unclick' the menu button
+      }else if(state->ds.timeLeftInUIAnimation[UIANIM_SEARCH_MENU_SHOW]==0.0f){
+				state->ds.shownElements |= (1UL << UIELEM_SEARCH_MENU);
+				state->lastOpenedMenu = UIELEM_SEARCH_MENU;
+				startUIAnimation(dat,state,UIANIM_SEARCH_MENU_SHOW);
+				changeUIState(dat,state,UISTATE_CHARTWITHMENU);
+				state->clickedUIElem = UIELEM_SEARCH_BUTTON;
+      }
+			break;
 			break;
 		case UIELEM_PREFS_DIALOG_UISCALE_DROPDOWN:
 			if((state->ds.shownElements & (1UL << UIELEM_PREFS_UISCALE_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_UISCALE_MENU_HIDE]==0.0f)){
@@ -2475,6 +2503,10 @@ void uiElemClickAction(app_data *restrict dat, app_state *restrict state, resour
 		case UIELEM_CHARTVIEW_MENU:
 			//clicked on menu background, do nothing except keep the menu button selected
 			state->clickedUIElem = UIELEM_CHARTVIEW_BUTTON;
+			break;
+		case UIELEM_SEARCH_MENU:
+			//clicked on menu background, do nothing except keep the menu button selected
+			state->clickedUIElem = UIELEM_SEARCH_BUTTON;
 			break;
 		case UIELEM_PREFS_UISCALE_MENU:
 			//clicked on menu background, do nothing except keep the menu button selected
@@ -2646,266 +2678,272 @@ void uiElemClickAction(app_data *restrict dat, app_state *restrict state, resour
 
 //updates UI element (buttons etc.) positions, based on the screen resolution and other factors
 //positioning constants are defined in gui_constants.h
-void updateSingleUIElemPosition(const app_data *restrict dat, drawing_state *restrict ds, resource_data *restrict rdat, const uint8_t uiElemInd){
+void updateSingleUIElemPosition(const app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat, const uint8_t uiElemInd){
 	switch(uiElemInd){
 		case UIELEM_MENU_BUTTON:
-			ds->uiElemPosX[uiElemInd] = (uint16_t)(ds->windowXRes-((MENU_BUTTON_WIDTH+MENU_BUTTON_POS_XR)*ds->uiUserScale));
-			ds->uiElemPosY[uiElemInd] = (uint16_t)(MENU_BUTTON_POS_Y*ds->uiUserScale);
-			ds->uiElemWidth[uiElemInd] = (uint16_t)(MENU_BUTTON_WIDTH*ds->uiUserScale);
-			ds->uiElemHeight[uiElemInd] = (uint16_t)(UI_TILE_SIZE*ds->uiUserScale);
-			ds->uiElemExtPlusX[uiElemInd] = (uint16_t)((MENU_BUTTON_POS_XR+1.0f)*ds->uiUserScale); //prevent clicking chart 'in between' buttons
-			ds->uiElemExtMinusY[uiElemInd] = (uint16_t)((MENU_BUTTON_POS_Y+1.0f)*ds->uiUserScale); //prevent clicking chart 'in between' buttons
-			//SDL_Log("res: [%u %u]\nx: %u, y: %u, w: %u, h: %u\n",ds->windowXRes,ds->windowYRes,ds->uiElemPosX[uiElemInd],ds->uiElemPosY[uiElemInd],ds->uiElemWidth[uiElemInd],ds->uiElemHeight[uiElemInd]);
+			state->ds.uiElemPosX[uiElemInd] = (uint16_t)(state->ds.windowXRes-((MENU_BUTTON_WIDTH+MENU_BUTTON_POS_XR)*state->ds.uiUserScale));
+			state->ds.uiElemPosY[uiElemInd] = (uint16_t)(MENU_BUTTON_POS_Y*state->ds.uiUserScale);
+			state->ds.uiElemWidth[uiElemInd] = (uint16_t)(MENU_BUTTON_WIDTH*state->ds.uiUserScale);
+			state->ds.uiElemHeight[uiElemInd] = (uint16_t)(UI_TILE_SIZE*state->ds.uiUserScale);
+			state->ds.uiElemExtPlusX[uiElemInd] = (uint16_t)((MENU_BUTTON_POS_XR+1.0f)*state->ds.uiUserScale); //prevent clicking chart 'in between' buttons
+			state->ds.uiElemExtMinusY[uiElemInd] = (uint16_t)((MENU_BUTTON_POS_Y+1.0f)*state->ds.uiUserScale); //prevent clicking chart 'in between' buttons
+			//SDL_Log("res: [%u %u]\nx: %u, y: %u, w: %u, h: %u\n",state->ds.windowXRes,state->ds.windowYRes,state->ds.uiElemPosX[uiElemInd],state->ds.uiElemPosY[uiElemInd],state->ds.uiElemWidth[uiElemInd],state->ds.uiElemHeight[uiElemInd]);
 			break;
 		case UIELEM_CHARTVIEW_BUTTON:
-			ds->uiElemPosX[uiElemInd] = (uint16_t)(ds->windowXRes-((CHARTVIEW_BUTTON_WIDTH+CHARTVIEW_BUTTON_POS_XR+MENU_BUTTON_WIDTH+MENU_BUTTON_POS_XR)*ds->uiUserScale));
-			ds->uiElemPosY[uiElemInd] = (uint16_t)(CHARTVIEW_BUTTON_POS_Y*ds->uiUserScale);
-			ds->uiElemWidth[uiElemInd] = (uint16_t)(CHARTVIEW_BUTTON_WIDTH*ds->uiUserScale);
-			ds->uiElemHeight[uiElemInd] = (uint16_t)(UI_TILE_SIZE*ds->uiUserScale);
-			ds->uiElemExtPlusX[uiElemInd] = (uint16_t)((CHARTVIEW_BUTTON_POS_XR+1.0f)*ds->uiUserScale); //prevent clicking chart 'in between' buttons
-			ds->uiElemExtMinusY[uiElemInd] = (uint16_t)((CHARTVIEW_BUTTON_POS_Y+1.0f)*ds->uiUserScale); //prevent clicking chart 'in between' buttons
+			state->ds.uiElemPosX[uiElemInd] = (uint16_t)(state->ds.windowXRes-((CHARTVIEW_BUTTON_WIDTH+CHARTVIEW_BUTTON_POS_XR+MENU_BUTTON_WIDTH+MENU_BUTTON_POS_XR)*state->ds.uiUserScale));
+			state->ds.uiElemPosY[uiElemInd] = (uint16_t)(CHARTVIEW_BUTTON_POS_Y*state->ds.uiUserScale);
+			state->ds.uiElemWidth[uiElemInd] = (uint16_t)(CHARTVIEW_BUTTON_WIDTH*state->ds.uiUserScale);
+			state->ds.uiElemHeight[uiElemInd] = (uint16_t)(UI_TILE_SIZE*state->ds.uiUserScale);
+			state->ds.uiElemExtPlusX[uiElemInd] = (uint16_t)((CHARTVIEW_BUTTON_POS_XR+1.0f)*state->ds.uiUserScale); //prevent clicking chart 'in between' buttons
+			state->ds.uiElemExtMinusY[uiElemInd] = (uint16_t)((CHARTVIEW_BUTTON_POS_Y+1.0f)*state->ds.uiUserScale); //prevent clicking chart 'in between' buttons
 			break;
 		case UIELEM_SEARCH_BUTTON:
-			ds->uiElemPosX[uiElemInd] = (uint16_t)(ds->windowXRes-((SEARCH_BUTTON_WIDTH+SEARCH_BUTTON_POS_XR+CHARTVIEW_BUTTON_WIDTH+CHARTVIEW_BUTTON_POS_XR+MENU_BUTTON_WIDTH+MENU_BUTTON_POS_XR)*ds->uiUserScale));
-			ds->uiElemPosY[uiElemInd] = (uint16_t)(SEARCH_BUTTON_POS_Y*ds->uiUserScale);
-			ds->uiElemWidth[uiElemInd] = (uint16_t)(SEARCH_BUTTON_WIDTH*ds->uiUserScale);
-			ds->uiElemHeight[uiElemInd] = (uint16_t)(UI_TILE_SIZE*ds->uiUserScale);
-			ds->uiElemExtPlusX[uiElemInd] = (uint16_t)((SEARCH_BUTTON_POS_XR+1.0f)*ds->uiUserScale); //prevent clicking chart 'in between' buttons
-			ds->uiElemExtMinusY[uiElemInd] = (uint16_t)((SEARCH_BUTTON_POS_Y+1.0f)*ds->uiUserScale); //prevent clicking chart 'in between' buttons
-			//SDL_Log("res: [%u %u]\nx: %u, y: %u, w: %u, h: %u\n",ds->windowXRes,ds->windowYRes,ds->uiElemPosX[uiElemInd],ds->uiElemPosY[uiElemInd],ds->uiElemWidth[uiElemInd],ds->uiElemHeight[uiElemInd]);
+			state->ds.uiElemPosX[uiElemInd] = (uint16_t)(state->ds.windowXRes-((SEARCH_BUTTON_WIDTH+SEARCH_BUTTON_POS_XR+CHARTVIEW_BUTTON_WIDTH+CHARTVIEW_BUTTON_POS_XR+MENU_BUTTON_WIDTH+MENU_BUTTON_POS_XR)*state->ds.uiUserScale));
+			state->ds.uiElemPosY[uiElemInd] = (uint16_t)(SEARCH_BUTTON_POS_Y*state->ds.uiUserScale);
+			state->ds.uiElemWidth[uiElemInd] = (uint16_t)(SEARCH_BUTTON_WIDTH*state->ds.uiUserScale);
+			state->ds.uiElemHeight[uiElemInd] = (uint16_t)(UI_TILE_SIZE*state->ds.uiUserScale);
+			state->ds.uiElemExtPlusX[uiElemInd] = (uint16_t)((SEARCH_BUTTON_POS_XR+1.0f)*state->ds.uiUserScale); //prevent clicking chart 'in between' buttons
+			state->ds.uiElemExtMinusY[uiElemInd] = (uint16_t)((SEARCH_BUTTON_POS_Y+1.0f)*state->ds.uiUserScale); //prevent clicking chart 'in between' buttons
+			//SDL_Log("res: [%u %u]\nx: %u, y: %u, w: %u, h: %u\n",state->ds.windowXRes,state->ds.windowYRes,state->ds.uiElemPosX[uiElemInd],state->ds.uiElemPosY[uiElemInd],state->ds.uiElemWidth[uiElemInd],state->ds.uiElemHeight[uiElemInd]);
 			break;
 		case UIELEM_PRIMARY_MENU:
-			ds->uiElemPosX[uiElemInd] = (uint16_t)(ds->windowXRes-((PRIMARY_MENU_WIDTH+PRIMARY_MENU_POS_XR)*ds->uiUserScale));
-			ds->uiElemPosY[uiElemInd] = (uint16_t)(PRIMARY_MENU_POS_Y*ds->uiUserScale);
-			ds->uiElemWidth[uiElemInd] = (uint16_t)(PRIMARY_MENU_WIDTH*ds->uiUserScale);
-			ds->uiElemHeight[uiElemInd] = (uint16_t)(PRIMARY_MENU_HEIGHT*ds->uiUserScale);
+			state->ds.uiElemPosX[uiElemInd] = (uint16_t)(state->ds.windowXRes-((PRIMARY_MENU_WIDTH+PRIMARY_MENU_POS_XR)*state->ds.uiUserScale));
+			state->ds.uiElemPosY[uiElemInd] = (uint16_t)(PRIMARY_MENU_POS_Y*state->ds.uiUserScale);
+			state->ds.uiElemWidth[uiElemInd] = (uint16_t)(PRIMARY_MENU_WIDTH*state->ds.uiUserScale);
+			state->ds.uiElemHeight[uiElemInd] = (uint16_t)(PRIMARY_MENU_HEIGHT*state->ds.uiUserScale);
 			break;
 		case UIELEM_PM_PREFS_BUTTON:
-			ds->uiElemPosX[uiElemInd] = (uint16_t)(ds->windowXRes-((PRIMARY_MENU_WIDTH+PRIMARY_MENU_POS_XR - PANEL_EDGE_SIZE - 2*UI_PADDING_SIZE)*ds->uiUserScale));
-			ds->uiElemPosY[uiElemInd] = (uint16_t)((PRIMARY_MENU_POS_Y + PANEL_EDGE_SIZE + 2*UI_PADDING_SIZE)*ds->uiUserScale);
-			ds->uiElemWidth[uiElemInd] = (uint16_t)((PRIMARY_MENU_WIDTH - 2*PANEL_EDGE_SIZE - 4*UI_PADDING_SIZE)*ds->uiUserScale);
-			ds->uiElemHeight[uiElemInd] = (uint16_t)((PRIMARY_MENU_ITEM_SPACING - UI_PADDING_SIZE)*ds->uiUserScale);
+			state->ds.uiElemPosX[uiElemInd] = (uint16_t)(state->ds.windowXRes-((PRIMARY_MENU_WIDTH+PRIMARY_MENU_POS_XR - PANEL_EDGE_SIZE - 2*UI_PADDING_SIZE)*state->ds.uiUserScale));
+			state->ds.uiElemPosY[uiElemInd] = (uint16_t)((PRIMARY_MENU_POS_Y + PANEL_EDGE_SIZE + 2*UI_PADDING_SIZE)*state->ds.uiUserScale);
+			state->ds.uiElemWidth[uiElemInd] = (uint16_t)((PRIMARY_MENU_WIDTH - 2*PANEL_EDGE_SIZE - 4*UI_PADDING_SIZE)*state->ds.uiUserScale);
+			state->ds.uiElemHeight[uiElemInd] = (uint16_t)((PRIMARY_MENU_ITEM_SPACING - UI_PADDING_SIZE)*state->ds.uiUserScale);
 			break;
 		case UIELEM_PM_ABOUT_BUTTON:
-			ds->uiElemPosX[uiElemInd] = (uint16_t)(ds->windowXRes-((PRIMARY_MENU_WIDTH+PRIMARY_MENU_POS_XR - PANEL_EDGE_SIZE - 2*UI_PADDING_SIZE)*ds->uiUserScale));
-			ds->uiElemPosY[uiElemInd] = (uint16_t)((PRIMARY_MENU_POS_Y + PANEL_EDGE_SIZE + 2*UI_PADDING_SIZE + PRIMARY_MENU_ITEM_SPACING)*ds->uiUserScale);
-			ds->uiElemWidth[uiElemInd] = (uint16_t)((PRIMARY_MENU_WIDTH - 2*PANEL_EDGE_SIZE - 4*UI_PADDING_SIZE)*ds->uiUserScale);
-			ds->uiElemHeight[uiElemInd] = (uint16_t)((PRIMARY_MENU_ITEM_SPACING - UI_PADDING_SIZE)*ds->uiUserScale);
+			state->ds.uiElemPosX[uiElemInd] = (uint16_t)(state->ds.windowXRes-((PRIMARY_MENU_WIDTH+PRIMARY_MENU_POS_XR - PANEL_EDGE_SIZE - 2*UI_PADDING_SIZE)*state->ds.uiUserScale));
+			state->ds.uiElemPosY[uiElemInd] = (uint16_t)((PRIMARY_MENU_POS_Y + PANEL_EDGE_SIZE + 2*UI_PADDING_SIZE + PRIMARY_MENU_ITEM_SPACING)*state->ds.uiUserScale);
+			state->ds.uiElemWidth[uiElemInd] = (uint16_t)((PRIMARY_MENU_WIDTH - 2*PANEL_EDGE_SIZE - 4*UI_PADDING_SIZE)*state->ds.uiUserScale);
+			state->ds.uiElemHeight[uiElemInd] = (uint16_t)((PRIMARY_MENU_ITEM_SPACING - UI_PADDING_SIZE)*state->ds.uiUserScale);
 			break;
 		case UIELEM_CHARTVIEW_MENU:
-			ds->uiElemPosX[uiElemInd] = (uint16_t)(ds->windowXRes-((CHARTVIEW_MENU_WIDTH+CHARTVIEW_MENU_POS_XR)*ds->uiUserScale));
-			ds->uiElemPosY[uiElemInd] = (uint16_t)(CHARTVIEW_MENU_POS_Y*ds->uiUserScale);
-			ds->uiElemWidth[uiElemInd] = (uint16_t)(CHARTVIEW_MENU_WIDTH*ds->uiUserScale);
-			ds->uiElemHeight[uiElemInd] = (uint16_t)(CHARTVIEW_MENU_HEIGHT*ds->uiUserScale);
+			state->ds.uiElemPosX[uiElemInd] = (uint16_t)(state->ds.windowXRes-((CHARTVIEW_MENU_WIDTH+CHARTVIEW_MENU_POS_XR)*state->ds.uiUserScale));
+			state->ds.uiElemPosY[uiElemInd] = (uint16_t)(CHARTVIEW_MENU_POS_Y*state->ds.uiUserScale);
+			state->ds.uiElemWidth[uiElemInd] = (uint16_t)(CHARTVIEW_MENU_WIDTH*state->ds.uiUserScale);
+			state->ds.uiElemHeight[uiElemInd] = (uint16_t)(CHARTVIEW_MENU_HEIGHT*state->ds.uiUserScale);
 			break;
 		case UIELEM_CVM_HALFLIFE_BUTTON:
-			ds->uiElemPosX[uiElemInd] = (uint16_t)(ds->windowXRes-((CHARTVIEW_MENU_WIDTH+CHARTVIEW_MENU_POS_XR - PANEL_EDGE_SIZE - 2*UI_PADDING_SIZE)*ds->uiUserScale));
-			ds->uiElemPosY[uiElemInd] = (uint16_t)((CHARTVIEW_MENU_POS_Y + PANEL_EDGE_SIZE + 2*UI_PADDING_SIZE + CHARTVIEW_MENU_ITEM_SPACING)*ds->uiUserScale);
-			ds->uiElemWidth[uiElemInd] = (uint16_t)((CHARTVIEW_MENU_WIDTH - 2*PANEL_EDGE_SIZE - 4*UI_PADDING_SIZE)*ds->uiUserScale);
-			ds->uiElemHeight[uiElemInd] = (uint16_t)((CHARTVIEW_MENU_ITEM_SPACING - UI_PADDING_SIZE)*ds->uiUserScale);
+			state->ds.uiElemPosX[uiElemInd] = (uint16_t)(state->ds.windowXRes-((CHARTVIEW_MENU_WIDTH+CHARTVIEW_MENU_POS_XR - PANEL_EDGE_SIZE - 2*UI_PADDING_SIZE)*state->ds.uiUserScale));
+			state->ds.uiElemPosY[uiElemInd] = (uint16_t)((CHARTVIEW_MENU_POS_Y + PANEL_EDGE_SIZE + 2*UI_PADDING_SIZE + CHARTVIEW_MENU_ITEM_SPACING)*state->ds.uiUserScale);
+			state->ds.uiElemWidth[uiElemInd] = (uint16_t)((CHARTVIEW_MENU_WIDTH - 2*PANEL_EDGE_SIZE - 4*UI_PADDING_SIZE)*state->ds.uiUserScale);
+			state->ds.uiElemHeight[uiElemInd] = (uint16_t)((CHARTVIEW_MENU_ITEM_SPACING - UI_PADDING_SIZE)*state->ds.uiUserScale);
 			break;
 		case UIELEM_CVM_DECAYMODE_BUTTON:
-			ds->uiElemPosX[uiElemInd] = (uint16_t)(ds->windowXRes-((CHARTVIEW_MENU_WIDTH+CHARTVIEW_MENU_POS_XR - PANEL_EDGE_SIZE - 2*UI_PADDING_SIZE)*ds->uiUserScale));
-			ds->uiElemPosY[uiElemInd] = (uint16_t)((CHARTVIEW_MENU_POS_Y + PANEL_EDGE_SIZE + 2*UI_PADDING_SIZE + 2*CHARTVIEW_MENU_ITEM_SPACING)*ds->uiUserScale);
-			ds->uiElemWidth[uiElemInd] = (uint16_t)((CHARTVIEW_MENU_WIDTH - 2*PANEL_EDGE_SIZE - 4*UI_PADDING_SIZE)*ds->uiUserScale);
-			ds->uiElemHeight[uiElemInd] = (uint16_t)((CHARTVIEW_MENU_ITEM_SPACING - UI_PADDING_SIZE)*ds->uiUserScale);
+			state->ds.uiElemPosX[uiElemInd] = (uint16_t)(state->ds.windowXRes-((CHARTVIEW_MENU_WIDTH+CHARTVIEW_MENU_POS_XR - PANEL_EDGE_SIZE - 2*UI_PADDING_SIZE)*state->ds.uiUserScale));
+			state->ds.uiElemPosY[uiElemInd] = (uint16_t)((CHARTVIEW_MENU_POS_Y + PANEL_EDGE_SIZE + 2*UI_PADDING_SIZE + 2*CHARTVIEW_MENU_ITEM_SPACING)*state->ds.uiUserScale);
+			state->ds.uiElemWidth[uiElemInd] = (uint16_t)((CHARTVIEW_MENU_WIDTH - 2*PANEL_EDGE_SIZE - 4*UI_PADDING_SIZE)*state->ds.uiUserScale);
+			state->ds.uiElemHeight[uiElemInd] = (uint16_t)((CHARTVIEW_MENU_ITEM_SPACING - UI_PADDING_SIZE)*state->ds.uiUserScale);
 			break;
 		case UIELEM_CVM_2PLUS_BUTTON:
-			ds->uiElemPosX[uiElemInd] = (uint16_t)(ds->windowXRes-((CHARTVIEW_MENU_WIDTH+CHARTVIEW_MENU_POS_XR - PANEL_EDGE_SIZE - 2*UI_PADDING_SIZE)*ds->uiUserScale));
-			ds->uiElemPosY[uiElemInd] = (uint16_t)((CHARTVIEW_MENU_POS_Y + PANEL_EDGE_SIZE + 2*UI_PADDING_SIZE + 3*CHARTVIEW_MENU_ITEM_SPACING)*ds->uiUserScale);
-			ds->uiElemWidth[uiElemInd] = (uint16_t)((CHARTVIEW_MENU_WIDTH - 2*PANEL_EDGE_SIZE - 4*UI_PADDING_SIZE)*ds->uiUserScale);
-			ds->uiElemHeight[uiElemInd] = (uint16_t)((CHARTVIEW_MENU_ITEM_SPACING - UI_PADDING_SIZE)*ds->uiUserScale);
+			state->ds.uiElemPosX[uiElemInd] = (uint16_t)(state->ds.windowXRes-((CHARTVIEW_MENU_WIDTH+CHARTVIEW_MENU_POS_XR - PANEL_EDGE_SIZE - 2*UI_PADDING_SIZE)*state->ds.uiUserScale));
+			state->ds.uiElemPosY[uiElemInd] = (uint16_t)((CHARTVIEW_MENU_POS_Y + PANEL_EDGE_SIZE + 2*UI_PADDING_SIZE + 3*CHARTVIEW_MENU_ITEM_SPACING)*state->ds.uiUserScale);
+			state->ds.uiElemWidth[uiElemInd] = (uint16_t)((CHARTVIEW_MENU_WIDTH - 2*PANEL_EDGE_SIZE - 4*UI_PADDING_SIZE)*state->ds.uiUserScale);
+			state->ds.uiElemHeight[uiElemInd] = (uint16_t)((CHARTVIEW_MENU_ITEM_SPACING - UI_PADDING_SIZE)*state->ds.uiUserScale);
 			break;
 		case UIELEM_CVM_R42_BUTTON:
-			ds->uiElemPosX[uiElemInd] = (uint16_t)(ds->windowXRes-((CHARTVIEW_MENU_WIDTH+CHARTVIEW_MENU_POS_XR - PANEL_EDGE_SIZE - 2*UI_PADDING_SIZE)*ds->uiUserScale));
-			ds->uiElemPosY[uiElemInd] = (uint16_t)((CHARTVIEW_MENU_POS_Y + PANEL_EDGE_SIZE + 2*UI_PADDING_SIZE + 4*CHARTVIEW_MENU_ITEM_SPACING)*ds->uiUserScale);
-			ds->uiElemWidth[uiElemInd] = (uint16_t)((CHARTVIEW_MENU_WIDTH - 2*PANEL_EDGE_SIZE - 4*UI_PADDING_SIZE)*ds->uiUserScale);
-			ds->uiElemHeight[uiElemInd] = (uint16_t)((CHARTVIEW_MENU_ITEM_SPACING - UI_PADDING_SIZE)*ds->uiUserScale);
+			state->ds.uiElemPosX[uiElemInd] = (uint16_t)(state->ds.windowXRes-((CHARTVIEW_MENU_WIDTH+CHARTVIEW_MENU_POS_XR - PANEL_EDGE_SIZE - 2*UI_PADDING_SIZE)*state->ds.uiUserScale));
+			state->ds.uiElemPosY[uiElemInd] = (uint16_t)((CHARTVIEW_MENU_POS_Y + PANEL_EDGE_SIZE + 2*UI_PADDING_SIZE + 4*CHARTVIEW_MENU_ITEM_SPACING)*state->ds.uiUserScale);
+			state->ds.uiElemWidth[uiElemInd] = (uint16_t)((CHARTVIEW_MENU_WIDTH - 2*PANEL_EDGE_SIZE - 4*UI_PADDING_SIZE)*state->ds.uiUserScale);
+			state->ds.uiElemHeight[uiElemInd] = (uint16_t)((CHARTVIEW_MENU_ITEM_SPACING - UI_PADDING_SIZE)*state->ds.uiUserScale);
+			break;
+		case UIELEM_SEARCH_MENU:
+			state->ds.uiElemPosX[uiElemInd] = (uint16_t)(state->ds.windowXRes-((SEARCH_MENU_WIDTH+SEARCH_MENU_POS_XR+CHARTVIEW_MENU_WIDTH+CHARTVIEW_MENU_POS_XR)*state->ds.uiUserScale));
+			state->ds.uiElemPosY[uiElemInd] = (uint16_t)(SEARCH_MENU_POS_Y*state->ds.uiUserScale);
+			state->ds.uiElemWidth[uiElemInd] = (uint16_t)(SEARCH_MENU_WIDTH*state->ds.uiUserScale);
+			state->ds.uiElemHeight[uiElemInd] = (uint16_t)((SEARCH_MENU_HEADER_HEIGHT + (float)state->returnedSearchResults*SEARCH_MENU_RESULT_HEIGHT)*state->ds.uiUserScale);
 			break;
 		case UIELEM_MSG_BOX:
-			ds->uiElemPosX[uiElemInd] = (uint16_t)((ds->windowXRes - MESSAGE_BOX_WIDTH*ds->uiUserScale)/2);
-			ds->uiElemPosY[uiElemInd] = (uint16_t)((ds->windowYRes - MESSAGE_BOX_HEIGHT*ds->uiUserScale)/2);
-			ds->uiElemWidth[uiElemInd] = (uint16_t)(MESSAGE_BOX_WIDTH*ds->uiUserScale);
-			ds->uiElemHeight[uiElemInd] = (uint16_t)(MESSAGE_BOX_HEIGHT*ds->uiUserScale);
+			state->ds.uiElemPosX[uiElemInd] = (uint16_t)((state->ds.windowXRes - MESSAGE_BOX_WIDTH*state->ds.uiUserScale)/2);
+			state->ds.uiElemPosY[uiElemInd] = (uint16_t)((state->ds.windowYRes - MESSAGE_BOX_HEIGHT*state->ds.uiUserScale)/2);
+			state->ds.uiElemWidth[uiElemInd] = (uint16_t)(MESSAGE_BOX_WIDTH*state->ds.uiUserScale);
+			state->ds.uiElemHeight[uiElemInd] = (uint16_t)(MESSAGE_BOX_HEIGHT*state->ds.uiUserScale);
 			break;
 		case UIELEM_MSG_BOX_OK_BUTTON:
-			ds->uiElemPosX[uiElemInd] = (uint16_t)((ds->windowXRes - MESSAGE_BOX_OK_BUTTON_WIDTH*ds->uiUserScale)/2);
-			ds->uiElemPosY[uiElemInd] = (uint16_t)((ds->windowYRes + MESSAGE_BOX_HEIGHT*ds->uiUserScale)/2 - ((MESSAGE_BOX_OK_BUTTON_YB + UI_TILE_SIZE)*ds->uiUserScale));
-			ds->uiElemWidth[uiElemInd] = (uint16_t)(MESSAGE_BOX_OK_BUTTON_WIDTH*ds->uiUserScale);
-			ds->uiElemHeight[uiElemInd] = (uint16_t)(UI_TILE_SIZE*ds->uiUserScale);
+			state->ds.uiElemPosX[uiElemInd] = (uint16_t)((state->ds.windowXRes - MESSAGE_BOX_OK_BUTTON_WIDTH*state->ds.uiUserScale)/2);
+			state->ds.uiElemPosY[uiElemInd] = (uint16_t)((state->ds.windowYRes + MESSAGE_BOX_HEIGHT*state->ds.uiUserScale)/2 - ((MESSAGE_BOX_OK_BUTTON_YB + UI_TILE_SIZE)*state->ds.uiUserScale));
+			state->ds.uiElemWidth[uiElemInd] = (uint16_t)(MESSAGE_BOX_OK_BUTTON_WIDTH*state->ds.uiUserScale);
+			state->ds.uiElemHeight[uiElemInd] = (uint16_t)(UI_TILE_SIZE*state->ds.uiUserScale);
 			break;
 		case UIELEM_ABOUT_BOX:
-			ds->uiElemPosX[uiElemInd] = (uint16_t)((ds->windowXRes - ABOUT_BOX_WIDTH*ds->uiUserScale)/2);
-			ds->uiElemPosY[uiElemInd] = (uint16_t)((ds->windowYRes - ABOUT_BOX_HEIGHT*ds->uiUserScale)/2);
-			ds->uiElemWidth[uiElemInd] = (uint16_t)(ABOUT_BOX_WIDTH*ds->uiUserScale);
-			ds->uiElemHeight[uiElemInd] = (uint16_t)(ABOUT_BOX_HEIGHT*ds->uiUserScale);
+			state->ds.uiElemPosX[uiElemInd] = (uint16_t)((state->ds.windowXRes - ABOUT_BOX_WIDTH*state->ds.uiUserScale)/2);
+			state->ds.uiElemPosY[uiElemInd] = (uint16_t)((state->ds.windowYRes - ABOUT_BOX_HEIGHT*state->ds.uiUserScale)/2);
+			state->ds.uiElemWidth[uiElemInd] = (uint16_t)(ABOUT_BOX_WIDTH*state->ds.uiUserScale);
+			state->ds.uiElemHeight[uiElemInd] = (uint16_t)(ABOUT_BOX_HEIGHT*state->ds.uiUserScale);
 			break;
 		case UIELEM_ABOUT_BOX_OK_BUTTON:
-			ds->uiElemPosX[uiElemInd] = (uint16_t)((ds->windowXRes - ABOUT_BOX_OK_BUTTON_WIDTH*ds->uiUserScale)/2);
-			ds->uiElemPosY[uiElemInd] = (uint16_t)((ds->windowYRes + ABOUT_BOX_HEIGHT*ds->uiUserScale)/2 - ((ABOUT_BOX_OK_BUTTON_YB + UI_TILE_SIZE)*ds->uiUserScale));
-			ds->uiElemWidth[uiElemInd] = (uint16_t)(ABOUT_BOX_OK_BUTTON_WIDTH*ds->uiUserScale);
-			ds->uiElemHeight[uiElemInd] = (uint16_t)(UI_TILE_SIZE*ds->uiUserScale);
+			state->ds.uiElemPosX[uiElemInd] = (uint16_t)((state->ds.windowXRes - ABOUT_BOX_OK_BUTTON_WIDTH*state->ds.uiUserScale)/2);
+			state->ds.uiElemPosY[uiElemInd] = (uint16_t)((state->ds.windowYRes + ABOUT_BOX_HEIGHT*state->ds.uiUserScale)/2 - ((ABOUT_BOX_OK_BUTTON_YB + UI_TILE_SIZE)*state->ds.uiUserScale));
+			state->ds.uiElemWidth[uiElemInd] = (uint16_t)(ABOUT_BOX_OK_BUTTON_WIDTH*state->ds.uiUserScale);
+			state->ds.uiElemHeight[uiElemInd] = (uint16_t)(UI_TILE_SIZE*state->ds.uiUserScale);
 			break;
 		case UIELEM_PREFS_DIALOG:
-			ds->uiElemPosX[uiElemInd] = (uint16_t)((ds->windowXRes - PREFS_DIALOG_WIDTH*ds->uiUserScale)/2);
-			ds->uiElemPosY[uiElemInd] = (uint16_t)((ds->windowYRes - PREFS_DIALOG_HEIGHT*ds->uiUserScale)/2);
-			ds->uiElemWidth[uiElemInd] = (uint16_t)(PREFS_DIALOG_WIDTH*ds->uiUserScale);
-			ds->uiElemHeight[uiElemInd] = (uint16_t)(PREFS_DIALOG_HEIGHT*ds->uiUserScale);
+			state->ds.uiElemPosX[uiElemInd] = (uint16_t)((state->ds.windowXRes - PREFS_DIALOG_WIDTH*state->ds.uiUserScale)/2);
+			state->ds.uiElemPosY[uiElemInd] = (uint16_t)((state->ds.windowYRes - PREFS_DIALOG_HEIGHT*state->ds.uiUserScale)/2);
+			state->ds.uiElemWidth[uiElemInd] = (uint16_t)(PREFS_DIALOG_WIDTH*state->ds.uiUserScale);
+			state->ds.uiElemHeight[uiElemInd] = (uint16_t)(PREFS_DIALOG_HEIGHT*state->ds.uiUserScale);
 			//update child/dependant UI elements
-			updateSingleUIElemPosition(dat,ds,rdat,UIELEM_PREFS_DIALOG_CLOSEBUTTON);
-			updateSingleUIElemPosition(dat,ds,rdat,UIELEM_PREFS_DIALOG_SHELLCLOSURE_CHECKBOX);
-			updateSingleUIElemPosition(dat,ds,rdat,UIELEM_PREFS_DIALOG_LIFETIME_CHECKBOX);
-			updateSingleUIElemPosition(dat,ds,rdat,UIELEM_PREFS_DIALOG_UIANIM_CHECKBOX);
-			updateSingleUIElemPosition(dat,ds,rdat,UIELEM_PREFS_DIALOG_UISCALE_DROPDOWN);
-			updateSingleUIElemPosition(dat,ds,rdat,UIELEM_PREFS_UISCALE_MENU);
-			updateSingleUIElemPosition(dat,ds,rdat,UIELEM_UISM_SMALL_BUTTON);
-			updateSingleUIElemPosition(dat,ds,rdat,UIELEM_UISM_DEFAULT_BUTTON);
-			updateSingleUIElemPosition(dat,ds,rdat,UIELEM_UISM_LARGE_BUTTON);
-			updateSingleUIElemPosition(dat,ds,rdat,UIELEM_UISM_HUGE_BUTTON);
+			updateSingleUIElemPosition(dat,state,rdat,UIELEM_PREFS_DIALOG_CLOSEBUTTON);
+			updateSingleUIElemPosition(dat,state,rdat,UIELEM_PREFS_DIALOG_SHELLCLOSURE_CHECKBOX);
+			updateSingleUIElemPosition(dat,state,rdat,UIELEM_PREFS_DIALOG_LIFETIME_CHECKBOX);
+			updateSingleUIElemPosition(dat,state,rdat,UIELEM_PREFS_DIALOG_UIANIM_CHECKBOX);
+			updateSingleUIElemPosition(dat,state,rdat,UIELEM_PREFS_DIALOG_UISCALE_DROPDOWN);
+			updateSingleUIElemPosition(dat,state,rdat,UIELEM_PREFS_UISCALE_MENU);
+			updateSingleUIElemPosition(dat,state,rdat,UIELEM_UISM_SMALL_BUTTON);
+			updateSingleUIElemPosition(dat,state,rdat,UIELEM_UISM_DEFAULT_BUTTON);
+			updateSingleUIElemPosition(dat,state,rdat,UIELEM_UISM_LARGE_BUTTON);
+			updateSingleUIElemPosition(dat,state,rdat,UIELEM_UISM_HUGE_BUTTON);
 			break;
 		case UIELEM_PREFS_DIALOG_CLOSEBUTTON:
-			ds->uiElemWidth[UIELEM_PREFS_DIALOG_CLOSEBUTTON] = (uint16_t)(UI_TILE_SIZE*ds->uiUserScale);
-			ds->uiElemHeight[UIELEM_PREFS_DIALOG_CLOSEBUTTON] = ds->uiElemWidth[UIELEM_PREFS_DIALOG_CLOSEBUTTON];
-			ds->uiElemPosX[UIELEM_PREFS_DIALOG_CLOSEBUTTON] = (uint16_t)((float)(ds->uiElemPosX[UIELEM_PREFS_DIALOG] + ds->uiElemWidth[UIELEM_PREFS_DIALOG] - ds->uiElemWidth[UIELEM_PREFS_DIALOG_CLOSEBUTTON]) - 4*UI_PADDING_SIZE*ds->uiUserScale);
-			ds->uiElemPosY[UIELEM_PREFS_DIALOG_CLOSEBUTTON] = ds->uiElemPosY[UIELEM_PREFS_DIALOG] + (uint16_t)(4*UI_PADDING_SIZE*ds->uiUserScale);
+			state->ds.uiElemWidth[UIELEM_PREFS_DIALOG_CLOSEBUTTON] = (uint16_t)(UI_TILE_SIZE*state->ds.uiUserScale);
+			state->ds.uiElemHeight[UIELEM_PREFS_DIALOG_CLOSEBUTTON] = state->ds.uiElemWidth[UIELEM_PREFS_DIALOG_CLOSEBUTTON];
+			state->ds.uiElemPosX[UIELEM_PREFS_DIALOG_CLOSEBUTTON] = (uint16_t)((float)(state->ds.uiElemPosX[UIELEM_PREFS_DIALOG] + state->ds.uiElemWidth[UIELEM_PREFS_DIALOG] - state->ds.uiElemWidth[UIELEM_PREFS_DIALOG_CLOSEBUTTON]) - 4*UI_PADDING_SIZE*state->ds.uiUserScale);
+			state->ds.uiElemPosY[UIELEM_PREFS_DIALOG_CLOSEBUTTON] = state->ds.uiElemPosY[UIELEM_PREFS_DIALOG] + (uint16_t)(4*UI_PADDING_SIZE*state->ds.uiUserScale);
 			break;
 		case UIELEM_PREFS_DIALOG_SHELLCLOSURE_CHECKBOX:
-			ds->uiElemWidth[UIELEM_PREFS_DIALOG_SHELLCLOSURE_CHECKBOX] = (uint16_t)(UI_TILE_SIZE*ds->uiUserScale);
-			ds->uiElemHeight[UIELEM_PREFS_DIALOG_SHELLCLOSURE_CHECKBOX] = ds->uiElemWidth[UIELEM_PREFS_DIALOG_SHELLCLOSURE_CHECKBOX];
-			ds->uiElemPosX[UIELEM_PREFS_DIALOG_SHELLCLOSURE_CHECKBOX] = ds->uiElemPosX[UIELEM_PREFS_DIALOG] + (uint16_t)(PREFS_DIALOG_PREFCOL1_X*ds->uiUserScale);
-			ds->uiElemPosY[UIELEM_PREFS_DIALOG_SHELLCLOSURE_CHECKBOX] = ds->uiElemPosY[UIELEM_PREFS_DIALOG] + (uint16_t)((PREFS_DIALOG_PREFCOL1_Y + PREFS_DIALOG_PREF_Y_SPACING + 2*UI_PADDING_SIZE)*ds->uiUserScale);
-			ds->uiElemExtPlusX[UIELEM_PREFS_DIALOG_SHELLCLOSURE_CHECKBOX] = (uint16_t)(2*UI_PADDING_SIZE*ds->uiUserScale) + (uint16_t)(getTextWidth(rdat,FONTSIZE_NORMAL,dat->strings[dat->locStringIDs[LOCSTR_PREF_SHELLCLOSURE]])/rdat->uiDPIScale); //so that checkbox can be toggled by clicking on adjacent text
+			state->ds.uiElemWidth[UIELEM_PREFS_DIALOG_SHELLCLOSURE_CHECKBOX] = (uint16_t)(UI_TILE_SIZE*state->ds.uiUserScale);
+			state->ds.uiElemHeight[UIELEM_PREFS_DIALOG_SHELLCLOSURE_CHECKBOX] = state->ds.uiElemWidth[UIELEM_PREFS_DIALOG_SHELLCLOSURE_CHECKBOX];
+			state->ds.uiElemPosX[UIELEM_PREFS_DIALOG_SHELLCLOSURE_CHECKBOX] = state->ds.uiElemPosX[UIELEM_PREFS_DIALOG] + (uint16_t)(PREFS_DIALOG_PREFCOL1_X*state->ds.uiUserScale);
+			state->ds.uiElemPosY[UIELEM_PREFS_DIALOG_SHELLCLOSURE_CHECKBOX] = state->ds.uiElemPosY[UIELEM_PREFS_DIALOG] + (uint16_t)((PREFS_DIALOG_PREFCOL1_Y + PREFS_DIALOG_PREF_Y_SPACING + 2*UI_PADDING_SIZE)*state->ds.uiUserScale);
+			state->ds.uiElemExtPlusX[UIELEM_PREFS_DIALOG_SHELLCLOSURE_CHECKBOX] = (uint16_t)(2*UI_PADDING_SIZE*state->ds.uiUserScale) + (uint16_t)(getTextWidth(rdat,FONTSIZE_NORMAL,dat->strings[dat->locStringIDs[LOCSTR_PREF_SHELLCLOSURE]])/rdat->uiDPIScale); //so that checkbox can be toggled by clicking on adjacent text
 			break;
 		case UIELEM_PREFS_DIALOG_LIFETIME_CHECKBOX:
-			ds->uiElemWidth[UIELEM_PREFS_DIALOG_LIFETIME_CHECKBOX] = (uint16_t)(UI_TILE_SIZE*ds->uiUserScale);
-			ds->uiElemHeight[UIELEM_PREFS_DIALOG_LIFETIME_CHECKBOX] = ds->uiElemWidth[UIELEM_PREFS_DIALOG_LIFETIME_CHECKBOX];
-			ds->uiElemPosX[UIELEM_PREFS_DIALOG_LIFETIME_CHECKBOX] = ds->uiElemPosX[UIELEM_PREFS_DIALOG] + (uint16_t)(PREFS_DIALOG_PREFCOL1_X*ds->uiUserScale);
-			ds->uiElemPosY[UIELEM_PREFS_DIALOG_LIFETIME_CHECKBOX] = ds->uiElemPosY[UIELEM_PREFS_DIALOG] + (uint16_t)((PREFS_DIALOG_PREFCOL1_Y + 2*PREFS_DIALOG_PREF_Y_SPACING + 2*UI_PADDING_SIZE)*ds->uiUserScale);
-			ds->uiElemExtPlusX[UIELEM_PREFS_DIALOG_LIFETIME_CHECKBOX] = (uint16_t)(2*UI_PADDING_SIZE*ds->uiUserScale) + (uint16_t)(getTextWidth(rdat,FONTSIZE_NORMAL,dat->strings[dat->locStringIDs[LOCSTR_PREF_LIFETIME]])/rdat->uiDPIScale); //so that checkbox can be toggled by clicking on adjacent text
+			state->ds.uiElemWidth[UIELEM_PREFS_DIALOG_LIFETIME_CHECKBOX] = (uint16_t)(UI_TILE_SIZE*state->ds.uiUserScale);
+			state->ds.uiElemHeight[UIELEM_PREFS_DIALOG_LIFETIME_CHECKBOX] = state->ds.uiElemWidth[UIELEM_PREFS_DIALOG_LIFETIME_CHECKBOX];
+			state->ds.uiElemPosX[UIELEM_PREFS_DIALOG_LIFETIME_CHECKBOX] = state->ds.uiElemPosX[UIELEM_PREFS_DIALOG] + (uint16_t)(PREFS_DIALOG_PREFCOL1_X*state->ds.uiUserScale);
+			state->ds.uiElemPosY[UIELEM_PREFS_DIALOG_LIFETIME_CHECKBOX] = state->ds.uiElemPosY[UIELEM_PREFS_DIALOG] + (uint16_t)((PREFS_DIALOG_PREFCOL1_Y + 2*PREFS_DIALOG_PREF_Y_SPACING + 2*UI_PADDING_SIZE)*state->ds.uiUserScale);
+			state->ds.uiElemExtPlusX[UIELEM_PREFS_DIALOG_LIFETIME_CHECKBOX] = (uint16_t)(2*UI_PADDING_SIZE*state->ds.uiUserScale) + (uint16_t)(getTextWidth(rdat,FONTSIZE_NORMAL,dat->strings[dat->locStringIDs[LOCSTR_PREF_LIFETIME]])/rdat->uiDPIScale); //so that checkbox can be toggled by clicking on adjacent text
 			break;
 		case UIELEM_PREFS_DIALOG_UIANIM_CHECKBOX:
-			ds->uiElemWidth[UIELEM_PREFS_DIALOG_UIANIM_CHECKBOX] = (uint16_t)(UI_TILE_SIZE*ds->uiUserScale);
-			ds->uiElemHeight[UIELEM_PREFS_DIALOG_UIANIM_CHECKBOX] = ds->uiElemWidth[UIELEM_PREFS_DIALOG_UIANIM_CHECKBOX];
-			ds->uiElemPosX[UIELEM_PREFS_DIALOG_UIANIM_CHECKBOX] = ds->uiElemPosX[UIELEM_PREFS_DIALOG] + (uint16_t)(PREFS_DIALOG_PREFCOL1_X*ds->uiUserScale);
-			ds->uiElemPosY[UIELEM_PREFS_DIALOG_UIANIM_CHECKBOX] = ds->uiElemPosY[UIELEM_PREFS_DIALOG] + (uint16_t)((PREFS_DIALOG_PREFCOL1_Y + 3*PREFS_DIALOG_PREF_Y_SPACING + 2*UI_PADDING_SIZE)*ds->uiUserScale);
-			ds->uiElemExtPlusX[UIELEM_PREFS_DIALOG_UIANIM_CHECKBOX] = (uint16_t)(2*UI_PADDING_SIZE*ds->uiUserScale) + (uint16_t)(getTextWidth(rdat,FONTSIZE_NORMAL,dat->strings[dat->locStringIDs[LOCSTR_PREF_UIANIM]])/rdat->uiDPIScale); //so that checkbox can be toggled by clicking on adjacent text
+			state->ds.uiElemWidth[UIELEM_PREFS_DIALOG_UIANIM_CHECKBOX] = (uint16_t)(UI_TILE_SIZE*state->ds.uiUserScale);
+			state->ds.uiElemHeight[UIELEM_PREFS_DIALOG_UIANIM_CHECKBOX] = state->ds.uiElemWidth[UIELEM_PREFS_DIALOG_UIANIM_CHECKBOX];
+			state->ds.uiElemPosX[UIELEM_PREFS_DIALOG_UIANIM_CHECKBOX] = state->ds.uiElemPosX[UIELEM_PREFS_DIALOG] + (uint16_t)(PREFS_DIALOG_PREFCOL1_X*state->ds.uiUserScale);
+			state->ds.uiElemPosY[UIELEM_PREFS_DIALOG_UIANIM_CHECKBOX] = state->ds.uiElemPosY[UIELEM_PREFS_DIALOG] + (uint16_t)((PREFS_DIALOG_PREFCOL1_Y + 3*PREFS_DIALOG_PREF_Y_SPACING + 2*UI_PADDING_SIZE)*state->ds.uiUserScale);
+			state->ds.uiElemExtPlusX[UIELEM_PREFS_DIALOG_UIANIM_CHECKBOX] = (uint16_t)(2*UI_PADDING_SIZE*state->ds.uiUserScale) + (uint16_t)(getTextWidth(rdat,FONTSIZE_NORMAL,dat->strings[dat->locStringIDs[LOCSTR_PREF_UIANIM]])/rdat->uiDPIScale); //so that checkbox can be toggled by clicking on adjacent text
 			break;
 		case UIELEM_PREFS_DIALOG_UISCALE_DROPDOWN:
-			ds->uiElemWidth[UIELEM_PREFS_DIALOG_UISCALE_DROPDOWN] = (uint16_t)(PREFS_DIALOG_UISCALE_BUTTON_WIDTH*ds->uiUserScale);
-			ds->uiElemHeight[UIELEM_PREFS_DIALOG_UISCALE_DROPDOWN] = (uint16_t)(UI_TILE_SIZE*ds->uiUserScale);
-			ds->uiElemPosX[UIELEM_PREFS_DIALOG_UISCALE_DROPDOWN] = (uint16_t)(ds->uiElemPosX[UIELEM_PREFS_DIALOG] + (uint16_t)((PREFS_DIALOG_PREFCOL1_X+3*UI_PADDING_SIZE)*ds->uiUserScale) + (uint16_t)(getTextWidth(rdat,FONTSIZE_NORMAL,dat->strings[dat->locStringIDs[LOCSTR_PREF_UISCALE]])/rdat->uiDPIScale));
-			ds->uiElemPosY[UIELEM_PREFS_DIALOG_UISCALE_DROPDOWN] = ds->uiElemPosY[UIELEM_PREFS_DIALOG] + (uint16_t)((PREFS_DIALOG_PREFCOL1_Y)*ds->uiUserScale);
+			state->ds.uiElemWidth[UIELEM_PREFS_DIALOG_UISCALE_DROPDOWN] = (uint16_t)(PREFS_DIALOG_UISCALE_BUTTON_WIDTH*state->ds.uiUserScale);
+			state->ds.uiElemHeight[UIELEM_PREFS_DIALOG_UISCALE_DROPDOWN] = (uint16_t)(UI_TILE_SIZE*state->ds.uiUserScale);
+			state->ds.uiElemPosX[UIELEM_PREFS_DIALOG_UISCALE_DROPDOWN] = (uint16_t)(state->ds.uiElemPosX[UIELEM_PREFS_DIALOG] + (uint16_t)((PREFS_DIALOG_PREFCOL1_X+3*UI_PADDING_SIZE)*state->ds.uiUserScale) + (uint16_t)(getTextWidth(rdat,FONTSIZE_NORMAL,dat->strings[dat->locStringIDs[LOCSTR_PREF_UISCALE]])/rdat->uiDPIScale));
+			state->ds.uiElemPosY[UIELEM_PREFS_DIALOG_UISCALE_DROPDOWN] = state->ds.uiElemPosY[UIELEM_PREFS_DIALOG] + (uint16_t)((PREFS_DIALOG_PREFCOL1_Y)*state->ds.uiUserScale);
 			break;
 		case UIELEM_PREFS_UISCALE_MENU:
-			ds->uiElemPosX[UIELEM_PREFS_UISCALE_MENU] = ds->uiElemPosX[UIELEM_PREFS_DIALOG_UISCALE_DROPDOWN];
-			ds->uiElemPosY[UIELEM_PREFS_UISCALE_MENU] = (uint16_t)(ds->uiElemPosY[UIELEM_PREFS_DIALOG_UISCALE_DROPDOWN] + ds->uiElemHeight[UIELEM_PREFS_DIALOG_UISCALE_DROPDOWN]);
-			ds->uiElemWidth[UIELEM_PREFS_UISCALE_MENU] = (uint16_t)(PREFS_DIALOG_UISCALE_MENU_WIDTH*ds->uiUserScale);
-			ds->uiElemHeight[UIELEM_PREFS_UISCALE_MENU] = (uint16_t)(((PREFS_DIALOG_UISCALE_MENU_ITEM_SPACING + UI_PADDING_SIZE)*UISCALE_ENUM_LENGTH + 2*PANEL_EDGE_SIZE)*ds->uiUserScale);
+			state->ds.uiElemPosX[UIELEM_PREFS_UISCALE_MENU] = state->ds.uiElemPosX[UIELEM_PREFS_DIALOG_UISCALE_DROPDOWN];
+			state->ds.uiElemPosY[UIELEM_PREFS_UISCALE_MENU] = (uint16_t)(state->ds.uiElemPosY[UIELEM_PREFS_DIALOG_UISCALE_DROPDOWN] + state->ds.uiElemHeight[UIELEM_PREFS_DIALOG_UISCALE_DROPDOWN]);
+			state->ds.uiElemWidth[UIELEM_PREFS_UISCALE_MENU] = (uint16_t)(PREFS_DIALOG_UISCALE_MENU_WIDTH*state->ds.uiUserScale);
+			state->ds.uiElemHeight[UIELEM_PREFS_UISCALE_MENU] = (uint16_t)(((PREFS_DIALOG_UISCALE_MENU_ITEM_SPACING + UI_PADDING_SIZE)*UISCALE_ENUM_LENGTH + 2*PANEL_EDGE_SIZE)*state->ds.uiUserScale);
 			break;
 		case UIELEM_UISM_SMALL_BUTTON:
-			ds->uiElemPosX[UIELEM_UISM_SMALL_BUTTON] = ds->uiElemPosX[UIELEM_PREFS_UISCALE_MENU] + (uint16_t)((PANEL_EDGE_SIZE + 2*UI_PADDING_SIZE)*ds->uiUserScale);
-			ds->uiElemPosY[UIELEM_UISM_SMALL_BUTTON] =  ds->uiElemPosY[UIELEM_PREFS_UISCALE_MENU] + (uint16_t)((PANEL_EDGE_SIZE + 2*UI_PADDING_SIZE)*ds->uiUserScale);
-			ds->uiElemWidth[UIELEM_UISM_SMALL_BUTTON] = ds->uiElemWidth[UIELEM_PREFS_UISCALE_MENU] - (uint16_t)((2*PANEL_EDGE_SIZE + 4*UI_PADDING_SIZE)*ds->uiUserScale);
-			ds->uiElemHeight[UIELEM_UISM_SMALL_BUTTON] = (uint16_t)((PREFS_DIALOG_UISCALE_MENU_ITEM_SPACING - UI_PADDING_SIZE)*ds->uiUserScale);
+			state->ds.uiElemPosX[UIELEM_UISM_SMALL_BUTTON] = state->ds.uiElemPosX[UIELEM_PREFS_UISCALE_MENU] + (uint16_t)((PANEL_EDGE_SIZE + 2*UI_PADDING_SIZE)*state->ds.uiUserScale);
+			state->ds.uiElemPosY[UIELEM_UISM_SMALL_BUTTON] =  state->ds.uiElemPosY[UIELEM_PREFS_UISCALE_MENU] + (uint16_t)((PANEL_EDGE_SIZE + 2*UI_PADDING_SIZE)*state->ds.uiUserScale);
+			state->ds.uiElemWidth[UIELEM_UISM_SMALL_BUTTON] = state->ds.uiElemWidth[UIELEM_PREFS_UISCALE_MENU] - (uint16_t)((2*PANEL_EDGE_SIZE + 4*UI_PADDING_SIZE)*state->ds.uiUserScale);
+			state->ds.uiElemHeight[UIELEM_UISM_SMALL_BUTTON] = (uint16_t)((PREFS_DIALOG_UISCALE_MENU_ITEM_SPACING - UI_PADDING_SIZE)*state->ds.uiUserScale);
 			break;
 		case UIELEM_UISM_DEFAULT_BUTTON:
-			ds->uiElemPosX[UIELEM_UISM_DEFAULT_BUTTON] = ds->uiElemPosX[UIELEM_PREFS_UISCALE_MENU] + (uint16_t)((PANEL_EDGE_SIZE + 2*UI_PADDING_SIZE)*ds->uiUserScale);
-			ds->uiElemPosY[UIELEM_UISM_DEFAULT_BUTTON] =  ds->uiElemPosY[UIELEM_PREFS_UISCALE_MENU] + (uint16_t)((PANEL_EDGE_SIZE + 2*UI_PADDING_SIZE + PREFS_DIALOG_UISCALE_MENU_ITEM_SPACING)*ds->uiUserScale);
-			ds->uiElemWidth[UIELEM_UISM_DEFAULT_BUTTON] = ds->uiElemWidth[UIELEM_PREFS_UISCALE_MENU] - (uint16_t)((2*PANEL_EDGE_SIZE + 4*UI_PADDING_SIZE)*ds->uiUserScale);
-			ds->uiElemHeight[UIELEM_UISM_DEFAULT_BUTTON] = (uint16_t)((PREFS_DIALOG_UISCALE_MENU_ITEM_SPACING - UI_PADDING_SIZE)*ds->uiUserScale);
+			state->ds.uiElemPosX[UIELEM_UISM_DEFAULT_BUTTON] = state->ds.uiElemPosX[UIELEM_PREFS_UISCALE_MENU] + (uint16_t)((PANEL_EDGE_SIZE + 2*UI_PADDING_SIZE)*state->ds.uiUserScale);
+			state->ds.uiElemPosY[UIELEM_UISM_DEFAULT_BUTTON] =  state->ds.uiElemPosY[UIELEM_PREFS_UISCALE_MENU] + (uint16_t)((PANEL_EDGE_SIZE + 2*UI_PADDING_SIZE + PREFS_DIALOG_UISCALE_MENU_ITEM_SPACING)*state->ds.uiUserScale);
+			state->ds.uiElemWidth[UIELEM_UISM_DEFAULT_BUTTON] = state->ds.uiElemWidth[UIELEM_PREFS_UISCALE_MENU] - (uint16_t)((2*PANEL_EDGE_SIZE + 4*UI_PADDING_SIZE)*state->ds.uiUserScale);
+			state->ds.uiElemHeight[UIELEM_UISM_DEFAULT_BUTTON] = (uint16_t)((PREFS_DIALOG_UISCALE_MENU_ITEM_SPACING - UI_PADDING_SIZE)*state->ds.uiUserScale);
 			break;
 		case UIELEM_UISM_LARGE_BUTTON:
-			ds->uiElemPosX[UIELEM_UISM_LARGE_BUTTON] = ds->uiElemPosX[UIELEM_PREFS_UISCALE_MENU] + (uint16_t)((PANEL_EDGE_SIZE + 2*UI_PADDING_SIZE)*ds->uiUserScale);
-			ds->uiElemPosY[UIELEM_UISM_LARGE_BUTTON] =  ds->uiElemPosY[UIELEM_PREFS_UISCALE_MENU] + (uint16_t)((PANEL_EDGE_SIZE + 2*UI_PADDING_SIZE + 2*PREFS_DIALOG_UISCALE_MENU_ITEM_SPACING)*ds->uiUserScale);
-			ds->uiElemWidth[UIELEM_UISM_LARGE_BUTTON] = ds->uiElemWidth[UIELEM_PREFS_UISCALE_MENU] - (uint16_t)((2*PANEL_EDGE_SIZE + 4*UI_PADDING_SIZE)*ds->uiUserScale);
-			ds->uiElemHeight[UIELEM_UISM_LARGE_BUTTON] = (uint16_t)((PREFS_DIALOG_UISCALE_MENU_ITEM_SPACING - UI_PADDING_SIZE)*ds->uiUserScale);
+			state->ds.uiElemPosX[UIELEM_UISM_LARGE_BUTTON] = state->ds.uiElemPosX[UIELEM_PREFS_UISCALE_MENU] + (uint16_t)((PANEL_EDGE_SIZE + 2*UI_PADDING_SIZE)*state->ds.uiUserScale);
+			state->ds.uiElemPosY[UIELEM_UISM_LARGE_BUTTON] =  state->ds.uiElemPosY[UIELEM_PREFS_UISCALE_MENU] + (uint16_t)((PANEL_EDGE_SIZE + 2*UI_PADDING_SIZE + 2*PREFS_DIALOG_UISCALE_MENU_ITEM_SPACING)*state->ds.uiUserScale);
+			state->ds.uiElemWidth[UIELEM_UISM_LARGE_BUTTON] = state->ds.uiElemWidth[UIELEM_PREFS_UISCALE_MENU] - (uint16_t)((2*PANEL_EDGE_SIZE + 4*UI_PADDING_SIZE)*state->ds.uiUserScale);
+			state->ds.uiElemHeight[UIELEM_UISM_LARGE_BUTTON] = (uint16_t)((PREFS_DIALOG_UISCALE_MENU_ITEM_SPACING - UI_PADDING_SIZE)*state->ds.uiUserScale);
 			break;
 		case UIELEM_UISM_HUGE_BUTTON:
-			ds->uiElemPosX[UIELEM_UISM_HUGE_BUTTON] = ds->uiElemPosX[UIELEM_PREFS_UISCALE_MENU] + (uint16_t)((PANEL_EDGE_SIZE + 2*UI_PADDING_SIZE)*ds->uiUserScale);
-			ds->uiElemPosY[UIELEM_UISM_HUGE_BUTTON] =  ds->uiElemPosY[UIELEM_PREFS_UISCALE_MENU] + (uint16_t)((PANEL_EDGE_SIZE + 2*UI_PADDING_SIZE + 3*PREFS_DIALOG_UISCALE_MENU_ITEM_SPACING)*ds->uiUserScale);
-			ds->uiElemWidth[UIELEM_UISM_HUGE_BUTTON] = ds->uiElemWidth[UIELEM_PREFS_UISCALE_MENU] - (uint16_t)((2*PANEL_EDGE_SIZE + 4*UI_PADDING_SIZE)*ds->uiUserScale);
-			ds->uiElemHeight[UIELEM_UISM_HUGE_BUTTON] = (uint16_t)((PREFS_DIALOG_UISCALE_MENU_ITEM_SPACING - UI_PADDING_SIZE)*ds->uiUserScale);
+			state->ds.uiElemPosX[UIELEM_UISM_HUGE_BUTTON] = state->ds.uiElemPosX[UIELEM_PREFS_UISCALE_MENU] + (uint16_t)((PANEL_EDGE_SIZE + 2*UI_PADDING_SIZE)*state->ds.uiUserScale);
+			state->ds.uiElemPosY[UIELEM_UISM_HUGE_BUTTON] =  state->ds.uiElemPosY[UIELEM_PREFS_UISCALE_MENU] + (uint16_t)((PANEL_EDGE_SIZE + 2*UI_PADDING_SIZE + 3*PREFS_DIALOG_UISCALE_MENU_ITEM_SPACING)*state->ds.uiUserScale);
+			state->ds.uiElemWidth[UIELEM_UISM_HUGE_BUTTON] = state->ds.uiElemWidth[UIELEM_PREFS_UISCALE_MENU] - (uint16_t)((2*PANEL_EDGE_SIZE + 4*UI_PADDING_SIZE)*state->ds.uiUserScale);
+			state->ds.uiElemHeight[UIELEM_UISM_HUGE_BUTTON] = (uint16_t)((PREFS_DIALOG_UISCALE_MENU_ITEM_SPACING - UI_PADDING_SIZE)*state->ds.uiUserScale);
 			break;
 		case UIELEM_NUCL_INFOBOX:
-			ds->uiElemPosX[uiElemInd] = (uint16_t)((ds->windowXRes - ds->infoBoxWidth*ds->uiUserScale)/2);
-			uint16_t freeXSpace = (uint16_t)(ds->windowXRes - ds->infoBoxWidth*ds->uiUserScale);
-			if(freeXSpace < 4*NUCL_INFOBOX_X_PADDING*ds->uiUserScale){
-				ds->uiElemPosX[uiElemInd] += (uint16_t)(NUCL_INFOBOX_X_PADDING*ds->uiUserScale - freeXSpace/4); //make sure info box doesn't bump up against y-axis
+			state->ds.uiElemPosX[uiElemInd] = (uint16_t)((state->ds.windowXRes - state->ds.infoBoxWidth*state->ds.uiUserScale)/2);
+			uint16_t freeXSpace = (uint16_t)(state->ds.windowXRes - state->ds.infoBoxWidth*state->ds.uiUserScale);
+			if(freeXSpace < 4*NUCL_INFOBOX_X_PADDING*state->ds.uiUserScale){
+				state->ds.uiElemPosX[uiElemInd] += (uint16_t)(NUCL_INFOBOX_X_PADDING*state->ds.uiUserScale - freeXSpace/4); //make sure info box doesn't bump up against y-axis
 			}
-			ds->uiElemHeight[uiElemInd] = (uint16_t)(((float)NUCL_INFOBOX_MIN_HEIGHT + ds->infoBoxTableHeight + 2*PANEL_EDGE_SIZE)*ds->uiUserScale);
-			ds->uiElemPosY[uiElemInd] = (uint16_t)(ds->windowYRes - ds->uiElemHeight[uiElemInd] - (uint16_t)((UI_PADDING_SIZE + CHART_AXIS_DEPTH)*ds->uiUserScale));
-			ds->uiElemWidth[uiElemInd] = (uint16_t)(ds->infoBoxWidth*ds->uiUserScale);
+			state->ds.uiElemHeight[uiElemInd] = (uint16_t)(((float)NUCL_INFOBOX_MIN_HEIGHT + state->ds.infoBoxTableHeight + 2*PANEL_EDGE_SIZE)*state->ds.uiUserScale);
+			state->ds.uiElemPosY[uiElemInd] = (uint16_t)(state->ds.windowYRes - state->ds.uiElemHeight[uiElemInd] - (uint16_t)((UI_PADDING_SIZE + CHART_AXIS_DEPTH)*state->ds.uiUserScale));
+			state->ds.uiElemWidth[uiElemInd] = (uint16_t)(state->ds.infoBoxWidth*state->ds.uiUserScale);
 			//update child/dependant UI elements
-			updateSingleUIElemPosition(dat,ds,rdat,UIELEM_NUCL_INFOBOX_CLOSEBUTTON);
-			updateSingleUIElemPosition(dat,ds,rdat,UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON);
+			updateSingleUIElemPosition(dat,state,rdat,UIELEM_NUCL_INFOBOX_CLOSEBUTTON);
+			updateSingleUIElemPosition(dat,state,rdat,UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON);
 			break;
 		case UIELEM_NUCL_INFOBOX_CLOSEBUTTON:
-			ds->uiElemWidth[UIELEM_NUCL_INFOBOX_CLOSEBUTTON] = (uint16_t)(UI_TILE_SIZE*ds->uiUserScale);
-			ds->uiElemHeight[UIELEM_NUCL_INFOBOX_CLOSEBUTTON] = ds->uiElemWidth[UIELEM_NUCL_INFOBOX_CLOSEBUTTON];
-			ds->uiElemPosX[UIELEM_NUCL_INFOBOX_CLOSEBUTTON] = (uint16_t)(ds->uiElemPosX[UIELEM_NUCL_INFOBOX] + ds->uiElemWidth[UIELEM_NUCL_INFOBOX] - ds->uiElemWidth[UIELEM_NUCL_INFOBOX_CLOSEBUTTON] - (int32_t)(4*UI_PADDING_SIZE*ds->uiUserScale));
-			ds->uiElemPosY[UIELEM_NUCL_INFOBOX_CLOSEBUTTON] = ds->uiElemPosY[UIELEM_NUCL_INFOBOX] + (uint16_t)(4*UI_PADDING_SIZE*ds->uiUserScale);
+			state->ds.uiElemWidth[UIELEM_NUCL_INFOBOX_CLOSEBUTTON] = (uint16_t)(UI_TILE_SIZE*state->ds.uiUserScale);
+			state->ds.uiElemHeight[UIELEM_NUCL_INFOBOX_CLOSEBUTTON] = state->ds.uiElemWidth[UIELEM_NUCL_INFOBOX_CLOSEBUTTON];
+			state->ds.uiElemPosX[UIELEM_NUCL_INFOBOX_CLOSEBUTTON] = (uint16_t)(state->ds.uiElemPosX[UIELEM_NUCL_INFOBOX] + state->ds.uiElemWidth[UIELEM_NUCL_INFOBOX] - state->ds.uiElemWidth[UIELEM_NUCL_INFOBOX_CLOSEBUTTON] - (int32_t)(4*UI_PADDING_SIZE*state->ds.uiUserScale));
+			state->ds.uiElemPosY[UIELEM_NUCL_INFOBOX_CLOSEBUTTON] = state->ds.uiElemPosY[UIELEM_NUCL_INFOBOX] + (uint16_t)(4*UI_PADDING_SIZE*state->ds.uiUserScale);
 			break;
 		case UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON:
-			ds->uiElemWidth[UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON] = (uint16_t)(NUCL_INFOBOX_ALLLEVELS_BUTTON_WIDTH*ds->uiUserScale);
-			ds->uiElemHeight[UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON] = (uint16_t)(UI_TILE_SIZE*ds->uiUserScale);
-			if(ds->uiAnimPlaying & (1U << UIANIM_NUCLINFOBOX_EXPAND)){
-				float animFrac = juice_smoothStop3(1.0f - ds->timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_EXPAND]/SHORT_UI_ANIM_LENGTH);
-				uint16_t defaultPosX = (uint16_t)(ds->uiElemPosX[UIELEM_NUCL_INFOBOX] + ds->uiElemWidth[UIELEM_NUCL_INFOBOX] - ds->uiElemWidth[UIELEM_NUCL_INFOBOX_CLOSEBUTTON] - ds->uiElemWidth[UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON] - (int32_t)(7*UI_PADDING_SIZE*ds->uiUserScale));
-				uint16_t defaultPosY = ds->uiElemPosY[UIELEM_NUCL_INFOBOX] + (uint16_t)(4*UI_PADDING_SIZE*ds->uiUserScale);
-				uint16_t fullPosX = (uint16_t)(ds->windowXRes-(NUCL_FULLINFOBOX_BACKBUTTON_WIDTH+NUCL_FULLINFOBOX_BACKBUTTON_POS_XR)*ds->uiUserScale);
-				uint16_t fullPosY = (uint16_t)(NUCL_FULLINFOBOX_BACKBUTTON_POS_Y*ds->uiUserScale);
-				ds->uiElemPosX[UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON] = (uint16_t)(defaultPosX + animFrac*(fullPosX - defaultPosX));
-				ds->uiElemPosY[UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON] = (uint16_t)(defaultPosY + animFrac*(fullPosY - defaultPosY));
-			}else if(ds->uiAnimPlaying & (1U << UIANIM_NUCLINFOBOX_CONTRACT)){
-				float animFrac = juice_smoothStop3(1.0f - ds->timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_CONTRACT]/UI_ANIM_LENGTH);
-				uint16_t defaultPosX = (uint16_t)(ds->uiElemPosX[UIELEM_NUCL_INFOBOX] + ds->uiElemWidth[UIELEM_NUCL_INFOBOX] - ds->uiElemWidth[UIELEM_NUCL_INFOBOX_CLOSEBUTTON] - ds->uiElemWidth[UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON] - (int32_t)(7*UI_PADDING_SIZE*ds->uiUserScale));
-				uint16_t defaultPosY = ds->uiElemPosY[UIELEM_NUCL_INFOBOX] + (uint16_t)(4*UI_PADDING_SIZE*ds->uiUserScale);
-				uint16_t fullPosX = (uint16_t)(ds->windowXRes-(NUCL_FULLINFOBOX_BACKBUTTON_WIDTH+NUCL_FULLINFOBOX_BACKBUTTON_POS_XR)*ds->uiUserScale);
-				uint16_t fullPosY = (uint16_t)(NUCL_FULLINFOBOX_BACKBUTTON_POS_Y*ds->uiUserScale);
-				ds->uiElemPosX[UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON] = (uint16_t)(fullPosX + animFrac*(defaultPosX - fullPosX));
-				ds->uiElemPosY[UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON] = (uint16_t)(fullPosY + animFrac*(defaultPosY - fullPosY));
+			state->ds.uiElemWidth[UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON] = (uint16_t)(NUCL_INFOBOX_ALLLEVELS_BUTTON_WIDTH*state->ds.uiUserScale);
+			state->ds.uiElemHeight[UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON] = (uint16_t)(UI_TILE_SIZE*state->ds.uiUserScale);
+			if(state->ds.uiAnimPlaying & (1U << UIANIM_NUCLINFOBOX_EXPAND)){
+				float animFrac = juice_smoothStop3(1.0f - state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_EXPAND]/SHORT_UI_ANIM_LENGTH);
+				uint16_t defaultPosX = (uint16_t)(state->ds.uiElemPosX[UIELEM_NUCL_INFOBOX] + state->ds.uiElemWidth[UIELEM_NUCL_INFOBOX] - state->ds.uiElemWidth[UIELEM_NUCL_INFOBOX_CLOSEBUTTON] - state->ds.uiElemWidth[UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON] - (int32_t)(7*UI_PADDING_SIZE*state->ds.uiUserScale));
+				uint16_t defaultPosY = state->ds.uiElemPosY[UIELEM_NUCL_INFOBOX] + (uint16_t)(4*UI_PADDING_SIZE*state->ds.uiUserScale);
+				uint16_t fullPosX = (uint16_t)(state->ds.windowXRes-(NUCL_FULLINFOBOX_BACKBUTTON_WIDTH+NUCL_FULLINFOBOX_BACKBUTTON_POS_XR)*state->ds.uiUserScale);
+				uint16_t fullPosY = (uint16_t)(NUCL_FULLINFOBOX_BACKBUTTON_POS_Y*state->ds.uiUserScale);
+				state->ds.uiElemPosX[UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON] = (uint16_t)(defaultPosX + animFrac*(fullPosX - defaultPosX));
+				state->ds.uiElemPosY[UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON] = (uint16_t)(defaultPosY + animFrac*(fullPosY - defaultPosY));
+			}else if(state->ds.uiAnimPlaying & (1U << UIANIM_NUCLINFOBOX_CONTRACT)){
+				float animFrac = juice_smoothStop3(1.0f - state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_CONTRACT]/UI_ANIM_LENGTH);
+				uint16_t defaultPosX = (uint16_t)(state->ds.uiElemPosX[UIELEM_NUCL_INFOBOX] + state->ds.uiElemWidth[UIELEM_NUCL_INFOBOX] - state->ds.uiElemWidth[UIELEM_NUCL_INFOBOX_CLOSEBUTTON] - state->ds.uiElemWidth[UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON] - (int32_t)(7*UI_PADDING_SIZE*state->ds.uiUserScale));
+				uint16_t defaultPosY = state->ds.uiElemPosY[UIELEM_NUCL_INFOBOX] + (uint16_t)(4*UI_PADDING_SIZE*state->ds.uiUserScale);
+				uint16_t fullPosX = (uint16_t)(state->ds.windowXRes-(NUCL_FULLINFOBOX_BACKBUTTON_WIDTH+NUCL_FULLINFOBOX_BACKBUTTON_POS_XR)*state->ds.uiUserScale);
+				uint16_t fullPosY = (uint16_t)(NUCL_FULLINFOBOX_BACKBUTTON_POS_Y*state->ds.uiUserScale);
+				state->ds.uiElemPosX[UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON] = (uint16_t)(fullPosX + animFrac*(defaultPosX - fullPosX));
+				state->ds.uiElemPosY[UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON] = (uint16_t)(fullPosY + animFrac*(defaultPosY - fullPosY));
 			}else{
-				ds->uiElemPosX[UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON] = (uint16_t)(ds->uiElemPosX[UIELEM_NUCL_INFOBOX] + ds->uiElemWidth[UIELEM_NUCL_INFOBOX] - ds->uiElemWidth[UIELEM_NUCL_INFOBOX_CLOSEBUTTON] - ds->uiElemWidth[UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON] - (int32_t)(7*UI_PADDING_SIZE*ds->uiUserScale));
-				ds->uiElemPosY[UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON] = ds->uiElemPosY[UIELEM_NUCL_INFOBOX] + (uint16_t)(4*UI_PADDING_SIZE*ds->uiUserScale);
+				state->ds.uiElemPosX[UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON] = (uint16_t)(state->ds.uiElemPosX[UIELEM_NUCL_INFOBOX] + state->ds.uiElemWidth[UIELEM_NUCL_INFOBOX] - state->ds.uiElemWidth[UIELEM_NUCL_INFOBOX_CLOSEBUTTON] - state->ds.uiElemWidth[UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON] - (int32_t)(7*UI_PADDING_SIZE*state->ds.uiUserScale));
+				state->ds.uiElemPosY[UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON] = state->ds.uiElemPosY[UIELEM_NUCL_INFOBOX] + (uint16_t)(4*UI_PADDING_SIZE*state->ds.uiUserScale);
 			}
-			//SDL_Log("x: %u, y: %u, w: %u, h: %u\n",ds->uiElemPosX[UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON],ds->uiElemPosY[UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON],ds->uiElemWidth[UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON],ds->uiElemHeight[UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON]);
+			//SDL_Log("x: %u, y: %u, w: %u, h: %u\n",state->ds.uiElemPosX[UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON],state->ds.uiElemPosY[UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON],state->ds.uiElemWidth[UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON],state->ds.uiElemHeight[UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON]);
 			break;
 		case UIELEM_NUCL_FULLINFOBOX_BACKBUTTON:
-			ds->uiElemPosX[UIELEM_NUCL_FULLINFOBOX_BACKBUTTON] = (uint16_t)(ds->windowXRes-(NUCL_FULLINFOBOX_BACKBUTTON_WIDTH+NUCL_FULLINFOBOX_BACKBUTTON_POS_XR)*ds->uiUserScale);
-			ds->uiElemPosY[UIELEM_NUCL_FULLINFOBOX_BACKBUTTON] = (uint16_t)(NUCL_FULLINFOBOX_BACKBUTTON_POS_Y*ds->uiUserScale);
-			ds->uiElemWidth[UIELEM_NUCL_FULLINFOBOX_BACKBUTTON] = (uint16_t)(NUCL_FULLINFOBOX_BACKBUTTON_WIDTH*ds->uiUserScale);
-			ds->uiElemHeight[UIELEM_NUCL_FULLINFOBOX_BACKBUTTON] = (uint16_t)(UI_TILE_SIZE*ds->uiUserScale);
+			state->ds.uiElemPosX[UIELEM_NUCL_FULLINFOBOX_BACKBUTTON] = (uint16_t)(state->ds.windowXRes-(NUCL_FULLINFOBOX_BACKBUTTON_WIDTH+NUCL_FULLINFOBOX_BACKBUTTON_POS_XR)*state->ds.uiUserScale);
+			state->ds.uiElemPosY[UIELEM_NUCL_FULLINFOBOX_BACKBUTTON] = (uint16_t)(NUCL_FULLINFOBOX_BACKBUTTON_POS_Y*state->ds.uiUserScale);
+			state->ds.uiElemWidth[UIELEM_NUCL_FULLINFOBOX_BACKBUTTON] = (uint16_t)(NUCL_FULLINFOBOX_BACKBUTTON_WIDTH*state->ds.uiUserScale);
+			state->ds.uiElemHeight[UIELEM_NUCL_FULLINFOBOX_BACKBUTTON] = (uint16_t)(UI_TILE_SIZE*state->ds.uiUserScale);
 			break;
 		case UIELEM_NUCL_FULLINFOBOX_SCROLLBAR:
-			ds->uiElemPosX[UIELEM_NUCL_FULLINFOBOX_SCROLLBAR] = (uint16_t)(ds->windowXRes - NUCL_FULLINFOBOX_SCROLLBAR_POS_XR*ds->uiUserScale);
-			ds->uiElemPosY[UIELEM_NUCL_FULLINFOBOX_SCROLLBAR] = (uint16_t)((NUCL_FULLINFOBOX_LEVELLIST_POS_Y + UI_PADDING_SIZE)*ds->uiUserScale);
-			ds->uiElemWidth[UIELEM_NUCL_FULLINFOBOX_SCROLLBAR] = (uint16_t)(0.5f*UI_TILE_SIZE*ds->uiUserScale);
-			ds->uiElemHeight[UIELEM_NUCL_FULLINFOBOX_SCROLLBAR] = (uint16_t)(ds->windowYRes - ds->uiElemPosY[UIELEM_NUCL_FULLINFOBOX_SCROLLBAR] - 2*UI_PADDING_SIZE*ds->uiUserScale);
+			state->ds.uiElemPosX[UIELEM_NUCL_FULLINFOBOX_SCROLLBAR] = (uint16_t)(state->ds.windowXRes - NUCL_FULLINFOBOX_SCROLLBAR_POS_XR*state->ds.uiUserScale);
+			state->ds.uiElemPosY[UIELEM_NUCL_FULLINFOBOX_SCROLLBAR] = (uint16_t)((NUCL_FULLINFOBOX_LEVELLIST_POS_Y + UI_PADDING_SIZE)*state->ds.uiUserScale);
+			state->ds.uiElemWidth[UIELEM_NUCL_FULLINFOBOX_SCROLLBAR] = (uint16_t)(0.5f*UI_TILE_SIZE*state->ds.uiUserScale);
+			state->ds.uiElemHeight[UIELEM_NUCL_FULLINFOBOX_SCROLLBAR] = (uint16_t)(state->ds.windowYRes - state->ds.uiElemPosY[UIELEM_NUCL_FULLINFOBOX_SCROLLBAR] - 2*UI_PADDING_SIZE*state->ds.uiUserScale);
 			break;
 		case UIELEM_ZOOMIN_BUTTON:
-			ds->uiElemPosX[uiElemInd] = (uint16_t)(ds->windowXRes-((UI_TILE_SIZE+ZOOM_BUTTON_POS_XR)*ds->uiUserScale));
-			ds->uiElemPosY[uiElemInd] = (uint16_t)(ds->windowYRes-((UI_TILE_SIZE+ZOOM_BUTTON_POS_YB+CHART_AXIS_DEPTH)*ds->uiUserScale));
-			ds->uiElemWidth[uiElemInd] = (uint16_t)(UI_TILE_SIZE*ds->uiUserScale);
-			ds->uiElemHeight[uiElemInd] = (uint16_t)(UI_TILE_SIZE*ds->uiUserScale);
-			ds->uiElemExtPlusX[uiElemInd] = (uint16_t)((ZOOM_BUTTON_POS_XR + 1.0f)*ds->uiUserScale); //prevent clicking chart 'in between' buttons
-			ds->uiElemExtPlusY[uiElemInd] = (uint16_t)((ZOOM_BUTTON_POS_YB + 1.0f)*ds->uiUserScale); //prevent clicking chart 'in between' buttons
-			ds->uiElemExtMinusX[uiElemInd] = (uint16_t)((0.5f*ZOOM_BUTTON_POS_XR + 1.0f)*ds->uiUserScale); //prevent clicking chart 'in between' buttons
+			state->ds.uiElemPosX[uiElemInd] = (uint16_t)(state->ds.windowXRes-((UI_TILE_SIZE+ZOOM_BUTTON_POS_XR)*state->ds.uiUserScale));
+			state->ds.uiElemPosY[uiElemInd] = (uint16_t)(state->ds.windowYRes-((UI_TILE_SIZE+ZOOM_BUTTON_POS_YB+CHART_AXIS_DEPTH)*state->ds.uiUserScale));
+			state->ds.uiElemWidth[uiElemInd] = (uint16_t)(UI_TILE_SIZE*state->ds.uiUserScale);
+			state->ds.uiElemHeight[uiElemInd] = (uint16_t)(UI_TILE_SIZE*state->ds.uiUserScale);
+			state->ds.uiElemExtPlusX[uiElemInd] = (uint16_t)((ZOOM_BUTTON_POS_XR + 1.0f)*state->ds.uiUserScale); //prevent clicking chart 'in between' buttons
+			state->ds.uiElemExtPlusY[uiElemInd] = (uint16_t)((ZOOM_BUTTON_POS_YB + 1.0f)*state->ds.uiUserScale); //prevent clicking chart 'in between' buttons
+			state->ds.uiElemExtMinusX[uiElemInd] = (uint16_t)((0.5f*ZOOM_BUTTON_POS_XR + 1.0f)*state->ds.uiUserScale); //prevent clicking chart 'in between' buttons
 			break;
 		case UIELEM_ZOOMOUT_BUTTON:
-			ds->uiElemPosX[uiElemInd] = (uint16_t)(ds->windowXRes-((2*(UI_TILE_SIZE+ZOOM_BUTTON_POS_XR))*ds->uiUserScale));
-			ds->uiElemPosY[uiElemInd] = (uint16_t)(ds->windowYRes-((UI_TILE_SIZE+ZOOM_BUTTON_POS_YB+CHART_AXIS_DEPTH)*ds->uiUserScale));
-			ds->uiElemWidth[uiElemInd] = (uint16_t)(UI_TILE_SIZE*ds->uiUserScale);
-			ds->uiElemHeight[uiElemInd] = (uint16_t)(UI_TILE_SIZE*ds->uiUserScale);
-			ds->uiElemExtPlusX[uiElemInd] = (uint16_t)((ZOOM_BUTTON_POS_XR + 1.0f)*ds->uiUserScale); //prevent clicking chart 'in between' buttons
-			ds->uiElemExtPlusY[uiElemInd] = (uint16_t)((ZOOM_BUTTON_POS_YB + 1.0f)*ds->uiUserScale); //prevent clicking chart 'in between' buttons
+			state->ds.uiElemPosX[uiElemInd] = (uint16_t)(state->ds.windowXRes-((2*(UI_TILE_SIZE+ZOOM_BUTTON_POS_XR))*state->ds.uiUserScale));
+			state->ds.uiElemPosY[uiElemInd] = (uint16_t)(state->ds.windowYRes-((UI_TILE_SIZE+ZOOM_BUTTON_POS_YB+CHART_AXIS_DEPTH)*state->ds.uiUserScale));
+			state->ds.uiElemWidth[uiElemInd] = (uint16_t)(UI_TILE_SIZE*state->ds.uiUserScale);
+			state->ds.uiElemHeight[uiElemInd] = (uint16_t)(UI_TILE_SIZE*state->ds.uiUserScale);
+			state->ds.uiElemExtPlusX[uiElemInd] = (uint16_t)((ZOOM_BUTTON_POS_XR + 1.0f)*state->ds.uiUserScale); //prevent clicking chart 'in between' buttons
+			state->ds.uiElemExtPlusY[uiElemInd] = (uint16_t)((ZOOM_BUTTON_POS_YB + 1.0f)*state->ds.uiUserScale); //prevent clicking chart 'in between' buttons
 			break;
 		default:
 			break;
 	}
 }
-void updateUIElemPositions(const app_data *restrict dat, drawing_state *restrict ds, resource_data *restrict rdat){
+void updateUIElemPositions(const app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat){
   for(uint8_t i=0; i<UIELEM_ENUM_LENGTH; i++){
-    updateSingleUIElemPosition(dat,ds,rdat,i);
+    updateSingleUIElemPosition(dat,state,rdat,i);
   }
 }
 
@@ -2927,7 +2965,7 @@ void updateUIScale(app_data *restrict dat, app_state *restrict state, resource_d
 	state->ds.nuclFullInfoMaxScrollY = getMaxNumLvlDispLines(&dat->ndat,state);
 	setFullLevelInfoDimensions(dat,state,rdat,state->chartSelectedNucl);
 	setInfoBoxDimensions(dat,state,rdat,state->chartSelectedNucl);
-	updateUIElemPositions(dat,&state->ds,rdat); //UI element positions
+	updateUIElemPositions(dat,state,rdat); //UI element positions
 	SDL_SetWindowMinimumSize(rdat->window,(int)(MIN_RENDER_WIDTH*state->ds.uiUserScale),(int)(MIN_RENDER_HEIGHT*state->ds.uiUserScale));
 	state->ds.forceRedraw = 1;
 }
@@ -2953,7 +2991,7 @@ void updateWindowRes(app_data *restrict dat, app_state *restrict state, resource
   state->ds.windowYRenderRes = (uint16_t)rheight;
 
   //update things that depend on the window res
-  updateUIElemPositions(dat,&state->ds,rdat); //UI element positions
+  updateUIElemPositions(dat,state,rdat); //UI element positions
 	changeUIState(dat,state,state->uiState);
 }
 
