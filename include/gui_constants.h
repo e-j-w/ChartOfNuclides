@@ -77,7 +77,7 @@ static const float uiScales[UISCALE_ENUM_LENGTH] = {1.0f,1.20f,1.5f,1.75f};
 #define PRIMARY_MENU_WIDTH           200 //in unscaled pixels
 #define PRIMARY_MENU_HEIGHT          (2*PRIMARY_MENU_ITEM_SPACING + 2*PANEL_EDGE_SIZE + 3*UI_PADDING_SIZE) //in unscaled pixels
 
-#define CHARTVIEW_BUTTON_POS_XR      (2*UI_PADDING_SIZE)   //in unscaled pixels, relative to menu betton position
+#define CHARTVIEW_BUTTON_POS_XR      (UI_PADDING_SIZE)   //in unscaled pixels, relative to menu betton position
 #define CHARTVIEW_BUTTON_POS_Y       UI_PADDING_SIZE   //in unscaled pixels
 #define CHARTVIEW_BUTTON_WIDTH       140 //in unscaled pixels
 
@@ -86,6 +86,10 @@ static const float uiScales[UISCALE_ENUM_LENGTH] = {1.0f,1.20f,1.5f,1.75f};
 #define CHARTVIEW_MENU_POS_Y         (UI_TILE_SIZE+UI_PADDING_SIZE)  //in unscaled pixels
 #define CHARTVIEW_MENU_WIDTH         180 //in unscaled pixels
 #define CHARTVIEW_MENU_HEIGHT        ((CHARTVIEW_ENUM_LENGTH+1)*CHARTVIEW_MENU_ITEM_SPACING + 2*PANEL_EDGE_SIZE + 4*UI_PADDING_SIZE) //in unscaled pixels
+
+#define SEARCH_BUTTON_POS_XR         (UI_PADDING_SIZE)   //in unscaled pixels, relative to chart view betton position
+#define SEARCH_BUTTON_POS_Y          UI_PADDING_SIZE   //in unscaled pixels
+#define SEARCH_BUTTON_WIDTH          40 //in unscaled pixels
 
 //zoom buttons
 #define ZOOM_BUTTON_POS_XR           UI_PADDING_SIZE   //in unscaled pixels

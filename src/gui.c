@@ -1635,7 +1635,7 @@ void drawUI(const app_data *restrict dat, app_state *restrict state, resource_da
   drawFlatBG(&state->ds,rdat,dat->rules.themeRules.bgCol);
 
   //draw chart of nuclides below everything else
-  if(state->ds.shownElements & (1U << UIELEM_CHARTOFNUCLIDES)){
+  if(state->ds.shownElements & (1UL << UIELEM_CHARTOFNUCLIDES)){
     drawChartOfNuclides(dat,state,rdat);
     if(state->chartView == CHARTVIEW_HALFLIFE){
       if(state->ds.useLifetimes){
@@ -1650,20 +1650,21 @@ void drawUI(const app_data *restrict dat, app_state *restrict state, resource_da
     }else if(state->chartView == CHARTVIEW_R42){
       drawIconAndTextButton(&dat->rules.themeRules,rdat,state->ds.uiElemPosX[UIELEM_CHARTVIEW_BUTTON],state->ds.uiElemPosY[UIELEM_CHARTVIEW_BUTTON],state->ds.uiElemWidth[UIELEM_CHARTVIEW_BUTTON],getHighlightState(state,UIELEM_CHARTVIEW_BUTTON),255,UIICON_CHARTVIEW,dat->strings[dat->locStringIDs[LOCSTR_CHARTVIEW_R42]]);
     }
+    drawIconButton(&dat->rules.themeRules,rdat,state->ds.uiElemPosX[UIELEM_SEARCH_BUTTON],state->ds.uiElemPosY[UIELEM_SEARCH_BUTTON],state->ds.uiElemWidth[UIELEM_SEARCH_BUTTON],getHighlightState(state,UIELEM_SEARCH_BUTTON),255,UIICON_SEARCH);
     drawIcon(&dat->rules.themeRules,rdat,state->ds.uiElemPosX[UIELEM_ZOOMIN_BUTTON],state->ds.uiElemPosY[UIELEM_ZOOMIN_BUTTON],state->ds.uiElemWidth[UIELEM_ZOOMIN_BUTTON],getHighlightState(state,UIELEM_ZOOMIN_BUTTON),255,UIICON_ZOOMIN);
     drawIcon(&dat->rules.themeRules,rdat,state->ds.uiElemPosX[UIELEM_ZOOMOUT_BUTTON],state->ds.uiElemPosY[UIELEM_ZOOMOUT_BUTTON],state->ds.uiElemWidth[UIELEM_ZOOMOUT_BUTTON],getHighlightState(state,UIELEM_ZOOMOUT_BUTTON),255,UIICON_ZOOMOUT);
   }
   
   //draw menus/panels etc.
-  if(state->ds.shownElements & (1U << UIELEM_NUCL_INFOBOX)){
+  if(state->ds.shownElements & (1UL << UIELEM_NUCL_INFOBOX)){
     drawNuclInfoBox(dat,state,rdat,state->chartSelectedNucl);
-  }else if(state->ds.shownElements & (1U << UIELEM_NUCL_FULLINFOBOX)){
+  }else if(state->ds.shownElements & (1UL << UIELEM_NUCL_FULLINFOBOX)){
     drawNuclFullInfoBox(dat,state,rdat,state->chartSelectedNucl);
   }
-  if(state->ds.shownElements & (1U << UIELEM_PRIMARY_MENU)){
+  if(state->ds.shownElements & (1UL << UIELEM_PRIMARY_MENU)){
     drawPrimaryMenu(dat,state,rdat);
   }
-  if(state->ds.shownElements & (1U << UIELEM_CHARTVIEW_MENU)){
+  if(state->ds.shownElements & (1UL << UIELEM_CHARTVIEW_MENU)){
     drawChartViewMenu(dat,state,rdat);
   }
 
@@ -1671,13 +1672,13 @@ void drawUI(const app_data *restrict dat, app_state *restrict state, resource_da
   drawIconButton(&dat->rules.themeRules,rdat,state->ds.uiElemPosX[UIELEM_MENU_BUTTON],state->ds.uiElemPosY[UIELEM_MENU_BUTTON],state->ds.uiElemWidth[UIELEM_MENU_BUTTON],getHighlightState(state,UIELEM_MENU_BUTTON),255,UIICON_MENU);
 
   //draw modal dialogs
-  if(state->ds.shownElements & (1U << UIELEM_MSG_BOX)){
+  if(state->ds.shownElements & (1UL << UIELEM_MSG_BOX)){
     drawMessageBox(dat,state,rdat);
-  }else if(state->ds.shownElements & (1U << UIELEM_ABOUT_BOX)){
+  }else if(state->ds.shownElements & (1UL << UIELEM_ABOUT_BOX)){
     drawAboutBox(dat,state,rdat);
-  }else if(state->ds.shownElements & (1U << UIELEM_PREFS_DIALOG)){
+  }else if(state->ds.shownElements & (1UL << UIELEM_PREFS_DIALOG)){
     drawPrefsDialog(dat,state,rdat);
-    if(state->ds.shownElements & (1U << UIELEM_PREFS_UISCALE_MENU)){
+    if(state->ds.shownElements & (1UL << UIELEM_PREFS_UISCALE_MENU)){
       drawUIScaleMenu(dat,state,rdat);
     }
   }

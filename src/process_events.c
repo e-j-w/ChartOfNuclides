@@ -202,8 +202,8 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
               state->mouseoverElement = (uint8_t)(UIELEM_PRIMARY_MENU-PRIMARY_MENU_NUM_UIELEMENTS);
             }
           }else if((left && !right)||(right && !left)){
-            if(!(state->ds.shownElements & (1U << UIELEM_NUCL_FULLINFOBOX))){
-              if((state->ds.shownElements & (1U << UIELEM_PRIMARY_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_PRIMARY_MENU_SHOW]==0.0f)){
+            if(!(state->ds.shownElements & (1UL << UIELEM_NUCL_FULLINFOBOX))){
+              if((state->ds.shownElements & (1UL << UIELEM_PRIMARY_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_PRIMARY_MENU_SHOW]==0.0f)){
                 uiElemClickAction(dat,state,rdat,0,UIELEM_CHARTVIEW_BUTTON); //open the chart view menu
               }
             }
