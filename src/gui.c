@@ -1101,6 +1101,8 @@ void drawNuclFullInfoBox(const app_data *restrict dat, const app_state *restrict
   rect.y = (NUCL_FULLINFOBOX_LEVELLIST_HEADER_POS_Y - 2*UI_PADDING_SIZE)*state->ds.uiUserScale + txtYOffset;
   rect.h = (NUCL_FULLINFOBOX_LEVELLIST_POS_Y - NUCL_FULLINFOBOX_LEVELLIST_HEADER_POS_Y + 2*UI_PADDING_SIZE)*state->ds.uiUserScale;
   drawFlatRect(rdat,rect,tableHeaderRectCol);
+  //draw divider line
+  drawLine(rdat,0.0f,rect.y+rect.h,state->ds.windowXRes,rect.y+rect.h,NUCL_FULLINFOBOX_DIVIDER_LINE_THICKNESS*state->ds.uiUserScale,dividerLineCol,dividerLineCol);
 
   //header
   char descStr[64];
@@ -1150,8 +1152,8 @@ void drawNuclFullInfoBox(const app_data *restrict dat, const app_state *restrict
   //draw column title strings
   drawXPos = origDrawXPos;
   drawYPos = NUCL_FULLINFOBOX_LEVELLIST_HEADER_POS_Y*state->ds.uiUserScale + txtYOffset;
-  drawTextAlignedSized(rdat,drawXPos,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,dat->strings[dat->locStringIDs[LOCSTR_LEVELINFO_HEADER]],ALIGN_LEFT,16384);
-  drawYPos += NUCL_INFOBOX_BIGLINE_HEIGHT*state->ds.uiUserScale;
+  drawTextAlignedSized(rdat,drawXPos - 2*UI_PADDING_SIZE*state->ds.uiUserScale,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,dat->strings[dat->locStringIDs[LOCSTR_LEVELINFO_HEADER]],ALIGN_LEFT,16384);
+  drawYPos += (NUCL_INFOBOX_BIGLINE_HEIGHT + 0.5f*UI_PADDING_SIZE)*state->ds.uiUserScale;
   drawTextAlignedSized(rdat,drawXPos,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,dat->strings[dat->locStringIDs[LOCSTR_ENERGY_KEV]],ALIGN_LEFT,16384);
   drawXPos += state->ds.fullInfoElevelColWidth*state->ds.uiUserScale;
   drawTextAlignedSized(rdat,drawXPos,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,dat->strings[dat->locStringIDs[LOCSTR_JPI]],ALIGN_LEFT,16384);
@@ -1240,8 +1242,12 @@ void drawNuclInfoBox(const app_data *restrict dat, app_state *restrict state, re
   }
   drawTextAlignedSized(rdat,drawXPos+state->ds.infoBoxDcyModeColOffset*state->ds.uiUserScale,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,alpha,dat->strings[dat->locStringIDs[LOCSTR_DECAYMODE]],ALIGN_LEFT,state->ds.uiElemWidth[UIELEM_NUCL_INFOBOX]);
 
+  //draw divider line
+  drawYPos += 0.9f*NUCL_INFOBOX_BIGLINE_HEIGHT*state->ds.uiUserScale;
+  drawLine(rdat,drawXPos,drawYPos,drawXPos + infoBoxPanelRect.w - 2.0f*state->ds.infoBoxEColOffset*state->ds.uiUserScale,drawYPos,NUCL_FULLINFOBOX_DIVIDER_LINE_THICKNESS*state->ds.uiUserScale,lightGrayCol,lightGrayCol);
+
   //ground state
-  drawYPos += NUCL_INFOBOX_BIGLINE_HEIGHT*state->ds.uiUserScale;
+  drawYPos += 0.2f*NUCL_INFOBOX_BIGLINE_HEIGHT*state->ds.uiUserScale;
   uint32_t lvlInd = dat->ndat.nuclData[nuclInd].firstLevel + dat->ndat.nuclData[nuclInd].gsLevel;
   getLvlEnergyStr(tmpStr,&dat->ndat,lvlInd,0);
   drawTextAlignedSized(rdat,drawXPos,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,alpha,tmpStr,ALIGN_LEFT,state->ds.uiElemWidth[UIELEM_NUCL_INFOBOX]);
