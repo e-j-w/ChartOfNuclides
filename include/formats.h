@@ -147,7 +147,7 @@ typedef struct
 typedef struct
 {
   SDL_FColor bgCol; //background colors
-  SDL_Color textColNormal; //colors for text (cannot be floating point as this is not supported by SDL_ttf)
+  SDL_Color textColNormal, textColInactive; //colors for text (cannot be floating point as this is not supported by SDL_ttf)
   SDL_FColor modNormalCol, modMouseOverCol, modSelectedCol; //color modulations for UI elements in different states
 }ui_theme_rules; //struct containing global UI thene rules
 
@@ -185,7 +185,6 @@ typedef struct
   uint16_t windowXRenderRes, windowYRenderRes; //render resolution (in pixels) taking HI-DPI into account
   uint16_t uiElemPosX[UIELEM_ENUM_LENGTH], uiElemPosY[UIELEM_ENUM_LENGTH], uiElemWidth[UIELEM_ENUM_LENGTH], uiElemHeight[UIELEM_ENUM_LENGTH]; //UI element positioning, used both for drawing elements and calculating mouse interactions 
   uint16_t uiElemExtPlusX[UIELEM_ENUM_LENGTH], uiElemExtPlusY[UIELEM_ENUM_LENGTH], uiElemExtMinusX[UIELEM_ENUM_LENGTH], uiElemExtMinusY[UIELEM_ENUM_LENGTH]; //'extension' of each UI element, to allow mouse interactions outside of the visible area of the UI element (eg. so that checkbox text can be clicked as well as the checkbox itself)
-  uint8_t texModR, texModG, texModB, texModA; //texture color and alpha modulation values
   uint8_t interfaceSizeInd; //user preference for UI scaling, values from ui_scale_enum
   unsigned int fcScrollInProgress : 1;
   unsigned int fcScrollFinished : 1;
@@ -210,6 +209,7 @@ typedef struct
   drawing_state ds;          //the state information for drawing
   char msgBoxHeaderTxt[32]; //text to show at the top of the message box
   char msgBoxTxt[256];      //main text to show in the message box
+  char searchString[256];   //the user's search query
   float mouseXPx, mouseYPx; //current position of the mouse, in pixels
   float mouseHoldStartPosXPx, mouseHoldStartPosYPx; //mouse position at the start of the last mouse button down event, in pixels
   float mouseClickPosXPx, mouseClickPosYPx; //mouse position at the start of a mouse (left) button up event, in pixels
@@ -217,7 +217,7 @@ typedef struct
   float zoomDeltaVal; //amount to zoom by, equivalent to mouse wheel or touchpad scroll delta, can be very small for subtle touchpad events
   float scrollSpeedMultiplier;
   uint32_t inputFlags;
-  uint16_t gamepadDeadzone,tmpGamepadDeadzone;
+  uint16_t gamepadDeadzone;
   int16_t lastAxisValLX, lastAxisValLY, lastAxisValRX, lastAxisValRY; //used to mask out spurious events in the gamepad axis deadzone
   uint8_t activeAxisX, activeAxisY; //the last used analog stick axis
   uint8_t chartView; //values from chart_view_enum

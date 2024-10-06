@@ -1515,6 +1515,7 @@ void drawSearchMenu(const app_data *restrict dat, const app_state *restrict stat
     alpha = (float)(1.0f*juice_smoothStop2(1.0f - state->ds.timeLeftInUIAnimation[UIANIM_SEARCH_MENU_SHOW]/UI_ANIM_LENGTH));
     yOffset = (-30.0f*state->ds.uiUserScale*juice_smoothStart2(state->ds.timeLeftInUIAnimation[UIANIM_SEARCH_MENU_SHOW]/(UI_ANIM_LENGTH)));
   }
+  uint8_t alpha8 = (uint8_t)SDL_floorf(alpha*255.0f);
   //SDL_Log("alpha: %f\n",(double)alpha);
   
   //draw menu background
@@ -1524,6 +1525,11 @@ void drawSearchMenu(const app_data *restrict dat, const app_state *restrict stat
   drawRect.w = state->ds.uiElemWidth[UIELEM_SEARCH_MENU];
   drawRect.h = state->ds.uiElemHeight[UIELEM_SEARCH_MENU];
   drawPanelBG(rdat,drawRect,alpha);
+
+  //draw entry box
+  if(strncmp(state->searchString,"",256)==0){
+    drawIconAndTextEntryBox(&dat->rules.themeRules,rdat,state->ds.uiElemPosX[UIELEM_SEARCH_ENTRYBOX],(uint16_t)(state->ds.uiElemPosY[UIELEM_SEARCH_ENTRYBOX]+yOffset),state->ds.uiElemWidth[UIELEM_SEARCH_ENTRYBOX],getHighlightState(state,UIELEM_SEARCH_ENTRYBOX),HIGHLIGHT_INACTIVE,alpha8,UIICON_SEARCHGRAY,dat->strings[dat->locStringIDs[LOCSTR_SEARCH_PLACEHOLDER]]);
+  }
 
 }
 

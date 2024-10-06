@@ -28,6 +28,7 @@ Zoom and pan with the mouse, the controls are basically identical to Google Maps
 | ] / [              | Cycle between view modes for the chart (half-life, 2+ energy, etc.) |
 | Enter              | Select menu items |
 | Escape / backspace | Exit out of open menus, cancel selection, etc. |
+| Ctrl+F             | Search |
 | F11                | Toggle fullscreen mode |
 | P                  | Toggle performance stats debug overlay |
 | Ctrl+Q             | Quit application |

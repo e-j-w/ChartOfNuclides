@@ -52,6 +52,7 @@ void initializeTempState(const app_data *restrict dat, app_state *restrict state
   state->ds.windowXRes = 880;
   state->ds.windowYRes = 580;
   state->ds.drawPerformanceStats = 0;
+	memset(state->searchString,0,sizeof(state->searchString));
   //ui state
 	state->lastUIState = UISTATE_CHARTONLY;
   changeUIState(dat,state,UISTATE_CHARTONLY);
@@ -81,6 +82,7 @@ void initializeTempState(const app_data *restrict dat, app_state *restrict state
 	state->ds.fcScrollFinished = 0;
 	state->ds.fcScrollInProgress = 0;
 	state->ds.fcNuclChangeInProgress = 0;
+	state->returnedSearchResults = 0;
 	state->ds.interfaceSizeInd = UISCALE_NORMAL;
 	memset(state->ds.uiElemExtPlusX,0,sizeof(state->ds.uiElemExtPlusX));
 	memset(state->ds.uiElemExtPlusY,0,sizeof(state->ds.uiElemExtPlusY));
@@ -2725,7 +2727,7 @@ void updateSingleUIElemPosition(const app_data *restrict dat, app_state *restric
 			state->ds.uiElemHeight[uiElemInd] = (uint16_t)((PRIMARY_MENU_ITEM_SPACING - UI_PADDING_SIZE)*state->ds.uiUserScale);
 			break;
 		case UIELEM_CHARTVIEW_MENU:
-			state->ds.uiElemPosX[uiElemInd] = (uint16_t)(state->ds.windowXRes-((CHARTVIEW_MENU_WIDTH+CHARTVIEW_MENU_POS_XR)*state->ds.uiUserScale));
+			state->ds.uiElemPosX[uiElemInd] = (uint16_t)(state->ds.windowXRes-((CHARTVIEW_MENU_WIDTH+CHARTVIEW_MENU_POS_XR+MENU_BUTTON_WIDTH)*state->ds.uiUserScale));
 			state->ds.uiElemPosY[uiElemInd] = (uint16_t)(CHARTVIEW_MENU_POS_Y*state->ds.uiUserScale);
 			state->ds.uiElemWidth[uiElemInd] = (uint16_t)(CHARTVIEW_MENU_WIDTH*state->ds.uiUserScale);
 			state->ds.uiElemHeight[uiElemInd] = (uint16_t)(CHARTVIEW_MENU_HEIGHT*state->ds.uiUserScale);
@@ -2759,6 +2761,12 @@ void updateSingleUIElemPosition(const app_data *restrict dat, app_state *restric
 			state->ds.uiElemPosY[uiElemInd] = (uint16_t)(SEARCH_MENU_POS_Y*state->ds.uiUserScale);
 			state->ds.uiElemWidth[uiElemInd] = (uint16_t)(SEARCH_MENU_WIDTH*state->ds.uiUserScale);
 			state->ds.uiElemHeight[uiElemInd] = (uint16_t)((SEARCH_MENU_HEADER_HEIGHT + (float)state->returnedSearchResults*SEARCH_MENU_RESULT_HEIGHT)*state->ds.uiUserScale);
+			break;
+		case UIELEM_SEARCH_ENTRYBOX:
+			state->ds.uiElemPosX[uiElemInd] = (uint16_t)(state->ds.windowXRes-((SEARCH_MENU_WIDTH+SEARCH_MENU_POS_XR+CHARTVIEW_MENU_WIDTH+CHARTVIEW_MENU_POS_XR-SEARCH_MENU_ENTRYBOX_POS_X)*state->ds.uiUserScale));
+			state->ds.uiElemPosY[uiElemInd] = (uint16_t)((SEARCH_MENU_POS_Y+SEARCH_MENU_ENTRYBOX_POS_Y)*state->ds.uiUserScale);
+			state->ds.uiElemWidth[uiElemInd] = (uint16_t)(SEARCH_MENU_ENTRYBOX_WIDTH*state->ds.uiUserScale);
+			state->ds.uiElemHeight[uiElemInd] = (uint16_t)(UI_TILE_SIZE*state->ds.uiUserScale);
 			break;
 		case UIELEM_MSG_BOX:
 			state->ds.uiElemPosX[uiElemInd] = (uint16_t)((state->ds.windowXRes - MESSAGE_BOX_WIDTH*state->ds.uiUserScale)/2);

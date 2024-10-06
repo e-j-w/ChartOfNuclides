@@ -43,6 +43,7 @@ LOCSTR_CHARTVIEW_HALFLIFE, //GUI code expects menu item strings to be defined in
 LOCSTR_CHARTVIEW_DECAYMODE,
 LOCSTR_CHARTVIEW_2PLUS,
 LOCSTR_CHARTVIEW_R42,
+LOCSTR_SEARCH_PLACEHOLDER,
 LOCSTR_ENUM_LENGTH
 }; //localization srings
 enum draw_opt_enum{
@@ -68,7 +69,13 @@ enum highlight_state_enum{
 HIGHLIGHT_NORMAL,
 HIGHLIGHT_MOUSEOVER,
 HIGHLIGHT_SELECTED,
+HIGHLIGHT_INACTIVE,
 HIGHLIGHT_ENUM_LENGTH
+};
+enum uielem_type_enum{
+UIELEMTYPE_BUTTON, 
+UIELEMTYPE_ENTRYBOX,
+UIELEMTYPE_ENUM_LENGTH
 };
 enum ui_element_enum{
 UIELEM_CHARTOFNUCLIDES, //some parts of the code assume this is the first enum entry, don't change
@@ -95,6 +102,7 @@ UIELEM_CHARTVIEW_MENU, //buttons in chart view menu should be defined in the ent
 UIELEM_PM_PREFS_BUTTON,
 UIELEM_PM_ABOUT_BUTTON,
 UIELEM_PRIMARY_MENU, //buttons in primary menu should be defined in the entries directly preceding this, in top to bottom order
+UIELEM_SEARCH_ENTRYBOX,
 UIELEM_SEARCH_MENU,
 UIELEM_MENU_BUTTON,
 UIELEM_CHARTVIEW_BUTTON,
@@ -125,6 +133,7 @@ UISTATE_ENUM_LENGTH
 enum ui_icon_enum{
 UIICON_MENU,
 UIICON_SEARCH,
+UIICON_SEARCHGRAY,
 UIICON_CLOSE,
 UIICON_DOWNARROWS,
 UIICON_UPARROWS,

@@ -118,10 +118,31 @@ void drawPanelBG(resource_data *restrict rdat, const SDL_FRect panelRect, const 
   }
 }
 
-//x, y, w: position and size of the button, assuming a UI scale of 1 (height assumed to be one tile height)
-//highlightState: values from highlight_state_enum
-void drawButton(const ui_theme_rules *restrict uirules, resource_data *restrict rdat, const uint16_t x, const uint16_t y, const uint16_t w, const uint8_t highlightState, const float alpha){
+//elemType: values from uielem_type_enum 
+void drawButtonOrEntryElem(const ui_theme_rules *restrict uirules, resource_data *restrict rdat, const uint16_t x, const uint16_t y, const uint16_t w, const uint8_t highlightState, const uint8_t elemType, const float alpha){
   
+  SDL_FRect srcRect, destRect;
+  const float nineSliceSize = 0.4f*UI_TILE_SIZE*rdat->uiThemeScale;
+  switch(elemType){
+    case UIELEMTYPE_BUTTON:
+      srcRect.x = UITHEME_BUTTON_TILE_X*UI_TILE_SIZE*rdat->uiThemeScale;
+      srcRect.y = UITHEME_BUTTON_TILE_Y*UI_TILE_SIZE*rdat->uiThemeScale;
+      break;
+    case UIELEMTYPE_ENTRYBOX:
+      srcRect.x = UITHEME_ENTRYBOX_TILE_X*UI_TILE_SIZE*rdat->uiThemeScale;
+      srcRect.y = UITHEME_ENTRYBOX_TILE_Y*UI_TILE_SIZE*rdat->uiThemeScale;
+      break;
+    default:
+      SDL_Log("WARNING: drawButtonOrEntryElem - invalid element type (%u).\n",elemType);
+      return;
+  }
+  srcRect.w = 3*UI_TILE_SIZE*rdat->uiThemeScale;
+  srcRect.h = UI_TILE_SIZE*rdat->uiThemeScale;
+  destRect.x = (float)(x*rdat->uiDPIScale);
+  destRect.y = (float)(y*rdat->uiDPIScale);
+  destRect.w = (float)(w*rdat->uiDPIScale);
+  destRect.h = (float)(UI_TILE_SIZE*rdat->uiScale);
+
   switch(highlightState){
     case HIGHLIGHT_NORMAL:
     default:
@@ -134,74 +155,23 @@ void drawButton(const ui_theme_rules *restrict uirules, resource_data *restrict 
       setUITexColAlpha(rdat,uirules->modSelectedCol.r,uirules->modSelectedCol.g,uirules->modSelectedCol.b,alpha);
       break;
   }
-
-  SDL_FRect srcRect, destRect;
-  float remainingWidth = (float)w*rdat->uiDPIScale/rdat->uiScale;
-  if(remainingWidth <= 2.0f*UI_TILE_SIZE){
-    //draw a smaller button using only the left/right side tiles
-    destRect.x = (float)(x*rdat->uiDPIScale);
-    destRect.y = (float)(y*rdat->uiDPIScale);
-    destRect.w = (float)((float)remainingWidth*rdat->uiScale/2.0f);
-    destRect.h = (float)(UI_TILE_SIZE*rdat->uiScale);
-    srcRect.x = 0.0f;
-    srcRect.y = 0.0f;
-    srcRect.w = (float)((float)remainingWidth*rdat->uiThemeScale/2.0f);
-    srcRect.h = (float)(UI_TILE_SIZE*rdat->uiThemeScale);
-    //draw the left side of the button
-    SDL_RenderTexture(rdat->renderer,rdat->uiThemeTex,&srcRect,&destRect);
-    remainingWidth -= (remainingWidth/2.0f);
-    //draw the right side of the button
-    srcRect.x += (float)(3.0f*UI_TILE_SIZE*rdat->uiThemeScale - (float)remainingWidth*rdat->uiThemeScale);
-    srcRect.w = (float)((float)remainingWidth*rdat->uiThemeScale);
-    destRect.x += destRect.w;
-    destRect.w = (float)((float)remainingWidth*rdat->uiScale);
-    SDL_RenderTexture(rdat->renderer,rdat->uiThemeTex,&srcRect,&destRect);
-  }else{
-    destRect.x = (float)(x*rdat->uiDPIScale);
-    destRect.y = (float)(y*rdat->uiDPIScale);
-    destRect.w = (float)(UI_TILE_SIZE*rdat->uiScale);
-    destRect.h = destRect.w;
-    srcRect.x = 0.0f;
-    srcRect.y = 0.0f;
-    srcRect.w = (float)(UI_TILE_SIZE*rdat->uiThemeScale);
-    srcRect.h = srcRect.w;
-    //draw the left side of the button
-    SDL_RenderTexture(rdat->renderer,rdat->uiThemeTex,&srcRect,&destRect);
-    remainingWidth -= UI_TILE_SIZE;
-    //draw the middle section of the button
-    srcRect.x += srcRect.w;
-    while(remainingWidth > UI_TILE_SIZE){
-      float tileWidth;
-      if((remainingWidth - UI_TILE_SIZE) >= UI_TILE_SIZE){
-        tileWidth = UI_TILE_SIZE; //button wide enough to draw an entire middle tile
-      }else{
-        tileWidth = remainingWidth - UI_TILE_SIZE; //can only draw a partial UI tile
-      }
-      srcRect.w = tileWidth*rdat->uiThemeScale;
-      destRect.x += destRect.w;
-      destRect.w = tileWidth*rdat->uiScale;
-      SDL_RenderTexture(rdat->renderer,rdat->uiThemeTex,&srcRect,&destRect);
-      remainingWidth -= tileWidth;
-    }
-    //draw the right side of the button
-    srcRect.x += (float)(UI_TILE_SIZE*rdat->uiThemeScale);
-    srcRect.w = (float)(UI_TILE_SIZE*rdat->uiThemeScale);
-    destRect.x += destRect.w;
-    destRect.w = (float)(UI_TILE_SIZE*rdat->uiScale);
-    SDL_RenderTexture(rdat->renderer,rdat->uiThemeTex,&srcRect,&destRect);
-  }
+  
+  SDL_RenderTexture9Grid(rdat->renderer,rdat->uiThemeTex,&srcRect,nineSliceSize,nineSliceSize,nineSliceSize,nineSliceSize,0.0f,&destRect);
 
   //reset the color modulation
   setUITexColAlpha(rdat,1.0f,1.0f,1.0f,1.0f);
+}
 
+//x, y, w: position and size of the button, assuming a UI scale of 1 (height assumed to be one tile height)
+//highlightState: values from highlight_state_enum
+void drawButton(const ui_theme_rules *restrict uirules, resource_data *restrict rdat, const uint16_t x, const uint16_t y, const uint16_t w, const uint8_t highlightState, const float alpha){
+   drawButtonOrEntryElem(uirules,rdat,x,y,w,highlightState,UIELEMTYPE_BUTTON,alpha);
 }
 
 //draw a button with a text label
 void drawTextButton(const ui_theme_rules *restrict uirules, resource_data *restrict rdat, const uint16_t x, const uint16_t y, const uint16_t w, const uint8_t highlightState, const uint8_t alpha, const char *text){
   drawButton(uirules,rdat,x,y,w,highlightState,(float)(alpha/255.0f));
-  //get the text width and height
-  //these should already fit a 1 tile height button well, with the default font size
-  //(remember that the font size is scaled by the UI scale, during font import)
+  //remember that the font size is scaled by the UI scale, during font import
   float textX = (float)x + (float)(w)/2.0f;
   float textY = (float)y + ((float)(UI_TILE_SIZE)/2.0f)*rdat->uiScale/rdat->uiDPIScale;
   drawTextAlignedSized(rdat,textX,textY,uirules->textColNormal,FONTSIZE_NORMAL,alpha,text,ALIGN_CENTER,(Uint16)w);
@@ -275,6 +245,37 @@ void drawDropDownTextButton(const ui_theme_rules *restrict uirules, resource_dat
   float textY = (float)y + ((float)(UI_TILE_SIZE)/2.0f)*rdat->uiScale/rdat->uiDPIScale;
   //printf("text x: %f, y: %f\n",(double)textX,(double)textY);
   drawTextAlignedSized(rdat,textX,textY,uirules->textColNormal,FONTSIZE_NORMAL,alpha,text,ALIGN_CENTER,(Uint16)(w*rdat->uiScale));
+}
+
+void drawTextEntryBox(const ui_theme_rules *restrict uirules, resource_data *restrict rdat, const uint16_t x, const uint16_t y, const uint16_t w, const uint8_t boxHighlightState, const uint8_t textHighlightState, const uint8_t alpha, const char *text){
+  drawButtonOrEntryElem(uirules,rdat,x,y,w,boxHighlightState,UIELEMTYPE_ENTRYBOX,(float)(alpha/255.0f));
+  float textX = (float)(x + 3*UI_PADDING_SIZE*rdat->uiScale/rdat->uiDPIScale);
+  float textY = (float)(y + 6*rdat->uiScale/rdat->uiDPIScale);
+  switch(textHighlightState){
+    case HIGHLIGHT_NORMAL:
+    default:
+      drawTextAlignedSized(rdat,textX,textY,uirules->textColNormal,FONTSIZE_NORMAL,alpha,text,ALIGN_LEFT,(Uint16)w);
+      break;
+    case HIGHLIGHT_INACTIVE:
+      drawTextAlignedSized(rdat,textX,textY,uirules->textColInactive,FONTSIZE_NORMAL,alpha,text,ALIGN_LEFT,(Uint16)w);
+      break;
+  }
+}
+
+void drawIconAndTextEntryBox(const ui_theme_rules *restrict uirules, resource_data *restrict rdat, const uint16_t x, const uint16_t y, const uint16_t w, const uint8_t boxHighlightState, const uint8_t textHighlightState, const uint8_t alpha, const uint8_t iconInd, const char *text){
+  drawButtonOrEntryElem(uirules,rdat,x,y,w,boxHighlightState,UIELEMTYPE_ENTRYBOX,(float)(alpha/255.0f));
+  drawIcon(uirules,rdat,(uint16_t)(x+UI_PADDING_SIZE*rdat->uiScale/rdat->uiDPIScale),y,(uint16_t)(UI_TILE_SIZE*rdat->uiScale/rdat->uiDPIScale),HIGHLIGHT_NORMAL,alpha,iconInd);
+  float textX = (float)(x + (UI_TILE_SIZE + UI_PADDING_SIZE)*rdat->uiScale/rdat->uiDPIScale);
+  float textY = (float)(y + 6*rdat->uiScale/rdat->uiDPIScale);
+  switch(textHighlightState){
+    case HIGHLIGHT_NORMAL:
+    default:
+      drawTextAlignedSized(rdat,textX,textY,uirules->textColNormal,FONTSIZE_NORMAL,alpha,text,ALIGN_LEFT,(Uint16)w);
+      break;
+    case HIGHLIGHT_INACTIVE:
+      drawTextAlignedSized(rdat,textX,textY,uirules->textColInactive,FONTSIZE_NORMAL,alpha,text,ALIGN_LEFT,(Uint16)w);
+      break;
+  }
 }
 
 void drawCheckbox(const ui_theme_rules *restrict uirules, resource_data *restrict rdat,const uint16_t x, const uint16_t y, const uint16_t w, const uint8_t highlightState, const uint8_t alpha, const uint8_t checked){

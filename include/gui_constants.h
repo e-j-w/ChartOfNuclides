@@ -45,6 +45,8 @@ which can be referenced by both the GUI draw code as well as the interaction cod
 //positions of UI theme elements, in tiles
 #define UITHEME_BUTTON_TILE_X 0
 #define UITHEME_BUTTON_TILE_Y 0
+#define UITHEME_ENTRYBOX_TILE_X 0
+#define UITHEME_ENTRYBOX_TILE_Y 2
 #define UITHEME_PANELBG_TILE_X 0
 #define UITHEME_PANELBG_TILE_Y 5
 #define UITHEME_HIGHLIGHT_TILE_X 0
@@ -53,8 +55,8 @@ which can be referenced by both the GUI draw code as well as the interaction cod
 #define UITHEME_SCROLLBAR_TILE_Y 3
 
 //UI theme icons
-static const uint8_t UITHEME_ICON_TILE_X[UIICON_ENUM_LENGTH] = {0,1,2,1,2,0,1,0,1,1,2};
-static const uint8_t UITHEME_ICON_TILE_Y[UIICON_ENUM_LENGTH] = {10,10,10,9,9,8,8,11,11,3,3};
+static const uint8_t UITHEME_ICON_TILE_X[UIICON_ENUM_LENGTH] = {0,1,2,2,1,2,0,1,0,1,1,2};
+static const uint8_t UITHEME_ICON_TILE_Y[UIICON_ENUM_LENGTH] = {10,10,11,10,9,9,8,8,11,11,3,3};
 
 //font sizes (assuming UI scale of 1)
 static const uint16_t fontSizes[FONTSIZE_ENUM_LENGTH] = {13,15,19};
@@ -77,7 +79,7 @@ static const float uiScales[UISCALE_ENUM_LENGTH] = {1.0f,1.20f,1.5f,1.75f};
 #define PRIMARY_MENU_WIDTH           200 //in unscaled pixels
 #define PRIMARY_MENU_HEIGHT          (2*PRIMARY_MENU_ITEM_SPACING + 2*PANEL_EDGE_SIZE + 3*UI_PADDING_SIZE) //in unscaled pixels
 
-#define CHARTVIEW_BUTTON_POS_XR      (UI_PADDING_SIZE) //in unscaled pixels, relative to menu betton position
+#define CHARTVIEW_BUTTON_POS_XR      (UI_PADDING_SIZE) //in unscaled pixels, relative to menu button position
 #define CHARTVIEW_BUTTON_POS_Y       UI_PADDING_SIZE //in unscaled pixels
 #define CHARTVIEW_BUTTON_WIDTH       140 //in unscaled pixels
 
@@ -93,9 +95,13 @@ static const float uiScales[UISCALE_ENUM_LENGTH] = {1.0f,1.20f,1.5f,1.75f};
 
 #define SEARCH_MENU_POS_XR           (SEARCH_BUTTON_POS_XR) //in unscaled pixels
 #define SEARCH_MENU_POS_Y            (UI_TILE_SIZE+UI_PADDING_SIZE) //in unscaled pixels
-#define SEARCH_MENU_WIDTH            200 //in unscaled pixels
-#define SEARCH_MENU_HEADER_HEIGHT    100 //in unscaled pixels
+#define SEARCH_MENU_WIDTH            300 //in unscaled pixels
+#define SEARCH_MENU_HEADER_HEIGHT    (UI_TILE_SIZE+4*UI_PADDING_SIZE+2*PANEL_EDGE_SIZE) //in unscaled pixels
 #define SEARCH_MENU_RESULT_HEIGHT    80 //in unscaled pixels
+
+#define SEARCH_MENU_ENTRYBOX_POS_X   (PANEL_EDGE_SIZE + 2*UI_PADDING_SIZE) //in unscaled pixels, relative to menu panel position
+#define SEARCH_MENU_ENTRYBOX_POS_Y   (PANEL_EDGE_SIZE + 2*UI_PADDING_SIZE) //in unscaled pixels, relative to menu panel position
+#define SEARCH_MENU_ENTRYBOX_WIDTH   (SEARCH_MENU_WIDTH - 2*SEARCH_MENU_ENTRYBOX_POS_X) //in unscaled pixels
 
 //zoom buttons
 #define ZOOM_BUTTON_POS_XR           UI_PADDING_SIZE   //in unscaled pixels

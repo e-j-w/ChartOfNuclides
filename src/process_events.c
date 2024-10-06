@@ -410,6 +410,9 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
     }else if((state->ds.shownElements & (1U << UIELEM_CHARTVIEW_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_CHARTVIEW_MENU_HIDE]==0.0f)){
       //close the chart view menu
       uiElemClickAction(dat,state,rdat,0,UIELEM_CHARTVIEW_BUTTON);
+    }else if((state->ds.shownElements & (1U << UIELEM_SEARCH_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_SEARCH_MENU_HIDE]==0.0f)){
+      //close the chart view menu
+      uiElemClickAction(dat,state,rdat,0,UIELEM_SEARCH_BUTTON);
     }else if((state->ds.shownElements & (1U << UIELEM_NUCL_INFOBOX))&&(state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_HIDE]==0.0f)){
       startUIAnimation(dat,state,UIANIM_NUCLINFOBOX_HIDE); //hide the info box, see stopUIAnimation() for info box hiding action
       startUIAnimation(dat,state,UIANIM_NUCLHIGHLIGHT_HIDE);
@@ -806,6 +809,13 @@ void processSingleEvent(app_data *restrict dat, app_state *restrict state, resou
             state->chartView = 0;
           }else{
             state->chartView++;
+          }
+          break;
+        case SDL_SCANCODE_F:
+          if(state->kbdModVal == KBD_MOD_CTRL){
+            if(!(state->ds.shownElements & (1U << UIELEM_SEARCH_MENU))){
+              uiElemClickAction(dat,state,rdat,0,UIELEM_SEARCH_BUTTON); //open search
+            }
           }
           break;
         /*case SDL_SCANCODE_F7:

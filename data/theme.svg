@@ -27,11 +27,11 @@
      inkscape:deskcolor="#d1d1d1"
      inkscape:document-units="px"
      showgrid="true"
-     inkscape:zoom="8.0000001"
-     inkscape:cx="52.124999"
-     inkscape:cy="332.625"
+     inkscape:zoom="11.313709"
+     inkscape:cx="53.828503"
+     inkscape:cy="383.34026"
      inkscape:window-width="1920"
-     inkscape:window-height="1043"
+     inkscape:window-height="1011"
      inkscape:window-x="0"
      inkscape:window-y="0"
      inkscape:window-maximized="1"
@@ -387,13 +387,14 @@
        y="43.65625"
        ry="0.52916807" />
     <rect
-       style="opacity:0.99;fill:#cbcbcb;fill-opacity:1;stroke:none;stroke-width:0.3;stroke-linecap:round;stroke-dasharray:none;stroke-opacity:1"
+       style="opacity:0.99;fill:#e5e5e5;fill-opacity:1;stroke:none;stroke-width:0.3;stroke-linecap:round;stroke-dasharray:none;stroke-opacity:1"
        id="rect1-6"
        width="24.341667"
        height="7.4083338"
        x="0.5291667"
        y="17.4625"
-       ry="0.5291667" />
+       ry="1.5875005"
+       rx="1.5875008" />
     <rect
        style="opacity:0.99;fill:#cbcbcb;fill-opacity:1;stroke:none;stroke-width:0.3;stroke-linecap:round;stroke-dasharray:none;stroke-opacity:1"
        id="rect1-6-5"
@@ -521,6 +522,17 @@
        style="fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:0.396875;stroke-dasharray:none;stroke-opacity:1"
        d="m 12.695888,89.055198 1.333493,1.311401"
        id="path4" />
+    <ellipse
+       style="fill:none;fill-opacity:1;stroke:#808080;stroke-width:0.396875;stroke-dasharray:none;stroke-opacity:1"
+       id="path3-5"
+       cx="20.51013"
+       cy="96.837502"
+       rx="0.92111933"
+       ry="0.92111927" />
+    <path
+       style="fill:#ffffff;fill-opacity:1;stroke:#808080;stroke-width:0.396875;stroke-dasharray:none;stroke-opacity:1"
+       d="m 21.172398,97.521863 1.333493,1.311401"
+       id="path4-3" />
     <path
        style="fill:none;stroke:#000000;stroke-width:0.4;stroke-linecap:round;stroke-dasharray:none;stroke-opacity:1"
        d="m 20.108335,81.726602 1.058333,-1.322916 1.058334,1.322916"

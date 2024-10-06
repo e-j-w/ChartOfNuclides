@@ -88,15 +88,40 @@ static int parseAppRules(app_data *restrict dat, asset_mapping *restrict stringI
                   dat->rules.themeRules.textColNormal.b = (Uint8)floor(atof(tok)*255.0);
                   dat->rules.themeRules.textColNormal.a = 255;
                 }else{
-                  SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"could not text_col color string in file: %s.\n",filePath);
+                  SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"could not parse text_col color string in file: %s.\n",filePath);
                   return -1;
                 }
               }else{
-                SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"could not text_col color string in file: %s.\n",filePath);
+                SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"could not parse text_col color string in file: %s.\n",filePath);
                 return -1;
               }
             }else{
-              SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"could not text_col color string in file: %s.\n",filePath);
+              SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"could not parse text_col color string in file: %s.\n",filePath);
+              return -1;
+            }
+          }else if(SDL_strcmp(tok,"text_col_inactive") == 0){
+            tok = strtok(NULL,""); //get the rest of the string
+            strncpy(str2,tok,255);
+            tok = strtok(str2,",");
+            if(tok!=NULL){
+              dat->rules.themeRules.textColInactive.r = (Uint8)floor(atof(tok)*255.0);
+              tok = strtok(NULL,",");
+              if(tok!=NULL){
+                dat->rules.themeRules.textColInactive.g = (Uint8)floor(atof(tok)*255.0);
+                tok = strtok(NULL,",");
+                if(tok!=NULL){
+                  dat->rules.themeRules.textColInactive.b = (Uint8)floor(atof(tok)*255.0);
+                  dat->rules.themeRules.textColInactive.a = 255;
+                }else{
+                  SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"could not parse text_col_inactive color string in file: %s.\n",filePath);
+                  return -1;
+                }
+              }else{
+                SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"could not parse text_col_inactive color string in file: %s.\n",filePath);
+                return -1;
+              }
+            }else{
+              SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"could not parse text_col_inactive color string in file: %s.\n",filePath);
               return -1;
             }
           }else if(SDL_strcmp(tok,"mod_col_normal") == 0){
@@ -113,15 +138,15 @@ static int parseAppRules(app_data *restrict dat, asset_mapping *restrict stringI
                   dat->rules.themeRules.modNormalCol.b = (float)atof(tok);
                   dat->rules.themeRules.modNormalCol.a = 1.0f;
                 }else{
-                  SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"could not mod_col_normal color string in file: %s.\n",filePath);
+                  SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"could not parse mod_col_normal color string in file: %s.\n",filePath);
                   return -1;
                 }
               }else{
-                SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"could not mod_col_normal color string in file: %s.\n",filePath);
+                SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"could not parse mod_col_normal color string in file: %s.\n",filePath);
                 return -1;
               }
             }else{
-              SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"could not mod_col_normal color string in file: %s.\n",filePath);
+              SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"could not parse mod_col_normal color string in file: %s.\n",filePath);
               return -1;
             }
           }else if(SDL_strcmp(tok,"mod_col_mouseover") == 0){
@@ -138,15 +163,15 @@ static int parseAppRules(app_data *restrict dat, asset_mapping *restrict stringI
                   dat->rules.themeRules.modMouseOverCol.b = (float)atof(tok);
                   dat->rules.themeRules.modMouseOverCol.a = 1.0f;
                 }else{
-                  SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"could not mod_col_mouseover color string in file: %s.\n",filePath);
+                  SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"could not parse mod_col_mouseover color string in file: %s.\n",filePath);
                   return -1;
                 }
               }else{
-                SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"could not mod_col_mouseover color string in file: %s.\n",filePath);
+                SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"could not parse mod_col_mouseover color string in file: %s.\n",filePath);
                 return -1;
               }
             }else{
-              SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"could not mod_col_mouseover color string in file: %s.\n",filePath);
+              SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"could not parse mod_col_mouseover color string in file: %s.\n",filePath);
               return -1;
             }
           }else if(SDL_strcmp(tok,"mod_col_selected") == 0){
@@ -163,15 +188,15 @@ static int parseAppRules(app_data *restrict dat, asset_mapping *restrict stringI
                   dat->rules.themeRules.modSelectedCol.b = (float)atof(tok);
                   dat->rules.themeRules.modSelectedCol.a = 1.0f;
                 }else{
-                  SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"could not mod_col_selected color string in file: %s.\n",filePath);
+                  SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"could not parse mod_col_selected color string in file: %s.\n",filePath);
                   return -1;
                 }
               }else{
-                SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"could not mod_col_selected color string in file: %s.\n",filePath);
+                SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"could not parse mod_col_selected color string in file: %s.\n",filePath);
                 return -1;
               }
             }else{
-              SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"could not mod_col_selected color string in file: %s.\n",filePath);
+              SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"could not parse mod_col_selected color string in file: %s.\n",filePath);
               return -1;
             }
           }else{
@@ -232,6 +257,7 @@ static int parseAppRules(app_data *restrict dat, asset_mapping *restrict stringI
 	dat->locStringIDs[LOCSTR_CHARTVIEW_DECAYMODE] = (uint16_t)nameToAssetID("chartview_decaymode",stringIDmap);
 	dat->locStringIDs[LOCSTR_CHARTVIEW_2PLUS] = (uint16_t)nameToAssetID("chartview_2plus",stringIDmap);
 	dat->locStringIDs[LOCSTR_CHARTVIEW_R42] = (uint16_t)nameToAssetID("chartview_r42",stringIDmap);
+	dat->locStringIDs[LOCSTR_SEARCH_PLACEHOLDER] = (uint16_t)nameToAssetID("search_placeholder",stringIDmap);
 	dat->locStringIDs[LOCSTR_PREF_UISCALE] = (uint16_t)nameToAssetID("interface_size",stringIDmap);
 	dat->locStringIDs[LOCSTR_SMALL] = (uint16_t)nameToAssetID("small",stringIDmap);
 	dat->locStringIDs[LOCSTR_LARGE] = (uint16_t)nameToAssetID("large",stringIDmap);
