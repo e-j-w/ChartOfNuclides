@@ -281,7 +281,10 @@ void drawIconAndTextEntryBox(const ui_theme_rules *restrict uirules, resource_da
         memcpy(cursorTxt,text,sizeof(char)*((size_t)cursorPos));
         cursorTxt[cursorPos] = '\0'; //null terminate string
         //SDL_Log("%s|\n",cursorTxt);
-        const float crXPos = textX+getTextWidth(rdat,FONTSIZE_NORMAL,cursorTxt)/rdat->uiDPIScale + 2.0f;
+        float crXPos = textX+getTextWidth(rdat,FONTSIZE_NORMAL,cursorTxt)/rdat->uiDPIScale;
+        if(cursorPos >= (int)strlen(text)){
+          crXPos += 1.0f*rdat->uiScale/rdat->uiDPIScale; //offset the cursor slightly at the end of the text string
+        }
         drawLine(rdat,crXPos,textY,crXPos,textY+(UI_TILE_SIZE-3*UI_PADDING_SIZE)*rdat->uiScale/rdat->uiDPIScale,1.0f,lineCol,lineCol);
       }
       break;
