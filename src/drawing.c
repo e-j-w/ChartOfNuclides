@@ -172,8 +172,8 @@ void drawButton(const ui_theme_rules *restrict uirules, resource_data *restrict 
 void drawTextButton(const ui_theme_rules *restrict uirules, resource_data *restrict rdat, const uint16_t x, const uint16_t y, const uint16_t w, const uint8_t highlightState, const uint8_t alpha, const char *text){
   drawButton(uirules,rdat,x,y,w,highlightState,(float)(alpha/255.0f));
   //remember that the font size is scaled by the UI scale, during font import
-  float textX = (float)x + (float)(w)/2.0f;
-  float textY = (float)y + ((float)(UI_TILE_SIZE)/2.0f)*rdat->uiScale/rdat->uiDPIScale;
+  const float textX = (float)x + (float)(w)/2.0f;
+  const float textY = (float)y + ((float)(UI_TILE_SIZE)/2.0f)*rdat->uiScale/rdat->uiDPIScale;
   drawTextAlignedSized(rdat,textX,textY,uirules->textColNormal,FONTSIZE_NORMAL,alpha,text,ALIGN_CENTER,(Uint16)w);
 }
 
@@ -229,8 +229,8 @@ void drawIconAndTextButton(const ui_theme_rules *restrict uirules, resource_data
   //get the text width and height
   //these should already fit a 1 tile height button well, with the default font size
   //(remember that the font size is scaled by the UI scale, during font import)
-  float textX = (float)x + (((float)(w*rdat->uiDPIScale + UI_TILE_SIZE*rdat->uiScale - 2*UI_PADDING_SIZE*rdat->uiScale)/2.0f)/rdat->uiDPIScale);
-  float textY = (float)y + ((float)(UI_TILE_SIZE)/2.0f)*rdat->uiScale/rdat->uiDPIScale;
+  const float textX = (float)x + (((float)(w*rdat->uiDPIScale + UI_TILE_SIZE*rdat->uiScale - 2*UI_PADDING_SIZE*rdat->uiScale)/2.0f)/rdat->uiDPIScale);
+  const float textY = (float)y + ((float)(UI_TILE_SIZE)/2.0f)*rdat->uiScale/rdat->uiDPIScale;
   //printf("text x: %f, y: %f\n",(double)textX,(double)textY);
   drawTextAlignedSized(rdat,textX,textY,uirules->textColNormal,FONTSIZE_NORMAL,alpha,text,ALIGN_CENTER,(Uint16)(w*rdat->uiScale));
 }
@@ -241,16 +241,16 @@ void drawDropDownTextButton(const ui_theme_rules *restrict uirules, resource_dat
   //get the text width and height
   //these should already fit a 1 tile height button well, with the default font size
   //(remember that the font size is scaled by the UI scale, during font import)
-  float textX = (float)x + (((float)(w*rdat->uiDPIScale - UI_TILE_SIZE*rdat->uiScale)/2.0f)/rdat->uiDPIScale);
-  float textY = (float)y + ((float)(UI_TILE_SIZE)/2.0f)*rdat->uiScale/rdat->uiDPIScale;
+  const float textX = (float)x + (((float)(w*rdat->uiDPIScale - UI_TILE_SIZE*rdat->uiScale)/2.0f)/rdat->uiDPIScale);
+  const float textY = (float)y + ((float)(UI_TILE_SIZE)/2.0f)*rdat->uiScale/rdat->uiDPIScale;
   //printf("text x: %f, y: %f\n",(double)textX,(double)textY);
   drawTextAlignedSized(rdat,textX,textY,uirules->textColNormal,FONTSIZE_NORMAL,alpha,text,ALIGN_CENTER,(Uint16)(w*rdat->uiScale));
 }
 
 void drawTextEntryBox(const ui_theme_rules *restrict uirules, resource_data *restrict rdat, const uint16_t x, const uint16_t y, const uint16_t w, const uint8_t boxHighlightState, const uint8_t textHighlightState, const uint8_t alpha, const char *text){
   drawButtonOrEntryElem(uirules,rdat,x,y,w,boxHighlightState,UIELEMTYPE_ENTRYBOX,(float)(alpha/255.0f));
-  float textX = (float)(x + 3*UI_PADDING_SIZE*rdat->uiScale/rdat->uiDPIScale);
-  float textY = (float)(y + 6*rdat->uiScale/rdat->uiDPIScale);
+  const float textX = (float)(x + 3*UI_PADDING_SIZE*rdat->uiScale/rdat->uiDPIScale);
+  const float textY = (float)(y + 6*rdat->uiScale/rdat->uiDPIScale);
   switch(textHighlightState){
     case HIGHLIGHT_NORMAL:
     default:
@@ -262,18 +262,37 @@ void drawTextEntryBox(const ui_theme_rules *restrict uirules, resource_data *res
   }
 }
 
-void drawIconAndTextEntryBox(const ui_theme_rules *restrict uirules, resource_data *restrict rdat, const uint16_t x, const uint16_t y, const uint16_t w, const uint8_t boxHighlightState, const uint8_t textHighlightState, const uint8_t alpha, const uint8_t iconInd, const char *text){
+//cursorPos: -ve value = draw no cursor
+void drawIconAndTextEntryBox(const ui_theme_rules *restrict uirules, resource_data *restrict rdat, const uint16_t x, const uint16_t y, const uint16_t w, const uint8_t boxHighlightState, const uint8_t textHighlightState, const uint8_t alpha, const uint8_t iconInd, const char *text, const int cursorPos){
+  const uint16_t iconWidth = (uint16_t)(UI_TILE_SIZE*rdat->uiScale/rdat->uiDPIScale);
   drawButtonOrEntryElem(uirules,rdat,x,y,w,boxHighlightState,UIELEMTYPE_ENTRYBOX,(float)(alpha/255.0f));
-  drawIcon(uirules,rdat,(uint16_t)(x+UI_PADDING_SIZE*rdat->uiScale/rdat->uiDPIScale),y,(uint16_t)(UI_TILE_SIZE*rdat->uiScale/rdat->uiDPIScale),HIGHLIGHT_NORMAL,alpha,iconInd);
-  float textX = (float)(x + (UI_TILE_SIZE + UI_PADDING_SIZE)*rdat->uiScale/rdat->uiDPIScale);
-  float textY = (float)(y + 6*rdat->uiScale/rdat->uiDPIScale);
+  drawIcon(uirules,rdat,(uint16_t)(x+UI_PADDING_SIZE*rdat->uiScale/rdat->uiDPIScale),y,iconWidth,HIGHLIGHT_NORMAL,alpha,iconInd);
+  const float textX = (float)(x + (UI_TILE_SIZE + UI_PADDING_SIZE)*rdat->uiScale/rdat->uiDPIScale);
+  const float textY = (float)(y + 6*rdat->uiScale/rdat->uiDPIScale);
   switch(textHighlightState){
     case HIGHLIGHT_NORMAL:
     default:
-      drawTextAlignedSized(rdat,textX,textY,uirules->textColNormal,FONTSIZE_NORMAL,alpha,text,ALIGN_LEFT,(Uint16)w);
+      drawTextAlignedSized(rdat,textX,textY,uirules->textColNormal,FONTSIZE_NORMAL,alpha,text,ALIGN_LEFT,(Uint16)(w - iconWidth));
+      if((cursorPos >= 0)&&(cursorPos < 256)){
+        ; //suppress pedantic warning
+        SDL_FColor lineCol = grayCol;
+        lineCol.a = alpha/255.0f;
+        char cursorTxt[256];
+        memcpy(cursorTxt,text,sizeof(char)*((size_t)cursorPos));
+        cursorTxt[cursorPos] = '\0'; //null terminate string
+        //SDL_Log("%s|\n",cursorTxt);
+        const float crXPos = textX+getTextWidth(rdat,FONTSIZE_NORMAL,cursorTxt)/rdat->uiDPIScale + 2.0f;
+        drawLine(rdat,crXPos,textY,crXPos,textY+(UI_TILE_SIZE-3*UI_PADDING_SIZE)*rdat->uiScale/rdat->uiDPIScale,1.0f,lineCol,lineCol);
+      }
       break;
     case HIGHLIGHT_INACTIVE:
-      drawTextAlignedSized(rdat,textX,textY,uirules->textColInactive,FONTSIZE_NORMAL,alpha,text,ALIGN_LEFT,(Uint16)w);
+      ; //suppress pedantic warning
+      drawTextAlignedSized(rdat,textX,textY,uirules->textColInactive,FONTSIZE_NORMAL,alpha,text,ALIGN_LEFT,(Uint16)(w - iconWidth));
+      if(cursorPos >= 0){
+        SDL_FColor lineCol = grayCol;
+        lineCol.a = alpha/255.0f;
+        drawLine(rdat,textX-4.0f,textY,textX-4.0f,textY+UI_TILE_SIZE-2*UI_PADDING_SIZE,1.0f,lineCol,lineCol);
+      }
       break;
   }
 }
@@ -289,7 +308,7 @@ void drawCheckbox(const ui_theme_rules *restrict uirules, resource_data *restric
 
 //draws a selection indicator with the position and size specified by the input SDL_Rect
 void drawSelectionRect(resource_data *restrict rdat, const SDL_FRect pos, const SDL_FColor col, const float thicknessPx){
-  float scaledThickness = thicknessPx*rdat->uiDPIScale;
+  const float scaledThickness = thicknessPx*rdat->uiDPIScale;
   SDL_SetRenderDrawColorFloat(rdat->renderer,col.r,col.g,col.b,col.a);
   SDL_FRect rect;
   rect.x = pos.x*rdat->uiDPIScale;
@@ -347,7 +366,7 @@ SDL_FRect drawTextAlignedSized(resource_data *restrict rdat, const float xPos, c
   if(alignment == ALIGN_RIGHT){
     drawX = drawX - drawW;
   }else if(alignment == ALIGN_CENTER){
-    float drawH = getTextHeight(rdat,fontSizeInd,txt);
+    const float drawH = getTextHeight(rdat,fontSizeInd,txt);
     drawX = drawX - drawW/2.0f;
     drawY = drawY - drawH/2.0f;
   }

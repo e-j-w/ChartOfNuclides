@@ -42,7 +42,7 @@ chartview_halflife|Half-life
 chartview_decaymode|Decay Mode
 chartview_2plus|E(2+)
 chartview_r42|E(4+)/E(2+)
-search_placeholder|eg. '32Si'
+search_placeholder|Type to search (eg. '32Si')
 interface_size|Interface size
 small|Small
 default|Default

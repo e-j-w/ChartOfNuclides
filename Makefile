@@ -3,8 +3,8 @@ CFLAGS = -O2 -Wall -Wextra -Wpedantic -Wc++-compat -Wdouble-promotion -Wshadow -
 #CFLAGS += $(DEBUG_FLAGS)
 SDL = `pkg-config sdl3 --libs --cflags` -lSDL3_image -lSDL3_ttf
 COMMON = include/formats.h include/enums.h include/gui_constants.h
-OBJ = lib/fontcache.o lib/juicer.o io_ops.o load_data.o data_ops.o gui.o drawing.o process_events.o
-INC =  -I./include -I./src -I./lib/fontcache -I./lib/juicer
+OBJ = lib/fontcache.o lib/strops.o lib/juicer.o io_ops.o load_data.o data_ops.o gui.o drawing.o process_events.o
+INC =  -I./include -I./src -I./lib/fontcache -I./lib/juicer -I./lib/strops
 CC = gcc
 #CC = clang
 
@@ -54,6 +54,9 @@ con.dat: proc_data
 lib/juicer.o: lib/juicer/*.c lib/juicer/*.h
 	$(CC) lib/juicer/juicer.c $(CFLAGS) -c -o lib/juicer.o
 
+lib/strops.o: lib/strops/*.c lib/strops/*.h
+	$(CC) lib/strops/strops.c $(CFLAGS) -c -o lib/strops.o
+
 lib/fontcache.o: lib/fontcache/*.c lib/fontcache/*.h
 	$(CC) lib/fontcache/SDL_FontCache.c $(CFLAGS) -c -o lib/fontcache.o
 
@@ -64,13 +67,13 @@ load_data.o: src/load_data.c include/load_data.h $(COMMON)
 	$(CC) src/load_data.c $(INC) $(CFLAGS) -c -o load_data.o
 
 data_ops.o: src/data_ops.c include/data_ops.h $(COMMON)
-	$(CC) src/data_ops.c -I./lib/juicer $(INC) $(CFLAGS) -c -o data_ops.o
+	$(CC) src/data_ops.c $(INC) $(CFLAGS) -c -o data_ops.o
 
 drawing.o: src/drawing.c include/drawing.h $(COMMON)
-	$(CC) src/drawing.c -I./lib/juicer $(INC) $(CFLAGS) -c -o drawing.o
+	$(CC) src/drawing.c $(INC) $(CFLAGS) -c -o drawing.o
 
 gui.o: src/gui.c include/gui.h $(COMMON)
-	$(CC) src/gui.c -I./lib/juicer $(INC) $(CFLAGS) -c -o gui.o
+	$(CC) src/gui.c $(INC) $(CFLAGS) -c -o gui.o
 
 process_events.o: src/process_events.c include/process_events.h $(COMMON)
 	$(CC) src/process_events.c $(INC) $(CFLAGS) -c -o process_events.o

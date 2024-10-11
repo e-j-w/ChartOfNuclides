@@ -19,6 +19,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "process_events.h"
 #include "data_ops.h"
+#include "strops.h" //for search query editing
 #include "gui_constants.h" //to compute mouse/pointer interactions
 
 void fcScrollAction(app_state *restrict state, const float deltaVal){
@@ -38,7 +39,7 @@ void fcScrollAction(app_state *restrict state, const float deltaVal){
 }
 
 void processInputFlags(app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat){
-  
+
   /* Handle directional input */
   uint32_t up,down,left,right,altup,altdown,altleft,altright;
   up = (state->inputFlags & (1U << INPUT_UP));
@@ -201,10 +202,16 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
             }else{
               state->mouseoverElement = (uint8_t)(UIELEM_PRIMARY_MENU-PRIMARY_MENU_NUM_UIELEMENTS);
             }
-          }else if((left && !right)||(right && !left)){
+          }else if(left && !right){
             if(!(state->ds.shownElements & (1UL << UIELEM_NUCL_FULLINFOBOX))){
               if((state->ds.shownElements & (1UL << UIELEM_PRIMARY_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_PRIMARY_MENU_SHOW]==0.0f)){
                 uiElemClickAction(dat,state,rdat,0,UIELEM_CHARTVIEW_BUTTON); //open the chart view menu
+              }
+            }
+          }else if(right && !left){
+            if(!(state->ds.shownElements & (1UL << UIELEM_NUCL_FULLINFOBOX))){
+              if((state->ds.shownElements & (1UL << UIELEM_PRIMARY_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_PRIMARY_MENU_SHOW]==0.0f)){
+                uiElemClickAction(dat,state,rdat,0,UIELEM_SEARCH_BUTTON); //open the search menu
               }
             }
           }
@@ -232,10 +239,25 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
             }else{
               state->mouseoverElement = (uint8_t)(UIELEM_CHARTVIEW_MENU-CHARTVIEW_ENUM_LENGTH);
             }
-          }else if((left && !right)||(right && !left)){
+          }else if(right && !left){
             if((state->ds.shownElements & (1U << UIELEM_CHARTVIEW_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_CHARTVIEW_MENU_SHOW]==0.0f)){
               uiElemClickAction(dat,state,rdat,0,UIELEM_MENU_BUTTON); //open the primary menu
             }
+          }else if(left && !right){
+            if((state->ds.shownElements & (1U << UIELEM_CHARTVIEW_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_CHARTVIEW_MENU_SHOW]==0.0f)){
+              uiElemClickAction(dat,state,rdat,0,UIELEM_SEARCH_BUTTON); //open the search menu
+            }
+          }
+        }
+      }else if(state->clickedUIElem == UIELEM_SEARCH_BUTTON){
+        //search menu navigation using arrow keys
+        if(right && !left){
+          if((state->ds.shownElements & (1U << UIELEM_SEARCH_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_SEARCH_MENU_SHOW]==0.0f)){
+            uiElemClickAction(dat,state,rdat,0,UIELEM_CHARTVIEW_BUTTON); //open the primary menu
+          }
+        }else if(left && !right){
+          if((state->ds.shownElements & (1U << UIELEM_SEARCH_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_SEARCH_MENU_SHOW]==0.0f)){
+            uiElemClickAction(dat,state,rdat,0,UIELEM_MENU_BUTTON); //open the search menu
           }
         }
       }
@@ -753,100 +775,165 @@ void processSingleEvent(app_data *restrict dat, app_state *restrict state, resou
       state->mouseYPx = -1.0f;
       //state->ds.forceRedraw = 1;
       break;
-    
     case SDL_EVENT_KEY_DOWN: //pressing key
       state->lastInputType = INPUT_TYPE_KEYBOARD; //set keyboard input
       switch(evt.key.scancode){
         case SDL_SCANCODE_LEFT:
-          state->inputFlags |= (1U << INPUT_LEFT);
+          if(SDL_TextInputActive(rdat->window)){
+            if(state->searchCursorPos > 0){
+              state->searchCursorPos -= 1;
+            }else if(strlen(state->searchString) == 0){
+              //empty string, can use keys to cycle throght menus
+              state->inputFlags |= (1U << INPUT_LEFT);
+            }
+          }else{
+            state->inputFlags |= (1U << INPUT_LEFT);
+          }
           break;
         case SDL_SCANCODE_A:
-          state->inputFlags |= (1U << INPUT_ALTLEFT);
+          if(!(SDL_TextInputActive(rdat->window))){
+            state->inputFlags |= (1U << INPUT_ALTLEFT);
+          }
           break;
         case SDL_SCANCODE_RIGHT:
-          state->inputFlags |= (1U << INPUT_RIGHT);
+          if(SDL_TextInputActive(rdat->window)){
+            if(state->searchCursorPos < (int)strlen(state->searchString)){
+              state->searchCursorPos += 1;
+            }else if(strlen(state->searchString) == 0){
+              //empty string, can use keys to cycle throght menus
+              state->inputFlags |= (1U << INPUT_RIGHT);
+            }
+          }else{
+            state->inputFlags |= (1U << INPUT_RIGHT);
+          }
           break;
         case SDL_SCANCODE_D:
-          state->inputFlags |= (1U << INPUT_ALTRIGHT);
+          if(!(SDL_TextInputActive(rdat->window))){
+            state->inputFlags |= (1U << INPUT_ALTRIGHT);
+          }
           break;
         case SDL_SCANCODE_UP:
-          state->inputFlags |= (1U << INPUT_UP);
+          if(!(SDL_TextInputActive(rdat->window))){
+            state->inputFlags |= (1U << INPUT_UP);
+          }
           break;
         case SDL_SCANCODE_W:
-          state->inputFlags |= (1U << INPUT_ALTUP);
+          if(!(SDL_TextInputActive(rdat->window))){
+            state->inputFlags |= (1U << INPUT_ALTUP);
+          }
           break;
         case SDL_SCANCODE_DOWN:
-          state->inputFlags |= (1U << INPUT_DOWN);
+          if(!(SDL_TextInputActive(rdat->window))){
+            state->inputFlags |= (1U << INPUT_DOWN);
+          }
           break;
         case SDL_SCANCODE_S:
-          state->inputFlags |= (1U << INPUT_ALTDOWN);
+          if(!(SDL_TextInputActive(rdat->window))){
+            state->inputFlags |= (1U << INPUT_ALTDOWN);
+          }
           break;
         case SDL_SCANCODE_ESCAPE:
-        case SDL_SCANCODE_BACKSPACE:
+          if(SDL_TextInputActive(rdat->window)){
+            SDL_StopTextInput(rdat->window);
+          }
           if(state->uiState == UISTATE_CHARTONLY){
             state->inputFlags |= (1U << INPUT_MENU);
           }else{
             state->inputFlags |= (1U << INPUT_BACK);
           }
           break;
+        case SDL_SCANCODE_BACKSPACE:
+          if(!(SDL_TextInputActive(rdat->window))){
+            if(state->uiState == UISTATE_CHARTONLY){
+              state->inputFlags |= (1U << INPUT_MENU);
+            }else{
+              state->inputFlags |= (1U << INPUT_BACK);
+            }
+          }else{
+            if(strdelchar(state->searchString,256,(size_t)state->searchCursorPos) >= 0){
+              state->searchCursorPos -= 1;
+              //SDL_Log("search query: %s\n",state->searchString);
+            }
+          }
+          break;
         case SDL_SCANCODE_EQUALS:
-          state->mouseholdElement = UIELEM_ZOOMIN_BUTTON;
-          uiElemClickAction(dat,state,rdat,0,UIELEM_ZOOMIN_BUTTON);
+          if(!(SDL_TextInputActive(rdat->window))){
+            state->mouseholdElement = UIELEM_ZOOMIN_BUTTON;
+            uiElemClickAction(dat,state,rdat,0,UIELEM_ZOOMIN_BUTTON);
+          }
           break;
         case SDL_SCANCODE_MINUS:
-          state->mouseholdElement = UIELEM_ZOOMOUT_BUTTON;
-          uiElemClickAction(dat,state,rdat,0,UIELEM_ZOOMOUT_BUTTON);
+          if(!(SDL_TextInputActive(rdat->window))){
+            state->mouseholdElement = UIELEM_ZOOMOUT_BUTTON;
+            uiElemClickAction(dat,state,rdat,0,UIELEM_ZOOMOUT_BUTTON);
+          }
           break;
         case SDL_SCANCODE_LEFTBRACKET:
-          if(state->chartView == 0){
-            state->chartView = (uint8_t)(CHARTVIEW_ENUM_LENGTH - 1);
-          }else{
-            state->chartView--;
+          if(!(SDL_TextInputActive(rdat->window))){
+            if(state->chartView == 0){
+              state->chartView = (uint8_t)(CHARTVIEW_ENUM_LENGTH - 1);
+            }else{
+              state->chartView--;
+            }
           }
           break;
         case SDL_SCANCODE_RIGHTBRACKET:
-          if(state->chartView == (uint8_t)(CHARTVIEW_ENUM_LENGTH - 1)){
-            state->chartView = 0;
-          }else{
-            state->chartView++;
+          if(!(SDL_TextInputActive(rdat->window))){
+            if(state->chartView == (uint8_t)(CHARTVIEW_ENUM_LENGTH - 1)){
+              state->chartView = 0;
+            }else{
+              state->chartView++;
+            }
           }
           break;
         case SDL_SCANCODE_F:
           if(state->kbdModVal == KBD_MOD_CTRL){
-            if(!(state->ds.shownElements & (1U << UIELEM_SEARCH_MENU))){
-              uiElemClickAction(dat,state,rdat,0,UIELEM_SEARCH_BUTTON); //open search
+            if(state->ds.shownElements & (1UL << UIELEM_CHARTOFNUCLIDES)){
+              uiElemClickAction(dat,state,rdat,0,UIELEM_SEARCH_BUTTON); //open search, also activates text input
             }
           }
           break;
         /*case SDL_SCANCODE_F7:
           //scale UI down
-          if(state->ds.interfaceSizeInd > 0){
-            state->ds.interfaceSizeInd--;
-          }else{
-            state->ds.interfaceSizeInd = UISCALE_ENUM_LENGTH - 1;
+          if(!(SDL_TextInputActive(rdat->window))){
+            if(state->ds.interfaceSizeInd > 0){
+              state->ds.interfaceSizeInd--;
+            }else{
+              state->ds.interfaceSizeInd = UISCALE_ENUM_LENGTH - 1;
+            }
+            state->ds.uiUserScale = uiScales[state->ds.interfaceSizeInd];
+            updateUIScale(dat,state,rdat);
           }
-          state->ds.uiUserScale = uiScales[state->ds.interfaceSizeInd];
-          updateUIScale(dat,state,rdat);
           break;
         case SDL_SCANCODE_F8:
           //scale UI up
-          if(state->ds.interfaceSizeInd < (UISCALE_ENUM_LENGTH - 1)){
-            state->ds.interfaceSizeInd++;
-          }else{
-            state->ds.interfaceSizeInd = 0;
+          if(!(SDL_TextInputActive(rdat->window))){
+            if(state->ds.interfaceSizeInd < (UISCALE_ENUM_LENGTH - 1)){
+              state->ds.interfaceSizeInd++;
+            }else{
+              state->ds.interfaceSizeInd = 0;
+            }
+            state->ds.uiUserScale = uiScales[state->ds.interfaceSizeInd];
+            updateUIScale(dat,state,rdat);
           }
-          state->ds.uiUserScale = uiScales[state->ds.interfaceSizeInd];
-          updateUIScale(dat,state,rdat);
           break;*/
         case SDL_SCANCODE_RETURN:
-          state->inputFlags |= (1U << INPUT_SELECT);
+          if(SDL_TextInputActive(rdat->window)){
+            //commit search entry (unimplemented)
+          }else{
+            state->inputFlags |= (1U << INPUT_SELECT);
+          }
           break;
         case SDL_SCANCODE_LSHIFT:
         case SDL_SCANCODE_RSHIFT:
-          state->kbdModVal = KBD_MOD_SHIFT;
+          if(!(SDL_TextInputActive(rdat->window))){
+            state->kbdModVal = KBD_MOD_SHIFT;
+          }
           break;
         case SDL_SCANCODE_P:
-          state->ds.drawPerformanceStats = !state->ds.drawPerformanceStats;
+          if(!(SDL_TextInputActive(rdat->window))){
+            state->ds.drawPerformanceStats = !state->ds.drawPerformanceStats;
+          }
           break;
         case SDL_SCANCODE_F11:
           state->ds.windowFullscreenMode = !state->ds.windowFullscreenMode;
@@ -1032,8 +1119,19 @@ void processSingleEvent(app_data *restrict dat, app_state *restrict state, resou
         default:
           break;
       }
-      
       break;
+    case SDL_EVENT_TEXT_INPUT:
+      //SDL_Log("text input: %s\n",evt.text.text);
+      // Add new text onto the end of the search string
+      if(strinsert(state->searchString,256,evt.text.text,(size_t)state->searchCursorPos) >= 0){
+        state->searchCursorPos += (int)strlen(evt.text.text);
+        //SDL_Log("search query: %s\n",state->searchString);
+      }
+      break;
+    /*case SDL_EVENT_TEXT_EDITING:
+      state->searchCursorPos = evt.edit.start; //seems to reset to 0 when changing workspace
+      state->searchSelectionLen = evt.edit.length;
+      break;*/
     default:
       break;
   }
