@@ -19,6 +19,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "process_events.h"
 #include "data_ops.h"
+#include "drawing.h"
 #include "strops.h" //for search query editing
 #include "gui_constants.h" //to compute mouse/pointer interactions
 
@@ -782,6 +783,10 @@ void processSingleEvent(app_data *restrict dat, app_state *restrict state, resou
           if(SDL_TextInputActive(rdat->window)){
             if(state->searchCursorPos > 0){
               state->searchCursorPos -= 1;
+              if(state->searchCursorPos < state->ds.searchEntryDispStartChar){
+                state->ds.searchEntryDispStartChar = (uint16_t)state->searchCursorPos;
+                state->ds.searchEntryDispNumChars = getNumTextCharsUnderWidth(rdat,SEARCH_MENU_ENTRYBOX_ENTRY_WIDTH,state->searchString,state->ds.searchEntryDispStartChar);
+              }
             }else if(strlen(state->searchString) == 0){
               //empty string, can use keys to cycle throght menus
               state->inputFlags |= (1U << INPUT_LEFT);
@@ -799,6 +804,14 @@ void processSingleEvent(app_data *restrict dat, app_state *restrict state, resou
           if(SDL_TextInputActive(rdat->window)){
             if(state->searchCursorPos < (int)strlen(state->searchString)){
               state->searchCursorPos += 1;
+              state->ds.searchEntryDispNumChars = getNumTextCharsUnderWidth(rdat,SEARCH_MENU_ENTRYBOX_ENTRY_WIDTH,state->searchString,state->ds.searchEntryDispStartChar);
+              while((state->searchCursorPos - state->ds.searchEntryDispStartChar) > state->ds.searchEntryDispNumChars){
+                state->ds.searchEntryDispStartChar++;
+                if(state->ds.searchEntryDispStartChar == 0){
+                  SDL_Log("WARNING: overflow");
+                  break;
+                }
+              }
             }else if(strlen(state->searchString) == 0){
               //empty string, can use keys to cycle throght menus
               state->inputFlags |= (1U << INPUT_RIGHT);
@@ -850,8 +863,12 @@ void processSingleEvent(app_data *restrict dat, app_state *restrict state, resou
               state->inputFlags |= (1U << INPUT_BACK);
             }
           }else{
-            if(strdelchar(state->searchString,256,(size_t)state->searchCursorPos) >= 0){
+            if(strdelchar(state->searchString,SEARCH_STRING_MAX_SIZE,(size_t)state->searchCursorPos) >= 0){
               state->searchCursorPos -= 1;
+              if(state->searchCursorPos < state->ds.searchEntryDispStartChar){
+                state->ds.searchEntryDispStartChar = (uint16_t)state->searchCursorPos;
+                state->ds.searchEntryDispNumChars = getNumTextCharsUnderWidth(rdat,SEARCH_MENU_ENTRYBOX_ENTRY_WIDTH,state->searchString,state->ds.searchEntryDispStartChar);
+              }
               //SDL_Log("search query: %s\n",state->searchString);
             }
           }
@@ -1119,8 +1136,17 @@ void processSingleEvent(app_data *restrict dat, app_state *restrict state, resou
     case SDL_EVENT_TEXT_INPUT:
       //SDL_Log("text input: %s\n",evt.text.text);
       // Add new text onto the end of the search string
-      if(strinsert(state->searchString,256,evt.text.text,(size_t)state->searchCursorPos) >= 0){
+      if(strinsert(state->searchString,SEARCH_STRING_MAX_SIZE,evt.text.text,(size_t)state->searchCursorPos) >= 0){
         state->searchCursorPos += (int)strlen(evt.text.text);
+        state->ds.searchEntryDispNumChars = getNumTextCharsUnderWidth(rdat,SEARCH_MENU_ENTRYBOX_ENTRY_WIDTH,state->searchString,state->ds.searchEntryDispStartChar);
+        while((state->searchCursorPos - state->ds.searchEntryDispStartChar) > state->ds.searchEntryDispNumChars){
+          state->ds.searchEntryDispStartChar++;
+          if(state->ds.searchEntryDispStartChar == 0){
+            SDL_Log("WARNING: overflow");
+            break;
+          }
+        }
+        //SDL_Log("Search query display start: %u, num chars: %u, cursor pos: %u\n",state->ds.searchEntryDispStartChar,state->ds.searchEntryDispNumChars,state->searchCursorPos);
         //SDL_Log("search query: %s\n",state->searchString);
       }
       break;

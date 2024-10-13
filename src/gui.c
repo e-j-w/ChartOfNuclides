@@ -1528,9 +1528,9 @@ void drawSearchMenu(const app_data *restrict dat, const app_state *restrict stat
 
   //draw entry box
   if(strncmp(state->searchString,"",256)==0){
-    drawIconAndTextEntryBox(&dat->rules.themeRules,rdat,state->ds.uiElemPosX[UIELEM_SEARCH_ENTRYBOX],(uint16_t)(state->ds.uiElemPosY[UIELEM_SEARCH_ENTRYBOX]+yOffset),state->ds.uiElemWidth[UIELEM_SEARCH_ENTRYBOX],getHighlightState(state,UIELEM_SEARCH_ENTRYBOX),HIGHLIGHT_INACTIVE,alpha8,UIICON_SEARCHGRAY,dat->strings[dat->locStringIDs[LOCSTR_SEARCH_PLACEHOLDER]],-1);
+    drawIconAndTextEntryBox(&dat->rules.themeRules,rdat,state->ds.uiElemPosX[UIELEM_SEARCH_ENTRYBOX],(uint16_t)(state->ds.uiElemPosY[UIELEM_SEARCH_ENTRYBOX]+yOffset),state->ds.uiElemWidth[UIELEM_SEARCH_ENTRYBOX],getHighlightState(state,UIELEM_SEARCH_ENTRYBOX),HIGHLIGHT_INACTIVE,alpha8,UIICON_SEARCHGRAY,dat->strings[dat->locStringIDs[LOCSTR_SEARCH_PLACEHOLDER]],0,256,-1);
   }else{
-    drawIconAndTextEntryBox(&dat->rules.themeRules,rdat,state->ds.uiElemPosX[UIELEM_SEARCH_ENTRYBOX],(uint16_t)(state->ds.uiElemPosY[UIELEM_SEARCH_ENTRYBOX]+yOffset),state->ds.uiElemWidth[UIELEM_SEARCH_ENTRYBOX],getHighlightState(state,UIELEM_SEARCH_ENTRYBOX),HIGHLIGHT_NORMAL,alpha8,UIICON_SEARCH,state->searchString,state->searchCursorPos);
+    drawIconAndTextEntryBox(&dat->rules.themeRules,rdat,state->ds.uiElemPosX[UIELEM_SEARCH_ENTRYBOX],(uint16_t)(state->ds.uiElemPosY[UIELEM_SEARCH_ENTRYBOX]+yOffset),state->ds.uiElemWidth[UIELEM_SEARCH_ENTRYBOX],getHighlightState(state,UIELEM_SEARCH_ENTRYBOX),HIGHLIGHT_NORMAL,alpha8,UIICON_SEARCH,state->searchString,state->ds.searchEntryDispStartChar,state->ds.searchEntryDispNumChars,state->searchCursorPos);
   }
 
 }

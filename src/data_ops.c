@@ -83,6 +83,8 @@ void initializeTempState(const app_data *restrict dat, app_state *restrict state
 	state->ds.fcScrollInProgress = 0;
 	state->ds.fcNuclChangeInProgress = 0;
 	state->returnedSearchResults = 0;
+	state->ds.searchEntryDispStartChar = 0;
+	state->ds.searchEntryDispNumChars = 0;
 	state->ds.interfaceSizeInd = UISCALE_NORMAL;
 	memset(state->ds.uiElemExtPlusX,0,sizeof(state->ds.uiElemExtPlusX));
 	memset(state->ds.uiElemExtPlusY,0,sizeof(state->ds.uiElemExtPlusY));
@@ -2360,6 +2362,8 @@ void uiElemClickAction(app_data *restrict dat, app_state *restrict state, resour
 				memset(state->searchString,0,sizeof(state->searchString));
 				state->searchCursorPos = 0;
 				state->searchSelectionLen = 0;
+				state->ds.searchEntryDispStartChar = 0;
+				state->ds.searchEntryDispNumChars = 0;
 				SDL_StopTextInput(rdat->window);
 			}
 		}
@@ -2410,6 +2414,8 @@ void uiElemClickAction(app_data *restrict dat, app_state *restrict state, resour
 					memset(state->searchString,0,sizeof(state->searchString));
 					state->searchCursorPos = 0;
 					state->searchSelectionLen = 0;
+					state->ds.searchEntryDispStartChar = 0;
+					state->ds.searchEntryDispNumChars = 0;
 					SDL_StopTextInput(rdat->window);
 				}
       }else if(state->ds.timeLeftInUIAnimation[UIANIM_SEARCH_MENU_SHOW]==0.0f){
@@ -2422,6 +2428,8 @@ void uiElemClickAction(app_data *restrict dat, app_state *restrict state, resour
 				memset(state->searchString,0,sizeof(state->searchString));
 				state->searchCursorPos = 0;
 				state->searchSelectionLen = 0;
+				state->ds.searchEntryDispStartChar = 0;
+				state->ds.searchEntryDispNumChars = 0;
 				SDL_StartTextInput(rdat->window);
       }
 			break;
@@ -2701,6 +2709,29 @@ void uiElemClickAction(app_data *restrict dat, app_state *restrict state, resour
       }
       break;
   }
+}
+
+
+//get the number of characters in a string which can be drawn below a certain width,
+//starting at txtStartChar
+uint16_t getNumTextCharsUnderWidth(resource_data *restrict rdat, const uint16_t widthPx, const char *text, const uint16_t txtStartChar){
+	
+	int textLen = (int)strlen(text);
+	if((textLen < 1)||(txtStartChar > textLen)){
+		return 0;
+	}
+
+	uint16_t txtDrawLen = 0;
+	char tmpTxt[256];
+	for(uint16_t i=(uint16_t)textLen; i>0; i--){
+		memcpy(tmpTxt,text+txtStartChar,sizeof(char)*(i-txtStartChar));
+		tmpTxt[i-txtStartChar] = '\0'; //null terminate string
+		if(getTextWidthScaleIndependent(rdat,FONTSIZE_NORMAL,tmpTxt) <= widthPx){
+			txtDrawLen = (uint16_t)(i-txtStartChar);
+			break;
+		}
+	}
+	return txtDrawLen;
 }
 
 

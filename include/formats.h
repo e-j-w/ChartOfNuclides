@@ -34,6 +34,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //app data parameters (should all be powers of 2)
 #define MAX_ARRAY_SIZE                 65536
 #define MAX_NUM_STRINGS                128  //maximum number of text strings
+#define SEARCH_STRING_MAX_SIZE         256
 
 //increasing these numbers will increase the size of 
 //the nuclear database stored in memory (and on disk)
@@ -185,6 +186,7 @@ typedef struct
   uint16_t windowXRenderRes, windowYRenderRes; //render resolution (in pixels) taking HI-DPI into account
   uint16_t uiElemPosX[UIELEM_ENUM_LENGTH], uiElemPosY[UIELEM_ENUM_LENGTH], uiElemWidth[UIELEM_ENUM_LENGTH], uiElemHeight[UIELEM_ENUM_LENGTH]; //UI element positioning, used both for drawing elements and calculating mouse interactions 
   uint16_t uiElemExtPlusX[UIELEM_ENUM_LENGTH], uiElemExtPlusY[UIELEM_ENUM_LENGTH], uiElemExtMinusX[UIELEM_ENUM_LENGTH], uiElemExtMinusY[UIELEM_ENUM_LENGTH]; //'extension' of each UI element, to allow mouse interactions outside of the visible area of the UI element (eg. so that checkbox text can be clicked as well as the checkbox itself)
+  uint16_t searchEntryDispStartChar, searchEntryDispNumChars; //search string display state
   uint8_t interfaceSizeInd; //user preference for UI scaling, values from ui_scale_enum
   unsigned int fcScrollInProgress : 1;
   unsigned int fcScrollFinished : 1;
@@ -209,7 +211,7 @@ typedef struct
   drawing_state ds;          //the state information for drawing
   char msgBoxHeaderTxt[32]; //text to show at the top of the message box
   char msgBoxTxt[256];      //main text to show in the message box
-  char searchString[256];   //the user's search query
+  char searchString[SEARCH_STRING_MAX_SIZE];   //the user's search query
   int searchCursorPos, searchSelectionLen; //for search query text editing
   float mouseXPx, mouseYPx; //current position of the mouse, in pixels
   float mouseHoldStartPosXPx, mouseHoldStartPosYPx; //mouse position at the start of the last mouse button down event, in pixels

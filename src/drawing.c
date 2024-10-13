@@ -263,7 +263,7 @@ void drawTextEntryBox(const ui_theme_rules *restrict uirules, resource_data *res
 }
 
 //cursorPos: -ve value = draw no cursor
-void drawIconAndTextEntryBox(const ui_theme_rules *restrict uirules, resource_data *restrict rdat, const uint16_t x, const uint16_t y, const uint16_t w, const uint8_t boxHighlightState, const uint8_t textHighlightState, const uint8_t alpha, const uint8_t iconInd, const char *text, const int cursorPos){
+void drawIconAndTextEntryBox(const ui_theme_rules *restrict uirules, resource_data *restrict rdat, const uint16_t x, const uint16_t y, const uint16_t w, const uint8_t boxHighlightState, const uint8_t textHighlightState, const uint8_t alpha, const uint8_t iconInd, const char *text, const uint16_t txtDrawStartPos, const uint16_t txtDrawNumChars, const int cursorPos){
   const uint16_t iconWidth = (uint16_t)(UI_TILE_SIZE*rdat->uiScale/rdat->uiDPIScale);
   drawButtonOrEntryElem(uirules,rdat,x,y,w,boxHighlightState,UIELEMTYPE_ENTRYBOX,(float)(alpha/255.0f));
   drawIcon(uirules,rdat,(uint16_t)(x+UI_PADDING_SIZE*rdat->uiScale/rdat->uiDPIScale),y,iconWidth,HIGHLIGHT_NORMAL,alpha,iconInd);
@@ -272,16 +272,24 @@ void drawIconAndTextEntryBox(const ui_theme_rules *restrict uirules, resource_da
   switch(textHighlightState){
     case HIGHLIGHT_NORMAL:
     default:
-      drawTextAlignedSized(rdat,textX,textY,uirules->textColNormal,FONTSIZE_NORMAL,alpha,text,ALIGN_LEFT,(Uint16)(w - iconWidth));
-      if((cursorPos >= 0)&&(cursorPos < 256)){
-        ; //suppress pedantic warning
+      ; //suppress pedantic warning
+      char tmpTxt[256];
+      if((txtDrawNumChars < 256)&&(txtDrawNumChars < strlen(text))){
+        memcpy(tmpTxt,text+txtDrawStartPos,sizeof(char)*txtDrawNumChars);
+        tmpTxt[txtDrawNumChars] = '\0'; //null terminate string
+      }else{
+        strncpy(tmpTxt,text,255);
+      }
+      //draw text
+      drawTextAlignedSized(rdat,textX,textY,uirules->textColNormal,FONTSIZE_NORMAL,alpha,tmpTxt,ALIGN_LEFT,65535U);
+      //draw cursor
+      if((cursorPos >= txtDrawStartPos)&&(cursorPos <= (txtDrawStartPos+txtDrawNumChars))){
         SDL_FColor lineCol = grayCol;
         lineCol.a = alpha/255.0f;
-        char cursorTxt[256];
-        memcpy(cursorTxt,text,sizeof(char)*((size_t)cursorPos));
-        cursorTxt[cursorPos] = '\0'; //null terminate string
+        memcpy(tmpTxt,text+txtDrawStartPos,sizeof(char)*((size_t)(cursorPos-txtDrawStartPos)));
+        tmpTxt[cursorPos-txtDrawStartPos] = '\0'; //null terminate string
         //SDL_Log("%s|\n",cursorTxt);
-        float crXPos = textX+getTextWidth(rdat,FONTSIZE_NORMAL,cursorTxt)/rdat->uiDPIScale;
+        float crXPos = textX+getTextWidth(rdat,FONTSIZE_NORMAL,tmpTxt)/rdat->uiDPIScale;
         if(cursorPos >= (int)strlen(text)){
           crXPos += 1.0f*rdat->uiScale/rdat->uiDPIScale; //offset the cursor slightly at the end of the text string
         }
@@ -290,7 +298,7 @@ void drawIconAndTextEntryBox(const ui_theme_rules *restrict uirules, resource_da
       break;
     case HIGHLIGHT_INACTIVE:
       ; //suppress pedantic warning
-      drawTextAlignedSized(rdat,textX,textY,uirules->textColInactive,FONTSIZE_NORMAL,alpha,text,ALIGN_LEFT,(Uint16)(w - iconWidth));
+      drawTextAlignedSized(rdat,textX,textY,uirules->textColInactive,FONTSIZE_NORMAL,alpha,text,ALIGN_LEFT,65535U);
       if(cursorPos >= 0){
         SDL_FColor lineCol = grayCol;
         lineCol.a = alpha/255.0f;

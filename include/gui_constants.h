@@ -99,9 +99,10 @@ static const float uiScales[UISCALE_ENUM_LENGTH] = {1.0f,1.20f,1.5f,1.75f};
 #define SEARCH_MENU_HEADER_HEIGHT    (UI_TILE_SIZE+4*UI_PADDING_SIZE+2*PANEL_EDGE_SIZE) //in unscaled pixels
 #define SEARCH_MENU_RESULT_HEIGHT    80 //in unscaled pixels
 
-#define SEARCH_MENU_ENTRYBOX_POS_X   (PANEL_EDGE_SIZE + 2*UI_PADDING_SIZE) //in unscaled pixels, relative to menu panel position
-#define SEARCH_MENU_ENTRYBOX_POS_Y   (PANEL_EDGE_SIZE + 2*UI_PADDING_SIZE) //in unscaled pixels, relative to menu panel position
-#define SEARCH_MENU_ENTRYBOX_WIDTH   (SEARCH_MENU_WIDTH - 2*SEARCH_MENU_ENTRYBOX_POS_X) //in unscaled pixels
+#define SEARCH_MENU_ENTRYBOX_POS_X         (PANEL_EDGE_SIZE + 2*UI_PADDING_SIZE) //in unscaled pixels, relative to menu panel position
+#define SEARCH_MENU_ENTRYBOX_POS_Y         (PANEL_EDGE_SIZE + 2*UI_PADDING_SIZE) //in unscaled pixels, relative to menu panel position
+#define SEARCH_MENU_ENTRYBOX_WIDTH         (SEARCH_MENU_WIDTH - 2*SEARCH_MENU_ENTRYBOX_POS_X) //in unscaled pixels
+#define SEARCH_MENU_ENTRYBOX_ENTRY_WIDTH   (SEARCH_MENU_ENTRYBOX_WIDTH - UI_TILE_SIZE - 4*UI_PADDING_SIZE)  //in unscaled pixels
 
 //zoom buttons
 #define ZOOM_BUTTON_POS_XR           UI_PADDING_SIZE   //in unscaled pixels

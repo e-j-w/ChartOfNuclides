@@ -79,6 +79,8 @@ void setSelectedNuclOnChartDirect(const app_data *restrict dat, app_state *restr
 void uiElemHoldAction(const app_data *restrict dat, app_state *restrict state, const uint8_t uiElemID);
 void uiElemClickAction(app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat, const uint8_t doubleClick, const uint8_t uiElemID);
 
+uint16_t getNumTextCharsUnderWidth(resource_data *restrict rdat, const uint16_t widthPx, const char *text, const uint16_t txtStartChar);
+
 void updateSingleUIElemPosition(const app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat, const uint8_t uiElemInd);
 void updateUIElemPositions(const app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat);
 
