@@ -55,6 +55,10 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #define NUMSHELLCLOSURES 7
 static const uint16_t shellClosureValues[NUMSHELLCLOSURES] = {2,8,20,28,50,82,126};
 
+//thread pool parameters
+#define MAX_NUM_THREADS 64 //maximum number of threads allowed in the thread pool
+#define THREAD_UPDATE_DELAY 10 //delay (in ms) for each thread to update its state
+
 //structures
 typedef struct
 {
@@ -269,12 +273,33 @@ typedef struct
   uint16_t locStringIDs[LOCSTR_ENUM_LENGTH];
 }app_data; //structure for all imported app data
 
+//data passed to a thread in the thread pool
+typedef struct
+{
+  //pointers to game data accessible to threads go here
+  uint8_t threadNum; //unique identifier for this thread
+  uint8_t threadState; //state of the thread, values from thread_state_enum
+  uint8_t threadPar; //thread parameter (eg. which search agent to run)
+  //data that the thread has access to:
+  app_state *state;        //the application state
+  app_data *dat;           //the application data
+}thread_data;
+
+//structure for thread management
+typedef struct
+{
+  uint8_t numThreads; //number of threads to have active in the thread pool
+  thread_data threadData[MAX_NUM_THREADS]; //data to give to each thread
+  uint8_t masterThreadState; //what state the threads are expected to be in, values from thread_state_enum
+}thread_manager_state;
+
 //structure containing all application data
 //used so that all app data can be allocated in a single block of memory
 typedef struct
 {
   app_state state;
   app_data dat;
+  thread_manager_state tms;
   resource_data rdat;
 }global_data;
 

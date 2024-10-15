@@ -3,7 +3,7 @@ CFLAGS = -O2 -Wall -Wextra -Wpedantic -Wc++-compat -Wdouble-promotion -Wshadow -
 #CFLAGS += $(DEBUG_FLAGS)
 SDL = `pkg-config sdl3 --libs --cflags` -lSDL3_image -lSDL3_ttf
 COMMON = include/formats.h include/enums.h include/gui_constants.h
-OBJ = lib/fontcache.o lib/strops.o lib/juicer.o io_ops.o load_data.o data_ops.o gui.o drawing.o process_events.o
+OBJ = lib/fontcache.o lib/strops.o lib/juicer.o io_ops.o load_data.o data_ops.o gui.o drawing.o process_events.o thread_manager.o
 INC =  -I./include -I./src -I./lib/fontcache -I./lib/juicer -I./lib/strops
 CC = gcc
 #CC = clang
@@ -77,6 +77,9 @@ gui.o: src/gui.c include/gui.h $(COMMON)
 
 process_events.o: src/process_events.c include/process_events.h $(COMMON)
 	$(CC) src/process_events.c $(INC) $(CFLAGS) -c -o process_events.o
+
+thread_manager.o: src/thread_manager.c include/thread_manager.h $(COMMON)
+	$(CC) src/thread_manager.c $(INC) $(CFLAGS) -c -o thread_manager.o
 
 proc_data: data_processor/proc_data.c data_processor/proc_data.h proc_data_parser.o $(OBJ)
 	$(CC) data_processor/proc_data.c proc_data_parser.o $(OBJ) -I./data_processor $(INC) $(SDL) $(CFLAGS) -lm -o proc_data
