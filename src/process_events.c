@@ -783,8 +783,13 @@ void processSingleEvent(app_data *restrict dat, app_state *restrict state, resou
           if(SDL_TextInputActive(rdat->window)){
             if(state->searchCursorPos > 0){
               state->searchCursorPos -= 1;
-              if(state->searchCursorPos < state->ds.searchEntryDispStartChar){
-                state->ds.searchEntryDispStartChar = (uint16_t)state->searchCursorPos;
+              if(state->searchCursorPos > 0){
+                if((state->searchCursorPos-1) < state->ds.searchEntryDispStartChar){
+                  state->ds.searchEntryDispStartChar = (uint16_t)(state->searchCursorPos-1);
+                  state->ds.searchEntryDispNumChars = getNumTextCharsUnderWidth(rdat,SEARCH_MENU_ENTRYBOX_ENTRY_WIDTH,state->searchString,state->ds.searchEntryDispStartChar);
+                }
+              }else{
+                state->ds.searchEntryDispStartChar = 0;
                 state->ds.searchEntryDispNumChars = getNumTextCharsUnderWidth(rdat,SEARCH_MENU_ENTRYBOX_ENTRY_WIDTH,state->searchString,state->ds.searchEntryDispStartChar);
               }
             }else if(strlen(state->searchString) == 0){
@@ -808,7 +813,7 @@ void processSingleEvent(app_data *restrict dat, app_state *restrict state, resou
               while((state->searchCursorPos - state->ds.searchEntryDispStartChar) > state->ds.searchEntryDispNumChars){
                 state->ds.searchEntryDispStartChar++;
                 if(state->ds.searchEntryDispStartChar == 0){
-                  SDL_Log("WARNING: overflow");
+                  SDL_Log("WARNING: overflow\n");
                   break;
                 }
               }
@@ -865,10 +870,17 @@ void processSingleEvent(app_data *restrict dat, app_state *restrict state, resou
           }else{
             if(strdelchar(state->searchString,SEARCH_STRING_MAX_SIZE,(size_t)state->searchCursorPos) >= 0){
               state->searchCursorPos -= 1;
-              if(state->searchCursorPos < state->ds.searchEntryDispStartChar){
-                state->ds.searchEntryDispStartChar = (uint16_t)state->searchCursorPos;
+              if(state->searchCursorPos > 0){
+                if((state->searchCursorPos-1) < state->ds.searchEntryDispStartChar){
+                  state->ds.searchEntryDispStartChar = (uint16_t)(state->searchCursorPos-1);
+                  state->ds.searchEntryDispNumChars = getNumTextCharsUnderWidth(rdat,SEARCH_MENU_ENTRYBOX_ENTRY_WIDTH,state->searchString,state->ds.searchEntryDispStartChar);
+                }
+              }else{
+                state->ds.searchEntryDispStartChar = 0;
                 state->ds.searchEntryDispNumChars = getNumTextCharsUnderWidth(rdat,SEARCH_MENU_ENTRYBOX_ENTRY_WIDTH,state->searchString,state->ds.searchEntryDispStartChar);
               }
+              state->searchStrUpdated = 1;
+              //SDL_Log("cursor pos: %u, start disp: %u\n",state->searchCursorPos,state->ds.searchEntryDispStartChar);
               //SDL_Log("search query: %s\n",state->searchString);
             }
           }
@@ -1142,10 +1154,11 @@ void processSingleEvent(app_data *restrict dat, app_state *restrict state, resou
         while((state->searchCursorPos - state->ds.searchEntryDispStartChar) > state->ds.searchEntryDispNumChars){
           state->ds.searchEntryDispStartChar++;
           if(state->ds.searchEntryDispStartChar == 0){
-            SDL_Log("WARNING: overflow");
+            SDL_Log("WARNING: overflow\n");
             break;
           }
         }
+        state->searchStrUpdated = 1;
         //SDL_Log("Search query display start: %u, num chars: %u, cursor pos: %u\n",state->ds.searchEntryDispStartChar,state->ds.searchEntryDispNumChars,state->searchCursorPos);
         //SDL_Log("search query: %s\n",state->searchString);
       }

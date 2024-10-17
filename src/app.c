@@ -99,7 +99,7 @@ int main(int argc, char *argv[]){
 
   //load preferences (needed prior to window created)
   gdat->rdat.appPrefPath = SDL_GetPrefPath(NULL,"con"); //setup path
-  initializeTempState(&gdat->dat,&gdat->state);
+  initializeTempState(&gdat->dat,&gdat->state,&gdat->tms);
   updatePrefsFromConfigFile(gdat->rdat.appPrefPath,&gdat->dat.rules,&gdat->state); //read settings from .ini file
 
   //setup the application window
@@ -182,12 +182,18 @@ int main(int argc, char *argv[]){
       deltaTime = 0.001f; //because of main thread blocking, set artificially low delta to prevent weird timing bugs
     }
 
+    killIdleThreads(&gdat->tms);
+
     updateUIAnimationTimes(&gdat->dat,&gdat->state,deltaTime);
 
     updateDrawingState(&gdat->dat,&gdat->state,&gdat->rdat,deltaTime);
 
     processFrameEvents(&gdat->dat,&gdat->state,&gdat->rdat); //can block the main thread to save CPU, see process_events.h
     
+    if(gdat->state.searchStrUpdated){
+      gdat->state.searchStrUpdated = 0;
+      startSearchThreads(&gdat->dat,&gdat->state,&gdat->tms);
+    }
     //SDL_RenderClear(gdat->rdat.renderer); //clear the window, disabled for optimization purposes
 
     drawUI(&gdat->dat,&gdat->state,&gdat->rdat); //gui.c

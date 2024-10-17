@@ -57,6 +57,7 @@ static const uint16_t shellClosureValues[NUMSHELLCLOSURES] = {2,8,20,28,50,82,12
 
 //thread pool parameters
 #define MAX_NUM_THREADS 64 //maximum number of threads allowed in the thread pool
+                           //(cannot be > 64 as aliveThreads is uint64_t)
 #define THREAD_UPDATE_DELAY 10 //delay (in ms) for each thread to update its state
 
 //structures
@@ -238,6 +239,7 @@ typedef struct
   uint16_t chartSelectedNucl; //nucleus selected on the chart, =MAXNUMNUCL if none selected
   uint64_t interactableElement; //bit pattern describing which UI elements are interactable, values from ui_element_enum
   uint8_t returnedSearchResults;
+  unsigned int searchStrUpdated : 1;
   unsigned int kbdModVal : 2; //values from kbd_mod_enum
   unsigned int lastInputType : 2; //0=keyboard, 1=apppad, 2=mouse
   unsigned int gamepadDisabled : 1; //1=gamepad/apppad disabled
@@ -289,6 +291,7 @@ typedef struct
 typedef struct
 {
   uint8_t numThreads; //number of threads to have active in the thread pool
+  uint64_t aliveThreads; //bit-pattern specifying which threads are in use
   thread_data threadData[MAX_NUM_THREADS]; //data to give to each thread
   uint8_t masterThreadState; //what state the threads are expected to be in, values from thread_state_enum
 }thread_manager_state;

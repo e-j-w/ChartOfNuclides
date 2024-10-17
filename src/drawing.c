@@ -274,7 +274,7 @@ void drawIconAndTextEntryBox(const ui_theme_rules *restrict uirules, resource_da
     default:
       ; //suppress pedantic warning
       char tmpTxt[256];
-      if((txtDrawNumChars < 256)&&(txtDrawNumChars < strlen(text))){
+      if((txtDrawStartPos > 0)||((txtDrawNumChars < 256)&&(txtDrawNumChars < strlen(text)))){
         memcpy(tmpTxt,text+txtDrawStartPos,sizeof(char)*txtDrawNumChars);
         tmpTxt[txtDrawNumChars] = '\0'; //null terminate string
       }else{

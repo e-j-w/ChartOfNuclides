@@ -28,6 +28,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include "gui_constants.h"
 #include "process_events.h"
 #include "data_ops.h"
+#include "thread_manager.h"
 
 #include <SDL3/SDL_main.h>
 

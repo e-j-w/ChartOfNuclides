@@ -290,7 +290,7 @@ int regenerateThemeAndFontCache(app_data *restrict dat, resource_data *restrict 
     SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"regenerateFontCache - invalid font filesize (%li) from file %s - %s.\n",(long int)fontFilesize,rdat->appDataFilepath,SDL_GetError());
     return -1;
   }
-  rdat->fontData=(void*)SDL_calloc(1,(size_t)fontFilesize);
+  rdat->fontData=(void*)SDL_realloc(rdat->fontData,(size_t)fontFilesize);
   if(rdat->fontData==NULL){
     SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,"Error","App data file read error - could not allocate memory.",rdat->window);
     SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"regenerateFontCache - couldn't allocate memory for font data.\n");
@@ -301,7 +301,6 @@ int regenerateThemeAndFontCache(app_data *restrict dat, resource_data *restrict 
     return -1;
   }
 
-//
   for(uint8_t i=0; i<FONTSIZE_ENUM_LENGTH; i++){
     rdat->font[i] = FC_CreateFont();
     FC_LoadFont_RW(rdat->font[i], rdat->renderer,SDL_IOFromConstMem(rdat->fontData,(size_t)fontFilesize),1,(Uint32)(fontSizes[i]*rdat->uiScale),whiteCol8Bit,TTF_STYLE_NORMAL);
@@ -317,6 +316,7 @@ int regenerateThemeAndFontCache(app_data *restrict dat, resource_data *restrict 
     SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"regenerateFontCache - failed to close data file %s\n",rdat->appDataFilepath);
     return -1;
   }
+
   return 0; //success
 
 }

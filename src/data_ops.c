@@ -26,7 +26,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //Initializes the temporary (unsaved) portion of the app state.
 //The default preferences are set here, these will later be overwritten during
 //app startup by the values in con.ini
-void initializeTempState(const app_data *restrict dat, app_state *restrict state){
+void initializeTempState(const app_data *restrict dat, app_state *restrict state, thread_manager_state *restrict tms){
   
 	//input
   state->mouseXPx = -1;
@@ -53,6 +53,7 @@ void initializeTempState(const app_data *restrict dat, app_state *restrict state
   state->ds.windowYRes = 580;
   state->ds.drawPerformanceStats = 0;
 	memset(state->searchString,0,sizeof(state->searchString));
+	state->searchStrUpdated = 0;
   //ui state
 	state->lastUIState = UISTATE_CHARTONLY;
   changeUIState(dat,state,UISTATE_CHARTONLY);
@@ -90,6 +91,10 @@ void initializeTempState(const app_data *restrict dat, app_state *restrict state
 	memset(state->ds.uiElemExtPlusY,0,sizeof(state->ds.uiElemExtPlusY));
 	memset(state->ds.uiElemExtMinusX,0,sizeof(state->ds.uiElemExtMinusX));
 	memset(state->ds.uiElemExtMinusY,0,sizeof(state->ds.uiElemExtMinusY));
+	//threads
+	for(uint8_t i=0;i<MAX_NUM_THREADS;i++){
+    tms->threadData[i].threadState = THREADSTATE_DEAD;
+	}
 
   //check that constants are valid
   if(UIELEM_ENUM_LENGTH > /* DISABLES CODE */ (64)){
