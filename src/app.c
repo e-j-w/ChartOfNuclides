@@ -199,7 +199,7 @@ int main(int argc, char *argv[]){
     drawUI(&gdat->dat,&gdat->state,&gdat->rdat); //gui.c
 
     if(gdat->state.ds.drawPerformanceStats == 1){
-      drawPerformanceStats(&gdat->dat.rules.themeRules,&gdat->state,&gdat->rdat,deltaTime);
+      drawPerformanceStats(&gdat->dat.rules.themeRules,&gdat->state,&gdat->tms,&gdat->rdat,deltaTime);
     }
 
     SDL_RenderPresent(gdat->rdat.renderer); //tell the renderer to actually show the image
