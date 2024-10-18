@@ -1150,6 +1150,9 @@ void processSingleEvent(app_data *restrict dat, app_state *restrict state, resou
       // Add new text onto the end of the search string
       if(strinsert(state->searchString,SEARCH_STRING_MAX_SIZE,evt.text.text,(size_t)state->searchCursorPos) >= 0){
         state->searchCursorPos += (int)strlen(evt.text.text);
+        if(state->searchCursorPos > (SEARCH_STRING_MAX_SIZE-1)){
+          state->searchCursorPos = (SEARCH_STRING_MAX_SIZE-1);
+        }
         state->ds.searchEntryDispNumChars = getNumTextCharsUnderWidth(rdat,SEARCH_MENU_ENTRYBOX_ENTRY_WIDTH,state->searchString,state->ds.searchEntryDispStartChar);
         while((state->searchCursorPos - state->ds.searchEntryDispStartChar) > state->ds.searchEntryDispNumChars){
           state->ds.searchEntryDispStartChar++;

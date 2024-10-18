@@ -1,7 +1,7 @@
 #include "strops.h"
 
 //insert a string into another string at the specified position 
-//return value: 0 if output is not truncated, 1 if it is truncated,-1 if there is an error
+//return value: 0 if output is not truncated, 1 if it is truncated,-1 if there is no change
 int strinsert(char *dest, size_t destsize, const char *ins, size_t position){
 
   if(!ins){
@@ -25,6 +25,9 @@ int strinsert(char *dest, size_t destsize, const char *ins, size_t position){
   //truncate inserted string if necessary
   if(destsize < resize){
     inssize = destsize - origsize - 1; //truncate
+    if(inssize == 0){
+      return -1; //truncated to nothing
+    }
     resize = destsize;
   }
 
