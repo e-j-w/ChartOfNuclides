@@ -617,7 +617,7 @@ void drawChartOfNuclides(const app_data *restrict dat, const app_state *restrict
 
   //calculate size of low box (extra info like isomers, 2+ energies etc.)
   float lowBoxHeight = 0.0f;
-  if(state->ds.chartZoomScale >= 8.0f){
+  if(state->ds.chartZoomScale >= 6.0f){
     lowBoxHeight = (boxLineLimit - 3)*20.0f*state->ds.uiUserScale;
     if(lowBoxHeight < 0.0f){
       lowBoxHeight = 0.0f;
@@ -655,7 +655,7 @@ void drawChartOfNuclides(const app_data *restrict dat, const app_state *restrict
               
               if(state->ds.chartZoomScale >= 4.0f){
                 uint8_t drawingLowBox = 0;
-                if(state->ds.chartZoomScale >= 8.0f){
+                if(state->ds.chartZoomScale >= 6.0f){
                   //setup low box rect
                   lowBoxRect.x = rect.x + lowBoxPadding;
                   lowBoxRect.y = rect.y + rect.h - lowBoxHeight - lowBoxPadding;
@@ -669,9 +669,9 @@ void drawChartOfNuclides(const app_data *restrict dat, const app_state *restrict
                       if((isomerHl >= 1.0E-1)||(isomerHl > getNuclGSHalfLifeSeconds(&dat->ndat,(uint16_t)i))){ //only show 'important' isomers on chart
                         drawingLowBox = 1;
                         SDL_FColor boxCol = getHalfLifeCol(isomerHl);
-                        if(state->ds.chartZoomScale < 9.0f){
+                        if(state->ds.chartZoomScale < 7.0f){
                           //handle fading in of isomer boxes
-                          boxCol.a =  1.0f - (9.0f-state->ds.chartZoomScale);
+                          boxCol.a =  1.0f - (7.0f-state->ds.chartZoomScale);
                         }
                         drawFlatRect(rdat,lowBoxRect,boxCol);
                         drawisomerBoxLabel(dat,&state->ds,rdat,lowBoxRect.x,lowBoxRect.y,lowBoxRect.w,lowBoxRect.h,(isomerHl > 1.0E3) ? whiteCol8Bit : blackCol8Bit,(uint16_t)i,isomerLvl,dat->ndat.nuclData[i].longestIsomerMVal);
@@ -683,9 +683,9 @@ void drawChartOfNuclides(const app_data *restrict dat, const app_state *restrict
                     if(dcyMode < (DECAYMODE_ENUM_LENGTH+1)){
                       drawingLowBox = 1;
                       SDL_FColor boxCol = whiteCol;
-                      if(state->ds.chartZoomScale < 9.0f){
+                      if(state->ds.chartZoomScale < 7.0f){
                         //handle fading in of 2+ boxes
-                        boxCol.a =  1.0f - (9.0f-state->ds.chartZoomScale);
+                        boxCol.a =  1.0f - (7.0f-state->ds.chartZoomScale);
                       }
                       drawFlatRect(rdat,lowBoxRect,boxCol);
                       drawDecayModeBoxLabel(dat,&state->ds,rdat,lowBoxRect.x,lowBoxRect.y,lowBoxRect.w,lowBoxRect.h,blackCol8Bit,dcyMode);
@@ -696,9 +696,9 @@ void drawChartOfNuclides(const app_data *restrict dat, const app_state *restrict
                     if(e2Plus > 0.0){
                       drawingLowBox = 1;
                       SDL_FColor boxCol = whiteCol;
-                      if(state->ds.chartZoomScale < 9.0f){
+                      if(state->ds.chartZoomScale < 7.0f){
                         //handle fading in of 2+ boxes
-                        boxCol.a =  1.0f - (9.0f-state->ds.chartZoomScale);
+                        boxCol.a =  1.0f - (7.0f-state->ds.chartZoomScale);
                       }
                       drawFlatRect(rdat,lowBoxRect,boxCol);
                       draw2PlusEnergyBoxLabel(dat,&state->ds,rdat,lowBoxRect.x,lowBoxRect.y,lowBoxRect.w,lowBoxRect.h,blackCol8Bit,get2PlusLvlInd(&dat->ndat,i));
@@ -709,9 +709,9 @@ void drawChartOfNuclides(const app_data *restrict dat, const app_state *restrict
                     if(r42 >= 0.0){
                       drawingLowBox = 1;
                       SDL_FColor boxCol = whiteCol;
-                      if(state->ds.chartZoomScale < 9.0f){
+                      if(state->ds.chartZoomScale < 7.0f){
                         //handle fading in of R42 boxes
-                        boxCol.a =  1.0f - (9.0f-state->ds.chartZoomScale);
+                        boxCol.a =  1.0f - (7.0f-state->ds.chartZoomScale);
                       }
                       drawFlatRect(rdat,lowBoxRect,boxCol);
                       drawR42BoxLabel(dat,&state->ds,rdat,lowBoxRect.x,lowBoxRect.y,lowBoxRect.w,lowBoxRect.h,blackCol8Bit,r42);
