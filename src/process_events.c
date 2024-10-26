@@ -786,13 +786,13 @@ void processSingleEvent(app_data *restrict dat, app_state *restrict state, resou
               if(state->searchCursorPos > 0){
                 if((state->searchCursorPos-1) < state->ds.searchEntryDispStartChar){
                   state->ds.searchEntryDispStartChar = (uint16_t)(state->searchCursorPos-1);
-                  state->ds.searchEntryDispNumChars = getNumTextCharsUnderWidth(rdat,SEARCH_MENU_ENTRYBOX_ENTRY_WIDTH,state->searchString,state->ds.searchEntryDispStartChar);
+                  state->ds.searchEntryDispNumChars = getNumTextCharsUnderWidth(rdat,SEARCH_MENU_ENTRYBOX_ENTRY_WIDTH,state->ss.searchString,state->ds.searchEntryDispStartChar);
                 }
               }else{
                 state->ds.searchEntryDispStartChar = 0;
-                state->ds.searchEntryDispNumChars = getNumTextCharsUnderWidth(rdat,SEARCH_MENU_ENTRYBOX_ENTRY_WIDTH,state->searchString,state->ds.searchEntryDispStartChar);
+                state->ds.searchEntryDispNumChars = getNumTextCharsUnderWidth(rdat,SEARCH_MENU_ENTRYBOX_ENTRY_WIDTH,state->ss.searchString,state->ds.searchEntryDispStartChar);
               }
-            }else if(strlen(state->searchString) == 0){
+            }else if(strlen(state->ss.searchString) == 0){
               //empty string, can use keys to cycle throght menus
               state->inputFlags |= (1U << INPUT_LEFT);
             }
@@ -807,9 +807,9 @@ void processSingleEvent(app_data *restrict dat, app_state *restrict state, resou
           break;
         case SDL_SCANCODE_RIGHT:
           if(SDL_TextInputActive(rdat->window)){
-            if(state->searchCursorPos < (int)strlen(state->searchString)){
+            if(state->searchCursorPos < (int)strlen(state->ss.searchString)){
               state->searchCursorPos += 1;
-              state->ds.searchEntryDispNumChars = getNumTextCharsUnderWidth(rdat,SEARCH_MENU_ENTRYBOX_ENTRY_WIDTH,state->searchString,state->ds.searchEntryDispStartChar);
+              state->ds.searchEntryDispNumChars = getNumTextCharsUnderWidth(rdat,SEARCH_MENU_ENTRYBOX_ENTRY_WIDTH,state->ss.searchString,state->ds.searchEntryDispStartChar);
               while((state->searchCursorPos - state->ds.searchEntryDispStartChar) > state->ds.searchEntryDispNumChars){
                 state->ds.searchEntryDispStartChar++;
                 if(state->ds.searchEntryDispStartChar == 0){
@@ -817,7 +817,7 @@ void processSingleEvent(app_data *restrict dat, app_state *restrict state, resou
                   break;
                 }
               }
-            }else if(strlen(state->searchString) == 0){
+            }else if(strlen(state->ss.searchString) == 0){
               //empty string, can use keys to cycle throght menus
               state->inputFlags |= (1U << INPUT_RIGHT);
             }
@@ -868,20 +868,20 @@ void processSingleEvent(app_data *restrict dat, app_state *restrict state, resou
               state->inputFlags |= (1U << INPUT_BACK);
             }
           }else{
-            if(strdelchar(state->searchString,SEARCH_STRING_MAX_SIZE,(size_t)state->searchCursorPos) >= 0){
+            if(strdelchar(state->ss.searchString,SEARCH_STRING_MAX_SIZE,(size_t)state->searchCursorPos) >= 0){
               state->searchCursorPos -= 1;
               if(state->searchCursorPos > 0){
                 if((state->searchCursorPos-1) < state->ds.searchEntryDispStartChar){
                   state->ds.searchEntryDispStartChar = (uint16_t)(state->searchCursorPos-1);
-                  state->ds.searchEntryDispNumChars = getNumTextCharsUnderWidth(rdat,SEARCH_MENU_ENTRYBOX_ENTRY_WIDTH,state->searchString,state->ds.searchEntryDispStartChar);
+                  state->ds.searchEntryDispNumChars = getNumTextCharsUnderWidth(rdat,SEARCH_MENU_ENTRYBOX_ENTRY_WIDTH,state->ss.searchString,state->ds.searchEntryDispStartChar);
                 }
               }else{
                 state->ds.searchEntryDispStartChar = 0;
-                state->ds.searchEntryDispNumChars = getNumTextCharsUnderWidth(rdat,SEARCH_MENU_ENTRYBOX_ENTRY_WIDTH,state->searchString,state->ds.searchEntryDispStartChar);
+                state->ds.searchEntryDispNumChars = getNumTextCharsUnderWidth(rdat,SEARCH_MENU_ENTRYBOX_ENTRY_WIDTH,state->ss.searchString,state->ds.searchEntryDispStartChar);
               }
               state->searchStrUpdated = 1;
               //SDL_Log("cursor pos: %u, start disp: %u\n",state->searchCursorPos,state->ds.searchEntryDispStartChar);
-              //SDL_Log("search query: %s\n",state->searchString);
+              //SDL_Log("search query: %s\n",state->ss.searchString);
             }
           }
           break;
@@ -1148,12 +1148,12 @@ void processSingleEvent(app_data *restrict dat, app_state *restrict state, resou
     case SDL_EVENT_TEXT_INPUT:
       //SDL_Log("text input: %s\n",evt.text.text);
       // Add new text onto the end of the search string
-      if(strinsert(state->searchString,SEARCH_STRING_MAX_SIZE,evt.text.text,(size_t)state->searchCursorPos) >= 0){
+      if(strinsert(state->ss.searchString,SEARCH_STRING_MAX_SIZE,evt.text.text,(size_t)state->searchCursorPos) >= 0){
         state->searchCursorPos += (int)strlen(evt.text.text);
         if(state->searchCursorPos > (SEARCH_STRING_MAX_SIZE-1)){
           state->searchCursorPos = (SEARCH_STRING_MAX_SIZE-1);
         }
-        state->ds.searchEntryDispNumChars = getNumTextCharsUnderWidth(rdat,SEARCH_MENU_ENTRYBOX_ENTRY_WIDTH,state->searchString,state->ds.searchEntryDispStartChar);
+        state->ds.searchEntryDispNumChars = getNumTextCharsUnderWidth(rdat,SEARCH_MENU_ENTRYBOX_ENTRY_WIDTH,state->ss.searchString,state->ds.searchEntryDispStartChar);
         while((state->searchCursorPos - state->ds.searchEntryDispStartChar) > state->ds.searchEntryDispNumChars){
           state->ds.searchEntryDispStartChar++;
           if(state->ds.searchEntryDispStartChar == 0){
@@ -1163,7 +1163,7 @@ void processSingleEvent(app_data *restrict dat, app_state *restrict state, resou
         }
         state->searchStrUpdated = 1;
         //SDL_Log("Search query display start: %u, num chars: %u, cursor pos: %u\n",state->ds.searchEntryDispStartChar,state->ds.searchEntryDispNumChars,state->searchCursorPos);
-        //SDL_Log("search query: %s\n",state->searchString);
+        //SDL_Log("search query: %s\n",state->ss.searchString);
       }
       break;
     /*case SDL_EVENT_TEXT_EDITING:

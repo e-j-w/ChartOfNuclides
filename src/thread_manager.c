@@ -19,6 +19,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "thread_manager.h"
 #include "data_ops.h"
+#include "search_ops.h"
 
 //monolithic callback function for threads in the pool
 int tpFunc(void *data){
@@ -32,7 +33,26 @@ int tpFunc(void *data){
       case THREADSTATE_SEARCH:
         //run a search agent
         SDL_Log("Running search with agent %u.\n",tdat->threadPar);
-        SDL_Log("Query: %s\n",tdat->state->searchString);
+        SDL_Log("Query: %s\n",tdat->state->ss.searchString);
+        switch(tdat->threadPar){
+          case SEARCHAGENT_TOKENIZE:
+            if(!(tdat->state->ss.finishedSearchAgents & (uint32_t)(1U << SEARCHAGENT_TOKENIZE))){
+              tokenizeSearchStr(&tdat->state->ss);
+              tdat->state->ss.finishedSearchAgents |= (uint32_t)(1U << SEARCHAGENT_TOKENIZE); //flag search agent as finished
+            }
+            break;
+          case SEARCHAGENT_NUCLIDE:
+            while(!(tdat->state->ss.finishedSearchAgents & (uint32_t)(1U << SEARCHAGENT_TOKENIZE))){
+              if(tdat->threadState == THREADSTATE_KILL){
+                break; //kill waiting thread, if requested
+              }
+              SDL_Delay(THREAD_UPDATE_DELAY); //wait for prerequisite 
+            }
+            SDL_Log("Searching for nuclides...\n");
+            break;
+          default:
+            break;
+        }
         tdat->threadState = THREADSTATE_IDLE; //fdone searching (idle threads will eventually be killed)
         break;
       case THREADSTATE_IDLE:
@@ -50,10 +70,13 @@ int tpFunc(void *data){
 
 int startSearchThreads(app_data *restrict dat, app_state *restrict state, thread_manager_state *restrict tms){
 
-  if(strlen(state->searchString)<=0){
+  if(strlen(state->ss.searchString)<=0){
     //no search string, no search threads needed
     return 0;
   }
+
+  //initialize search state
+  state->ss.finishedSearchAgents = 0;
 
   //determine number of threads
   int numCores = SDL_GetNumLogicalCPUCores();

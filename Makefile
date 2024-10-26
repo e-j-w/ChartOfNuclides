@@ -3,7 +3,7 @@ CFLAGS = -O2 -Wall -Wextra -Wpedantic -Wc++-compat -Wdouble-promotion -Wshadow -
 #CFLAGS += $(DEBUG_FLAGS)
 SDL = `pkg-config sdl3 --libs --cflags` -lSDL3_image -lSDL3_ttf
 COMMON = include/formats.h include/enums.h include/gui_constants.h
-OBJ = lib/fontcache.o lib/strops.o lib/juicer.o io_ops.o load_data.o data_ops.o gui.o drawing.o process_events.o thread_manager.o
+OBJ = lib/fontcache.o lib/strops.o lib/juicer.o io_ops.o load_data.o data_ops.o search_ops.o gui.o drawing.o process_events.o thread_manager.o
 INC =  -I./include -I./src -I./lib/fontcache -I./lib/juicer -I./lib/strops
 CC = gcc
 #CC = clang
@@ -68,6 +68,9 @@ load_data.o: src/load_data.c include/load_data.h $(COMMON)
 
 data_ops.o: src/data_ops.c include/data_ops.h $(COMMON)
 	$(CC) src/data_ops.c $(INC) $(CFLAGS) -c -o data_ops.o
+
+search_ops.o: src/search_ops.c include/search_ops.h $(COMMON)
+	$(CC) src/search_ops.c $(INC) $(CFLAGS) -c -o search_ops.o
 
 drawing.o: src/drawing.c include/drawing.h $(COMMON)
 	$(CC) src/drawing.c $(INC) $(CFLAGS) -c -o drawing.o

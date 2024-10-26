@@ -35,6 +35,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #define MAX_ARRAY_SIZE                 65536
 #define MAX_NUM_STRINGS                128  //maximum number of text strings
 #define SEARCH_STRING_MAX_SIZE         256
+#define MAX_SEARCH_TOKENS              16
 
 //increasing these numbers will increase the size of 
 //the nuclear database stored in memory (and on disk)
@@ -213,10 +214,17 @@ typedef struct
 
 typedef struct
 {
+  char searchString[SEARCH_STRING_MAX_SIZE];   //the user's search query
+  char searchTok[MAX_SEARCH_TOKENS][16];
+  uint32_t finishedSearchAgents; //bit pattern specifying which search agents have finished
+}search_state; //struct containing search data
+
+typedef struct
+{
   drawing_state ds;          //the state information for drawing
+  search_state ss;           //the state information for search queries
   char msgBoxHeaderTxt[32]; //text to show at the top of the message box
   char msgBoxTxt[256];      //main text to show in the message box
-  char searchString[SEARCH_STRING_MAX_SIZE];   //the user's search query
   int searchCursorPos, searchSelectionLen; //for search query text editing
   float mouseXPx, mouseYPx; //current position of the mouse, in pixels
   float mouseHoldStartPosXPx, mouseHoldStartPosYPx; //mouse position at the start of the last mouse button down event, in pixels

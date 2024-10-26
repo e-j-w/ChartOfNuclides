@@ -52,7 +52,7 @@ void initializeTempState(const app_data *restrict dat, app_state *restrict state
   state->ds.windowXRes = 880;
   state->ds.windowYRes = 580;
   state->ds.drawPerformanceStats = 0;
-	memset(state->searchString,0,sizeof(state->searchString));
+	memset(state->ss.searchString,0,sizeof(state->ss.searchString));
 	state->searchStrUpdated = 0;
   //ui state
 	state->lastUIState = UISTATE_CHARTONLY;
@@ -105,8 +105,12 @@ void initializeTempState(const app_data *restrict dat, app_state *restrict state
     SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"ui_animation_enum is too long, cannot be indexed by a uint32_t bit pattern (ds->uiAnimPlaying)!\n");
     exit(-1);
   }
-}
+	if(SEARCHAGENT_ENUM_LENGTH > /* DISABLES CODE */ (32)){
+		SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"search_agent_enum is too long, cannot be indexed by a uint32_t bit pattern (ss->finishedSearchAgents)!\n");
+    exit(-1);
+	}
 
+}
 
 void startUIAnimation(const app_data *restrict dat, app_state *restrict state, const uint8_t uiAnim){
   if(uiAnim >= UIANIM_ENUM_LENGTH){
@@ -2364,7 +2368,7 @@ void uiElemClickAction(app_data *restrict dat, app_state *restrict state, resour
 			state->clickedUIElem = UIELEM_ENUM_LENGTH; //'unclick' the menu button
 			//stop search input
 			if(SDL_TextInputActive(rdat->window)){
-				memset(state->searchString,0,sizeof(state->searchString));
+				memset(state->ss.searchString,0,sizeof(state->ss.searchString));
 				state->searchCursorPos = 0;
 				state->searchSelectionLen = 0;
 				state->ds.searchEntryDispStartChar = 0;
@@ -2416,7 +2420,7 @@ void uiElemClickAction(app_data *restrict dat, app_state *restrict state, resour
         state->clickedUIElem = UIELEM_ENUM_LENGTH; //'unclick' the menu button
 				//stop search input
 				if(SDL_TextInputActive(rdat->window)){
-					memset(state->searchString,0,sizeof(state->searchString));
+					memset(state->ss.searchString,0,sizeof(state->ss.searchString));
 					state->searchCursorPos = 0;
 					state->searchSelectionLen = 0;
 					state->ds.searchEntryDispStartChar = 0;
@@ -2430,7 +2434,7 @@ void uiElemClickAction(app_data *restrict dat, app_state *restrict state, resour
 				changeUIState(dat,state,UISTATE_CHARTWITHMENU);
 				state->clickedUIElem = UIELEM_SEARCH_BUTTON;
 				//start search input
-				memset(state->searchString,0,sizeof(state->searchString));
+				memset(state->ss.searchString,0,sizeof(state->ss.searchString));
 				state->searchCursorPos = 0;
 				state->searchSelectionLen = 0;
 				state->ds.searchEntryDispStartChar = 0;
