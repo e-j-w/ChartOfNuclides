@@ -124,10 +124,10 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
     }else if(altleft || altright || altup || altdown){
 
       //close any menus
-      if((state->ds.shownElements & (1U << UIELEM_PRIMARY_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_PRIMARY_MENU_HIDE]==0.0f)){
+      if((state->ds.shownElements & (1UL << UIELEM_PRIMARY_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_PRIMARY_MENU_HIDE]==0.0f)){
         //close the primary menu
         uiElemClickAction(dat,state,rdat,0,UIELEM_MENU_BUTTON);
-      }else if((state->ds.shownElements & (1U << UIELEM_CHARTVIEW_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_CHARTVIEW_MENU_HIDE]==0.0f)){
+      }else if((state->ds.shownElements & (1UL << UIELEM_CHARTVIEW_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_CHARTVIEW_MENU_HIDE]==0.0f)){
         //close the chart view menu
         uiElemClickAction(dat,state,rdat,0,UIELEM_CHARTVIEW_BUTTON);
       }
@@ -241,11 +241,11 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
               state->mouseoverElement = (uint8_t)(UIELEM_CHARTVIEW_MENU-CHARTVIEW_ENUM_LENGTH);
             }
           }else if(right && !left){
-            if((state->ds.shownElements & (1U << UIELEM_CHARTVIEW_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_CHARTVIEW_MENU_SHOW]==0.0f)){
+            if((state->ds.shownElements & (1UL << UIELEM_CHARTVIEW_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_CHARTVIEW_MENU_SHOW]==0.0f)){
               uiElemClickAction(dat,state,rdat,0,UIELEM_MENU_BUTTON); //open the primary menu
             }
           }else if(left && !right){
-            if((state->ds.shownElements & (1U << UIELEM_CHARTVIEW_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_CHARTVIEW_MENU_SHOW]==0.0f)){
+            if((state->ds.shownElements & (1UL << UIELEM_CHARTVIEW_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_CHARTVIEW_MENU_SHOW]==0.0f)){
               uiElemClickAction(dat,state,rdat,0,UIELEM_SEARCH_BUTTON); //open the search menu
             }
           }
@@ -253,11 +253,11 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
       }else if(state->clickedUIElem == UIELEM_SEARCH_BUTTON){
         //search menu navigation using arrow keys
         if(right && !left){
-          if((state->ds.shownElements & (1U << UIELEM_SEARCH_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_SEARCH_MENU_SHOW]==0.0f)){
+          if((state->ds.shownElements & (1UL << UIELEM_SEARCH_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_SEARCH_MENU_SHOW]==0.0f)){
             uiElemClickAction(dat,state,rdat,0,UIELEM_CHARTVIEW_BUTTON); //open the primary menu
           }
         }else if(left && !right){
-          if((state->ds.shownElements & (1U << UIELEM_SEARCH_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_SEARCH_MENU_SHOW]==0.0f)){
+          if((state->ds.shownElements & (1UL << UIELEM_SEARCH_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_SEARCH_MENU_SHOW]==0.0f)){
             uiElemClickAction(dat,state,rdat,0,UIELEM_MENU_BUTTON); //open the search menu
           }
         }
@@ -309,7 +309,7 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
   }else if(state->uiState == UISTATE_PREFS_DIALOG){
     if(left || right || up || down){
       //SDL_Log("dir: [%u %u %u %u]\n",!(up==0),!(down==0),!(left==0),!(right==0));
-      if((state->ds.shownElements & (1U << UIELEM_PREFS_UISCALE_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_UISCALE_MENU_HIDE]==0.0f)){
+      if((state->ds.shownElements & (1UL << UIELEM_PREFS_UISCALE_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_UISCALE_MENU_HIDE]==0.0f)){
         //UI scale dropdown navigation using arrow keys
         state->mouseholdElement = UIELEM_ENUM_LENGTH; //remove any previous selection highlight
         if((state->mouseoverElement >= UIELEM_PREFS_UISCALE_MENU)||(state->mouseoverElement < (UIELEM_PREFS_UISCALE_MENU-UISCALE_ENUM_LENGTH))){
@@ -373,36 +373,36 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
 
 
   if(state->inputFlags & (1U << INPUT_SELECT)){
-    if((state->ds.shownElements & (1U << UIELEM_ABOUT_BOX))&&(state->ds.timeLeftInUIAnimation[UIANIM_MODAL_BOX_HIDE]==0.0f)){
+    if((state->ds.shownElements & (1UL << UIELEM_ABOUT_BOX))&&(state->ds.timeLeftInUIAnimation[UIANIM_MODAL_BOX_HIDE]==0.0f)){
       //close the about box
       state->mouseholdElement = UIELEM_ABOUT_BOX_OK_BUTTON;
       uiElemClickAction(dat,state,rdat,0,UIELEM_ABOUT_BOX_OK_BUTTON);
-    }else if((state->ds.shownElements & (1U << UIELEM_PRIMARY_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_PRIMARY_MENU_HIDE]==0.0f)){
+    }else if((state->ds.shownElements & (1UL << UIELEM_PRIMARY_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_PRIMARY_MENU_HIDE]==0.0f)){
       //select primary menu button
       if((state->mouseoverElement < UIELEM_PRIMARY_MENU)&&(state->mouseoverElement >= (UIELEM_PRIMARY_MENU-PRIMARY_MENU_NUM_UIELEMENTS))){
         state->mouseholdElement = state->mouseoverElement;
         uiElemClickAction(dat,state,rdat,0,state->mouseoverElement);
       }
-    }else if((state->ds.shownElements & (1U << UIELEM_CHARTVIEW_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_CHARTVIEW_MENU_HIDE]==0.0f)){
+    }else if((state->ds.shownElements & (1UL << UIELEM_CHARTVIEW_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_CHARTVIEW_MENU_HIDE]==0.0f)){
       //select chart view menu button
       if((state->mouseoverElement < UIELEM_CHARTVIEW_MENU)&&(state->mouseoverElement >= (UIELEM_CHARTVIEW_MENU-CHARTVIEW_ENUM_LENGTH))){
         state->mouseholdElement = state->mouseoverElement;
         uiElemClickAction(dat,state,rdat,0,state->mouseoverElement);
       }
-    }else if((state->ds.shownElements & (1U << UIELEM_PREFS_UISCALE_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_UISCALE_MENU_HIDE]==0.0f)){
+    }else if((state->ds.shownElements & (1UL << UIELEM_PREFS_UISCALE_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_UISCALE_MENU_HIDE]==0.0f)){
       //select UI scale dropdown menu button
       if((state->mouseoverElement < UIELEM_PREFS_UISCALE_MENU)&&(state->mouseoverElement >= (UIELEM_PREFS_UISCALE_MENU-UISCALE_ENUM_LENGTH))){
         state->mouseholdElement = state->mouseoverElement;
         uiElemClickAction(dat,state,rdat,0,state->mouseoverElement);
       }
-    }else if((state->ds.shownElements & (1U << UIELEM_PREFS_DIALOG))&&(state->ds.timeLeftInUIAnimation[UIANIM_MODAL_BOX_HIDE]==0.0f)){
+    }else if((state->ds.shownElements & (1UL << UIELEM_PREFS_DIALOG))&&(state->ds.timeLeftInUIAnimation[UIANIM_MODAL_BOX_HIDE]==0.0f)){
       //select pref menu button
       //only get here if the UI scale dropdown isn't open 
       if((state->mouseoverElement < UIELEM_PREFS_DIALOG)&&(state->mouseoverElement >= (UIELEM_PREFS_DIALOG-PREFS_DIALOG_NUM_UIELEMENTS))){
         state->mouseholdElement = state->mouseoverElement;
         uiElemClickAction(dat,state,rdat,0,state->mouseoverElement);
       }
-    }else if((state->ds.shownElements & (1U << UIELEM_NUCL_INFOBOX))&&(state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_SHOW]==0.0f)&&(state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_EXPAND]==0.0f)){
+    }else if((state->ds.shownElements & (1UL << UIELEM_NUCL_INFOBOX))&&(state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_SHOW]==0.0f)&&(state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_EXPAND]==0.0f)){
       state->mouseholdElement = UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON;
       uiElemClickAction(dat,state,rdat,0,UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON);
     }else if(state->uiState == UISTATE_CHARTONLY){
@@ -417,26 +417,26 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
   }else if(state->inputFlags & (1U << INPUT_BACK)){
     //escape open menus
     //handle modal dialogs first
-    if((state->ds.shownElements & (1U << UIELEM_ABOUT_BOX))&&(state->ds.timeLeftInUIAnimation[UIANIM_MODAL_BOX_HIDE]==0.0f)){
+    if((state->ds.shownElements & (1UL << UIELEM_ABOUT_BOX))&&(state->ds.timeLeftInUIAnimation[UIANIM_MODAL_BOX_HIDE]==0.0f)){
       //close the about box
       state->mouseholdElement = UIELEM_ABOUT_BOX_OK_BUTTON;
       uiElemClickAction(dat,state,rdat,0,UIELEM_ABOUT_BOX_OK_BUTTON);
-    }else if((state->ds.shownElements & (1U << UIELEM_PREFS_UISCALE_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_UISCALE_MENU_HIDE]==0.0f)){
+    }else if((state->ds.shownElements & (1UL << UIELEM_PREFS_UISCALE_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_UISCALE_MENU_HIDE]==0.0f)){
       //close the UI scale menu
       uiElemClickAction(dat,state,rdat,0,UIELEM_PREFS_DIALOG_UISCALE_DROPDOWN);
-    }else if((state->ds.shownElements & (1U << UIELEM_PREFS_DIALOG))&&(state->ds.timeLeftInUIAnimation[UIANIM_MODAL_BOX_HIDE]==0.0f)){
+    }else if((state->ds.shownElements & (1UL << UIELEM_PREFS_DIALOG))&&(state->ds.timeLeftInUIAnimation[UIANIM_MODAL_BOX_HIDE]==0.0f)){
       state->mouseholdElement = UIELEM_PREFS_DIALOG_CLOSEBUTTON;
       uiElemClickAction(dat,state,rdat,0,UIELEM_PREFS_DIALOG_CLOSEBUTTON);
-    }else if((state->ds.shownElements & (1U << UIELEM_PRIMARY_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_PRIMARY_MENU_HIDE]==0.0f)){
+    }else if((state->ds.shownElements & (1UL << UIELEM_PRIMARY_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_PRIMARY_MENU_HIDE]==0.0f)){
       //close the primary menu
       uiElemClickAction(dat,state,rdat,0,UIELEM_MENU_BUTTON);
-    }else if((state->ds.shownElements & (1U << UIELEM_CHARTVIEW_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_CHARTVIEW_MENU_HIDE]==0.0f)){
+    }else if((state->ds.shownElements & (1UL << UIELEM_CHARTVIEW_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_CHARTVIEW_MENU_HIDE]==0.0f)){
       //close the chart view menu
       uiElemClickAction(dat,state,rdat,0,UIELEM_CHARTVIEW_BUTTON);
-    }else if((state->ds.shownElements & (1U << UIELEM_SEARCH_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_SEARCH_MENU_HIDE]==0.0f)){
+    }else if((state->ds.shownElements & (1UL << UIELEM_SEARCH_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_SEARCH_MENU_HIDE]==0.0f)){
       //close the chart view menu
       uiElemClickAction(dat,state,rdat,0,UIELEM_SEARCH_BUTTON);
-    }else if((state->ds.shownElements & (1U << UIELEM_NUCL_INFOBOX))&&(state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_HIDE]==0.0f)){
+    }else if((state->ds.shownElements & (1UL << UIELEM_NUCL_INFOBOX))&&(state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_HIDE]==0.0f)){
       startUIAnimation(dat,state,UIANIM_NUCLINFOBOX_HIDE); //hide the info box, see stopUIAnimation() for info box hiding action
       startUIAnimation(dat,state,UIANIM_NUCLHIGHLIGHT_HIDE);
     }else if((state->uiState == UISTATE_FULLLEVELINFO)&&(state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_EXPAND]==0.0f)){
@@ -534,7 +534,7 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
       }
     }else if(state->uiState == UISTATE_PREFS_DIALOG){
       if(state->mouseClickPosXPx >= 0.0f){
-        if((state->ds.shownElements & (1U << UIELEM_PREFS_UISCALE_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_UISCALE_MENU_HIDE]==0.0f)){
+        if((state->ds.shownElements & (1UL << UIELEM_PREFS_UISCALE_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_UISCALE_MENU_HIDE]==0.0f)){
           //close the UI scale menu
           uiElemClickAction(dat,state,rdat,0,UIELEM_PREFS_DIALOG_UISCALE_DROPDOWN);
         }

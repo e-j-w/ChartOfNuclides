@@ -29,7 +29,8 @@ void setAtlTexColAlpha(drawing_state *restrict ds, resource_data *restrict rdat,
 
 void drawScrollBar(const ui_theme_rules *restrict uirules, resource_data *restrict rdat, const SDL_FRect sbRect, const uint8_t highlightState, const float alpha, const float sbPos, const float sbViewSize);
 
-void drawPanelBG(resource_data *restrict rdat, const SDL_FRect menuRect, const float alpha);
+void drawPanelBG(const ui_theme_rules *restrict uirules, resource_data *restrict rdat, const SDL_FRect panelRect, const float alpha);
+void drawButtonBG(const ui_theme_rules *restrict uirules, resource_data *restrict rdat, const SDL_FRect buttonRect, const uint8_t highlightState, const float alpha);
 
 void drawTextButton(const ui_theme_rules *restrict uirules, resource_data *restrict rdat, const uint16_t x, const uint16_t y, const uint16_t w, const uint8_t highlightState, const uint8_t alpha, const char *text);
 void drawIcon(const ui_theme_rules *restrict uirules, resource_data *restrict rdat, const uint16_t x, const uint16_t y, const uint16_t w, const uint8_t highlightState, const uint8_t alpha, const uint8_t iconInd);

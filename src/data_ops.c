@@ -3079,6 +3079,12 @@ void updateSingleUIElemPosition(const app_data *restrict dat, app_state *restric
 			state->ds.uiElemWidth[uiElemInd] = (uint16_t)(SEARCH_MENU_ENTRYBOX_WIDTH*state->ds.uiUserScale);
 			state->ds.uiElemHeight[uiElemInd] = (uint16_t)(UI_TILE_SIZE*state->ds.uiUserScale);
 			break;
+		case UIELEM_SEARCH_RESULT:
+			state->ds.uiElemPosX[uiElemInd] = (uint16_t)(state->ds.windowXRes-((SEARCH_MENU_WIDTH+SEARCH_MENU_POS_XR+CHARTVIEW_MENU_WIDTH+CHARTVIEW_MENU_POS_XR-SEARCH_MENU_ENTRYBOX_POS_X)*state->ds.uiUserScale));
+			state->ds.uiElemPosY[uiElemInd] = (uint16_t)((SEARCH_MENU_POS_Y+SEARCH_MENU_ENTRYBOX_POS_Y+UI_TILE_SIZE+UI_PADDING_SIZE)*state->ds.uiUserScale);
+			state->ds.uiElemWidth[uiElemInd] = (uint16_t)(SEARCH_MENU_ENTRYBOX_WIDTH*state->ds.uiUserScale);
+			state->ds.uiElemHeight[uiElemInd] = (uint16_t)((SEARCH_MENU_RESULT_HEIGHT-UI_PADDING_SIZE)*state->ds.uiUserScale);
+			break;
 		case UIELEM_MSG_BOX:
 			state->ds.uiElemPosX[uiElemInd] = (uint16_t)((state->ds.windowXRes - MESSAGE_BOX_WIDTH*state->ds.uiUserScale)/2);
 			state->ds.uiElemPosY[uiElemInd] = (uint16_t)((state->ds.windowYRes - MESSAGE_BOX_HEIGHT*state->ds.uiUserScale)/2);

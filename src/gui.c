@@ -1218,7 +1218,7 @@ void drawNuclInfoBox(const app_data *restrict dat, app_state *restrict state, re
     infoBoxPanelRect.w = state->ds.uiElemWidth[UIELEM_NUCL_INFOBOX];
     infoBoxPanelRect.h = state->ds.uiElemHeight[UIELEM_NUCL_INFOBOX];
   }
-  drawPanelBG(rdat,infoBoxPanelRect,1.0f);
+  drawPanelBG(&dat->rules.themeRules,rdat,infoBoxPanelRect,1.0f);
 
   //draw column title strings
   char tmpStr[32];
@@ -1349,7 +1349,7 @@ void drawMessageBox(const app_data *restrict dat, const app_state *restrict stat
   msgBoxPanelRect.y = state->ds.uiElemPosY[UIELEM_MSG_BOX] + yOffset;
   msgBoxPanelRect.w = state->ds.uiElemWidth[UIELEM_MSG_BOX];
   msgBoxPanelRect.h = state->ds.uiElemHeight[UIELEM_MSG_BOX];
-  drawPanelBG(rdat,msgBoxPanelRect,alpha);
+  drawPanelBG(&dat->rules.themeRules,rdat,msgBoxPanelRect,alpha);
 
   drawTextAlignedSized(rdat,msgBoxPanelRect.x+(msgBoxPanelRect.w/2),msgBoxPanelRect.y+MESSAGE_BOX_HEADERTXT_Y,dat->rules.themeRules.textColNormal,FONTSIZE_LARGE,(uint8_t)SDL_floorf(alpha*255.0f),state->msgBoxHeaderTxt,ALIGN_CENTER,(Uint16)(msgBoxPanelRect.w - 2*UI_PADDING_SIZE));
   drawTextAlignedSized(rdat,msgBoxPanelRect.x+(msgBoxPanelRect.w/2),msgBoxPanelRect.y+(msgBoxPanelRect.h/2),dat->rules.themeRules.textColNormal,FONTSIZE_NORMAL,(uint8_t)SDL_floorf(alpha*255.0f),state->msgBoxTxt,ALIGN_CENTER,(Uint16)(msgBoxPanelRect.w - 2*UI_PADDING_SIZE));
@@ -1380,7 +1380,7 @@ void drawAboutBox(const app_data *restrict dat, const app_state *restrict state,
   aboutBoxPanelRect.y = state->ds.uiElemPosY[UIELEM_ABOUT_BOX] + yOffset;
   aboutBoxPanelRect.w = state->ds.uiElemWidth[UIELEM_ABOUT_BOX];
   aboutBoxPanelRect.h = state->ds.uiElemHeight[UIELEM_ABOUT_BOX];
-  drawPanelBG(rdat,aboutBoxPanelRect,alpha);
+  drawPanelBG(&dat->rules.themeRules,rdat,aboutBoxPanelRect,alpha);
 
   drawTextAlignedSized(rdat,aboutBoxPanelRect.x+(aboutBoxPanelRect.w/2),aboutBoxPanelRect.y+ABOUT_BOX_HEADERTXT_Y*state->ds.uiUserScale,dat->rules.themeRules.textColNormal,FONTSIZE_LARGE,(uint8_t)SDL_floorf(alpha*255.0f),dat->rules.appName,ALIGN_CENTER,(Uint16)(aboutBoxPanelRect.w - 2*UI_PADDING_SIZE*state->ds.uiUserScale));
   drawTextAlignedSized(rdat,aboutBoxPanelRect.x+(aboutBoxPanelRect.w/2),aboutBoxPanelRect.y+ABOUT_BOX_VERSION_Y*state->ds.uiUserScale,dat->rules.themeRules.textColNormal,FONTSIZE_SMALL,(uint8_t)SDL_floorf(alpha*255.0f),dat->strings[dat->locStringIDs[LOCSTR_ABOUTSTR_VERSION]],ALIGN_CENTER,16384);
@@ -1433,7 +1433,7 @@ void drawPrefsDialog(const app_data *restrict dat, const app_state *restrict sta
   prefsDialogPanelRect.y = state->ds.uiElemPosY[UIELEM_PREFS_DIALOG] + yOffset;
   prefsDialogPanelRect.w = state->ds.uiElemWidth[UIELEM_PREFS_DIALOG];
   prefsDialogPanelRect.h = state->ds.uiElemHeight[UIELEM_PREFS_DIALOG];
-  drawPanelBG(rdat,prefsDialogPanelRect,alpha);
+  drawPanelBG(&dat->rules.themeRules,rdat,prefsDialogPanelRect,alpha);
 
   uint8_t alpha8 = (uint8_t)SDL_floorf(alpha*255.0f);
   drawTextAlignedSized(rdat,prefsDialogPanelRect.x+PREFS_DIALOG_HEADERTXT_X*state->ds.uiUserScale,prefsDialogPanelRect.y+PREFS_DIALOG_HEADERTXT_Y*state->ds.uiUserScale,dat->rules.themeRules.textColNormal,FONTSIZE_LARGE,alpha8,dat->strings[dat->locStringIDs[LOCSTR_MENUITEM_PREFS]],ALIGN_LEFT,(Uint16)(prefsDialogPanelRect.w));
@@ -1470,7 +1470,7 @@ void drawUIScaleMenu(const app_data *restrict dat, const app_state *restrict sta
   drawRect.y = ((float)state->ds.uiElemPosY[UIELEM_PREFS_UISCALE_MENU] + yOffset);
   drawRect.w = state->ds.uiElemWidth[UIELEM_PREFS_UISCALE_MENU];
   drawRect.h = state->ds.uiElemHeight[UIELEM_PREFS_UISCALE_MENU];
-  drawPanelBG(rdat,drawRect,alpha);
+  drawPanelBG(&dat->rules.themeRules,rdat,drawRect,alpha);
   
   //draw menu item highlight
   if(state->ds.timeLeftInUIAnimation[UIANIM_UISCALE_MENU_HIDE]==0.0f){
@@ -1526,13 +1526,23 @@ void drawSearchMenu(const app_data *restrict dat, const app_state *restrict stat
   drawRect.y = ((float)state->ds.uiElemPosY[UIELEM_SEARCH_MENU] + yOffset);
   drawRect.w = state->ds.uiElemWidth[UIELEM_SEARCH_MENU];
   drawRect.h = state->ds.uiElemHeight[UIELEM_SEARCH_MENU];
-  drawPanelBG(rdat,drawRect,alpha);
+  drawPanelBG(&dat->rules.themeRules,rdat,drawRect,alpha);
 
   //draw entry box
   if(strncmp(state->ss.searchString,"",256)==0){
     drawIconAndTextEntryBox(&dat->rules.themeRules,rdat,state->ds.uiElemPosX[UIELEM_SEARCH_ENTRYBOX],(uint16_t)(state->ds.uiElemPosY[UIELEM_SEARCH_ENTRYBOX]+yOffset),state->ds.uiElemWidth[UIELEM_SEARCH_ENTRYBOX],getHighlightState(state,UIELEM_SEARCH_ENTRYBOX),HIGHLIGHT_INACTIVE,alpha8,UIICON_SEARCHGRAY,dat->strings[dat->locStringIDs[LOCSTR_SEARCH_PLACEHOLDER]],0,256,-1);
   }else{
     drawIconAndTextEntryBox(&dat->rules.themeRules,rdat,state->ds.uiElemPosX[UIELEM_SEARCH_ENTRYBOX],(uint16_t)(state->ds.uiElemPosY[UIELEM_SEARCH_ENTRYBOX]+yOffset),state->ds.uiElemWidth[UIELEM_SEARCH_ENTRYBOX],getHighlightState(state,UIELEM_SEARCH_ENTRYBOX),HIGHLIGHT_NORMAL,alpha8,UIICON_SEARCH,state->ss.searchString,state->ds.searchEntryDispStartChar,state->ds.searchEntryDispNumChars,state->searchCursorPos);
+  }
+
+  //draw results
+  drawRect.x = state->ds.uiElemPosX[UIELEM_SEARCH_RESULT];
+  drawRect.y = ((float)state->ds.uiElemPosY[UIELEM_SEARCH_RESULT] + yOffset);
+  drawRect.w = state->ds.uiElemWidth[UIELEM_SEARCH_RESULT];
+  drawRect.h = state->ds.uiElemHeight[UIELEM_SEARCH_RESULT];
+  for(uint8_t i=0; i<state->ss.numResults; i++){
+    drawRect.y += (float)(i*SEARCH_MENU_RESULT_HEIGHT*state->ds.uiUserScale);
+    drawButtonBG(&dat->rules.themeRules,rdat,drawRect,HIGHLIGHT_NORMAL,alpha);
   }
 
 }
@@ -1556,7 +1566,7 @@ void drawChartViewMenu(const app_data *restrict dat, const app_state *restrict s
   drawRect.y = ((float)state->ds.uiElemPosY[UIELEM_CHARTVIEW_MENU] + yOffset);
   drawRect.w = state->ds.uiElemWidth[UIELEM_CHARTVIEW_MENU];
   drawRect.h = state->ds.uiElemHeight[UIELEM_CHARTVIEW_MENU];
-  drawPanelBG(rdat,drawRect,alpha);
+  drawPanelBG(&dat->rules.themeRules,rdat,drawRect,alpha);
   
   //draw menu item highlight
   SDL_FColor highlightCol;
@@ -1624,7 +1634,7 @@ void drawPrimaryMenu(const app_data *restrict dat, const app_state *restrict sta
   drawRect.y = ((float)state->ds.uiElemPosY[UIELEM_PRIMARY_MENU] + yOffset);
   drawRect.w = state->ds.uiElemWidth[UIELEM_PRIMARY_MENU];
   drawRect.h = state->ds.uiElemHeight[UIELEM_PRIMARY_MENU];
-  drawPanelBG(rdat,drawRect,alpha);
+  drawPanelBG(&dat->rules.themeRules,rdat,drawRect,alpha);
   
   //draw menu item highlight
   SDL_FColor highlightCol;

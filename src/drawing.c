@@ -89,59 +89,45 @@ void drawScrollBar(const ui_theme_rules *restrict uirules, resource_data *restri
   setUITexColAlpha(rdat,1.0f,1.0f,1.0f,1.0f);
 }
 
-//draw a panel background
-//panelRect: dimensions and position of the panel, in unscaled pixels
-void drawPanelBG(resource_data *restrict rdat, const SDL_FRect panelRect, const float alpha){
+
+void drawBGElement(const ui_theme_rules *restrict uirules, resource_data *restrict rdat, const SDL_FRect elemRect, const uint8_t elemType, const uint8_t highlightState, const float alpha){
 
   if(alpha != 1.0f){
     if(SDL_SetTextureAlphaModFloat(rdat->uiThemeTex,alpha)==false){
-      SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,"drawPanelBG - cannot set UI texture alpha - %s\n",SDL_GetError());
+      SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,"drawBGElement - cannot set UI texture alpha - %s\n",SDL_GetError());
     }
   }
-  
-  SDL_FRect srcRect, destRect;
-  const float nineSliceSize = 0.5f*UI_TILE_SIZE*rdat->uiThemeScale;
-  srcRect.x = UITHEME_PANELBG_TILE_X*UI_TILE_SIZE*rdat->uiThemeScale;
-  srcRect.y = UITHEME_PANELBG_TILE_Y*UI_TILE_SIZE*rdat->uiThemeScale;
-  srcRect.w = 3*UI_TILE_SIZE*rdat->uiThemeScale;
-  srcRect.h = srcRect.w;
-  destRect.x = panelRect.x*rdat->uiDPIScale;
-  destRect.y = panelRect.y*rdat->uiDPIScale;
-  destRect.w = panelRect.w*rdat->uiDPIScale;
-  destRect.h = panelRect.h*rdat->uiDPIScale;
-  SDL_RenderTexture9Grid(rdat->renderer,rdat->uiThemeTex,&srcRect,nineSliceSize,nineSliceSize,nineSliceSize,nineSliceSize,0.0f,&destRect);
-  
-  if(alpha != 1.0f){
-    if(SDL_SetTextureAlphaModFloat(rdat->uiThemeTex,1.0f)==0){
-      SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,"drawPanelBG - cannot reset UI texture alpha - %s\n",SDL_GetError());
-    }
-  }
-}
-
-//elemType: values from uielem_type_enum 
-void drawButtonOrEntryElem(const ui_theme_rules *restrict uirules, resource_data *restrict rdat, const uint16_t x, const uint16_t y, const uint16_t w, const uint8_t highlightState, const uint8_t elemType, const float alpha){
   
   SDL_FRect srcRect, destRect;
   const float nineSliceSize = 0.4f*UI_TILE_SIZE*rdat->uiThemeScale;
   switch(elemType){
+    case UIELEMTYPE_PANEL:
+      srcRect.x = UITHEME_PANELBG_TILE_X*UI_TILE_SIZE*rdat->uiThemeScale;
+      srcRect.y = UITHEME_PANELBG_TILE_Y*UI_TILE_SIZE*rdat->uiThemeScale;
+      srcRect.w = 3*UI_TILE_SIZE*rdat->uiThemeScale;
+      srcRect.h = srcRect.w;
+      break;
     case UIELEMTYPE_BUTTON:
       srcRect.x = UITHEME_BUTTON_TILE_X*UI_TILE_SIZE*rdat->uiThemeScale;
       srcRect.y = UITHEME_BUTTON_TILE_Y*UI_TILE_SIZE*rdat->uiThemeScale;
+      srcRect.w = 3*UI_TILE_SIZE*rdat->uiThemeScale;
+      srcRect.h = UI_TILE_SIZE*rdat->uiThemeScale;
       break;
     case UIELEMTYPE_ENTRYBOX:
       srcRect.x = UITHEME_ENTRYBOX_TILE_X*UI_TILE_SIZE*rdat->uiThemeScale;
       srcRect.y = UITHEME_ENTRYBOX_TILE_Y*UI_TILE_SIZE*rdat->uiThemeScale;
+      srcRect.w = 3*UI_TILE_SIZE*rdat->uiThemeScale;
+      srcRect.h = UI_TILE_SIZE*rdat->uiThemeScale;
       break;
     default:
-      SDL_Log("WARNING: drawButtonOrEntryElem - invalid element type (%u).\n",elemType);
+      SDL_Log("WARNING: drawBGElement - invalid element type (%u).\n",elemType);
       return;
   }
-  srcRect.w = 3*UI_TILE_SIZE*rdat->uiThemeScale;
-  srcRect.h = UI_TILE_SIZE*rdat->uiThemeScale;
-  destRect.x = (float)(x*rdat->uiDPIScale);
-  destRect.y = (float)(y*rdat->uiDPIScale);
-  destRect.w = (float)(w*rdat->uiDPIScale);
-  destRect.h = (float)(UI_TILE_SIZE*rdat->uiScale);
+  
+  destRect.x = elemRect.x*rdat->uiDPIScale;
+  destRect.y = elemRect.y*rdat->uiDPIScale;
+  destRect.w = elemRect.w*rdat->uiDPIScale;
+  destRect.h = elemRect.h*rdat->uiDPIScale;
 
   switch(highlightState){
     case HIGHLIGHT_NORMAL:
@@ -155,11 +141,48 @@ void drawButtonOrEntryElem(const ui_theme_rules *restrict uirules, resource_data
       setUITexColAlpha(rdat,uirules->modSelectedCol.r,uirules->modSelectedCol.g,uirules->modSelectedCol.b,alpha);
       break;
   }
-  
-  SDL_RenderTexture9Grid(rdat->renderer,rdat->uiThemeTex,&srcRect,nineSliceSize,nineSliceSize,nineSliceSize,nineSliceSize,0.0f,&destRect);
 
+  SDL_RenderTexture9Grid(rdat->renderer,rdat->uiThemeTex,&srcRect,nineSliceSize,nineSliceSize,nineSliceSize,nineSliceSize,0.0f,&destRect);
+  
   //reset the color modulation
   setUITexColAlpha(rdat,1.0f,1.0f,1.0f,1.0f);
+  if(alpha != 1.0f){
+    if(SDL_SetTextureAlphaModFloat(rdat->uiThemeTex,1.0f)==0){
+      SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,"drawBGElement - cannot reset UI texture alpha - %s\n",SDL_GetError());
+    }
+  }
+
+}
+
+//draw a panel background
+//panelRect: dimensions and position of the panel, in unscaled pixels
+void drawPanelBG(const ui_theme_rules *restrict uirules, resource_data *restrict rdat, const SDL_FRect panelRect, const float alpha){
+  drawBGElement(uirules,rdat,panelRect,UIELEMTYPE_PANEL,HIGHLIGHT_NORMAL,alpha);
+}
+void drawButtonBG(const ui_theme_rules *restrict uirules, resource_data *restrict rdat, const SDL_FRect buttonRect, const uint8_t highlightState, const float alpha){
+  drawBGElement(uirules,rdat,buttonRect,UIELEMTYPE_BUTTON,highlightState,alpha);
+}
+
+//elemType: values from uielem_type_enum 
+void drawButtonOrEntryElem(const ui_theme_rules *restrict uirules, resource_data *restrict rdat, const uint16_t x, const uint16_t y, const uint16_t w, const uint8_t highlightState, const uint8_t elemType, const float alpha){
+  
+  SDL_FRect destRectUnscaled;
+  destRectUnscaled.x = (float)(x);
+  destRectUnscaled.y = (float)(y);
+  destRectUnscaled.w = (float)(w);
+  destRectUnscaled.h = (float)(UI_TILE_SIZE*rdat->uiScale/rdat->uiDPIScale);
+  switch(elemType){
+    case UIELEMTYPE_BUTTON:
+      drawBGElement(uirules,rdat,destRectUnscaled,UIELEMTYPE_BUTTON,highlightState,alpha);
+      break;
+    case UIELEMTYPE_ENTRYBOX:
+      drawBGElement(uirules,rdat,destRectUnscaled,UIELEMTYPE_ENTRYBOX,highlightState,alpha);
+      break;
+    default:
+      SDL_Log("WARNING: drawButtonOrEntryElem - invalid element type (%u).\n",elemType);
+      return;
+  }
+  
 }
 
 //x, y, w: position and size of the button, assuming a UI scale of 1 (height assumed to be one tile height)
