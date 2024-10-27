@@ -1536,13 +1536,27 @@ void drawSearchMenu(const app_data *restrict dat, const app_state *restrict stat
   }
 
   //draw results
+  char tmpStr[32];
   drawRect.x = state->ds.uiElemPosX[UIELEM_SEARCH_RESULT];
   drawRect.y = ((float)state->ds.uiElemPosY[UIELEM_SEARCH_RESULT] + yOffset);
   drawRect.w = state->ds.uiElemWidth[UIELEM_SEARCH_RESULT];
   drawRect.h = state->ds.uiElemHeight[UIELEM_SEARCH_RESULT];
   for(uint8_t i=0; i<state->ss.numResults; i++){
-    drawRect.y += (float)(i*SEARCH_MENU_RESULT_HEIGHT*state->ds.uiUserScale);
     drawButtonBG(&dat->rules.themeRules,rdat,drawRect,HIGHLIGHT_NORMAL,alpha);
+    switch(state->ss.results[i].resultType){
+      case SEARCHAGENT_NUCLIDE:
+        ; //suppress warning in gcc
+        uint16_t Z = (uint16_t)dat->ndat.nuclData[state->ss.results[i].resultVal].Z;
+        uint16_t N = (uint16_t)dat->ndat.nuclData[state->ss.results[i].resultVal].N;
+        snprintf(tmpStr,32,"%u",N+Z);
+        float numWidth = drawTextAlignedSized(rdat,drawRect.x+12.0f,drawRect.y+12.0f,blackCol8Bit,FONTSIZE_SMALL,255,tmpStr,ALIGN_LEFT,16384).w; //draw number label
+        drawTextAlignedSized(rdat,drawRect.x+12.0f+numWidth,drawRect.y+12.0f+(10.0f*state->ds.uiUserScale),blackCol8Bit,FONTSIZE_LARGE,255,getElemStr((uint8_t)Z),ALIGN_LEFT,16384); //draw element label
+        drawTextAlignedSized(rdat,drawRect.x+12.0f,drawRect.y+SEARCH_MENU_RESULT_HEIGHT-24.0f,grayCol8Bit,FONTSIZE_NORMAL,255,dat->strings[dat->locStringIDs[LOCSTR_SEARCHRES_NUCLIDE]],ALIGN_LEFT,16384);
+        break;
+      default:
+        continue;
+    }
+    drawRect.y += (float)(SEARCH_MENU_RESULT_HEIGHT*state->ds.uiUserScale);
   }
 
 }

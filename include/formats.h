@@ -32,16 +32,18 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include "enums.h"
 
 //app data parameters (should all be powers of 2)
-#define MAX_ARRAY_SIZE                 65536
-#define MAX_NUM_STRINGS                128  //maximum number of text strings
-#define SEARCH_STRING_MAX_SIZE         256
-#define MAX_SEARCH_TOKENS              16
-#define MAX_SEARCH_RESULTS             5
+#define MAX_ARRAY_SIZE           65536
+#define MAX_NUM_STRINGS          128  //maximum number of text strings
+
+//search parameters
+#define SEARCH_STRING_MAX_SIZE   256
+#define MAX_SEARCH_TOKENS        16
+#define MAX_SEARCH_RESULTS       4
 
 //increasing these numbers will increase the size of 
 //the nuclear database stored in memory (and on disk)
-#define MAXCASCDELENGTH 20
-#define MAXGAMMASPERLEVEL 10
+#define MAXCASCDELENGTH          20
+#define MAXGAMMASPERLEVEL        10
 #define MAXSPPERLEVEL            3
 #define MAXMULTPERLEVEL          3
 #define MAXNUMNUCL               3500

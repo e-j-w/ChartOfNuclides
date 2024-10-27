@@ -207,6 +207,7 @@ static const SDL_FColor whiteCol = {1.0f,1.0f,1.0f,1.0f};
 static const SDL_FColor whiteTransparentCol = {1.0f,1.0f,1.0f,0.7f};
 
 static const SDL_Color whiteCol8Bit = {255,255,255,255};
+static const SDL_Color grayCol8Bit = {127,127,127,255};
 static const SDL_Color blackCol8Bit = {0,0,0,255};
 
 #endif
