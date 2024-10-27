@@ -83,10 +83,10 @@ void initializeTempState(const app_data *restrict dat, app_state *restrict state
 	state->ds.fcScrollFinished = 0;
 	state->ds.fcScrollInProgress = 0;
 	state->ds.fcNuclChangeInProgress = 0;
-	state->returnedSearchResults = 0;
 	state->ds.searchEntryDispStartChar = 0;
 	state->ds.searchEntryDispNumChars = 0;
 	state->ds.interfaceSizeInd = UISCALE_NORMAL;
+	state->ss.numResults = 0;
 	memset(state->ds.uiElemExtPlusX,0,sizeof(state->ds.uiElemExtPlusX));
 	memset(state->ds.uiElemExtPlusY,0,sizeof(state->ds.uiElemExtPlusY));
 	memset(state->ds.uiElemExtMinusX,0,sizeof(state->ds.uiElemExtMinusX));
@@ -2679,6 +2679,7 @@ void uiElemClickAction(app_data *restrict dat, app_state *restrict state, resour
 				state->clickedUIElem = UIELEM_SEARCH_BUTTON;
 				//start search input
 				memset(state->ss.searchString,0,sizeof(state->ss.searchString));
+				state->ss.numResults = 0;
 				state->searchCursorPos = 0;
 				state->searchSelectionLen = 0;
 				state->ds.searchEntryDispStartChar = 0;
@@ -3070,7 +3071,7 @@ void updateSingleUIElemPosition(const app_data *restrict dat, app_state *restric
 			state->ds.uiElemPosX[uiElemInd] = (uint16_t)(state->ds.windowXRes-((SEARCH_MENU_WIDTH+SEARCH_MENU_POS_XR+CHARTVIEW_MENU_WIDTH+CHARTVIEW_MENU_POS_XR)*state->ds.uiUserScale));
 			state->ds.uiElemPosY[uiElemInd] = (uint16_t)(SEARCH_MENU_POS_Y*state->ds.uiUserScale);
 			state->ds.uiElemWidth[uiElemInd] = (uint16_t)(SEARCH_MENU_WIDTH*state->ds.uiUserScale);
-			state->ds.uiElemHeight[uiElemInd] = (uint16_t)((SEARCH_MENU_HEADER_HEIGHT + (float)state->returnedSearchResults*SEARCH_MENU_RESULT_HEIGHT)*state->ds.uiUserScale);
+			state->ds.uiElemHeight[uiElemInd] = (uint16_t)((SEARCH_MENU_HEADER_HEIGHT + (float)state->ss.numResults*SEARCH_MENU_RESULT_HEIGHT)*state->ds.uiUserScale);
 			break;
 		case UIELEM_SEARCH_ENTRYBOX:
 			state->ds.uiElemPosX[uiElemInd] = (uint16_t)(state->ds.windowXRes-((SEARCH_MENU_WIDTH+SEARCH_MENU_POS_XR+CHARTVIEW_MENU_WIDTH+CHARTVIEW_MENU_POS_XR-SEARCH_MENU_ENTRYBOX_POS_X)*state->ds.uiUserScale));

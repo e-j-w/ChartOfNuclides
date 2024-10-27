@@ -1701,6 +1701,7 @@ void drawUI(const app_data *restrict dat, app_state *restrict state, resource_da
     drawChartViewMenu(dat,state,rdat);
   }
   if(state->ds.shownElements & (1UL << UIELEM_SEARCH_MENU)){
+    updateSingleUIElemPosition(dat,state,rdat,UIELEM_SEARCH_MENU);
     drawSearchMenu(dat,state,rdat);
   }
 

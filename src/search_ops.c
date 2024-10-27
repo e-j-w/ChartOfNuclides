@@ -32,6 +32,17 @@ int SDLCALL compareRelevance(void *userdata, const void *a, const void *b){
 }
 
 void sortAndAppendResult(search_state *restrict ss, const search_result *restrict res){
+	
+	//check that the result isn't identical to an existing one
+	for(uint8_t i=0; i<ss->numResults;i++){
+		if(res->resultType == ss->results[i].resultType){
+			if(res->resultVal == ss->results[i].resultVal){
+				return; //don't append identical results
+			}
+		}
+	}
+	
+	//add the result to the list, if possible
 	if(ss->numResults < MAX_SEARCH_RESULTS){
 		//append the result
 		memcpy(&ss->results[ss->numResults],res,sizeof(search_result));
@@ -118,5 +129,5 @@ void searchNuclides(const ndata *restrict ndat, search_state *restrict ss){
 		}
 	}
 
-	
+	SDL_Log("Number of search results: %u\n",ss->numResults);
 }
