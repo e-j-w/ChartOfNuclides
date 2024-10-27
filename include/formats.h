@@ -36,6 +36,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #define MAX_NUM_STRINGS                128  //maximum number of text strings
 #define SEARCH_STRING_MAX_SIZE         256
 #define MAX_SEARCH_TOKENS              16
+#define MAX_SEARCH_RESULTS             5
 
 //increasing these numbers will increase the size of 
 //the nuclear database stored in memory (and on disk)
@@ -153,6 +154,13 @@ typedef struct
 
 typedef struct
 {
+  uint8_t resultType; //values from search_agent_enum
+  uint32_t resultVal; //defines the actual result (eg. nuclide index for nuclide search)
+  float relevance; //a value which defines how relevant the result is (for sorting)
+}search_result;
+
+typedef struct
+{
   SDL_FColor bgCol; //background colors
   SDL_Color textColNormal, textColInactive; //colors for text (cannot be floating point as this is not supported by SDL_ttf)
   SDL_FColor modNormalCol, modMouseOverCol, modSelectedCol; //color modulations for UI elements in different states
@@ -216,6 +224,9 @@ typedef struct
 {
   char searchString[SEARCH_STRING_MAX_SIZE];   //the user's search query
   char searchTok[MAX_SEARCH_TOKENS][16];
+  search_result results[MAX_SEARCH_RESULTS];
+  uint8_t numResults; //the number of results returned so far
+  uint8_t numSearchTok;
   uint32_t finishedSearchAgents; //bit pattern specifying which search agents have finished
 }search_state; //struct containing search data
 

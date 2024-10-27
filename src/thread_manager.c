@@ -46,9 +46,10 @@ int tpFunc(void *data){
               if(tdat->threadState == THREADSTATE_KILL){
                 break; //kill waiting thread, if requested
               }
-              SDL_Delay(THREAD_UPDATE_DELAY); //wait for prerequisite 
+              SDL_Delay(THREAD_UPDATE_DELAY); //wait for tokenization to complete
             }
             SDL_Log("Searching for nuclides...\n");
+            searchNuclides(&tdat->dat->ndat,&tdat->state->ss);
             break;
           default:
             break;
@@ -77,6 +78,7 @@ int startSearchThreads(app_data *restrict dat, app_state *restrict state, thread
 
   //initialize search state
   state->ss.finishedSearchAgents = 0;
+  state->ss.numResults = 0;
 
   //determine number of threads
   int numCores = SDL_GetNumLogicalCPUCores();
