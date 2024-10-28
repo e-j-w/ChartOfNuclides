@@ -111,13 +111,26 @@ void searchNuclides(const ndata *restrict ndat, search_state *restrict ss){
 			if(foundNucl){
 				int16_t nuclA = (int16_t)SDL_atoi(nuclAStr);
 				int16_t nuclZ = (int16_t)elemStrToZ(nuclElemName);
+				nuclElemName[0] = (char)SDL_toupper(nuclElemName[0]); //convert to uppercase
+				int16_t nuclZu = (int16_t)elemStrToZ(nuclElemName);
 				SDL_Log("A: %i, Z: %i, elem name: %s, len: %u\n",nuclA,nuclZ,nuclElemName,len);
 				for(int16_t j=0; j<ndat->numNucl; j++){
 					if(ndat->nuclData[j].Z == nuclZ){
 						if(((ndat->nuclData[j].N + ndat->nuclData[j].Z)) == nuclA){
-							//identified nuclide
+							//identified nuclide (exact match)
 							search_result res;
-							res.relevance = 1.0f;
+							res.relevance = 1.0f; //exact match
+							res.resultType = SEARCHAGENT_NUCLIDE;
+							res.resultVal = (uint32_t)j;
+							SDL_Log("Found nuclide %u\n",res.resultVal);
+							sortAndAppendResult(ss,&res);
+						}
+					}
+					if((nuclZu != nuclZ)&&(ndat->nuclData[j].Z == nuclZu)){
+						if(((ndat->nuclData[j].N + ndat->nuclData[j].Z)) == nuclA){
+							//identified nuclide (uppercase match)
+							search_result res;
+							res.relevance = 0.8f; //uppercase match
 							res.resultType = SEARCHAGENT_NUCLIDE;
 							res.resultVal = (uint32_t)j;
 							SDL_Log("Found nuclide %u\n",res.resultVal);
