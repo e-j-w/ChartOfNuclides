@@ -32,8 +32,8 @@ int tpFunc(void *data){
     switch(tdat->threadState){
       case THREADSTATE_SEARCH:
         //run a search agent
-        SDL_Log("Running search with agent %u.\n",tdat->threadPar);
-        SDL_Log("Query: %s\n",tdat->state->ss.searchString);
+        //SDL_Log("Running search with agent %u.\n",tdat->threadPar);
+        //SDL_Log("Query: %s\n",tdat->state->ss.searchString);
         switch(tdat->threadPar){
           case SEARCHAGENT_TOKENIZE:
             if(!(tdat->state->ss.finishedSearchAgents & (uint32_t)(1U << SEARCHAGENT_TOKENIZE))){
@@ -48,7 +48,7 @@ int tpFunc(void *data){
               }
               SDL_Delay(THREAD_UPDATE_DELAY); //wait for tokenization to complete
             }
-            SDL_Log("Searching for nuclides...\n");
+            //SDL_Log("Searching for nuclides...\n");
             searchNuclides(&tdat->dat->ndat,&tdat->state->ss);
             break;
           default:
@@ -78,7 +78,7 @@ int startSearchThreads(app_data *restrict dat, app_state *restrict state, thread
 
   //initialize search state
   state->ss.finishedSearchAgents = 0;
-  state->ss.numResults = 0;
+  state->ss.numUpdatedResults = 0;
 
   //determine number of threads
   int numCores = SDL_GetNumLogicalCPUCores();
@@ -97,7 +97,7 @@ int startSearchThreads(app_data *restrict dat, app_state *restrict state, thread
     SDL_Log("ERROR: startSearchThreads - trying to start invalid number of threads (%u).\n",tms->numThreads);
     return -1;
   }
-  printf("Starting %u search thread(s).\n",tms->numThreads);
+  //printf("Starting %u search thread(s).\n",tms->numThreads);
 
   uint8_t numThreadsStarted = 0;
   uint8_t i=0;
@@ -147,7 +147,7 @@ int startSearchThreads(app_data *restrict dat, app_state *restrict state, thread
   return (int)(tms->numThreads);
 }
 
-void killIdleThreads(thread_manager_state *restrict tms){
+void killIdleThreads(app_state *restrict state, thread_manager_state *restrict tms){
   for(uint8_t i=0;i<MAX_NUM_THREADS;i++){
     if(tms->aliveThreads & (uint64_t)(1UL << i)){
       if(tms->threadData[i].threadState == THREADSTATE_IDLE){
@@ -157,6 +157,17 @@ void killIdleThreads(thread_manager_state *restrict tms){
           tms->numThreads--;
         }
       }
+    }
+  }
+  //take action once all threads are done
+  if(tms->numThreads == 0){
+    if(tms->masterThreadState == THREADSTATE_SEARCH){
+      //search is finished, copy over the search results
+      memcpy(state->ss.results,state->ss.updatedResults,sizeof(state->ss.updatedResults));
+      state->ss.numResults = state->ss.numUpdatedResults;
+      tms->masterThreadState = THREADSTATE_KILL;
+      SDL_Event evt;
+      SDL_PushEvent(&evt); //force frame update even if time has passed, as SDL will wait for an event
     }
   }
 }

@@ -104,8 +104,11 @@ UIELEM_PM_PREFS_BUTTON,
 UIELEM_PM_ABOUT_BUTTON,
 UIELEM_PRIMARY_MENU, //buttons in primary menu should be defined in the entries directly preceding this, in top to bottom order
 UIELEM_SEARCH_ENTRYBOX,
-UIELEM_SEARCH_RESULT,
-UIELEM_SEARCH_MENU,
+UIELEM_SEARCH_RESULT, //MAX_SEARCH_RESULTS elements defined in order
+UIELEM_SEARCH_RESULT_2,
+UIELEM_SEARCH_RESULT_3,
+UIELEM_SEARCH_RESULT_4,
+UIELEM_SEARCH_MENU, //buttons in search menu should be defined in the entries directly preceding this, in top to bottom order
 UIELEM_MENU_BUTTON,
 UIELEM_CHARTVIEW_BUTTON,
 UIELEM_SEARCH_BUTTON,

@@ -355,19 +355,22 @@ void updateDrawingState(const app_data *restrict dat, app_state *restrict state,
 	//dismiss info box if it selected nuclide is offscreen
 	if(state->chartSelectedNucl != MAXNUMNUCL){
 		if(state->ds.shownElements & (1UL << UIELEM_NUCL_INFOBOX)){
-			if((state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_HIDE]==0.0f)&&(state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_SHOW]==0.0f)){
-				if(((dat->ndat.nuclData[state->chartSelectedNucl].N+1) < getMinChartN(&state->ds))||(dat->ndat.nuclData[state->chartSelectedNucl].N > getMaxChartN(&state->ds))){
-					//SDL_Log("hiding info box\n");
-					startUIAnimation(dat,state,UIANIM_NUCLINFOBOX_HIDE); //hide the info box, see stopUIAnimation() for info box hiding action
-					startUIAnimation(dat,state,UIANIM_NUCLHIGHLIGHT_HIDE);
-				}else if((dat->ndat.nuclData[state->chartSelectedNucl].Z < getMinChartZ(&state->ds))||((dat->ndat.nuclData[state->chartSelectedNucl].Z-1) > getMaxChartZ(&state->ds))){
-					//SDL_Log("hiding info box\n");
-					startUIAnimation(dat,state,UIANIM_NUCLINFOBOX_HIDE); //hide the info box, see stopUIAnimation() for info box hiding action
-					startUIAnimation(dat,state,UIANIM_NUCLHIGHLIGHT_HIDE);
+			if(state->ds.panInProgress == 0){ //don't hide while panning (eg. when panning to a search result)
+				if((state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_HIDE]==0.0f)&&(state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_SHOW]==0.0f)){
+					if(((dat->ndat.nuclData[state->chartSelectedNucl].N+1) < getMinChartN(&state->ds))||(dat->ndat.nuclData[state->chartSelectedNucl].N > getMaxChartN(&state->ds))){
+						//SDL_Log("hiding info box\n");
+						startUIAnimation(dat,state,UIANIM_NUCLINFOBOX_HIDE); //hide the info box, see stopUIAnimation() for info box hiding action
+						startUIAnimation(dat,state,UIANIM_NUCLHIGHLIGHT_HIDE);
+					}else if((dat->ndat.nuclData[state->chartSelectedNucl].Z < getMinChartZ(&state->ds))||((dat->ndat.nuclData[state->chartSelectedNucl].Z-1) > getMaxChartZ(&state->ds))){
+						//SDL_Log("hiding info box\n");
+						startUIAnimation(dat,state,UIANIM_NUCLINFOBOX_HIDE); //hide the info box, see stopUIAnimation() for info box hiding action
+						startUIAnimation(dat,state,UIANIM_NUCLHIGHLIGHT_HIDE);
+					}
 				}
 			}
 		}
 	}
+
 }
 
 //sets everything needed to show a message box
@@ -2176,6 +2179,10 @@ void changeUIState(const app_data *restrict dat, app_state *restrict state, cons
 					state->mouseoverElement = (uint8_t)(UIELEM_CHARTVIEW_MENU - CHARTVIEW_ENUM_LENGTH); //select the first menu item
 				}
 			}
+			if((state->ds.shownElements & (1UL << UIELEM_SEARCH_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_SEARCH_MENU_HIDE]==0.0f)){
+				state->interactableElement |= (uint64_t)(1UL << UIELEM_SEARCH_ENTRYBOX);
+				state->interactableElement |= (uint64_t)(1UL << UIELEM_SEARCH_MENU);
+			}
 			break;
     case UISTATE_CHARTONLY:
     default:
@@ -2500,8 +2507,6 @@ void setSelectedNuclOnLevelList(const app_data *restrict dat, app_state *restric
 	}
 }
 
-
-
 //handles everything needed to select a new nucleus on the main chart view
 //forcePan: 0=don't pan chart (except to dodge UI elements)
 //          1=pan chart from mouse (double-click)
@@ -2587,6 +2592,21 @@ void uiElemHoldAction(const app_data *restrict dat, app_state *restrict state, c
 	}
 }
 
+//updates the search result UI as results come in
+void updateSearchUIState(const app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat){
+  updateSingleUIElemPosition(dat,state,rdat,UIELEM_SEARCH_MENU);
+  for(uint8_t i=0; i<state->ss.numResults; i++){
+    if(i<MAX_SEARCH_RESULTS){
+      state->interactableElement |= (uint64_t)(1UL << (UIELEM_SEARCH_RESULT+i));
+			//SDL_Log("interactable: %u\n",i);
+    }
+  }
+  for(uint8_t i=state->ss.numResults; i<MAX_SEARCH_RESULTS; i++){
+    state->interactableElement = (uint64_t)(state->interactableElement & ~(1UL << (UIELEM_SEARCH_RESULT+i))); //unset
+		//SDL_Log("uninteractable: %u\n",i);
+  }
+}
+
 //take action after clicking a button or other UI element
 void uiElemClickAction(app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat, const uint8_t doubleClick, const uint8_t uiElemID){
 
@@ -2606,7 +2626,7 @@ void uiElemClickAction(app_data *restrict dat, app_state *restrict state, resour
 			state->clickedUIElem = UIELEM_ENUM_LENGTH; //'unclick' the menu button
 		}
 	}
-	if((uiElemID != UIELEM_SEARCH_BUTTON)&&(uiElemID != UIELEM_SEARCH_MENU)){
+	if((uiElemID != UIELEM_SEARCH_BUTTON)&&(uiElemID != UIELEM_SEARCH_MENU)&&(uiElemID != UIELEM_SEARCH_ENTRYBOX)){
 		if((state->ds.shownElements & (1UL << UIELEM_SEARCH_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_SEARCH_MENU_HIDE]==0.0f)){
 			startUIAnimation(dat,state,UIANIM_SEARCH_MENU_HIDE); //menu will be closed after animation finishes
 			state->clickedUIElem = UIELEM_ENUM_LENGTH; //'unclick' the menu button
@@ -2677,6 +2697,7 @@ void uiElemClickAction(app_data *restrict dat, app_state *restrict state, resour
 				startUIAnimation(dat,state,UIANIM_SEARCH_MENU_SHOW);
 				changeUIState(dat,state,UISTATE_CHARTWITHMENU);
 				state->clickedUIElem = UIELEM_SEARCH_BUTTON;
+				state->mouseholdElement = UIELEM_ENUM_LENGTH; //remove any previous selection highlight (from previous searches)
 				//start search input
 				memset(state->ss.searchString,0,sizeof(state->ss.searchString));
 				state->ss.numResults = 0;
@@ -2686,7 +2707,6 @@ void uiElemClickAction(app_data *restrict dat, app_state *restrict state, resour
 				state->ds.searchEntryDispNumChars = 0;
 				SDL_StartTextInput(rdat->window);
       }
-			break;
 			break;
 		case UIELEM_PREFS_DIALOG_UISCALE_DROPDOWN:
 			if((state->ds.shownElements & (1UL << UIELEM_PREFS_UISCALE_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_UISCALE_MENU_HIDE]==0.0f)){
@@ -2785,6 +2805,50 @@ void uiElemClickAction(app_data *restrict dat, app_state *restrict state, resour
 			state->clickedUIElem = UIELEM_ENUM_LENGTH; //'unclick' the menu button
 			state->chartView = CHARTVIEW_R42;
 			changeUIState(dat,state,UISTATE_CHARTONLY); //prevents mouseover from still highlighting buttons while the menu closes
+			break;
+		case UIELEM_SEARCH_ENTRYBOX:
+			if(state->ds.searchEntryDispNumChars > 0){
+				//reposition the cursor using the mouse
+				float relXPos = ((state->mouseXPx-state->ds.uiElemPosX[UIELEM_SEARCH_ENTRYBOX])/state->ds.uiUserScale)-33.0f;
+				if(relXPos > 0.0f){
+					uint16_t mousePosChar = getNumTextCharsUnderWidth(rdat,(uint16_t)relXPos,state->ss.searchString,state->ds.searchEntryDispStartChar);
+					state->searchCursorPos = state->ds.searchEntryDispStartChar + mousePosChar;
+					//SDL_Log("Repositioned cursor to position %u (rel pos %f).\n",state->searchCursorPos,(double)relXPos);
+				}
+			}
+			state->clickedUIElem = UIELEM_SEARCH_BUTTON; //keep the menu button selected
+			break;
+		case UIELEM_SEARCH_RESULT:
+			startUIAnimation(dat,state,UIANIM_SEARCH_MENU_HIDE); //menu will be closed after animation finishes
+			state->clickedUIElem = UIELEM_ENUM_LENGTH; //'unclick' the menu button
+			changeUIState(dat,state,UISTATE_CHARTONLY); //prevents mouseover from still highlighting buttons while the menu closes
+			if(state->ss.results[0].resultType == SEARCHAGENT_NUCLIDE){
+				setSelectedNuclOnChartDirect(dat,state,rdat,(uint16_t)(state->ss.results[0].resultVal),1);
+			}
+			break;
+		case UIELEM_SEARCH_RESULT_2:
+			startUIAnimation(dat,state,UIANIM_SEARCH_MENU_HIDE); //menu will be closed after animation finishes
+			state->clickedUIElem = UIELEM_ENUM_LENGTH; //'unclick' the menu button
+			changeUIState(dat,state,UISTATE_CHARTONLY); //prevents mouseover from still highlighting buttons while the menu closes
+			if(state->ss.results[1].resultType == SEARCHAGENT_NUCLIDE){
+				setSelectedNuclOnChartDirect(dat,state,rdat,(uint16_t)(state->ss.results[1].resultVal),1);
+			}
+			break;
+		case UIELEM_SEARCH_RESULT_3:
+			startUIAnimation(dat,state,UIANIM_SEARCH_MENU_HIDE); //menu will be closed after animation finishes
+			state->clickedUIElem = UIELEM_ENUM_LENGTH; //'unclick' the menu button
+			changeUIState(dat,state,UISTATE_CHARTONLY); //prevents mouseover from still highlighting buttons while the menu closes
+			if(state->ss.results[2].resultType == SEARCHAGENT_NUCLIDE){
+				setSelectedNuclOnChartDirect(dat,state,rdat,(uint16_t)(state->ss.results[2].resultVal),1);
+			}
+			break;
+		case UIELEM_SEARCH_RESULT_4:
+			startUIAnimation(dat,state,UIANIM_SEARCH_MENU_HIDE); //menu will be closed after animation finishes
+			state->clickedUIElem = UIELEM_ENUM_LENGTH; //'unclick' the menu button
+			changeUIState(dat,state,UISTATE_CHARTONLY); //prevents mouseover from still highlighting buttons while the menu closes
+			if(state->ss.results[3].resultType == SEARCHAGENT_NUCLIDE){
+				setSelectedNuclOnChartDirect(dat,state,rdat,(uint16_t)(state->ss.results[3].resultVal),1);
+			}
 			break;
 		case UIELEM_PRIMARY_MENU:
 			//clicked on menu background, do nothing except keep the menu button selected
@@ -3085,6 +3149,24 @@ void updateSingleUIElemPosition(const app_data *restrict dat, app_state *restric
 			state->ds.uiElemWidth[uiElemInd] = (uint16_t)(SEARCH_MENU_ENTRYBOX_WIDTH*state->ds.uiUserScale);
 			state->ds.uiElemHeight[uiElemInd] = (uint16_t)((SEARCH_MENU_RESULT_HEIGHT-UI_PADDING_SIZE)*state->ds.uiUserScale);
 			break;
+		case UIELEM_SEARCH_RESULT_2:
+			state->ds.uiElemPosX[uiElemInd] = (uint16_t)(state->ds.windowXRes-((SEARCH_MENU_WIDTH+SEARCH_MENU_POS_XR+CHARTVIEW_MENU_WIDTH+CHARTVIEW_MENU_POS_XR-SEARCH_MENU_ENTRYBOX_POS_X)*state->ds.uiUserScale));
+			state->ds.uiElemPosY[uiElemInd] = (uint16_t)((SEARCH_MENU_POS_Y+SEARCH_MENU_ENTRYBOX_POS_Y+UI_TILE_SIZE+UI_PADDING_SIZE+SEARCH_MENU_RESULT_HEIGHT)*state->ds.uiUserScale);
+			state->ds.uiElemWidth[uiElemInd] = (uint16_t)(SEARCH_MENU_ENTRYBOX_WIDTH*state->ds.uiUserScale);
+			state->ds.uiElemHeight[uiElemInd] = (uint16_t)((SEARCH_MENU_RESULT_HEIGHT-UI_PADDING_SIZE)*state->ds.uiUserScale);
+			break;
+		case UIELEM_SEARCH_RESULT_3:
+			state->ds.uiElemPosX[uiElemInd] = (uint16_t)(state->ds.windowXRes-((SEARCH_MENU_WIDTH+SEARCH_MENU_POS_XR+CHARTVIEW_MENU_WIDTH+CHARTVIEW_MENU_POS_XR-SEARCH_MENU_ENTRYBOX_POS_X)*state->ds.uiUserScale));
+			state->ds.uiElemPosY[uiElemInd] = (uint16_t)((SEARCH_MENU_POS_Y+SEARCH_MENU_ENTRYBOX_POS_Y+UI_TILE_SIZE+UI_PADDING_SIZE+2*SEARCH_MENU_RESULT_HEIGHT)*state->ds.uiUserScale);
+			state->ds.uiElemWidth[uiElemInd] = (uint16_t)(SEARCH_MENU_ENTRYBOX_WIDTH*state->ds.uiUserScale);
+			state->ds.uiElemHeight[uiElemInd] = (uint16_t)((SEARCH_MENU_RESULT_HEIGHT-UI_PADDING_SIZE)*state->ds.uiUserScale);
+			break;
+		case UIELEM_SEARCH_RESULT_4:
+			state->ds.uiElemPosX[uiElemInd] = (uint16_t)(state->ds.windowXRes-((SEARCH_MENU_WIDTH+SEARCH_MENU_POS_XR+CHARTVIEW_MENU_WIDTH+CHARTVIEW_MENU_POS_XR-SEARCH_MENU_ENTRYBOX_POS_X)*state->ds.uiUserScale));
+			state->ds.uiElemPosY[uiElemInd] = (uint16_t)((SEARCH_MENU_POS_Y+SEARCH_MENU_ENTRYBOX_POS_Y+UI_TILE_SIZE+UI_PADDING_SIZE+3*SEARCH_MENU_RESULT_HEIGHT)*state->ds.uiUserScale);
+			state->ds.uiElemWidth[uiElemInd] = (uint16_t)(SEARCH_MENU_ENTRYBOX_WIDTH*state->ds.uiUserScale);
+			state->ds.uiElemHeight[uiElemInd] = (uint16_t)((SEARCH_MENU_RESULT_HEIGHT-UI_PADDING_SIZE)*state->ds.uiUserScale);
+			break;	
 		case UIELEM_MSG_BOX:
 			state->ds.uiElemPosX[uiElemInd] = (uint16_t)((state->ds.windowXRes - MESSAGE_BOX_WIDTH*state->ds.uiUserScale)/2);
 			state->ds.uiElemPosY[uiElemInd] = (uint16_t)((state->ds.windowYRes - MESSAGE_BOX_HEIGHT*state->ds.uiUserScale)/2);

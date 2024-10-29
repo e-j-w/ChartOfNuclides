@@ -617,7 +617,7 @@ void drawChartOfNuclides(const app_data *restrict dat, const app_state *restrict
 
   //calculate size of low box (extra info like isomers, 2+ energies etc.)
   float lowBoxHeight = 0.0f;
-  if(state->ds.chartZoomScale >= 6.0f){
+  if(state->ds.chartZoomScale >= 4.5f){
     lowBoxHeight = (boxLineLimit - 3)*20.0f*state->ds.uiUserScale;
     if(lowBoxHeight < 0.0f){
       lowBoxHeight = 0.0f;
@@ -655,7 +655,7 @@ void drawChartOfNuclides(const app_data *restrict dat, const app_state *restrict
               
               if(state->ds.chartZoomScale >= 4.0f){
                 uint8_t drawingLowBox = 0;
-                if(state->ds.chartZoomScale >= 6.0f){
+                if(state->ds.chartZoomScale >= 4.5f){
                   //setup low box rect
                   lowBoxRect.x = rect.x + lowBoxPadding;
                   lowBoxRect.y = rect.y + rect.h - lowBoxHeight - lowBoxPadding;
@@ -669,9 +669,9 @@ void drawChartOfNuclides(const app_data *restrict dat, const app_state *restrict
                       if((isomerHl >= 1.0E-1)||(isomerHl > getNuclGSHalfLifeSeconds(&dat->ndat,(uint16_t)i))){ //only show 'important' isomers on chart
                         drawingLowBox = 1;
                         SDL_FColor boxCol = getHalfLifeCol(isomerHl);
-                        if(state->ds.chartZoomScale < 7.0f){
+                        if(state->ds.chartZoomScale < 5.5f){
                           //handle fading in of isomer boxes
-                          boxCol.a =  1.0f - (7.0f-state->ds.chartZoomScale);
+                          boxCol.a =  1.0f - (5.5f-state->ds.chartZoomScale);
                         }
                         drawFlatRect(rdat,lowBoxRect,boxCol);
                         drawisomerBoxLabel(dat,&state->ds,rdat,lowBoxRect.x,lowBoxRect.y,lowBoxRect.w,lowBoxRect.h,(isomerHl > 1.0E3) ? whiteCol8Bit : blackCol8Bit,(uint16_t)i,isomerLvl,dat->ndat.nuclData[i].longestIsomerMVal);
@@ -1537,26 +1537,27 @@ void drawSearchMenu(const app_data *restrict dat, const app_state *restrict stat
 
   //draw results
   char tmpStr[32];
-  drawRect.x = state->ds.uiElemPosX[UIELEM_SEARCH_RESULT];
-  drawRect.y = ((float)state->ds.uiElemPosY[UIELEM_SEARCH_RESULT] + yOffset);
-  drawRect.w = state->ds.uiElemWidth[UIELEM_SEARCH_RESULT];
-  drawRect.h = state->ds.uiElemHeight[UIELEM_SEARCH_RESULT];
   for(uint8_t i=0; i<state->ss.numResults; i++){
-    drawButtonBG(&dat->rules.themeRules,rdat,drawRect,HIGHLIGHT_NORMAL,alpha);
-    switch(state->ss.results[i].resultType){
-      case SEARCHAGENT_NUCLIDE:
-        ; //suppress warning in gcc
-        uint16_t Z = (uint16_t)dat->ndat.nuclData[state->ss.results[i].resultVal].Z;
-        uint16_t N = (uint16_t)dat->ndat.nuclData[state->ss.results[i].resultVal].N;
-        snprintf(tmpStr,32,"%u",N+Z);
-        float numWidth = drawTextAlignedSized(rdat,drawRect.x+12.0f,drawRect.y+12.0f,blackCol8Bit,FONTSIZE_SMALL,255,tmpStr,ALIGN_LEFT,16384).w; //draw number label
-        drawTextAlignedSized(rdat,drawRect.x+12.0f+numWidth,drawRect.y+12.0f+(10.0f*state->ds.uiUserScale),blackCol8Bit,FONTSIZE_LARGE,255,getElemStr((uint8_t)Z),ALIGN_LEFT,16384); //draw element label
-        drawTextAlignedSized(rdat,drawRect.x+12.0f,drawRect.y+SEARCH_MENU_RESULT_HEIGHT-24.0f,grayCol8Bit,FONTSIZE_NORMAL,255,dat->strings[dat->locStringIDs[LOCSTR_SEARCHRES_NUCLIDE]],ALIGN_LEFT,16384);
-        break;
-      default:
-        continue;
+    if(i<MAX_SEARCH_RESULTS){
+      drawRect.x = state->ds.uiElemPosX[UIELEM_SEARCH_RESULT+i];
+      drawRect.y = ((float)state->ds.uiElemPosY[UIELEM_SEARCH_RESULT+i] + yOffset);
+      drawRect.w = state->ds.uiElemWidth[UIELEM_SEARCH_RESULT+i];
+      drawRect.h = state->ds.uiElemHeight[UIELEM_SEARCH_RESULT+i];
+      drawButtonBG(&dat->rules.themeRules,rdat,drawRect,getHighlightState(state,UIELEM_SEARCH_RESULT+i),alpha);
+      switch(state->ss.results[i].resultType){
+        case SEARCHAGENT_NUCLIDE:
+          ; //suppress warning in gcc
+          uint16_t Z = (uint16_t)dat->ndat.nuclData[state->ss.results[i].resultVal].Z;
+          uint16_t N = (uint16_t)dat->ndat.nuclData[state->ss.results[i].resultVal].N;
+          snprintf(tmpStr,32,"%u",N+Z);
+          float numWidth = drawTextAlignedSized(rdat,drawRect.x+12.0f,drawRect.y+12.0f,blackCol8Bit,FONTSIZE_SMALL,alpha8,tmpStr,ALIGN_LEFT,16384).w; //draw number label
+          drawTextAlignedSized(rdat,drawRect.x+12.0f+numWidth,drawRect.y+12.0f+(10.0f*state->ds.uiUserScale),blackCol8Bit,FONTSIZE_LARGE,alpha8,getElemStr((uint8_t)Z),ALIGN_LEFT,16384); //draw element label
+          drawTextAlignedSized(rdat,drawRect.x+12.0f,drawRect.y+SEARCH_MENU_RESULT_HEIGHT-24.0f,grayCol8Bit,FONTSIZE_NORMAL,alpha8,dat->strings[dat->locStringIDs[LOCSTR_SEARCHRES_NUCLIDE]],ALIGN_LEFT,16384);
+          break;
+        default:
+          continue;
+      }
     }
-    drawRect.y += (float)(SEARCH_MENU_RESULT_HEIGHT*state->ds.uiUserScale);
   }
 
 }
@@ -1725,7 +1726,7 @@ void drawUI(const app_data *restrict dat, app_state *restrict state, resource_da
     drawChartViewMenu(dat,state,rdat);
   }
   if(state->ds.shownElements & (1UL << UIELEM_SEARCH_MENU)){
-    updateSingleUIElemPosition(dat,state,rdat,UIELEM_SEARCH_MENU);
+    updateSearchUIState(dat,state,rdat);
     drawSearchMenu(dat,state,rdat);
   }
 

@@ -77,6 +77,7 @@ uint16_t getNearestNuclInd(const app_data *restrict dat, const int16_t N, const 
 void setSelectedNuclOnLevelList(const app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat, const uint16_t N, const uint16_t Z);
 void setSelectedNuclOnChart(const app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat, const uint16_t N, const uint16_t Z, const uint8_t forcePan);
 void setSelectedNuclOnChartDirect(const app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat, const uint16_t selNucl, const uint8_t forcePan);
+void updateSearchUIState(const app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat);
 void uiElemHoldAction(const app_data *restrict dat, app_state *restrict state, const uint8_t uiElemID);
 void uiElemClickAction(app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat, const uint8_t doubleClick, const uint8_t uiElemID);
 

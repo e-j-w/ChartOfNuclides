@@ -226,6 +226,11 @@ typedef struct
 {
   char searchString[SEARCH_STRING_MAX_SIZE];   //the user's search query
   char searchTok[MAX_SEARCH_TOKENS][16];
+  //the search results that are currently being worked on
+  //will only be displayed once the search is completed
+  search_result updatedResults[MAX_SEARCH_RESULTS];
+  uint8_t numUpdatedResults; //the number of results returned so far
+  //the search results to display
   search_result results[MAX_SEARCH_RESULTS];
   uint8_t numResults; //the number of results returned so far
   uint8_t numSearchTok;

@@ -34,31 +34,31 @@ int SDLCALL compareRelevance(void *userdata, const void *a, const void *b){
 void sortAndAppendResult(search_state *restrict ss, const search_result *restrict res){
 	
 	//check that the result isn't identical to an existing one
-	for(uint8_t i=0; i<ss->numResults;i++){
-		if(res->resultType == ss->results[i].resultType){
-			if(res->resultVal == ss->results[i].resultVal){
+	for(uint8_t i=0; i<ss->numUpdatedResults;i++){
+		if(res->resultType == ss->updatedResults[i].resultType){
+			if(res->resultVal == ss->updatedResults[i].resultVal){
 				return; //don't append identical results
 			}
 		}
 	}
 	
 	//add the result to the list, if possible
-	if(ss->numResults < MAX_SEARCH_RESULTS){
+	if(ss->numUpdatedResults < MAX_SEARCH_RESULTS){
 		//append the result
-		memcpy(&ss->results[ss->numResults],res,sizeof(search_result));
-		ss->numResults++;
+		memcpy(&ss->updatedResults[ss->numUpdatedResults],res,sizeof(search_result));
+		ss->numUpdatedResults++;
 	}else{
 		//assuming results are already sorted...
 		//if the new result has higher relevance than the lowest rank result,
 		//overwrite that lowest ranked result
-		if(res->relevance > ss->results[MAX_SEARCH_RESULTS-1].relevance){
-			memcpy(&ss->results[MAX_SEARCH_RESULTS-1],res,sizeof(search_result));
+		if(res->relevance > ss->updatedResults[MAX_SEARCH_RESULTS-1].relevance){
+			memcpy(&ss->updatedResults[MAX_SEARCH_RESULTS-1],res,sizeof(search_result));
 		}else{
 			return; //no result appended
 		}
 	}
 	//sort the results by relevance
-	SDL_qsort_r(&ss->results[0],ss->numResults,sizeof(search_result),compareRelevance,NULL);
+	SDL_qsort_r(&ss->updatedResults[0],ss->numUpdatedResults,sizeof(search_result),compareRelevance,NULL);
 }
 
 //breaks the search string down into smaller tokens
@@ -79,11 +79,11 @@ void tokenizeSearchStr(search_state *restrict ss){
 	}
 	ss->numSearchTok = numTok;
 
-	printf("%u search tokens:",ss->numSearchTok);
+	/*printf("%u search tokens:",ss->numSearchTok);
 	for(uint8_t i=0; i<ss->numSearchTok; i++){
 		printf(" %s",ss->searchTok[i]);
 	}
-	printf("\n");
+	printf("\n");*/
 
 }
 
@@ -100,7 +100,7 @@ void searchNuclides(const ndata *restrict ndat, search_state *restrict ss){
 				if(!(isdigit(ss->searchTok[i][j]))){
 					memcpy(&nuclAStr,&ss->searchTok[i],(size_t)j);
 					nuclAStr[j] = '\0'; //terminate string at end
-					if(len > j){
+					if((len > j)&&((len-j)<8)){
 						memcpy(&nuclElemName,&(ss->searchTok[i][j]),(size_t)(len-j));
 						nuclElemName[len-j] = '\0'; //terminate string at end
 						foundNucl = 1;
@@ -113,7 +113,7 @@ void searchNuclides(const ndata *restrict ndat, search_state *restrict ss){
 				int16_t nuclZ = (int16_t)elemStrToZ(nuclElemName);
 				nuclElemName[0] = (char)SDL_toupper(nuclElemName[0]); //convert to uppercase
 				int16_t nuclZu = (int16_t)elemStrToZ(nuclElemName);
-				SDL_Log("A: %i, Z: %i, elem name: %s, len: %u\n",nuclA,nuclZ,nuclElemName,len);
+				//SDL_Log("A: %i, Z: %i, elem name: %s, len: %u\n",nuclA,nuclZ,nuclElemName,len);
 				for(int16_t j=0; j<ndat->numNucl; j++){
 					if(ndat->nuclData[j].Z == nuclZ){
 						if(((ndat->nuclData[j].N + ndat->nuclData[j].Z)) == nuclA){
@@ -122,7 +122,7 @@ void searchNuclides(const ndata *restrict ndat, search_state *restrict ss){
 							res.relevance = 1.0f; //exact match
 							res.resultType = SEARCHAGENT_NUCLIDE;
 							res.resultVal = (uint32_t)j;
-							SDL_Log("Found nuclide %u\n",res.resultVal);
+							//SDL_Log("Found nuclide %u\n",res.resultVal);
 							sortAndAppendResult(ss,&res);
 						}
 					}
@@ -133,7 +133,7 @@ void searchNuclides(const ndata *restrict ndat, search_state *restrict ss){
 							res.relevance = 0.8f; //uppercase match
 							res.resultType = SEARCHAGENT_NUCLIDE;
 							res.resultVal = (uint32_t)j;
-							SDL_Log("Found nuclide %u\n",res.resultVal);
+							//SDL_Log("Found nuclide %u\n",res.resultVal);
 							sortAndAppendResult(ss,&res);
 						}
 					}
@@ -142,5 +142,5 @@ void searchNuclides(const ndata *restrict ndat, search_state *restrict ss){
 		}
 	}
 
-	SDL_Log("Number of search results: %u\n",ss->numResults);
+	//SDL_Log("Number of search results: %u\n",ss->numUpdatedResults);
 }

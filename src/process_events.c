@@ -55,7 +55,32 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
   const uint8_t chartDraggable = ((state->uiState == UISTATE_CHARTONLY)||(state->uiState == UISTATE_CHARTWITHMENU)||(state->uiState == UISTATE_INFOBOX));
   const uint8_t chartPannable =  ((state->uiState == UISTATE_CHARTONLY)||(state->uiState == UISTATE_INFOBOX));
 
-  if(chartPannable){
+  if(SDL_TextInputActive(rdat->window)){
+    //scroll between search results
+    if(state->ss.numResults > 0){
+      if(up && !down){
+        if((state->ss.numResults > 1)&&(state->mouseoverElement >= UIELEM_SEARCH_RESULT)&&(state->mouseoverElement <= UIELEM_SEARCH_RESULT_4)){
+          if(state->mouseoverElement <= UIELEM_SEARCH_RESULT){
+            state->mouseoverElement = UIELEM_SEARCH_RESULT + state->ss.numResults - 1;
+          }else{
+            state->mouseoverElement--;
+          }
+        }else{
+          state->mouseoverElement = UIELEM_SEARCH_RESULT;
+        }
+      }else if(down && !up){
+        if((state->ss.numResults > 1)&&(state->mouseoverElement >= UIELEM_SEARCH_RESULT)&&(state->mouseoverElement <= UIELEM_SEARCH_RESULT_4)){
+          if(state->mouseoverElement >= (UIELEM_SEARCH_RESULT + state->ss.numResults - 1)){
+            state->mouseoverElement = UIELEM_SEARCH_RESULT;
+          }else{
+            state->mouseoverElement++;
+          }
+        }else{
+          state->mouseoverElement = UIELEM_SEARCH_RESULT;
+        }
+      }
+    }
+  }else if(chartPannable){
 
     //in main chart view, handle chart panning
     //SDL_Log("Processing input, mouseover element: %u\n",state->mouseoverElement);
@@ -373,7 +398,17 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
 
 
   if(state->inputFlags & (1U << INPUT_SELECT)){
-    if((state->ds.shownElements & (1UL << UIELEM_ABOUT_BOX))&&(state->ds.timeLeftInUIAnimation[UIANIM_MODAL_BOX_HIDE]==0.0f)){
+    if(state->ss.numResults > 0){
+      //commit search result
+      if((state->mouseoverElement >= UIELEM_SEARCH_RESULT)&&(state->mouseoverElement <= UIELEM_SEARCH_RESULT_4)){
+        state->mouseholdElement = state->mouseoverElement;
+        uiElemClickAction(dat,state,rdat,0,state->mouseoverElement);
+      }else{
+        //select the first search result
+        state->mouseholdElement = UIELEM_SEARCH_RESULT;
+        uiElemClickAction(dat,state,rdat,0,UIELEM_SEARCH_RESULT);
+      }
+    }else if((state->ds.shownElements & (1UL << UIELEM_ABOUT_BOX))&&(state->ds.timeLeftInUIAnimation[UIANIM_MODAL_BOX_HIDE]==0.0f)){
       //close the about box
       state->mouseholdElement = UIELEM_ABOUT_BOX_OK_BUTTON;
       uiElemClickAction(dat,state,rdat,0,UIELEM_ABOUT_BOX_OK_BUTTON);
@@ -831,9 +866,7 @@ void processSingleEvent(app_data *restrict dat, app_state *restrict state, resou
           }
           break;
         case SDL_SCANCODE_UP:
-          if(!(SDL_TextInputActive(rdat->window))){
-            state->inputFlags |= (1U << INPUT_UP);
-          }
+          state->inputFlags |= (1U << INPUT_UP);
           break;
         case SDL_SCANCODE_W:
           if(!(SDL_TextInputActive(rdat->window))){
@@ -841,9 +874,7 @@ void processSingleEvent(app_data *restrict dat, app_state *restrict state, resou
           }
           break;
         case SDL_SCANCODE_DOWN:
-          if(!(SDL_TextInputActive(rdat->window))){
-            state->inputFlags |= (1U << INPUT_DOWN);
-          }
+          state->inputFlags |= (1U << INPUT_DOWN);
           break;
         case SDL_SCANCODE_S:
           if(!(SDL_TextInputActive(rdat->window))){
@@ -943,11 +974,7 @@ void processSingleEvent(app_data *restrict dat, app_state *restrict state, resou
           updateUIScale(dat,state,rdat);
           break;*/
         case SDL_SCANCODE_RETURN:
-          if(SDL_TextInputActive(rdat->window)){
-            //commit search entry (unimplemented)
-          }else{
-            state->inputFlags |= (1U << INPUT_SELECT);
-          }
+          state->inputFlags |= (1U << INPUT_SELECT);
           break;
         case SDL_SCANCODE_LSHIFT:
         case SDL_SCANCODE_RSHIFT:
@@ -1161,6 +1188,9 @@ void processSingleEvent(app_data *restrict dat, app_state *restrict state, resou
             break;
           }
         }
+        /*if(state->ss.numResults > 0){
+          state->mouseoverElement = (uint8_t)(UIELEM_SEARCH_RESULT); //select the first search result
+        }*/
         state->searchStrUpdated = 1;
         //SDL_Log("Search query display start: %u, num chars: %u, cursor pos: %u\n",state->ds.searchEntryDispStartChar,state->ds.searchEntryDispNumChars,state->searchCursorPos);
         //SDL_Log("search query: %s\n",state->ss.searchString);
