@@ -398,7 +398,7 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
 
 
   if(state->inputFlags & (1U << INPUT_SELECT)){
-    if(state->ss.numResults > 0){
+    if((state->ds.shownElements & (1UL << UIELEM_SEARCH_MENU))&&(state->ss.numResults > 0)){
       //commit search result
       if((state->mouseoverElement >= UIELEM_SEARCH_RESULT)&&(state->mouseoverElement <= UIELEM_SEARCH_RESULT_4)){
         state->mouseholdElement = state->mouseoverElement;

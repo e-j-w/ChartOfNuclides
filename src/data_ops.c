@@ -2543,13 +2543,21 @@ void setSelectedNuclOnChart(const app_data *restrict dat, app_state *restrict st
 					if(forcePan==2){
 						if(state->kbdModVal == KBD_MOD_SHIFT){
 							panChartToPos(dat,&state->ds,N,Z,CHART_KEY_PAN_TIME*PAN_SPRINT_MULTIPLIER);
+							return;
 						}else{
 							panChartToPos(dat,&state->ds,N,Z,CHART_KEY_PAN_TIME);
+							return;
 						}
 					}else{
 						panChartToPos(dat,&state->ds,N,Z,CHART_DOUBLECLICK_PAN_TIME);
+						return;
 					}
 				}
+			}
+			//check if nuclide is at screen edge
+			float yOcclBottom = chartZtoYPx(&state->ds,(float)(Z));
+			if((xOcclRight < (0.0f + CHART_AXIS_DEPTH))||(xOcclLeft > state->ds.windowXRes)||(yOcclBottom < 0.0f)||(yOcclTop > (state->ds.windowYRes - CHART_AXIS_DEPTH))){
+				panChartToPos(dat,&state->ds,N,Z,CHART_DOUBLECLICK_PAN_TIME);
 			}
 		}	
 	}else{
