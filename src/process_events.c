@@ -55,7 +55,7 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
   const uint8_t chartDraggable = ((state->uiState == UISTATE_CHARTONLY)||(state->uiState == UISTATE_CHARTWITHMENU)||(state->uiState == UISTATE_INFOBOX));
   const uint8_t chartPannable =  ((state->uiState == UISTATE_CHARTONLY)||(state->uiState == UISTATE_INFOBOX));
 
-  if(SDL_TextInputActive(rdat->window)){
+  if((SDL_TextInputActive(rdat->window))&&(strlen(state->ss.searchString) > 0)){
     //scroll between search results
     if(state->ss.numResults > 0){
       if(up && !down){
