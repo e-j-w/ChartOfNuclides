@@ -610,6 +610,23 @@ void drawNuclBoxLabel(const app_data *restrict dat, const drawing_state *restric
               }
             }
           }
+        }else{
+          for(int8_t i=0; i<dat->ndat.levels[gsLevInd].numDecModes; i++){
+            getDecayModeStr(tmpStr,&dat->ndat,dat->ndat.levels[gsLevInd].firstDecMode + (uint32_t)i);
+            //SDL_Log("%s\n",tmpStr);
+            drawYOffsets = 1;
+            if(getTextWidth(rdat,FONTSIZE_NORMAL,tmpStr) > (maxLblWidth*rdat->uiDPIScale)){
+              drawYOffsets = 2;
+            }
+            if(((yOffsets+drawYOffsets) <= yOffsetLimit)||((drawYOffsets == 1)&&(i==(dat->ndat.levels[gsLevInd].numDecModes-1)))){
+              drawTextAlignedSized(rdat,drawXPos,drawYPos+((yOffsets*19.0f + 36.0f)*ds->uiUserScale),col,FONTSIZE_NORMAL,255,tmpStr,ALIGN_CENTER,maxLblWidth); //draw decay mode label
+              //SDL_Log("height: %f\n",(double)height);
+              yOffsets += drawYOffsets;
+            }else{
+              drawTextAlignedSized(rdat,drawXPos,drawYPos+((yOffsets*19.0f + 36.0f)*ds->uiUserScale),col,FONTSIZE_NORMAL,255,"(...)",ALIGN_CENTER,maxLblWidth);
+              break;
+            }
+          }
         }
       }else{
         drawTextAlignedSized(rdat,drawXPos,drawYPos+((yOffsets*19.0f + 36.0f)*ds->uiUserScale),col,FONTSIZE_NORMAL,255,"(...)",ALIGN_CENTER,maxLblWidth);
