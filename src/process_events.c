@@ -66,7 +66,11 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
             state->mouseoverElement--;
           }
         }else{
-          state->mouseoverElement = UIELEM_SEARCH_RESULT;
+          if(state->mouseoverElement != UIELEM_SEARCH_RESULT){
+            state->mouseoverElement = UIELEM_SEARCH_RESULT;
+          }else{
+            state->mouseoverElement = UIELEM_ENUM_LENGTH;
+          }
         }
       }else if(down && !up){
         if((state->ss.numResults > 1)&&(state->mouseoverElement >= UIELEM_SEARCH_RESULT)&&(state->mouseoverElement <= UIELEM_SEARCH_RESULT_4)){
@@ -76,7 +80,65 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
             state->mouseoverElement++;
           }
         }else{
-          state->mouseoverElement = UIELEM_SEARCH_RESULT;
+          if(state->mouseoverElement != UIELEM_SEARCH_RESULT){
+            state->mouseoverElement = UIELEM_SEARCH_RESULT;
+          }else{
+            state->mouseoverElement = UIELEM_ENUM_LENGTH;
+          }
+        }
+      }else if((left && !right)&&((state->mouseoverElement < UIELEM_SEARCH_RESULT)||(state->mouseoverElement > UIELEM_SEARCH_RESULT_4))){
+        if(state->searchCursorPos > 0){
+          state->searchCursorPos -= 1;
+          if(state->searchCursorPos > 0){
+            if((state->searchCursorPos-1) < state->ds.searchEntryDispStartChar){
+              state->ds.searchEntryDispStartChar = (uint16_t)(state->searchCursorPos-1);
+              state->ds.searchEntryDispNumChars = getNumTextCharsUnderWidth(rdat,SEARCH_MENU_ENTRYBOX_ENTRY_WIDTH,state->ss.searchString,state->ds.searchEntryDispStartChar);
+            }
+          }else{
+            state->ds.searchEntryDispStartChar = 0;
+            state->ds.searchEntryDispNumChars = getNumTextCharsUnderWidth(rdat,SEARCH_MENU_ENTRYBOX_ENTRY_WIDTH,state->ss.searchString,state->ds.searchEntryDispStartChar);
+          }
+        }
+      }else if((right && !left)&&((state->mouseoverElement < UIELEM_SEARCH_RESULT)||(state->mouseoverElement > UIELEM_SEARCH_RESULT_4))){
+        if(state->searchCursorPos < (int)strlen(state->ss.searchString)){
+          state->searchCursorPos += 1;
+          state->ds.searchEntryDispNumChars = getNumTextCharsUnderWidth(rdat,SEARCH_MENU_ENTRYBOX_ENTRY_WIDTH,state->ss.searchString,state->ds.searchEntryDispStartChar);
+          while((state->searchCursorPos - state->ds.searchEntryDispStartChar) > state->ds.searchEntryDispNumChars){
+            state->ds.searchEntryDispStartChar++;
+            if(state->ds.searchEntryDispStartChar == 0){
+              SDL_Log("WARNING: overflow\n");
+              break;
+            }
+          }
+        }
+      }else if(left || right){
+        goto menu_navigation; //considered harmful
+      }
+    }else{
+      if(left && !right){
+        if(state->searchCursorPos > 0){
+          state->searchCursorPos -= 1;
+          if(state->searchCursorPos > 0){
+            if((state->searchCursorPos-1) < state->ds.searchEntryDispStartChar){
+              state->ds.searchEntryDispStartChar = (uint16_t)(state->searchCursorPos-1);
+              state->ds.searchEntryDispNumChars = getNumTextCharsUnderWidth(rdat,SEARCH_MENU_ENTRYBOX_ENTRY_WIDTH,state->ss.searchString,state->ds.searchEntryDispStartChar);
+            }
+          }else{
+            state->ds.searchEntryDispStartChar = 0;
+            state->ds.searchEntryDispNumChars = getNumTextCharsUnderWidth(rdat,SEARCH_MENU_ENTRYBOX_ENTRY_WIDTH,state->ss.searchString,state->ds.searchEntryDispStartChar);
+          }
+        }
+      }else if(right && !left){
+        if(state->searchCursorPos < (int)strlen(state->ss.searchString)){
+          state->searchCursorPos += 1;
+          state->ds.searchEntryDispNumChars = getNumTextCharsUnderWidth(rdat,SEARCH_MENU_ENTRYBOX_ENTRY_WIDTH,state->ss.searchString,state->ds.searchEntryDispStartChar);
+          while((state->searchCursorPos - state->ds.searchEntryDispStartChar) > state->ds.searchEntryDispNumChars){
+            state->ds.searchEntryDispStartChar++;
+            if(state->ds.searchEntryDispStartChar == 0){
+              SDL_Log("WARNING: overflow\n");
+              break;
+            }
+          }
         }
       }
     }
@@ -204,6 +266,7 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
       }
     }
   }else if((state->uiState == UISTATE_CHARTWITHMENU)||(state->uiState == UISTATE_FULLLEVELINFOWITHMENU)){
+    menu_navigation:
     if(left || right || up || down){
       if(state->clickedUIElem == UIELEM_MENU_BUTTON){
         //primary menu navigation using arrow keys
@@ -815,25 +878,7 @@ void processSingleEvent(app_data *restrict dat, app_state *restrict state, resou
       state->lastInputType = INPUT_TYPE_KEYBOARD; //set keyboard input
       switch(evt.key.scancode){
         case SDL_SCANCODE_LEFT:
-          if(SDL_TextInputActive(rdat->window)){
-            if(state->searchCursorPos > 0){
-              state->searchCursorPos -= 1;
-              if(state->searchCursorPos > 0){
-                if((state->searchCursorPos-1) < state->ds.searchEntryDispStartChar){
-                  state->ds.searchEntryDispStartChar = (uint16_t)(state->searchCursorPos-1);
-                  state->ds.searchEntryDispNumChars = getNumTextCharsUnderWidth(rdat,SEARCH_MENU_ENTRYBOX_ENTRY_WIDTH,state->ss.searchString,state->ds.searchEntryDispStartChar);
-                }
-              }else{
-                state->ds.searchEntryDispStartChar = 0;
-                state->ds.searchEntryDispNumChars = getNumTextCharsUnderWidth(rdat,SEARCH_MENU_ENTRYBOX_ENTRY_WIDTH,state->ss.searchString,state->ds.searchEntryDispStartChar);
-              }
-            }else if(strlen(state->ss.searchString) == 0){
-              //empty string, can use keys to cycle throght menus
-              state->inputFlags |= (1U << INPUT_LEFT);
-            }
-          }else{
-            state->inputFlags |= (1U << INPUT_LEFT);
-          }
+          state->inputFlags |= (1U << INPUT_LEFT);
           break;
         case SDL_SCANCODE_A:
           if(!(SDL_TextInputActive(rdat->window))){
@@ -841,24 +886,7 @@ void processSingleEvent(app_data *restrict dat, app_state *restrict state, resou
           }
           break;
         case SDL_SCANCODE_RIGHT:
-          if(SDL_TextInputActive(rdat->window)){
-            if(state->searchCursorPos < (int)strlen(state->ss.searchString)){
-              state->searchCursorPos += 1;
-              state->ds.searchEntryDispNumChars = getNumTextCharsUnderWidth(rdat,SEARCH_MENU_ENTRYBOX_ENTRY_WIDTH,state->ss.searchString,state->ds.searchEntryDispStartChar);
-              while((state->searchCursorPos - state->ds.searchEntryDispStartChar) > state->ds.searchEntryDispNumChars){
-                state->ds.searchEntryDispStartChar++;
-                if(state->ds.searchEntryDispStartChar == 0){
-                  SDL_Log("WARNING: overflow\n");
-                  break;
-                }
-              }
-            }else if(strlen(state->ss.searchString) == 0){
-              //empty string, can use keys to cycle throght menus
-              state->inputFlags |= (1U << INPUT_RIGHT);
-            }
-          }else{
-            state->inputFlags |= (1U << INPUT_RIGHT);
-          }
+          state->inputFlags |= (1U << INPUT_RIGHT);
           break;
         case SDL_SCANCODE_D:
           if(!(SDL_TextInputActive(rdat->window))){

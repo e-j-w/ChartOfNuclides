@@ -546,25 +546,53 @@ void drawNuclBoxLabel(const app_data *restrict dat, const drawing_state *restric
     }
     drawXPos += (drawTextAlignedSized(rdat,drawXPos,drawYPos,col,FONTSIZE_SMALL,255,tmpStr,ALIGN_LEFT,16384)).w; //draw number label
     drawTextAlignedSized(rdat,drawXPos,drawYPos+(10.0f*ds->uiUserScale),col,FONTSIZE_LARGE,255,getElemStr((uint8_t)Z),ALIGN_LEFT,16384); //draw element label
-    getGSHalfLifeStr(tmpStr,dat,nuclInd,ds->useLifetimes);
     uint32_t gsLevInd = (uint32_t)(dat->ndat.nuclData[nuclInd].firstLevel + dat->ndat.nuclData[nuclInd].gsLevel);
-    if((ds->chartZoomScale >= 12.0f)&&(getTextWidth(rdat,FONTSIZE_NORMAL,tmpStr) <= (maxLblWidth*rdat->uiDPIScale))){
+    if(ds->chartZoomScale >= 12.0f){
+      uint8_t yOffsets = 0;
+      uint8_t yOffsetLimit = 1;
+      yOffsetLimit += (uint8_t)(floorf((boxHeight - 75.0f*ds->uiUserScale)/(30.0f*ds->uiUserScale)));
+      //SDL_Log("Offset limit: %u\n",yOffsetLimit);
       drawXPos = xPos + boxWidth/2;
       drawYPos = yPos + 1.6f*labelMargin;
-      drawTextAlignedSized(rdat,drawXPos,drawYPos+(36.0f*ds->uiUserScale),col,FONTSIZE_NORMAL,255,tmpStr,ALIGN_CENTER,16384); //draw GS half-life label
-      if(dat->ndat.nuclData[nuclInd].numLevels > 0){
-        uint8_t yOffsets = 1;
-        uint8_t yOffsetLimit = 1;
-        yOffsetLimit += (uint8_t)(floorf((boxHeight - 75.0f*ds->uiUserScale)/(30.0f*ds->uiUserScale)));
-        if(dat->ndat.nuclData[nuclInd].abundance.unit == VALUE_UNIT_PERCENT){
-          getAbundanceStr(tmpStr,&dat->ndat,nuclInd);
-          uint8_t drawYOffsets = 1;
-          if(getTextWidth(rdat,FONTSIZE_NORMAL,tmpStr) > (maxLblWidth*rdat->uiDPIScale)){
-            drawYOffsets = 2;
-          }
-          if(((yOffsets+drawYOffsets) <= yOffsetLimit)||((drawYOffsets == 1)&&(dat->ndat.levels[gsLevInd].numDecModes==0))){
-            drawTextAlignedSized(rdat,drawXPos,drawYPos+((yOffsets*19.0f + 36.0f)*ds->uiUserScale),col,FONTSIZE_NORMAL,255,tmpStr,ALIGN_CENTER,maxLblWidth); //draw abundance label
-            yOffsets += drawYOffsets;
+      getGSHalfLifeStr(tmpStr,dat,nuclInd,ds->useLifetimes);
+      uint8_t drawYOffsets = 1;
+      if(getTextWidth(rdat,FONTSIZE_NORMAL,tmpStr) > (maxLblWidth*rdat->uiDPIScale)){
+        drawYOffsets = 2;
+      }
+      if((yOffsets+drawYOffsets) <= yOffsetLimit){
+        drawTextAlignedSized(rdat,drawXPos,drawYPos+((yOffsets*19.0f + 36.0f)*ds->uiUserScale),col,FONTSIZE_NORMAL,255,tmpStr,ALIGN_CENTER,maxLblWidth); //draw GS half-life label
+        yOffsets += drawYOffsets;
+        if(dat->ndat.nuclData[nuclInd].numLevels > 0){
+          if(dat->ndat.nuclData[nuclInd].abundance.unit == VALUE_UNIT_PERCENT){
+            getAbundanceStr(tmpStr,&dat->ndat,nuclInd);
+            drawYOffsets = 1;
+            if(getTextWidth(rdat,FONTSIZE_NORMAL,tmpStr) > (maxLblWidth*rdat->uiDPIScale)){
+              drawYOffsets = 2;
+            }
+            if(((yOffsets+drawYOffsets) <= yOffsetLimit)||((drawYOffsets == 1)&&(dat->ndat.levels[gsLevInd].numDecModes==0))){
+              //SDL_Log("Abundance y-offset: %u\n",yOffsets);
+              drawTextAlignedSized(rdat,drawXPos,drawYPos+((yOffsets*19.0f + 36.0f)*ds->uiUserScale),col,FONTSIZE_NORMAL,255,tmpStr,ALIGN_CENTER,maxLblWidth); //draw abundance label
+              yOffsets += drawYOffsets;
+              for(int8_t i=0; i<dat->ndat.levels[gsLevInd].numDecModes; i++){
+                getDecayModeStr(tmpStr,&dat->ndat,dat->ndat.levels[gsLevInd].firstDecMode + (uint32_t)i);
+                //SDL_Log("%s\n",tmpStr);
+                drawYOffsets = 1;
+                if(getTextWidth(rdat,FONTSIZE_NORMAL,tmpStr) > (maxLblWidth*rdat->uiDPIScale)){
+                  drawYOffsets = 2;
+                }
+                if(((yOffsets+drawYOffsets) <= yOffsetLimit)||((drawYOffsets == 1)&&(i==(dat->ndat.levels[gsLevInd].numDecModes-1)))){
+                  drawTextAlignedSized(rdat,drawXPos,drawYPos+((yOffsets*19.0f + 36.0f)*ds->uiUserScale),col,FONTSIZE_NORMAL,255,tmpStr,ALIGN_CENTER,maxLblWidth); //draw decay mode label
+                  //SDL_Log("height: %f\n",(double)height);
+                  yOffsets += drawYOffsets;
+                }else{
+                  drawTextAlignedSized(rdat,drawXPos,drawYPos+((yOffsets*19.0f + 36.0f)*ds->uiUserScale),col,FONTSIZE_NORMAL,255,"(...)",ALIGN_CENTER,maxLblWidth);
+                  break;
+                }
+              }
+            }else{
+              drawTextAlignedSized(rdat,drawXPos,drawYPos+((yOffsets*19.0f + 36.0f)*ds->uiUserScale),col,FONTSIZE_NORMAL,255,"(...)",ALIGN_CENTER,maxLblWidth);
+            }
+          }else{
             for(int8_t i=0; i<dat->ndat.levels[gsLevInd].numDecModes; i++){
               getDecayModeStr(tmpStr,&dat->ndat,dat->ndat.levels[gsLevInd].firstDecMode + (uint32_t)i);
               //SDL_Log("%s\n",tmpStr);
@@ -581,15 +609,12 @@ void drawNuclBoxLabel(const app_data *restrict dat, const drawing_state *restric
                 break;
               }
             }
-          }else{
-            drawTextAlignedSized(rdat,drawXPos,drawYPos+((yOffsets*19.0f + 36.0f)*ds->uiUserScale),col,FONTSIZE_NORMAL,255,"(...)",ALIGN_CENTER,maxLblWidth);
           }
         }
+      }else{
+        drawTextAlignedSized(rdat,drawXPos,drawYPos+((yOffsets*19.0f + 36.0f)*ds->uiUserScale),col,FONTSIZE_NORMAL,255,"(...)",ALIGN_CENTER,maxLblWidth);
       }
-    }else if(ds->chartZoomScale >= 12.0f){
-      drawXPos = xPos + boxWidth/2;
-      drawYPos = yPos + 1.6f*labelMargin;
-      drawTextAlignedSized(rdat,drawXPos,drawYPos+(36.0f*ds->uiUserScale),col,FONTSIZE_NORMAL,255,"(...)",ALIGN_CENTER,16384);
+      
     }
     if(ds->chartZoomScale >= 12.0f){
       //draw corner label(s)

@@ -397,20 +397,23 @@ SDL_FRect drawTextAlignedSized(resource_data *restrict rdat, const float xPos, c
     drawW = maxWidth*rdat->uiDPIScale;
   }
   //SDL_Log("Width: %f\n", (double)drawW);
+  FC_AlignEnum alignFC = FC_ALIGN_LEFT;
   if(alignment == ALIGN_RIGHT){
-    drawX = drawX - drawW;
+    drawX = drawX - (maxWidth*rdat->uiDPIScale);
+    alignFC = FC_ALIGN_RIGHT;
   }else if(alignment == ALIGN_CENTER){
     const float drawH = getTextHeight(rdat,fontSizeInd,txt);
-    drawX = drawX - drawW/2.0f;
+    drawX = drawX - (maxWidth*rdat->uiDPIScale)/2.0f;
     drawY = drawY - drawH/2.0f;
+    alignFC = FC_ALIGN_CENTER;
   }
   SDL_FRect drawRect;
   if(alpha != textColor.a){
     SDL_Color drawCol = textColor;
     drawCol.a = alpha;
-    drawRect = FC_DrawColumnColor(rdat->font[fontSizeInd],rdat->renderer,drawX,drawY,(Uint16)(maxWidth*rdat->uiDPIScale),drawCol,txt);
+    drawRect = FC_DrawColumnColorAlign(rdat->font[fontSizeInd],rdat->renderer,drawX,drawY,(Uint16)(maxWidth*rdat->uiDPIScale),drawCol,alignFC,txt);
   }else{
-    drawRect = FC_DrawColumnColor(rdat->font[fontSizeInd],rdat->renderer,drawX,drawY,(Uint16)(maxWidth*rdat->uiDPIScale),textColor,txt);
+    drawRect = FC_DrawColumnColorAlign(rdat->font[fontSizeInd],rdat->renderer,drawX,drawY,(Uint16)(maxWidth*rdat->uiDPIScale),textColor,alignFC,txt);
   }
   drawRect.w /= rdat->uiDPIScale;
   drawRect.h /= rdat->uiDPIScale;

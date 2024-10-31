@@ -1685,7 +1685,7 @@ static FC_StringList* FC_ExplodeBreakingSpace(const char* text, FC_StringList** 
     while(1)
     {
         // Add any characters here that should make separate words (except for \n?)
-        if(*end == ' ' || *end == '\t' || *end == '\0')
+        if(*end == ' ' || *end == ')' || *end == '\t' || *end == '\0')
         {
             FC_StringListPushBackBytes(node, start, (int)size);
             FC_StringListPushBackBytes(spaces, end, 1);
@@ -1912,6 +1912,28 @@ FC_Rect FC_DrawColumnColor(FC_Font* font, FC_Target* dest, float x, float y, Uin
     set_color_for_all_caches(font, color);
 
     FC_DrawColumnFromBuffer(font, dest, box, &total_height, FC_MakeScale(1,1), FC_ALIGN_LEFT);
+
+    return FC_MakeRect((float)box.x, (float)box.y, drawWidth, (float)total_height);
+}
+
+FC_Rect FC_DrawColumnColorAlign(FC_Font* font, FC_Target* dest, float x, float y, Uint16 width, SDL_Color color, FC_AlignEnum alignment, const char* formatted_text, ...)
+{
+    FC_Rect box = {x, y, (float)width, 0.0f};
+    int total_height = 0;
+
+    float drawWidth = FC_GetWidth(font,formatted_text);
+    if(drawWidth > width){
+        drawWidth = (float)width;
+    }
+
+    if(formatted_text == NULL || font == NULL)
+        return FC_MakeRect(x, y, 0, 0);
+
+    FC_EXTRACT_VARARGS(fc_buffer, formatted_text);
+
+    set_color_for_all_caches(font, color);
+
+    FC_DrawColumnFromBuffer(font, dest, box, &total_height, FC_MakeScale(1,1), alignment);
 
     return FC_MakeRect((float)box.x, (float)box.y, drawWidth, (float)total_height);
 }

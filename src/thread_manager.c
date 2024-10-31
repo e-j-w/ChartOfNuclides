@@ -147,7 +147,7 @@ int startSearchThreads(app_data *restrict dat, app_state *restrict state, thread
   return (int)(tms->numThreads);
 }
 
-void killIdleThreads(app_state *restrict state, thread_manager_state *restrict tms){
+void killIdleThreads(const app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat, thread_manager_state *restrict tms){
   for(uint8_t i=0;i<MAX_NUM_THREADS;i++){
     if(tms->aliveThreads & (uint64_t)(1UL << i)){
       if(tms->threadData[i].threadState == THREADSTATE_IDLE){
@@ -165,6 +165,7 @@ void killIdleThreads(app_state *restrict state, thread_manager_state *restrict t
       //search is finished, copy over the search results
       memcpy(state->ss.results,state->ss.updatedResults,sizeof(state->ss.updatedResults));
       state->ss.numResults = state->ss.numUpdatedResults;
+      updateSearchUIState(dat,state,rdat);
       tms->masterThreadState = THREADSTATE_KILL;
       SDL_Event evt;
       SDL_PushEvent(&evt); //force frame update even if time has passed, as SDL will wait for an event

@@ -244,6 +244,7 @@ FC_Rect FC_DrawColumn(FC_Font* font, FC_Target* dest, float x, float y, Uint16 w
 FC_Rect FC_DrawColumnAlign(FC_Font* font, FC_Target* dest, float x, float y, Uint16 width, FC_AlignEnum align, const char* formatted_text, ...);
 FC_Rect FC_DrawColumnScale(FC_Font* font, FC_Target* dest, float x, float y, Uint16 width, FC_Scale scale, const char* formatted_text, ...);
 FC_Rect FC_DrawColumnColor(FC_Font* font, FC_Target* dest, float x, float y, Uint16 width, SDL_Color color, const char* formatted_text, ...);
+FC_Rect FC_DrawColumnColorAlign(FC_Font* font, FC_Target* dest, float x, float y, Uint16 width, SDL_Color color, FC_AlignEnum alignment, const char* formatted_text, ...);
 FC_Rect FC_DrawColumnColorScale(FC_Font* font, FC_Target* dest, float x, float y, Uint16 width, SDL_Color color, const float scale, const char* formatted_text, ...);
 FC_Rect FC_DrawColumnEffect(FC_Font* font, FC_Target* dest, float x, float y, Uint16 width, FC_Effect effect, const char* formatted_text, ...);
 
