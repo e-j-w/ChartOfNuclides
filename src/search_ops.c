@@ -90,9 +90,10 @@ void tokenizeSearchStr(search_state *restrict ss){
 void searchNuclides(const ndata *restrict ndat, search_state *restrict ss){
 	char nuclAStr[8], nuclElemName[8];
 	for(uint8_t i=0; i<ss->numSearchTok; i++){
+		uint8_t foundNucl = 0;
 		uint8_t len = (uint8_t)strlen(ss->searchTok[i]);
 		if(isdigit(ss->searchTok[i][0])){
-			uint8_t foundNucl = 0;
+			//look for nuclide names starting with a digit (eg. 32Si)
 			for(uint8_t j=1; j<len; j++){
 				if(j>=7){
 					break;
@@ -108,34 +109,51 @@ void searchNuclides(const ndata *restrict ndat, search_state *restrict ss){
 					}
 				}
 			}
-			if(foundNucl){
-				int16_t nuclA = (int16_t)SDL_atoi(nuclAStr);
-				int16_t nuclZ = (int16_t)elemStrToZ(nuclElemName);
-				nuclElemName[0] = (char)SDL_toupper(nuclElemName[0]); //convert to uppercase
-				int16_t nuclZu = (int16_t)elemStrToZ(nuclElemName);
-				//SDL_Log("A: %i, Z: %i, elem name: %s, len: %u\n",nuclA,nuclZ,nuclElemName,len);
-				for(int16_t j=0; j<ndat->numNucl; j++){
-					if(ndat->nuclData[j].Z == nuclZ){
-						if(((ndat->nuclData[j].N + ndat->nuclData[j].Z)) == nuclA){
-							//identified nuclide (exact match)
-							search_result res;
-							res.relevance = 1.0f; //exact match
-							res.resultType = SEARCHAGENT_NUCLIDE;
-							res.resultVal = (uint32_t)j;
-							//SDL_Log("Found nuclide %u\n",res.resultVal);
-							sortAndAppendResult(ss,&res);
-						}
+		}else if(isalpha(ss->searchTok[i][0])){
+			//look for nuclide names starting with a letter (eg. si32)
+			for(uint8_t j=1; j<len; j++){
+				if(j>=7){
+					break;
+				}
+				if(isdigit(ss->searchTok[i][j])){
+					memcpy(&nuclElemName,&ss->searchTok[i],(size_t)j);
+					nuclElemName[j] = '\0'; //terminate string at end
+					if((len > j)&&((len-j)<8)){
+						memcpy(&nuclAStr,&(ss->searchTok[i][j]),(size_t)(len-j));
+						nuclAStr[len-j] = '\0'; //terminate string at end
+						foundNucl = 1;
+						break;
 					}
-					if((nuclZu != nuclZ)&&(ndat->nuclData[j].Z == nuclZu)){
-						if(((ndat->nuclData[j].N + ndat->nuclData[j].Z)) == nuclA){
-							//identified nuclide (uppercase match)
-							search_result res;
-							res.relevance = 0.8f; //uppercase match
-							res.resultType = SEARCHAGENT_NUCLIDE;
-							res.resultVal = (uint32_t)j;
-							//SDL_Log("Found nuclide %u\n",res.resultVal);
-							sortAndAppendResult(ss,&res);
-						}
+				}
+			}
+		}
+		if(foundNucl){
+			int16_t nuclA = (int16_t)SDL_atoi(nuclAStr);
+			int16_t nuclZ = (int16_t)elemStrToZ(nuclElemName);
+			nuclElemName[0] = (char)SDL_toupper(nuclElemName[0]); //convert to uppercase
+			int16_t nuclZu = (int16_t)elemStrToZ(nuclElemName);
+			//SDL_Log("A: %i, Z: %i, elem name: %s, len: %u\n",nuclA,nuclZ,nuclElemName,len);
+			for(int16_t j=0; j<ndat->numNucl; j++){
+				if(ndat->nuclData[j].Z == nuclZ){
+					if(((ndat->nuclData[j].N + ndat->nuclData[j].Z)) == nuclA){
+						//identified nuclide (exact match)
+						search_result res;
+						res.relevance = 1.0f; //exact match
+						res.resultType = SEARCHAGENT_NUCLIDE;
+						res.resultVal = (uint32_t)j;
+						//SDL_Log("Found nuclide %u\n",res.resultVal);
+						sortAndAppendResult(ss,&res);
+					}
+				}
+				if((nuclZu != nuclZ)&&(ndat->nuclData[j].Z == nuclZu)){
+					if(((ndat->nuclData[j].N + ndat->nuclData[j].Z)) == nuclA){
+						//identified nuclide (uppercase match)
+						search_result res;
+						res.relevance = 0.8f; //uppercase match
+						res.resultType = SEARCHAGENT_NUCLIDE;
+						res.resultVal = (uint32_t)j;
+						//SDL_Log("Found nuclide %u\n",res.resultVal);
+						sortAndAppendResult(ss,&res);
 					}
 				}
 			}

@@ -548,6 +548,14 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
   }else if(state->inputFlags & (1U << INPUT_MENU)){
     //open the primary menu
     switch(state->lastOpenedMenu){
+      case UIELEM_SEARCH_MENU:
+        if((state->uiState == UISTATE_CHARTONLY)||(state->uiState == UISTATE_CHARTWITHMENU)||(state->uiState == UISTATE_INFOBOX)){
+          //cannot open this menu from the full level info screen
+          uiElemClickAction(dat,state,rdat,0,UIELEM_SEARCH_BUTTON);
+        }else{
+          uiElemClickAction(dat,state,rdat,0,UIELEM_MENU_BUTTON);
+        }
+        break;
       case UIELEM_CHARTVIEW_MENU:
         if((state->uiState == UISTATE_CHARTONLY)||(state->uiState == UISTATE_CHARTWITHMENU)||(state->uiState == UISTATE_INFOBOX)){
           //cannot open this menu from the full level info screen
@@ -641,7 +649,6 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
   }else{
     SDL_HideCursor();
   }
-  
 
   /* Handle zoom input */
   if((state->inputFlags & (1U << INPUT_ZOOM))&&(fabsf(state->zoomDeltaVal)>0.05f)){

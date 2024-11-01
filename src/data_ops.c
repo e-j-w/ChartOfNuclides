@@ -1612,6 +1612,44 @@ void getDecayModeStr(char strOut[32], const ndata *restrict nd, const uint32_t d
 	}
 }
 
+void getMostProbableDecayModeStr(char strOut[32], const ndata *restrict nd, const uint32_t lvlInd){
+
+	uint32_t probDcyModeInd = MAXNUMDECAYMODES;
+
+	uint8_t hlUnit = nd->levels[lvlInd].halfLife.unit;
+	if(hlUnit == VALUE_UNIT_STABLE){
+		SDL_snprintf(strOut,32," "); //stable
+		return;
+	}else if((nd->levels[lvlInd].numDecModes == 0)&&(getLevelHalfLifeSeconds(nd,lvlInd)>1.0E15)){
+		SDL_snprintf(strOut,32," "); //roughly stable
+		return;
+	}
+
+	double maxProb = -1.0;
+	int8_t maxProbInd = -1;
+	for(int8_t i=0; i<nd->levels[lvlInd].numDecModes; i++){
+		uint32_t dcyModeInd = nd->levels[lvlInd].firstDecMode + (uint32_t)i;
+		uint8_t decUnitType = nd->dcyMode[dcyModeInd].prob.unit;
+		if(decUnitType < VALUETYPE_ENUM_LENGTH){
+			double prob = getRawValFromDB(&nd->dcyMode[dcyModeInd].prob);
+			if(prob > maxProb){
+				maxProb = prob;
+				maxProbInd = i;
+			}
+		}		
+	}
+
+	if(maxProbInd >= 0){
+		probDcyModeInd = nd->levels[lvlInd].firstDecMode + (uint32_t)maxProbInd;
+		getDecayModeStr(strOut,nd,probDcyModeInd);
+	}else if(nd->levels[lvlInd].numTran >0){
+		SDL_snprintf(strOut,32,"IT > 0%%%%");
+	}else{
+		SDL_snprintf(strOut,32," "); //couldn't find probable decay mode
+		return;
+	}
+}
+
 void getAbundanceStr(char strOut[32], const ndata *restrict nd, const uint16_t nuclInd){
 	if(nuclInd < nd->numNucl){
 		if(nd->nuclData[nuclInd].abundance.unit == VALUE_UNIT_PERCENT){
@@ -1922,9 +1960,8 @@ double getNuclGSHalfLifeSeconds(const ndata *restrict nd, const uint16_t nuclInd
 	return getNuclLevelHalfLifeSeconds(nd,nuclInd,nd->nuclData[nuclInd].gsLevel);
 }
 
-uint8_t getNuclLevelMostProbableDcyMode(const ndata *restrict nd, const uint16_t nuclInd, const uint16_t nuclLevel){
+uint8_t getLevelMostProbableDcyMode(const ndata *restrict nd, const uint32_t lvlInd){
 	
-	uint32_t lvlInd = nd->nuclData[nuclInd].firstLevel + (uint32_t)nuclLevel;
 	uint8_t hlUnit = nd->levels[lvlInd].halfLife.unit;
 	if(hlUnit == VALUE_UNIT_STABLE){
 		return (DECAYMODE_ENUM_LENGTH+1); //stable
@@ -1943,14 +1980,23 @@ uint8_t getNuclLevelMostProbableDcyMode(const ndata *restrict nd, const uint16_t
 				maxProb = prob;
 				maxProbInd = i;
 			}
-		}		
+		}
 	}
 
 	if(maxProbInd >= 0){
-		return nd->dcyMode[nd->levels[nd->nuclData[nuclInd].firstLevel + (uint32_t)nuclLevel].firstDecMode + (uint32_t)maxProbInd].type;
+		return nd->dcyMode[nd->levels[lvlInd].firstDecMode + (uint32_t)maxProbInd].type;
+	}else if(nd->levels[lvlInd].numTran > 0){
+		//no decay mode is specified, but there are gammas depopulating the level
+		return DECAYMODE_IT;
 	}
 
 	return DECAYMODE_ENUM_LENGTH; //no decay mode found
+}
+
+uint8_t getNuclLevelMostProbableDcyMode(const ndata *restrict nd, const uint16_t nuclInd, const uint16_t nuclLevel){
+	
+	uint32_t lvlInd = nd->nuclData[nuclInd].firstLevel + (uint32_t)nuclLevel;
+	return getLevelMostProbableDcyMode(nd,lvlInd);
 }
 
 uint8_t getNuclGSMostProbableDcyMode(const ndata *restrict nd, const uint16_t nuclInd){

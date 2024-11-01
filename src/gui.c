@@ -193,9 +193,9 @@ SDL_FColor getDecayModeCol(const uint8_t dcyMode){
       col.b = 1.0f;
       break;
     case DECAYMODE_IT:
-      col.r = 0.6f;
-      col.g = 0.8f;
-      col.b = 0.8f;
+      col.r = 1.0f;
+      col.g = 0.5f;
+      col.b = 0.5f;
       break;
     case DECAYMODE_SPONTANEOUSFISSION:
     case DECAYMODE_BETAMINUS_SPONTANEOUSFISSION:
@@ -230,9 +230,9 @@ SDL_Color getDecayModeTextCol(const uint8_t dcyMode){
 
 SDL_FColor get2PlusCol(const double e2PlusKeV){
   SDL_FColor col;
-  col.r = 1.0f;
-  col.g = 1.0f;
-  col.b = 1.0f;
+  col.r = 0.9f;
+  col.g = 0.9f;
+  col.b = 0.9f;
   col.a = 1.0f;
   if(e2PlusKeV >= 8000.0){
     col.r = 0.0f;
@@ -316,9 +316,9 @@ SDL_FColor get2PlusCol(const double e2PlusKeV){
 
 SDL_FColor getR42Col(const double r42){
   SDL_FColor col;
-  col.r = 1.0f;
-  col.g = 1.0f;
-  col.b = 1.0f;
+  col.r = 0.9f;
+  col.g = 0.9f;
+  col.b = 0.9f;
   col.a = 1.0f;
   if(r42 >= 5.0){
     col.r = 0.0f;
@@ -414,78 +414,53 @@ uint8_t getNuclBoxLabelNumLines(const app_data *restrict dat, const uint16_t nuc
   return numLines;
 }
 
-//draws label for the R42 energy box
-void drawR42BoxLabel(const app_data *restrict dat, const drawing_state *restrict ds, resource_data *restrict rdat, const float xPos, const float yPos, const float boxWidth, const float boxHeight, SDL_Color col, const double r42){
-  if(r42 >= 0.0){
-    char tmpStr[32];
-    float drawXPos, drawYPos;
-    float labelMargin = NUCLBOX_LABEL_SMALLMARGIN*ds->chartZoomScale*ds->uiUserScale;
-    if(boxHeight > 38.0f){
-      drawXPos = xPos + labelMargin + (2.0f*ds->uiUserScale);
-      float totalLblHeight = getTextHeight(rdat,FONTSIZE_LARGE,dat->strings[dat->locStringIDs[LOCSTR_CHARTVIEW_R42]])/rdat->uiDPIScale;
-      drawYPos = yPos+boxHeight*0.5f - totalLblHeight*0.5f + 4.0f*ds->uiUserScale;
-      drawTextAlignedSized(rdat,drawXPos,drawYPos,col,FONTSIZE_LARGE,255,dat->strings[dat->locStringIDs[LOCSTR_CHARTVIEW_R42]],ALIGN_LEFT,16384); //draw label
-      //handle energy label
-      drawXPos = xPos + boxWidth - labelMargin;
-      snprintf(tmpStr,32,"%0.2f",r42);
-      float drawSpace = boxWidth  - getTextWidth(rdat,FONTSIZE_LARGE,dat->strings[dat->locStringIDs[LOCSTR_CHARTVIEW_R42]])/rdat->uiDPIScale;
-      //SDL_Log("remaining space: %f, width: %f\n",(double)drawSpace,(double)getTextWidth(rdat,FONTSIZE_LARGE,tmpStr));
-      if(drawSpace > getTextWidth(rdat,FONTSIZE_LARGE,tmpStr)/rdat->uiDPIScale){
-        drawTextAlignedSized(rdat,drawXPos,drawYPos+(2.5f*ds->uiUserScale),col,FONTSIZE_NORMAL,255,tmpStr,ALIGN_RIGHT,16384); //draw energy label
-      }else{
-        drawTextAlignedSized(rdat,drawXPos,drawYPos+(2.5f*ds->uiUserScale),col,FONTSIZE_NORMAL,255,"(...)",ALIGN_RIGHT,16384);
-      }
-    }
-  }
-}
-
-//draws label for the 2+ energy box
-void draw2PlusEnergyBoxLabel(const app_data *restrict dat, const drawing_state *restrict ds, resource_data *restrict rdat, const float xPos, const float yPos, const float boxWidth, const float boxHeight, SDL_Color col, const uint32_t lvlInd){
-  char tmpStr[32];
-  float drawXPos, drawYPos;
-  float labelMargin = NUCLBOX_LABEL_SMALLMARGIN*ds->chartZoomScale*ds->uiUserScale;
-  if(boxHeight > 38.0f){
-    drawXPos = xPos + labelMargin + (2.0f*ds->uiUserScale);
-    float totalLblHeight = getTextHeight(rdat,FONTSIZE_LARGE,dat->strings[dat->locStringIDs[LOCSTR_CHARTVIEW_2PLUS]])/rdat->uiDPIScale;
-    drawYPos = yPos+boxHeight*0.5f - totalLblHeight*0.5f + 4.0f*ds->uiUserScale;
-    drawTextAlignedSized(rdat,drawXPos,drawYPos,col,FONTSIZE_LARGE,255,dat->strings[dat->locStringIDs[LOCSTR_CHARTVIEW_2PLUS]],ALIGN_LEFT,16384); //draw label
-    //handle energy label
-    drawXPos = xPos + boxWidth - labelMargin;
-    getLvlEnergyStr(tmpStr,&dat->ndat,lvlInd,1);
-    strcat(tmpStr," keV");
-    float drawSpace = boxWidth  - getTextWidth(rdat,FONTSIZE_LARGE,dat->strings[dat->locStringIDs[LOCSTR_CHARTVIEW_2PLUS]])/rdat->uiDPIScale;
-    //SDL_Log("remaining space: %f, width: %f\n",(double)drawSpace,(double)getTextWidth(rdat,FONTSIZE_LARGE,tmpStr));
-    if(drawSpace > getTextWidth(rdat,FONTSIZE_LARGE,tmpStr)/rdat->uiDPIScale){
-      drawTextAlignedSized(rdat,drawXPos,drawYPos+(2.5f*ds->uiUserScale),col,FONTSIZE_NORMAL,255,tmpStr,ALIGN_RIGHT,16384); //draw energy label
-    }else{
-      drawTextAlignedSized(rdat,drawXPos,drawYPos+(2.5f*ds->uiUserScale),col,FONTSIZE_NORMAL,255,"(...)",ALIGN_RIGHT,16384);
-    }
-  }
-}
-
 //draws label for the decay mode box
-void drawDecayModeBoxLabel(const app_data *restrict dat, const drawing_state *restrict ds, resource_data *restrict rdat, const float xPos, const float yPos, const float boxWidth, const float boxHeight, SDL_Color col, const uint8_t dcyMode){
+void drawDecayModeBoxLabel(const app_data *restrict dat, const drawing_state *restrict ds, resource_data *restrict rdat, const float xPos, const float yPos, const float boxWidth, const float boxHeight, SDL_Color col, const uint16_t nuclInd, const uint32_t isomerLvl, const uint8_t isomerMVal, const uint8_t dcyMode){
   char tmpStr[32];
   float drawXPos, drawYPos;
   float labelMargin = NUCLBOX_LABEL_SMALLMARGIN*ds->chartZoomScale*ds->uiUserScale;
+  uint16_t Z = (uint16_t)dat->ndat.nuclData[nuclInd].Z;
+  uint16_t N = (uint16_t)dat->ndat.nuclData[nuclInd].N;
   if(boxHeight > 38.0f){
-    drawXPos = xPos + labelMargin + (2.0f*ds->uiUserScale);
-    float totalLblHeight = getTextHeight(rdat,FONTSIZE_LARGE,dat->strings[dat->locStringIDs[LOCSTR_CHARTVIEW_DECAYMODE]])/rdat->uiDPIScale;
-    drawYPos = yPos+boxHeight*0.5f - totalLblHeight*0.5f + 4.0f*ds->uiUserScale;
-    drawTextAlignedSized(rdat,drawXPos,drawYPos,col,FONTSIZE_LARGE,255,dat->strings[dat->locStringIDs[LOCSTR_CHARTVIEW_DECAYMODE]],ALIGN_LEFT,16384); //draw label
-    //handle energy label
-    drawXPos = xPos + boxWidth - labelMargin;
-    if(dcyMode == DECAYMODE_ENUM_LENGTH){
-      snprintf(tmpStr,32,"%s",dat->strings[dat->locStringIDs[LOCSTR_UNKNOWN]]);
+    if((isomerMVal==0)||(dat->ndat.nuclData[nuclInd].numIsomerMVals <= 1)){
+      snprintf(tmpStr,32,"%um",N+Z);
     }else{
-      snprintf(tmpStr,32,"%s",getDecayTypeShortStr(dcyMode));
+      snprintf(tmpStr,32,"%um%u",N+Z,isomerMVal);
     }
-    float drawSpace = boxWidth  - getTextWidth(rdat,FONTSIZE_LARGE,dat->strings[dat->locStringIDs[LOCSTR_CHARTVIEW_DECAYMODE]])/rdat->uiDPIScale;
-    //SDL_Log("remaining space: %f, width: %f\n",(double)drawSpace,(double)getTextWidth(rdat,FONTSIZE_LARGE,tmpStr));
-    if(drawSpace > getTextWidth(rdat,FONTSIZE_LARGE,tmpStr)/rdat->uiDPIScale){
-      drawTextAlignedSized(rdat,drawXPos,drawYPos+(2.5f*ds->uiUserScale),col,FONTSIZE_NORMAL,255,tmpStr,ALIGN_RIGHT,16384); //draw decay mode label
+    drawXPos = xPos + labelMargin;
+    float totalLblHeight = (getTextHeight(rdat,FONTSIZE_SMALL,tmpStr) + getTextHeight(rdat,FONTSIZE_LARGE,getElemStr((uint8_t)Z)))/rdat->uiDPIScale;
+    drawYPos = yPos+boxHeight*0.5f - totalLblHeight*0.5f + 4.0f*ds->uiUserScale;
+    drawXPos += (drawTextAlignedSized(rdat,drawXPos,drawYPos,col,FONTSIZE_SMALL,255,tmpStr,ALIGN_LEFT,16384)).w; //draw number label
+    drawTextAlignedSized(rdat,drawXPos,drawYPos+(10.0f*ds->uiUserScale),col,FONTSIZE_LARGE,255,getElemStr((uint8_t)Z),ALIGN_LEFT,16384); //draw element label
+    float drawSpace = boxWidth - (10.0f*ds->uiUserScale) - getTextWidth(rdat,FONTSIZE_LARGE,tmpStr)/rdat->uiDPIScale;
+    //handle decay mode, spin-parity labels
+    drawXPos = xPos + boxWidth - labelMargin;
+    if(dat->ndat.levels[isomerLvl].numSpinParVals > 0){
+      //spin-parity is known
+      getSpinParStr(tmpStr,&dat->ndat,isomerLvl);
+      drawTextAlignedSized(rdat,drawXPos,drawYPos-(2.0f*ds->uiUserScale),col,FONTSIZE_NORMAL,255,tmpStr,ALIGN_RIGHT,16384); //draw spin-parity label
+      if(dcyMode >= DECAYMODE_ENUM_LENGTH){
+        snprintf(tmpStr,32,"%s",dat->strings[dat->locStringIDs[LOCSTR_UNKNOWN]]);
+      }else{
+        getMostProbableDecayModeStr(tmpStr,&dat->ndat,isomerLvl);
+      }
+      if(drawSpace > getTextWidth(rdat,FONTSIZE_LARGE,tmpStr)/rdat->uiDPIScale){
+        drawTextAlignedSized(rdat,drawXPos,drawYPos+(18.0f*ds->uiUserScale),col,FONTSIZE_NORMAL,255,tmpStr,ALIGN_RIGHT,16384); //draw decay mode label
+      }else{
+        drawTextAlignedSized(rdat,drawXPos,drawYPos+(18.0f*ds->uiUserScale),col,FONTSIZE_NORMAL,255,"(...)",ALIGN_RIGHT,16384);
+      }
     }else{
-      drawTextAlignedSized(rdat,drawXPos,drawYPos+(2.5f*ds->uiUserScale),col,FONTSIZE_NORMAL,255,"(...)",ALIGN_RIGHT,16384);
+      //only decay mode known
+      if(dcyMode >= DECAYMODE_ENUM_LENGTH){
+        snprintf(tmpStr,32,"%s",dat->strings[dat->locStringIDs[LOCSTR_UNKNOWN]]);
+      }else{
+        getMostProbableDecayModeStr(tmpStr,&dat->ndat,isomerLvl);
+      }
+      if(drawSpace > getTextWidth(rdat,FONTSIZE_LARGE,tmpStr)/rdat->uiDPIScale){
+        drawTextAlignedSized(rdat,drawXPos,drawYPos+(8.0f*ds->uiUserScale),col,FONTSIZE_NORMAL,255,tmpStr,ALIGN_RIGHT,16384); //draw decay mode label
+      }else{
+        drawTextAlignedSized(rdat,drawXPos,drawYPos+(8.0f*ds->uiUserScale),col,FONTSIZE_NORMAL,255,"(...)",ALIGN_RIGHT,16384);
+      }
     }
   }
 }
@@ -525,92 +500,37 @@ void drawisomerBoxLabel(const app_data *restrict dat, const drawing_state *restr
   }
 }
 
-//draws the main label for a box on the chart of nuclides
-void drawNuclBoxLabel(const app_data *restrict dat, const drawing_state *restrict ds, resource_data *restrict rdat, const float xPos, const float yPos, const float boxWidth, const float boxHeight, SDL_Color col, const uint16_t nuclInd){
+void drawNuclBoxLabelDetails(const app_data *restrict dat, const app_state *restrict state, resource_data *restrict rdat, const float xPos, const float yPos, const float boxWidth, const float boxHeight, SDL_Color col, const uint16_t nuclInd){
   char tmpStr[32];
-  float drawXPos, drawYPos;
-  float labelMargin = NUCLBOX_LABEL_MARGIN*ds->chartZoomScale*ds->uiUserScale;
-  float labelSmallMargin = 2.0f*NUCLBOX_LABEL_SMALLMARGIN*ds->chartZoomScale*ds->uiUserScale;
-  Uint16 maxLblWidth = (Uint16)(boxWidth - 2.0f*labelMargin);
-  uint16_t Z = (uint16_t)dat->ndat.nuclData[nuclInd].Z;
-  if(ds->chartZoomScale >= 8.0f){
-    uint16_t N = (uint16_t)dat->ndat.nuclData[nuclInd].N;
-    snprintf(tmpStr,32,"%u",N+Z);
-    float totalLblWidth = (getTextWidth(rdat,FONTSIZE_SMALL,tmpStr) + getTextWidth(rdat,FONTSIZE_LARGE,getElemStr((uint8_t)Z)))/rdat->uiDPIScale;
-    drawXPos = xPos+boxWidth*0.5f - totalLblWidth*0.5f;
-    if(ds->chartZoomScale >= 12.0f){
-      drawYPos = yPos + labelMargin;
-    }else{
-      float totalLblHeight = (getTextHeight(rdat,FONTSIZE_SMALL,tmpStr) - (10.0f*ds->uiUserScale) + getTextHeight(rdat,FONTSIZE_LARGE,getElemStr((uint8_t)Z)))/rdat->uiDPIScale;
-      drawYPos = yPos+boxWidth*0.5f - totalLblHeight*0.5f;
+  const uint32_t gsLevInd = (uint32_t)(dat->ndat.nuclData[nuclInd].firstLevel + dat->ndat.nuclData[nuclInd].gsLevel);
+  uint8_t yOffsets = 0;
+  uint8_t yOffsetLimit = 1;
+  yOffsetLimit += (uint8_t)(floorf((boxHeight - 75.0f*state->ds.uiUserScale)/(30.0f*state->ds.uiUserScale)));
+  //SDL_Log("Offset limit: %u\n",yOffsetLimit);
+  const float labelMargin = NUCLBOX_LABEL_MARGIN*state->ds.chartZoomScale*state->ds.uiUserScale;
+  const float labelSmallMargin = 2.0f*NUCLBOX_LABEL_SMALLMARGIN*state->ds.chartZoomScale*state->ds.uiUserScale;
+  const Uint16 maxLblWidth = (Uint16)(boxWidth - 2.0f*labelMargin);
+  const float drawXPos = xPos + boxWidth/2;
+  const float drawYPos = yPos + 1.6f*labelMargin;
+  uint8_t drawYOffsets = 1;
+  if(state->chartView == CHARTVIEW_HALFLIFE){
+    getGSHalfLifeStr(tmpStr,dat,nuclInd,state->ds.useLifetimes);
+    if(getTextWidth(rdat,FONTSIZE_NORMAL,tmpStr) > (maxLblWidth*rdat->uiDPIScale)){
+      drawYOffsets = 2;
     }
-    drawXPos += (drawTextAlignedSized(rdat,drawXPos,drawYPos,col,FONTSIZE_SMALL,255,tmpStr,ALIGN_LEFT,16384)).w; //draw number label
-    drawTextAlignedSized(rdat,drawXPos,drawYPos+(10.0f*ds->uiUserScale),col,FONTSIZE_LARGE,255,getElemStr((uint8_t)Z),ALIGN_LEFT,16384); //draw element label
-    uint32_t gsLevInd = (uint32_t)(dat->ndat.nuclData[nuclInd].firstLevel + dat->ndat.nuclData[nuclInd].gsLevel);
-    if(ds->chartZoomScale >= 12.0f){
-      uint8_t yOffsets = 0;
-      uint8_t yOffsetLimit = 1;
-      yOffsetLimit += (uint8_t)(floorf((boxHeight - 75.0f*ds->uiUserScale)/(30.0f*ds->uiUserScale)));
-      //SDL_Log("Offset limit: %u\n",yOffsetLimit);
-      drawXPos = xPos + boxWidth/2;
-      drawYPos = yPos + 1.6f*labelMargin;
-      getGSHalfLifeStr(tmpStr,dat,nuclInd,ds->useLifetimes);
-      uint8_t drawYOffsets = 1;
-      if(getTextWidth(rdat,FONTSIZE_NORMAL,tmpStr) > (maxLblWidth*rdat->uiDPIScale)){
-        drawYOffsets = 2;
-      }
-      if((yOffsets+drawYOffsets) <= yOffsetLimit){
-        drawTextAlignedSized(rdat,drawXPos,drawYPos+((yOffsets*19.0f + 36.0f)*ds->uiUserScale),col,FONTSIZE_NORMAL,255,tmpStr,ALIGN_CENTER,maxLblWidth); //draw GS half-life label
-        yOffsets += drawYOffsets;
-        if(dat->ndat.nuclData[nuclInd].numLevels > 0){
-          if(dat->ndat.nuclData[nuclInd].abundance.unit == VALUE_UNIT_PERCENT){
-            getAbundanceStr(tmpStr,&dat->ndat,nuclInd);
-            drawYOffsets = 1;
-            if(getTextWidth(rdat,FONTSIZE_NORMAL,tmpStr) > (maxLblWidth*rdat->uiDPIScale)){
-              drawYOffsets = 2;
-            }
-            if(((yOffsets+drawYOffsets) <= yOffsetLimit)||((drawYOffsets == 1)&&(dat->ndat.levels[gsLevInd].numDecModes==0))){
-              //SDL_Log("Abundance y-offset: %u\n",yOffsets);
-              drawTextAlignedSized(rdat,drawXPos,drawYPos+((yOffsets*19.0f + 36.0f)*ds->uiUserScale),col,FONTSIZE_NORMAL,255,tmpStr,ALIGN_CENTER,maxLblWidth); //draw abundance label
-              yOffsets += drawYOffsets;
-              for(int8_t i=0; i<dat->ndat.levels[gsLevInd].numDecModes; i++){
-                getDecayModeStr(tmpStr,&dat->ndat,dat->ndat.levels[gsLevInd].firstDecMode + (uint32_t)i);
-                //SDL_Log("%s\n",tmpStr);
-                drawYOffsets = 1;
-                if(getTextWidth(rdat,FONTSIZE_NORMAL,tmpStr) > (maxLblWidth*rdat->uiDPIScale)){
-                  drawYOffsets = 2;
-                }
-                if(((yOffsets+drawYOffsets) <= yOffsetLimit)||((drawYOffsets == 1)&&(i==(dat->ndat.levels[gsLevInd].numDecModes-1)))){
-                  drawTextAlignedSized(rdat,drawXPos,drawYPos+((yOffsets*19.0f + 36.0f)*ds->uiUserScale),col,FONTSIZE_NORMAL,255,tmpStr,ALIGN_CENTER,maxLblWidth); //draw decay mode label
-                  //SDL_Log("height: %f\n",(double)height);
-                  yOffsets += drawYOffsets;
-                }else{
-                  drawTextAlignedSized(rdat,drawXPos,drawYPos+((yOffsets*19.0f + 36.0f)*ds->uiUserScale),col,FONTSIZE_NORMAL,255,"(...)",ALIGN_CENTER,maxLblWidth);
-                  break;
-                }
-              }
-            }else{
-              drawTextAlignedSized(rdat,drawXPos,drawYPos+((yOffsets*19.0f + 36.0f)*ds->uiUserScale),col,FONTSIZE_NORMAL,255,"(...)",ALIGN_CENTER,maxLblWidth);
-            }
-          }else{
-            for(int8_t i=0; i<dat->ndat.levels[gsLevInd].numDecModes; i++){
-              getDecayModeStr(tmpStr,&dat->ndat,dat->ndat.levels[gsLevInd].firstDecMode + (uint32_t)i);
-              //SDL_Log("%s\n",tmpStr);
-              drawYOffsets = 1;
-              if(getTextWidth(rdat,FONTSIZE_NORMAL,tmpStr) > (maxLblWidth*rdat->uiDPIScale)){
-                drawYOffsets = 2;
-              }
-              if(((yOffsets+drawYOffsets) <= yOffsetLimit)||((drawYOffsets == 1)&&(i==(dat->ndat.levels[gsLevInd].numDecModes-1)))){
-                drawTextAlignedSized(rdat,drawXPos,drawYPos+((yOffsets*19.0f + 36.0f)*ds->uiUserScale),col,FONTSIZE_NORMAL,255,tmpStr,ALIGN_CENTER,maxLblWidth); //draw decay mode label
-                //SDL_Log("height: %f\n",(double)height);
-                yOffsets += drawYOffsets;
-              }else{
-                drawTextAlignedSized(rdat,drawXPos,drawYPos+((yOffsets*19.0f + 36.0f)*ds->uiUserScale),col,FONTSIZE_NORMAL,255,"(...)",ALIGN_CENTER,maxLblWidth);
-                break;
-              }
-            }
-          }
-        }else{
+    if((yOffsets+drawYOffsets) <= yOffsetLimit){
+      drawTextAlignedSized(rdat,drawXPos,drawYPos+((yOffsets*19.0f + 36.0f)*state->ds.uiUserScale),col,FONTSIZE_NORMAL,255,tmpStr,ALIGN_CENTER,maxLblWidth); //draw GS half-life label
+      yOffsets += drawYOffsets;
+      if(dat->ndat.nuclData[nuclInd].abundance.unit == VALUE_UNIT_PERCENT){
+        getAbundanceStr(tmpStr,&dat->ndat,nuclInd);
+        drawYOffsets = 1;
+        if(getTextWidth(rdat,FONTSIZE_NORMAL,tmpStr) > (maxLblWidth*rdat->uiDPIScale)){
+          drawYOffsets = 2;
+        }
+        if(((yOffsets+drawYOffsets) <= yOffsetLimit)||((drawYOffsets == 1)&&(dat->ndat.levels[gsLevInd].numDecModes==0))){
+          //SDL_Log("Abundance y-offset: %u\n",yOffsets);
+          drawTextAlignedSized(rdat,drawXPos,drawYPos+((yOffsets*19.0f + 36.0f)*state->ds.uiUserScale),col,FONTSIZE_NORMAL,255,tmpStr,ALIGN_CENTER,maxLblWidth); //draw abundance label
+          yOffsets += drawYOffsets;
           for(int8_t i=0; i<dat->ndat.levels[gsLevInd].numDecModes; i++){
             getDecayModeStr(tmpStr,&dat->ndat,dat->ndat.levels[gsLevInd].firstDecMode + (uint32_t)i);
             //SDL_Log("%s\n",tmpStr);
@@ -619,31 +539,155 @@ void drawNuclBoxLabel(const app_data *restrict dat, const drawing_state *restric
               drawYOffsets = 2;
             }
             if(((yOffsets+drawYOffsets) <= yOffsetLimit)||((drawYOffsets == 1)&&(i==(dat->ndat.levels[gsLevInd].numDecModes-1)))){
-              drawTextAlignedSized(rdat,drawXPos,drawYPos+((yOffsets*19.0f + 36.0f)*ds->uiUserScale),col,FONTSIZE_NORMAL,255,tmpStr,ALIGN_CENTER,maxLblWidth); //draw decay mode label
+              drawTextAlignedSized(rdat,drawXPos,drawYPos+((yOffsets*19.0f + 36.0f)*state->ds.uiUserScale),col,FONTSIZE_NORMAL,255,tmpStr,ALIGN_CENTER,maxLblWidth); //draw decay mode label
               //SDL_Log("height: %f\n",(double)height);
               yOffsets += drawYOffsets;
             }else{
-              drawTextAlignedSized(rdat,drawXPos,drawYPos+((yOffsets*19.0f + 36.0f)*ds->uiUserScale),col,FONTSIZE_NORMAL,255,"(...)",ALIGN_CENTER,maxLblWidth);
+              drawTextAlignedSized(rdat,drawXPos,drawYPos+((yOffsets*19.0f + 36.0f)*state->ds.uiUserScale),col,FONTSIZE_NORMAL,255,"(...)",ALIGN_CENTER,maxLblWidth);
               break;
             }
           }
+        }else{
+          drawTextAlignedSized(rdat,drawXPos,drawYPos+((yOffsets*19.0f + 36.0f)*state->ds.uiUserScale),col,FONTSIZE_NORMAL,255,"(...)",ALIGN_CENTER,maxLblWidth);
         }
       }else{
-        drawTextAlignedSized(rdat,drawXPos,drawYPos+((yOffsets*19.0f + 36.0f)*ds->uiUserScale),col,FONTSIZE_NORMAL,255,"(...)",ALIGN_CENTER,maxLblWidth);
+        for(int8_t i=0; i<dat->ndat.levels[gsLevInd].numDecModes; i++){
+          getDecayModeStr(tmpStr,&dat->ndat,dat->ndat.levels[gsLevInd].firstDecMode + (uint32_t)i);
+          //SDL_Log("%s\n",tmpStr);
+          drawYOffsets = 1;
+          if(getTextWidth(rdat,FONTSIZE_NORMAL,tmpStr) > (maxLblWidth*rdat->uiDPIScale)){
+            drawYOffsets = 2;
+          }
+          if(((yOffsets+drawYOffsets) <= yOffsetLimit)||((drawYOffsets == 1)&&(i==(dat->ndat.levels[gsLevInd].numDecModes-1)))){
+            drawTextAlignedSized(rdat,drawXPos,drawYPos+((yOffsets*19.0f + 36.0f)*state->ds.uiUserScale),col,FONTSIZE_NORMAL,255,tmpStr,ALIGN_CENTER,maxLblWidth); //draw decay mode label
+            //SDL_Log("height: %f\n",(double)height);
+            yOffsets += drawYOffsets;
+          }else{
+            drawTextAlignedSized(rdat,drawXPos,drawYPos+((yOffsets*19.0f + 36.0f)*state->ds.uiUserScale),col,FONTSIZE_NORMAL,255,"(...)",ALIGN_CENTER,maxLblWidth);
+            break;
+          }
+        }
       }
-      
+    }else{
+      drawTextAlignedSized(rdat,drawXPos,drawYPos+((yOffsets*19.0f + 36.0f)*state->ds.uiUserScale),col,FONTSIZE_NORMAL,255,"(...)",ALIGN_CENTER,maxLblWidth);
     }
-    if(ds->chartZoomScale >= 12.0f){
-      //draw corner label(s)
-      if(ds->chartZoomScale >= 18.0f){
-        getSpinParStr(tmpStr,&dat->ndat,gsLevInd);
-        drawTextAlignedSized(rdat,xPos+boxWidth-labelSmallMargin,yPos+labelSmallMargin,col,FONTSIZE_NORMAL,255,tmpStr,ALIGN_RIGHT,16384); //draw spin-parity label
-      }else if(dat->ndat.levels[gsLevInd].numSpinParVals <= 1){
-        getSpinParStr(tmpStr,&dat->ndat,gsLevInd);
-        drawTextAlignedSized(rdat,xPos+boxWidth-labelSmallMargin,yPos+labelSmallMargin,col,FONTSIZE_SMALL,255,tmpStr,ALIGN_RIGHT,16384); //draw small spin-parity label
-      }else{
-        drawTextAlignedSized(rdat,xPos+boxWidth-labelSmallMargin,yPos+labelSmallMargin,col,FONTSIZE_SMALL,255,"(...)",ALIGN_RIGHT,16384);
+    //draw corner label(s)
+    if(state->ds.chartZoomScale >= 18.0f){
+      getSpinParStr(tmpStr,&dat->ndat,gsLevInd);
+      drawTextAlignedSized(rdat,xPos+boxWidth-labelSmallMargin,yPos+labelSmallMargin,col,FONTSIZE_NORMAL,255,tmpStr,ALIGN_RIGHT,16384); //draw spin-parity label
+    }else if(dat->ndat.levels[gsLevInd].numSpinParVals <= 1){
+      getSpinParStr(tmpStr,&dat->ndat,gsLevInd);
+      drawTextAlignedSized(rdat,xPos+boxWidth-labelSmallMargin,yPos+labelSmallMargin,col,FONTSIZE_SMALL,255,tmpStr,ALIGN_RIGHT,16384); //draw small spin-parity label
+    }else{
+      drawTextAlignedSized(rdat,xPos+boxWidth-labelSmallMargin,yPos+labelSmallMargin,col,FONTSIZE_SMALL,255,"(...)",ALIGN_RIGHT,16384);
+    }
+  }else if(state->chartView == CHARTVIEW_DECAYMODE){
+    //draw decay modes only
+    if(dat->ndat.levels[gsLevInd].halfLife.unit == VALUE_UNIT_STABLE){
+      //if the nuclide is stable, show the 'STABLE' label
+      getGSHalfLifeStr(tmpStr,dat,nuclInd,state->ds.useLifetimes);
+      drawTextAlignedSized(rdat,drawXPos,drawYPos+((yOffsets*19.0f + 36.0f)*state->ds.uiUserScale),col,FONTSIZE_NORMAL,255,tmpStr,ALIGN_CENTER,maxLblWidth); //draw GS half-life label
+      yOffsets += drawYOffsets;
+    }
+    if(dat->ndat.nuclData[nuclInd].abundance.unit == VALUE_UNIT_PERCENT){
+      getAbundanceStr(tmpStr,&dat->ndat,nuclInd);
+      drawYOffsets = 1;
+      if(getTextWidth(rdat,FONTSIZE_NORMAL,tmpStr) > (maxLblWidth*rdat->uiDPIScale)){
+        drawYOffsets = 2;
       }
+      if(((yOffsets+drawYOffsets) <= yOffsetLimit)||((drawYOffsets == 1)&&(dat->ndat.levels[gsLevInd].numDecModes==0))){
+        //SDL_Log("Abundance y-offset: %u\n",yOffsets);
+        drawTextAlignedSized(rdat,drawXPos,drawYPos+((yOffsets*19.0f + 36.0f)*state->ds.uiUserScale),col,FONTSIZE_NORMAL,255,tmpStr,ALIGN_CENTER,maxLblWidth); //draw abundance label
+        yOffsets += drawYOffsets;
+        for(int8_t i=0; i<dat->ndat.levels[gsLevInd].numDecModes; i++){
+          getDecayModeStr(tmpStr,&dat->ndat,dat->ndat.levels[gsLevInd].firstDecMode + (uint32_t)i);
+          //SDL_Log("%s\n",tmpStr);
+          drawYOffsets = 1;
+          if(getTextWidth(rdat,FONTSIZE_NORMAL,tmpStr) > (1.3f*maxLblWidth*rdat->uiDPIScale)){
+            drawYOffsets = 3;
+          }else if(getTextWidth(rdat,FONTSIZE_NORMAL,tmpStr) > (maxLblWidth*rdat->uiDPIScale)){
+            drawYOffsets = 2;
+          }
+          if(((yOffsets+drawYOffsets) <= yOffsetLimit)||((drawYOffsets == 1)&&(i==(dat->ndat.levels[gsLevInd].numDecModes-1)))){
+            drawTextAlignedSized(rdat,drawXPos,drawYPos+((yOffsets*19.0f + 36.0f)*state->ds.uiUserScale),col,FONTSIZE_NORMAL,255,tmpStr,ALIGN_CENTER,maxLblWidth); //draw decay mode label
+            //SDL_Log("height: %f\n",(double)height);
+            yOffsets += drawYOffsets;
+          }else{
+            drawTextAlignedSized(rdat,drawXPos,drawYPos+((yOffsets*19.0f + 36.0f)*state->ds.uiUserScale),col,FONTSIZE_NORMAL,255,"(...)",ALIGN_CENTER,maxLblWidth);
+            break;
+          }
+        }
+      }else{
+        drawTextAlignedSized(rdat,drawXPos,drawYPos+((yOffsets*19.0f + 36.0f)*state->ds.uiUserScale),col,FONTSIZE_NORMAL,255,"(...)",ALIGN_CENTER,maxLblWidth);
+      }
+    }else{
+      for(int8_t i=0; i<dat->ndat.levels[gsLevInd].numDecModes; i++){
+        getDecayModeStr(tmpStr,&dat->ndat,dat->ndat.levels[gsLevInd].firstDecMode + (uint32_t)i);
+        //SDL_Log("%s\n",tmpStr);
+        drawYOffsets = 1;
+        if(getTextWidth(rdat,FONTSIZE_NORMAL,tmpStr) > (1.3f*maxLblWidth*rdat->uiDPIScale)){
+          drawYOffsets = 3;
+        }else if(getTextWidth(rdat,FONTSIZE_NORMAL,tmpStr) > (maxLblWidth*rdat->uiDPIScale)){
+          drawYOffsets = 2;
+        }
+        if(((yOffsets+drawYOffsets) <= yOffsetLimit)||((drawYOffsets == 1)&&(i==(dat->ndat.levels[gsLevInd].numDecModes-1)))){
+          drawTextAlignedSized(rdat,drawXPos,drawYPos+((yOffsets*19.0f + 36.0f)*state->ds.uiUserScale),col,FONTSIZE_NORMAL,255,tmpStr,ALIGN_CENTER,maxLblWidth); //draw decay mode label
+          //SDL_Log("height: %f\n",(double)height);
+          yOffsets += drawYOffsets;
+        }else{
+          drawTextAlignedSized(rdat,drawXPos,drawYPos+((yOffsets*19.0f + 36.0f)*state->ds.uiUserScale),col,FONTSIZE_NORMAL,255,"(...)",ALIGN_CENTER,maxLblWidth);
+          break;
+        }
+      }
+    }
+    //draw corner label(s)
+    if(state->ds.chartZoomScale >= 18.0f){
+      getSpinParStr(tmpStr,&dat->ndat,gsLevInd);
+      drawTextAlignedSized(rdat,xPos+boxWidth-labelSmallMargin,yPos+labelSmallMargin,col,FONTSIZE_NORMAL,255,tmpStr,ALIGN_RIGHT,16384); //draw spin-parity label
+    }else if(dat->ndat.levels[gsLevInd].numSpinParVals <= 1){
+      getSpinParStr(tmpStr,&dat->ndat,gsLevInd);
+      drawTextAlignedSized(rdat,xPos+boxWidth-labelSmallMargin,yPos+labelSmallMargin,col,FONTSIZE_SMALL,255,tmpStr,ALIGN_RIGHT,16384); //draw small spin-parity label
+    }else{
+      drawTextAlignedSized(rdat,xPos+boxWidth-labelSmallMargin,yPos+labelSmallMargin,col,FONTSIZE_SMALL,255,"(...)",ALIGN_RIGHT,16384);
+    }
+  }else if(state->chartView == CHARTVIEW_2PLUS){
+    uint32_t plus2Lvl = get2PlusLvlInd(&dat->ndat,nuclInd);
+    if(plus2Lvl != MAXNUMLVLS){
+      getLvlEnergyStr(tmpStr,&dat->ndat,plus2Lvl,1);
+      strcat(tmpStr," keV");
+      drawTextAlignedSized(rdat,drawXPos,drawYPos+((yOffsets*19.0f + 40.0f)*state->ds.uiUserScale),col,FONTSIZE_NORMAL,255,tmpStr,ALIGN_CENTER,maxLblWidth); //draw 2+ energy label
+    }
+  }else if(state->chartView == CHARTVIEW_R42){
+    double r42 = getR42(&dat->ndat,nuclInd);
+    if(r42 > 0.0){
+      snprintf(tmpStr,32,"%0.2f",r42);
+      drawTextAlignedSized(rdat,drawXPos,drawYPos+((yOffsets*19.0f + 40.0f)*state->ds.uiUserScale),col,FONTSIZE_NORMAL,255,tmpStr,ALIGN_CENTER,maxLblWidth); //draw R42 label
+    }
+  }
+  
+}
+
+//draws the main label for a box on the chart of nuclides
+void drawNuclBoxLabel(const app_data *restrict dat, const app_state *restrict state, resource_data *restrict rdat, const float xPos, const float yPos, const float boxWidth, const float boxHeight, SDL_Color col, const uint16_t nuclInd){
+  char tmpStr[32];
+  float drawXPos, drawYPos;
+  const float labelMargin = NUCLBOX_LABEL_MARGIN*state->ds.chartZoomScale*state->ds.uiUserScale;
+  const uint16_t Z = (uint16_t)dat->ndat.nuclData[nuclInd].Z;
+  if(state->ds.chartZoomScale >= 8.0f){
+    const uint16_t N = (uint16_t)dat->ndat.nuclData[nuclInd].N;
+    snprintf(tmpStr,32,"%u",N+Z);
+    float totalLblWidth = (getTextWidth(rdat,FONTSIZE_SMALL,tmpStr) + getTextWidth(rdat,FONTSIZE_LARGE,getElemStr((uint8_t)Z)))/rdat->uiDPIScale;
+    drawXPos = xPos+boxWidth*0.5f - totalLblWidth*0.5f;
+    if(state->ds.chartZoomScale >= 12.0f){
+      drawYPos = yPos + labelMargin;
+    }else{
+      float totalLblHeight = (getTextHeight(rdat,FONTSIZE_SMALL,tmpStr) - (10.0f*state->ds.uiUserScale) + getTextHeight(rdat,FONTSIZE_LARGE,getElemStr((uint8_t)Z)))/rdat->uiDPIScale;
+      drawYPos = yPos+boxWidth*0.5f - totalLblHeight*0.5f;
+    }
+    drawXPos += (drawTextAlignedSized(rdat,drawXPos,drawYPos,col,FONTSIZE_SMALL,255,tmpStr,ALIGN_LEFT,16384)).w; //draw number label
+    drawTextAlignedSized(rdat,drawXPos,drawYPos+(10.0f*state->ds.uiUserScale),col,FONTSIZE_LARGE,255,getElemStr((uint8_t)Z),ALIGN_LEFT,16384); //draw element label
+    if(state->ds.chartZoomScale >= 12.0f){
+      drawNuclBoxLabelDetails(dat,state,rdat,xPos,yPos,boxWidth,boxHeight,col,nuclInd);
     }
   }else{
     drawTextAlignedSized(rdat,xPos+boxWidth*0.5f,yPos+boxWidth*0.5f,col,FONTSIZE_NORMAL,255,getElemStr((uint8_t)Z),ALIGN_CENTER,16384); //draw element label only
@@ -728,64 +772,55 @@ void drawChartOfNuclides(const app_data *restrict dat, const app_state *restrict
                     }
                   }else if(state->chartView == CHARTVIEW_DECAYMODE){
                     //draw decay mode box
-                    uint8_t dcyMode = getNuclGSMostProbableDcyMode(&dat->ndat,(uint16_t)i);
-                    if(dcyMode < (DECAYMODE_ENUM_LENGTH+1)){
-                      drawingLowBox = 1;
-                      SDL_FColor boxCol = whiteCol;
-                      if(state->ds.chartZoomScale < 7.0f){
-                        //handle fading in of 2+ boxes
-                        boxCol.a =  1.0f - (7.0f-state->ds.chartZoomScale);
+                    uint32_t isomerLvl = dat->ndat.nuclData[i].longestIsomerLevel;
+                    const double isomerHl = getLevelHalfLifeSeconds(&dat->ndat,isomerLvl);
+                    if((isomerLvl != MAXNUMLVLS)&&(isomerLvl != (dat->ndat.nuclData[i].firstLevel + dat->ndat.nuclData[i].gsLevel))){
+                      if((isomerHl >= 1.0E-1)||(isomerHl > getNuclGSHalfLifeSeconds(&dat->ndat,(uint16_t)i))){ //only show 'important' isomers on chart
+                        uint8_t isomerDcyMode = getLevelMostProbableDcyMode(&dat->ndat,dat->ndat.nuclData[i].longestIsomerLevel);
+                        if(isomerDcyMode < (DECAYMODE_ENUM_LENGTH+1)){
+                          drawingLowBox = 1;
+                          SDL_FColor boxCol = getDecayModeCol(isomerDcyMode);
+                          if(state->ds.chartZoomScale < 5.5f){
+                            //handle fading in of isomer boxes
+                            boxCol.a =  1.0f - (5.5f-state->ds.chartZoomScale);
+                          }
+                          drawFlatRect(rdat,lowBoxRect,boxCol);
+                          drawDecayModeBoxLabel(dat,&state->ds,rdat,lowBoxRect.x,lowBoxRect.y,lowBoxRect.w,lowBoxRect.h,getDecayModeTextCol(isomerDcyMode),(uint16_t)i,isomerLvl,dat->ndat.nuclData[i].longestIsomerMVal,isomerDcyMode);
+                        }else if(isomerHl > 1.0E15){
+                          //'stable' isomer with no known decay mode
+                          //draw its box using the half-life color
+                          drawingLowBox = 1;
+                          SDL_FColor boxCol = getHalfLifeCol(isomerHl);
+                          if(state->ds.chartZoomScale < 5.5f){
+                            //handle fading in of isomer boxes
+                            boxCol.a =  1.0f - (5.5f-state->ds.chartZoomScale);
+                          }
+                          drawFlatRect(rdat,lowBoxRect,boxCol);
+                          drawDecayModeBoxLabel(dat,&state->ds,rdat,lowBoxRect.x,lowBoxRect.y,lowBoxRect.w,lowBoxRect.h,getDecayModeTextCol(isomerDcyMode),(uint16_t)i,isomerLvl,dat->ndat.nuclData[i].longestIsomerMVal,isomerDcyMode);
+                        }
                       }
-                      drawFlatRect(rdat,lowBoxRect,boxCol);
-                      drawDecayModeBoxLabel(dat,&state->ds,rdat,lowBoxRect.x,lowBoxRect.y,lowBoxRect.w,lowBoxRect.h,blackCol8Bit,dcyMode);
-                    }
-                  }else if(state->chartView == CHARTVIEW_2PLUS){
-                    //draw 2+ energy box
-                    double e2Plus = get2PlusEnergy(&dat->ndat,(uint16_t)i);
-                    if(e2Plus > 0.0){
-                      drawingLowBox = 1;
-                      SDL_FColor boxCol = whiteCol;
-                      if(state->ds.chartZoomScale < 7.0f){
-                        //handle fading in of 2+ boxes
-                        boxCol.a =  1.0f - (7.0f-state->ds.chartZoomScale);
-                      }
-                      drawFlatRect(rdat,lowBoxRect,boxCol);
-                      draw2PlusEnergyBoxLabel(dat,&state->ds,rdat,lowBoxRect.x,lowBoxRect.y,lowBoxRect.w,lowBoxRect.h,blackCol8Bit,get2PlusLvlInd(&dat->ndat,i));
-                    }
-                  }else if(state->chartView == CHARTVIEW_R42){
-                    //draw R42 energy box
-                    double r42 = getR42(&dat->ndat,(uint16_t)i);
-                    if(r42 >= 0.0){
-                      drawingLowBox = 1;
-                      SDL_FColor boxCol = whiteCol;
-                      if(state->ds.chartZoomScale < 7.0f){
-                        //handle fading in of R42 boxes
-                        boxCol.a =  1.0f - (7.0f-state->ds.chartZoomScale);
-                      }
-                      drawFlatRect(rdat,lowBoxRect,boxCol);
-                      drawR42BoxLabel(dat,&state->ds,rdat,lowBoxRect.x,lowBoxRect.y,lowBoxRect.w,lowBoxRect.h,blackCol8Bit,r42);
                     }
                   }
                 }
                 if(drawingLowBox){
                   if(state->chartView == CHARTVIEW_HALFLIFE){
-                    drawNuclBoxLabel(dat,&state->ds,rdat,rect.x,rect.y,rect.w,(rect.h-lowBoxHeight-(2.0f*lowBoxPadding)),(getNuclGSHalfLifeSeconds(&dat->ndat,(uint16_t)i) > 1.0E3) ? whiteCol8Bit : blackCol8Bit,(uint16_t)i);
+                    drawNuclBoxLabel(dat,state,rdat,rect.x,rect.y,rect.w,(rect.h-lowBoxHeight-(2.0f*lowBoxPadding)),(getNuclGSHalfLifeSeconds(&dat->ndat,(uint16_t)i) > 1.0E3) ? whiteCol8Bit : blackCol8Bit,(uint16_t)i);
                   }else if(state->chartView == CHARTVIEW_DECAYMODE){
-                    drawNuclBoxLabel(dat,&state->ds,rdat,rect.x,rect.y,rect.w,(rect.h-lowBoxHeight-(2.0f*lowBoxPadding)),getDecayModeTextCol(getNuclGSMostProbableDcyMode(&dat->ndat,(uint16_t)i)),(uint16_t)i);
+                    drawNuclBoxLabel(dat,state,rdat,rect.x,rect.y,rect.w,(rect.h-lowBoxHeight-(2.0f*lowBoxPadding)),getDecayModeTextCol(getNuclGSMostProbableDcyMode(&dat->ndat,(uint16_t)i)),(uint16_t)i);
                   }else if(state->chartView == CHARTVIEW_2PLUS){
-                    drawNuclBoxLabel(dat,&state->ds,rdat,rect.x,rect.y,rect.w,(rect.h-lowBoxHeight-(2.0f*lowBoxPadding)),(get2PlusEnergy(&dat->ndat,(uint16_t)i) >= 3000.0) ? whiteCol8Bit : blackCol8Bit,(uint16_t)i);
+                    drawNuclBoxLabel(dat,state,rdat,rect.x,rect.y,rect.w,(rect.h-lowBoxHeight-(2.0f*lowBoxPadding)),(get2PlusEnergy(&dat->ndat,(uint16_t)i) >= 3000.0) ? whiteCol8Bit : blackCol8Bit,(uint16_t)i);
                   }else if(state->chartView == CHARTVIEW_R42){
-                    drawNuclBoxLabel(dat,&state->ds,rdat,rect.x,rect.y,rect.w,(rect.h-lowBoxHeight-(2.0f*lowBoxPadding)),(getR42(&dat->ndat,(uint16_t)i) >= 3.2) ? whiteCol8Bit : blackCol8Bit,(uint16_t)i);
+                    drawNuclBoxLabel(dat,state,rdat,rect.x,rect.y,rect.w,(rect.h-lowBoxHeight-(2.0f*lowBoxPadding)),(getR42(&dat->ndat,(uint16_t)i) >= 3.2) ? whiteCol8Bit : blackCol8Bit,(uint16_t)i);
                   }
                 }else{
                   if(state->chartView == CHARTVIEW_HALFLIFE){
-                    drawNuclBoxLabel(dat,&state->ds,rdat,rect.x,rect.y,rect.w,rect.h,(getNuclGSHalfLifeSeconds(&dat->ndat,(uint16_t)i) > 1.0E3) ? whiteCol8Bit : blackCol8Bit,(uint16_t)i);
+                    drawNuclBoxLabel(dat,state,rdat,rect.x,rect.y,rect.w,rect.h,(getNuclGSHalfLifeSeconds(&dat->ndat,(uint16_t)i) > 1.0E3) ? whiteCol8Bit : blackCol8Bit,(uint16_t)i);
                   }else if(state->chartView == CHARTVIEW_DECAYMODE){
-                    drawNuclBoxLabel(dat,&state->ds,rdat,rect.x,rect.y,rect.w,rect.h,getDecayModeTextCol(getNuclGSMostProbableDcyMode(&dat->ndat,(uint16_t)i)),(uint16_t)i);
+                    drawNuclBoxLabel(dat,state,rdat,rect.x,rect.y,rect.w,rect.h,getDecayModeTextCol(getNuclGSMostProbableDcyMode(&dat->ndat,(uint16_t)i)),(uint16_t)i);
                   }else if(state->chartView == CHARTVIEW_2PLUS){
-                    drawNuclBoxLabel(dat,&state->ds,rdat,rect.x,rect.y,rect.w,rect.h,(get2PlusEnergy(&dat->ndat,(uint16_t)i) >= 3000.0) ? whiteCol8Bit : blackCol8Bit,(uint16_t)i);
+                    drawNuclBoxLabel(dat,state,rdat,rect.x,rect.y,rect.w,rect.h,(get2PlusEnergy(&dat->ndat,(uint16_t)i) >= 3000.0) ? whiteCol8Bit : blackCol8Bit,(uint16_t)i);
                   }else if(state->chartView == CHARTVIEW_R42){
-                    drawNuclBoxLabel(dat,&state->ds,rdat,rect.x,rect.y,rect.w,rect.h,(getR42(&dat->ndat,(uint16_t)i) >= 3.2) ? whiteCol8Bit : blackCol8Bit,(uint16_t)i);
+                    drawNuclBoxLabel(dat,state,rdat,rect.x,rect.y,rect.w,rect.h,(getR42(&dat->ndat,(uint16_t)i) >= 3.2) ? whiteCol8Bit : blackCol8Bit,(uint16_t)i);
                   }
                 }
               }
@@ -1423,6 +1458,7 @@ void drawAboutBox(const app_data *restrict dat, const app_state *restrict state,
   }else{
     drawScreenDimmer(&state->ds,rdat,DIMMER_OPACITY);
   }
+  uint8_t alpha8 = (uint8_t)SDL_floorf(alpha*255.0f);
   
   SDL_FRect aboutBoxPanelRect;
   aboutBoxPanelRect.x = state->ds.uiElemPosX[UIELEM_ABOUT_BOX];
@@ -1431,13 +1467,14 @@ void drawAboutBox(const app_data *restrict dat, const app_state *restrict state,
   aboutBoxPanelRect.h = state->ds.uiElemHeight[UIELEM_ABOUT_BOX];
   drawPanelBG(&dat->rules.themeRules,rdat,aboutBoxPanelRect,alpha);
 
-  drawTextAlignedSized(rdat,aboutBoxPanelRect.x+(aboutBoxPanelRect.w/2),aboutBoxPanelRect.y+ABOUT_BOX_HEADERTXT_Y*state->ds.uiUserScale,dat->rules.themeRules.textColNormal,FONTSIZE_LARGE,(uint8_t)SDL_floorf(alpha*255.0f),dat->rules.appName,ALIGN_CENTER,(Uint16)(aboutBoxPanelRect.w - 2*UI_PADDING_SIZE*state->ds.uiUserScale));
-  drawTextAlignedSized(rdat,aboutBoxPanelRect.x+(aboutBoxPanelRect.w/2),aboutBoxPanelRect.y+ABOUT_BOX_VERSION_Y*state->ds.uiUserScale,dat->rules.themeRules.textColNormal,FONTSIZE_SMALL,(uint8_t)SDL_floorf(alpha*255.0f),dat->strings[dat->locStringIDs[LOCSTR_ABOUTSTR_VERSION]],ALIGN_CENTER,16384);
-  drawTextAlignedSized(rdat,aboutBoxPanelRect.x+(aboutBoxPanelRect.w/2),aboutBoxPanelRect.y+ABOUT_BOX_STR1_Y*state->ds.uiUserScale,dat->rules.themeRules.textColNormal,FONTSIZE_NORMAL,(uint8_t)SDL_floorf(alpha*255.0f),dat->strings[dat->locStringIDs[LOCSTR_ABOUTSTR_1]],ALIGN_CENTER,(Uint16)(aboutBoxPanelRect.w - 12*UI_PADDING_SIZE*state->ds.uiUserScale));
-  drawTextAlignedSized(rdat,aboutBoxPanelRect.x+(aboutBoxPanelRect.w/2),aboutBoxPanelRect.y+ABOUT_BOX_STR2_Y*state->ds.uiUserScale,dat->rules.themeRules.textColNormal,FONTSIZE_SMALL,(uint8_t)SDL_floorf(alpha*255.0f),dat->strings[dat->locStringIDs[LOCSTR_ABOUTSTR_2]],ALIGN_CENTER,(Uint16)(aboutBoxPanelRect.w - 14*UI_PADDING_SIZE*state->ds.uiUserScale));
-  drawTextAlignedSized(rdat,aboutBoxPanelRect.x+(aboutBoxPanelRect.w/2),aboutBoxPanelRect.y+ABOUT_BOX_STR3_Y*state->ds.uiUserScale,dat->rules.themeRules.textColNormal,FONTSIZE_SMALL,(uint8_t)SDL_floorf(alpha*255.0f),dat->strings[dat->locStringIDs[LOCSTR_ABOUTSTR_3]],ALIGN_CENTER,(Uint16)(aboutBoxPanelRect.w - 14*UI_PADDING_SIZE*state->ds.uiUserScale));
-  drawTextAlignedSized(rdat,aboutBoxPanelRect.x+(aboutBoxPanelRect.w/2),aboutBoxPanelRect.y+ABOUT_BOX_STR4_Y*state->ds.uiUserScale,dat->rules.themeRules.textColNormal,FONTSIZE_NORMAL,(uint8_t)SDL_floorf(alpha*255.0f),dat->strings[dat->locStringIDs[LOCSTR_ABOUTSTR_4]],ALIGN_CENTER,(Uint16)(aboutBoxPanelRect.w - 12*UI_PADDING_SIZE*state->ds.uiUserScale));
-  drawTextButton(&dat->rules.themeRules,rdat,state->ds.uiElemPosX[UIELEM_ABOUT_BOX_OK_BUTTON],(uint16_t)(state->ds.uiElemPosY[UIELEM_ABOUT_BOX_OK_BUTTON]+yOffset),state->ds.uiElemWidth[UIELEM_ABOUT_BOX_OK_BUTTON],getHighlightState(state,UIELEM_ABOUT_BOX_OK_BUTTON),(uint8_t)SDL_floorf(alpha*255.0f),dat->strings[dat->locStringIDs[LOCSTR_OK]]);
+  drawIcon(&dat->rules.themeRules,rdat,(uint16_t)(aboutBoxPanelRect.x + UI_TILE_SIZE*state->ds.uiUserScale),(uint16_t)(aboutBoxPanelRect.y+(ABOUT_BOX_HEADERTXT_Y+UI_PADDING_SIZE)*state->ds.uiUserScale),(uint16_t)(UI_TILE_SIZE*state->ds.uiUserScale),HIGHLIGHT_NORMAL,alpha8,UIICON_APPICON);
+  drawTextAlignedSized(rdat,aboutBoxPanelRect.x+(2*UI_TILE_SIZE + 2*UI_PADDING_SIZE)*state->ds.uiUserScale,aboutBoxPanelRect.y+ABOUT_BOX_HEADERTXT_Y*state->ds.uiUserScale,dat->rules.themeRules.textColNormal,FONTSIZE_LARGE,alpha8,dat->rules.appName,ALIGN_LEFT,(Uint16)(aboutBoxPanelRect.w - 2*UI_PADDING_SIZE*state->ds.uiUserScale));
+  drawTextAlignedSized(rdat,aboutBoxPanelRect.x+(2*UI_TILE_SIZE + 2*UI_PADDING_SIZE)*state->ds.uiUserScale,aboutBoxPanelRect.y+ABOUT_BOX_VERSION_Y*state->ds.uiUserScale,dat->rules.themeRules.textColNormal,FONTSIZE_SMALL,alpha8,dat->strings[dat->locStringIDs[LOCSTR_ABOUTSTR_VERSION]],ALIGN_LEFT,16384);
+  drawTextAlignedSized(rdat,aboutBoxPanelRect.x+(aboutBoxPanelRect.w/2),aboutBoxPanelRect.y+ABOUT_BOX_STR1_Y*state->ds.uiUserScale,dat->rules.themeRules.textColNormal,FONTSIZE_NORMAL,alpha8,dat->strings[dat->locStringIDs[LOCSTR_ABOUTSTR_1]],ALIGN_CENTER,(Uint16)(aboutBoxPanelRect.w - 12*UI_PADDING_SIZE*state->ds.uiUserScale));
+  drawTextAlignedSized(rdat,aboutBoxPanelRect.x+(aboutBoxPanelRect.w/2),aboutBoxPanelRect.y+ABOUT_BOX_STR2_Y*state->ds.uiUserScale,dat->rules.themeRules.textColNormal,FONTSIZE_SMALL,alpha8,dat->strings[dat->locStringIDs[LOCSTR_ABOUTSTR_2]],ALIGN_CENTER,(Uint16)(aboutBoxPanelRect.w - 14*UI_PADDING_SIZE*state->ds.uiUserScale));
+  drawTextAlignedSized(rdat,aboutBoxPanelRect.x+(aboutBoxPanelRect.w/2),aboutBoxPanelRect.y+ABOUT_BOX_STR3_Y*state->ds.uiUserScale,dat->rules.themeRules.textColNormal,FONTSIZE_SMALL,alpha8,dat->strings[dat->locStringIDs[LOCSTR_ABOUTSTR_3]],ALIGN_CENTER,(Uint16)(aboutBoxPanelRect.w - 14*UI_PADDING_SIZE*state->ds.uiUserScale));
+  drawTextAlignedSized(rdat,aboutBoxPanelRect.x+(aboutBoxPanelRect.w/2),aboutBoxPanelRect.y+ABOUT_BOX_STR4_Y*state->ds.uiUserScale,dat->rules.themeRules.textColNormal,FONTSIZE_SMALL,alpha8,dat->strings[dat->locStringIDs[LOCSTR_ABOUTSTR_4]],ALIGN_CENTER,(Uint16)(aboutBoxPanelRect.w - 12*UI_PADDING_SIZE*state->ds.uiUserScale));
+  drawTextButton(&dat->rules.themeRules,rdat,state->ds.uiElemPosX[UIELEM_ABOUT_BOX_OK_BUTTON],(uint16_t)(state->ds.uiElemPosY[UIELEM_ABOUT_BOX_OK_BUTTON]+yOffset),state->ds.uiElemWidth[UIELEM_ABOUT_BOX_OK_BUTTON],getHighlightState(state,UIELEM_ABOUT_BOX_OK_BUTTON),alpha8,dat->strings[dat->locStringIDs[LOCSTR_OK]]);
   //SDL_Log("%.3f %.3f alpha %u\n",(double)state->ds.timeLeftInUIAnimation[UIANIM_MODAL_BOX_SHOW],(double)state->ds.timeLeftInUIAnimation[UIANIM_MODAL_BOX_HIDE],alpha);
 }
 

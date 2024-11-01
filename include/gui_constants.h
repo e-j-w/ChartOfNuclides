@@ -55,8 +55,8 @@ which can be referenced by both the GUI draw code as well as the interaction cod
 #define UITHEME_SCROLLBAR_TILE_Y 3
 
 //UI theme icons
-static const uint8_t UITHEME_ICON_TILE_X[UIICON_ENUM_LENGTH] = {0,1,2,2,1,2,0,1,0,1,1,2};
-static const uint8_t UITHEME_ICON_TILE_Y[UIICON_ENUM_LENGTH] = {10,10,11,10,9,9,8,8,11,11,3,3};
+static const uint8_t UITHEME_ICON_TILE_X[UIICON_ENUM_LENGTH] = {0,0,1,2,2,1,2,0,1,0,1,1,2};
+static const uint8_t UITHEME_ICON_TILE_Y[UIICON_ENUM_LENGTH] = {1,10,10,11,10,9,9,8,8,11,11,3,3};
 
 //font sizes (assuming UI scale of 1)
 static const uint16_t fontSizes[FONTSIZE_ENUM_LENGTH] = {13,15,19};
@@ -119,13 +119,13 @@ static const float uiScales[UISCALE_ENUM_LENGTH] = {1.0f,1.20f,1.60f,1.85f};
 
 //about box (credits etc.)
 #define ABOUT_BOX_WIDTH            420 //in unscaled pixels
-#define ABOUT_BOX_HEIGHT           420 //in unscaled pixels
+#define ABOUT_BOX_HEIGHT           366 //in unscaled pixels
 #define ABOUT_BOX_HEADERTXT_Y      (8*UI_PADDING_SIZE)
 #define ABOUT_BOX_VERSION_Y        (14*UI_PADDING_SIZE)
 #define ABOUT_BOX_STR1_Y           98 //in unscaled pixels
-#define ABOUT_BOX_STR2_Y           142 //in unscaled pixels
-#define ABOUT_BOX_STR3_Y           216 //in unscaled pixels
-#define ABOUT_BOX_STR4_Y           284 //in unscaled pixels
+#define ABOUT_BOX_STR2_Y           132 //in unscaled pixels
+#define ABOUT_BOX_STR3_Y           206 //in unscaled pixels
+#define ABOUT_BOX_STR4_Y           264 //in unscaled pixels
 #define ABOUT_BOX_OK_BUTTON_WIDTH  120
 #define ABOUT_BOX_OK_BUTTON_YB     (4*UI_PADDING_SIZE)
 

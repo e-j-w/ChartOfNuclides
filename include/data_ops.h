@@ -31,6 +31,7 @@ void getLvlEnergyStr(char strOut[32], const ndata *restrict nd, const uint32_t l
 void getHalfLifeStr(char strOut[32], const app_data *restrict dat, const uint32_t lvlInd, const uint8_t showErr, const uint8_t showUnknown, const uint8_t useLifetime);
 void getGSHalfLifeStr(char strOut[32], const app_data *restrict dat, const uint16_t nuclInd, const uint8_t useLifetime);
 void getDecayModeStr(char strOut[32], const ndata *restrict nd, const uint32_t dcyModeInd);
+void getMostProbableDecayModeStr(char strOut[32], const ndata *restrict nd, const uint32_t lvlInd);
 void getAbundanceStr(char strOut[32], const ndata *restrict nd, const uint16_t nuclInd);
 void getSpinParStr(char strOut[32], const ndata *restrict nd, const uint32_t lvlInd);
 
@@ -47,6 +48,7 @@ double getLevelHalfLifeSeconds(const ndata *restrict nd, const uint32_t levelInd
 double getNuclLevelHalfLifeSeconds(const ndata *restrict nd, const uint16_t nuclInd, const uint16_t nuclLevel);
 double getNuclGSHalfLifeSeconds(const ndata *restrict nd, const uint16_t nuclInd);
 
+uint8_t getLevelMostProbableDcyMode(const ndata *restrict nd, const uint32_t lvlInd);
 uint8_t getNuclGSMostProbableDcyMode(const ndata *restrict nd, const uint16_t nuclInd);
 
 uint32_t getFinalLvlInd(const ndata *restrict nd, const uint32_t initialLevel, const uint32_t tran);
