@@ -779,6 +779,13 @@ void parseSpinPar(level * lev, sp_var_data * varDat, char * spstring){
 					continue;
 				}
 
+				//check for ranges specified without spaces
+				if(val[i][0]=='>'){
+					lev->spval[lev->numSpinParVals].format |= (VALUETYPE_GREATERTHAN << 1U);
+				}else if(val[i][0]=='<'){
+					lev->spval[lev->numSpinParVals].format |= (VALUETYPE_LESSTHAN << 1U);
+				}
+
 				//check for brackets
 				strcpy(tmpstr,val[i]);
 				tok=strtok(tmpstr,"(");
@@ -867,7 +874,7 @@ void parseSpinPar(level * lev, sp_var_data * varDat, char * spstring){
 				//extract spin
 				lev->spval[lev->numSpinParVals].spinVal = 255; //default to unknown spin
 				strcpy(tmpstr,val[i]);
-				tok=strtok(tmpstr,"()+-, GELTAP");
+				tok=strtok(tmpstr,"()+-, GELTAP><");
 				if(tok!=NULL){
 					strcpy(tmpstr2,tok);
 					tok=strtok(tok,"/");

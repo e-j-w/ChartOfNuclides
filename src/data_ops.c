@@ -1177,6 +1177,244 @@ uint8_t elemStrToZ(const char *elemStr){
 		return 117;
 	}else if(strcmp(elemStr,"Og")==0){
 		return 118;
+	}else if(strcmp(elemStr,"Neutron")==0){
+		return 0;
+	}else if((strcmp(elemStr,"Hydrogen")==0)||(strcmp(elemStr,"Proton")==0)){
+		return 1;
+	}else if(strcmp(elemStr,"Helium")==0){
+		return 2;
+	}else if(strcmp(elemStr,"Lithium")==0){
+		return 3;
+	}else if(strcmp(elemStr,"Beryllium")==0){
+		return 4;
+	}else if(strcmp(elemStr,"Boron")==0){
+		return 5;
+	}else if(strcmp(elemStr,"Carbon")==0){
+		return 6;
+	}else if(strcmp(elemStr,"Nitrogen")==0){
+		return 7;
+	}else if(strcmp(elemStr,"Oxygen")==0){
+		return 8;
+	}else if(strcmp(elemStr,"Fluorine")==0){
+		return 9;
+	}else if(strcmp(elemStr,"Neon")==0){
+		return 10;
+	}else if(strcmp(elemStr,"Sodium")==0){
+		return 11;
+	}else if(strcmp(elemStr,"Magnesium")==0){
+		return 12;
+	}else if((strcmp(elemStr,"Aluminium")==0)||(strcmp(elemStr,"Aluminum")==0)){
+		return 13;
+	}else if(strcmp(elemStr,"Silicon")==0){
+		return 14;
+	}else if(strcmp(elemStr,"Phosphorus")==0){
+		return 15;
+	}else if((strcmp(elemStr,"Sulfur")==0)||(strcmp(elemStr,"Sulphur")==0)){
+		return 16;
+	}else if(strcmp(elemStr,"Chlorine")==0){
+		return 17;
+	}else if(strcmp(elemStr,"Argon")==0){
+		return 18;
+	}else if(strcmp(elemStr,"Potassium")==0){
+		return 19;
+	}else if(strcmp(elemStr,"Calcium")==0){
+		return 20;
+	}else if(strcmp(elemStr,"Scandium")==0){
+		return 21;
+	}else if(strcmp(elemStr,"Titanium")==0){
+		return 22;
+	}else if(strcmp(elemStr,"Vanadium")==0){
+		return 23;
+	}else if(strcmp(elemStr,"Chromium")==0){
+		return 24;
+	}else if(strcmp(elemStr,"Manganese")==0){
+		return 25;
+	}else if(strcmp(elemStr,"Iron")==0){
+		return 26;
+	}else if(strcmp(elemStr,"Cobalt")==0){
+		return 27;
+	}else if(strcmp(elemStr,"Nickel")==0){
+		return 28;
+	}else if(strcmp(elemStr,"Copper")==0){
+		return 29;
+	}else if(strcmp(elemStr,"Zinc")==0){
+		return 30;
+	}else if(strcmp(elemStr,"Gallium")==0){
+		return 31;
+	}else if(strcmp(elemStr,"Germanium")==0){
+		return 32;
+	}else if(strcmp(elemStr,"Arsenic")==0){
+		return 33;
+	}else if(strcmp(elemStr,"Selenium")==0){
+		return 34;
+	}else if(strcmp(elemStr,"Bromine")==0){
+		return 35;
+	}else if(strcmp(elemStr,"Krypton")==0){
+		return 36;
+	}else if(strcmp(elemStr,"Rubidium")==0){
+		return 37;
+	}else if(strcmp(elemStr,"Strontium")==0){
+		return 38;
+	}else if(strcmp(elemStr,"Yttrium")==0){
+		return 39;
+	}else if(strcmp(elemStr,"Zirconium")==0){
+		return 40;
+	}else if((strcmp(elemStr,"Niobium")==0)||(strcmp(elemStr,"Columbium")==0)){
+		return 41;
+	}else if(strcmp(elemStr,"Molybdenum")==0){
+		return 42;
+	}else if(strcmp(elemStr,"Technetium")==0){
+		return 43;
+	}else if(strcmp(elemStr,"Ruthenium")==0){
+		return 44;
+	}else if(strcmp(elemStr,"Rhodium")==0){
+		return 45;
+	}else if(strcmp(elemStr,"Palladium")==0){
+		return 46;
+	}else if(strcmp(elemStr,"Silver")==0){
+		return 47;
+	}else if(strcmp(elemStr,"Cadmium")==0){
+		return 48;
+	}else if(strcmp(elemStr,"Indium")==0){
+		return 49;
+	}else if(strcmp(elemStr,"Tin")==0){
+		return 50;
+	}else if(strcmp(elemStr,"Antimony")==0){
+		return 51;
+	}else if(strcmp(elemStr,"Tellurium")==0){
+		return 52;
+	}else if(strcmp(elemStr,"Iodine")==0){
+		return 53;
+	}else if(strcmp(elemStr,"Xenon")==0){
+		return 54;
+	}else if((strcmp(elemStr,"Caesium")==0)||(strcmp(elemStr,"Cesium")==0)){
+		return 55;
+	}else if(strcmp(elemStr,"Barium")==0){
+		return 56;
+	}else if(strcmp(elemStr,"Lanthanum")==0){
+		return 57;
+	}else if(strcmp(elemStr,"Cerium")==0){
+		return 58;
+	}else if(strcmp(elemStr,"Praseodymium")==0){
+		return 59;
+	}else if(strcmp(elemStr,"Neodymium")==0){
+		return 60;
+	}else if(strcmp(elemStr,"Promethium")==0){
+		return 61;
+	}else if(strcmp(elemStr,"Samarium")==0){
+		return 62;
+	}else if(strcmp(elemStr,"Europium")==0){
+		return 63;
+	}else if(strcmp(elemStr,"Gadolinium")==0){
+		return 64;
+	}else if(strcmp(elemStr,"Terbium")==0){
+		return 65;
+	}else if(strcmp(elemStr,"Dysprosium")==0){
+		return 66;
+	}else if(strcmp(elemStr,"Holmium")==0){
+		return 67;
+	}else if(strcmp(elemStr,"Erbium")==0){
+		return 68;
+	}else if(strcmp(elemStr,"Thulium")==0){
+		return 69;
+	}else if(strcmp(elemStr,"Ytterbium")==0){
+		return 70;
+	}else if(strcmp(elemStr,"Lutetium")==0){
+		return 71;
+	}else if(strcmp(elemStr,"Hafnium")==0){
+		return 72;
+	}else if(strcmp(elemStr,"Tantalum")==0){
+		return 73;
+	}else if((strcmp(elemStr,"Tungsten")==0)||(strcmp(elemStr,"Wolfram")==0)){
+		return 74;
+	}else if(strcmp(elemStr,"Rhenium")==0){
+		return 75;
+	}else if(strcmp(elemStr,"Osmium")==0){
+		return 76;
+	}else if(strcmp(elemStr,"Iridium")==0){
+		return 77;
+	}else if(strcmp(elemStr,"Platinum")==0){
+		return 78;
+	}else if(strcmp(elemStr,"Gold")==0){
+		return 79;
+	}else if(strcmp(elemStr,"Mercury")==0){
+		return 80;
+	}else if(strcmp(elemStr,"Thallium")==0){
+		return 81;
+	}else if(strcmp(elemStr,"Lead")==0){
+		return 82;
+	}else if(strcmp(elemStr,"Bismuth")==0){
+		return 83;
+	}else if(strcmp(elemStr,"Polonium")==0){
+		return 84;
+	}else if(strcmp(elemStr,"Astatine")==0){
+		return 85;
+	}else if(strcmp(elemStr,"Radon")==0){
+		return 86;
+	}else if(strcmp(elemStr,"Francium")==0){
+		return 87;
+	}else if(strcmp(elemStr,"Radium")==0){
+		return 88;
+	}else if(strcmp(elemStr,"Actinium")==0){
+		return 89;
+	}else if(strcmp(elemStr,"Thorium")==0){
+		return 90;
+	}else if(strcmp(elemStr,"Protactinium")==0){
+		return 91;
+	}else if(strcmp(elemStr,"Uranium")==0){
+		return 92;
+	}else if(strcmp(elemStr,"Neptunium")==0){
+		return 93;
+	}else if(strcmp(elemStr,"Plutonium")==0){
+		return 94;
+	}else if(strcmp(elemStr,"Americium")==0){
+		return 95;
+	}else if(strcmp(elemStr,"Curium")==0){
+		return 96;
+	}else if(strcmp(elemStr,"Berkelium")==0){
+		return 97;
+	}else if(strcmp(elemStr,"Californium")==0){
+		return 98;
+	}else if(strcmp(elemStr,"Einsteinium")==0){
+		return 99;
+	}else if(strcmp(elemStr,"Fermium")==0){
+		return 100;
+	}else if(strcmp(elemStr,"Mendelevium")==0){
+		return 101;
+	}else if(strcmp(elemStr,"Nobelium")==0){
+		return 102;
+	}else if(strcmp(elemStr,"Lawrencium")==0){
+		return 103;
+	}else if(strcmp(elemStr,"Rutherfordium")==0){
+		return 104;
+	}else if(strcmp(elemStr,"Dubnium")==0){
+		return 105;
+	}else if(strcmp(elemStr,"Seaborgium")==0){
+		return 106;
+	}else if(strcmp(elemStr,"Bohrium")==0){
+		return 107;
+	}else if(strcmp(elemStr,"Hassium")==0){
+		return 108;
+	}else if(strcmp(elemStr,"Meitnerium")==0){
+		return 109;
+	}else if(strcmp(elemStr,"Darmstadtium")==0){
+		return 110;
+	}else if((strcmp(elemStr,"Roentgenium")==0)||(strcmp(elemStr,"Unununium")==0)){
+		return 111;
+	}else if(strcmp(elemStr,"Copernicium")==0){
+		return 112;
+	}else if(strcmp(elemStr,"Nihonium")==0){
+		return 113;
+	}else if(strcmp(elemStr,"Flerovium")==0){
+		return 114;
+	}else if(strcmp(elemStr,"Moscovium")==0){
+		return 115;
+	}else if(strcmp(elemStr,"Livermorium")==0){
+		return 116;
+	}else if(strcmp(elemStr,"Tennessine")==0){
+		return 117;
+	}else if(strcmp(elemStr,"Oganesson")==0){
+		return 118;
 	}
 
 	return 255; //no matching element found
@@ -2947,7 +3185,11 @@ void uiElemClickAction(app_data *restrict dat, app_state *restrict state, resour
 		case UIELEM_ZOOMIN_BUTTON:
 			//zoom in
 			state->ds.chartZoomStartScale = state->ds.chartZoomScale;
-			state->ds.chartZoomToScale += state->ds.chartZoomToScale*1.0f;
+			if(state->ds.chartZoomToScale <= 0.55f){
+				state->ds.chartZoomToScale = 2.0f; //UX: zoom in more than usual, so that the initial interaction is more responsive
+			}else{
+				state->ds.chartZoomToScale += state->ds.chartZoomToScale*1.0f;
+			}
 			if(state->ds.chartZoomToScale > MAX_CHART_ZOOM_SCALE){
 				state->ds.chartZoomToScale = MAX_CHART_ZOOM_SCALE;
 			}
@@ -2992,7 +3234,11 @@ void uiElemClickAction(app_data *restrict dat, app_state *restrict state, resour
 		case UIELEM_ZOOMOUT_BUTTON:
 			//zoom out
 			state->ds.chartZoomStartScale = state->ds.chartZoomScale;
-			state->ds.chartZoomToScale -= state->ds.chartZoomToScale*0.5f;
+			if(state->ds.chartZoomToScale <= 2.05f){
+				state->ds.chartZoomToScale = 0.5f;
+			}else{
+				state->ds.chartZoomToScale -= state->ds.chartZoomToScale*0.5f;
+			}
 			if(state->ds.chartZoomToScale < MIN_CHART_ZOOM_SCALE){
 				state->ds.chartZoomToScale = MIN_CHART_ZOOM_SCALE;
 			}

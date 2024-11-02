@@ -88,7 +88,7 @@ void tokenizeSearchStr(search_state *restrict ss){
 }
 
 void searchNuclides(const ndata *restrict ndat, search_state *restrict ss){
-	char nuclAStr[8], nuclElemName[8];
+	char nuclAStr[8], nuclElemName[32];
 	for(uint8_t i=0; i<ss->numSearchTok; i++){
 		uint8_t foundNucl = 0;
 		uint8_t len = (uint8_t)strlen(ss->searchTok[i]);
@@ -98,10 +98,19 @@ void searchNuclides(const ndata *restrict ndat, search_state *restrict ss){
 				if(j>=7){
 					break;
 				}
-				if(!(isdigit(ss->searchTok[i][j]))){
+				if(ss->searchTok[i][j] == '-'){
 					memcpy(&nuclAStr,&ss->searchTok[i],(size_t)j);
 					nuclAStr[j] = '\0'; //terminate string at end
-					if((len > j)&&((len-j)<8)){
+					if((len > (j+1))&&((len-j+1)<32)){
+						memcpy(&nuclElemName,&(ss->searchTok[i][j+1]),(size_t)(len-j+1));
+						nuclElemName[len-j+1] = '\0'; //terminate string at end
+						foundNucl = 1;
+						break;
+					}
+				}else if(!(isdigit(ss->searchTok[i][j]))){
+					memcpy(&nuclAStr,&ss->searchTok[i],(size_t)j);
+					nuclAStr[j] = '\0'; //terminate string at end
+					if((len > j)&&((len-j)<32)){
 						memcpy(&nuclElemName,&(ss->searchTok[i][j]),(size_t)(len-j));
 						nuclElemName[len-j] = '\0'; //terminate string at end
 						foundNucl = 1;
@@ -109,13 +118,28 @@ void searchNuclides(const ndata *restrict ndat, search_state *restrict ss){
 					}
 				}
 			}
+			if(foundNucl == 0){
+				//try looking at the full string, for special cases
+				strncpy(nuclElemName,ss->searchTok[i],31);
+				strncpy(nuclAStr,"-1",7); //mark special case
+				//SDL_Log("Parsing special case: %s\n",ss->searchTok[i]);
+			}
 		}else if(isalpha(ss->searchTok[i][0])){
 			//look for nuclide names starting with a letter (eg. si32)
 			for(uint8_t j=1; j<len; j++){
-				if(j>=7){
+				if(j>=32){
 					break;
 				}
-				if(isdigit(ss->searchTok[i][j])){
+				if(ss->searchTok[i][j] == '-'){
+					memcpy(&nuclElemName,&ss->searchTok[i],(size_t)j);
+					nuclElemName[j] = '\0'; //terminate string at end
+					if((len > (j+1))&&((len-j+1)<8)){
+						memcpy(&nuclAStr,&(ss->searchTok[i][j+1]),(size_t)(len-j+1));
+						nuclAStr[len-j+1] = '\0'; //terminate string at end
+						foundNucl = 1;
+						break;
+					}
+				}else if(isdigit(ss->searchTok[i][j])){
 					memcpy(&nuclElemName,&ss->searchTok[i],(size_t)j);
 					nuclElemName[j] = '\0'; //terminate string at end
 					if((len > j)&&((len-j)<8)){
@@ -126,14 +150,45 @@ void searchNuclides(const ndata *restrict ndat, search_state *restrict ss){
 					}
 				}
 			}
+			if(foundNucl == 0){
+				//try looking at the full string, for special cases
+				strncpy(nuclElemName,ss->searchTok[i],31);
+				strncpy(nuclAStr,"-1",7); //mark special case
+				//SDL_Log("Parsing special case: %s\n",ss->searchTok[i]);
+			}
 		}
-		if(foundNucl){
-			int16_t nuclA = (int16_t)SDL_atoi(nuclAStr);
-			int16_t nuclZ = (int16_t)elemStrToZ(nuclElemName);
+		int16_t nuclZ = -1;
+		int16_t nuclZu = -1;
+		int16_t nuclA = (int16_t)SDL_atoi(nuclAStr);
+		//SDL_Log("A: %i, Z: %i, elem name: %s, len: %u\n",nuclA,nuclZ,nuclElemName,len);
+		if(nuclA < 0){
+			//check for special cases
 			nuclElemName[0] = (char)SDL_toupper(nuclElemName[0]); //convert to uppercase
-			int16_t nuclZu = (int16_t)elemStrToZ(nuclElemName);
-			//SDL_Log("A: %i, Z: %i, elem name: %s, len: %u\n",nuclA,nuclZ,nuclElemName,len);
-			for(int16_t j=0; j<ndat->numNucl; j++){
+			if(strcmp(nuclElemName,"Neutron")==0){
+				nuclZ = 0;
+				nuclA = 1;
+			}else if(strcmp(nuclElemName,"Tetraneutron")==0){
+				nuclZ = 0;
+				nuclA = 4;
+			}else if((strcmp(nuclElemName,"Proton")==0)||(strcmp(nuclElemName,"Hydrogen")==0)){
+				nuclZ = 1;
+				nuclA = 1;
+			}else if(strcmp(nuclElemName,"Deuterium")==0){
+				nuclZ = 1;
+				nuclA = 2;
+			}else if(strcmp(nuclElemName,"Tritium")==0){
+				nuclZ = 1;
+				nuclA = 3;
+			}else{
+				continue; //go to the next token
+			}
+		}else{
+			nuclZ = (int16_t)elemStrToZ(nuclElemName);
+			nuclElemName[0] = (char)SDL_toupper(nuclElemName[0]); //convert to uppercase
+			nuclZu = (int16_t)elemStrToZ(nuclElemName);
+		}
+		for(int16_t j=0; j<ndat->numNucl; j++){
+			if(nuclZ >= 0){
 				if(ndat->nuclData[j].Z == nuclZ){
 					if(((ndat->nuclData[j].N + ndat->nuclData[j].Z)) == nuclA){
 						//identified nuclide (exact match)
@@ -145,6 +200,8 @@ void searchNuclides(const ndata *restrict ndat, search_state *restrict ss){
 						sortAndAppendResult(ss,&res);
 					}
 				}
+			}
+			if(nuclZu >= 0){
 				if((nuclZu != nuclZ)&&(ndat->nuclData[j].Z == nuclZu)){
 					if(((ndat->nuclData[j].N + ndat->nuclData[j].Z)) == nuclA){
 						//identified nuclide (uppercase match)
