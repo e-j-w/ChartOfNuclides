@@ -830,7 +830,7 @@ void parseSpinPar(level * lev, sp_var_data * varDat, char * spstring){
 					if(strcmp(tok,val[i])!=0){
 						//SDL_Log("setting parity marker, tok: %s, val: %s\n",tok,val[i]);
 						//contains parity info
-						tok=strtok(val[i],"/(0123456789, ");
+						tok=strtok(val[i],"/(0123456789GELTAP, ");
 						//SDL_Log("tok: %s\n",tok);
 						if((strcmp(tok,"+")==0)||(strcmp(tok,"+)")==0)){
 							lev->spval[lev->numSpinParVals].parVal = 1;
