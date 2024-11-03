@@ -57,6 +57,10 @@ int tpFunc(void *data){
         tdat->threadState = THREADSTATE_IDLE; //fdone searching (idle threads will eventually be killed)
         break;
       case THREADSTATE_IDLE:
+        ; //suppress gcc warning
+        //send a fake SDL event to ensure the idle state is processed on the next frame
+        SDL_Event evt;
+        SDL_PushEvent(&evt); //force frame update even if time has passed, as SDL will wait for an event
         //printf("Thread %u is idle.\n",tdat->threadNum);
         break;
       default:
@@ -163,10 +167,13 @@ void killIdleThreads(const app_data *restrict dat, app_state *restrict state, re
   if(tms->numThreads == 0){
     if(tms->masterThreadState == THREADSTATE_SEARCH){
       //search is finished, copy over the search results
+      //SDL_Log("Search finished.\n");
       memcpy(state->ss.results,state->ss.updatedResults,sizeof(state->ss.updatedResults));
       state->ss.numResults = state->ss.numUpdatedResults;
       updateSearchUIState(dat,state,rdat);
       tms->masterThreadState = THREADSTATE_KILL;
+      //send a fake SDL event to ensure the dearch results are processed on the next frame
+      //regardless of the presence of user input or other events
       SDL_Event evt;
       SDL_PushEvent(&evt); //force frame update even if time has passed, as SDL will wait for an event
     }
