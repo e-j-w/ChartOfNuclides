@@ -1852,7 +1852,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 											nd->nuclData[nd->numNucl].longestIsomerMVal = isomerMValInNucl;
 											
 										}
-									}else if(en < 0.02){
+									}else if((en < 0.02)&&(eValueType != VALUETYPE_PLUSX)&&(eValueType != VALUETYPE_X)){
 										//low energy levels are generally isomers (even if their half-life is unknown)
 										//229Th is a famous case
 										//only include these if no other long-lived isomers are found
