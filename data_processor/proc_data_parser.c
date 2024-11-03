@@ -1754,27 +1754,27 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 									tok = strtok(NULL,"E+"); //some level energies are specified with exponents, or relative to a variable (eg. 73.0+X)
 									if(tok!=NULL){
 										
-											//SDL_Log("%s\n",tok);
-											uint16_t len = (uint16_t)strlen(tok);
-											//check for trailing empty spaces
-											for(uint16_t i=0;i<len;i++){
-												if(isspace(tok[i])){
-													len = i;
-													break;
-												}
+										//SDL_Log("%s\n",tok);
+										uint16_t len = (uint16_t)strlen(tok);
+										//check for trailing empty spaces
+										for(uint16_t i=0;i<len;i++){
+											if(isspace(tok[i])){
+												len = i;
+												break;
 											}
-											nd->levels[nd->numLvls-1].energy.format |= (uint16_t)(len & 15U);
-											//SDL_Log("format: %u\n",nd->levels[nd->numLvls-1].energy.format);
-											if(((nd->levels[nd->numLvls-1].energy.format >> 5U) & 15U) != VALUETYPE_PLUSX){
-												tok = strtok(NULL,""); //get the remaining part of the string (only get past here if the value was expressed in exponent form)
-												if(tok!=NULL){
-													//SDL_Log("energy in exponent form: %s\n",ebuff);
-													//value was in exponent format
-													nd->levels[nd->numLvls-1].energy.exponent = (int8_t)atoi(tok);
-													levelE = levelE / powf(10.0f,(float)(nd->levels[nd->numLvls-1].energy.exponent));
-													nd->levels[nd->numLvls-1].energy.format |= (uint16_t)(1U << 4); //exponent flag
-												}
+										}
+										nd->levels[nd->numLvls-1].energy.format |= (uint16_t)(len & 15U);
+										//SDL_Log("format: %u\n",nd->levels[nd->numLvls-1].energy.format);
+										if(((nd->levels[nd->numLvls-1].energy.format >> 5U) & 15U) != VALUETYPE_PLUSX){
+											tok = strtok(NULL,""); //get the remaining part of the string (only get past here if the value was expressed in exponent form)
+											if(tok!=NULL){
+												//SDL_Log("energy in exponent form: %s\n",ebuff);
+												//value was in exponent format
+												nd->levels[nd->numLvls-1].energy.exponent = (int8_t)atoi(tok);
+												levelE = levelE / powf(10.0f,(float)(nd->levels[nd->numLvls-1].energy.exponent));
+												nd->levels[nd->numLvls-1].energy.format |= (uint16_t)(1U << 4); //exponent flag
 											}
+										}
 									}else{
 										//potentially an exponent form value with no decimal place
 										memcpy(ebuff, &line[9], 10); //re-copy buffer
@@ -2038,9 +2038,77 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 								uint32_t tranInd = nd->levels[nd->numLvls-1].firstTran + (uint32_t)(nd->levels[nd->numLvls-1].numTran);
 
 								//process gamma energy
-								float gammaE = (float)atof(ebuff);
+
+								//get length without trailing spaces
+								uint8_t gamEStrLen = 10;
+								for(int i=9;i>=0;i--){
+									if(isspace(ebuff[i])){
+										gamEStrLen=(uint8_t)i;
+									}else{
+										break;
+									}
+								}
+								//get the position of the first non-space character
+								uint8_t gamEStartPos = 10;
+								for(uint8_t i=0;i<10;i++){
+									if(!(isspace(ebuff[i]))){
+										gamEStartPos = i;
+										break;
+									}
+								}
+
+								//check for variables in gamma energy
+								float gammaE = 0.0f;
+								if(isalpha(ebuff[gamEStrLen-1])&&((gamEStrLen==1) || ebuff[gamEStrLen-2]==' ')){
+									//SDL_Log("X ebuff: %s\n",ebuff);
+									nd->tran[tranInd].energy.val=0;
+									nd->tran[tranInd].energy.err=0;
+									nd->tran[tranInd].energy.unit=VALUE_UNIT_NOVAL;
+									nd->tran[tranInd].energy.format = 0; //default
+									nd->tran[tranInd].energy.format |= (uint16_t)(VALUETYPE_X << 5);
+									//record variable index (stored value = variable ASCII code)
+									nd->tran[tranInd].energy.format |= (uint16_t)(ebuff[gamEStrLen-1] << 9);
+								}else if((gamEStartPos < 10)&&(isalpha(ebuff[gamEStartPos]))&&(ebuff[gamEStartPos+1]=='+')){
+									//gamma energy in X+number format
+									//SDL_Log("X+number ebuff: %s\n",ebuff);
+									tok = strtok(ebuff,"+");
+									if(tok != NULL){
+										tok = strtok(NULL,""); //get the rest of the string
+										if(tok != NULL){
+											gammaE = (float)atof(tok);
+											nd->tran[tranInd].energy.format = 0; //default
+											nd->tran[tranInd].energy.format |= (uint16_t)(VALUETYPE_PLUSX << 5);
+										}
+									}
+									memcpy(ebuff, &line[9], 10); //re-constitute original buffer
+									ebuff[10] = '\0';
+									nd->tran[tranInd].energy.format |= (uint16_t)(ebuff[gamEStartPos] << 9);
+								}else if((gamEStrLen > 1)&&(ebuff[gamEStrLen-2]=='+')&&(isalpha(ebuff[gamEStrLen-1]))){
+									//gamma energy in number+X format
+									//SDL_Log("number+X ebuff: %s\n",ebuff);
+									tok = strtok(ebuff,"+");
+									if(tok != NULL){
+										gammaE = (float)atof(tok);
+										tok = strtok(NULL,""); //get the rest of the string
+										if(tok != NULL){
+											nd->tran[tranInd].energy.format = 0; //default
+											nd->tran[tranInd].energy.format |= (uint16_t)(VALUETYPE_PLUSX << 5);
+											nd->tran[tranInd].energy.format |= (uint16_t)(tok[0] << 9);
+											//SDL_Log("variable: %c\n",tok[0]);
+										}
+									}
+									memcpy(ebuff, &line[9], 10); //re-constitute original buffer
+									ebuff[10] = '\0';
+								}else{
+									//normal gamma energy
+									//SDL_Log("normal ebuff: %s (length %u)\n",ebuff,gamEStrLen);
+									gammaE = (float)atof(ebuff);
+									nd->tran[tranInd].energy.format = 0; //default
+									//SDL_Log("Found gamma at %f keV from string: %s\n",(double)gammaE,ebuff);
+								}
+
+
 								//get the number of sig figs
-								nd->tran[tranInd].energy.format = 0; //default
 								//SDL_Log("ebuff: %s\n",ebuff);
 								tok = strtok(ebuff,".");
 								if(tok!=NULL){
@@ -2048,25 +2116,25 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 									tok = strtok(NULL,"E"); //some gamma energies are specified with exponents
 									if(tok!=NULL){
 										//SDL_Log("%s\n",tok);
-										nd->tran[tranInd].energy.format = (uint16_t)strlen(tok);
+										uint16_t len = (uint16_t)strlen(tok);
 										//check for trailing empty spaces
-										for(uint8_t i=0;i<nd->tran[tranInd].energy.format;i++){
+										for(uint16_t i=0;i<len;i++){
 											if(isspace(tok[i])){
-												nd->tran[tranInd].energy.format = i;
+												len = i;
 												break;
 											}
 										}
-										if(nd->tran[tranInd].energy.format > 15U){
-											nd->tran[tranInd].energy.format = 15U; //only 4 bits available for precision
-										}
+										nd->tran[tranInd].energy.format |= (uint16_t)(len & 15U);
 										//SDL_Log("format: %u\n",nd->tran[tranInd].energy.format);
-										tok = strtok(NULL,""); //get the remaining part of the string (only get past here if the value was expressed in exponent form)
-										if(tok!=NULL){
-											//SDL_Log("energy in exponent form: %s\n",ebuff);
-											//value was in exponent format
-											nd->tran[tranInd].energy.exponent = (int8_t)atoi(tok);
-											gammaE = gammaE / powf(10.0f,(float)(nd->tran[tranInd].energy.exponent));
-											nd->tran[tranInd].energy.format |= (uint16_t)(1U << 4); //exponent flag
+										if(((nd->tran[tranInd].energy.format >> 5U) & 15U) != VALUETYPE_PLUSX){
+											tok = strtok(NULL,""); //get the remaining part of the string (only get past here if the value was expressed in exponent form)
+											if(tok!=NULL){
+												//SDL_Log("energy in exponent form: %s\n",ebuff);
+												//value was in exponent format
+												nd->tran[tranInd].energy.exponent = (int8_t)atoi(tok);
+												gammaE = gammaE / powf(10.0f,(float)(nd->tran[tranInd].energy.exponent));
+												nd->tran[tranInd].energy.format |= (uint16_t)(1U << 4); //exponent flag
+											}
 										}
 									}
 								}else{
@@ -2089,14 +2157,31 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 
 								nd->tran[tranInd].energy.val=gammaE;
 								nd->tran[tranInd].energy.err=gammaEerr;
-								nd->tran[tranInd].energy.unit=VALUE_UNIT_KEV;
+								if(nd->tran[tranInd].energy.unit != VALUE_UNIT_NOVAL){
+									nd->tran[tranInd].energy.unit=VALUE_UNIT_KEV;
+								}
 								
 								//check for final level of transition
 								float minEDiff = 1000.0f;
 								nd->tran[tranInd].finalLvlOffset = 0;
 								uint8_t lvlValType = ((nd->levels[nd->numLvls-1].energy.format >> 5U) & 15U);
+								uint8_t gammaValType = ((nd->tran[tranInd].energy.format >> 5U) & 15U);
+								//SDL_Log("lvl type: %u, gamma type: %u\n",lvlValType,gammaValType);
 								if(nd->numLvls >= 2){
 									for(uint32_t lvlInd = (nd->numLvls-2); lvlInd >= nd->nuclData[nd->numNucl].firstLevel; lvlInd--){
+										
+										if((gammaValType == VALUETYPE_X)&&(lvlValType == VALUETYPE_PLUSX)){
+											//handle special case where gamma energy is variable and defines a level
+											//offset from a previous level
+											float eDiff = fabsf(nd->levels[lvlInd].energy.val - nd->levels[nd->numLvls-1].energy.val);
+											if(eDiff < minEDiff){
+												minEDiff = eDiff;
+												nd->tran[tranInd].finalLvlOffset = (uint8_t)((nd->numLvls-1) - lvlInd);
+											}
+											//SDL_Log("finalLvlOffset: %u\n",nd->tran[tranInd].finalLvlOffset);
+											continue; //don't evaluate other conditions that don't correspond to this special case
+										}
+										
 										//handle variable level energies (ie. number+X, Y+number...)
 										//transitions cannot link between levels defined by different variables
 										uint8_t prevLvlValType = ((nd->levels[lvlInd].energy.format >> 5U) & 15U);
@@ -2116,7 +2201,8 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 												continue; //skip
 											}
 										}
-
+										
+									
 										float fudgeFactor = (float)getRawErrFromDB(&nd->tran[tranInd].energy);
 										if(fudgeFactor < 0.01f){
 											fudgeFactor = 1.0f; //default assumed energy resolution, when no error is reported 
@@ -2129,6 +2215,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 											}
 											//SDL_Log("finalLvlOffset: %u\n",nd->tran[tranInd].finalLvlOffset);
 										}
+										
 										if(lvlInd == 0){
 											break; //handle rare integer overflow case
 										}

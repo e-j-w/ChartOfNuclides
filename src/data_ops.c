@@ -1601,7 +1601,18 @@ void getGammaEnergyStr(char strOut[32], const ndata *restrict nd, const uint32_t
 
 	uint8_t ePrecision = (uint8_t)(nd->tran[tranInd].energy.format & 15U);
 	uint8_t eExponent = (uint8_t)((nd->tran[tranInd].energy.format >> 4U) & 1U);
-	if((showErr == 0)||(nd->tran[tranInd].energy.err == 0)){
+	uint8_t eValueType = (uint8_t)((nd->tran[tranInd].energy.format >> 5U) & 15U);
+	if(eValueType == VALUETYPE_X){
+		uint8_t variable = (uint8_t)((nd->tran[tranInd].energy.format >> 9U) & 127U);
+		SDL_snprintf(strOut,32,"%c",variable);
+	}else if(eValueType == VALUETYPE_PLUSX){
+		uint8_t variable = (uint8_t)((nd->tran[tranInd].energy.format >> 9U) & 127U);
+		if(eExponent == 0){
+			SDL_snprintf(strOut,32,"%.*f+%c",ePrecision,(double)(nd->tran[tranInd].energy.val),variable);
+		}else{
+			SDL_snprintf(strOut,32,"%.*fE%i+%c",ePrecision,(double)(nd->tran[tranInd].energy.val),nd->tran[tranInd].energy.exponent,variable);
+		}
+	}else if((showErr == 0)||(nd->tran[tranInd].energy.err == 0)){
 		if(eExponent == 0){
 			SDL_snprintf(strOut,32,"%.*f",ePrecision,(double)(nd->tran[tranInd].energy.val));
 		}else{
