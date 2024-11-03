@@ -33,24 +33,24 @@
 <url type="vcs-browser">https://github.com/e-j-w/ChartOfNuclides</url>
 <screenshots>
   <screenshot type="default">
-    <image>https://raw.githubusercontent.com/e-j-w/ChartOfNuclides-flatpak/c122e49e3a156790324ef900b19753d8a443f0b4/assets/con_screenshot.png</image>
+    <image>https://github.com/e-j-w/ChartOfNuclides-flatpak/blob/e439f2caf5547e928186a42330e6cc07dea57bc5/assets/con_screenshot.png</image>
     <caption>Main interface view showing a zoomed-out chart of nuclides</caption>
   </screenshot>
   <screenshot>
-    <image>https://raw.githubusercontent.com/e-j-w/ChartOfNuclides-flatpak/c122e49e3a156790324ef900b19753d8a443f0b4/assets/con_screenshot2.png</image>
+    <image>https://github.com/e-j-w/ChartOfNuclides-flatpak/blob/e439f2caf5547e928186a42330e6cc07dea57bc5/assets/con_screenshot2.png</image>
+    <caption>Zoomed-in main view with the 27Al nuclide selected, using the 'half-life' color scheme</caption>
+  </screenshot>
+  <screenshot>
+    <image>https://github.com/e-j-w/ChartOfNuclides-flatpak/blob/e439f2caf5547e928186a42330e6cc07dea57bc5/assets/con_screenshot3.png</image>
+    <caption>List of levels and gamma rays for a selected nuclide (38K)</caption>
+  </screenshot>
+  <screenshot>
+    <image>https://github.com/e-j-w/ChartOfNuclides-flatpak/blob/e439f2caf5547e928186a42330e6cc07dea57bc5/assets/con_screenshot4.png</image>
     <caption>Zoomed-in main view with the 99Tc nuclide selected, using the 'decay mode' color scheme</caption>
-  </screenshot>
-  <screenshot>
-    <image>https://raw.githubusercontent.com/e-j-w/ChartOfNuclides-flatpak/c122e49e3a156790324ef900b19753d8a443f0b4/assets/con_screenshot3.png</image>
-    <caption>Zoomed-in main view with the 58Ni nuclide selected, using the 'half-life' color scheme</caption>
-  </screenshot>
-  <screenshot>
-    <image>https://raw.githubusercontent.com/e-j-w/ChartOfNuclides-flatpak/c122e49e3a156790324ef900b19753d8a443f0b4/assets/con_screenshot4.png</image>
-    <caption>List of levels and gamma rays for a selected nuclide (212Po)</caption>
   </screenshot>
 </screenshots>
 <releases>
-  <release version="0.1.0" date="2024-09-24">
+  <release version="0.2.0" date="2024-11-03">
     <description>
       <p>Initial release.</p>
     </description>
