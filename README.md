@@ -1,10 +1,10 @@
 <h1 align="center">Chart of Nuclides</h1>
 
-An offline viewer of isotope and nuclear structure data in the familiar [Chart of Nuclides / Segrè chart](https://en.wikipedia.org/wiki/Table_of_nuclides) format. Uses nuclear structure data from [ENSDF](https://www.nndc.bnl.gov/ensdf/about.jsp) and isotopic abundance data from [NIST](https://www.nist.gov/pml/atomic-weights-and-isotopic-compositions-relative-atomic-masses). A full list of features is [here](doc/FEATURES.md).
+An offline viewer of isotope and nuclear structure data in the [Chart of Nuclides / Segrè chart](https://en.wikipedia.org/wiki/Table_of_nuclides) format. Uses nuclear structure data from [ENSDF](https://www.nndc.bnl.gov/ensdf/about.jsp) and isotopic abundance data from [NIST](https://www.nist.gov/pml/atomic-weights-and-isotopic-compositions-relative-atomic-masses). A full list of features is [here](doc/FEATURES.md).
 
 ## Screenshots
 
-<div align = center><img src="https://github.com/e-j-w/ChartOfNuclides-flatpak/blob/c122e49e3a156790324ef900b19753d8a443f0b4/assets/con_screenshot.png?raw=true" width="376" height="248" alt="main interface"><img src="https://github.com/e-j-w/ChartOfNuclides-flatpak/blob/c122e49e3a156790324ef900b19753d8a443f0b4/assets/con_screenshot2.png?raw=true" width="376" height="248" alt="zoomed in interface"></div>
+<div align = center><img src="https://github.com/e-j-w/ChartOfNuclides-flatpak/blob/e439f2caf5547e928186a42330e6cc07dea57bc5/assets/con_screenshot.png?raw=true" width="188" height="124" alt="main interface"><img src="https://github.com/e-j-w/ChartOfNuclides-flatpak/blob/e439f2caf5547e928186a42330e6cc07dea57bc5/assets/con_screenshot2.png?raw=true" width="188" height="124" alt="zoomed in interface"><img src="https://github.com/e-j-w/ChartOfNuclides-flatpak/blob/e439f2caf5547e928186a42330e6cc07dea57bc5/assets/con_screenshot3.png?raw=true" width="188" height="124" alt="level list view"><img src="https://github.com/e-j-w/ChartOfNuclides-flatpak/blob/e439f2caf5547e928186a42330e6cc07dea57bc5/assets/con_screenshot4.png?raw=true" width="188" height="124" alt="alternate color scheme view"></div>
 
 ## Quick installation
 
