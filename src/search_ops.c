@@ -20,11 +20,22 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include "search_ops.h"
 #include "data_ops.h"
 
-int SDLCALL compareRelevance(void *userdata, const void *a, const void *b){
-	(void)userdata; //unused
+int SDLCALL compareRelevance(const void *a, const void *b){
 	search_result *resA = ((search_result*)(intptr_t)(a)); //get the search result (double cast to avoid warning)
 	search_result *resB = ((search_result*)(intptr_t)(b)); //get the search result (double cast to avoid warning)
-	if(resA->relevance >= resB->relevance){
+	float relA = resA->relevance;
+	float relB = resB->relevance;
+	//printf("A: val %u rel %f\n",resA->resultVal,(double)resA->relevance);
+	//printf("B: val %u rel %f\n",resB->resultVal,(double)resB->relevance);
+	for(uint8_t i=0; i<32; i++){
+		if(resA->corrRes & (uint32_t)(1U << i)){
+			relA += 1.0f;
+		}
+		if(resB->corrRes & (uint32_t)(1U << i)){
+			relB += 1.0f;
+		}
+	}
+	if(relA >= relB){
 		return -1;
 	}else{
 		return 1;
@@ -32,16 +43,21 @@ int SDLCALL compareRelevance(void *userdata, const void *a, const void *b){
 }
 
 void sortAndAppendResult(search_state *restrict ss, const search_result *restrict res){
+
+	SDL_WaitSemaphore(ss->canUpdateResults); //wait while any other threads update the results
 	
 	//check that the result isn't identical to an existing one
 	for(uint8_t i=0; i<ss->numUpdatedResults;i++){
 		if(res->resultType == ss->updatedResults[i].resultType){
 			if(res->resultVal == ss->updatedResults[i].resultVal){
-				return; //don't append identical results
+				if(res->resultVal2 == ss->updatedResults[i].resultVal2){
+					SDL_SignalSemaphore(ss->canUpdateResults); //signal that other threads can now update the results
+					return; //don't append identical results
+				}
 			}
 		}
 	}
-	
+	//SDL_Log("Appending result with type %u, values [%u %u], relevance %0.3f.\n",res->resultType,res->resultVal,res->resultVal2,(double)res->relevance);
 	//add the result to the list, if possible
 	if(ss->numUpdatedResults < MAX_SEARCH_RESULTS){
 		//append the result
@@ -49,16 +65,36 @@ void sortAndAppendResult(search_state *restrict ss, const search_result *restric
 		ss->numUpdatedResults++;
 	}else{
 		//assuming results are already sorted...
-		//if the new result has higher relevance than the lowest rank result,
-		//overwrite that lowest ranked result
-		if(res->relevance > ss->updatedResults[MAX_SEARCH_RESULTS-1].relevance){
-			memcpy(&ss->updatedResults[MAX_SEARCH_RESULTS-1],res,sizeof(search_result));
-		}else{
-			return; //no result appended
+		//overwrite that lowest ranked result with the new result
+		memcpy(&ss->updatedResults[MAX_SEARCH_RESULTS-1],res,sizeof(search_result));
+	}
+
+	//check for correlations between results
+	for(uint8_t i=0; i<ss->numUpdatedResults; i++){
+		ss->updatedResults[i].corrRes = 0;
+		for(uint8_t j=0; j<ss->numUpdatedResults; j++){
+			if(i != j){
+				if((ss->updatedResults[i].resultType == SEARCHAGENT_EGAMMA)||(ss->updatedResults[i].resultType == SEARCHAGENT_ELEVEL)){
+					if(ss->updatedResults[j].resultType == SEARCHAGENT_NUCLIDE){
+						if(ss->updatedResults[i].resultVal == ss->updatedResults[j].resultVal){
+							//gamma matching a nuclide
+							//SDL_Log("Correlated result %u with result %u\n",i,j);
+							ss->updatedResults[i].corrRes |= (uint32_t)(1U << j);
+						}
+					}
+				}
+			}
 		}
 	}
+	
 	//sort the results by relevance
-	SDL_qsort_r(&ss->updatedResults[0],ss->numUpdatedResults,sizeof(search_result),compareRelevance,NULL);
+	//SDL_Log("Results: %u\n",ss->numUpdatedResults);
+	/*for(uint8_t i=0;i<ss->numUpdatedResults;i++){
+		SDL_Log("  Result %u - rel: %f\n",i,(double)ss->updatedResults[i].relevance);
+	}*/
+	qsort(&ss->updatedResults,ss->numUpdatedResults,sizeof(ss->updatedResults[0]),compareRelevance); //SDL_qsort appears to have a bug right now that causes it to sort out of bounds in the array...
+
+	SDL_SignalSemaphore(ss->canUpdateResults); //signal that other threads can now update the results
 }
 
 //breaks the search string down into smaller tokens
@@ -85,6 +121,106 @@ void tokenizeSearchStr(search_state *restrict ss){
 	}
 	printf("\n");*/
 
+}
+
+void searchELevel(const ndata *restrict ndat, search_state *restrict ss){
+	for(uint8_t i=0; i<ss->numSearchTok; i++){
+
+		//first, filter out any tokens with characters
+		uint8_t isNum = 1;
+		for(uint16_t j=0; j<strlen(ss->searchTok[i]); j++){
+			if(isalpha(ss->searchTok[i][j])){
+				isNum = 0;
+				break;
+			}
+		}
+		if(isNum == 0){
+			continue; //check next search token
+		}
+
+		double eSearch = atof(ss->searchTok[i]);
+		if(eSearch > 0.0){
+			//valid energy
+			for(int16_t j=0; j<ndat->numNucl; j++){
+				for(uint32_t k=ndat->nuclData[j].firstLevel; k<(ndat->nuclData[j].firstLevel + (uint32_t)ndat->nuclData[j].numLevels); k++){
+					if((((ndat->levels[k].energy.format >> 5U) & 15U)) != VALUETYPE_X){ //ignore variable energy
+						double rawEVal = getRawValFromDB(&ndat->levels[k].energy);
+						double rawErrVal = getRawErrFromDB(&ndat->levels[k].energy);
+						if(rawEVal > 0.0){
+							double errBound = 3.0*rawErrVal;
+							if(errBound < 5.0){
+								errBound = 5.0;
+							}
+							if(((rawEVal - errBound) <= eSearch)&&((rawEVal + errBound) >= eSearch)){
+								//energy matches query
+								search_result res;
+								res.relevance = 0.6f; //base value
+								res.relevance -= (float)(rawErrVal/rawEVal); //weight by size of error bars
+								res.relevance /= (1.0f + (float)fabs(0.1*(eSearch - rawEVal))); //weight by distance from value
+								res.resultType = SEARCHAGENT_ELEVEL;
+								res.resultVal = (uint32_t)j; //nuclide index
+								res.resultVal2 = (uint32_t)k; //level index
+								res.corrRes = 0;
+								//SDL_Log("Found level %u\n",res.resultVal2);
+								sortAndAppendResult(ss,&res);
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+void searchEGamma(const ndata *restrict ndat, search_state *restrict ss){
+	for(uint8_t i=0; i<ss->numSearchTok; i++){
+
+		//first, filter out any tokens with characters
+		uint8_t isNum = 1;
+		for(uint16_t j=0; j<strlen(ss->searchTok[i]); j++){
+			if(isalpha(ss->searchTok[i][j])){
+				isNum = 0;
+				break;
+			}
+		}
+		if(isNum == 0){
+			continue; //check next search token
+		}
+
+		double eSearch = atof(ss->searchTok[i]);
+		if(eSearch > 0.0){
+			//valid energy
+			for(int16_t j=0; j<ndat->numNucl; j++){
+				for(uint32_t k=ndat->nuclData[j].firstLevel; k<(ndat->nuclData[j].firstLevel + (uint32_t)ndat->nuclData[j].numLevels); k++){
+					for(uint32_t l=ndat->levels[k].firstTran; l<(ndat->levels[k].firstTran + (uint32_t)ndat->levels[k].numTran); l++){
+						if((((ndat->tran[l].energy.format >> 5U) & 15U)) != VALUETYPE_X){ //ignore variable energy
+							double rawEVal = getRawValFromDB(&ndat->tran[l].energy);
+							double rawErrVal = getRawErrFromDB(&ndat->tran[l].energy);
+							if(rawEVal > 0.0){
+								double errBound = 3.0*rawErrVal;
+								if(errBound < 5.0){
+									errBound = 5.0;
+								}
+								if(((rawEVal - errBound) <= eSearch)&&((rawEVal + errBound) >= eSearch)){
+									//energy matches query
+									search_result res;
+									res.relevance = 0.5f; //base value
+									res.relevance -= (float)(rawErrVal/rawEVal); //weight by size of error bars
+									res.relevance /= (1.0f + (float)fabs(0.1*(eSearch - rawEVal))); //weight by distance from value
+									res.resultType = SEARCHAGENT_EGAMMA;
+									res.resultVal = (uint32_t)j; //nuclide index
+									res.resultVal2 = (uint32_t)l; //transition index
+									res.corrRes = 0;
+									//SDL_Log("Found transition %u\n",res.resultVal2);
+									sortAndAppendResult(ss,&res);
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
 }
 
 void searchNuclides(const ndata *restrict ndat, search_state *restrict ss){
@@ -196,6 +332,8 @@ void searchNuclides(const ndata *restrict ndat, search_state *restrict ss){
 						res.relevance = 1.0f; //exact match
 						res.resultType = SEARCHAGENT_NUCLIDE;
 						res.resultVal = (uint32_t)j;
+						res.resultVal2 = 0;
+						res.corrRes = 0;
 						//SDL_Log("Found nuclide %u\n",res.resultVal);
 						sortAndAppendResult(ss,&res);
 					}
@@ -209,6 +347,8 @@ void searchNuclides(const ndata *restrict ndat, search_state *restrict ss){
 						res.relevance = 0.8f; //uppercase match
 						res.resultType = SEARCHAGENT_NUCLIDE;
 						res.resultVal = (uint32_t)j;
+						res.resultVal2 = 0;
+						res.corrRes = 0;
 						//SDL_Log("Found nuclide %u\n",res.resultVal);
 						sortAndAppendResult(ss,&res);
 					}

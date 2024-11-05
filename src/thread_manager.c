@@ -51,6 +51,26 @@ int tpFunc(void *data){
             //SDL_Log("Searching for nuclides...\n");
             searchNuclides(&tdat->dat->ndat,&tdat->state->ss);
             break;
+          case SEARCHAGENT_EGAMMA:
+            while(!(tdat->state->ss.finishedSearchAgents & (uint32_t)(1U << SEARCHAGENT_TOKENIZE))){
+              if(tdat->threadState == THREADSTATE_KILL){
+                break; //kill waiting thread, if requested
+              }
+              SDL_Delay(THREAD_UPDATE_DELAY); //wait for tokenization to complete
+            }
+            //SDL_Log("Searching for transitions...\n");
+            searchEGamma(&tdat->dat->ndat,&tdat->state->ss);
+            break;
+          case SEARCHAGENT_ELEVEL:
+            while(!(tdat->state->ss.finishedSearchAgents & (uint32_t)(1U << SEARCHAGENT_TOKENIZE))){
+              if(tdat->threadState == THREADSTATE_KILL){
+                break; //kill waiting thread, if requested
+              }
+              SDL_Delay(THREAD_UPDATE_DELAY); //wait for tokenization to complete
+            }
+            //SDL_Log("Searching for levels...\n");
+            searchELevel(&tdat->dat->ndat,&tdat->state->ss);
+            break;
           default:
             break;
         }
@@ -77,25 +97,18 @@ int startSearchThreads(app_data *restrict dat, app_state *restrict state, thread
 
   if(strlen(state->ss.searchString)<=0){
     //no search string, no search threads needed
+    //clear search results
+    state->ss.numResults = 0;
     return 0;
   }
 
   //initialize search state
+  memset(state->ss.updatedResults,0,sizeof(state->ss.updatedResults));
   state->ss.finishedSearchAgents = 0;
   state->ss.numUpdatedResults = 0;
 
   //determine number of threads
-  int numCores = SDL_GetNumLogicalCPUCores();
-  if(numCores <= 0){
-    tms->numThreads = 1;
-  }else if(numCores <= 2){
-    tms->numThreads = (uint8_t)(numCores);
-  }else{
-    tms->numThreads = (uint8_t)(numCores-1);
-  }
-  if(tms->numThreads > SEARCHAGENT_ENUM_LENGTH){
-    tms->numThreads = SEARCHAGENT_ENUM_LENGTH;
-  }
+  tms->numThreads = SEARCHAGENT_ENUM_LENGTH;
   tms->masterThreadState = THREADSTATE_SEARCH;
   if(tms->numThreads > MAX_NUM_THREADS){
     SDL_Log("ERROR: startSearchThreads - trying to start invalid number of threads (%u).\n",tms->numThreads);
@@ -168,9 +181,14 @@ void killIdleThreads(const app_data *restrict dat, app_state *restrict state, re
     if(tms->masterThreadState == THREADSTATE_SEARCH){
       //search is finished, copy over the search results
       //SDL_Log("Search finished.\n");
-      memcpy(state->ss.results,state->ss.updatedResults,sizeof(state->ss.updatedResults));
-      state->ss.numResults = state->ss.numUpdatedResults;
-      updateSearchUIState(dat,state,rdat);
+      if(strlen(state->ss.searchString)>0){
+        memcpy(state->ss.results,state->ss.updatedResults,sizeof(state->ss.updatedResults));
+        state->ss.numResults = state->ss.numUpdatedResults;
+        updateSearchUIState(dat,state,rdat);
+      }else{
+        //perhaps the user pressed backspace too quickly...
+        state->ss.numResults = 0;
+      }
       tms->masterThreadState = THREADSTATE_KILL;
       //send a fake SDL event to ensure the dearch results are processed on the next frame
       //regardless of the presence of user input or other events

@@ -259,6 +259,8 @@ static int parseAppRules(app_data *restrict dat, asset_mapping *restrict stringI
 	dat->locStringIDs[LOCSTR_CHARTVIEW_R42] = (uint16_t)nameToAssetID("chartview_r42",stringIDmap);
 	dat->locStringIDs[LOCSTR_SEARCH_PLACEHOLDER] = (uint16_t)nameToAssetID("search_placeholder",stringIDmap);
 	dat->locStringIDs[LOCSTR_SEARCHRES_NUCLIDE] = (uint16_t)nameToAssetID("search_result_nuclide",stringIDmap);
+	dat->locStringIDs[LOCSTR_SEARCHRES_EGAMMA] = (uint16_t)nameToAssetID("search_result_egamma",stringIDmap);
+	dat->locStringIDs[LOCSTR_SEARCHRES_ELEVEL] = (uint16_t)nameToAssetID("search_result_elevel",stringIDmap);
 	dat->locStringIDs[LOCSTR_PREF_UISCALE] = (uint16_t)nameToAssetID("interface_size",stringIDmap);
 	dat->locStringIDs[LOCSTR_SMALL] = (uint16_t)nameToAssetID("small",stringIDmap);
 	dat->locStringIDs[LOCSTR_LARGE] = (uint16_t)nameToAssetID("large",stringIDmap);
@@ -332,7 +334,7 @@ void parseHalfLife(level * lev, char * hlstring){
     tok = strtok(NULL, "");
     if(tok!=NULL){
       //SDL_Log("%s\n",tok);
-      memcpy(hlUnitVal,tok,3);
+      strncpy(hlUnitVal,tok,3);
       for(uint8_t i=0;i<3;i++){
         if(isspace(hlUnitVal[i])){
           hlUnitVal[i] = '\0'; //terminate string at first space
@@ -616,7 +618,7 @@ void parseSpinPar(level * lev, sp_var_data * varDat, char * spstring){
 								if(strcmp(tmpstr2,varDat->spVars[j])==0){
 									spVarNum = (uint8_t)j;
 									lev->spval[lev->numSpinParVals].format |= (VALUETYPE_NUMBER << 1U);
-									lev->spval[lev->numSpinParVals].format |= (spVarNum << 5U); //set variable index
+									lev->spval[lev->numSpinParVals].format |= (uint16_t)(spVarNum << 5U); //set variable index
 									//SDL_Log("variable index %u\n",spVarNum);
 								}
 							}
@@ -625,7 +627,7 @@ void parseSpinPar(level * lev, sp_var_data * varDat, char * spstring){
 								//couldn't match to a previous spin variable, make a new one
 								if(varDat->numSpVars < MAX_SPIN_VARS){
 									lev->spval[lev->numSpinParVals].format |= (VALUETYPE_NUMBER << 1U);
-									lev->spval[lev->numSpinParVals].format |= (varDat->numSpVars << 5U); //set variable index
+									lev->spval[lev->numSpinParVals].format |= (uint16_t)(varDat->numSpVars << 5U); //set variable index
 									strcpy(varDat->spVars[varDat->numSpVars],tmpstr2);
 									varDat->numSpVars++;
 								}else{
@@ -673,7 +675,7 @@ void parseSpinPar(level * lev, sp_var_data * varDat, char * spstring){
 								for(int j=0;j<(varDat->numSpVars);j++){
 									if(strcmp(tmpstr2,varDat->spVars[j])==0){
 										spVarNum = (uint8_t)j;
-										lev->spval[lev->numSpinParVals].format |= (spVarNum << 5U); //set variable index
+										lev->spval[lev->numSpinParVals].format |= (uint16_t)(spVarNum << 5U); //set variable index
 										//SDL_Log("variable index %u\n",spVarNum);
 									}
 								}
@@ -681,7 +683,7 @@ void parseSpinPar(level * lev, sp_var_data * varDat, char * spstring){
 									//SDL_Log("new variable found, index %u\n",varDat->numSpVars);
 									//couldn't match to a previous spin variable, make a new one
 									if(varDat->numSpVars < MAX_SPIN_VARS){
-										lev->spval[lev->numSpinParVals].format |= (varDat->numSpVars << 5U); //set variable index
+										lev->spval[lev->numSpinParVals].format |= (uint16_t)(varDat->numSpVars << 5U); //set variable index
 										strcpy(varDat->spVars[varDat->numSpVars],tmpstr2);
 										varDat->numSpVars++;
 									}else{
@@ -700,14 +702,14 @@ void parseSpinPar(level * lev, sp_var_data * varDat, char * spstring){
 									for(int j=0;j<(varDat->numSpVars);j++){
 										if(strcmp(varName,varDat->spVars[j])==0){
 											spVarNum = (uint8_t)j;
-											lev->spval[lev->numSpinParVals].format |= (spVarNum << 5U); //set variable index
+											lev->spval[lev->numSpinParVals].format |= (uint16_t)(spVarNum << 5U); //set variable index
 										}
 									}
 									if(spVarNum == 255){
 										//SDL_Log("new variable found, index %u\n",varDat->numSpVars);
 										//couldn't match to a previous spin variable, make a new one
 										if(varDat->numSpVars < MAX_SPIN_VARS){
-											lev->spval[lev->numSpinParVals].format |= (varDat->numSpVars << 5U); //set variable index
+											lev->spval[lev->numSpinParVals].format |= (uint16_t)(varDat->numSpVars << 5U); //set variable index
 											strcpy(varDat->spVars[varDat->numSpVars],varName);
 											varDat->numSpVars++;
 										}else{
@@ -894,7 +896,7 @@ void parseSpinPar(level * lev, sp_var_data * varDat, char * spstring){
 					}
 				}
 
-				lev->spval[lev->numSpinParVals].format |= ((tentative & 7U) << 9U);
+				lev->spval[lev->numSpinParVals].format |= (uint16_t)((tentative & 7U) << 9U);
 				lev->numSpinParVals++;
 
 				//SDL_Log("%f keV Entry %i: spin %i (half-int %i), parity %i, tentative %i\n",lev->energy,lev->numSpinParVals,lev->spval[lev->numSpinParVals-1].spinVal,lev->spval[lev->numSpinParVals-1].format,lev->spval[lev->numSpinParVals-1].parVal,lev->spval[lev->numSpinParVals-1].tentative);

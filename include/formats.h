@@ -38,7 +38,8 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //search parameters
 #define SEARCH_STRING_MAX_SIZE   256
 #define MAX_SEARCH_TOKENS        16
-#define MAX_SEARCH_RESULTS       4
+#define MAX_SEARCH_RESULTS       32 //number of results to cache (max 32, indexed by corrRes bitpattern)
+#define MAX_DISP_SEARCH_RESULTS  4  //number of results to display
 
 //increasing these numbers will increase the size of 
 //the nuclear database stored in memory (and on disk)
@@ -155,9 +156,11 @@ typedef struct
 
 typedef struct
 {
-  uint8_t resultType; //values from search_agent_enum
-  uint32_t resultVal; //defines the actual result (eg. nuclide index for nuclide search)
-  float relevance; //a value which defines how relevant the result is (for sorting)
+  uint8_t resultType;  //values from search_agent_enum
+  uint32_t resultVal;  //defines the actual result (eg. nuclide index for nuclide search)
+  uint32_t resultVal2; //secondary result value
+  uint32_t corrRes; //bitpattern specifying other results that this is correlated with
+  float relevance;     //a value which defines how relevant the result is (for sorting)
 }search_result;
 
 typedef struct
@@ -234,6 +237,7 @@ typedef struct
   uint8_t numResults; //the number of results returned so far
   uint8_t numSearchTok;
   uint32_t finishedSearchAgents; //bit pattern specifying which search agents have finished
+  SDL_Semaphore *canUpdateResults;
 }search_state; //struct containing search data
 
 typedef struct

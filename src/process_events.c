@@ -61,7 +61,7 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
       if(up && !down){
         if((state->ss.numResults > 1)&&(state->mouseoverElement >= UIELEM_SEARCH_RESULT)&&(state->mouseoverElement <= UIELEM_SEARCH_RESULT_4)){
           if(state->mouseoverElement <= UIELEM_SEARCH_RESULT){
-            state->mouseoverElement = UIELEM_SEARCH_RESULT + state->ss.numResults - 1;
+            state->mouseoverElement = (uint8_t)(UIELEM_SEARCH_RESULT + state->ss.numResults - 1);
           }else{
             state->mouseoverElement--;
           }
@@ -275,7 +275,7 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
           //select the first menu item
           state->mouseoverElement = (uint8_t)(UIELEM_PRIMARY_MENU-PRIMARY_MENU_NUM_UIELEMENTS);
         }else{
-          uint8_t selMenuElem = PRIMARY_MENU_NUM_UIELEMENTS - (UIELEM_PRIMARY_MENU - state->mouseoverElement);
+          uint8_t selMenuElem = (uint8_t)(PRIMARY_MENU_NUM_UIELEMENTS - (UIELEM_PRIMARY_MENU - state->mouseoverElement));
           if(selMenuElem >= PRIMARY_MENU_NUM_UIELEMENTS){
             state->mouseoverElement = (uint8_t)(UIELEM_PRIMARY_MENU-PRIMARY_MENU_NUM_UIELEMENTS);
           }
@@ -312,7 +312,7 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
           //select the first menu item
           state->mouseoverElement = (uint8_t)(UIELEM_CHARTVIEW_MENU-CHARTVIEW_ENUM_LENGTH);
         }else{
-          uint8_t selMenuElem = CHARTVIEW_ENUM_LENGTH - (UIELEM_CHARTVIEW_MENU - state->mouseoverElement);
+          uint8_t selMenuElem = (uint8_t)(CHARTVIEW_ENUM_LENGTH - (UIELEM_CHARTVIEW_MENU - state->mouseoverElement));
           if(selMenuElem >= CHARTVIEW_ENUM_LENGTH){
             state->mouseoverElement = (uint8_t)(UIELEM_CHARTVIEW_MENU-CHARTVIEW_ENUM_LENGTH);
           }
@@ -405,7 +405,7 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
           //select the first menu item
           state->mouseoverElement = (uint8_t)(UIELEM_PREFS_UISCALE_MENU-UISCALE_ENUM_LENGTH);
         }else{
-          uint8_t selMenuElem = UISCALE_ENUM_LENGTH - (UIELEM_PREFS_UISCALE_MENU - state->mouseoverElement);
+          uint8_t selMenuElem = (uint8_t)(UISCALE_ENUM_LENGTH - (UIELEM_PREFS_UISCALE_MENU - state->mouseoverElement));
           if(selMenuElem >= UISCALE_ENUM_LENGTH){
             state->mouseoverElement = (uint8_t)(UIELEM_PREFS_UISCALE_MENU-UISCALE_ENUM_LENGTH);
           }
@@ -431,7 +431,7 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
           //select the first menu item
           state->mouseoverElement = (uint8_t)(UIELEM_PREFS_DIALOG-PREFS_DIALOG_NUM_UIELEMENTS);
         }else{
-          uint8_t selMenuElem = PREFS_DIALOG_NUM_UIELEMENTS - (UIELEM_PREFS_DIALOG - state->mouseoverElement);
+          uint8_t selMenuElem = (uint8_t)(PREFS_DIALOG_NUM_UIELEMENTS - (UIELEM_PREFS_DIALOG - state->mouseoverElement));
           if(selMenuElem >= PREFS_DIALOG_NUM_UIELEMENTS){
             state->mouseoverElement = (uint8_t)(UIELEM_PREFS_DIALOG-PREFS_DIALOG_NUM_UIELEMENTS);
           }
