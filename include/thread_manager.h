@@ -25,7 +25,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //function prototypes
 
 int startSearchThreads(app_data *restrict dat, app_state *restrict state, thread_manager_state *restrict tms);
-void killIdleThreads(const app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat, thread_manager_state *restrict tms);
+void updateThreads(const app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat, thread_manager_state *restrict tms);
 void stopThreadPool(thread_manager_state *restrict tms);
 
 #endif

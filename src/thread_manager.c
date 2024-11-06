@@ -77,11 +77,6 @@ int tpFunc(void *data){
         tdat->threadState = THREADSTATE_IDLE; //fdone searching (idle threads will eventually be killed)
         break;
       case THREADSTATE_IDLE:
-        ; //suppress gcc warning
-        //send a fake SDL event to ensure the idle state is processed on the next frame
-        SDL_Event evt;
-        SDL_PushEvent(&evt); //force frame update even if time has passed, as SDL will wait for an event
-        //printf("Thread %u is idle.\n",tdat->threadNum);
         break;
       default:
         break;
@@ -164,7 +159,9 @@ int startSearchThreads(app_data *restrict dat, app_state *restrict state, thread
   return (int)(tms->numThreads);
 }
 
-void killIdleThreads(const app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat, thread_manager_state *restrict tms){
+void updateThreads(const app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat, thread_manager_state *restrict tms){
+  
+  //kill any idle threads
   for(uint8_t i=0;i<MAX_NUM_THREADS;i++){
     if(tms->aliveThreads & (uint64_t)(1UL << i)){
       if(tms->threadData[i].threadState == THREADSTATE_IDLE){
@@ -176,6 +173,16 @@ void killIdleThreads(const app_data *restrict dat, app_state *restrict state, re
       }
     }
   }
+
+  //update UI based on thread state
+  if(tms->masterThreadState == THREADSTATE_SEARCH){
+    updateSearchUIState(dat,state,rdat);
+    //send a fake SDL event to ensure the search results are processed on the next frame
+    //regardless of the presence of user input or other events
+    SDL_Event evt;
+    SDL_PushEvent(&evt); //force frame update even if time has passed, as SDL will wait for an event
+  }
+
   //take action once all threads are done
   if(tms->numThreads == 0){
     if(tms->masterThreadState == THREADSTATE_SEARCH){
@@ -184,16 +191,12 @@ void killIdleThreads(const app_data *restrict dat, app_state *restrict state, re
       if(strlen(state->ss.searchString)>0){
         memcpy(state->ss.results,state->ss.updatedResults,sizeof(state->ss.updatedResults));
         state->ss.numResults = state->ss.numUpdatedResults;
-        updateSearchUIState(dat,state,rdat);
       }else{
         //perhaps the user pressed backspace too quickly...
         state->ss.numResults = 0;
       }
+      updateSearchUIState(dat,state,rdat);
       tms->masterThreadState = THREADSTATE_KILL;
-      //send a fake SDL event to ensure the dearch results are processed on the next frame
-      //regardless of the presence of user input or other events
-      SDL_Event evt;
-      SDL_PushEvent(&evt); //force frame update even if time has passed, as SDL will wait for an event
     }
   }
 }

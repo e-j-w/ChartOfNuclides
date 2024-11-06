@@ -182,7 +182,7 @@ int main(int argc, char *argv[]){
       deltaTime = 0.001f; //because of main thread blocking, set artificially low delta to prevent weird timing bugs
     }
 
-    killIdleThreads(&gdat->dat,&gdat->state,&gdat->rdat,&gdat->tms);
+    updateThreads(&gdat->dat,&gdat->state,&gdat->rdat,&gdat->tms);
 
     updateUIAnimationTimes(&gdat->dat,&gdat->state,deltaTime);
 
