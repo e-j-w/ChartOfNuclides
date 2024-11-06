@@ -177,10 +177,9 @@ void updateThreads(const app_data *restrict dat, app_state *restrict state, reso
   //update UI based on thread state
   if(tms->masterThreadState == THREADSTATE_SEARCH){
     updateSearchUIState(dat,state,rdat);
-    //send a fake SDL event to ensure the search results are processed on the next frame
+    //ensure the search results are processed on the next frame
     //regardless of the presence of user input or other events
-    SDL_Event evt;
-    SDL_PushEvent(&evt); //force frame update even if time has passed, as SDL will wait for an event
+    state->ds.forceRedraw = 1;
   }
 
   //take action once all threads are done
