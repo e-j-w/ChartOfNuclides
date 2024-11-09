@@ -1612,7 +1612,8 @@ void drawSearchMenu(const app_data *restrict dat, const app_state *restrict stat
   drawRect.y = ((float)state->ds.uiElemPosY[UIELEM_SEARCH_MENU] + yOffset);
   drawRect.w = state->ds.uiElemWidth[UIELEM_SEARCH_MENU];
   drawRect.h = state->ds.uiElemHeight[UIELEM_SEARCH_MENU];
-  drawPanelBG(&dat->rules.themeRules,rdat,drawRect,alpha);
+  uint16_t arrowX = (uint16_t)(drawRect.x + 0.44f*drawRect.w);
+  drawMenuBGWithArrow(&dat->rules.themeRules,rdat,drawRect,arrowX,alpha);
 
   //draw entry box
   if(strncmp(state->ss.searchString,"",256)==0){
@@ -1638,29 +1639,29 @@ void drawSearchMenu(const app_data *restrict dat, const app_state *restrict stat
           Z = (uint16_t)dat->ndat.nuclData[state->ss.results[i].resultVal].Z;
           N = (uint16_t)dat->ndat.nuclData[state->ss.results[i].resultVal].N;
           snprintf(tmpStr,64,"%u",N+Z);
-          numWidth = drawTextAlignedSized(rdat,drawRect.x+12.0f,drawRect.y+12.0f,blackCol8Bit,FONTSIZE_SMALL,alpha8,tmpStr,ALIGN_LEFT,16384).w; //draw number label
-          drawTextAlignedSized(rdat,drawRect.x+12.0f+numWidth,drawRect.y+12.0f+(10.0f*state->ds.uiUserScale),blackCol8Bit,FONTSIZE_LARGE,alpha8,getElemStr((uint8_t)Z),ALIGN_LEFT,16384); //draw element label
-          drawTextAlignedSized(rdat,drawRect.x+12.0f,drawRect.y+SEARCH_MENU_RESULT_HEIGHT-24.0f,grayCol8Bit,FONTSIZE_NORMAL,alpha8,dat->strings[dat->locStringIDs[LOCSTR_SEARCHRES_NUCLIDE]],ALIGN_LEFT,16384);
+          numWidth = drawTextAlignedSized(rdat,drawRect.x+12.0f*state->ds.uiUserScale,drawRect.y+12.0f*state->ds.uiUserScale,blackCol8Bit,FONTSIZE_SMALL,alpha8,tmpStr,ALIGN_LEFT,16384).w; //draw number label
+          drawTextAlignedSized(rdat,drawRect.x+12.0f*state->ds.uiUserScale+numWidth,drawRect.y+(20.0f*state->ds.uiUserScale),blackCol8Bit,FONTSIZE_LARGE,alpha8,getElemStr((uint8_t)Z),ALIGN_LEFT,16384); //draw element label
+          drawTextAlignedSized(rdat,drawRect.x+12.0f*state->ds.uiUserScale,drawRect.y+(SEARCH_MENU_RESULT_HEIGHT-32.0f)*state->ds.uiUserScale,grayCol8Bit,FONTSIZE_NORMAL,alpha8,dat->strings[dat->locStringIDs[LOCSTR_SEARCHRES_NUCLIDE]],ALIGN_LEFT,16384);
           break;
         case SEARCHAGENT_EGAMMA:
           Z = (uint16_t)dat->ndat.nuclData[state->ss.results[i].resultVal].Z;
           N = (uint16_t)dat->ndat.nuclData[state->ss.results[i].resultVal].N;
           snprintf(tmpStr,64,"%u",N+Z);
-          numWidth = drawTextAlignedSized(rdat,drawRect.x+12.0f,drawRect.y+12.0f,blackCol8Bit,FONTSIZE_SMALL,alpha8,tmpStr,ALIGN_LEFT,16384).w; //draw number label
+          numWidth = drawTextAlignedSized(rdat,drawRect.x+12.0f*state->ds.uiUserScale,drawRect.y+12.0f*state->ds.uiUserScale,blackCol8Bit,FONTSIZE_SMALL,alpha8,tmpStr,ALIGN_LEFT,16384).w; //draw number label
           getGammaEnergyStr(eStr,&dat->ndat,state->ss.results[i].resultVal2,1);
           snprintf(tmpStr,64,"%s - %s keV",getElemStr((uint8_t)Z),eStr);
-          drawTextAlignedSized(rdat,drawRect.x+12.0f+numWidth,drawRect.y+12.0f+(10.0f*state->ds.uiUserScale),blackCol8Bit,FONTSIZE_LARGE,alpha8,tmpStr,ALIGN_LEFT,16384); //draw element and gamma label
-          drawTextAlignedSized(rdat,drawRect.x+12.0f,drawRect.y+SEARCH_MENU_RESULT_HEIGHT-24.0f,grayCol8Bit,FONTSIZE_NORMAL,alpha8,dat->strings[dat->locStringIDs[LOCSTR_SEARCHRES_EGAMMA]],ALIGN_LEFT,16384);
+          drawTextAlignedSized(rdat,drawRect.x+12.0f*state->ds.uiUserScale+numWidth,drawRect.y+(20.0f*state->ds.uiUserScale),blackCol8Bit,FONTSIZE_LARGE,alpha8,tmpStr,ALIGN_LEFT,16384); //draw element and gamma label
+          drawTextAlignedSized(rdat,drawRect.x+12.0f*state->ds.uiUserScale,drawRect.y+(SEARCH_MENU_RESULT_HEIGHT-32.0f)*state->ds.uiUserScale,grayCol8Bit,FONTSIZE_NORMAL,alpha8,dat->strings[dat->locStringIDs[LOCSTR_SEARCHRES_EGAMMA]],ALIGN_LEFT,16384);
           break;
         case SEARCHAGENT_ELEVEL:
           Z = (uint16_t)dat->ndat.nuclData[state->ss.results[i].resultVal].Z;
           N = (uint16_t)dat->ndat.nuclData[state->ss.results[i].resultVal].N;
           snprintf(tmpStr,64,"%u",N+Z);
-          numWidth = drawTextAlignedSized(rdat,drawRect.x+12.0f,drawRect.y+12.0f,blackCol8Bit,FONTSIZE_SMALL,alpha8,tmpStr,ALIGN_LEFT,16384).w; //draw number label
+          numWidth = drawTextAlignedSized(rdat,drawRect.x+12.0f*state->ds.uiUserScale,drawRect.y+12.0f*state->ds.uiUserScale,blackCol8Bit,FONTSIZE_SMALL,alpha8,tmpStr,ALIGN_LEFT,16384).w; //draw number label
           getLvlEnergyStr(eStr,&dat->ndat,state->ss.results[i].resultVal2,1);
           snprintf(tmpStr,64,"%s - %s keV",getElemStr((uint8_t)Z),eStr);
-          drawTextAlignedSized(rdat,drawRect.x+12.0f+numWidth,drawRect.y+12.0f+(10.0f*state->ds.uiUserScale),blackCol8Bit,FONTSIZE_LARGE,alpha8,tmpStr,ALIGN_LEFT,16384); //draw element and level label
-          drawTextAlignedSized(rdat,drawRect.x+12.0f,drawRect.y+SEARCH_MENU_RESULT_HEIGHT-24.0f,grayCol8Bit,FONTSIZE_NORMAL,alpha8,dat->strings[dat->locStringIDs[LOCSTR_SEARCHRES_ELEVEL]],ALIGN_LEFT,16384);
+          drawTextAlignedSized(rdat,drawRect.x+12.0f*state->ds.uiUserScale+numWidth,drawRect.y+(20.0f*state->ds.uiUserScale),blackCol8Bit,FONTSIZE_LARGE,alpha8,tmpStr,ALIGN_LEFT,16384); //draw element and level label
+          drawTextAlignedSized(rdat,drawRect.x+12.0f*state->ds.uiUserScale,drawRect.y+(SEARCH_MENU_RESULT_HEIGHT-32.0f)*state->ds.uiUserScale,grayCol8Bit,FONTSIZE_NORMAL,alpha8,dat->strings[dat->locStringIDs[LOCSTR_SEARCHRES_ELEVEL]],ALIGN_LEFT,16384);
           break;
         default:
           continue;
@@ -1689,7 +1690,8 @@ void drawChartViewMenu(const app_data *restrict dat, const app_state *restrict s
   drawRect.y = ((float)state->ds.uiElemPosY[UIELEM_CHARTVIEW_MENU] + yOffset);
   drawRect.w = state->ds.uiElemWidth[UIELEM_CHARTVIEW_MENU];
   drawRect.h = state->ds.uiElemHeight[UIELEM_CHARTVIEW_MENU];
-  drawPanelBG(&dat->rules.themeRules,rdat,drawRect,alpha);
+  uint16_t arrowX = (uint16_t)(drawRect.x + 0.43f*drawRect.w);
+  drawMenuBGWithArrow(&dat->rules.themeRules,rdat,drawRect,arrowX,alpha);
   
   //draw menu item highlight
   SDL_FColor highlightCol;
@@ -1757,7 +1759,8 @@ void drawPrimaryMenu(const app_data *restrict dat, const app_state *restrict sta
   drawRect.y = ((float)state->ds.uiElemPosY[UIELEM_PRIMARY_MENU] + yOffset);
   drawRect.w = state->ds.uiElemWidth[UIELEM_PRIMARY_MENU];
   drawRect.h = state->ds.uiElemHeight[UIELEM_PRIMARY_MENU];
-  drawPanelBG(&dat->rules.themeRules,rdat,drawRect,alpha);
+  uint16_t arrowX = (uint16_t)(drawRect.x + 0.82f*drawRect.w);
+  drawMenuBGWithArrow(&dat->rules.themeRules,rdat,drawRect,arrowX,alpha);
   
   //draw menu item highlight
   SDL_FColor highlightCol;
@@ -1821,12 +1824,17 @@ void drawUI(const app_data *restrict dat, app_state *restrict state, resource_da
     drawIcon(&dat->rules.themeRules,rdat,state->ds.uiElemPosX[UIELEM_ZOOMOUT_BUTTON],state->ds.uiElemPosY[UIELEM_ZOOMOUT_BUTTON],state->ds.uiElemWidth[UIELEM_ZOOMOUT_BUTTON],getHighlightState(state,UIELEM_ZOOMOUT_BUTTON),255,UIICON_ZOOMOUT);
   }
   
-  //draw menus/panels etc.
+  //draw info boxes
   if(state->ds.shownElements & (1UL << UIELEM_NUCL_INFOBOX)){
     drawNuclInfoBox(dat,state,rdat,state->chartSelectedNucl);
   }else if(state->ds.shownElements & (1UL << UIELEM_NUCL_FULLINFOBOX)){
     drawNuclFullInfoBox(dat,state,rdat,state->chartSelectedNucl);
   }
+  
+  //draw persistent button(s)
+  drawIconButton(&dat->rules.themeRules,rdat,state->ds.uiElemPosX[UIELEM_MENU_BUTTON],state->ds.uiElemPosY[UIELEM_MENU_BUTTON],state->ds.uiElemWidth[UIELEM_MENU_BUTTON],getHighlightState(state,UIELEM_MENU_BUTTON),255,UIICON_MENU);
+
+  //draw menus/panels etc.
   if(state->ds.shownElements & (1UL << UIELEM_PRIMARY_MENU)){
     drawPrimaryMenu(dat,state,rdat);
   }
@@ -1837,9 +1845,6 @@ void drawUI(const app_data *restrict dat, app_state *restrict state, resource_da
     updateSearchUIState(dat,state,rdat);
     drawSearchMenu(dat,state,rdat);
   }
-
-  //draw persistent button(s)
-  drawIconButton(&dat->rules.themeRules,rdat,state->ds.uiElemPosX[UIELEM_MENU_BUTTON],state->ds.uiElemPosY[UIELEM_MENU_BUTTON],state->ds.uiElemWidth[UIELEM_MENU_BUTTON],getHighlightState(state,UIELEM_MENU_BUTTON),255,UIICON_MENU);
 
   //draw modal dialogs
   if(state->ds.shownElements & (1UL << UIELEM_MSG_BOX)){

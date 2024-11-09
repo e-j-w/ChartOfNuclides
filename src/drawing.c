@@ -163,6 +163,15 @@ void drawButtonBG(const ui_theme_rules *restrict uirules, resource_data *restric
   drawBGElement(uirules,rdat,buttonRect,UIELEMTYPE_BUTTON,highlightState,alpha);
 }
 
+void drawMenuBGWithArrow(const ui_theme_rules *restrict uirules, resource_data *restrict rdat, const SDL_FRect panelRect, const uint16_t arrowPosX, const float alpha){
+  drawPanelBG(uirules,rdat,panelRect,alpha);
+  float arrowY = panelRect.y - 4.0f*rdat->uiScale/rdat->uiDPIScale;
+  if(arrowY < 0.0f){
+    arrowY = 0.0f;
+  }
+  drawIcon(uirules,rdat,arrowPosX,(uint16_t)arrowY,(uint16_t)(UI_TILE_SIZE*rdat->uiScale/rdat->uiDPIScale),HIGHLIGHT_NORMAL,(uint8_t)(alpha*255.0f),UIICON_PANELEDGEARROW);
+}
+
 //elemType: values from uielem_type_enum 
 void drawButtonOrEntryElem(const ui_theme_rules *restrict uirules, resource_data *restrict rdat, const uint16_t x, const uint16_t y, const uint16_t w, const uint8_t highlightState, const uint8_t elemType, const float alpha){
   
@@ -207,16 +216,17 @@ void drawIcon(const ui_theme_rules *restrict uirules, resource_data *restrict rd
     return;
   }
 
+  float alphaF = alpha/255.0f;
   switch(highlightState){
     case HIGHLIGHT_NORMAL:
     default:
-      setUITexColAlpha(rdat,uirules->modNormalCol.r,uirules->modNormalCol.g,uirules->modNormalCol.b,alpha);
+      setUITexColAlpha(rdat,uirules->modNormalCol.r,uirules->modNormalCol.g,uirules->modNormalCol.b,alphaF);
       break;
     case HIGHLIGHT_MOUSEOVER:
-      setUITexColAlpha(rdat,uirules->modMouseOverCol.r,uirules->modMouseOverCol.g,uirules->modMouseOverCol.b,alpha);
+      setUITexColAlpha(rdat,uirules->modMouseOverCol.r,uirules->modMouseOverCol.g,uirules->modMouseOverCol.b,alphaF);
       break;
     case HIGHLIGHT_SELECTED:
-      setUITexColAlpha(rdat,uirules->modSelectedCol.r,uirules->modSelectedCol.g,uirules->modSelectedCol.b,alpha);
+      setUITexColAlpha(rdat,uirules->modSelectedCol.r,uirules->modSelectedCol.g,uirules->modSelectedCol.b,alphaF);
       break;
   }
 
@@ -229,12 +239,7 @@ void drawIcon(const ui_theme_rules *restrict uirules, resource_data *restrict rd
   drawPos.h = (float)(UI_TILE_SIZE*rdat->uiScale);
   drawPos.x = (float)(x*rdat->uiDPIScale) + (float)(w*rdat->uiDPIScale)/2.0f - drawPos.w/2.0f;
   drawPos.y = (float)(y*rdat->uiDPIScale) + (float)(UI_TILE_SIZE*rdat->uiScale)/2.0f - drawPos.h/2.0f;
-  //printf("drawPos: %i %i %i %i\n",drawPos.x,drawPos.y,drawPos.w,drawPos.h);
-  if(SDL_SetTextureAlphaMod(rdat->uiThemeTex,alpha)==0){
-    SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,"drawIcon - cannot set texture alpha - %s\n",SDL_GetError());
-  }
   SDL_RenderTexture(rdat->renderer,rdat->uiThemeTex,&srcRect,&drawPos);
-  SDL_SetTextureAlphaMod(rdat->uiThemeTex,255);
 
   //reset the color modulation
   setUITexColAlpha(rdat,1.0f,1.0f,1.0f,1.0f);

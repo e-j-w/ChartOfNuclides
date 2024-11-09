@@ -3445,37 +3445,37 @@ void updateSingleUIElemPosition(const app_data *restrict dat, app_state *restric
 			state->ds.uiElemHeight[uiElemInd] = (uint16_t)((PRIMARY_MENU_ITEM_SPACING - UI_PADDING_SIZE)*state->ds.uiUserScale);
 			break;
 		case UIELEM_CHARTVIEW_MENU:
-			state->ds.uiElemPosX[uiElemInd] = (uint16_t)(state->ds.windowXRes-((CHARTVIEW_MENU_WIDTH+CHARTVIEW_MENU_POS_XR+MENU_BUTTON_WIDTH)*state->ds.uiUserScale));
+			state->ds.uiElemPosX[uiElemInd] = (uint16_t)(state->ds.windowXRes-((CHARTVIEW_MENU_WIDTH+CHARTVIEW_MENU_POS_XR)*state->ds.uiUserScale));
 			state->ds.uiElemPosY[uiElemInd] = (uint16_t)(CHARTVIEW_MENU_POS_Y*state->ds.uiUserScale);
 			state->ds.uiElemWidth[uiElemInd] = (uint16_t)(CHARTVIEW_MENU_WIDTH*state->ds.uiUserScale);
 			state->ds.uiElemHeight[uiElemInd] = (uint16_t)(CHARTVIEW_MENU_HEIGHT*state->ds.uiUserScale);
 			break;
 		case UIELEM_CVM_HALFLIFE_BUTTON:
-			state->ds.uiElemPosX[uiElemInd] = (uint16_t)(state->ds.windowXRes-((CHARTVIEW_MENU_WIDTH+CHARTVIEW_MENU_POS_XR+MENU_BUTTON_WIDTH - PANEL_EDGE_SIZE - 2*UI_PADDING_SIZE)*state->ds.uiUserScale));
+			state->ds.uiElemPosX[uiElemInd] = (uint16_t)(state->ds.windowXRes-((CHARTVIEW_MENU_WIDTH+CHARTVIEW_MENU_POS_XR - PANEL_EDGE_SIZE - 2*UI_PADDING_SIZE)*state->ds.uiUserScale));
 			state->ds.uiElemPosY[uiElemInd] = (uint16_t)((CHARTVIEW_MENU_POS_Y + PANEL_EDGE_SIZE + 2*UI_PADDING_SIZE + CHARTVIEW_MENU_ITEM_SPACING)*state->ds.uiUserScale);
 			state->ds.uiElemWidth[uiElemInd] = (uint16_t)((CHARTVIEW_MENU_WIDTH - 2*PANEL_EDGE_SIZE - 4*UI_PADDING_SIZE)*state->ds.uiUserScale);
 			state->ds.uiElemHeight[uiElemInd] = (uint16_t)((CHARTVIEW_MENU_ITEM_SPACING - UI_PADDING_SIZE)*state->ds.uiUserScale);
 			break;
 		case UIELEM_CVM_DECAYMODE_BUTTON:
-			state->ds.uiElemPosX[uiElemInd] = (uint16_t)(state->ds.windowXRes-((CHARTVIEW_MENU_WIDTH+CHARTVIEW_MENU_POS_XR+MENU_BUTTON_WIDTH - PANEL_EDGE_SIZE - 2*UI_PADDING_SIZE)*state->ds.uiUserScale));
+			state->ds.uiElemPosX[uiElemInd] = (uint16_t)(state->ds.windowXRes-((CHARTVIEW_MENU_WIDTH+CHARTVIEW_MENU_POS_XR - PANEL_EDGE_SIZE - 2*UI_PADDING_SIZE)*state->ds.uiUserScale));
 			state->ds.uiElemPosY[uiElemInd] = (uint16_t)((CHARTVIEW_MENU_POS_Y + PANEL_EDGE_SIZE + 2*UI_PADDING_SIZE + 2*CHARTVIEW_MENU_ITEM_SPACING)*state->ds.uiUserScale);
 			state->ds.uiElemWidth[uiElemInd] = (uint16_t)((CHARTVIEW_MENU_WIDTH - 2*PANEL_EDGE_SIZE - 4*UI_PADDING_SIZE)*state->ds.uiUserScale);
 			state->ds.uiElemHeight[uiElemInd] = (uint16_t)((CHARTVIEW_MENU_ITEM_SPACING - UI_PADDING_SIZE)*state->ds.uiUserScale);
 			break;
 		case UIELEM_CVM_2PLUS_BUTTON:
-			state->ds.uiElemPosX[uiElemInd] = (uint16_t)(state->ds.windowXRes-((CHARTVIEW_MENU_WIDTH+CHARTVIEW_MENU_POS_XR+MENU_BUTTON_WIDTH - PANEL_EDGE_SIZE - 2*UI_PADDING_SIZE)*state->ds.uiUserScale));
+			state->ds.uiElemPosX[uiElemInd] = (uint16_t)(state->ds.windowXRes-((CHARTVIEW_MENU_WIDTH+CHARTVIEW_MENU_POS_XR - PANEL_EDGE_SIZE - 2*UI_PADDING_SIZE)*state->ds.uiUserScale));
 			state->ds.uiElemPosY[uiElemInd] = (uint16_t)((CHARTVIEW_MENU_POS_Y + PANEL_EDGE_SIZE + 2*UI_PADDING_SIZE + 3*CHARTVIEW_MENU_ITEM_SPACING)*state->ds.uiUserScale);
 			state->ds.uiElemWidth[uiElemInd] = (uint16_t)((CHARTVIEW_MENU_WIDTH - 2*PANEL_EDGE_SIZE - 4*UI_PADDING_SIZE)*state->ds.uiUserScale);
 			state->ds.uiElemHeight[uiElemInd] = (uint16_t)((CHARTVIEW_MENU_ITEM_SPACING - UI_PADDING_SIZE)*state->ds.uiUserScale);
 			break;
 		case UIELEM_CVM_R42_BUTTON:
-			state->ds.uiElemPosX[uiElemInd] = (uint16_t)(state->ds.windowXRes-((CHARTVIEW_MENU_WIDTH+CHARTVIEW_MENU_POS_XR+MENU_BUTTON_WIDTH - PANEL_EDGE_SIZE - 2*UI_PADDING_SIZE)*state->ds.uiUserScale));
+			state->ds.uiElemPosX[uiElemInd] = (uint16_t)(state->ds.windowXRes-((CHARTVIEW_MENU_WIDTH+CHARTVIEW_MENU_POS_XR - PANEL_EDGE_SIZE - 2*UI_PADDING_SIZE)*state->ds.uiUserScale));
 			state->ds.uiElemPosY[uiElemInd] = (uint16_t)((CHARTVIEW_MENU_POS_Y + PANEL_EDGE_SIZE + 2*UI_PADDING_SIZE + 4*CHARTVIEW_MENU_ITEM_SPACING)*state->ds.uiUserScale);
 			state->ds.uiElemWidth[uiElemInd] = (uint16_t)((CHARTVIEW_MENU_WIDTH - 2*PANEL_EDGE_SIZE - 4*UI_PADDING_SIZE)*state->ds.uiUserScale);
 			state->ds.uiElemHeight[uiElemInd] = (uint16_t)((CHARTVIEW_MENU_ITEM_SPACING - UI_PADDING_SIZE)*state->ds.uiUserScale);
 			break;
 		case UIELEM_SEARCH_MENU:
-			state->ds.uiElemPosX[uiElemInd] = (uint16_t)(state->ds.windowXRes-((SEARCH_MENU_WIDTH+SEARCH_MENU_POS_XR+CHARTVIEW_MENU_WIDTH+CHARTVIEW_MENU_POS_XR)*state->ds.uiUserScale));
+			state->ds.uiElemPosX[uiElemInd] = (uint16_t)(state->ds.windowXRes-((SEARCH_MENU_WIDTH+SEARCH_MENU_POS_XR)*state->ds.uiUserScale));
 			state->ds.uiElemPosY[uiElemInd] = (uint16_t)(SEARCH_MENU_POS_Y*state->ds.uiUserScale);
 			state->ds.uiElemWidth[uiElemInd] = (uint16_t)(SEARCH_MENU_WIDTH*state->ds.uiUserScale);
 			if(state->ss.numResults < MAX_DISP_SEARCH_RESULTS){
@@ -3485,31 +3485,31 @@ void updateSingleUIElemPosition(const app_data *restrict dat, app_state *restric
 			}
 			break;
 		case UIELEM_SEARCH_ENTRYBOX:
-			state->ds.uiElemPosX[uiElemInd] = (uint16_t)(state->ds.windowXRes-((SEARCH_MENU_WIDTH+SEARCH_MENU_POS_XR+CHARTVIEW_MENU_WIDTH+CHARTVIEW_MENU_POS_XR-SEARCH_MENU_ENTRYBOX_POS_X)*state->ds.uiUserScale));
+			state->ds.uiElemPosX[uiElemInd] = (uint16_t)(state->ds.windowXRes-((SEARCH_MENU_WIDTH+SEARCH_MENU_POS_XR-SEARCH_MENU_ENTRYBOX_POS_X)*state->ds.uiUserScale));
 			state->ds.uiElemPosY[uiElemInd] = (uint16_t)((SEARCH_MENU_POS_Y+SEARCH_MENU_ENTRYBOX_POS_Y)*state->ds.uiUserScale);
 			state->ds.uiElemWidth[uiElemInd] = (uint16_t)(SEARCH_MENU_ENTRYBOX_WIDTH*state->ds.uiUserScale);
 			state->ds.uiElemHeight[uiElemInd] = (uint16_t)(UI_TILE_SIZE*state->ds.uiUserScale);
 			break;
 		case UIELEM_SEARCH_RESULT:
-			state->ds.uiElemPosX[uiElemInd] = (uint16_t)(state->ds.windowXRes-((SEARCH_MENU_WIDTH+SEARCH_MENU_POS_XR+CHARTVIEW_MENU_WIDTH+CHARTVIEW_MENU_POS_XR-SEARCH_MENU_ENTRYBOX_POS_X)*state->ds.uiUserScale));
+			state->ds.uiElemPosX[uiElemInd] = (uint16_t)(state->ds.windowXRes-((SEARCH_MENU_WIDTH+SEARCH_MENU_POS_XR-SEARCH_MENU_ENTRYBOX_POS_X)*state->ds.uiUserScale));
 			state->ds.uiElemPosY[uiElemInd] = (uint16_t)((SEARCH_MENU_POS_Y+SEARCH_MENU_ENTRYBOX_POS_Y+UI_TILE_SIZE+UI_PADDING_SIZE)*state->ds.uiUserScale);
 			state->ds.uiElemWidth[uiElemInd] = (uint16_t)(SEARCH_MENU_ENTRYBOX_WIDTH*state->ds.uiUserScale);
 			state->ds.uiElemHeight[uiElemInd] = (uint16_t)((SEARCH_MENU_RESULT_HEIGHT-UI_PADDING_SIZE)*state->ds.uiUserScale);
 			break;
 		case UIELEM_SEARCH_RESULT_2:
-			state->ds.uiElemPosX[uiElemInd] = (uint16_t)(state->ds.windowXRes-((SEARCH_MENU_WIDTH+SEARCH_MENU_POS_XR+CHARTVIEW_MENU_WIDTH+CHARTVIEW_MENU_POS_XR-SEARCH_MENU_ENTRYBOX_POS_X)*state->ds.uiUserScale));
+			state->ds.uiElemPosX[uiElemInd] = (uint16_t)(state->ds.windowXRes-((SEARCH_MENU_WIDTH+SEARCH_MENU_POS_XR-SEARCH_MENU_ENTRYBOX_POS_X)*state->ds.uiUserScale));
 			state->ds.uiElemPosY[uiElemInd] = (uint16_t)((SEARCH_MENU_POS_Y+SEARCH_MENU_ENTRYBOX_POS_Y+UI_TILE_SIZE+UI_PADDING_SIZE+SEARCH_MENU_RESULT_HEIGHT)*state->ds.uiUserScale);
 			state->ds.uiElemWidth[uiElemInd] = (uint16_t)(SEARCH_MENU_ENTRYBOX_WIDTH*state->ds.uiUserScale);
 			state->ds.uiElemHeight[uiElemInd] = (uint16_t)((SEARCH_MENU_RESULT_HEIGHT-UI_PADDING_SIZE)*state->ds.uiUserScale);
 			break;
 		case UIELEM_SEARCH_RESULT_3:
-			state->ds.uiElemPosX[uiElemInd] = (uint16_t)(state->ds.windowXRes-((SEARCH_MENU_WIDTH+SEARCH_MENU_POS_XR+CHARTVIEW_MENU_WIDTH+CHARTVIEW_MENU_POS_XR-SEARCH_MENU_ENTRYBOX_POS_X)*state->ds.uiUserScale));
+			state->ds.uiElemPosX[uiElemInd] = (uint16_t)(state->ds.windowXRes-((SEARCH_MENU_WIDTH+SEARCH_MENU_POS_XR-SEARCH_MENU_ENTRYBOX_POS_X)*state->ds.uiUserScale));
 			state->ds.uiElemPosY[uiElemInd] = (uint16_t)((SEARCH_MENU_POS_Y+SEARCH_MENU_ENTRYBOX_POS_Y+UI_TILE_SIZE+UI_PADDING_SIZE+2*SEARCH_MENU_RESULT_HEIGHT)*state->ds.uiUserScale);
 			state->ds.uiElemWidth[uiElemInd] = (uint16_t)(SEARCH_MENU_ENTRYBOX_WIDTH*state->ds.uiUserScale);
 			state->ds.uiElemHeight[uiElemInd] = (uint16_t)((SEARCH_MENU_RESULT_HEIGHT-UI_PADDING_SIZE)*state->ds.uiUserScale);
 			break;
 		case UIELEM_SEARCH_RESULT_4:
-			state->ds.uiElemPosX[uiElemInd] = (uint16_t)(state->ds.windowXRes-((SEARCH_MENU_WIDTH+SEARCH_MENU_POS_XR+CHARTVIEW_MENU_WIDTH+CHARTVIEW_MENU_POS_XR-SEARCH_MENU_ENTRYBOX_POS_X)*state->ds.uiUserScale));
+			state->ds.uiElemPosX[uiElemInd] = (uint16_t)(state->ds.windowXRes-((SEARCH_MENU_WIDTH+SEARCH_MENU_POS_XR-SEARCH_MENU_ENTRYBOX_POS_X)*state->ds.uiUserScale));
 			state->ds.uiElemPosY[uiElemInd] = (uint16_t)((SEARCH_MENU_POS_Y+SEARCH_MENU_ENTRYBOX_POS_Y+UI_TILE_SIZE+UI_PADDING_SIZE+3*SEARCH_MENU_RESULT_HEIGHT)*state->ds.uiUserScale);
 			state->ds.uiElemWidth[uiElemInd] = (uint16_t)(SEARCH_MENU_ENTRYBOX_WIDTH*state->ds.uiUserScale);
 			state->ds.uiElemHeight[uiElemInd] = (uint16_t)((SEARCH_MENU_RESULT_HEIGHT-UI_PADDING_SIZE)*state->ds.uiUserScale);

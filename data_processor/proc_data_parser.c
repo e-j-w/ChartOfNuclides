@@ -2164,18 +2164,21 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 								}
 								
 								//check for final level of transition
-								float minEDiff = 1000.0f;
+								double minEDiff = 1000.0;
 								nd->tran[tranInd].finalLvlOffset = 0;
 								uint8_t lvlValType = ((nd->levels[nd->numLvls-1].energy.format >> 5U) & 15U);
 								uint8_t gammaValType = ((nd->tran[tranInd].energy.format >> 5U) & 15U);
 								//SDL_Log("lvl type: %u, gamma type: %u\n",lvlValType,gammaValType);
+								//SDL_Log("Lvl E: %f, gamma E: %f\n",getRawValFromDB(&nd->levels[nd->numLvls-1].energy),getRawValFromDB(&nd->tran[tranInd].energy));
 								if(nd->numLvls >= 2){
 									for(uint32_t lvlInd = (nd->numLvls-2); lvlInd >= nd->nuclData[nd->numNucl].firstLevel; lvlInd--){
 										
+										//SDL_Log("Final lvl E: %f\n",getRawValFromDB(&nd->levels[lvlInd].energy));
+
 										if((gammaValType == VALUETYPE_X)&&(lvlValType == VALUETYPE_PLUSX)){
 											//handle special case where gamma energy is variable and defines a level
 											//offset from a previous level
-											float eDiff = fabsf(nd->levels[lvlInd].energy.val - nd->levels[nd->numLvls-1].energy.val);
+											double eDiff = fabs(getRawValFromDB(&nd->levels[lvlInd].energy) - getRawValFromDB(&nd->levels[nd->numLvls-1].energy));
 											if(eDiff < minEDiff){
 												minEDiff = eDiff;
 												nd->tran[tranInd].finalLvlOffset = (uint8_t)((nd->numLvls-1) - lvlInd);
@@ -2205,11 +2208,13 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 										}
 										
 									
-										float fudgeFactor = (float)getRawErrFromDB(&nd->tran[tranInd].energy);
-										if(fudgeFactor < 0.01f){
-											fudgeFactor = 1.0f; //default assumed energy resolution, when no error is reported 
+										double fudgeFactor = SDL_sqrt(pow(getRawErrFromDB(&nd->tran[tranInd].energy),2.0) + pow(getRawErrFromDB(&nd->levels[lvlInd].energy),2.0) + pow(getRawErrFromDB(&nd->levels[nd->numLvls-1].energy),2.0));
+										fudgeFactor += pow(getRawValFromDB(&nd->tran[tranInd].energy),2.0)/(2.0E6*(nd->nuclData[nd->numNucl].Z + nd->nuclData[nd->numNucl].N)); //nuclear recoil energy approximation
+										if(fudgeFactor < 0.01){
+											fudgeFactor = 1.0; //default assumed energy resolution, when no error is reported 
 										}
-										float eDiff = fabsf((nd->levels[nd->numLvls-1].energy.val - gammaE) - nd->levels[lvlInd].energy.val);
+										//SDL_Log("Fudge factor: %f\n",fudgeFactor);
+										double eDiff = fabs(getRawValFromDB(&nd->levels[lvlInd].energy) - (getRawValFromDB(&nd->levels[nd->numLvls-1].energy) - getRawValFromDB(&nd->tran[tranInd].energy)));
 										if(eDiff <= fudgeFactor){
 											if(eDiff < minEDiff){
 												minEDiff = eDiff;
@@ -2220,6 +2225,24 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 										
 										if(lvlInd == 0){
 											break; //handle rare integer overflow case
+										}
+									}
+
+									//if a final level wasn't found with the usual method, 
+									//try to simply look for a final level within a few keV
+									//without taking the error bars into account	
+									if(nd->tran[tranInd].finalLvlOffset == 0){
+										//no final level was found yet
+										if((lvlValType == VALUETYPE_NUMBER)&&(gammaValType == VALUETYPE_NUMBER)){
+											minEDiff = 1.5;
+											for(uint32_t lvlInd = (nd->numLvls-2); lvlInd >= nd->nuclData[nd->numNucl].firstLevel; lvlInd--){
+												double eDiff = fabs(getRawValFromDB(&nd->levels[lvlInd].energy) - (getRawValFromDB(&nd->levels[nd->numLvls-1].energy) - getRawValFromDB(&nd->tran[tranInd].energy)));
+												if(eDiff < minEDiff){
+													minEDiff = eDiff;
+													nd->tran[tranInd].finalLvlOffset = (uint8_t)((nd->numLvls-1) - lvlInd);
+												}
+												//SDL_Log("finalLvlOffset: %u\n",nd->tran[tranInd].finalLvlOffset);
+											}
 										}
 									}
 								}

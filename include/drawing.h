@@ -31,6 +31,7 @@ void drawScrollBar(const ui_theme_rules *restrict uirules, resource_data *restri
 
 void drawPanelBG(const ui_theme_rules *restrict uirules, resource_data *restrict rdat, const SDL_FRect panelRect, const float alpha);
 void drawButtonBG(const ui_theme_rules *restrict uirules, resource_data *restrict rdat, const SDL_FRect buttonRect, const uint8_t highlightState, const float alpha);
+void drawMenuBGWithArrow(const ui_theme_rules *restrict uirules, resource_data *restrict rdat, const SDL_FRect panelRect, const uint16_t arrowPosX, const float alpha);
 
 void drawTextButton(const ui_theme_rules *restrict uirules, resource_data *restrict rdat, const uint16_t x, const uint16_t y, const uint16_t w, const uint8_t highlightState, const uint8_t alpha, const char *text);
 void drawIcon(const ui_theme_rules *restrict uirules, resource_data *restrict rdat, const uint16_t x, const uint16_t y, const uint16_t w, const uint8_t highlightState, const uint8_t alpha, const uint8_t iconInd);

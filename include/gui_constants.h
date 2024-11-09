@@ -55,8 +55,8 @@ which can be referenced by both the GUI draw code as well as the interaction cod
 #define UITHEME_SCROLLBAR_TILE_Y 3
 
 //UI theme icons
-static const uint8_t UITHEME_ICON_TILE_X[UIICON_ENUM_LENGTH] = {0,0,1,2,2,1,2,0,1,0,1,1,2};
-static const uint8_t UITHEME_ICON_TILE_Y[UIICON_ENUM_LENGTH] = {1,10,10,11,10,9,9,8,8,11,11,3,3};
+static const uint8_t UITHEME_ICON_TILE_X[UIICON_ENUM_LENGTH] = {0,0, 0, 1, 2, 2,1,2,0,1, 0, 1,1,2};
+static const uint8_t UITHEME_ICON_TILE_Y[UIICON_ENUM_LENGTH] = {1,9,10,10,11,10,9,9,8,8,11,11,3,3};
 
 //font sizes (assuming UI scale of 1)
 static const uint16_t fontSizes[FONTSIZE_ENUM_LENGTH] = {13,15,19};
@@ -84,7 +84,7 @@ static const float uiScales[UISCALE_ENUM_LENGTH] = {1.0f,1.20f,1.60f,1.85f};
 #define CHARTVIEW_BUTTON_WIDTH       140 //in unscaled pixels
 
 #define CHARTVIEW_MENU_ITEM_SPACING  40 //in unscaled pixels
-#define CHARTVIEW_MENU_POS_XR        (CHARTVIEW_BUTTON_POS_XR) //in unscaled pixels
+#define CHARTVIEW_MENU_POS_XR        26 //in unscaled pixels
 #define CHARTVIEW_MENU_POS_Y         (UI_TILE_SIZE+UI_PADDING_SIZE)  //in unscaled pixels
 #define CHARTVIEW_MENU_WIDTH         180 //in unscaled pixels
 #define CHARTVIEW_MENU_HEIGHT        ((CHARTVIEW_ENUM_LENGTH+1)*CHARTVIEW_MENU_ITEM_SPACING + 2*PANEL_EDGE_SIZE + 4*UI_PADDING_SIZE) //in unscaled pixels
@@ -93,7 +93,7 @@ static const float uiScales[UISCALE_ENUM_LENGTH] = {1.0f,1.20f,1.60f,1.85f};
 #define SEARCH_BUTTON_POS_Y          UI_PADDING_SIZE //in unscaled pixels
 #define SEARCH_BUTTON_WIDTH          40 //in unscaled pixels
 
-#define SEARCH_MENU_POS_XR           (SEARCH_BUTTON_POS_XR) //in unscaled pixels
+#define SEARCH_MENU_POS_XR           60 //in unscaled pixels
 #define SEARCH_MENU_POS_Y            (UI_TILE_SIZE+UI_PADDING_SIZE) //in unscaled pixels
 #define SEARCH_MENU_WIDTH            300 //in unscaled pixels
 #define SEARCH_MENU_HEADER_HEIGHT    (UI_TILE_SIZE+4*UI_PADDING_SIZE+2*PANEL_EDGE_SIZE) //in unscaled pixels
