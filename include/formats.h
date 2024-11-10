@@ -50,7 +50,8 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #define MAXNUMNUCL               3500
 #define MAXNUMLVLS               200000
 #define MAXNUMTRAN               300000
-#define MAXNUMDECAYMODES         20000
+#define MAXNUMDECAYMODES         12000
+#define MAXNUMREACTIONS          10000
 #define MAX_NEUTRON_NUM          200
 #define MAX_PROTON_NUM           130
 #define MAX_MASS_NUM             350
@@ -78,6 +79,18 @@ typedef struct
   //bits 9-15: reserve value dependent on value type (-ve error if VALUETYPE_ASYMERROR,
   //X index if VALUETYPE_X or VALUETYPE_PLUSX)
 }valWithErr; //parsed value with an error
+
+typedef struct
+{
+  uint16_t projectileNucl; //MAXNUMNUCL if no projectile
+  uint16_t targetNucl; //MAXNUMNUCL if no target
+  uint16_t ejectileNucl; //if transfer, nuclide index
+  //if fusion-evaporation, bits 0-2: num particles,
+  //bits 3-4: particle type (from evap_particle_type_enum),
+  //repeat up to 3 times (15 bits total)
+  //MAXNUMNUCL if no ejectile
+  uint8_t type; //values from reaction_type_enum
+}reaction; //reaction populating a level
 
 typedef struct
 {
@@ -112,6 +125,7 @@ typedef struct
   spinparval spval[MAXSPPERLEVEL]; //assinged spin parity value(s)
   uint16_t numTran; //number of gamma rays in this level
   uint32_t firstTran; //index of first transition from this level
+  uint64_t populatingRxns; //bit-pattern specifying which reactions populate this level
   int8_t numDecModes; //-1 by default for no decay modes specified (assume 100% IT in that case)
   uint16_t firstDecMode;
   float decayProb[DECAYMODE_ENUM_LENGTH]; //% probability of each decay mode for this level
@@ -131,6 +145,7 @@ typedef struct
   uint32_t longestIsomerLevel; //which isomer in the nucleus is longest lived (=MAXNUMLVLS if no isomers)
   uint8_t longestIsomerMVal; //m-value of longest lived isomer (eg. 1 or 2 for 178m1Hf vs. 178m2Hf)
   uint8_t numIsomerMVals; //total number of isomer m-values assigned
+  uint16_t firstRxn; //index of first reaction populating this nuclide
   valWithErr abundance;
   uint8_t flags; //bits 0 to 1: observation flag (observed/unobserved/inferred/tentative)
 }nucl; //gamma data for a given nuclide
@@ -141,6 +156,7 @@ typedef struct
   uint32_t numTran; //number of transitions across all levels
   int16_t numNucl; //number of nuclides for which data is stored (-1 if no nuclides)
   uint16_t numDecModes; //number of decay modes across all levels
+  uint16_t numRxns; //number of populating reactions across all nuclides
   uint16_t minNforZ[MAX_PROTON_NUM];
   uint16_t maxNforZ[MAX_PROTON_NUM];
   uint16_t minZforN[MAX_NEUTRON_NUM];
@@ -151,6 +167,7 @@ typedef struct
   level levels[MAXNUMLVLS]; //levels belonging to nuclides
   transition tran[MAXNUMTRAN]; //transitions between levels
   decayMode dcyMode[MAXNUMDECAYMODES]; //decay modes of levels
+  reaction rxn[MAXNUMREACTIONS]; //reactions populating nuclides
 }ndata; //complete set of gamma data for all nuclides
 
 

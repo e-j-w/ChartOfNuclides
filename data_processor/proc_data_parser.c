@@ -1480,6 +1480,8 @@ void initialize_database(ndata *nd){
 	nd->numNucl = -1;
 	nd->numLvls = 0;
 	nd->numTran = 0;
+	nd->numDecModes = 0;
+	nd->numRxns = 0;
 	for(uint32_t i=0;i<MAXNUMNUCL;i++){
 		nd->nuclData[i].numLevels = 0;
 	}
@@ -2752,7 +2754,7 @@ int buildDatabase(const char *appBasePath, ndata *nd){
       return -1;
     }
 	}
-	SDL_Log("Data imported for %i nuclei, containing %u levels, %u transitions, and %u decay branches.\n",nd->numNucl,nd->numLvls,nd->numTran,nd->numDecModes);
+	SDL_Log("Data imported for %i nuclei, containing:\n  %u levels (max %u)\n  %u transitions (max %u)\n  %u decay branches (max %u)\n  %u reactions (max %u)\n",nd->numNucl,nd->numLvls,MAXNUMLVLS,nd->numTran,MAXNUMTRAN,nd->numDecModes,MAXNUMDECAYMODES,nd->numRxns,MAXNUMREACTIONS);
 	
 	//parse abundance data file
 	strcpy(filePath,"");
@@ -2818,6 +2820,9 @@ int parseAppData(app_data *restrict dat, const char *appBasePath){
     return -1;
   }else if(TENTATIVEMULT_ENUM_LENGTH > /* DISABLES CODE */ (4)){
     SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"TENTATIVEMULT_ENUM_LENGTH is too large, can't store as 2 bits in a bit pattern (eg. transition->multipole).\n");
+    return -1;
+  }else if(EVAPTYPE_ENUM_LENGTH > /* DISABLES CODE */ (4)){
+    SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"EVAPTYPE_ENUM_LENGTH is too large, can't store as 2 bits in a bit pattern (eg. reaction->ejectileNucl).\n");
     return -1;
   }
 
