@@ -315,6 +315,27 @@ static int parseStrings(app_data *restrict dat, asset_mapping *restrict stringID
 }
 
 
+//parse reaction strings
+//returns 1 on success, 0 on failure
+uint8_t parseRxn(reaction *rxn, char * rxnstring){
+
+	if(strcmp(rxnstring,"COMMENTS")==0){
+		return 0;
+	}else if(strcmp(rxnstring,"REFERENCES")==0){
+		return 0;
+	}else if(strcmp(rxnstring,"COULOMB EXCITATION")==0){
+		rxn->type = REACTIONTYPE_COULEX;
+		return 1;
+	}
+
+	//SDL_Log("Parsing reaction string: %s\n",rxnstring);
+	//char *tok;
+	//tok = strtok(rxnstring, " (");
+	
+	return 1;
+}
+
+
 //parse half-life values for a given level
 void parseHalfLife(level * lev, char * hlstring){
 
@@ -1529,6 +1550,8 @@ int parseENSDFFile(const char * filePath, ndata * nd){
   //each nucleus has multiple entries, including adopted gammas, and gammas 
   //associated with a particlular reaction mechanism
   int subSec=0;
+	uint8_t startedParsingSec=0;
+	uint8_t numRxnsParsed=0;
   
   //open the file and read all parameters
   if((efile=fopen(filePath,"r"))==NULL){
@@ -1540,11 +1563,13 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 
 		if(fgets(str,256,efile)!=NULL){ //get an entire line
 
-			strcpy(line,str); //store the entire line
+			strncpy(line,str,256); //store the entire line
 			//SDL_Log("%s\n",line);
 			if(isEmpty(str)){
 				subSec++; //empty line, increment which subsection we're on
+				startedParsingSec=0;
 				firstQLine = 1;
+				continue;
 			}else{
 				tok=strtok(str," ");
 				tokPos=0;
@@ -1588,7 +1613,9 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 
 				if(nd->numNucl<MAXNUMNUCL){
 					nd->numNucl++;
-					subSec=0; //we're at the beginning of the entry for this nucleus
+					subSec=0; //we're at the beginning of the entry for this nuclide
+					startedParsingSec=1;
+					numRxnsParsed=0; //no reactions parsed yet for this nuclide
 					longestIsomerHl = 0.0;
 					isomerMValInNucl = 0;
 					qValDecModeFlag = 0;
@@ -1597,6 +1624,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 					nd->nuclData[nd->numNucl].numIsomerMVals = 0;
 					nd->nuclData[nd->numNucl].longestIsomerLevel = MAXNUMLVLS;
 					nd->nuclData[nd->numNucl].abundance.unit = VALUE_UNIT_NOVAL; //default
+					nd->nuclData[nd->numNucl].firstRxn = nd->numRxns;
 					memset(&varDat,0,sizeof(sp_var_data));
 					//SDL_Log("Adding gamma data for nucleus %s\n",val[0]);
 					memcpy(nuclNameStr,val[0],10);
@@ -1663,6 +1691,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 			//add levels
 			if(nd->numNucl>=0){ //check that indices are valid
 				if(subSec==0){ //adopted levels subsection
+
 					if(nd->numLvls<MAXNUMLVLS){
 						if(strcmp(typebuff,"  L")==0){
 
@@ -1896,12 +1925,9 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 							
 						}
 					}
-				}
-			}
-			//add decay modes
-			if(nd->numNucl>=0){ //check that indices are valid
-				if(nd->nuclData[nd->numNucl].numLevels>0){ //check that indices are valid
-					if(subSec==0){ //adopted levels subsection
+
+					//add decay modes
+					if(nd->nuclData[nd->numNucl].numLevels>0){ //check that indices are valid
 						//can parse multiple 'L' lines, but only one 'cL' (comment) line
 						//logic here is that if there are many known decay modes, they will be
 						//listed across several 'L' lines, but if decay modes are tentative, 
@@ -1965,10 +1991,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 							}
 						}
 					}
-				}
-			}
-			if(nd->numNucl>=0){ //check that indices are valid
-				if(subSec==0){ //adopted levels subsection
+
 					//SDL_Log("line: %s\n",line);
 					if(strcmp(typebuff+1,"cQ")==0){
 						//some GS decays are only specified as Q-values
@@ -2007,13 +2030,9 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 							}
 						}
 					}
-				}
-			}
 
-			//add gamma rays
-			if(nd->numNucl>=0){ //check that indices are valid
-				if(nd->nuclData[nd->numNucl].numLevels>0){ //check that indices are valid
-					if(subSec==0){ //adopted levels subsection
+					//add gamma rays
+					if(nd->nuclData[nd->numNucl].numLevels>0){ //check that indices are valid
 						if(nd->levels[nd->numLvls-1].numTran<MAXGAMMASPERLEVEL){
 							if(strcmp(typebuff,"  G")==0){
 								//SDL_Log("%s\n",line);
@@ -2383,12 +2402,8 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 							}
 						}
 					}
-				}
-			}
-			
-			//add Q-values and separation energies
-			if(nd->numNucl>=0){ //check that indices are valid
-				if(subSec==0){ //adopted levels subsection
+
+					//add Q-values and separation energies
 					if(strcmp(typebuff,"  Q")==0){
 						if(firstQLine==1){
 							//parse the beta Q-value
@@ -2618,6 +2633,26 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 						}
 						firstQLine = 0;
 					}
+				}else if(subSec > 0){
+					//reaction subsection
+					//reaction hasn't been parsed yet
+					if(startedParsingSec == 0){
+						//SDL_Log("numRxnsParsed: %u, subSec: %u\n",numRxnsParsed,subSec);
+						startedParsingSec=1;
+						char rxnBuff[31];
+						memcpy(rxnBuff, &line[9], 30);
+						for(uint8_t i=29; 1; i--){
+							if(!(isspace(rxnBuff[i]))){
+								rxnBuff[i+1] = '\0'; //terminate string at end, without trailing whitespace
+								break;
+							}
+						}
+						if(parseRxn(&nd->rxn[nd->numRxns],rxnBuff)==1){
+							numRxnsParsed++;
+							nd->numRxns++;
+						}
+					}
+					
 				}
 			}
 

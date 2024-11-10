@@ -1,6 +1,6 @@
 # Building from source
 
-The current code has been tested under Arch Linux and Debian 12 as of October 2024, though most recent Linux distros should work as well. The plan is to eventually support other platforms (Windows especially) once a stable SDL3 release is available.
+The current code has been tested under Arch Linux and Debian 12 as of November 2024, though most recent Linux distros should work as well. The plan is to eventually support other platforms (Windows especially) once a stable SDL3 release is available.
 
 ## Using Flatpak
 
@@ -71,7 +71,7 @@ Have fun!
 
 ## Manual build
 
-For those who don't want to use Flatpak.
+Instructions to produce a 'native' build that doesn't use Flatpak.
 
 ### Build dependencies
 
