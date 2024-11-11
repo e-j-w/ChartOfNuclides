@@ -188,6 +188,7 @@ SDL_FColor getDecayModeCol(const uint8_t dcyMode){
     case DECAYMODE_NEUTRON:
     case DECAYMODE_TWONEUTRON:
     case DECAYMODE_BETAMINUS_NEUTRON:
+    case DECAYMODE_BETAMINUS_TWONEUTRON:
       col.r = 0.6f;
       col.g = 0.6f;
       col.b = 1.0f;

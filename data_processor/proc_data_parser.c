@@ -315,10 +315,55 @@ static int parseStrings(app_data *restrict dat, asset_mapping *restrict stringID
   return 0; //success
 }
 
+//get the N and Z values from an ENSDF formatted nuclide string like '27AL'
+void getENSDFNuclStrNZ(int16_t *N, int16_t *Z, const char *nuclStr){
+	
+	int16_t A = -1;
+	char *tok;
+	char str[256];
+	*Z = -1;
+	*N = -1;
+	
+	//get mass number
+	strncpy(str,nuclStr,255); //copy the nucleus name
+	tok=strtok(str,"ABCDEFGHIJKLMNOPQRSTUVWXYZ");
+	if(tok!=NULL){
+		A=(int16_t)atoi(tok);
+	}
+	
+	//get proton number
+	strncpy(str,nuclStr,255); //copy the nucleus name
+	tok=strtok(str,"0123456789");
+	if(tok!=NULL){
+		if(strcmp(tok,"NN")==0){
+			*Z=0;
+			*N=A;
+		}else if(strcmp(tok,"D")==0){
+			*Z=1;
+			*N=2;
+		}else if(strcmp(tok,"T")==0){
+			*Z=1;
+			*N=3;
+		}else if(strcmp(tok,"A")==0){
+			*Z=2;
+			*N=2;
+		}else{
+			for(int i=1;i<(int)(strlen(tok));i++){
+				tok[i]=(char)SDL_tolower(tok[i]); //elemStrToZ() expects only first character to be uppercase
+			}
+			*Z=elemStrToZ(tok);
+			if(*Z==255){
+				*Z=-1; //no element found
+			}else if(A>0){
+      	*N=A-(*Z); //get neutron number
+			}
+		}
+	}
+}
 
 //parse reaction strings
 //returns 1 on success, 0 on failure
-uint8_t parseRxn(reaction *rxn, char * rxnstring){
+uint8_t parseRxn(reaction *rxn, char *rxnstring){
 
 	if(strcmp(rxnstring,"COMMENTS")==0){
 		return 0;
@@ -328,7 +373,7 @@ uint8_t parseRxn(reaction *rxn, char * rxnstring){
 		rxn->type = REACTIONTYPE_COULEX;
 		return 1;
 	}else if(strncmp(rxnstring,"INELASTIC SCATTERING",20)==0){
-		rxn->type = REACTIONTYPE_SCATTERING;
+		rxn->type = REACTIONTYPE_INELASTICSCATTERING;
 		rxn->projectileNucl = 65535U;
 		rxn->targetNucl = 65535U;
 		rxn->ejectileNucl = 65535U;
@@ -343,7 +388,7 @@ uint8_t parseRxn(reaction *rxn, char * rxnstring){
 		rxn->targetNucl = 65535U;
 		rxn->ejectileNucl = 65535U;
 		return 1;
-	}else if(strcmp(rxnstring,"MUONIC ATOM")==0){
+	}else if(strncmp(rxnstring,"MUONIC ATOM",11)==0){
 		rxn->type = REACTIONTYPE_MUONICATOM;
 		rxn->projectileNucl = 65535U;
 		rxn->targetNucl = 65535U;
@@ -356,44 +401,16 @@ uint8_t parseRxn(reaction *rxn, char * rxnstring){
 	rxn->ejectileNucl = 65535U;
 
 	//SDL_Log("Parsing reaction string: %s\n",rxnstring);
-	char rxnBuff[31], nucName[16], nameBuff[16];
-	int16_t A, Z, N;
+	char rxnBuff[31];
+	int16_t Z, N;
 	strncpy(rxnBuff,rxnstring,30); //copy original string
 	char *tok;
-	tok = strtok(rxnBuff, " (");
+
+	tok = strtok(rxnBuff," (,");
 	if(tok!=NULL){
-		//get projectile
-		A=-1; Z=-1; N=-1;
-		strncpy(nucName,tok,15); //copy the nucleus name
-		strcpy(nameBuff,nucName); //copy name to temporary buffer
-		//get mass number
-		tok=strtok(nameBuff,"ABCDEFGHIJKLMNOPQRSTUVWXYZ");
-		if(tok!=NULL){
-			A=(int16_t)atoi(tok);
-		}
-		
-		//get proton number
-		strcpy(nameBuff,nucName); //copy name to temporary buffer
-		tok=strtok(nameBuff,"0123456789");
-		if(tok!=NULL){
-			if(strcmp(tok,"NN")==0){
-				Z=0;
-				N=A;
-			}else{
-				for(int i=1;i<(int)(strlen(tok));i++){
-					tok[i]=(char)SDL_tolower(tok[i]); //elemStrToZ() expects only first character to be uppercase
-				}
-				Z=elemStrToZ(tok);
-				if(Z==255){
-					Z=-1; //no element found
-				}else{
-					//get neutron number
-					if(A>=0){
-						N=A-Z;
-					}
-				}
-			}
-		}
+		//parse typical decay mode strings
+		//get projectile N,Z
+		getENSDFNuclStrNZ(&N,&Z,tok);
 
 		if((Z>=0)&&(N>=0)){
 			//projectile found
@@ -406,8 +423,83 @@ uint8_t parseRxn(reaction *rxn, char * rxnstring){
 			rxn->projectileNucl |= (uint16_t)(255U);
 			rxn->projectileNucl |= (uint16_t)((Z & 255U) << 7U);
 		}else{
-			SDL_Log("WARNING: invalid projectile in reaction string: %s\n",rxnstring);
+			SDL_Log("WARNING: invalid projectile in reaction string: %s (tok: %s)\n",rxnstring,tok);
+			return 0;
 		}
+
+		//SDL_Log("Projectile N: %i, Z: %i, from tok: %s\n",N,Z,tok);
+
+		strncpy(rxnBuff,rxnstring,30); //reconstitute original string (since strtok was called in getENSDFNuclStrNZ)
+		tok = strtok(rxnBuff," (,");
+		tok = strtok(NULL," ,)");
+		if(tok!=NULL){
+			//get target N,Z
+			getENSDFNuclStrNZ(&N,&Z,tok);
+
+			if((Z>=0)&&(N>=0)){
+				//target found
+				rxn->targetNucl = 0;
+				rxn->targetNucl |= (uint16_t)(N & 255U);
+				rxn->targetNucl |= (uint16_t)((Z & 255U) << 7U);
+			}else if(Z>=0){
+				//element only string (eg. 'C')
+				rxn->targetNucl = 0;
+				rxn->targetNucl |= (uint16_t)(255U);
+				rxn->targetNucl |= (uint16_t)((Z & 255U) << 7U);
+			}else{
+				//try looking at the rest of the string after the 'projectile', which might specify a decay mode
+				strncpy(rxnBuff,rxnstring,30); //reconstitute original string (since strtok was called in getENSDFNuclStrNZ)
+				tok = strtok(rxnBuff," (,");
+				tok = strtok(NULL,""); //get the rest of the string
+				if(strncmp(tok,"B- DECAY",8)==0){
+					rxn->type = REACTIONTYPE_DECAY;
+					rxn->targetNucl = DECAYMODE_BETAMINUS;
+				}else if(strncmp(tok,"B+ DECAY",8)==0){
+					rxn->type = REACTIONTYPE_DECAY;
+					rxn->targetNucl = DECAYMODE_BETAPLUS;
+				}else if(strncmp(tok,"EC DECAY",8)==0){
+					rxn->type = REACTIONTYPE_DECAY;
+					rxn->targetNucl = DECAYMODE_EC;
+				}else if(strncmp(tok,"EC+B+ DECAY",11)==0){
+					rxn->type = REACTIONTYPE_DECAY;
+					rxn->targetNucl = DECAYMODE_ECANDBETAPLUS;
+				}else if(strncmp(tok,"ECP DECAY",9)==0){
+					rxn->type = REACTIONTYPE_DECAY;
+					rxn->targetNucl = DECAYMODE_EC_PROTON;
+				}else if(strncmp(tok,"B-N DECAY",9)==0){
+					rxn->type = REACTIONTYPE_DECAY;
+					rxn->targetNucl = DECAYMODE_BETAMINUS_NEUTRON;
+				}else if(strncmp(tok,"B-2N DECAY",10)==0){
+					rxn->type = REACTIONTYPE_DECAY;
+					rxn->targetNucl = DECAYMODE_BETAMINUS_TWONEUTRON;
+				}else if(strncmp(tok,"2B- DECAY",9)==0){
+					rxn->type = REACTIONTYPE_DECAY;
+					rxn->targetNucl = DECAYMODE_2BETAMINUS;
+				}else if(strncmp(tok,"IT DECAY",8)==0){
+					rxn->type = REACTIONTYPE_DECAY;
+					rxn->targetNucl = DECAYMODE_IT;
+				}else if(strncmp(tok,"SF DECAY",8)==0){
+					rxn->type = REACTIONTYPE_DECAY;
+					rxn->targetNucl = DECAYMODE_SPONTANEOUSFISSION;
+				}else if(strncmp(tok,"G,G')",5)==0){
+					rxn->type = REACTIONTYPE_INELASTICSCATTERING;
+					rxn->targetNucl = SCATTERING_GAMMA;
+				}else if(strncmp(tok,"E,E')",5)==0){
+					rxn->type = REACTIONTYPE_INELASTICSCATTERING;
+					rxn->targetNucl = SCATTERING_ELECTRON;
+				}else if((strncmp(tok,"PI+,PI+)",8)==0)||((strncmp(tok,"PI+,PI+')",9)==0))){
+					rxn->type = REACTIONTYPE_INELASTICSCATTERING;
+					rxn->targetNucl = SCATTERING_PIPLUS;
+				}else{
+					SDL_Log("WARNING: invalid target in reaction string: %s (tok: %s)\n",rxnstring,tok);
+					return 0;
+				}
+				return 1;
+			}
+
+			//SDL_Log("Target N: %i, Z: %i, from tok: %s\n",N,Z,tok);
+		}
+
 	}else{
 		SDL_Log("WARNING: couln't parse reaction string: %s\n",rxnstring);
 		return 0;
@@ -1016,35 +1108,9 @@ void parseSpinPar(level * lev, sp_var_data * varDat, char * spstring){
 
 void getNuclNZ(nucl *nuc, const char *nucName){
 
-	char str[256];
-	int16_t Z = -1;
-	int16_t N = -1;
-	char *tok;
+	int16_t Z,N;
 	
-	//get mass number
-	strcpy(str,nucName); //copy the nucleus name
-	tok=strtok(str,"ABCDEFGHIJKLMNOPQRSTUVWXYZ");
-	int16_t A=(int16_t)atoi(tok);
-	
-	//get proton number
-	strcpy(str,nucName); //copy the nucleus name
-	tok=strtok(str,"0123456789");
-	if(tok!=NULL){
-		if(strcmp(tok,"NN")==0){
-			Z=0;
-			N=A;
-		}else{
-			for(int i=1;i<(int)(strlen(tok));i++){
-				tok[i]=(char)SDL_tolower(tok[i]); //elemStrToZ() expects only first character to be uppercase
-			}
-			Z=elemStrToZ(tok);
-			if(Z==255){
-				Z=-1; //no element found
-			}else{
-      	N=A-Z; //get neutron number
-			}
-		}
-	}
+	getENSDFNuclStrNZ(&N,&Z,nucName); //here's where the real work is done
 	
 	nuc->N=N;
 	nuc->Z=Z;
@@ -1064,6 +1130,8 @@ uint8_t getDcyModeFromENSDFSubstr(const char *substr){
 		return DECAYMODE_ECANDBETAPLUS;
 	}else if(strcmp(substr,"%B-N")==0){
 		return DECAYMODE_BETAMINUS_NEUTRON;
+	}else if(strcmp(substr,"%B-2N")==0){
+		return DECAYMODE_BETAMINUS_TWONEUTRON;
 	}else if(strcmp(substr,"%B+P")==0){
 		return DECAYMODE_BETAPLUS_PROTON;
 	}else if(strcmp(substr,"%B+2P")==0){

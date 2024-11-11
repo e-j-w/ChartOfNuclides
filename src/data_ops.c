@@ -1491,6 +1491,8 @@ const char* getDecayTypeShortStr(const uint8_t type){
 			return "β-α";
 		case DECAYMODE_BETAMINUS_NEUTRON:
 			return "β-n";
+		case DECAYMODE_BETAMINUS_TWONEUTRON:
+			return "β-2n";
 		case DECAYMODE_BETAPLUS_PROTON:
 			return "β+p";
 		case DECAYMODE_BETAPLUS_TWOPROTON:

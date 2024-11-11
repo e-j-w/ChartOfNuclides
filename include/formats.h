@@ -50,7 +50,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #define MAXNUMNUCL               3500
 #define MAXNUMLVLS               200000
 #define MAXNUMTRAN               300000
-#define MAXNUMDECAYMODES         10000
+#define MAXNUMDECAYMODES         11000
 #define MAXNUMREACTIONS          16000
 #define MAX_NEUTRON_NUM          200
 #define MAX_PROTON_NUM           130
@@ -84,6 +84,8 @@ typedef struct
 {
   uint16_t projectileNucl; //bits 0-7: N, bits 8-15: Z, 65535 if no projectile
   uint16_t targetNucl; //bits 0-7: N, bits 8-15: Z, 65535 if no target
+                       //for decay, values from decay_mode_enum
+                       //if scattering, values from scattering_type_enum
   uint16_t ejectileNucl; //if transfer, same format as target/projectile
   //if fusion-evaporation, bits 0-2: num particles,
   //bits 3-4: particle type (from evap_particle_type_enum),
