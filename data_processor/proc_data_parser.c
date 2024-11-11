@@ -275,6 +275,7 @@ static int parseAppRules(app_data *restrict dat, asset_mapping *restrict stringI
 //For strings, we supply a map of all the files containing string data
 //However, the strings themselves inside these files are mapped in this function
 static int parseStrings(app_data *restrict dat, asset_mapping *restrict stringIDmap, const char *appBasePath){
+	
   FILE *inp;
   char filePath[536], str[256];
   char *tok;
@@ -323,14 +324,95 @@ uint8_t parseRxn(reaction *rxn, char * rxnstring){
 		return 0;
 	}else if(strcmp(rxnstring,"REFERENCES")==0){
 		return 0;
-	}else if(strcmp(rxnstring,"COULOMB EXCITATION")==0){
+	}else if(strncmp(rxnstring,"COULOMB EXCITATION",18)==0){
 		rxn->type = REACTIONTYPE_COULEX;
+		return 1;
+	}else if(strncmp(rxnstring,"INELASTIC SCATTERING",20)==0){
+		rxn->type = REACTIONTYPE_SCATTERING;
+		rxn->projectileNucl = 65535U;
+		rxn->targetNucl = 65535U;
+		rxn->ejectileNucl = 65535U;
+		return 1;
+	}else if((strncmp(rxnstring,"(HI,XNG)",8)==0)||(strncmp(rxnstring,"(HI,XNYPG)",10)==0)){
+		//sometimes used for fusion-evaporation data
+		//with various projectile/target combinations
+		//(often multiple papers grouped together in a
+		//single dataset)
+		rxn->type = REACTIONTYPE_FUSEVAP;
+		rxn->projectileNucl = 65535U;
+		rxn->targetNucl = 65535U;
+		rxn->ejectileNucl = 65535U;
+		return 1;
+	}else if(strcmp(rxnstring,"MUONIC ATOM")==0){
+		rxn->type = REACTIONTYPE_MUONICATOM;
+		rxn->projectileNucl = 65535U;
+		rxn->targetNucl = 65535U;
+		rxn->ejectileNucl = 65535U;
 		return 1;
 	}
 
+	rxn->projectileNucl = 65535U;
+	rxn->targetNucl = 65535U;
+	rxn->ejectileNucl = 65535U;
+
 	//SDL_Log("Parsing reaction string: %s\n",rxnstring);
-	//char *tok;
-	//tok = strtok(rxnstring, " (");
+	char rxnBuff[31], nucName[16], nameBuff[16];
+	int16_t A, Z, N;
+	strncpy(rxnBuff,rxnstring,30); //copy original string
+	char *tok;
+	tok = strtok(rxnBuff, " (");
+	if(tok!=NULL){
+		//get projectile
+		A=-1; Z=-1; N=-1;
+		strncpy(nucName,tok,15); //copy the nucleus name
+		strcpy(nameBuff,nucName); //copy name to temporary buffer
+		//get mass number
+		tok=strtok(nameBuff,"ABCDEFGHIJKLMNOPQRSTUVWXYZ");
+		if(tok!=NULL){
+			A=(int16_t)atoi(tok);
+		}
+		
+		//get proton number
+		strcpy(nameBuff,nucName); //copy name to temporary buffer
+		tok=strtok(nameBuff,"0123456789");
+		if(tok!=NULL){
+			if(strcmp(tok,"NN")==0){
+				Z=0;
+				N=A;
+			}else{
+				for(int i=1;i<(int)(strlen(tok));i++){
+					tok[i]=(char)SDL_tolower(tok[i]); //elemStrToZ() expects only first character to be uppercase
+				}
+				Z=elemStrToZ(tok);
+				if(Z==255){
+					Z=-1; //no element found
+				}else{
+					//get neutron number
+					if(A>=0){
+						N=A-Z;
+					}
+				}
+			}
+		}
+
+		if((Z>=0)&&(N>=0)){
+			//projectile found
+			rxn->projectileNucl = 0;
+			rxn->projectileNucl |= (uint16_t)(N & 255U);
+			rxn->projectileNucl |= (uint16_t)((Z & 255U) << 7U);
+		}else if(Z>=0){
+			//element only string (eg. 'C')
+			rxn->projectileNucl = 0;
+			rxn->projectileNucl |= (uint16_t)(255U);
+			rxn->projectileNucl |= (uint16_t)((Z & 255U) << 7U);
+		}else{
+			SDL_Log("WARNING: invalid projectile in reaction string: %s\n",rxnstring);
+		}
+	}else{
+		SDL_Log("WARNING: couln't parse reaction string: %s\n",rxnstring);
+		return 0;
+	}
+
 	
 	return 1;
 }
@@ -935,264 +1017,33 @@ void parseSpinPar(level * lev, sp_var_data * varDat, char * spstring){
 void getNuclNZ(nucl *nuc, const char *nucName){
 
 	char str[256];
-	int16_t A,Z,N;
+	int16_t Z = -1;
+	int16_t N = -1;
 	char *tok;
 	
 	//get mass number
 	strcpy(str,nucName); //copy the nucleus name
 	tok=strtok(str,"ABCDEFGHIJKLMNOPQRSTUVWXYZ");
-	A=(int16_t)atoi(tok);
+	int16_t A=(int16_t)atoi(tok);
 	
 	//get proton number
 	strcpy(str,nucName); //copy the nucleus name
 	tok=strtok(str,"0123456789");
 	if(tok!=NULL){
-		if(strcmp(tok,"H")==0)
-			Z=1;
-		else if(strcmp(tok,"HE")==0)
-			Z=2;
-		else if(strcmp(tok,"LI")==0)
-			Z=3;
-		else if(strcmp(tok,"BE")==0)
-			Z=4;
-		else if(strcmp(tok,"B")==0)
-			Z=5;
-		else if(strcmp(tok,"C")==0)
-			Z=6;
-		else if(strcmp(tok,"N")==0)
-			Z=7;
-		else if(strcmp(tok,"O")==0)
-			Z=8;
-		else if(strcmp(tok,"F")==0)
-			Z=9;
-		else if(strcmp(tok,"NE")==0)
-			Z=10;
-		else if(strcmp(tok,"NA")==0)
-			Z=11;
-		else if(strcmp(tok,"MG")==0)
-			Z=12;
-		else if(strcmp(tok,"AL")==0)
-			Z=13;
-		else if(strcmp(tok,"SI")==0)
-			Z=14;
-		else if(strcmp(tok,"P")==0)
-			Z=15;
-		else if(strcmp(tok,"S")==0)
-			Z=16;
-		else if(strcmp(tok,"CL")==0)
-			Z=17;
-		else if(strcmp(tok,"AR")==0)
-			Z=18;
-		else if(strcmp(tok,"K")==0)
-			Z=19;
-		else if(strcmp(tok,"CA")==0)
-			Z=20;
-		else if(strcmp(tok,"SC")==0)
-			Z=21;
-		else if(strcmp(tok,"TI")==0)
-			Z=22;
-		else if(strcmp(tok,"V")==0)
-			Z=23;
-		else if(strcmp(tok,"CR")==0)
-			Z=24;
-		else if(strcmp(tok,"MN")==0)
-			Z=25;
-		else if(strcmp(tok,"FE")==0)
-			Z=26;
-		else if(strcmp(tok,"CO")==0)
-			Z=27;
-		else if(strcmp(tok,"NI")==0)
-			Z=28;
-		else if(strcmp(tok,"CU")==0)
-			Z=29;
-		else if(strcmp(tok,"ZN")==0)
-			Z=30;
-		else if(strcmp(tok,"GA")==0)
-			Z=31;
-		else if(strcmp(tok,"GE")==0)
-			Z=32;
-		else if(strcmp(tok,"AS")==0)
-			Z=33;
-		else if(strcmp(tok,"SE")==0)
-			Z=34;
-		else if(strcmp(tok,"BR")==0)
-			Z=35;
-		else if(strcmp(tok,"KR")==0)
-			Z=36;
-		else if(strcmp(tok,"RB")==0)
-			Z=37;
-		else if(strcmp(tok,"SR")==0)
-			Z=38;
-		else if(strcmp(tok,"Y")==0)
-			Z=39;
-		else if(strcmp(tok,"ZR")==0)
-			Z=40;
-		else if(strcmp(tok,"NB")==0)
-			Z=41;
-		else if(strcmp(tok,"MO")==0)
-			Z=42;
-		else if(strcmp(tok,"TC")==0)
-			Z=43;
-		else if(strcmp(tok,"RU")==0)
-			Z=44;
-		else if(strcmp(tok,"RH")==0)
-			Z=45;
-		else if(strcmp(tok,"PD")==0)
-			Z=46;
-		else if(strcmp(tok,"AG")==0)
-			Z=47;
-		else if(strcmp(tok,"CD")==0)
-			Z=48;
-		else if(strcmp(tok,"IN")==0)
-			Z=49;
-		else if(strcmp(tok,"SN")==0)
-			Z=50;
-		else if(strcmp(tok,"SB")==0)
-			Z=51;
-		else if(strcmp(tok,"TE")==0)
-			Z=52;
-		else if(strcmp(tok,"I")==0)
-			Z=53;
-		else if(strcmp(tok,"XE")==0)
-			Z=54;
-		else if(strcmp(tok,"CS")==0)
-			Z=55;
-		else if(strcmp(tok,"BA")==0)
-			Z=56;
-		else if(strcmp(tok,"LA")==0)
-			Z=57;
-		else if(strcmp(tok,"CE")==0)
-			Z=58;
-		else if(strcmp(tok,"PR")==0)
-			Z=59;
-		else if(strcmp(tok,"ND")==0)
-			Z=60;
-		else if(strcmp(tok,"PM")==0)
-			Z=61;
-		else if(strcmp(tok,"SM")==0)
-			Z=62;
-		else if(strcmp(tok,"EU")==0)
-			Z=63;
-		else if(strcmp(tok,"GD")==0)
-			Z=64;
-		else if(strcmp(tok,"TB")==0)
-			Z=65;
-		else if(strcmp(tok,"DY")==0)
-			Z=66;
-		else if(strcmp(tok,"HO")==0)
-			Z=67;
-		else if(strcmp(tok,"ER")==0)
-			Z=68;
-		else if(strcmp(tok,"TM")==0)
-			Z=69;
-		else if(strcmp(tok,"YB")==0)
-			Z=70;
-		else if(strcmp(tok,"LU")==0)
-			Z=71;
-		else if(strcmp(tok,"HF")==0)
-			Z=72;
-		else if(strcmp(tok,"TA")==0)
-			Z=73;
-		else if(strcmp(tok,"W")==0)
-			Z=74;
-		else if(strcmp(tok,"RE")==0)
-			Z=75;
-		else if(strcmp(tok,"OS")==0)
-			Z=76;
-		else if(strcmp(tok,"IR")==0)
-			Z=77;
-		else if(strcmp(tok,"PT")==0)
-			Z=78;
-		else if(strcmp(tok,"AU")==0)
-			Z=79;
-		else if(strcmp(tok,"HG")==0)
-			Z=80;
-		else if(strcmp(tok,"TL")==0)
-			Z=81;
-		else if(strcmp(tok,"PB")==0)
-			Z=82;
-		else if(strcmp(tok,"BI")==0)
-			Z=83;
-		else if(strcmp(tok,"PO")==0)
-			Z=84;
-		else if(strcmp(tok,"AT")==0)
-			Z=85;
-		else if(strcmp(tok,"RN")==0)
-			Z=86;
-		else if(strcmp(tok,"FR")==0)
-			Z=87;
-		else if(strcmp(tok,"RA")==0)
-			Z=88;
-		else if(strcmp(tok,"AC")==0)
-			Z=89;
-		else if(strcmp(tok,"TH")==0)
-			Z=90;
-		else if(strcmp(tok,"PA")==0)
-			Z=91;
-		else if(strcmp(tok,"U")==0)
-			Z=92;
-		else if(strcmp(tok,"NP")==0)
-			Z=93;
-		else if(strcmp(tok,"PU")==0)
-			Z=94;
-		else if(strcmp(tok,"AM")==0)
-			Z=95;
-		else if(strcmp(tok,"CM")==0)
-			Z=96;
-		else if(strcmp(tok,"BK")==0)
-			Z=97;
-		else if(strcmp(tok,"CF")==0)
-			Z=98;
-		else if(strcmp(tok,"ES")==0)
-			Z=99;
-		else if(strcmp(tok,"FM")==0)
-			Z=100;
-		else if(strcmp(tok,"MD")==0)
-			Z=101;
-		else if(strcmp(tok,"NO")==0)
-			Z=102;
-		else if(strcmp(tok,"LR")==0)
-			Z=103;
-		else if(strcmp(tok,"RF")==0)
-			Z=104;
-		else if(strcmp(tok,"DB")==0)
-			Z=105;
-		else if(strcmp(tok,"SG")==0)
-			Z=106;
-		else if(strcmp(tok,"BH")==0)
-			Z=107;
-		else if(strcmp(tok,"HS")==0)
-			Z=108;
-		else if(strcmp(tok,"MT")==0)
-			Z=109;
-		else if(strcmp(tok,"DS")==0)
-			Z=110;
-		else if(strcmp(tok,"RG")==0)
-			Z=111;
-    else if(strcmp(tok,"CN")==0)
-			Z=112;
-    else if(strcmp(tok,"NH")==0)
-			Z=113;
-    else if(strcmp(tok,"FL")==0)
-			Z=114;
-    else if(strcmp(tok,"MC")==0)
-			Z=115;
-    else if(strcmp(tok,"LV")==0)
-			Z=116;
-    else if(strcmp(tok,"TS")==0)
-			Z=117;
-    else if(strcmp(tok,"OG")==0)
-			Z=118;
-    else if(strcmp(tok,"NN")==0)
-      Z=0;
-		else
-			Z=-1;
-
-		//get neutron number
-    N=A-Z;
-	}else{
-		Z=-1;
-		N=-1;
+		if(strcmp(tok,"NN")==0){
+			Z=0;
+			N=A;
+		}else{
+			for(int i=1;i<(int)(strlen(tok));i++){
+				tok[i]=(char)SDL_tolower(tok[i]); //elemStrToZ() expects only first character to be uppercase
+			}
+			Z=elemStrToZ(tok);
+			if(Z==255){
+				Z=-1; //no element found
+			}else{
+      	N=A-Z; //get neutron number
+			}
+		}
 	}
 	
 	nuc->N=N;
@@ -1559,6 +1410,9 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 		//SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,"Cannot open the ENSDF file %s\n",filePath);
 		return 0;
 	}
+
+	SDL_Log("Reading file: %s\n",filePath);
+
   while(!(feof(efile))){ //go until the end of file is reached
 
 		if(fgets(str,256,efile)!=NULL){ //get an entire line
@@ -2676,7 +2530,6 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 		return -1;
 	}
 	
-	SDL_Log("Finished reading ENSDF file: %s\n",filePath);
   return 0;
 }
 

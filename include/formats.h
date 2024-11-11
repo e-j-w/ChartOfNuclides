@@ -82,7 +82,7 @@ typedef struct
 
 typedef struct
 {
-  uint8_t projectileNucl; //bits 0-7: N, bits 8-15: Z, 65535 if no projectile
+  uint16_t projectileNucl; //bits 0-7: N, bits 8-15: Z, 65535 if no projectile
   uint16_t targetNucl; //bits 0-7: N, bits 8-15: Z, 65535 if no target
   uint16_t ejectileNucl; //if transfer, same format as target/projectile
   //if fusion-evaporation, bits 0-2: num particles,
