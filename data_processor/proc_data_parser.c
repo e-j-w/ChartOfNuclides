@@ -472,6 +472,12 @@ uint8_t parseRxn(reaction *rxn, char *rxnstring){
 				}else if(strncmp(tok,"B-2N DECAY",10)==0){
 					rxn->type = REACTIONTYPE_DECAY;
 					rxn->targetNucl = DECAYMODE_BETAMINUS_TWONEUTRON;
+				}else if(strncmp(tok,"B+P DECAY",9)==0){
+					rxn->type = REACTIONTYPE_DECAY;
+					rxn->targetNucl = DECAYMODE_BETAPLUS_PROTON;
+				}else if(strncmp(tok,"B+2P DECAY",10)==0){
+					rxn->type = REACTIONTYPE_DECAY;
+					rxn->targetNucl = DECAYMODE_BETAPLUS_TWOPROTON;
 				}else if(strncmp(tok,"2B- DECAY",9)==0){
 					rxn->type = REACTIONTYPE_DECAY;
 					rxn->targetNucl = DECAYMODE_2BETAMINUS;
@@ -481,15 +487,62 @@ uint8_t parseRxn(reaction *rxn, char *rxnstring){
 				}else if(strncmp(tok,"SF DECAY",8)==0){
 					rxn->type = REACTIONTYPE_DECAY;
 					rxn->targetNucl = DECAYMODE_SPONTANEOUSFISSION;
-				}else if(strncmp(tok,"G,G')",5)==0){
+				}else if((strncmp(tok,"G,G')",5)==0)||(strncmp(tok,"G,G)",4)==0)||(strncmp(tok,"POL G,G')",9)==0)){
 					rxn->type = REACTIONTYPE_INELASTICSCATTERING;
-					rxn->targetNucl = SCATTERING_GAMMA;
-				}else if(strncmp(tok,"E,E')",5)==0){
+					rxn->targetNucl = RXNPARTICLE_GAMMA;
+					rxn->ejectileNucl = 65535;
+				}else if((strncmp(tok,"E,E')",5)==0)||(strncmp(tok,"E,E)",4)==0)){
 					rxn->type = REACTIONTYPE_INELASTICSCATTERING;
-					rxn->targetNucl = SCATTERING_ELECTRON;
+					rxn->targetNucl = RXNPARTICLE_ELECTRON;
+					rxn->ejectileNucl = 65535;
 				}else if((strncmp(tok,"PI+,PI+)",8)==0)||((strncmp(tok,"PI+,PI+')",9)==0))){
 					rxn->type = REACTIONTYPE_INELASTICSCATTERING;
-					rxn->targetNucl = SCATTERING_PIPLUS;
+					rxn->targetNucl = RXNPARTICLE_PIPLUS;
+					rxn->ejectileNucl = 65535;
+				}else if(strncmp(tok,"E,E'P)",6)==0){
+					rxn->type = REACTIONTYPE_INELASTICSCATTERING;
+					rxn->targetNucl = RXNPARTICLE_ELECTRON;
+					rxn->ejectileNucl = RXNPARTICLE_PROTON;
+				}else if((strncmp(tok,"POL P,P')",9)==0)||(strncmp(tok,"POL P,P)",8)==0)){
+					rxn->type = REACTIONTYPE_INELASTICSCATTERING;
+					rxn->targetNucl = RXNPARTICLE_PROTON;
+					rxn->ejectileNucl = 65535;
+				}else if(strncmp(tok,"PI+,PI0)",8)==0){
+					rxn->type = REACTIONTYPE_MISCPARTICLE;
+					rxn->targetNucl = RXNPARTICLE_PIPLUS;
+					rxn->ejectileNucl = RXNPARTICLE_PIZERO;
+				}else if(strncmp(tok,"PI-,PI0)",8)==0){
+					rxn->type = REACTIONTYPE_MISCPARTICLE;
+					rxn->targetNucl = RXNPARTICLE_PIMINUS;
+					rxn->ejectileNucl = RXNPARTICLE_PIZERO;
+				}else if(strncmp(tok,"PI-,D)",6)==0){
+					rxn->type = REACTIONTYPE_MISCPARTICLE;
+					rxn->targetNucl = RXNPARTICLE_PIMINUS;
+					rxn->ejectileNucl = RXNPARTICLE_DEUTERON;
+				}else if(strncmp(tok,"PI-,X)",6)==0){
+					rxn->type = REACTIONTYPE_MISCPARTICLE;
+					rxn->targetNucl = RXNPARTICLE_PIMINUS;
+					rxn->ejectileNucl = RXNPARTICLE_X;
+				}else if(strncmp(tok,"MU-,X)",6)==0){
+					rxn->type = REACTIONTYPE_MISCPARTICLE;
+					rxn->targetNucl = RXNPARTICLE_MUMINUS;
+					rxn->ejectileNucl = RXNPARTICLE_X;
+				}else if(strncmp(tok,"MU-,NG)",7)==0){
+					rxn->type = REACTIONTYPE_MISCPARTICLE;
+					rxn->targetNucl = RXNPARTICLE_MUMINUS;
+					rxn->ejectileNucl = RXNPARTICLE_NEUTRON;
+				}else if(strncmp(tok,"K-,G)",5)==0){
+					rxn->type = REACTIONTYPE_MISCPARTICLE;
+					rxn->targetNucl = RXNPARTICLE_KMINUS;
+					rxn->ejectileNucl = RXNPARTICLE_GAMMA;
+				}else if(strncmp(tok,"K-,XG)",6)==0){
+					rxn->type = REACTIONTYPE_MISCPARTICLE;
+					rxn->targetNucl = RXNPARTICLE_KMINUS;
+					rxn->ejectileNucl = RXNPARTICLE_X;
+				}else if(strncmp(tok,"G,N)",4)==0){
+					rxn->type = REACTIONTYPE_MISCPARTICLE;
+					rxn->targetNucl = RXNPARTICLE_GAMMA;
+					rxn->ejectileNucl = RXNPARTICLE_NEUTRON;
 				}else{
 					SDL_Log("WARNING: invalid target in reaction string: %s (tok: %s)\n",rxnstring,tok);
 					return 0;
