@@ -83,9 +83,9 @@ typedef struct
 typedef struct
 {
   uint16_t projectileNucl; //bits 0-7: N, bits 8-15: Z, 65535 if no projectile
+                           //for decay, values from decay_mode_enum
+                           //if scattering or misc particle rxn, values from rxnparticle_type_enum
   uint16_t targetNucl; //bits 0-7: N, bits 8-15: Z, 65535 if no target
-                       //for decay, values from decay_mode_enum
-                       //if scattering or misc particle rxn, values from rxnparticle_type_enum
   uint16_t ejectileNucl; //if transfer, same format as target/projectile
   //if fusion-evaporation, bits 0-2: num particles,
   //bits 3-4: particle type (from evap_particle_type_enum),

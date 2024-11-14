@@ -172,6 +172,7 @@ SDL_FColor getDecayModeCol(const uint8_t dcyMode){
       break;
     case DECAYMODE_ALPHA:
     case DECAYMODE_BETAMINUS_ALPHA:
+    case DECAYMODE_EC_ALPHA:
       col.r = 1.0f;
       col.g = 1.0f;
       col.b = 0.6f;
