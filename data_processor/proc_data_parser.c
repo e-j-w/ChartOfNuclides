@@ -358,6 +358,13 @@ void getENSDFNuclStrNZ(int16_t *N, int16_t *Z, const char *nuclStr){
       	*N=A-(*Z); //get neutron number
 			}
 		}
+	}else if(A > 20000){
+		//sometimes heavy elements are specified this way in some strings
+		//eg. '26710 A DECAY'
+		//so return a special value specifying that the result is some unknown
+		//heavy nuclide
+		*Z=-2;
+		*N=-2;
 	}
 }
 
@@ -422,6 +429,10 @@ uint8_t parseRxn(reaction *rxn, char *rxnstring){
 			rxn->targetNucl = 0;
 			rxn->targetNucl |= (uint16_t)(255U);
 			rxn->targetNucl |= (uint16_t)((Z & 255U) << 7U);
+		}else if((Z==-2)&&(N==-2)){
+			//unknown heavy nuclide
+			rxn->targetNucl |= (uint16_t)(254U);
+			rxn->targetNucl |= (uint16_t)((254U) << 7U);
 		}else{
 			SDL_Log("WARNING: invalid target in reaction string: %s (tok: %s)\n",rxnstring,tok);
 			return 0;
@@ -479,9 +490,18 @@ uint8_t parseRxn(reaction *rxn, char *rxnstring){
 				}else if(strncmp(projStr,"ECP DECAY",9)==0){
 					rxn->type = REACTIONTYPE_DECAY;
 					rxn->projectileNucl = DECAYMODE_EC_PROTON;
+				}else if(strncmp(projStr,"EC2P DECAY",9)==0){
+					rxn->type = REACTIONTYPE_DECAY;
+					rxn->projectileNucl = DECAYMODE_EC_TWOPROTON;
+				}else if(strncmp(projStr,"EC3P DECAY",9)==0){
+					rxn->type = REACTIONTYPE_DECAY;
+					rxn->projectileNucl = DECAYMODE_EC_THREEPROTON;
 				}else if(strncmp(projStr,"ECA DECAY",9)==0){
 					rxn->type = REACTIONTYPE_DECAY;
 					rxn->projectileNucl = DECAYMODE_EC_ALPHA;
+				}else if(strncmp(projStr,"2EC DECAY",9)==0){
+					rxn->type = REACTIONTYPE_DECAY;
+					rxn->projectileNucl = DECAYMODE_2EC;
 				}else if(strncmp(projStr,"B-N DECAY",9)==0){
 					rxn->type = REACTIONTYPE_DECAY;
 					rxn->projectileNucl = DECAYMODE_BETAMINUS_NEUTRON;
@@ -497,6 +517,9 @@ uint8_t parseRxn(reaction *rxn, char *rxnstring){
 				}else if(strncmp(projStr,"B+2P DECAY",10)==0){
 					rxn->type = REACTIONTYPE_DECAY;
 					rxn->projectileNucl = DECAYMODE_BETAPLUS_TWOPROTON;
+				}else if(strncmp(projStr,"B+3P DECAY",10)==0){
+					rxn->type = REACTIONTYPE_DECAY;
+					rxn->projectileNucl = DECAYMODE_BETAPLUS_THREEPROTON;
 				}else if(strncmp(projStr,"2B- DECAY",9)==0){
 					rxn->type = REACTIONTYPE_DECAY;
 					rxn->projectileNucl = DECAYMODE_2BETAMINUS;
@@ -525,18 +548,50 @@ uint8_t parseRxn(reaction *rxn, char *rxnstring){
 					rxn->type = REACTIONTYPE_INELASTICSCATTERING;
 					rxn->projectileNucl = RXNPARTICLE_GAMMA;
 					rxn->ejectileNucl = 65535;
+				}else if(strncmp(projStr,"G,PI-)",6)==0){
+					rxn->type = REACTIONTYPE_MISCPARTICLE;
+					rxn->projectileNucl = RXNPARTICLE_GAMMA;
+					rxn->ejectileNucl = RXNPARTICLE_PIMINUS;
+				}else if(strncmp(projStr,"G,PG)",5)==0){
+					rxn->type = REACTIONTYPE_MISCPARTICLE;
+					rxn->projectileNucl = RXNPARTICLE_GAMMA;
+					rxn->ejectileNucl = RXNPARTICLE_PROTON;
+				}else if(strncmp(projStr,"G,PNG)",6)==0){
+					rxn->type = REACTIONTYPE_MISCPARTICLE;
+					rxn->projectileNucl = RXNPARTICLE_GAMMA;
+					rxn->ejectileNucl = RXNPARTICLE_PROTONNEUTRON;
 				}else if((strncmp(projStr,"E,E')",5)==0)||(strncmp(projStr,"E,E)",4)==0)){
 					rxn->type = REACTIONTYPE_INELASTICSCATTERING;
 					rxn->projectileNucl = RXNPARTICLE_ELECTRON;
-					rxn->ejectileNucl = 65535;
-				}else if((strncmp(projStr,"PI+,PI+)",8)==0)||((strncmp(projStr,"PI+,PI+')",9)==0))){
-					rxn->type = REACTIONTYPE_INELASTICSCATTERING;
-					rxn->projectileNucl = RXNPARTICLE_PIPLUS;
 					rxn->ejectileNucl = 65535;
 				}else if(strncmp(projStr,"E,E'P)",6)==0){
 					rxn->type = REACTIONTYPE_INELASTICSCATTERING;
 					rxn->projectileNucl = RXNPARTICLE_ELECTRON;
 					rxn->ejectileNucl = RXNPARTICLE_PROTON;
+				}else if(strncmp(projStr,"E,E'N)",6)==0){
+					rxn->type = REACTIONTYPE_INELASTICSCATTERING;
+					rxn->projectileNucl = RXNPARTICLE_ELECTRON;
+					rxn->ejectileNucl = RXNPARTICLE_NEUTRON;
+				}else if(strncmp(projStr,"E,N)",4)==0){
+					rxn->type = REACTIONTYPE_MISCPARTICLE;
+					rxn->projectileNucl = RXNPARTICLE_ELECTRON;
+					rxn->ejectileNucl = RXNPARTICLE_NEUTRON;
+				}else if(strncmp(projStr,"E,F)",4)==0){
+					rxn->type = REACTIONTYPE_MISCPARTICLE;
+					rxn->projectileNucl = RXNPARTICLE_ELECTRON;
+					rxn->ejectileNucl = RXNPARTICLE_FISSION;
+				}else if((strncmp(projStr,"E,G)",4)==0)||(strncmp(projStr,"E-,G)",5)==0)){
+					rxn->type = REACTIONTYPE_MISCPARTICLE;
+					rxn->projectileNucl = RXNPARTICLE_ELECTRON;
+					rxn->ejectileNucl = RXNPARTICLE_GAMMA;
+				}else if(strncmp(projStr,"E+,G)",5)==0){
+					rxn->type = REACTIONTYPE_MISCPARTICLE;
+					rxn->projectileNucl = RXNPARTICLE_POSITRON;
+					rxn->ejectileNucl = RXNPARTICLE_GAMMA;
+				}else if(strncmp(projStr,"E+,XG)",6)==0){
+					rxn->type = REACTIONTYPE_MISCPARTICLE;
+					rxn->projectileNucl = RXNPARTICLE_POSITRON;
+					rxn->ejectileNucl = RXNPARTICLE_X;
 				}else if((strncmp(projStr,"P,P')",9)==0)||(strncmp(projStr,"P,P)",8)==0)){
 					rxn->type = REACTIONTYPE_INELASTICSCATTERING;
 					rxn->projectileNucl = RXNPARTICLE_PROTON;
@@ -557,6 +612,14 @@ uint8_t parseRxn(reaction *rxn, char *rxnstring){
 					rxn->type = REACTIONTYPE_MISCPARTICLE;
 					rxn->projectileNucl = RXNPARTICLE_PIMINUS;
 					rxn->ejectileNucl = RXNPARTICLE_PIZERO;
+				}else if((strncmp(projStr,"PI+,PI+)",8)==0)||((strncmp(projStr,"PI+,PI+')",9)==0))){
+					rxn->type = REACTIONTYPE_INELASTICSCATTERING;
+					rxn->projectileNucl = RXNPARTICLE_PIPLUS;
+					rxn->ejectileNucl = 65535;
+				}else if((strncmp(projStr,"PI-,PI-)",8)==0)||((strncmp(projStr,"PI-,PI-')",9)==0))){
+					rxn->type = REACTIONTYPE_INELASTICSCATTERING;
+					rxn->projectileNucl = RXNPARTICLE_PIMINUS;
+					rxn->ejectileNucl = 65535;
 				}else if(strncmp(projStr,"PI-,D)",6)==0){
 					rxn->type = REACTIONTYPE_MISCPARTICLE;
 					rxn->projectileNucl = RXNPARTICLE_PIMINUS;
@@ -565,19 +628,39 @@ uint8_t parseRxn(reaction *rxn, char *rxnstring){
 					rxn->type = REACTIONTYPE_MISCPARTICLE;
 					rxn->projectileNucl = RXNPARTICLE_PIMINUS;
 					rxn->ejectileNucl = RXNPARTICLE_GAMMA;
+				}else if((strlen(projStr)>=8)&&(strncmp(projStr,"PI-,",4)==0)&&(strncmp(&projStr[5],"NG)",3)==0)){
+					rxn->type = REACTIONTYPE_MISCPARTICLE_MULTIEJECTILE;
+					rxn->projectileNucl = RXNPARTICLE_PIMINUS;
+					rxn->ejectileNucl = 0;
+					uint8_t numPart = (uint8_t)(projStr[4] - '0');
+					if(numPart <= 7){
+						//number of particles is known
+						//(if we don't get here, then the number of particles is kept at 0,
+						//meaning the number is unknown)
+						rxn->ejectileNucl |= numPart;
+					}
+					rxn->ejectileNucl |= (uint16_t)(EVAPTYPE_NEUTRON << 3U);
 				}else if((strncmp(projStr,"PI-,X)",6)==0)||(strncmp(projStr,"PI-,XG)",7)==0)){
 					rxn->type = REACTIONTYPE_MISCPARTICLE;
 					rxn->projectileNucl = RXNPARTICLE_PIMINUS;
-					rxn->ejectileNucl = RXNPARTICLE_X;
-				}else if((strncmp(projStr,"PI,X)",5)==0)||(strncmp(projStr,"PI,XG)",6)==0)){
-					rxn->type = REACTIONTYPE_MISCPARTICLE;
-					rxn->projectileNucl = RXNPARTICLE_PI;
 					rxn->ejectileNucl = RXNPARTICLE_X;
 				}else if((strncmp(projStr,"PI+,X)",6)==0)||(strncmp(projStr,"PI+,XG)",7)==0)){
 					rxn->type = REACTIONTYPE_MISCPARTICLE;
 					rxn->projectileNucl = RXNPARTICLE_PIPLUS;
 					rxn->ejectileNucl = RXNPARTICLE_X;
-				}else if(strncmp(projStr,"MU-,X)",6)==0){
+				}else if(strncmp(projStr,"PI+,K+)",7)==0){
+					rxn->type = REACTIONTYPE_MISCPARTICLE;
+					rxn->projectileNucl = RXNPARTICLE_PIPLUS;
+					rxn->ejectileNucl = RXNPARTICLE_KPLUS;
+				}else if((strncmp(projStr,"PI,X)",5)==0)||(strncmp(projStr,"PI,XG)",6)==0)){
+					rxn->type = REACTIONTYPE_MISCPARTICLE;
+					rxn->projectileNucl = RXNPARTICLE_PI;
+					rxn->ejectileNucl = RXNPARTICLE_X;
+				}else if((strncmp(projStr,"PI,PI)",6)==0)||((strncmp(projStr,"PI,PI')",7)==0))){
+					rxn->type = REACTIONTYPE_INELASTICSCATTERING;
+					rxn->projectileNucl = RXNPARTICLE_PI;
+					rxn->ejectileNucl = 65535;
+				}else if((strncmp(projStr,"MU-,X)",6)==0)||(strncmp(projStr,"MU-,XG)",7)==0)){
 					rxn->type = REACTIONTYPE_MISCPARTICLE;
 					rxn->projectileNucl = RXNPARTICLE_MUMINUS;
 					rxn->ejectileNucl = RXNPARTICLE_X;
@@ -585,6 +668,66 @@ uint8_t parseRxn(reaction *rxn, char *rxnstring){
 					rxn->type = REACTIONTYPE_MISCPARTICLE;
 					rxn->projectileNucl = RXNPARTICLE_MUMINUS;
 					rxn->ejectileNucl = RXNPARTICLE_NEUTRON;
+				}else if(strncmp(projStr,"MU-,PG)",7)==0){
+					rxn->type = REACTIONTYPE_MISCPARTICLE;
+					rxn->projectileNucl = RXNPARTICLE_MUMINUS;
+					rxn->ejectileNucl = RXNPARTICLE_PROTON;
+				}else if(strncmp(projStr,"MU-,G)",6)==0){
+					rxn->type = REACTIONTYPE_MISCPARTICLE;
+					rxn->projectileNucl = RXNPARTICLE_MUMINUS;
+					rxn->ejectileNucl = RXNPARTICLE_GAMMA;
+				}else if(strncmp(projStr,"MU-,NUG)",8)==0){
+					rxn->type = REACTIONTYPE_MISCPARTICLE;
+					rxn->projectileNucl = RXNPARTICLE_MUMINUS;
+					rxn->ejectileNucl = RXNPARTICLE_NU;
+				}else if(strncmp(projStr,"MU-,NUPG)",9)==0){
+					rxn->type = REACTIONTYPE_MISCPARTICLE;
+					rxn->projectileNucl = RXNPARTICLE_MUMINUS;
+					rxn->ejectileNucl = RXNPARTICLE_NU_PROTON;
+				}else if(strncmp(projStr,"MU-,NUNG)",9)==0){
+					rxn->type = REACTIONTYPE_MISCPARTICLE;
+					rxn->projectileNucl = RXNPARTICLE_MUMINUS;
+					rxn->ejectileNucl = RXNPARTICLE_NU_NEUTRON;
+				}else if(strncmp(projStr,"MU-,NUPNG)",10)==0){
+					rxn->type = REACTIONTYPE_MISCPARTICLE;
+					rxn->projectileNucl = RXNPARTICLE_MUMINUS;
+					rxn->ejectileNucl = RXNPARTICLE_NU_PROTONNEUTRON;
+				}else if(strncmp(projStr,"MU-,NU2NG)",10)==0){
+					rxn->type = REACTIONTYPE_MISCPARTICLE;
+					rxn->projectileNucl = RXNPARTICLE_MUMINUS;
+					rxn->ejectileNucl = RXNPARTICLE_NU_TWONEUTRON;
+				}else if((strncmp(projStr,"MU,X)",5)==0)||(strncmp(projStr,"MU,XG)",6)==0)){
+					rxn->type = REACTIONTYPE_MISCPARTICLE;
+					rxn->projectileNucl = RXNPARTICLE_MU;
+					rxn->ejectileNucl = RXNPARTICLE_X;
+				}else if(strncmp(projStr,"MU,NG)",6)==0){
+					rxn->type = REACTIONTYPE_MISCPARTICLE;
+					rxn->projectileNucl = RXNPARTICLE_MU;
+					rxn->ejectileNucl = RXNPARTICLE_NEUTRON;
+				}else if((strlen(projStr)>=8)&&(strncmp(projStr,"MU-,",4)==0)&&(strncmp(&projStr[5],"NG)",3)==0)){
+					rxn->type = REACTIONTYPE_MISCPARTICLE_MULTIEJECTILE;
+					rxn->projectileNucl = RXNPARTICLE_MUMINUS;
+					rxn->ejectileNucl = 0;
+					uint8_t numPart = (uint8_t)(projStr[4] - '0');
+					if(numPart <= 7){
+						//number of particles is known
+						//(if we don't get here, then the number of particles is kept at 0,
+						//meaning the number is unknown)
+						rxn->ejectileNucl |= numPart;
+					}
+					rxn->ejectileNucl |= (uint16_t)(EVAPTYPE_NEUTRON << 3U);
+				}else if((strlen(projStr)>=7)&&(strncmp(projStr,"MU,",3)==0)&&(strncmp(&projStr[4],"NG)",3)==0)){
+					rxn->type = REACTIONTYPE_MISCPARTICLE_MULTIEJECTILE;
+					rxn->projectileNucl = RXNPARTICLE_MU;
+					rxn->ejectileNucl = 0;
+					uint8_t numPart = (uint8_t)(projStr[3] - '0');
+					if(numPart <= 7){
+						//number of particles is known
+						//(if we don't get here, then the number of particles is kept at 0,
+						//meaning the number is unknown)
+						rxn->ejectileNucl |= numPart;
+					}
+					rxn->ejectileNucl |= (uint16_t)(EVAPTYPE_NEUTRON << 3U);
 				}else if(strncmp(projStr,"K-,G)",5)==0){
 					rxn->type = REACTIONTYPE_MISCPARTICLE;
 					rxn->projectileNucl = RXNPARTICLE_KMINUS;
@@ -597,10 +740,26 @@ uint8_t parseRxn(reaction *rxn, char *rxnstring){
 					rxn->type = REACTIONTYPE_MISCPARTICLE;
 					rxn->projectileNucl = RXNPARTICLE_GAMMA;
 					rxn->ejectileNucl = RXNPARTICLE_NEUTRON;
+				}else if(strncmp(projStr,"G,P)",4)==0){
+					rxn->type = REACTIONTYPE_MISCPARTICLE;
+					rxn->projectileNucl = RXNPARTICLE_GAMMA;
+					rxn->ejectileNucl = RXNPARTICLE_NEUTRON;
 				}else if(strncmp(projStr,"G,X)",4)==0){
 					rxn->type = REACTIONTYPE_MISCPARTICLE;
 					rxn->projectileNucl = RXNPARTICLE_GAMMA;
 					rxn->ejectileNucl = RXNPARTICLE_X;
+				}else if(strncmp(projStr,"G,F)",4)==0){
+					rxn->type = REACTIONTYPE_MISCPARTICLE;
+					rxn->projectileNucl = RXNPARTICLE_GAMMA;
+					rxn->ejectileNucl = RXNPARTICLE_FISSION;
+				}else if(strncmp(projStr,"G,XN)",5)==0){
+					rxn->type = REACTIONTYPE_MISCPARTICLE;
+					rxn->projectileNucl = RXNPARTICLE_GAMMA;
+					rxn->ejectileNucl = RXNPARTICLE_XNEUTRONS;
+				}else if((strncmp(projStr,"X,X')",5)==0)||(strncmp(projStr,"X,X'G)",6)==0)||(strncmp(projStr,"X,X)",4)==0)){
+					rxn->type = REACTIONTYPE_INELASTICSCATTERING;
+					rxn->projectileNucl = RXNPARTICLE_X;
+					rxn->ejectileNucl = 65535;
 				}else{
 					SDL_Log("WARNING: invalid projectile in reaction string: %s (projStr: %s )\n",rxnstring,projStr);
 					return 0;
@@ -1247,8 +1406,14 @@ uint8_t getDcyModeFromENSDFSubstr(const char *substr){
 		return DECAYMODE_BETAPLUS_PROTON;
 	}else if(strcmp(substr,"%B+2P")==0){
 		return DECAYMODE_BETAPLUS_TWOPROTON;
+	}else if(strcmp(substr,"%B+3P")==0){
+		return DECAYMODE_BETAPLUS_THREEPROTON;
 	}else if(strcmp(substr,"%ECP")==0){
 		return DECAYMODE_EC_PROTON;
+	}else if(strcmp(substr,"%EC2P")==0){
+		return DECAYMODE_EC_TWOPROTON;
+	}else if(strcmp(substr,"%EC3P")==0){
+		return DECAYMODE_EC_THREEPROTON;
 	}else if(strcmp(substr,"%ECA")==0){
 		return DECAYMODE_EC_ALPHA;
 	}else if(strcmp(substr,"%P")==0){
