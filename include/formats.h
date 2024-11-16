@@ -94,6 +94,8 @@ typedef struct
   //if scattering with an ejectile, values from rxnparticle_type_enum
   //if misc particle, values from rxnparticle_type_enum
   //if misc particle with multi ejectile, then same as fusion-evaporation
+  //if decay, can specify an alternate decay species (same format as targetNucl,
+  //to handle strings like '248CM,252CF SF DECAY'), 0 if no alternate species
   //65535 if no ejectile
   uint8_t type; //values from reaction_type_enum
 }reaction; //reaction populating a level
