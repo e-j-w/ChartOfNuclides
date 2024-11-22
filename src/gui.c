@@ -172,6 +172,7 @@ SDL_FColor getDecayModeCol(const uint8_t dcyMode){
       break;
     case DECAYMODE_ALPHA:
     case DECAYMODE_BETAMINUS_ALPHA:
+    case DECAYMODE_BETAPLUS_ALPHA:
     case DECAYMODE_EC_ALPHA:
       col.r = 1.0f;
       col.g = 1.0f;
@@ -185,6 +186,7 @@ SDL_FColor getDecayModeCol(const uint8_t dcyMode){
     case DECAYMODE_EC_PROTON:
     case DECAYMODE_EC_TWOPROTON:
     case DECAYMODE_EC_THREEPROTON:
+    case DECAYMODE_BETAMINUS_PROTON:
       col.r = 1.0f;
       col.g = 0.6f;
       col.b = 0.6f;
