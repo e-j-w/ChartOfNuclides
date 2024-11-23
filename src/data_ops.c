@@ -2080,6 +2080,47 @@ double getRawErrFromDB(const valWithErr *restrict valStruct){
 	return err;
 }
 
+//returns 255 in case of failure (eg. if the particle isn't defined as a nuclide)
+//particle: values from reaction_particle_enum
+//getZ: 0 to get N, 1 to get Z
+uint8_t getNuclNorZFromRxnParticle(const reaction *rxn, const uint8_t particle, const uint8_t getZ){
+	uint8_t type = rxn->type;
+	switch(particle){
+		case REACTIONPARTICLE_PROJECTILE:
+			if((type == REACTIONTYPE_UNASSIGNED)||(type == REACTIONTYPE_FUSEVAP)||(type == REACTIONTYPE_NUCLTRANSFER)||(type == REACTIONTYPE_NUCLTRANSFER_MISCEJECTILE)||(type == REACTIONTYPE_NUCLTRANSFER_MULTIEJECTILE)){
+				if(getZ==0){
+					return rxn->projectileNucl & 255U;
+				}else{
+					return (rxn->projectileNucl >> 7U) & 255U;
+				}
+			}else{
+				return 255;
+			}
+		case REACTIONPARTICLE_EJECTILE:
+			if((type == REACTIONTYPE_UNASSIGNED)||(type == REACTIONTYPE_NUCLTRANSFER)){
+				if(getZ==0){
+					return rxn->projectileNucl & 255U;
+				}else{
+					return (rxn->projectileNucl >> 7U) & 255U;
+				}
+			}else{
+				return 255;
+			}
+		case REACTIONPARTICLE_TARGET:
+		default:
+			if((type == REACTIONTYPE_UNASSIGNED)||(type == REACTIONTYPE_FUSEVAP)||(type == REACTIONTYPE_NUCLTRANSFER)||(type == REACTIONTYPE_NUCLTRANSFER_MISCEJECTILE)||(type == REACTIONTYPE_NUCLTRANSFER_MULTIEJECTILE)){
+				if(getZ==0){
+					return rxn->projectileNucl & 255U;
+				}else{
+					return (rxn->projectileNucl >> 7U) & 255U;
+				}
+			}else{
+				return 255;
+			}
+			break;
+	}
+}
+
 double getLevelEnergykeV(const ndata *restrict nd, const uint32_t levelInd){
 	if(levelInd < nd->numLvls){
 		double levelE = getRawValFromDB(&nd->levels[levelInd].energy);
