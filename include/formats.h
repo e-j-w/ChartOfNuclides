@@ -91,6 +91,8 @@ typedef struct
   //if fusion-evaporation, bits 0-2: num particles (=0 if unknown number),
   //bits 3-4: particle type (from evap_particle_type_enum),
   //repeat up to 3 times (15 bits total)
+  //if fragmentation, values from rxnparticle_type_enum
+  //if fragmentation with multi ejectile, then same as fusion-evaporation
   //if scattering with an ejectile, values from rxnparticle_type_enum
   //if misc particle, values from rxnparticle_type_enum
   //if misc particle with multi ejectile, then same as fusion-evaporation
