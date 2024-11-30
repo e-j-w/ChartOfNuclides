@@ -937,6 +937,10 @@ uint8_t parseSpecialRxnProjEjectStr(reaction *rxn, const char *projStr){
 		rxn->type = REACTIONTYPE_INELASTICSCATTERING;
 		rxn->projectileNucl = RXNPARTICLE_X;
 		rxn->ejectileNucl = 65535;
+	}else if(strncmp(projStr,"X,20NG",5)==0){
+		rxn->type = REACTIONTYPE_MISCPARTICLE;
+		rxn->projectileNucl = RXNPARTICLE_X;
+		rxn->ejectileNucl = RXNPARTICLE_20N;
 	}else{
 		//no reaction found
 		return 0;
@@ -986,14 +990,26 @@ uint8_t parseSpecialRxnEjectStr(reaction *rxn, const char *ejStr){
 	}else if(strcmp(ejStr,"19BN")==0){
 		rxn->type = REACTIONTYPE_NUCLTRANSFER_MISCEJECTILE;
 		rxn->ejectileNucl = RXNPARTICLE_19B_NEUTRON;
+	}else if(strcmp(ejStr,"TP")==0){
+		rxn->type = REACTIONTYPE_NUCLTRANSFER_MISCEJECTILE;
+		rxn->ejectileNucl = RXNPARTICLE_PROTON_TRITON;
 	}else if(strcmp(ejStr,"DP")==0){
 		rxn->type = REACTIONTYPE_NUCLTRANSFER_MISCEJECTILE;
 		rxn->ejectileNucl = RXNPARTICLE_PROTONDEUTERON;
+	}else if(strcmp(ejStr,"DA")==0){
+		rxn->type = REACTIONTYPE_NUCLTRANSFER_MISCEJECTILE;
+		rxn->ejectileNucl = RXNPARTICLE_DEUTERON_4HE;
 	}else if(strcmp(ejStr,"PP")==0){
 		rxn->type = REACTIONTYPE_NUCLTRANSFER_MULTIEJECTILE;
 		rxn->ejectileNucl = 0;
 		//two protons
 		rxn->ejectileNucl |= (uint16_t)(2U);
+		rxn->ejectileNucl |= (uint16_t)(EVAPTYPE_PROTON << 3U);
+	}else if(strcmp(ejStr,"GP")==0){
+		rxn->type = REACTIONTYPE_NUCLTRANSFER_MULTIEJECTILE;
+		rxn->ejectileNucl = 0;
+		//one proton
+		rxn->ejectileNucl |= (uint16_t)(1U);
 		rxn->ejectileNucl |= (uint16_t)(EVAPTYPE_PROTON << 3U);
 	}else if(strcmp(ejStr,"AP")==0){
 		rxn->type = REACTIONTYPE_NUCLTRANSFER_MULTIEJECTILE;
@@ -1198,7 +1214,7 @@ uint8_t parseSpecialRxnEjectStr(reaction *rxn, const char *ejStr){
 			rxn->ejectileNucl |= numPart;
 		}
 		rxn->ejectileNucl |= (uint16_t)(EVAPTYPE_PROTON << 3U);
-	}else if(strcmp(ejStr,"A'P")==0){
+	}else if((strcmp(ejStr,"A'P")==0)||(strcmp(ejStr,"A'PG")==0)){
 		rxn->ejectileNucl = 0;
 		if((getNuclNorZFromRxnParticle(rxn,REACTIONPARTICLE_PROJECTILE,0)==2)&&(getNuclNorZFromRxnParticle(rxn,REACTIONPARTICLE_PROJECTILE,1)==2)){
 			//alpha projectile, reclassify reaction
@@ -1213,6 +1229,21 @@ uint8_t parseSpecialRxnEjectStr(reaction *rxn, const char *ejStr){
 		//one proton
 		rxn->ejectileNucl |= 1U;
 		rxn->ejectileNucl |= (uint16_t)(EVAPTYPE_PROTON << 3U);
+	}else if((strcmp(ejStr,"A'N")==0)||(strcmp(ejStr,"A'NG")==0)){
+		rxn->ejectileNucl = 0;
+		if((getNuclNorZFromRxnParticle(rxn,REACTIONPARTICLE_PROJECTILE,0)==2)&&(getNuclNorZFromRxnParticle(rxn,REACTIONPARTICLE_PROJECTILE,1)==2)){
+			//alpha projectile, reclassify reaction
+			rxn->type = REACTIONTYPE_INELASTICSCATTERING_MULTIEJECTILE;
+			rxn->projectileNucl = RXNPARTICLE_ALPHA;
+		}else{
+			rxn->type = REACTIONTYPE_NUCLTRANSFER_MULTIEJECTILE;
+			//one alpha
+			rxn->ejectileNucl |= (uint16_t)(1U << 5U);
+			rxn->ejectileNucl |= (uint16_t)(EVAPTYPE_ALPHA << 8U);
+		}
+		//one neutron
+		rxn->ejectileNucl |= 1U;
+		rxn->ejectileNucl |= (uint16_t)(EVAPTYPE_NEUTRON << 3U);
 	}else if(strcmp(ejStr,"P'A")==0){
 		rxn->ejectileNucl = 0;
 		if((getNuclNorZFromRxnParticle(rxn,REACTIONPARTICLE_PROJECTILE,0)==0)&&(getNuclNorZFromRxnParticle(rxn,REACTIONPARTICLE_PROJECTILE,1)==1)){
@@ -1384,6 +1415,9 @@ uint8_t parseSpecialRxnEjectStr(reaction *rxn, const char *ejStr){
 		//one neutron
 		rxn->ejectileNucl |= (uint16_t)(1U << 5U);
 		rxn->ejectileNucl |= (uint16_t)(EVAPTYPE_NEUTRON << 8U);
+	}else if(strcmp(ejStr,"G17O")==0){
+		rxn->type = REACTIONTYPE_NUCLTRANSFER_MISCEJECTILE;
+		rxn->ejectileNucl = RXNPARTICLE_17O;
 	}else if(strcmp(ejStr,"23ALPG")==0){
 		rxn->type = REACTIONTYPE_NUCLTRANSFER_MISCEJECTILE;
 		rxn->ejectileNucl = RXNPARTICLE_23AL_PROTON;
@@ -3760,6 +3794,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 						//SDL_Log("numRxnsParsed: %u, subSec: %u\n",numRxnsParsed,subSec);
 						startedParsingSec=1;
 						char rxnBuff[31];
+						char rxnSubStr[3][31];
 						memcpy(rxnBuff, &line[9], 30);
 						for(uint8_t i=29; 1; i--){
 							if(!(isspace(rxnBuff[i]))){
@@ -3767,10 +3802,42 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 								break;
 							}
 						}
-						if(parseRxn(&nd->rxn[nd->numRxns],rxnBuff)==1){
-							numRxnsParsed++;
-							nd->numRxns++;
+						//SDL_Log("Reaction buffer: %s\n",rxnBuff);
+						//tokenize reaction string
+						uint8_t numRxnSubStr=0;
+						tok=strtok(rxnBuff,")");
+						while(tok!=NULL){
+							if(numRxnSubStr<3){
+								//set starting position to remove spaces/commas at start of string
+								uint8_t startPos = 0;
+								for(uint8_t i=0;i<strlen(tok);i++){
+									if(!(isspace(tok[i]))){
+										if(tok[i]!=','){
+											startPos = i;
+											break;
+										}
+									}
+								}
+								//SDL_Log("tok: %s, startPos: %u, strlen: %li\n",tok,startPos,strlen(tok));
+								strncpy(rxnSubStr[numRxnSubStr],&tok[startPos],30);
+								//check for and reject invalid strings
+								if((strlen(rxnSubStr[numRxnSubStr]) >= 2)&&(rxnSubStr[numRxnSubStr][0] != ':')&&(rxnSubStr[numRxnSubStr][0] != '(')&&(rxnSubStr[numRxnSubStr][0] != '+')&&(strncmp(rxnSubStr[numRxnSubStr],"E=",2)!=0)&&(strncmp(rxnSubStr[numRxnSubStr],"E ",2)!=0)&&(strncmp(rxnSubStr[numRxnSubStr],"IA",2)!=0)&&(strncmp(rxnSubStr[numRxnSubStr],"RE",2)!=0)&&(strncmp(rxnSubStr[numRxnSubStr],"ST",2)!=0)){
+									numRxnSubStr++;
+								}
+								tok=strtok(NULL,")");
+							}else{
+								break;
+							}
 						}
+						//SDL_Log("Number of sub-strings: %u",numRxnSubStr);
+						
+						for(uint8_t i=0;i<numRxnSubStr;i++){
+							if(parseRxn(&nd->rxn[nd->numRxns],rxnSubStr[i])==1){
+								numRxnsParsed++;
+								nd->numRxns++;
+							}
+						}
+						
 					}
 					
 				}
