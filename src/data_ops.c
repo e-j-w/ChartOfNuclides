@@ -84,7 +84,7 @@ void initializeTempState(const app_data *restrict dat, app_state *restrict state
 	state->ds.fcScrollInProgress = 0;
 	state->ds.fcNuclChangeInProgress = 0;
 	state->ds.searchEntryDispStartChar = 0;
-	state->ds.searchEntryDispNumChars = 0;
+	state->ds.searchEntryDispNumChars = 65535U; //default value specifying no text has been input yet
 	state->ds.interfaceSizeInd = UISCALE_NORMAL;
 	state->ss.numResults = 0;
 	state->ss.canUpdateResults = SDL_CreateSemaphore(1);
@@ -2958,6 +2958,17 @@ void uiElemHoldAction(const app_data *restrict dat, app_state *restrict state, c
 	}
 }
 
+void uiElemMouseoverAction(resource_data *restrict rdat, const uint8_t uiElemID){
+	switch(uiElemID){
+		case UIELEM_SEARCH_ENTRYBOX:
+			SDL_SetCursor(rdat->textEntryCursor);
+			break;
+		default:
+			SDL_SetCursor(rdat->defaultCursor);
+			break;
+	}
+}
+
 //updates the search result UI as results come in
 void updateSearchUIState(const app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat){
   updateSingleUIElemPosition(dat,state,rdat,UIELEM_SEARCH_MENU);
@@ -3046,7 +3057,7 @@ void uiElemClickAction(app_data *restrict dat, app_state *restrict state, resour
 				state->searchCursorPos = 0;
 				state->searchSelectionLen = 0;
 				state->ds.searchEntryDispStartChar = 0;
-				state->ds.searchEntryDispNumChars = 0;
+				state->ds.searchEntryDispNumChars = 65535U; //default value specifying no text has been input yet
 				SDL_StopTextInput(rdat->window);
 			}
 		}
@@ -3098,7 +3109,7 @@ void uiElemClickAction(app_data *restrict dat, app_state *restrict state, resour
 					state->searchCursorPos = 0;
 					state->searchSelectionLen = 0;
 					state->ds.searchEntryDispStartChar = 0;
-					state->ds.searchEntryDispNumChars = 0;
+					state->ds.searchEntryDispNumChars = 65535U; //default value specifying no text has been input yet
 					SDL_StopTextInput(rdat->window);
 				}
       }else if(state->ds.timeLeftInUIAnimation[UIANIM_SEARCH_MENU_SHOW]==0.0f){
@@ -3114,7 +3125,7 @@ void uiElemClickAction(app_data *restrict dat, app_state *restrict state, resour
 				state->searchCursorPos = 0;
 				state->searchSelectionLen = 0;
 				state->ds.searchEntryDispStartChar = 0;
-				state->ds.searchEntryDispNumChars = 0;
+				state->ds.searchEntryDispNumChars = 65535U; //default value specifying no text has been input yet
 				SDL_StartTextInput(rdat->window);
       }
 			break;
@@ -3217,7 +3228,7 @@ void uiElemClickAction(app_data *restrict dat, app_state *restrict state, resour
 			changeUIState(dat,state,UISTATE_CHARTONLY); //prevents mouseover from still highlighting buttons while the menu closes
 			break;
 		case UIELEM_SEARCH_ENTRYBOX:
-			if(state->ds.searchEntryDispNumChars > 0){
+			if((state->ds.searchEntryDispNumChars > 0)&&(state->ds.searchEntryDispNumChars < 65535U)){
 				//reposition the cursor using the mouse
 				float relXPos = ((state->mouseXPx-state->ds.uiElemPosX[UIELEM_SEARCH_ENTRYBOX])/state->ds.uiUserScale)-33.0f;
 				if(relXPos > 0.0f){
@@ -3225,6 +3236,9 @@ void uiElemClickAction(app_data *restrict dat, app_state *restrict state, resour
 					state->searchCursorPos = state->ds.searchEntryDispStartChar + mousePosChar;
 					//SDL_Log("Repositioned cursor to position %u (rel pos %f).\n",state->searchCursorPos,(double)relXPos);
 				}
+			}else{
+				state->ds.searchEntryDispNumChars = 0;
+				state->searchCursorPos = 0;
 			}
 			state->clickedUIElem = UIELEM_SEARCH_BUTTON; //keep the menu button selected
 			break;

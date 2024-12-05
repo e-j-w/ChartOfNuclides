@@ -602,6 +602,8 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
         }
       }
 
+      uiElemMouseoverAction(rdat,state->mouseoverElement); //handle cursor changes with mouse position
+
       //handle click and drag on the chart of nuclides
       if((chartDraggable)&&(state->mouseholdElement == UIELEM_ENUM_LENGTH)&&(state->mouseHoldStartPosXPx >= 0.0f)){
         state->ds.chartDragStartX = state->ds.chartPosX;
@@ -615,8 +617,10 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
 
     //check for mouse release
     if(state->mouseHoldStartPosXPx < 0.0f){
-      //SDL_Log("Mouse released.\n");
-      state->ds.dragFinished = 1;
+      if(state->ds.dragInProgress){
+        //SDL_Log("Mouse released.\n");
+        state->ds.dragFinished = 1;
+      }
     }
 
     uint32_t doubleClick = (state->inputFlags & (1U << INPUT_DOUBLECLICK));

@@ -135,6 +135,7 @@ int main(int argc, char *argv[]){
   //cursors
   gdat->rdat.defaultCursor = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_DEFAULT);
   gdat->rdat.dragCursor = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_MOVE);
+  gdat->rdat.textEntryCursor = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_TEXT);
   SDL_SetCursor(gdat->rdat.defaultCursor);
   
   //setup splash screen
