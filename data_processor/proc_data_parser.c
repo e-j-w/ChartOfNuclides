@@ -238,6 +238,7 @@ static int parseAppRules(app_data *restrict dat, asset_mapping *restrict stringI
 	dat->locStringIDs[LOCSTR_NOTNATURAL] = (uint16_t)nameToAssetID("not_natural",stringIDmap);
 	dat->locStringIDs[LOCSTR_ALLLEVELS] = (uint16_t)nameToAssetID("all_levels",stringIDmap);
 	dat->locStringIDs[LOCSTR_BACKTOSUMMARY] = (uint16_t)nameToAssetID("back_to_summary",stringIDmap);
+	dat->locStringIDs[LOCSTR_ALLREACTIONS] = (uint16_t)nameToAssetID("all_reactions",stringIDmap);
 	dat->locStringIDs[LOCSTR_MENUITEM_PREFS] = (uint16_t)nameToAssetID("menuitem_preferences",stringIDmap);
 	dat->locStringIDs[LOCSTR_MENUITEM_ABOUT] = (uint16_t)nameToAssetID("menuitem_about",stringIDmap);
 	dat->locStringIDs[LOCSTR_ABOUTSTR_VERSION] = (uint16_t)nameToAssetID("about_string_version",stringIDmap);
@@ -1729,9 +1730,149 @@ uint8_t parseRxn(reaction *rxn, const char *rxnstring){
 	return 1;
 }
 
+void parseLevelE(valWithErr * levelEVal, const char * estring, const char * errstring){
+
+	char *tok;
+	char eVal[11];
+  eVal[0] = '\0';
+  memcpy(eVal,&estring[0],10);
+	eVal[10] = '\0'; //terminate string
+
+	float levelE = -1.0f;
+
+	//get length without trailing spaces
+	uint8_t levEStrLen = 10;
+	for(int i=9;i>=0;i--){
+		if(isspace(eVal[i])){
+			levEStrLen=(uint8_t)i;
+		}else{
+			break;
+		}
+	}
+	//get the position of the first non-space character
+	uint8_t levEStartPos = 10;
+	for(uint8_t i=0;i<10;i++){
+		if(!(isspace(eVal[i]))){
+			levEStartPos = i;
+			break;
+		}
+	}
+
+	//check for variables in level energy
+	if(isalpha(eVal[levEStrLen-1])&&((levEStrLen==1) || eVal[levEStrLen-2]==' ')){
+		//SDL_Log("X eVal: %s\n",eVal);
+		
+		levelEVal->val=0;
+		levelEVal->err=0;
+		levelEVal->unit=VALUE_UNIT_NOVAL;
+		levelEVal->format = 0; //default
+		levelEVal->format |= (uint16_t)(VALUETYPE_X << 5);
+		//record variable index (stored value = variable ASCII code)
+		levelEVal->format |= (uint16_t)(eVal[levEStrLen-1] << 9);
+		
+	}else if((levEStartPos < 10)&&(isalpha(eVal[levEStartPos]))&&(eVal[levEStartPos+1]=='+')){
+		//level energy in X+number format
+		//SDL_Log("X+number eVal: %s\n",eVal);
+		tok = strtok(eVal,"+");
+		if(tok != NULL){
+			tok = strtok(NULL,""); //get the rest of the string
+			if(tok != NULL){
+				levelE = (float)atof(tok);
+				levelEVal->format = 0; //default
+				levelEVal->format |= (uint16_t)(VALUETYPE_PLUSX << 5);
+			}
+		}
+		memcpy(eVal,&estring[0],10); //re-constitute original buffer
+		eVal[10] = '\0'; //terminate string
+		levelEVal->format |= (uint16_t)(eVal[levEStartPos] << 9);
+	}else if((levEStrLen > 1)&&(eVal[levEStrLen-2]=='+')&&(isalpha(eVal[levEStrLen-1]))){
+		//level energy in number+X format
+		//SDL_Log("number+X eVal: %s\n",eVal);
+		tok = strtok(eVal,"+");
+		if(tok != NULL){
+			levelE = (float)atof(tok);
+			tok = strtok(NULL,""); //get the rest of the string
+			if(tok != NULL){
+				levelEVal->format = 0; //default
+				levelEVal->format |= (uint16_t)(VALUETYPE_PLUSX << 5);
+				levelEVal->format |= (uint16_t)(tok[0] << 9);
+				//SDL_Log("variable: %c\n",tok[0]);
+			}
+		}
+		memcpy(eVal,&estring[0],10); //re-constitute original buffer
+		eVal[10] = '\0'; //terminate string
+	}else{
+		//normal level energy
+		//SDL_Log("normal eVal: %s (length %u)\n",eVal,levEStrLen);
+		levelE = (float)atof(eVal);
+		levelEVal->format = 0; //default
+		//SDL_Log("Found level at %f keV from string: %s\n",(double)levelE,eVal);
+	}
+
+	if(levelE >= 0.0f){
+		//get the number of sig figs in the level energy
+		//SDL_Log("eVal: %s\n",eVal);
+		tok = strtok(eVal,".");
+		if(tok!=NULL){
+			//SDL_Log("%s\n",tok);
+			tok = strtok(NULL,"E+"); //some level energies are specified with exponents, or relative to a variable (eg. 73.0+X)
+			if(tok!=NULL){
+				
+				//SDL_Log("%s\n",tok);
+				uint16_t len = (uint16_t)strlen(tok);
+				//check for trailing empty spaces
+				for(uint16_t i=0;i<len;i++){
+					if(isspace(tok[i])){
+						len = i;
+						break;
+					}
+				}
+				levelEVal->format |= (uint16_t)(len & 15U);
+				//SDL_Log("format: %u\n",levelEVal->format);
+				if(((levelEVal->format >> 5U) & 15U) != VALUETYPE_PLUSX){
+					tok = strtok(NULL,""); //get the remaining part of the string (only get past here if the value was expressed in exponent form)
+					if(tok!=NULL){
+						//SDL_Log("energy in exponent form: %s\n",eVal);
+						//value was in exponent format
+						levelEVal->exponent = (int8_t)atoi(tok);
+						levelE = levelE / powf(10.0f,(float)(levelEVal->exponent));
+						levelEVal->format |= (uint16_t)(1U << 4); //exponent flag
+					}
+				}
+			}else{
+				//potentially an exponent form value with no decimal place
+				memcpy(eVal,&estring[0],10); //re-constitute original buffer
+				eVal[10] = '\0'; //terminate string
+				tok = strtok(eVal,"E");
+				//SDL_Log("eVal: %s\n",eVal);
+				if(tok!=NULL){
+					tok = strtok(NULL,""); //get the remaining part of the string (only get past here if the value was expressed in exponent form)
+					if(tok!=NULL){
+						//SDL_Log("%s\n",tok);
+						//value was in exponent format
+						levelEVal->exponent = (int8_t)atoi(tok);
+						levelE = levelE / powf(10.0f,(float)(levelEVal->exponent));
+						levelEVal->format |= (uint16_t)(1U << 4); //exponent flag
+					}
+				}
+			}
+		}
+		if((levelE==0.0f)&&((levelEVal->format & 15U) == 0)){
+			levelEVal->format |= 1U; //always include at least one decimal place for ground states, for aesthetic purposes
+		}
+		uint8_t levelEerr = (uint8_t)atoi(errstring);
+
+		//assign level energy values
+		levelEVal->val=levelE;
+		levelEVal->err=levelEerr;
+		levelEVal->unit=VALUE_UNIT_KEV;
+		
+	}
+}
+
 
 //parse half-life values for a given level
-void parseHalfLife(level * lev, char * hlstring){
+void parseHalfLife(level * lev, const char * hlstring){
 
 	char *tok;
   char hlAndUnitVal[11]; //both the half-life and its unit
@@ -1846,7 +1987,8 @@ void parseHalfLife(level * lev, char * hlstring){
     }else if(strcmp(hlUnitVal,"MEV")==0){
       lev->halfLife.unit = VALUE_UNIT_MEV;
     }else{
-      SDL_Log("Unknown half-life unit: %s (full string: %s)\n",hlUnitVal,hlstring);
+			//assume keV if no unit given (this occurs once in the Nov 2024 ENSDF data)
+      lev->halfLife.unit = VALUE_UNIT_KEV;
     }
 
     
@@ -2702,7 +2844,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
   //associated with a particlular reaction mechanism
   int subSec=0;
 	uint8_t startedParsingSec=0;
-	uint8_t numRxnsParsed=0;
+	uint8_t numRxnsinSubSec=0;
   
   //open the file and read all parameters
   if((efile=fopen(filePath,"r"))==NULL){
@@ -2769,7 +2911,6 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 					nd->numNucl++;
 					subSec=0; //we're at the beginning of the entry for this nuclide
 					startedParsingSec=1;
-					numRxnsParsed=0; //no reactions parsed yet for this nuclide
 					longestIsomerHl = 0.0;
 					isomerMValInNucl = 0;
 					qValDecModeFlag = 0;
@@ -2849,156 +2990,22 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 					if(nd->numLvls<MAXNUMLVLS){
 						if(strcmp(typebuff,"  L")==0){
 
-							float levelE = -1.0f;
+							//parse the energy error
+							char eeBuff[3];
+							memcpy(eeBuff, &line[19], 2);
+							eeBuff[2] = '\0';
 
-							//get length without trailing spaces
-							uint8_t levEStrLen = 10;
-							for(int i=9;i>=0;i--){
-								if(isspace(ebuff[i])){
-									levEStrLen=(uint8_t)i;
-								}else{
-									break;
-								}
-							}
-							//get the position of the first non-space character
-							uint8_t levEStartPos = 10;
-							for(uint8_t i=0;i<10;i++){
-								if(!(isspace(ebuff[i]))){
-									levEStartPos = i;
-									break;
-								}
-							}
-
-							//check for variables in level energy
-							if(isalpha(ebuff[levEStrLen-1])&&((levEStrLen==1) || ebuff[levEStrLen-2]==' ')){
-								//SDL_Log("X ebuff: %s\n",ebuff);
-								nd->nuclData[nd->numNucl].numLevels++;
-								nd->numLvls++;
-								
-								nd->levels[nd->numLvls-1].energy.val=0;
-								nd->levels[nd->numLvls-1].energy.err=0;
-								nd->levels[nd->numLvls-1].energy.unit=VALUE_UNIT_NOVAL;
-								nd->levels[nd->numLvls-1].energy.format = 0; //default
-								nd->levels[nd->numLvls-1].energy.format |= (uint16_t)(VALUETYPE_X << 5);
-								//record variable index (stored value = variable ASCII code)
-								nd->levels[nd->numLvls-1].energy.format |= (uint16_t)(ebuff[levEStrLen-1] << 9);
-								
-							}else if((levEStartPos < 10)&&(isalpha(ebuff[levEStartPos]))&&(ebuff[levEStartPos+1]=='+')){
-								//level energy in X+number format
-								//SDL_Log("X+number ebuff: %s\n",ebuff);
-								tok = strtok(ebuff,"+");
-								if(tok != NULL){
-									tok = strtok(NULL,""); //get the rest of the string
-									if(tok != NULL){
-										levelE = (float)atof(tok);
-										nd->nuclData[nd->numNucl].numLevels++;
-										nd->numLvls++;
-										nd->levels[nd->numLvls-1].energy.format = 0; //default
-										nd->levels[nd->numLvls-1].energy.format |= (uint16_t)(VALUETYPE_PLUSX << 5);
-									}
-								}
-								memcpy(ebuff, &line[9], 10); //re-constitute original buffer
-								ebuff[10] = '\0';
-								nd->levels[nd->numLvls-1].energy.format |= (uint16_t)(ebuff[levEStartPos] << 9);
-							}else if((levEStrLen > 1)&&(ebuff[levEStrLen-2]=='+')&&(isalpha(ebuff[levEStrLen-1]))){
-								//level energy in number+X format
-								//SDL_Log("number+X ebuff: %s\n",ebuff);
-								tok = strtok(ebuff,"+");
-								if(tok != NULL){
-									levelE = (float)atof(tok);
-									nd->nuclData[nd->numNucl].numLevels++;
-									nd->numLvls++;
-									tok = strtok(NULL,""); //get the rest of the string
-									if(tok != NULL){
-										nd->levels[nd->numLvls-1].energy.format = 0; //default
-										nd->levels[nd->numLvls-1].energy.format |= (uint16_t)(VALUETYPE_PLUSX << 5);
-										nd->levels[nd->numLvls-1].energy.format |= (uint16_t)(tok[0] << 9);
-										//SDL_Log("variable: %c\n",tok[0]);
-									}
-								}
-								memcpy(ebuff, &line[9], 10); //re-constitute original buffer
-								ebuff[10] = '\0';
-							}else{
-								//normal level energy
-								//SDL_Log("normal ebuff: %s (length %u)\n",ebuff,levEStrLen);
-								levelE = (float)atof(ebuff);
-								nd->nuclData[nd->numNucl].numLevels++;
-								nd->numLvls++;
-								nd->levels[nd->numLvls-1].energy.format = 0; //default
-								//SDL_Log("Found level at %f keV from string: %s\n",(double)levelE,ebuff);
-							}
-
+							//parse the level energy
+							parseLevelE(&nd->levels[nd->numLvls].energy,ebuff,eeBuff);
+							nd->nuclData[nd->numNucl].numLevels++;
+							nd->numLvls++;
 							if(nd->nuclData[nd->numNucl].numLevels == 1){
 								nd->nuclData[nd->numNucl].firstLevel = nd->numLvls-1;
 							}
 
-							if(levelE >= 0.0f){
-								//get the number of sig figs in the level energy
-								//SDL_Log("ebuff: %s\n",ebuff);
-								tok = strtok(ebuff,".");
-								if(tok!=NULL){
-									//SDL_Log("%s\n",tok);
-									tok = strtok(NULL,"E+"); //some level energies are specified with exponents, or relative to a variable (eg. 73.0+X)
-									if(tok!=NULL){
-										
-										//SDL_Log("%s\n",tok);
-										uint16_t len = (uint16_t)strlen(tok);
-										//check for trailing empty spaces
-										for(uint16_t i=0;i<len;i++){
-											if(isspace(tok[i])){
-												len = i;
-												break;
-											}
-										}
-										nd->levels[nd->numLvls-1].energy.format |= (uint16_t)(len & 15U);
-										//SDL_Log("format: %u\n",nd->levels[nd->numLvls-1].energy.format);
-										if(((nd->levels[nd->numLvls-1].energy.format >> 5U) & 15U) != VALUETYPE_PLUSX){
-											tok = strtok(NULL,""); //get the remaining part of the string (only get past here if the value was expressed in exponent form)
-											if(tok!=NULL){
-												//SDL_Log("energy in exponent form: %s\n",ebuff);
-												//value was in exponent format
-												nd->levels[nd->numLvls-1].energy.exponent = (int8_t)atoi(tok);
-												levelE = levelE / powf(10.0f,(float)(nd->levels[nd->numLvls-1].energy.exponent));
-												nd->levels[nd->numLvls-1].energy.format |= (uint16_t)(1U << 4); //exponent flag
-											}
-										}
-									}else{
-										//potentially an exponent form value with no decimal place
-										memcpy(ebuff, &line[9], 10); //re-copy buffer
-										ebuff[10] = '\0';
-										tok = strtok(ebuff,"E");
-										//SDL_Log("ebuff: %s\n",ebuff);
-										if(tok!=NULL){
-											tok = strtok(NULL,""); //get the remaining part of the string (only get past here if the value was expressed in exponent form)
-											if(tok!=NULL){
-												//SDL_Log("%s\n",tok);
-												//value was in exponent format
-												nd->levels[nd->numLvls-1].energy.exponent = (int8_t)atoi(tok);
-												levelE = levelE / powf(10.0f,(float)(nd->levels[nd->numLvls-1].energy.exponent));
-												nd->levels[nd->numLvls-1].energy.format |= (uint16_t)(1U << 4); //exponent flag
-											}
-										}
-									}
-								}
-								if((levelE==0.0f)&&((nd->levels[nd->numLvls-1].energy.format & 15U) == 0)){
-									nd->levels[nd->numLvls-1].energy.format |= 1U; //always include at least one decimal place for ground states, for aesthetic purposes
-								}
-
-								//parse the energy error
-								char eeBuff[3];
-								memcpy(eeBuff, &line[19], 2);
-								eeBuff[2] = '\0';
-								uint8_t levelEerr = (uint8_t)atoi(eeBuff);
-
-								//assign level energy values
-								nd->levels[nd->numLvls-1].energy.val=levelE;
-								nd->levels[nd->numLvls-1].energy.err=levelEerr;
-								nd->levels[nd->numLvls-1].energy.unit=VALUE_UNIT_KEV;
-								
-							}
-
 							//parse and handle level properties not related to energy
-							
+							nd->levels[nd->numLvls-1].populatingRxns = 0;
+
 							uint8_t halfInt = 0;
 							if(((nd->nuclData[nd->numNucl].N + nd->nuclData[nd->numNucl].Z) % 2) != 0){
 								halfInt = 1; //odd mass nucleus, half-integer spins
@@ -3791,7 +3798,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 					//reaction subsection
 					//reaction hasn't been parsed yet
 					if(startedParsingSec == 0){
-						//SDL_Log("numRxnsParsed: %u, subSec: %u\n",numRxnsParsed,subSec);
+						//SDL_Log("subSec: %u\n",subSec);
 						startedParsingSec=1;
 						char rxnBuff[31];
 						char rxnSubStr[3][31];
@@ -3830,14 +3837,47 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 							}
 						}
 						//SDL_Log("Number of sub-strings: %u",numRxnSubStr);
-						
+						numRxnsinSubSec=0;
 						for(uint8_t i=0;i<numRxnSubStr;i++){
 							if(parseRxn(&nd->rxn[nd->numRxns],rxnSubStr[i])==1){
-								numRxnsParsed++;
-								nd->numRxns++;
+								if(nd->numRxns < MAXNUMREACTIONS){
+									nd->numRxns++;
+									numRxnsinSubSec++;
+								}else{
+									SDL_Log("ERROR: number of reactions parsed exceeds the maximum (%i).\n",MAXNUMREACTIONS);
+									return -1;
+								}
 							}
 						}
 						
+					}else{
+						//look for levels and assign them to the reaction
+						if(strcmp(typebuff,"  L")==0){
+
+							valWithErr levelEVal;
+							memset(&levelEVal,0,sizeof(levelEVal));
+
+							//parse the energy error
+							char eeBuff[3];
+							memcpy(eeBuff, &line[19], 2);
+							eeBuff[2] = '\0';
+
+							//parse the level energy
+							parseLevelE(&levelEVal,ebuff,eeBuff);
+							
+							//check against known levels in the same nuclide
+							for(uint32_t i=nd->nuclData[nd->numNucl].firstLevel; i<(nd->nuclData[nd->numNucl].firstLevel+nd->nuclData[nd->numNucl].numLevels); i++){
+								if(fabs(getRawValFromDB(&nd->levels[i].energy) - getRawValFromDB(&levelEVal)) < 0.05){
+									//flag level as belonging to reaction(s) from this subsection
+									//SDL_Log("Matching energies: [%f, %f]\n",getRawValFromDB(&nd->levels[i].energy),getRawValFromDB(&levelEVal));
+									for(uint8_t j=0; i<numRxnsinSubSec; j++){
+										uint16_t rxnInd = (uint16_t)(nd->numRxns - nd->nuclData[nd->numNucl].firstRxn - j);
+										nd->levels[i].populatingRxns |= (1UL << rxnInd);
+									}
+								}
+							}
+							
+						}
 					}
 					
 				}

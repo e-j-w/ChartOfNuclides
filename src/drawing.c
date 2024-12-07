@@ -163,17 +163,17 @@ void drawButtonBG(const ui_theme_rules *restrict uirules, resource_data *restric
   drawBGElement(uirules,rdat,buttonRect,UIELEMTYPE_BUTTON,highlightState,alpha);
 }
 
-void drawMenuBGWithArrow(const ui_theme_rules *restrict uirules, resource_data *restrict rdat, const SDL_FRect panelRect, const uint16_t arrowPosX, const float alpha){
+void drawMenuBGWithArrow(const ui_theme_rules *restrict uirules, resource_data *restrict rdat, const SDL_FRect panelRect, const int16_t arrowPosX, const float alpha){
   drawPanelBG(uirules,rdat,panelRect,alpha);
   float arrowY = panelRect.y - 4.0f*rdat->uiScale/rdat->uiDPIScale;
   if(arrowY < 0.0f){
     arrowY = 0.0f;
   }
-  drawIcon(uirules,rdat,arrowPosX,(uint16_t)arrowY,(uint16_t)(UI_TILE_SIZE*rdat->uiScale/rdat->uiDPIScale),HIGHLIGHT_NORMAL,(uint8_t)(alpha*255.0f),UIICON_PANELEDGEARROW);
+  drawIcon(uirules,rdat,arrowPosX,(int16_t)arrowY,(int16_t)(UI_TILE_SIZE*rdat->uiScale/rdat->uiDPIScale),HIGHLIGHT_NORMAL,(uint8_t)(alpha*255.0f),UIICON_PANELEDGEARROW);
 }
 
 //elemType: values from uielem_type_enum 
-void drawButtonOrEntryElem(const ui_theme_rules *restrict uirules, resource_data *restrict rdat, const uint16_t x, const uint16_t y, const uint16_t w, const uint8_t highlightState, const uint8_t elemType, const float alpha){
+void drawButtonOrEntryElem(const ui_theme_rules *restrict uirules, resource_data *restrict rdat, const int16_t x, const int16_t y, const int16_t w, const uint8_t highlightState, const uint8_t elemType, const float alpha){
   
   SDL_FRect destRectUnscaled;
   destRectUnscaled.x = (float)(x);
@@ -196,12 +196,12 @@ void drawButtonOrEntryElem(const ui_theme_rules *restrict uirules, resource_data
 
 //x, y, w: position and size of the button, assuming a UI scale of 1 (height assumed to be one tile height)
 //highlightState: values from highlight_state_enum
-void drawButton(const ui_theme_rules *restrict uirules, resource_data *restrict rdat, const uint16_t x, const uint16_t y, const uint16_t w, const uint8_t highlightState, const float alpha){
+void drawButton(const ui_theme_rules *restrict uirules, resource_data *restrict rdat, const int16_t x, const int16_t y, const int16_t w, const uint8_t highlightState, const float alpha){
    drawButtonOrEntryElem(uirules,rdat,x,y,w,highlightState,UIELEMTYPE_BUTTON,alpha);
 }
 
 //draw a button with a text label
-void drawTextButton(const ui_theme_rules *restrict uirules, resource_data *restrict rdat, const uint16_t x, const uint16_t y, const uint16_t w, const uint8_t highlightState, const uint8_t alpha, const char *text){
+void drawTextButton(const ui_theme_rules *restrict uirules, resource_data *restrict rdat, const int16_t x, const int16_t y, const int16_t w, const uint8_t highlightState, const uint8_t alpha, const char *text){
   drawButton(uirules,rdat,x,y,w,highlightState,(float)(alpha/255.0f));
   //remember that the font size is scaled by the UI scale, during font import
   const float textX = (float)x + (float)(w)/2.0f;
@@ -209,7 +209,7 @@ void drawTextButton(const ui_theme_rules *restrict uirules, resource_data *restr
   drawTextAlignedSized(rdat,textX,textY,uirules->textColNormal,FONTSIZE_NORMAL,alpha,text,ALIGN_CENTER,(Uint16)w);
 }
 
-void drawIcon(const ui_theme_rules *restrict uirules, resource_data *restrict rdat, const uint16_t x, const uint16_t y, const uint16_t w, const uint8_t highlightState, const uint8_t alpha, const uint8_t iconInd){
+void drawIcon(const ui_theme_rules *restrict uirules, resource_data *restrict rdat, const int16_t x, const int16_t y, const int16_t w, const uint8_t highlightState, const uint8_t alpha, const uint8_t iconInd){
   
   if(iconInd >= UIICON_ENUM_LENGTH){
     SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,"drawIcon - invalid icon index (%u).\n",iconInd);
@@ -246,14 +246,14 @@ void drawIcon(const ui_theme_rules *restrict uirules, resource_data *restrict rd
 
 }
 
-void drawIconButton(const ui_theme_rules *restrict uirules, resource_data *restrict rdat, const uint16_t x, const uint16_t y, const uint16_t w, const uint8_t highlightState, const uint8_t alpha, const uint8_t iconInd){
+void drawIconButton(const ui_theme_rules *restrict uirules, resource_data *restrict rdat, const int16_t x, const int16_t y, const int16_t w, const uint8_t highlightState, const uint8_t alpha, const uint8_t iconInd){
   drawButton(uirules,rdat,x,y,w,highlightState,(float)(alpha/255.0f));
   drawIcon(uirules,rdat,x,y,w,HIGHLIGHT_NORMAL,alpha,iconInd);
 }
 
-void drawIconAndTextButton(const ui_theme_rules *restrict uirules, resource_data *restrict rdat, const uint16_t x, const uint16_t y, const uint16_t w, const uint8_t highlightState, const uint8_t alpha, const uint8_t iconInd, const char *text){
+void drawIconAndTextButton(const ui_theme_rules *restrict uirules, resource_data *restrict rdat, const int16_t x, const int16_t y, const int16_t w, const uint8_t highlightState, const uint8_t alpha, const uint8_t iconInd, const char *text){
   drawButton(uirules,rdat,x,y,w,highlightState,(float)(alpha/255.0f));
-  drawIcon(uirules,rdat,(uint16_t)(x+UI_PADDING_SIZE*rdat->uiScale/rdat->uiDPIScale),y,(uint16_t)(UI_TILE_SIZE*rdat->uiScale/rdat->uiDPIScale),HIGHLIGHT_NORMAL,alpha,iconInd);
+  drawIcon(uirules,rdat,(int16_t)(x+UI_PADDING_SIZE*rdat->uiScale/rdat->uiDPIScale),y,(int16_t)(UI_TILE_SIZE*rdat->uiScale/rdat->uiDPIScale),HIGHLIGHT_NORMAL,alpha,iconInd);
   //get the text width and height
   //these should already fit a 1 tile height button well, with the default font size
   //(remember that the font size is scaled by the UI scale, during font import)
@@ -263,9 +263,9 @@ void drawIconAndTextButton(const ui_theme_rules *restrict uirules, resource_data
   drawTextAlignedSized(rdat,textX,textY,uirules->textColNormal,FONTSIZE_NORMAL,alpha,text,ALIGN_CENTER,(Uint16)(w*rdat->uiScale));
 }
 
-void drawDropDownTextButton(const ui_theme_rules *restrict uirules, resource_data *restrict rdat, const uint16_t x, const uint16_t y, const uint16_t w, const uint8_t highlightState, const uint8_t alpha, const char *text){
+void drawDropDownTextButton(const ui_theme_rules *restrict uirules, resource_data *restrict rdat, const int16_t x, const int16_t y, const int16_t w, const uint8_t highlightState, const uint8_t alpha, const char *text){
   drawButton(uirules,rdat,x,y,w,highlightState,(float)(alpha/255.0f));
-  drawIcon(uirules,rdat,(uint16_t)(x+w-(UI_PADDING_SIZE+UI_TILE_SIZE)*rdat->uiScale/rdat->uiDPIScale),y,(uint16_t)(UI_TILE_SIZE*rdat->uiScale/rdat->uiDPIScale),HIGHLIGHT_NORMAL,alpha,UIICON_DROPDOWNARROW);
+  drawIcon(uirules,rdat,(int16_t)(x+w-(UI_PADDING_SIZE+UI_TILE_SIZE)*rdat->uiScale/rdat->uiDPIScale),y,(int16_t)(UI_TILE_SIZE*rdat->uiScale/rdat->uiDPIScale),HIGHLIGHT_NORMAL,alpha,UIICON_DROPDOWNARROW);
   //get the text width and height
   //these should already fit a 1 tile height button well, with the default font size
   //(remember that the font size is scaled by the UI scale, during font import)
@@ -275,7 +275,7 @@ void drawDropDownTextButton(const ui_theme_rules *restrict uirules, resource_dat
   drawTextAlignedSized(rdat,textX,textY,uirules->textColNormal,FONTSIZE_NORMAL,alpha,text,ALIGN_CENTER,(Uint16)(w*rdat->uiScale));
 }
 
-void drawTextEntryBox(const ui_theme_rules *restrict uirules, resource_data *restrict rdat, const uint16_t x, const uint16_t y, const uint16_t w, const uint8_t boxHighlightState, const uint8_t textHighlightState, const uint8_t alpha, const char *text){
+void drawTextEntryBox(const ui_theme_rules *restrict uirules, resource_data *restrict rdat, const int16_t x, const int16_t y, const int16_t w, const uint8_t boxHighlightState, const uint8_t textHighlightState, const uint8_t alpha, const char *text){
   drawButtonOrEntryElem(uirules,rdat,x,y,w,boxHighlightState,UIELEMTYPE_ENTRYBOX,(float)(alpha/255.0f));
   const float textX = (float)(x + 3*UI_PADDING_SIZE*rdat->uiScale/rdat->uiDPIScale);
   const float textY = (float)(y + 6*rdat->uiScale/rdat->uiDPIScale);
@@ -291,10 +291,10 @@ void drawTextEntryBox(const ui_theme_rules *restrict uirules, resource_data *res
 }
 
 //cursorPos: -ve value = draw no cursor
-void drawIconAndTextEntryBox(const ui_theme_rules *restrict uirules, resource_data *restrict rdat, const uint16_t x, const uint16_t y, const uint16_t w, const uint8_t boxHighlightState, const uint8_t textHighlightState, const uint8_t alpha, const uint8_t iconInd, const char *text, const uint16_t txtDrawStartPos, const uint16_t txtDrawNumChars, const int cursorPos){
-  const uint16_t iconWidth = (uint16_t)(UI_TILE_SIZE*rdat->uiScale/rdat->uiDPIScale);
+void drawIconAndTextEntryBox(const ui_theme_rules *restrict uirules, resource_data *restrict rdat, const int16_t x, const int16_t y, const int16_t w, const uint8_t boxHighlightState, const uint8_t textHighlightState, const uint8_t alpha, const uint8_t iconInd, const char *text, const uint16_t txtDrawStartPos, const uint16_t txtDrawNumChars, const int cursorPos){
+  const int16_t iconWidth = (int16_t)(UI_TILE_SIZE*rdat->uiScale/rdat->uiDPIScale);
   drawButtonOrEntryElem(uirules,rdat,x,y,w,boxHighlightState,UIELEMTYPE_ENTRYBOX,(float)(alpha/255.0f));
-  drawIcon(uirules,rdat,(uint16_t)(x+UI_PADDING_SIZE*rdat->uiScale/rdat->uiDPIScale),y,iconWidth,HIGHLIGHT_NORMAL,alpha,iconInd);
+  drawIcon(uirules,rdat,(int16_t)(x+UI_PADDING_SIZE*rdat->uiScale/rdat->uiDPIScale),y,iconWidth,HIGHLIGHT_NORMAL,alpha,iconInd);
   const float textX = (float)(x + (UI_TILE_SIZE + UI_PADDING_SIZE)*rdat->uiScale/rdat->uiDPIScale);
   const float textY = (float)(y + 6*rdat->uiScale/rdat->uiDPIScale);
   switch(textHighlightState){
@@ -336,7 +336,7 @@ void drawIconAndTextEntryBox(const ui_theme_rules *restrict uirules, resource_da
   }
 }
 
-void drawCheckbox(const ui_theme_rules *restrict uirules, resource_data *restrict rdat,const uint16_t x, const uint16_t y, const uint16_t w, const uint8_t highlightState, const uint8_t alpha, const uint8_t checked){
+void drawCheckbox(const ui_theme_rules *restrict uirules, resource_data *restrict rdat,const int16_t x, const int16_t y, const int16_t w, const uint8_t highlightState, const uint8_t alpha, const uint8_t checked){
   if(checked){
     drawIcon(uirules,rdat,x,y,w,highlightState,alpha,UIICON_CHECKBOX_OUTLINE);
     drawIcon(uirules,rdat,x,y,w,highlightState,alpha,UIICON_CHECKBOX_CHECK);

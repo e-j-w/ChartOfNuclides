@@ -23,6 +23,7 @@ protons_desc|Protons (Z)
 not_natural|Not naturally occurring
 all_levels|All levels/gammas
 back_to_summary|Back to summary
+all_reactions|All Reactions
 menuitem_preferences|Preferences
 menuitem_about|About Chart of Nuclides
 about_string_version|Version 0.3.0 - "There Is No Hope In This Building"
