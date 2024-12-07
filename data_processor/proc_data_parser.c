@@ -1544,13 +1544,13 @@ uint8_t parseRxn(reaction *rxn, const char *rxnstring){
 		if((Z>=0)&&(N>=0)){
 			//target found
 			rxn->targetNucl = 0;
-			rxn->targetNucl |= (uint16_t)(N & 255U);
-			rxn->targetNucl |= (uint16_t)((Z & 255U) << 7U);
+			rxn->targetNucl |= (uint16_t)((uint32_t)N & 255U);
+			rxn->targetNucl |= (uint16_t)(((uint32_t)Z & 255U) << 7U);
 		}else if(Z>=0){
 			//element only string (eg. 'C')
 			rxn->targetNucl = 0;
 			rxn->targetNucl |= (uint16_t)(255U);
-			rxn->targetNucl |= (uint16_t)((Z & 255U) << 7U);
+			rxn->targetNucl |= (uint16_t)(((uint32_t)Z & 255U) << 7U);
 		}else if((Z==-2)&&(N==-2)){
 			//unknown heavy nuclide
 			rxn->targetNucl |= (uint16_t)(254U);
@@ -1580,13 +1580,13 @@ uint8_t parseRxn(reaction *rxn, const char *rxnstring){
 				if(N>=0){
 					//projectile found
 					rxn->projectileNucl = 0;
-					rxn->projectileNucl |= (uint16_t)(N & 255U);
-					rxn->projectileNucl |= (uint16_t)((Z & 255U) << 7U);
+					rxn->projectileNucl |= (uint16_t)((uint32_t)N & 255U);
+					rxn->projectileNucl |= (uint16_t)(((uint32_t)Z & 255U) << 7U);
 				}else{
 					//element only string (eg. 'C')
 					rxn->projectileNucl = 0;
 					rxn->projectileNucl |= (uint16_t)(255U);
-					rxn->projectileNucl |= (uint16_t)((Z & 255U) << 7U);
+					rxn->projectileNucl |= (uint16_t)(((uint32_t)Z & 255U) << 7U);
 				}
 				rxnBuffPos += (uint8_t)(strlen(tok) + 1);
 				strncpy(rxnBuff,rxnstring+rxnBuffPos,30-rxnBuffPos); //reconstitute string (since strtok was called in getENSDFNuclStrNZ)
@@ -1605,8 +1605,8 @@ uint8_t parseRxn(reaction *rxn, const char *rxnstring){
 						if(N>=0){
 							//ejectile found
 							rxn->ejectileNucl = 0;
-							rxn->ejectileNucl |= (uint16_t)(N & 255U);
-							rxn->ejectileNucl |= (uint16_t)((Z & 255U) << 7U);
+							rxn->ejectileNucl |= (uint16_t)((uint32_t)N & 255U);
+							rxn->ejectileNucl |= (uint16_t)(((uint32_t)Z & 255U) << 7U);
 							rxn->type = REACTIONTYPE_NUCLTRANSFER;
 							if(rxn->ejectileNucl == rxn->projectileNucl){
 								//reclassify reaction
@@ -1617,7 +1617,7 @@ uint8_t parseRxn(reaction *rxn, const char *rxnstring){
 							//element only string (eg. 'C')
 							rxn->ejectileNucl = 0;
 							rxn->ejectileNucl |= (uint16_t)(255U);
-							rxn->ejectileNucl |= (uint16_t)((Z & 255U) << 7U);
+							rxn->ejectileNucl |= (uint16_t)(((uint32_t)Z & 255U) << 7U);
 							rxn->type = REACTIONTYPE_NUCLTRANSFER;
 							if(rxn->ejectileNucl == rxn->projectileNucl){
 								//reclassify reaction
@@ -1642,8 +1642,8 @@ uint8_t parseRxn(reaction *rxn, const char *rxnstring){
 								if(N>=0){
 									//ejectile found
 									rxn->ejectileNucl = 0;
-									rxn->ejectileNucl |= (uint16_t)(N & 255U);
-									rxn->ejectileNucl |= (uint16_t)((Z & 255U) << 7U);
+									rxn->ejectileNucl |= (uint16_t)((uint32_t)N & 255U);
+									rxn->ejectileNucl |= (uint16_t)(((uint32_t)Z & 255U) << 7U);
 									rxn->type = REACTIONTYPE_NUCLTRANSFER;
 									if(rxn->ejectileNucl == rxn->projectileNucl){
 										//reclassify reaction
@@ -1654,7 +1654,7 @@ uint8_t parseRxn(reaction *rxn, const char *rxnstring){
 									//element only string (eg. 'C')
 									rxn->ejectileNucl = 0;
 									rxn->ejectileNucl |= (uint16_t)(255U);
-									rxn->ejectileNucl |= (uint16_t)((Z & 255U) << 7U);
+									rxn->ejectileNucl |= (uint16_t)(((uint32_t)Z & 255U) << 7U);
 									rxn->type = REACTIONTYPE_NUCLTRANSFER;
 									if(rxn->ejectileNucl == rxn->projectileNucl){
 										//reclassify reaction
@@ -3870,7 +3870,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 								if(fabs(getRawValFromDB(&nd->levels[i].energy) - getRawValFromDB(&levelEVal)) < 0.05){
 									//flag level as belonging to reaction(s) from this subsection
 									//SDL_Log("Matching energies: [%f, %f]\n",getRawValFromDB(&nd->levels[i].energy),getRawValFromDB(&levelEVal));
-									for(uint8_t j=0; i<numRxnsinSubSec; j++){
+									for(uint8_t j=0; j<numRxnsinSubSec; j++){
 										uint16_t rxnInd = (uint16_t)(nd->numRxns - nd->nuclData[nd->numNucl].firstRxn - j);
 										nd->levels[i].populatingRxns |= (1UL << rxnInd);
 									}
