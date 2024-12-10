@@ -534,9 +534,11 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
       state->mouseholdElement = UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON;
       uiElemClickAction(dat,state,rdat,0,UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON);
     }else if((state->ds.shownElements & (1UL << UIELEM_NUCL_FULLINFOBOX))&&(state->mouseoverElement == UIELEM_NUCL_FULLINFOBOX_BACKBUTTON)&&(state->lastOpenedMenu == UIELEM_NUCL_FULLINFOBOX_BACKBUTTON)&&(state->lastInputType == INPUT_TYPE_KEYBOARD)){
-      //navigated to the back button by keyboard, so select it now
-      uiElemClickAction(dat,state,rdat,0,UIELEM_NUCL_FULLINFOBOX_BACKBUTTON); //go back to the main chart
-      state->mouseholdElement = UIELEM_ENUM_LENGTH;
+      if((state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_EXPAND]==0.0f)&&(state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_CONTRACT]==0.0f)){
+        //navigated to the back button by keyboard, so select it now
+        uiElemClickAction(dat,state,rdat,0,UIELEM_NUCL_FULLINFOBOX_BACKBUTTON); //go back to the main chart
+        state->mouseholdElement = UIELEM_ENUM_LENGTH;
+      }
     }else if(state->uiState == UISTATE_CHARTONLY){
       if(state->chartSelectedNucl == MAXNUMNUCL){
         //select the center-screen nuclide on the chart
@@ -574,7 +576,7 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
     }else if((state->ds.shownElements & (1UL << UIELEM_RXN_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_RXN_MENU_HIDE]==0.0f)){
       //close the reaction menu
       uiElemClickAction(dat,state,rdat,0,UIELEM_NUCL_FULLINFOBOX_RXNBUTTON);
-    }else if((state->uiState == UISTATE_FULLLEVELINFOWITHMENU)&&(state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_EXPAND]==0.0f)){
+    }else if((state->uiState == UISTATE_FULLLEVELINFOWITHMENU)&&(state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_EXPAND]==0.0f)&&(state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_CONTRACT]==0.0f)){
       uiElemClickAction(dat,state,rdat,0,UIELEM_NUCL_FULLINFOBOX_BACKBUTTON); //go back to the main chart
       state->mouseholdElement = UIELEM_ENUM_LENGTH;
     }else if(state->ds.windowFullscreenMode){
@@ -600,12 +602,14 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
     }else if(state->uiState == UISTATE_FULLLEVELINFO){
       switch(state->lastOpenedMenu){
         case UIELEM_NUCL_FULLINFOBOX_BACKBUTTON:
-          if(state->mouseoverElement == UIELEM_NUCL_FULLINFOBOX_BACKBUTTON){
-            uiElemClickAction(dat,state,rdat,0,UIELEM_NUCL_FULLINFOBOX_BACKBUTTON); //go back to the main chart
-            state->mouseholdElement = UIELEM_ENUM_LENGTH;
-          }else{
-            state->uiState = UISTATE_FULLLEVELINFOWITHMENU; //allow menu navigation by keyboard
-            state->mouseoverElement = UIELEM_NUCL_FULLINFOBOX_BACKBUTTON; //highlight the back button
+          if((state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_EXPAND]==0.0f)&&(state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_CONTRACT]==0.0f)){
+            if(state->mouseoverElement == UIELEM_NUCL_FULLINFOBOX_BACKBUTTON){
+              uiElemClickAction(dat,state,rdat,0,UIELEM_NUCL_FULLINFOBOX_BACKBUTTON); //go back to the main chart
+              state->mouseholdElement = UIELEM_ENUM_LENGTH;
+            }else{
+              state->uiState = UISTATE_FULLLEVELINFOWITHMENU; //allow menu navigation by keyboard
+              state->mouseoverElement = UIELEM_NUCL_FULLINFOBOX_BACKBUTTON; //highlight the back button
+            }
           }
           break;
         case UIELEM_RXN_MENU:

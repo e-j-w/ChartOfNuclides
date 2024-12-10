@@ -1198,7 +1198,7 @@ void drawNuclFullInfoBox(const app_data *restrict dat, const app_state *restrict
 
   //header
   char descStr[64];
-  drawInfoBoxHeader(dat,&state->ds,rdat,0.0f,NUCL_FULLINFOBOX_HEADER_POS_Y,255,nuclInd);
+  drawInfoBoxHeader(dat,&state->ds,rdat,0.0f,NUCL_FULLINFOBOX_HEADER_POS_Y*state->ds.uiUserScale,255,nuclInd);
   //proton and neutron numbers, abundance
   drawYPos = NUCL_FULLINFOBOX_NZVALS_POS_Y*state->ds.uiUserScale + txtYOffset;
   SDL_snprintf(descStr,64,"%s: %3i, %s: %3i",dat->strings[dat->locStringIDs[LOCSTR_PROTONSDESC]],dat->ndat.nuclData[nuclInd].Z,dat->strings[dat->locStringIDs[LOCSTR_NEUTRONSDESC]],dat->ndat.nuclData[nuclInd].N);
@@ -1244,8 +1244,7 @@ void drawNuclFullInfoBox(const app_data *restrict dat, const app_state *restrict
   //draw column title strings
   drawXPos = origDrawXPos;
   drawYPos = (NUCL_FULLINFOBOX_LEVELLIST_HEADER_POS_Y - 2.0f)*state->ds.uiUserScale + txtYOffset;
-  drawTextAlignedSized(rdat,drawXPos - 2*UI_PADDING_SIZE*state->ds.uiUserScale,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,dat->strings[dat->locStringIDs[LOCSTR_LEVELINFO_HEADER]],ALIGN_LEFT,16384);
-  drawTextAlignedSized(rdat,drawXPos - (2*UI_PADDING_SIZE - 0.3f)*state->ds.uiUserScale,drawYPos - 0.3f*state->ds.uiUserScale,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,dat->strings[dat->locStringIDs[LOCSTR_LEVELINFO_HEADER]],ALIGN_LEFT,16384); //fake bold text
+  drawTextAlignedSized(rdat,drawXPos - 2*UI_PADDING_SIZE*state->ds.uiUserScale,drawYPos,blackCol8Bit,FONTSIZE_NORMAL_BOLD,txtAlpha,dat->strings[dat->locStringIDs[LOCSTR_LEVELINFO_HEADER]],ALIGN_LEFT,16384);
   drawYPos += (NUCL_INFOBOX_SMALLLINE_HEIGHT + UI_PADDING_SIZE)*state->ds.uiUserScale;
   drawTextAlignedSized(rdat,drawXPos,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,dat->strings[dat->locStringIDs[LOCSTR_ENERGY_KEV]],ALIGN_LEFT,16384);
   drawXPos += state->ds.fullInfoElevelColWidth*state->ds.uiUserScale;

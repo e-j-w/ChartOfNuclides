@@ -59,7 +59,8 @@ static const uint8_t UITHEME_ICON_TILE_X[UIICON_ENUM_LENGTH] = {0,0, 0, 1, 2, 2,
 static const uint8_t UITHEME_ICON_TILE_Y[UIICON_ENUM_LENGTH] = {1,9,10,10,11,10,9,9,8,8,11,11,3,3};
 
 //font sizes (assuming UI scale of 1)
-static const uint16_t fontSizes[FONTSIZE_ENUM_LENGTH] = {13,15,19};
+static const uint16_t fontSizes[FONTSIZE_ENUM_LENGTH] = {13,15,15,19};
+static const uint16_t fontStyles[FONTSIZE_ENUM_LENGTH] = {TTF_STYLE_NORMAL,TTF_STYLE_NORMAL,TTF_STYLE_BOLD,TTF_STYLE_NORMAL};
 
 //user UI scaling factors
 static const float uiScales[UISCALE_ENUM_LENGTH] = {1.0f,1.20f,1.60f,1.85f};
@@ -175,7 +176,7 @@ static const float uiScales[UISCALE_ENUM_LENGTH] = {1.0f,1.20f,1.60f,1.85f};
 
 //full info box (level list)
 #define NUCL_FULLINFOBOX_SCROLL_TIME                    0.1f //time (in seconds) for the list scroll animation to finish
-#define NUCL_FULLINFOBOX_HEADER_POS_Y                   -12.0f //in unscaled pixels
+#define NUCL_FULLINFOBOX_HEADER_POS_Y                   -10.0f //in unscaled pixels
 #define NUCL_FULLINFOBOX_BACKBUTTON_POS_XR              (2*MENU_BUTTON_POS_XR + MENU_BUTTON_WIDTH)
 #define NUCL_FULLINFOBOX_BACKBUTTON_POS_Y               MENU_BUTTON_POS_Y
 #define NUCL_FULLINFOBOX_BACKBUTTON_WIDTH               NUCL_INFOBOX_ALLLEVELS_BUTTON_WIDTH
