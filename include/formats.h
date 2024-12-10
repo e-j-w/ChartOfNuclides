@@ -156,6 +156,7 @@ typedef struct
   uint8_t longestIsomerMVal; //m-value of longest lived isomer (eg. 1 or 2 for 178m1Hf vs. 178m2Hf)
   uint8_t numIsomerMVals; //total number of isomer m-values assigned
   uint16_t firstRxn; //index of first reaction populating this nuclide
+  uint8_t numRxns;
   valWithErr abundance;
   uint8_t flags; //bits 0 to 1: observation flag (observed/unobserved/inferred/tentative)
 }nucl; //gamma data for a given nuclide
@@ -224,6 +225,7 @@ typedef struct
   float fullInfoAllColWidth, fullInfoAllColWidthExclM, fullInfoAllColWidthExcluMFinalJpi;
   float nuclFullInfoScrollStartY, nuclFullInfoScrollToY, nuclFullInfoScrollY; //full level info view: number of lines scrolled in the y-direction
   uint16_t nuclFullInfoMaxScrollY; //maximum scroll position, in lines
+  uint8_t rxnMenuColumns; //how many columns to use in the reaction menu
   uint64_t shownElements; //bit pattern describing which UI elements are being shown, values from ui_element_enum
   uint32_t uiAnimPlaying; //bit pattern describing which UI animations are playing
   float timeLeftInUIAnimation[UIANIM_ENUM_LENGTH]; //time left in each UI animation

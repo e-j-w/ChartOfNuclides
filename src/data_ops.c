@@ -159,14 +159,16 @@ void stopUIAnimation(const app_data *restrict dat, app_state *restrict state, co
 				if(!(state->ds.shownElements & (1UL << UIELEM_ABOUT_BOX))){
 					if(!(state->ds.shownElements & (1UL << UIELEM_CHARTVIEW_MENU))){
 						if(!(state->ds.shownElements & (1UL << UIELEM_SEARCH_MENU))){
-							if(state->ds.shownElements & (1UL << UIELEM_NUCL_FULLINFOBOX)){
-								changeUIState(dat,state,UISTATE_FULLLEVELINFO);
-							}else if(state->ds.shownElements & (1UL << UIELEM_NUCL_INFOBOX)){
-								changeUIState(dat,state,UISTATE_INFOBOX);
-							}else if(state->ds.shownElements & (1UL << UIELEM_NUCL_FULLINFOBOX)){
-								changeUIState(dat,state,UISTATE_FULLLEVELINFO);
-							}else{
-								changeUIState(dat,state,UISTATE_CHARTONLY);
+							if(!(state->ds.shownElements & (1UL << UIELEM_RXN_MENU))){
+								if(state->ds.shownElements & (1UL << UIELEM_NUCL_FULLINFOBOX)){
+									if((state->mouseoverElement != UIELEM_NUCL_FULLINFOBOX_BACKBUTTON)||(state->lastOpenedMenu != UIELEM_NUCL_FULLINFOBOX_BACKBUTTON)||(state->lastInputType != INPUT_TYPE_KEYBOARD)){
+										changeUIState(dat,state,UISTATE_FULLLEVELINFO);
+									}
+								}else if(state->ds.shownElements & (1UL << UIELEM_NUCL_INFOBOX)){
+									changeUIState(dat,state,UISTATE_INFOBOX);
+								}else{
+									changeUIState(dat,state,UISTATE_CHARTONLY);
+								}
 							}
 						}
 					}
@@ -204,6 +206,14 @@ void stopUIAnimation(const app_data *restrict dat, app_state *restrict state, co
 		case UIANIM_UISCALE_MENU_HIDE:
 			state->ds.shownElements &= (uint64_t)(~(1UL << UIELEM_PREFS_UISCALE_MENU)); //close the menu
 			changeUIState(dat,state,UISTATE_PREFS_DIALOG);
+			break;
+		case UIANIM_RXN_MENU_HIDE:
+			state->ds.shownElements &= (uint64_t)(~(1UL << UIELEM_RXN_MENU)); //close the menu
+			if(!(state->ds.shownElements & (1UL << UIELEM_PRIMARY_MENU))){
+				if((state->mouseoverElement != UIELEM_NUCL_FULLINFOBOX_BACKBUTTON)||(state->lastOpenedMenu != UIELEM_NUCL_FULLINFOBOX_BACKBUTTON)||(state->lastInputType != INPUT_TYPE_KEYBOARD)){
+					changeUIState(dat,state,UISTATE_FULLLEVELINFO);
+				}
+			}
 			break;
     case UIANIM_MODAL_BOX_HIDE:
       state->ds.shownElements &= (uint64_t)(~(1UL << UIELEM_MSG_BOX)); //close the message box
@@ -2498,6 +2508,10 @@ void changeUIState(const app_data *restrict dat, app_state *restrict state, cons
 				state->interactableElement |= (uint64_t)(1UL << UIELEM_PM_PREFS_BUTTON);
 				state->interactableElement |= (uint64_t)(1UL << UIELEM_PM_ABOUT_BUTTON);
 				state->interactableElement |= (uint64_t)(1UL << UIELEM_PRIMARY_MENU);
+				if(state->lastInputType != INPUT_TYPE_MOUSE){
+					//keyboard/gamepad navigation of the menu
+					state->mouseoverElement = (uint8_t)(UIELEM_PRIMARY_MENU - PRIMARY_MENU_NUM_UIELEMENTS); //select the first menu item
+				}
 			}
 			break;
 		case UISTATE_INFOBOX:
@@ -2841,6 +2855,7 @@ void setInfoBoxDimensions(const app_data *restrict dat, app_state *restrict stat
 
 	updateSingleUIElemPosition(dat,state,rdat,UIELEM_NUCL_INFOBOX);
 	updateSingleUIElemPosition(dat,state,rdat,UIELEM_NUCL_INFOBOX_CLOSEBUTTON);
+	updateSingleUIElemPosition(dat,state,rdat,UIELEM_RXN_MENU);
 }
 
 void setSelectedNuclOnLevelList(const app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat, const uint16_t N, const uint16_t Z){
@@ -3069,6 +3084,19 @@ void uiElemClickAction(app_data *restrict dat, app_state *restrict state, resour
 			state->clickedUIElem = UIELEM_ENUM_LENGTH; //'unclick' the menu button
 		}
 	}
+	if((uiElemID != UIELEM_NUCL_FULLINFOBOX_RXNBUTTON)&&(uiElemID != UIELEM_RXN_MENU)){
+		if((state->ds.shownElements & (1UL << UIELEM_RXN_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_RXN_MENU_HIDE]==0.0f)){
+			startUIAnimation(dat,state,UIANIM_RXN_MENU_HIDE); //menu will be closed after animation finishes
+			state->clickedUIElem = UIELEM_ENUM_LENGTH; //'unclick' the menu button
+		}
+	}
+	if((uiElemID != UIELEM_NUCL_FULLINFOBOX_BACKBUTTON)){
+		if((state->lastOpenedMenu == UIELEM_NUCL_FULLINFOBOX_BACKBUTTON)&&(state->uiState == UISTATE_FULLLEVELINFOWITHMENU)){
+			state->uiState = UISTATE_FULLLEVELINFO; //exit menu control
+			state->mouseoverElement = UIELEM_ENUM_LENGTH; //'unclick' all buttons
+			state->clickedUIElem = UIELEM_ENUM_LENGTH; //'unclick' all buttons
+		}
+	}
 
 	//take action from click
   switch(uiElemID){
@@ -3179,6 +3207,7 @@ void uiElemClickAction(app_data *restrict dat, app_state *restrict state, resour
 			break;
 		case UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON:
 				state->ds.nuclFullInfoScrollY = 0.0f;
+				state->lastOpenedMenu = UIELEM_NUCL_FULLINFOBOX_BACKBUTTON;
 				startUIAnimation(dat,state,UIANIM_NUCLINFOBOX_EXPAND);
 				setFullLevelInfoDimensions(dat,state,rdat,state->chartSelectedNucl);
 			break;
@@ -3187,6 +3216,18 @@ void uiElemClickAction(app_data *restrict dat, app_state *restrict state, resour
 			break;
 		case UIELEM_NUCL_FULLINFOBOX_SCROLLBAR:
 			state->clickedUIElem = UIELEM_ENUM_LENGTH; //'unclick' the scrollbar when the mouse is released
+			break;
+		case UIELEM_NUCL_FULLINFOBOX_RXNBUTTON:
+			if((state->ds.shownElements & (1UL << UIELEM_RXN_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_RXN_MENU_HIDE]==0.0f)){
+				startUIAnimation(dat,state,UIANIM_RXN_MENU_HIDE); //menu will be closed after animation finishes
+        state->clickedUIElem = UIELEM_ENUM_LENGTH; //'unclick' the menu button
+      }else if(state->ds.timeLeftInUIAnimation[UIANIM_RXN_MENU_SHOW]==0.0f){
+				state->ds.shownElements |= (1UL << UIELEM_RXN_MENU);
+				state->lastOpenedMenu = UIELEM_RXN_MENU;
+				startUIAnimation(dat,state,UIANIM_RXN_MENU_SHOW);
+				changeUIState(dat,state,UISTATE_FULLLEVELINFOWITHMENU);
+				state->clickedUIElem = UIELEM_NUCL_FULLINFOBOX_RXNBUTTON;
+      }
 			break;
 		case UIELEM_PM_PREFS_BUTTON:
 			//SDL_Log("Clicked prefs button.\n");
@@ -3743,6 +3784,18 @@ void updateSingleUIElemPosition(const app_data *restrict dat, app_state *restric
 			state->ds.uiElemPosY[UIELEM_NUCL_FULLINFOBOX_RXNBUTTON] = (int16_t)(NUCL_FULLINFOBOX_BACKBUTTON_POS_Y*state->ds.uiUserScale);
 			state->ds.uiElemWidth[UIELEM_NUCL_FULLINFOBOX_RXNBUTTON] = (int16_t)(NUCL_FULLINFOBOX_RXNBUTTON_WIDTH*state->ds.uiUserScale);
 			state->ds.uiElemHeight[UIELEM_NUCL_FULLINFOBOX_RXNBUTTON] = (int16_t)(UI_TILE_SIZE*state->ds.uiUserScale);
+			break;
+		case UIELEM_RXN_MENU:
+			state->ds.uiElemPosY[uiElemInd] = (int16_t)(state->ds.uiElemPosY[UIELEM_NUCL_FULLINFOBOX_RXNBUTTON] + state->ds.uiElemHeight[UIELEM_NUCL_FULLINFOBOX_RXNBUTTON]);
+			state->ds.rxnMenuColumns = (uint8_t)(SDL_ceilf((dat->ndat.nuclData[state->chartSelectedNucl].numRxns+1.0f)/SDL_floorf((float)(state->ds.windowYRes - state->ds.uiElemPosY[uiElemInd])/(RXN_MENU_ITEM_SPACING*state->ds.uiUserScale) - 1.0f)));
+			if(state->ds.rxnMenuColumns == 0){
+				state->ds.rxnMenuColumns = 1;
+			}
+			//SDL_Log("numRxns: %u, columns: %u\n",dat->ndat.nuclData[state->chartSelectedNucl].numRxns,state->ds.rxnMenuColumns);
+			state->ds.uiElemWidth[uiElemInd] = (int16_t)(RXN_MENU_COLUMN_WIDTH*state->ds.rxnMenuColumns*state->ds.uiUserScale);
+			state->ds.uiElemHeight[uiElemInd] = (int16_t)((SDL_ceilf((dat->ndat.nuclData[state->chartSelectedNucl].numRxns+1.0f)/(state->ds.rxnMenuColumns*1.0f))*RXN_MENU_ITEM_SPACING + 2*PANEL_EDGE_SIZE + 4*UI_PADDING_SIZE)*state->ds.uiUserScale);
+			state->ds.uiElemPosX[uiElemInd] = (int16_t)(state->ds.uiElemPosX[UIELEM_NUCL_FULLINFOBOX_RXNBUTTON] + state->ds.uiElemWidth[UIELEM_NUCL_FULLINFOBOX_RXNBUTTON]/2 - state->ds.uiElemWidth[UIELEM_RXN_MENU]/2);
+			//SDL_Log("position: %i %i, dimensions: %i %i\n",state->ds.uiElemPosX[uiElemInd],state->ds.uiElemPosY[uiElemInd],state->ds.uiElemWidth[uiElemInd],state->ds.uiElemHeight[uiElemInd]);
 			break;
 		case UIELEM_NUCL_FULLINFOBOX_SCROLLBAR:
 			state->ds.uiElemPosX[UIELEM_NUCL_FULLINFOBOX_SCROLLBAR] = (int16_t)(state->ds.windowXRes - NUCL_FULLINFOBOX_SCROLLBAR_POS_XR*state->ds.uiUserScale);

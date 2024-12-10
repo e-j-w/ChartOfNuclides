@@ -2798,6 +2798,7 @@ void initialize_database(ndata *nd){
 	nd->numRxns = 0;
 	for(uint32_t i=0;i<MAXNUMNUCL;i++){
 		nd->nuclData[i].numLevels = 0;
+		nd->nuclData[i].numRxns = 0;
 	}
 	for(uint32_t i=0;i<MAXNUMLVLS;i++){
 		nd->levels[i].numDecModes = -1; //default if no decay mode info in data
@@ -3842,6 +3843,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 							if(parseRxn(&nd->rxn[nd->numRxns],rxnSubStr[i])==1){
 								if(nd->numRxns < MAXNUMREACTIONS){
 									nd->numRxns++;
+									nd->nuclData[nd->numNucl].numRxns++;
 									numRxnsinSubSec++;
 								}else{
 									SDL_Log("ERROR: number of reactions parsed exceeds the maximum (%i).\n",MAXNUMREACTIONS);

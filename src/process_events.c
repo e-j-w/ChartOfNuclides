@@ -296,11 +296,21 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
               if((state->ds.shownElements & (1UL << UIELEM_PRIMARY_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_PRIMARY_MENU_SHOW]==0.0f)){
                 uiElemClickAction(dat,state,rdat,0,UIELEM_CHARTVIEW_BUTTON); //open the chart view menu
               }
+            }else{
+              if((state->ds.shownElements & (1UL << UIELEM_PRIMARY_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_PRIMARY_MENU_SHOW]==0.0f)){
+                uiElemClickAction(dat,state,rdat,0,UIELEM_MENU_BUTTON); //close the menu
+                state->mouseoverElement = UIELEM_NUCL_FULLINFOBOX_BACKBUTTON; //highlight the back button (has to happen after uiElemClickAction, as this is reset during click action)
+                state->lastOpenedMenu = UIELEM_NUCL_FULLINFOBOX_BACKBUTTON; //set back button as selected
+              }
             }
           }else if(right && !left){
             if(!(state->ds.shownElements & (1UL << UIELEM_NUCL_FULLINFOBOX))){
               if((state->ds.shownElements & (1UL << UIELEM_PRIMARY_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_PRIMARY_MENU_SHOW]==0.0f)){
                 uiElemClickAction(dat,state,rdat,0,UIELEM_SEARCH_BUTTON); //open the search menu
+              }
+            }else{
+              if((state->ds.shownElements & (1UL << UIELEM_PRIMARY_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_PRIMARY_MENU_SHOW]==0.0f)){
+                uiElemClickAction(dat,state,rdat,0,UIELEM_NUCL_FULLINFOBOX_RXNBUTTON); //open the reaction menu
               }
             }
           }
@@ -342,12 +352,32 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
         //search menu navigation using arrow keys
         if(right && !left){
           if((state->ds.shownElements & (1UL << UIELEM_SEARCH_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_SEARCH_MENU_SHOW]==0.0f)){
-            uiElemClickAction(dat,state,rdat,0,UIELEM_CHARTVIEW_BUTTON); //open the primary menu
+            uiElemClickAction(dat,state,rdat,0,UIELEM_CHARTVIEW_BUTTON); //open the chart view menu
           }
         }else if(left && !right){
           if((state->ds.shownElements & (1UL << UIELEM_SEARCH_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_SEARCH_MENU_SHOW]==0.0f)){
             uiElemClickAction(dat,state,rdat,0,UIELEM_MENU_BUTTON); //open the search menu
           }
+        }
+      }else if(state->clickedUIElem == UIELEM_NUCL_FULLINFOBOX_RXNBUTTON){
+        //reaction menu navigation using arrow keys
+        if(right && !left){
+          if((state->ds.shownElements & (1UL << UIELEM_RXN_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_RXN_MENU_SHOW]==0.0f)){
+            uiElemClickAction(dat,state,rdat,0,UIELEM_NUCL_FULLINFOBOX_RXNBUTTON); //close the menu
+            state->mouseoverElement = UIELEM_NUCL_FULLINFOBOX_BACKBUTTON; //highlight the back button (has to happen after uiElemClickAction, as this is reset during click action)
+            state->lastOpenedMenu = UIELEM_NUCL_FULLINFOBOX_BACKBUTTON; //set back button as selected
+          }
+        }else if(left && !right){
+          if((state->ds.shownElements & (1UL << UIELEM_RXN_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_RXN_MENU_SHOW]==0.0f)){
+            uiElemClickAction(dat,state,rdat,0,UIELEM_MENU_BUTTON); //open the primary menu
+          }
+        }
+      }else if(state->lastOpenedMenu == UIELEM_NUCL_FULLINFOBOX_BACKBUTTON){
+        //back button navigation using arrow keys
+        if(right && !left){
+          uiElemClickAction(dat,state,rdat,0,UIELEM_MENU_BUTTON); //open the primary menu
+        }else if(left && !right){
+          uiElemClickAction(dat,state,rdat,0,UIELEM_NUCL_FULLINFOBOX_RXNBUTTON); //open the reaction menu
         }
       }
     }
@@ -503,6 +533,10 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
     }else if((state->ds.shownElements & (1UL << UIELEM_NUCL_INFOBOX))&&(state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_SHOW]==0.0f)&&(state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_EXPAND]==0.0f)){
       state->mouseholdElement = UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON;
       uiElemClickAction(dat,state,rdat,0,UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON);
+    }else if((state->ds.shownElements & (1UL << UIELEM_NUCL_FULLINFOBOX))&&(state->mouseoverElement == UIELEM_NUCL_FULLINFOBOX_BACKBUTTON)&&(state->lastOpenedMenu == UIELEM_NUCL_FULLINFOBOX_BACKBUTTON)&&(state->lastInputType == INPUT_TYPE_KEYBOARD)){
+      //navigated to the back button by keyboard, so select it now
+      uiElemClickAction(dat,state,rdat,0,UIELEM_NUCL_FULLINFOBOX_BACKBUTTON); //go back to the main chart
+      state->mouseholdElement = UIELEM_ENUM_LENGTH;
     }else if(state->uiState == UISTATE_CHARTONLY){
       if(state->chartSelectedNucl == MAXNUMNUCL){
         //select the center-screen nuclide on the chart
@@ -537,7 +571,10 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
     }else if((state->ds.shownElements & (1UL << UIELEM_NUCL_INFOBOX))&&(state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_HIDE]==0.0f)){
       startUIAnimation(dat,state,UIANIM_NUCLINFOBOX_HIDE); //hide the info box, see stopUIAnimation() for info box hiding action
       startUIAnimation(dat,state,UIANIM_NUCLHIGHLIGHT_HIDE);
-    }else if((state->uiState == UISTATE_FULLLEVELINFO)&&(state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_EXPAND]==0.0f)){
+    }else if((state->ds.shownElements & (1UL << UIELEM_RXN_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_RXN_MENU_HIDE]==0.0f)){
+      //close the reaction menu
+      uiElemClickAction(dat,state,rdat,0,UIELEM_NUCL_FULLINFOBOX_RXNBUTTON);
+    }else if((state->uiState == UISTATE_FULLLEVELINFOWITHMENU)&&(state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_EXPAND]==0.0f)){
       uiElemClickAction(dat,state,rdat,0,UIELEM_NUCL_FULLINFOBOX_BACKBUTTON); //go back to the main chart
       state->mouseholdElement = UIELEM_ENUM_LENGTH;
     }else if(state->ds.windowFullscreenMode){
@@ -546,28 +583,39 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
       handleScreenGraphicsMode(dat,state,rdat); 
     }
   }else if(state->inputFlags & (1U << INPUT_MENU)){
-    //open the primary menu
-    switch(state->lastOpenedMenu){
-      case UIELEM_SEARCH_MENU:
-        if((state->uiState == UISTATE_CHARTONLY)||(state->uiState == UISTATE_CHARTWITHMENU)||(state->uiState == UISTATE_INFOBOX)){
-          //cannot open this menu from the full level info screen
+    if((state->uiState == UISTATE_CHARTONLY)||(state->uiState == UISTATE_CHARTWITHMENU)||(state->uiState == UISTATE_INFOBOX)){
+      //open the primary menu
+      switch(state->lastOpenedMenu){
+        case UIELEM_SEARCH_MENU:
           uiElemClickAction(dat,state,rdat,0,UIELEM_SEARCH_BUTTON);
-        }else{
-          uiElemClickAction(dat,state,rdat,0,UIELEM_MENU_BUTTON);
-        }
-        break;
-      case UIELEM_CHARTVIEW_MENU:
-        if((state->uiState == UISTATE_CHARTONLY)||(state->uiState == UISTATE_CHARTWITHMENU)||(state->uiState == UISTATE_INFOBOX)){
-          //cannot open this menu from the full level info screen
+          break;
+        case UIELEM_CHARTVIEW_MENU:
           uiElemClickAction(dat,state,rdat,0,UIELEM_CHARTVIEW_BUTTON);
-        }else{
+          break;
+        case UIELEM_PRIMARY_MENU:
+        default:
           uiElemClickAction(dat,state,rdat,0,UIELEM_MENU_BUTTON);
-        }
-        break;
-      case UIELEM_PRIMARY_MENU:
-      default:
-        uiElemClickAction(dat,state,rdat,0,UIELEM_MENU_BUTTON);
-        break;
+          break;
+      }
+    }else if(state->uiState == UISTATE_FULLLEVELINFO){
+      switch(state->lastOpenedMenu){
+        case UIELEM_NUCL_FULLINFOBOX_BACKBUTTON:
+          if(state->mouseoverElement == UIELEM_NUCL_FULLINFOBOX_BACKBUTTON){
+            uiElemClickAction(dat,state,rdat,0,UIELEM_NUCL_FULLINFOBOX_BACKBUTTON); //go back to the main chart
+            state->mouseholdElement = UIELEM_ENUM_LENGTH;
+          }else{
+            state->uiState = UISTATE_FULLLEVELINFOWITHMENU; //allow menu navigation by keyboard
+            state->mouseoverElement = UIELEM_NUCL_FULLINFOBOX_BACKBUTTON; //highlight the back button
+          }
+          break;
+        case UIELEM_RXN_MENU:
+          uiElemClickAction(dat,state,rdat,0,UIELEM_NUCL_FULLINFOBOX_RXNBUTTON);
+          break;
+        case UIELEM_PRIMARY_MENU:
+        default:
+          uiElemClickAction(dat,state,rdat,0,UIELEM_MENU_BUTTON);
+          break;
+      }
     }
     state->mouseholdElement = UIELEM_ENUM_LENGTH; //remove any previous selection highlight
   }
@@ -819,6 +867,9 @@ void processSingleEvent(app_data *restrict dat, app_state *restrict state, resou
       if(state->lastInputType != INPUT_TYPE_MOUSE){
         state->lastInputType = INPUT_TYPE_MOUSE; //set mouse input
       }
+      if((state->lastOpenedMenu == UIELEM_NUCL_FULLINFOBOX_BACKBUTTON)&&(state->uiState == UISTATE_FULLLEVELINFOWITHMENU)){
+        state->uiState = UISTATE_FULLLEVELINFO; //exit menu control
+      }
       //SDL_Log("Mouse position: %i %i\n",*mouseX,*mouseY);
       break;
     case SDL_EVENT_MOUSE_BUTTON_DOWN:
@@ -924,7 +975,7 @@ void processSingleEvent(app_data *restrict dat, app_state *restrict state, resou
           if(SDL_TextInputActive(rdat->window)){
             SDL_StopTextInput(rdat->window);
           }
-          if(state->uiState == UISTATE_CHARTONLY){
+          if((state->uiState == UISTATE_CHARTONLY)||(state->uiState == UISTATE_FULLLEVELINFO)){
             state->inputFlags |= (1U << INPUT_MENU);
           }else{
             state->inputFlags |= (1U << INPUT_BACK);
@@ -932,7 +983,7 @@ void processSingleEvent(app_data *restrict dat, app_state *restrict state, resou
           break;
         case SDL_SCANCODE_BACKSPACE:
           if(!(SDL_TextInputActive(rdat->window))){
-            if(state->uiState == UISTATE_CHARTONLY){
+            if((state->uiState == UISTATE_CHARTONLY)||(state->uiState == UISTATE_FULLLEVELINFO)){
               state->inputFlags |= (1U << INPUT_MENU);
             }else{
               state->inputFlags |= (1U << INPUT_BACK);

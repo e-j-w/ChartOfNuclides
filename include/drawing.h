@@ -34,15 +34,15 @@ void drawButtonBG(const ui_theme_rules *restrict uirules, resource_data *restric
 void drawMenuBGWithArrow(const ui_theme_rules *restrict uirules, resource_data *restrict rdat, const SDL_FRect panelRect, const int16_t arrowPosX, const float alpha);
 
 void drawTextButton(const ui_theme_rules *restrict uirules, resource_data *restrict rdat, const int16_t x, const int16_t y, const int16_t w, const uint8_t highlightState, const uint8_t alpha, const char *text);
-void drawIcon(const ui_theme_rules *restrict uirules, resource_data *restrict rdat, const int16_t x, const int16_t y, const int16_t w, const uint8_t highlightState, const uint8_t alpha, const uint8_t iconInd);
-void drawIconButton(const ui_theme_rules *restrict uirules, resource_data *restrict rdat, const int16_t x, const int16_t y, const int16_t w, const uint8_t highlightState, const uint8_t alpha, const uint8_t iconInd);
+void drawIcon(const ui_theme_rules *restrict uirules, resource_data *restrict rdat, const int16_t x, const int16_t y, const int16_t w, const uint8_t highlightState, const float alpha, const uint8_t iconInd);
+void drawIconButton(const ui_theme_rules *restrict uirules, resource_data *restrict rdat, const int16_t x, const int16_t y, const int16_t w, const uint8_t highlightState, const float alpha, const uint8_t iconInd);
 void drawIconAndTextButton(const ui_theme_rules *restrict uirules, resource_data *restrict rdat, const int16_t x, const int16_t y, const int16_t w, const uint8_t highlightState, const uint8_t alpha, const uint8_t iconInd, const char *text);
 void drawDropDownTextButton(const ui_theme_rules *restrict uirules, resource_data *restrict rdat, const int16_t x, const int16_t y, const int16_t w, const uint8_t highlightState, const uint8_t alpha, const char *text);
 
 void drawTextEntryBox(const ui_theme_rules *restrict uirules, resource_data *restrict rdat, const int16_t x, const int16_t y, const int16_t w, const uint8_t boxHighlightState, const uint8_t textHighlightState, const uint8_t alpha, const char *text);
 void drawIconAndTextEntryBox(const ui_theme_rules *restrict uirules, resource_data *restrict rdat, const int16_t x, const int16_t y, const int16_t w, const uint8_t boxHighlightState, const uint8_t textHighlightState, const uint8_t alpha, const uint8_t iconInd, const char *text, const uint16_t txtDrawStartPos, const uint16_t txtDrawNumChars, const int cursorPos);
 
-void drawCheckbox(const ui_theme_rules *restrict uirules, resource_data *restrict rdat,const int16_t x, const int16_t y, const int16_t w, const uint8_t highlightState, const uint8_t alpha, const uint8_t checked);
+void drawCheckbox(const ui_theme_rules *restrict uirules, resource_data *restrict rdat,const int16_t x, const int16_t y, const int16_t w, const uint8_t highlightState, const float alpha, const uint8_t checked);
 
 void drawSelectionRect(resource_data *restrict rdat, const SDL_FRect pos, const SDL_FColor col, const float thicknessPx);
 

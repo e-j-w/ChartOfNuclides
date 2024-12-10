@@ -1414,7 +1414,7 @@ void drawNuclInfoBox(const app_data *restrict dat, app_state *restrict state, re
   }
   drawXPos = state->ds.uiElemPosX[UIELEM_NUCL_INFOBOX_CLOSEBUTTON] + 0.5f*(infoBoxPanelRect.w - state->ds.uiElemWidth[UIELEM_NUCL_INFOBOX]);
   drawYPos = state->ds.uiElemPosY[UIELEM_NUCL_INFOBOX_CLOSEBUTTON] + infoBoxPanelRect.y - state->ds.uiElemPosY[UIELEM_NUCL_INFOBOX];
-  drawIcon(&dat->rules.themeRules,rdat,(int16_t)drawXPos,(int16_t)drawYPos,state->ds.uiElemWidth[UIELEM_NUCL_INFOBOX_CLOSEBUTTON],getHighlightState(state,UIELEM_NUCL_INFOBOX_CLOSEBUTTON),alpha,UIICON_CLOSE);
+  drawIcon(&dat->rules.themeRules,rdat,(int16_t)drawXPos,(int16_t)drawYPos,state->ds.uiElemWidth[UIELEM_NUCL_INFOBOX_CLOSEBUTTON],getHighlightState(state,UIELEM_NUCL_INFOBOX_CLOSEBUTTON),(float)(alpha/255.0f),UIICON_CLOSE);
 
   //SDL_Log("%.3f %.3f alpha %u\n",(double)state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_SHOW],(double)state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_HIDE],alpha);
 }
@@ -1474,7 +1474,7 @@ void drawAboutBox(const app_data *restrict dat, const app_state *restrict state,
   aboutBoxPanelRect.h = state->ds.uiElemHeight[UIELEM_ABOUT_BOX];
   drawPanelBG(&dat->rules.themeRules,rdat,aboutBoxPanelRect,alpha);
 
-  drawIcon(&dat->rules.themeRules,rdat,(int16_t)(aboutBoxPanelRect.x + UI_TILE_SIZE*state->ds.uiUserScale),(int16_t)(aboutBoxPanelRect.y+(ABOUT_BOX_HEADERTXT_Y+UI_PADDING_SIZE)*state->ds.uiUserScale),(int16_t)(UI_TILE_SIZE*state->ds.uiUserScale),HIGHLIGHT_NORMAL,alpha8,UIICON_APPICON);
+  drawIcon(&dat->rules.themeRules,rdat,(int16_t)(aboutBoxPanelRect.x + UI_TILE_SIZE*state->ds.uiUserScale),(int16_t)(aboutBoxPanelRect.y+(ABOUT_BOX_HEADERTXT_Y+UI_PADDING_SIZE)*state->ds.uiUserScale),(int16_t)(UI_TILE_SIZE*state->ds.uiUserScale),HIGHLIGHT_NORMAL,alpha,UIICON_APPICON);
   drawTextAlignedSized(rdat,aboutBoxPanelRect.x+(2*UI_TILE_SIZE + 2*UI_PADDING_SIZE)*state->ds.uiUserScale,aboutBoxPanelRect.y+ABOUT_BOX_HEADERTXT_Y*state->ds.uiUserScale,dat->rules.themeRules.textColNormal,FONTSIZE_LARGE,alpha8,dat->rules.appName,ALIGN_LEFT,(Uint16)(aboutBoxPanelRect.w - 2*UI_PADDING_SIZE*state->ds.uiUserScale));
   drawTextAlignedSized(rdat,aboutBoxPanelRect.x+(2*UI_TILE_SIZE + 2*UI_PADDING_SIZE)*state->ds.uiUserScale,aboutBoxPanelRect.y+ABOUT_BOX_VERSION_Y*state->ds.uiUserScale,dat->rules.themeRules.textColNormal,FONTSIZE_SMALL,alpha8,dat->strings[dat->locStringIDs[LOCSTR_ABOUTSTR_VERSION]],ALIGN_LEFT,16384);
   drawTextAlignedSized(rdat,aboutBoxPanelRect.x+(aboutBoxPanelRect.w/2),aboutBoxPanelRect.y+ABOUT_BOX_STR1_Y*state->ds.uiUserScale,dat->rules.themeRules.textColNormal,FONTSIZE_NORMAL,alpha8,dat->strings[dat->locStringIDs[LOCSTR_ABOUTSTR_1]],ALIGN_CENTER,(Uint16)(aboutBoxPanelRect.w - 12*UI_PADDING_SIZE*state->ds.uiUserScale));
@@ -1533,12 +1533,12 @@ void drawPrefsDialog(const app_data *restrict dat, const app_state *restrict sta
   drawTextAlignedSized(rdat,prefsDialogPanelRect.x+(PREFS_DIALOG_PREFCOL1_X+UI_TILE_SIZE+2*UI_PADDING_SIZE)*state->ds.uiUserScale,prefsDialogPanelRect.y+(PREFS_DIALOG_PREFCOL1_Y+6.0f+(2*PREFS_DIALOG_PREF_Y_SPACING)+(2*UI_PADDING_SIZE))*state->ds.uiUserScale,dat->rules.themeRules.textColNormal,FONTSIZE_NORMAL,alpha8,dat->strings[dat->locStringIDs[LOCSTR_PREF_LIFETIME]],ALIGN_LEFT,(Uint16)(prefsDialogPanelRect.w));
   drawTextAlignedSized(rdat,prefsDialogPanelRect.x+(PREFS_DIALOG_PREFCOL1_X+UI_TILE_SIZE+2*UI_PADDING_SIZE)*state->ds.uiUserScale,prefsDialogPanelRect.y+(PREFS_DIALOG_PREFCOL1_Y+6.0f+(3*PREFS_DIALOG_PREF_Y_SPACING)+(2*UI_PADDING_SIZE))*state->ds.uiUserScale,dat->rules.themeRules.textColNormal,FONTSIZE_NORMAL,alpha8,dat->strings[dat->locStringIDs[LOCSTR_PREF_UIANIM]],ALIGN_LEFT,(Uint16)(prefsDialogPanelRect.w));
   drawTextAlignedSized(rdat,prefsDialogPanelRect.x+(PREFS_DIALOG_PREFCOL1_X+UI_PADDING_SIZE)*state->ds.uiUserScale,prefsDialogPanelRect.y+(PREFS_DIALOG_PREFCOL1_Y+6.0f)*state->ds.uiUserScale,dat->rules.themeRules.textColNormal,FONTSIZE_NORMAL,alpha8,dat->strings[dat->locStringIDs[LOCSTR_PREF_UISCALE]],ALIGN_LEFT,(Uint16)(prefsDialogPanelRect.w));
-  drawCheckbox(&dat->rules.themeRules,rdat,state->ds.uiElemPosX[UIELEM_PREFS_DIALOG_SHELLCLOSURE_CHECKBOX],(int16_t)(state->ds.uiElemPosY[UIELEM_PREFS_DIALOG_SHELLCLOSURE_CHECKBOX]+yOffset),state->ds.uiElemWidth[UIELEM_PREFS_DIALOG_SHELLCLOSURE_CHECKBOX],getHighlightState(state,UIELEM_PREFS_DIALOG_SHELLCLOSURE_CHECKBOX),alpha8,state->ds.drawShellClosures);
-  drawCheckbox(&dat->rules.themeRules,rdat,state->ds.uiElemPosX[UIELEM_PREFS_DIALOG_LIFETIME_CHECKBOX],(int16_t)(state->ds.uiElemPosY[UIELEM_PREFS_DIALOG_LIFETIME_CHECKBOX]+yOffset),state->ds.uiElemWidth[UIELEM_PREFS_DIALOG_LIFETIME_CHECKBOX],getHighlightState(state,UIELEM_PREFS_DIALOG_LIFETIME_CHECKBOX),alpha8,state->ds.useLifetimes);
-  drawCheckbox(&dat->rules.themeRules,rdat,state->ds.uiElemPosX[UIELEM_PREFS_DIALOG_UIANIM_CHECKBOX],(int16_t)(state->ds.uiElemPosY[UIELEM_PREFS_DIALOG_UIANIM_CHECKBOX]+yOffset),state->ds.uiElemWidth[UIELEM_PREFS_DIALOG_UIANIM_CHECKBOX],getHighlightState(state,UIELEM_PREFS_DIALOG_UIANIM_CHECKBOX),alpha8,state->ds.useUIAnimations);
+  drawCheckbox(&dat->rules.themeRules,rdat,state->ds.uiElemPosX[UIELEM_PREFS_DIALOG_SHELLCLOSURE_CHECKBOX],(int16_t)(state->ds.uiElemPosY[UIELEM_PREFS_DIALOG_SHELLCLOSURE_CHECKBOX]+yOffset),state->ds.uiElemWidth[UIELEM_PREFS_DIALOG_SHELLCLOSURE_CHECKBOX],getHighlightState(state,UIELEM_PREFS_DIALOG_SHELLCLOSURE_CHECKBOX),alpha,state->ds.drawShellClosures);
+  drawCheckbox(&dat->rules.themeRules,rdat,state->ds.uiElemPosX[UIELEM_PREFS_DIALOG_LIFETIME_CHECKBOX],(int16_t)(state->ds.uiElemPosY[UIELEM_PREFS_DIALOG_LIFETIME_CHECKBOX]+yOffset),state->ds.uiElemWidth[UIELEM_PREFS_DIALOG_LIFETIME_CHECKBOX],getHighlightState(state,UIELEM_PREFS_DIALOG_LIFETIME_CHECKBOX),alpha,state->ds.useLifetimes);
+  drawCheckbox(&dat->rules.themeRules,rdat,state->ds.uiElemPosX[UIELEM_PREFS_DIALOG_UIANIM_CHECKBOX],(int16_t)(state->ds.uiElemPosY[UIELEM_PREFS_DIALOG_UIANIM_CHECKBOX]+yOffset),state->ds.uiElemWidth[UIELEM_PREFS_DIALOG_UIANIM_CHECKBOX],getHighlightState(state,UIELEM_PREFS_DIALOG_UIANIM_CHECKBOX),alpha,state->ds.useUIAnimations);
   drawDropDownTextButton(&dat->rules.themeRules,rdat,state->ds.uiElemPosX[UIELEM_PREFS_DIALOG_UISCALE_DROPDOWN],(int16_t)(state->ds.uiElemPosY[UIELEM_PREFS_DIALOG_UISCALE_DROPDOWN]+yOffset),state->ds.uiElemWidth[UIELEM_PREFS_DIALOG_UISCALE_DROPDOWN],getHighlightState(state,UIELEM_PREFS_DIALOG_UISCALE_DROPDOWN),alpha8,dat->strings[getStrIndForUIScale(dat,&state->ds)]);
   //close button
-  drawIcon(&dat->rules.themeRules,rdat,state->ds.uiElemPosX[UIELEM_PREFS_DIALOG_CLOSEBUTTON],(int16_t)(state->ds.uiElemPosY[UIELEM_PREFS_DIALOG_CLOSEBUTTON] + yOffset),state->ds.uiElemWidth[UIELEM_PREFS_DIALOG_CLOSEBUTTON],getHighlightState(state,UIELEM_PREFS_DIALOG_CLOSEBUTTON),alpha8,UIICON_CLOSE);
+  drawIcon(&dat->rules.themeRules,rdat,state->ds.uiElemPosX[UIELEM_PREFS_DIALOG_CLOSEBUTTON],(int16_t)(state->ds.uiElemPosY[UIELEM_PREFS_DIALOG_CLOSEBUTTON] + yOffset),state->ds.uiElemWidth[UIELEM_PREFS_DIALOG_CLOSEBUTTON],getHighlightState(state,UIELEM_PREFS_DIALOG_CLOSEBUTTON),alpha,UIICON_CLOSE);
   
   //SDL_Log("%.3f %.3f alpha %u\n",(double)state->ds.timeLeftInUIAnimation[UIANIM_MODAL_BOX_SHOW],(double)state->ds.timeLeftInUIAnimation[UIANIM_MODAL_BOX_HIDE],alpha);
 }
@@ -1594,6 +1594,43 @@ void drawUIScaleMenu(const app_data *restrict dat, const app_state *restrict sta
   drawTextAlignedSized(rdat,drawRect.x,drawRect.y + 1.4f*PRIMARY_MENU_ITEM_SPACING*state->ds.uiUserScale + yOffset,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,dat->strings[dat->locStringIDs[LOCSTR_DEFAULT]],ALIGN_LEFT,(Uint16)(drawRect.w - (PANEL_EDGE_SIZE + 6*UI_PADDING_SIZE)*state->ds.uiUserScale));
   drawTextAlignedSized(rdat,drawRect.x,drawRect.y + 2.4f*PRIMARY_MENU_ITEM_SPACING*state->ds.uiUserScale + yOffset,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,dat->strings[dat->locStringIDs[LOCSTR_LARGE]],ALIGN_LEFT,(Uint16)(drawRect.w - (PANEL_EDGE_SIZE + 6*UI_PADDING_SIZE)*state->ds.uiUserScale));
   drawTextAlignedSized(rdat,drawRect.x,drawRect.y + 3.4f*PRIMARY_MENU_ITEM_SPACING*state->ds.uiUserScale + yOffset,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,dat->strings[dat->locStringIDs[LOCSTR_HUGE]],ALIGN_LEFT,(Uint16)(drawRect.w - (PANEL_EDGE_SIZE + 6*UI_PADDING_SIZE)*state->ds.uiUserScale));
+
+}
+
+void drawRxnMenu(const app_data *restrict dat, const app_state *restrict state, resource_data *restrict rdat){
+  
+  float alpha = 1.0f;
+  float yOffset = 0;
+  if(state->ds.uiAnimPlaying & (1U << UIANIM_RXN_MENU_HIDE)){
+    alpha = (float)(1.0f*juice_smoothStart2(state->ds.timeLeftInUIAnimation[UIANIM_RXN_MENU_HIDE]/(UI_ANIM_LENGTH)));
+  }else if(state->ds.uiAnimPlaying & (1U << UIANIM_RXN_MENU_SHOW)){
+    alpha = (float)(1.0f*juice_smoothStop2(1.0f - state->ds.timeLeftInUIAnimation[UIANIM_RXN_MENU_SHOW]/UI_ANIM_LENGTH));
+    yOffset = (-30.0f*state->ds.uiUserScale*juice_smoothStart2(state->ds.timeLeftInUIAnimation[UIANIM_RXN_MENU_SHOW]/(UI_ANIM_LENGTH)));
+  }
+  uint8_t alpha8 = (uint8_t)SDL_floorf(alpha*255.0f);
+  //SDL_Log("alpha: %f\n",(double)alpha);
+  
+  //draw menu background
+  SDL_FRect drawRect;
+  drawRect.x = state->ds.uiElemPosX[UIELEM_RXN_MENU];
+  drawRect.y = ((float)state->ds.uiElemPosY[UIELEM_RXN_MENU] + yOffset);
+  drawRect.w = state->ds.uiElemWidth[UIELEM_RXN_MENU];
+  drawRect.h = state->ds.uiElemHeight[UIELEM_RXN_MENU];
+  drawPanelBG(&dat->rules.themeRules,rdat,drawRect,alpha);
+
+  //draw menu item text
+  drawRect.x = state->ds.uiElemPosX[UIELEM_RXN_MENU] + (PANEL_EDGE_SIZE + 3*UI_PADDING_SIZE)*state->ds.uiUserScale;
+  drawRect.w = state->ds.uiElemWidth[UIELEM_RXN_MENU];
+  drawRect.h = state->ds.uiElemHeight[UIELEM_RXN_MENU];
+  drawTextAlignedSized(rdat,drawRect.x,((float)state->ds.uiElemPosY[UIELEM_RXN_MENU] + PANEL_EDGE_SIZE*state->ds.uiUserScale + 0.4f*RXN_MENU_ITEM_SPACING*state->ds.uiUserScale + yOffset),blackCol8Bit,FONTSIZE_NORMAL,alpha8,dat->strings[dat->locStringIDs[LOCSTR_ALLREACTIONS]],ALIGN_LEFT,(Uint16)(RXN_MENU_COLUMN_WIDTH*state->ds.uiUserScale));
+  char rxnStr[32];
+  uint8_t numRxnPerCol = (uint8_t)(SDL_ceilf((dat->ndat.nuclData[state->chartSelectedNucl].numRxns+1.0f)/(state->ds.rxnMenuColumns*1.0f)));
+  for(uint8_t i=0; i<dat->ndat.nuclData[state->chartSelectedNucl].numRxns; i++){
+    SDL_snprintf(rxnStr,64,"Reaction %u",i+1);
+    drawRect.x = state->ds.uiElemPosX[UIELEM_RXN_MENU] + (float)(PANEL_EDGE_SIZE + 3*UI_PADDING_SIZE + RXN_MENU_COLUMN_WIDTH*((i+1)/numRxnPerCol))*state->ds.uiUserScale;
+    drawRect.y = (float)state->ds.uiElemPosY[UIELEM_RXN_MENU] + (PANEL_EDGE_SIZE + ((float)((i+1)%numRxnPerCol) + 0.4f)*RXN_MENU_ITEM_SPACING)*state->ds.uiUserScale + yOffset;
+    drawTextAlignedSized(rdat,drawRect.x,drawRect.y,blackCol8Bit,FONTSIZE_NORMAL,alpha8,rxnStr,ALIGN_LEFT,(Uint16)(RXN_MENU_COLUMN_WIDTH*state->ds.uiUserScale));
+  }
 
 }
 
@@ -1732,7 +1769,7 @@ void drawChartViewMenu(const app_data *restrict dat, const app_state *restrict s
   for(uint8_t i=0;i<CHARTVIEW_ENUM_LENGTH;i++){
     if(state->chartView == i){
       //draw checkmark icon
-      drawIcon(&dat->rules.themeRules,rdat,(int16_t)(state->ds.uiElemPosX[UIELEM_CHARTVIEW_MENU] + (PANEL_EDGE_SIZE + 3*UI_PADDING_SIZE)*state->ds.uiUserScale),(int16_t)(drawRect.y + (1.25f + 1.0f*i)*CHARTVIEW_MENU_ITEM_SPACING*state->ds.uiUserScale + yOffset),UI_TILE_SIZE,HIGHLIGHT_NORMAL,txtAlpha,UIICON_CHECKBOX_CHECK);
+      drawIcon(&dat->rules.themeRules,rdat,(int16_t)(state->ds.uiElemPosX[UIELEM_CHARTVIEW_MENU] + (PANEL_EDGE_SIZE + 3*UI_PADDING_SIZE)*state->ds.uiUserScale),(int16_t)(drawRect.y + (1.25f + 1.0f*i)*CHARTVIEW_MENU_ITEM_SPACING*state->ds.uiUserScale + yOffset),UI_TILE_SIZE,HIGHLIGHT_NORMAL,alpha,UIICON_CHECKBOX_CHECK);
     }
     if((i==0)&&(state->ds.useLifetimes)){
       drawTextAlignedSized(rdat,drawRect.x,drawRect.y + (1.4f + 1.0f*i)*CHARTVIEW_MENU_ITEM_SPACING*state->ds.uiUserScale + yOffset,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,dat->strings[dat->locStringIDs[LOCSTR_CHARTVIEW_LIFETIME]],ALIGN_LEFT,(Uint16)(drawRect.w - 8*UI_PADDING_SIZE*state->ds.uiUserScale));
@@ -1821,9 +1858,9 @@ void drawUI(const app_data *restrict dat, app_state *restrict state, resource_da
     }else if(state->chartView == CHARTVIEW_R42){
       drawIconAndTextButton(&dat->rules.themeRules,rdat,state->ds.uiElemPosX[UIELEM_CHARTVIEW_BUTTON],state->ds.uiElemPosY[UIELEM_CHARTVIEW_BUTTON],state->ds.uiElemWidth[UIELEM_CHARTVIEW_BUTTON],getHighlightState(state,UIELEM_CHARTVIEW_BUTTON),255,UIICON_CHARTVIEW,dat->strings[dat->locStringIDs[LOCSTR_CHARTVIEW_R42]]);
     }
-    drawIconButton(&dat->rules.themeRules,rdat,state->ds.uiElemPosX[UIELEM_SEARCH_BUTTON],state->ds.uiElemPosY[UIELEM_SEARCH_BUTTON],state->ds.uiElemWidth[UIELEM_SEARCH_BUTTON],getHighlightState(state,UIELEM_SEARCH_BUTTON),255,UIICON_SEARCH);
-    drawIcon(&dat->rules.themeRules,rdat,state->ds.uiElemPosX[UIELEM_ZOOMIN_BUTTON],state->ds.uiElemPosY[UIELEM_ZOOMIN_BUTTON],state->ds.uiElemWidth[UIELEM_ZOOMIN_BUTTON],getHighlightState(state,UIELEM_ZOOMIN_BUTTON),255,UIICON_ZOOMIN);
-    drawIcon(&dat->rules.themeRules,rdat,state->ds.uiElemPosX[UIELEM_ZOOMOUT_BUTTON],state->ds.uiElemPosY[UIELEM_ZOOMOUT_BUTTON],state->ds.uiElemWidth[UIELEM_ZOOMOUT_BUTTON],getHighlightState(state,UIELEM_ZOOMOUT_BUTTON),255,UIICON_ZOOMOUT);
+    drawIconButton(&dat->rules.themeRules,rdat,state->ds.uiElemPosX[UIELEM_SEARCH_BUTTON],state->ds.uiElemPosY[UIELEM_SEARCH_BUTTON],state->ds.uiElemWidth[UIELEM_SEARCH_BUTTON],getHighlightState(state,UIELEM_SEARCH_BUTTON),1.0f,UIICON_SEARCH);
+    drawIcon(&dat->rules.themeRules,rdat,state->ds.uiElemPosX[UIELEM_ZOOMIN_BUTTON],state->ds.uiElemPosY[UIELEM_ZOOMIN_BUTTON],state->ds.uiElemWidth[UIELEM_ZOOMIN_BUTTON],getHighlightState(state,UIELEM_ZOOMIN_BUTTON),1.0f,UIICON_ZOOMIN);
+    drawIcon(&dat->rules.themeRules,rdat,state->ds.uiElemPosX[UIELEM_ZOOMOUT_BUTTON],state->ds.uiElemPosY[UIELEM_ZOOMOUT_BUTTON],state->ds.uiElemWidth[UIELEM_ZOOMOUT_BUTTON],getHighlightState(state,UIELEM_ZOOMOUT_BUTTON),1.0f,UIICON_ZOOMOUT);
   }
   
   //draw info boxes
@@ -1831,10 +1868,13 @@ void drawUI(const app_data *restrict dat, app_state *restrict state, resource_da
     drawNuclInfoBox(dat,state,rdat,state->chartSelectedNucl);
   }else if(state->ds.shownElements & (1UL << UIELEM_NUCL_FULLINFOBOX)){
     drawNuclFullInfoBox(dat,state,rdat,state->chartSelectedNucl);
+    if(state->ds.shownElements & (1UL << UIELEM_RXN_MENU)){
+      drawRxnMenu(dat,state,rdat);
+    }
   }
   
   //draw persistent button(s)
-  drawIconButton(&dat->rules.themeRules,rdat,state->ds.uiElemPosX[UIELEM_MENU_BUTTON],state->ds.uiElemPosY[UIELEM_MENU_BUTTON],state->ds.uiElemWidth[UIELEM_MENU_BUTTON],getHighlightState(state,UIELEM_MENU_BUTTON),255,UIICON_MENU);
+  drawIconButton(&dat->rules.themeRules,rdat,state->ds.uiElemPosX[UIELEM_MENU_BUTTON],state->ds.uiElemPosY[UIELEM_MENU_BUTTON],state->ds.uiElemWidth[UIELEM_MENU_BUTTON],getHighlightState(state,UIELEM_MENU_BUTTON),1.0f,UIICON_MENU);
 
   //draw menus/panels etc.
   if(state->ds.shownElements & (1UL << UIELEM_PRIMARY_MENU)){
