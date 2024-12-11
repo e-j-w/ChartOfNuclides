@@ -20,6 +20,8 @@ Zoom and pan with the mouse, the controls are basically identical to Google Maps
 
 ### Keyboard shortcuts
 
+This program is also designed to be fully navigable with a keyboard.
+
 | Key                | Action |
 | :----------------- | :----- |
 | Arrow keys         | Pan chart view, navigate menus |
@@ -27,6 +29,7 @@ Zoom and pan with the mouse, the controls are basically identical to Google Maps
 | + / -              | Zoom in/out on chart |
 | ] / [              | Cycle between view modes for the chart (half-life, 2+ energy, etc.) |
 | Enter              | Select menu items |
+| Alt                | Open menu |
 | Escape / backspace | Exit out of open menus, cancel selection, etc. |
 | Ctrl+F             | Search |
 | F11                | Toggle fullscreen mode |

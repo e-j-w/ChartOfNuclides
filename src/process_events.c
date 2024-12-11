@@ -577,6 +577,9 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
       //close the reaction menu
       uiElemClickAction(dat,state,rdat,0,UIELEM_NUCL_FULLINFOBOX_RXNBUTTON);
     }else if((state->uiState == UISTATE_FULLLEVELINFOWITHMENU)&&(state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_EXPAND]==0.0f)&&(state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_CONTRACT]==0.0f)){
+      state->uiState = UISTATE_FULLLEVELINFO;
+      state->mouseoverElement = UIELEM_ENUM_LENGTH;
+    }else if((state->uiState == UISTATE_FULLLEVELINFO)&&(state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_EXPAND]==0.0f)&&(state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_CONTRACT]==0.0f)){
       uiElemClickAction(dat,state,rdat,0,UIELEM_NUCL_FULLINFOBOX_BACKBUTTON); //go back to the main chart
       state->mouseholdElement = UIELEM_ENUM_LENGTH;
     }else if(state->ds.windowFullscreenMode){
@@ -975,23 +978,19 @@ void processSingleEvent(app_data *restrict dat, app_state *restrict state, resou
             state->inputFlags |= (1U << INPUT_ALTDOWN);
           }
           break;
+        case SDL_SCANCODE_LALT:
+        case SDL_SCANCODE_RALT:
+          state->inputFlags |= (1U << INPUT_MENU);
+          break;
         case SDL_SCANCODE_ESCAPE:
           if(SDL_TextInputActive(rdat->window)){
             SDL_StopTextInput(rdat->window);
           }
-          if((state->uiState == UISTATE_CHARTONLY)||(state->uiState == UISTATE_FULLLEVELINFO)){
-            state->inputFlags |= (1U << INPUT_MENU);
-          }else{
-            state->inputFlags |= (1U << INPUT_BACK);
-          }
+          state->inputFlags |= (1U << INPUT_BACK);
           break;
         case SDL_SCANCODE_BACKSPACE:
           if(!(SDL_TextInputActive(rdat->window))){
-            if((state->uiState == UISTATE_CHARTONLY)||(state->uiState == UISTATE_FULLLEVELINFO)){
-              state->inputFlags |= (1U << INPUT_MENU);
-            }else{
-              state->inputFlags |= (1U << INPUT_BACK);
-            }
+            state->inputFlags |= (1U << INPUT_BACK);
           }else{
             if(strdelchar(state->ss.searchString,SEARCH_STRING_MAX_SIZE,(size_t)state->searchCursorPos) >= 0){
               state->searchCursorPos -= 1;
