@@ -1104,7 +1104,7 @@ void drawNuclFullInfoBox(const app_data *restrict dat, const app_state *restrict
       //handle special level info
       uint8_t slInd = (uint8_t)((dat->ndat.levels[lvlInd].format >> 1U) & 127U);
       if(slInd > 0){
-        drawYPos += NUCL_INFOBOX_SMALLLINE_HEIGHT*state->ds.uiUserScale;
+        drawYPos += (NUCL_INFOBOX_SMALLLINE_HEIGHT*state->ds.uiUserScale + txtYOffset);
         char slStr[64];
         SDL_snprintf(slStr,64,"  (%s)",getSpecialLvlStr(dat,slInd));
         //SDL_Log("%s\n",tmpStr);
@@ -1119,7 +1119,7 @@ void drawNuclFullInfoBox(const app_data *restrict dat, const app_state *restrict
       drawTextAlignedSized(rdat,drawXPos,drawYPos,(hl > 1.0E3) ? whiteCol8Bit : blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_LEFT,16384);
       if(dat->ndat.levels[lvlInd].numDecModes > 0){
         for(int8_t i=0; i<dat->ndat.levels[lvlInd].numDecModes; i++){
-          drawYPos += NUCL_INFOBOX_SMALLLINE_HEIGHT*state->ds.uiUserScale;
+          drawYPos += (NUCL_INFOBOX_SMALLLINE_HEIGHT*state->ds.uiUserScale + txtYOffset);
           getDecayModeStr(tmpStr,&dat->ndat,dat->ndat.levels[lvlInd].firstDecMode + (uint32_t)i);
           //SDL_Log("%s\n",tmpStr);
           drawTextAlignedSized(rdat,drawXPos+(2*UI_PADDING_SIZE*state->ds.uiUserScale),drawYPos,(hl > 1.0E3) ? whiteCol8Bit : blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_LEFT,16384); //draw decay mode label
@@ -1153,15 +1153,15 @@ void drawNuclFullInfoBox(const app_data *restrict dat, const app_state *restrict
             }
           }
 
-          drawYPos += NUCL_INFOBOX_SMALLLINE_HEIGHT*state->ds.uiUserScale;
+          drawYPos += (NUCL_INFOBOX_SMALLLINE_HEIGHT*state->ds.uiUserScale + txtYOffset);
         }
       }
-      drawYPos = levelStartDrawPos + numLines*NUCL_INFOBOX_SMALLLINE_HEIGHT*state->ds.uiUserScale;
+      drawYPos = levelStartDrawPos + numLines*(NUCL_INFOBOX_SMALLLINE_HEIGHT*state->ds.uiUserScale + txtYOffset);
     }else{
       if(drawYPos > state->ds.windowYRes){
         break;
       }
-      drawYPos += numLines*NUCL_INFOBOX_SMALLLINE_HEIGHT*state->ds.uiUserScale;
+      drawYPos += (numLines*(NUCL_INFOBOX_SMALLLINE_HEIGHT*state->ds.uiUserScale + txtYOffset));
     }
     //draw divider line
     drawLine(rdat,rect.x,drawYPos,rect.x+rect.w,drawYPos,NUCL_FULLINFOBOX_DIVIDER_LINE_THICKNESS*state->ds.uiUserScale,dividerLineCol,dividerLineCol);
