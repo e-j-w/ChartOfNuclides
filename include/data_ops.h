@@ -32,6 +32,7 @@ void getHalfLifeStr(char strOut[32], const app_data *restrict dat, const uint32_
 void getGSHalfLifeStr(char strOut[32], const app_data *restrict dat, const uint16_t nuclInd, const uint8_t useLifetime);
 void getDecayModeStr(char strOut[32], const ndata *restrict nd, const uint32_t dcyModeInd);
 void getMostProbableDecayModeStr(char strOut[32], const ndata *restrict nd, const uint32_t lvlInd);
+void getRxnStr(char strOut[32], const ndata *restrict nd, const uint32_t rxnInd);
 void getAbundanceStr(char strOut[32], const ndata *restrict nd, const uint16_t nuclInd);
 void getSpinParStr(char strOut[32], const ndata *restrict nd, const uint32_t lvlInd);
 

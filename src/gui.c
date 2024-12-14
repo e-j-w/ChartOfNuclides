@@ -661,7 +661,7 @@ void drawNuclBoxLabelDetails(const app_data *restrict dat, const app_state *rest
     uint32_t plus2Lvl = get2PlusLvlInd(&dat->ndat,nuclInd);
     if(plus2Lvl != MAXNUMLVLS){
       getLvlEnergyStr(tmpStr,&dat->ndat,plus2Lvl,1);
-      strcat(tmpStr," keV");
+      SDL_strlcat(tmpStr," keV",32);
       drawTextAlignedSized(rdat,drawXPos,drawYPos+((yOffsets*19.0f + 40.0f)*state->ds.uiUserScale),col,FONTSIZE_NORMAL,255,tmpStr,ALIGN_CENTER,maxLblWidth); //draw 2+ energy label
     }
   }else if(state->chartView == CHARTVIEW_R42){
@@ -1625,7 +1625,7 @@ void drawRxnMenu(const app_data *restrict dat, const app_state *restrict state, 
   char rxnStr[32];
   uint8_t numRxnPerCol = (uint8_t)(SDL_ceilf((dat->ndat.nuclData[state->chartSelectedNucl].numRxns+1.0f)/(state->ds.rxnMenuColumns*1.0f)));
   for(uint8_t i=0; i<dat->ndat.nuclData[state->chartSelectedNucl].numRxns; i++){
-    SDL_snprintf(rxnStr,64,"Reaction %u",i+1);
+    getRxnStr(rxnStr,&dat->ndat,dat->ndat.nuclData[state->chartSelectedNucl].firstRxn + (uint32_t)i);
     drawRect.x = state->ds.uiElemPosX[UIELEM_RXN_MENU] + (float)(PANEL_EDGE_SIZE + 3*UI_PADDING_SIZE + RXN_MENU_COLUMN_WIDTH*((i+1)/numRxnPerCol))*state->ds.uiUserScale;
     drawRect.y = (float)state->ds.uiElemPosY[UIELEM_RXN_MENU] + (PANEL_EDGE_SIZE + ((float)((i+1)%numRxnPerCol) + 0.4f)*RXN_MENU_ITEM_SPACING)*state->ds.uiUserScale + yOffset;
     drawTextAlignedSized(rdat,drawRect.x,drawRect.y,blackCol8Bit,FONTSIZE_NORMAL,alpha8,rxnStr,ALIGN_LEFT,(Uint16)(RXN_MENU_COLUMN_WIDTH*state->ds.uiUserScale));

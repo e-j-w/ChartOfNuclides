@@ -1690,28 +1690,28 @@ void getGammaMultipolarityStr(char strOut[32], const ndata *restrict nd, const u
 		if(mTentative == TENTATIVEMULT_YES){
 			if(tentative == 0){
 				tentative = 1;
-				strcat(strOut,"(");
+				SDL_strlcat(strOut,"(",32);
 			}
 		}else if(mTentative == TENTATIVEMULT_DERIVED){
 			if(derived == 0){
 				derived = 1;
-				strcat(strOut,"[");
+				SDL_strlcat(strOut,"[",32);
 			}
 		}else if(mTentative == TENTATIVESP_NONE){
 			if(tentative == 1){
 				tentative = 0;
-				strcat(strOut,")");
+				SDL_strlcat(strOut,")",32);
 			}
 			if(derived == 1){
 				derived = 0;
-				strcat(strOut,"]");
+				SDL_strlcat(strOut,"]",32);
 			}
 		}
 		if(i>0){
 			if(multsCanMix(nd->tran[tranInd].multipole[i],nd->tran[tranInd].multipole[i-1])){
-				strcat(strOut,"+");
+				SDL_strlcat(strOut,"+",32);
 			}else{
-				strcat(strOut,",");
+				SDL_strlcat(strOut,",",32);
 			}
 		}
 
@@ -1719,27 +1719,27 @@ void getGammaMultipolarityStr(char strOut[32], const ndata *restrict nd, const u
 			//dipole/quadrupole assignment
 			//check placeholder multipole values to determine which is which
 			if((mEM == 0)&&(mOrder == 2)){
-				strcat(strOut,"Q");
+				SDL_strlcat(strOut,"Q",32);
 			}else if((mEM == 1)&&(mOrder == 1)){
-				strcat(strOut,"D");
+				SDL_strlcat(strOut,"D",32);
 			}
 		}else{
 			if(mEM){
-				strcat(strOut,"M");
+				SDL_strlcat(strOut,"M",32);
 			}else{
-				strcat(strOut,"E");
+				SDL_strlcat(strOut,"E",32);
 			}
 			char order[16];
 		  SDL_snprintf(order,16,"%u",mOrder);
-			strcat(strOut,order);
+			SDL_strlcat(strOut,order,32);
 		}
 
 		if(i==(nd->tran[tranInd].numMultipoles-1)){
 			if(derived == 1){
-				strcat(strOut,"]");
+				SDL_strlcat(strOut,"]",32);
 			}
 			if(tentative == 1){
-				strcat(strOut,")");
+				SDL_strlcat(strOut,")",32);
 			}
 		}
 	}
@@ -1779,7 +1779,7 @@ void getLvlEnergyStr(char strOut[32], const ndata *restrict nd, const uint32_t l
 void getHalfLifeStr(char strOut[32], const app_data *restrict dat, const uint32_t lvlInd, const uint8_t showErr, const uint8_t showUnknown, const uint8_t useLifetime){
 	if(lvlInd < dat->ndat.numLvls){
 		if(dat->ndat.levels[lvlInd].halfLife.unit == VALUE_UNIT_STABLE){
-			SDL_snprintf(strOut,32,"STABLE");
+			SDL_snprintf(strOut,32,"Stable");
 		}else if(dat->ndat.levels[lvlInd].halfLife.unit == VALUE_UNIT_NOVAL){
 			if(showUnknown){
 				SDL_snprintf(strOut,32,"%s",dat->strings[dat->locStringIDs[LOCSTR_UNKNOWN]]);
@@ -1924,6 +1924,112 @@ void getMostProbableDecayModeStr(char strOut[32], const ndata *restrict nd, cons
 	}
 }
 
+uint8_t getZFromRxnNucl(const uint16_t rxnNucl){
+	return (uint8_t)((rxnNucl >> 8U) & 255U);
+}
+uint8_t getAFromRxnNucl(const uint16_t rxnNucl){
+	uint8_t N = (uint8_t)(rxnNucl & 255U);
+	uint8_t Z = getZFromRxnNucl(rxnNucl);
+	return N+Z;
+}
+const char* getEvapParticleStr(const uint8_t evapPartType){
+	switch(evapPartType){
+		case EVAPTYPE_PROTON:
+			return "p";
+		case EVAPTYPE_NEUTRON:
+			return "n";
+		case EVAPTYPE_ALPHA:
+			return "α";
+		case EVAPTYPE_NONE:
+		default:
+			return " ";
+	}
+}
+void getRxnMultiEjectileStr(char ejStr[16], const uint16_t ejectileNucl){
+	char tmpStr[16];
+	ejStr[0] = '\0'; //terminate string
+	uint8_t numEj, ejType;
+	for(uint8_t i=0; i<3; i++){ //up to 3 ejectile types
+		numEj = (uint8_t)((ejectileNucl >> (i*5U)) & 7U);
+		//SDL_Log("numEj[%u]=%u",i,numEj);
+		if(numEj > 0){
+			ejType = (uint8_t)((ejectileNucl >> (3U + (i*5U))) & 3U);
+			//SDL_Log("ejType[%u]=%u",i,ejType);
+			if(numEj > 1){
+				SDL_snprintf(tmpStr,16,"%u%s",numEj,getEvapParticleStr(ejType));
+				SDL_strlcat(ejStr,tmpStr,16);
+			}else{
+				SDL_strlcat(ejStr,getEvapParticleStr(ejType),16);
+			}
+		}
+	}
+	//SDL_Log("Ejectile %u gives string: %s\n",ejectileNucl,ejStr);
+}
+
+void getRxnStr(char strOut[32], const ndata *restrict nd, const uint32_t rxnInd){
+	char ejStr[16];
+	if(rxnInd < nd->numRxns){
+		switch(nd->rxn[rxnInd].type){
+			case REACTIONTYPE_DECAY:
+				if((nd->rxn[rxnInd].ejectileNucl == 0)||(nd->rxn[rxnInd].ejectileNucl == 65535U)){
+					SDL_snprintf(strOut,32,"%u%s %s Decay",getAFromRxnNucl(nd->rxn[rxnInd].targetNucl),getElemStr(getZFromRxnNucl(nd->rxn[rxnInd].targetNucl)),getDecayTypeShortStr((uint8_t)(nd->rxn[rxnInd].projectileNucl)));
+				}else{
+					SDL_snprintf(strOut,32,"%u%s, %u%s %s Decay",getAFromRxnNucl(nd->rxn[rxnInd].targetNucl),getElemStr(getZFromRxnNucl(nd->rxn[rxnInd].targetNucl)),getAFromRxnNucl(nd->rxn[rxnInd].ejectileNucl),getElemStr(getZFromRxnNucl(nd->rxn[rxnInd].ejectileNucl)),getDecayTypeShortStr((uint8_t)(nd->rxn[rxnInd].projectileNucl)));
+				}
+				break;
+			case REACTIONTYPE_INELASTICSCATTERING:
+				SDL_snprintf(strOut,32,"INELASTICSCATTERING");
+				break;
+			case REACTIONTYPE_INELASTICSCATTERING_MULTIEJECTILE:
+				SDL_snprintf(strOut,32,"IS_MULTIEJECTILE");
+				break;
+			case REACTIONTYPE_NUCL_INELASTICSCATTERING:
+				SDL_snprintf(strOut,32,"NUCL_IS");
+				break;
+			case REACTIONTYPE_NUCL_INELASTICSCATTERING_MULTIEJECTILE:
+				SDL_snprintf(strOut,32,"NUCL_IS_MULTIEJECTILE");
+				break;
+			case REACTIONTYPE_COULEX:
+				SDL_snprintf(strOut,32,"Coulomb Excitation");
+				break;
+			case REACTIONTYPE_NUCLTRANSFER:
+				SDL_snprintf(strOut,32,"NUCLTRANSFER");
+				break;
+			case REACTIONTYPE_NUCLTRANSFER_MISCEJECTILE:
+				SDL_snprintf(strOut,32,"NT_MISCEJECTILE");
+				break;
+			case REACTIONTYPE_FRAGMENTATION:
+				SDL_snprintf(strOut,32,"FRAGMENTATION");
+				break;
+			case REACTIONTYPE_FRAGMENTATION_MULTIEJECTILE:
+				SDL_snprintf(strOut,32,"FRAG_MULTIEJECTILE");
+				break;
+			case REACTIONTYPE_FUSEVAP:
+				getRxnMultiEjectileStr(ejStr,nd->rxn[rxnInd].ejectileNucl);
+				SDL_snprintf(strOut,32,"%u%s(%u%s,%s)",getAFromRxnNucl(nd->rxn[rxnInd].targetNucl),getElemStr(getZFromRxnNucl(nd->rxn[rxnInd].targetNucl)),getAFromRxnNucl(nd->rxn[rxnInd].projectileNucl),getElemStr(getZFromRxnNucl(nd->rxn[rxnInd].projectileNucl)),ejStr);
+				break;
+			case REACTIONTYPE_MISCPARTICLE:
+				SDL_snprintf(strOut,32,"MISCPARTICLE");
+				break;
+			case REACTIONTYPE_MISCPARTICLE_MULTIEJECTILE:
+				SDL_snprintf(strOut,32,"MP_MULTIEJECTILE");
+				break;
+			case REACTIONTYPE_MUONICATOM:
+				SDL_snprintf(strOut,32,"Muonic Atom");
+				break;
+			case REACTIONTYPE_NEUTRONRESONANCES:
+				SDL_snprintf(strOut,32,"Neutron Resonances");
+				break;
+			case REACTIONTYPE_UNASSIGNED:
+			default:
+				SDL_snprintf(strOut,32," ");
+				break;
+		}
+	}else{
+		SDL_snprintf(strOut,32," ");
+	}
+}
+
 void getAbundanceStr(char strOut[32], const ndata *restrict nd, const uint16_t nuclInd){
 	if(nuclInd < nd->numNucl){
 		if(nd->nuclData[nuclInd].abundance.unit == VALUE_UNIT_PERCENT){
@@ -1958,7 +2064,7 @@ void getSpinParStr(char strOut[32], const ndata *restrict nd, const uint32_t lvl
 		}
 
 		if(tentative == TENTATIVESP_RANGE){
-			strcat(strOut,"to");
+			SDL_strlcat(strOut,"to",32);
 		}else{
 
 			uint8_t spinIsVar = (uint8_t)(nd->levels[lvlInd].spval[i].format & 1U);
@@ -1969,39 +2075,39 @@ void getSpinParStr(char strOut[32], const ndata *restrict nd, const uint32_t lvl
 				if((i==0)||((i>0)&&((prevTentative != TENTATIVESP_SPINANDPARITY)&&(prevTentative != TENTATIVESP_SPINONLY)))){
 					if((i>0)&&(prevTentative == TENTATIVESP_RANGE)){
 						//previous spin parity value specified a range
-						strcat(strOut," ");
+						SDL_strlcat(strOut," ",32);
 					}else{
-						strcat(strOut,"(");
+						SDL_strlcat(strOut,"(",32);
 					}
 				}
 			}
 
 			if(spinIsVar){
 				if(spinValType != VALUETYPE_NUMBER){
-					strcat(strOut,getValueTypeShortStr(spinValType));
+					SDL_strlcat(strOut,getValueTypeShortStr(spinValType),32);
 				}
 				if(nd->levels[lvlInd].spval[i].spinVal == 0){
 					//variable only
 					if(spinVarInd == 0){
-						strcat(strOut,"J");
+						SDL_strlcat(strOut,"J",32);
 					}else{
 						sprintf(val,"J%u",spinVarInd);
-						strcat(strOut,val);
+						SDL_strlcat(strOut,val,32);
 					}
 				}else{
 					//variable + offset
 					if(spinVarInd == 0){
-						strcat(strOut,"J+");
+						SDL_strlcat(strOut,"J+",32);
 					}else{
 						sprintf(val,"J%u+",spinVarInd);
-						strcat(strOut,val);
+						SDL_strlcat(strOut,val,32);
 					}
 				}
 			}
 
 			if((!spinIsVar)||(nd->levels[lvlInd].spval[i].spinVal > 0)){
 				if(spinValType != VALUETYPE_NUMBER){
-					strcat(strOut,getValueTypeShortStr(spinValType));
+					SDL_strlcat(strOut,getValueTypeShortStr(spinValType),32);
 				}
 				if(nd->levels[lvlInd].spval[i].spinVal < 255){
 					if((nd->levels[lvlInd].format & 1U) == 1){
@@ -2009,36 +2115,36 @@ void getSpinParStr(char strOut[32], const ndata *restrict nd, const uint32_t lvl
 					}else{
 						sprintf(val,"%i",nd->levels[lvlInd].spval[i].spinVal);
 					}
-					strcat(strOut,val);
+					SDL_strlcat(strOut,val,32);
 				}
 			}
 			if((tentative != TENTATIVESP_SPINONLY)&&(tentative != TENTATIVESP_PARITYONLY)){
 				if(nd->levels[lvlInd].spval[i].parVal == -1){
-					strcat(strOut,"-");
+					SDL_strlcat(strOut,"-",32);
 				}else if(nd->levels[lvlInd].spval[i].parVal == 1){
-					strcat(strOut,"+");
+					SDL_strlcat(strOut,"+",32);
 				}
 			}
 			if((tentative == TENTATIVESP_SPINANDPARITY)||(tentative == TENTATIVESP_SPINONLY)){
 				if(i==nd->levels[lvlInd].numSpinParVals-1){
-					strcat(strOut,")");
+					SDL_strlcat(strOut,")",32);
 					if(tentative == TENTATIVESP_SPINONLY){
 						if(nd->levels[lvlInd].spval[i].parVal == -1){
-							strcat(strOut,"-");
+							SDL_strlcat(strOut,"-",32);
 						}else if(nd->levels[lvlInd].spval[i].parVal == 1){
-							strcat(strOut,"+");
+							SDL_strlcat(strOut,"+",32);
 						}
 					}
 				}else if(i<nd->levels[lvlInd].numSpinParVals-1){
 					if(nextTentative != TENTATIVESP_RANGE){
 						if(nextTentative != TENTATIVESP_SPINANDPARITY){
 							if(nextTentative != TENTATIVESP_SPINONLY){
-								strcat(strOut,")");
+								SDL_strlcat(strOut,")",32);
 								if(tentative == TENTATIVESP_SPINONLY){
 									if(nd->levels[lvlInd].spval[i].parVal == -1){
-										strcat(strOut,"-");
+										SDL_strlcat(strOut,"-",32);
 									}else if(nd->levels[lvlInd].spval[i].parVal == 1){
-										strcat(strOut,"+");
+										SDL_strlcat(strOut,"+",32);
 									}
 								}
 							}
@@ -2047,17 +2153,17 @@ void getSpinParStr(char strOut[32], const ndata *restrict nd, const uint32_t lvl
 				}
 			}else if(tentative == TENTATIVESP_PARITYONLY){
 				if(nd->levels[lvlInd].spval[i].parVal == -1){
-					strcat(strOut,"(-)");
+					SDL_strlcat(strOut,"(-)",32);
 				}else if(nd->levels[lvlInd].spval[i].parVal == 1){
-					strcat(strOut,"(+)");
+					SDL_strlcat(strOut,"(+)",32);
 				}
 			}
 			if(i!=nd->levels[lvlInd].numSpinParVals-1){
 				if(nextTentative == TENTATIVESP_RANGE){
 					//next spin parity value specifies a range
-					strcat(strOut," ");
+					SDL_strlcat(strOut," ",32);
 				}else{
-					strcat(strOut,",");
+					SDL_strlcat(strOut,",",32);
 				}
 			}
 		}
@@ -2097,7 +2203,7 @@ uint8_t getNuclNorZFromRxnParticle(const reaction *rxn, const uint8_t particle, 
 	uint8_t type = rxn->type;
 	switch(particle){
 		case REACTIONPARTICLE_PROJECTILE:
-			if((type == REACTIONTYPE_UNASSIGNED)||(type == REACTIONTYPE_FUSEVAP)||(type == REACTIONTYPE_NUCLTRANSFER)||(type == REACTIONTYPE_NUCLTRANSFER_MISCEJECTILE)||(type == REACTIONTYPE_NUCLTRANSFER_MULTIEJECTILE)){
+			if((type == REACTIONTYPE_UNASSIGNED)||(type == REACTIONTYPE_FUSEVAP)||(type == REACTIONTYPE_NUCLTRANSFER)||(type == REACTIONTYPE_NUCLTRANSFER_MISCEJECTILE)){
 				if(getZ==0){
 					return rxn->projectileNucl & 255U;
 				}else{
@@ -2118,7 +2224,7 @@ uint8_t getNuclNorZFromRxnParticle(const reaction *rxn, const uint8_t particle, 
 			}
 		case REACTIONPARTICLE_TARGET:
 		default:
-			if((type == REACTIONTYPE_UNASSIGNED)||(type == REACTIONTYPE_FUSEVAP)||(type == REACTIONTYPE_NUCLTRANSFER)||(type == REACTIONTYPE_NUCLTRANSFER_MISCEJECTILE)||(type == REACTIONTYPE_NUCLTRANSFER_MULTIEJECTILE)){
+			if((type == REACTIONTYPE_UNASSIGNED)||(type == REACTIONTYPE_FUSEVAP)||(type == REACTIONTYPE_NUCLTRANSFER)||(type == REACTIONTYPE_NUCLTRANSFER_MISCEJECTILE)){
 				if(getZ==0){
 					return rxn->projectileNucl & 255U;
 				}else{

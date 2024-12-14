@@ -444,25 +444,25 @@ uint8_t parseSpecialRxnProjEjectStr(reaction *rxn, const char *projStr){
 		rxn->projectileNucl = DECAYMODE_SPONTANEOUSFISSION;
 		rxn->ejectileNucl = 0;
 		rxn->ejectileNucl |= (uint16_t)(148U);
-		rxn->ejectileNucl |= (uint16_t)((94U) << 7U);	
+		rxn->ejectileNucl |= (uint16_t)((94U) << 8U);	
 	}else if(strncmp(projStr,"248CM SF DECAY",14)==0){
 		rxn->type = REACTIONTYPE_DECAY;
 		rxn->projectileNucl = DECAYMODE_SPONTANEOUSFISSION;
 		rxn->ejectileNucl = 0;
 		rxn->ejectileNucl |= (uint16_t)(152U);
-		rxn->ejectileNucl |= (uint16_t)((96U) << 7U);	
+		rxn->ejectileNucl |= (uint16_t)((96U) << 8U);	
 	}else if(strncmp(projStr,"252CF SF DECAY",14)==0){
 		rxn->type = REACTIONTYPE_DECAY;
 		rxn->projectileNucl = DECAYMODE_SPONTANEOUSFISSION;
 		rxn->ejectileNucl = 0;
 		rxn->ejectileNucl |= (uint16_t)(154U);
-		rxn->ejectileNucl |= (uint16_t)((98U) << 7U);	
+		rxn->ejectileNucl |= (uint16_t)((98U) << 8U);	
 	}else if(strncmp(projStr,"254CF SF DECAY",14)==0){
 		rxn->type = REACTIONTYPE_DECAY;
 		rxn->projectileNucl = DECAYMODE_SPONTANEOUSFISSION;
 		rxn->ejectileNucl = 0;
 		rxn->ejectileNucl |= (uint16_t)(156U);
-		rxn->ejectileNucl |= (uint16_t)((98U) << 7U);	
+		rxn->ejectileNucl |= (uint16_t)((98U) << 8U);	
 	}else if(strncmp(projStr,"A DECAY",7)==0){
 		rxn->type = REACTIONTYPE_DECAY;
 		rxn->projectileNucl = DECAYMODE_ALPHA;
@@ -1001,19 +1001,28 @@ uint8_t parseSpecialRxnEjectStr(reaction *rxn, const char *ejStr){
 		rxn->type = REACTIONTYPE_NUCLTRANSFER_MISCEJECTILE;
 		rxn->ejectileNucl = RXNPARTICLE_DEUTERON_4HE;
 	}else if(strcmp(ejStr,"PP")==0){
-		rxn->type = REACTIONTYPE_NUCLTRANSFER_MULTIEJECTILE;
+		rxn->type = REACTIONTYPE_FUSEVAP;
 		rxn->ejectileNucl = 0;
 		//two protons
 		rxn->ejectileNucl |= (uint16_t)(2U);
 		rxn->ejectileNucl |= (uint16_t)(EVAPTYPE_PROTON << 3U);
 	}else if(strcmp(ejStr,"GP")==0){
-		rxn->type = REACTIONTYPE_NUCLTRANSFER_MULTIEJECTILE;
+		rxn->type = REACTIONTYPE_FUSEVAP;
 		rxn->ejectileNucl = 0;
 		//one proton
 		rxn->ejectileNucl |= (uint16_t)(1U);
 		rxn->ejectileNucl |= (uint16_t)(EVAPTYPE_PROTON << 3U);
-	}else if(strcmp(ejStr,"AP")==0){
-		rxn->type = REACTIONTYPE_NUCLTRANSFER_MULTIEJECTILE;
+	}else if((strcmp(ejStr,"PN")==0)||(strcmp(ejStr,"PNG")==0)||(strcmp(ejStr,"NP")==0)||(strcmp(ejStr,"NPG")==0)){
+		rxn->type = REACTIONTYPE_FUSEVAP;
+		rxn->ejectileNucl = 0;
+		//one proton
+		rxn->ejectileNucl |= (uint16_t)(1U);
+		rxn->ejectileNucl |= (uint16_t)(EVAPTYPE_PROTON << 3U);
+		//one neutron
+		rxn->ejectileNucl |= (uint16_t)(1U << 5U);
+		rxn->ejectileNucl |= (uint16_t)(EVAPTYPE_NEUTRON << 8U);
+	}else if((strcmp(ejStr,"AP")==0)||(strcmp(ejStr,"PA")==0)){
+		rxn->type = REACTIONTYPE_FUSEVAP;
 		rxn->ejectileNucl = 0;
 		//one alpha
 		rxn->ejectileNucl |= (uint16_t)(1U);
@@ -1022,7 +1031,7 @@ uint8_t parseSpecialRxnEjectStr(reaction *rxn, const char *ejStr){
 		rxn->ejectileNucl |= (uint16_t)(1U << 5U);
 		rxn->ejectileNucl |= (uint16_t)(EVAPTYPE_PROTON << 8U);
 	}else if(strcmp(ejStr,"AN")==0){
-		rxn->type = REACTIONTYPE_NUCLTRANSFER_MULTIEJECTILE;
+		rxn->type = REACTIONTYPE_FUSEVAP;
 		rxn->ejectileNucl = 0;
 		//one alpha
 		rxn->ejectileNucl |= (uint16_t)(1U);
@@ -1030,8 +1039,8 @@ uint8_t parseSpecialRxnEjectStr(reaction *rxn, const char *ejStr){
 		//one neutron
 		rxn->ejectileNucl |= (uint16_t)(1U << 5U);
 		rxn->ejectileNucl |= (uint16_t)(EVAPTYPE_NEUTRON << 8U);
-	}else if(strcmp(ejStr,"NPAG")==0){
-		rxn->type = REACTIONTYPE_NUCLTRANSFER_MULTIEJECTILE;
+	}else if((strcmp(ejStr,"NPAG")==0)||(strcmp(ejStr,"APNG")==0)||(strcmp(ejStr,"NAPG")==0)||(strcmp(ejStr,"ANPG")==0)||(strcmp(ejStr,"PNAG")==0)||(strcmp(ejStr,"PANG")==0)||(strcmp(ejStr,"NPA")==0)||(strcmp(ejStr,"APN")==0)||(strcmp(ejStr,"NAP")==0)||(strcmp(ejStr,"ANP")==0)||(strcmp(ejStr,"PNA")==0)||(strcmp(ejStr,"PAN")==0)){
+		rxn->type = REACTIONTYPE_FUSEVAP;
 		rxn->ejectileNucl = 0;
 		//one alpha
 		rxn->ejectileNucl |= (uint16_t)(1U);
@@ -1042,8 +1051,41 @@ uint8_t parseSpecialRxnEjectStr(reaction *rxn, const char *ejStr){
 		//one neutron
 		rxn->ejectileNucl |= (uint16_t)(1U << 10U);
 		rxn->ejectileNucl |= (uint16_t)(EVAPTYPE_NEUTRON << 13U);
+	}else if(((strlen(ejStr)==2)&&(strncmp(&ejStr[1],"N",1)==0))||((strlen(ejStr)==3)&&(strncmp(&ejStr[1],"NG",2)==0))){
+		rxn->type = REACTIONTYPE_FUSEVAP;
+		rxn->ejectileNucl = 0;
+		uint8_t numPart = (uint8_t)(ejStr[0] - '0');
+		if(numPart <= 7){
+			//number of particles is known
+			//(if we don't get here, then the number of particles is kept at 0,
+			//meaning the number is unknown)
+			rxn->ejectileNucl |= numPart;
+		}
+		rxn->ejectileNucl |= (uint16_t)(EVAPTYPE_NEUTRON << 3U);
+	}else if(((strlen(ejStr)==2)&&(strncmp(&ejStr[1],"P",1)==0))||((strlen(ejStr)==3)&&(strncmp(&ejStr[1],"PG",2)==0))){
+		rxn->type = REACTIONTYPE_FUSEVAP;
+		rxn->ejectileNucl = 0;
+		uint8_t numPart = (uint8_t)(ejStr[0] - '0');
+		if(numPart <= 7){
+			//number of particles is known
+			//(if we don't get here, then the number of particles is kept at 0,
+			//meaning the number is unknown)
+			rxn->ejectileNucl |= numPart;
+		}
+		rxn->ejectileNucl |= (uint16_t)(EVAPTYPE_PROTON << 3U);
+	}else if(((strlen(ejStr)==2)&&(strncmp(&ejStr[1],"A",1)==0))||((strlen(ejStr)==3)&&(strncmp(&ejStr[1],"AG",2)==0))){
+		rxn->type = REACTIONTYPE_FUSEVAP;
+		rxn->ejectileNucl = 0;
+		uint8_t numPart = (uint8_t)(ejStr[0] - '0');
+		if(numPart <= 7){
+			//number of particles is known
+			//(if we don't get here, then the number of particles is kept at 0,
+			//meaning the number is unknown)
+			rxn->ejectileNucl |= numPart;
+		}
+		rxn->ejectileNucl |= (uint16_t)(EVAPTYPE_ALPHA << 3U);
 	}else if((strlen(ejStr)==4)&&(strncmp(&ejStr[1],"NPG",3)==0)){
-		rxn->type = REACTIONTYPE_NUCLTRANSFER_MULTIEJECTILE;
+		rxn->type = REACTIONTYPE_FUSEVAP;
 		rxn->ejectileNucl = 0;
 		uint8_t numPart = (uint8_t)(ejStr[0] - '0');
 		if(numPart <= 7){
@@ -1057,7 +1099,7 @@ uint8_t parseSpecialRxnEjectStr(reaction *rxn, const char *ejStr){
 		rxn->ejectileNucl |= (uint16_t)(1U << 5U);
 		rxn->ejectileNucl |= (uint16_t)(EVAPTYPE_PROTON << 8U);
 	}else if((strlen(ejStr)==4)&&(strncmp(&ejStr[1],"APG",3)==0)){
-		rxn->type = REACTIONTYPE_NUCLTRANSFER_MULTIEJECTILE;
+		rxn->type = REACTIONTYPE_FUSEVAP;
 		rxn->ejectileNucl = 0;
 		uint8_t numPart = (uint8_t)(ejStr[0] - '0');
 		if(numPart <= 7){
@@ -1071,7 +1113,7 @@ uint8_t parseSpecialRxnEjectStr(reaction *rxn, const char *ejStr){
 		rxn->ejectileNucl |= (uint16_t)(1U << 5U);
 		rxn->ejectileNucl |= (uint16_t)(EVAPTYPE_PROTON << 8U);
 	}else if((strlen(ejStr)>=4)&&(strncmp(&ejStr[1],"ANG",3)==0)){
-		rxn->type = REACTIONTYPE_NUCLTRANSFER_MULTIEJECTILE;
+		rxn->type = REACTIONTYPE_FUSEVAP;
 		rxn->ejectileNucl = 0;
 		uint8_t numPart = (uint8_t)(ejStr[0] - '0');
 		if(numPart <= 7){
@@ -1085,7 +1127,7 @@ uint8_t parseSpecialRxnEjectStr(reaction *rxn, const char *ejStr){
 		rxn->ejectileNucl |= (uint16_t)(1U << 5U);
 		rxn->ejectileNucl |= (uint16_t)(EVAPTYPE_NEUTRON << 8U);
 	}else if((strlen(ejStr)==5)&&(strncmp(&ejStr[0],"AP",2)==0)&&(strncmp(&ejStr[3],"NG",2)==0)){
-		rxn->type = REACTIONTYPE_NUCLTRANSFER_MULTIEJECTILE;
+		rxn->type = REACTIONTYPE_FUSEVAP;
 		rxn->ejectileNucl = 0;
 		uint8_t numPart = (uint8_t)(ejStr[2] - '0');
 		//one alpha
@@ -1102,7 +1144,7 @@ uint8_t parseSpecialRxnEjectStr(reaction *rxn, const char *ejStr){
 		}
 		rxn->ejectileNucl |= (uint16_t)(EVAPTYPE_NEUTRON << 13U);
 	}else if((strlen(ejStr)==5)&&((strncmp(&ejStr[1],"ANPG",4)==0)||(strncmp(&ejStr[1],"APNG",4)==0))){
-		rxn->type = REACTIONTYPE_NUCLTRANSFER_MULTIEJECTILE;
+		rxn->type = REACTIONTYPE_FUSEVAP;
 		rxn->ejectileNucl = 0;
 		uint8_t numPart = (uint8_t)(ejStr[0] - '0');
 		if(numPart <= 7){
@@ -1119,7 +1161,7 @@ uint8_t parseSpecialRxnEjectStr(reaction *rxn, const char *ejStr){
 		rxn->ejectileNucl |= (uint16_t)(1U << 10U);
 		rxn->ejectileNucl |= (uint16_t)(EVAPTYPE_PROTON << 13U);
 	}else if((strlen(ejStr)==5)&&((strncmp(&ejStr[0],"PN",2)==0)||(strncmp(&ejStr[3],"AG",4)==0))){
-		rxn->type = REACTIONTYPE_NUCLTRANSFER_MULTIEJECTILE;
+		rxn->type = REACTIONTYPE_FUSEVAP;
 		rxn->ejectileNucl = 0;
 		uint8_t numPart = (uint8_t)(ejStr[2] - '0');
 		if(numPart <= 7){
@@ -1136,7 +1178,7 @@ uint8_t parseSpecialRxnEjectStr(reaction *rxn, const char *ejStr){
 		rxn->ejectileNucl |= (uint16_t)(1U << 10U);
 		rxn->ejectileNucl |= (uint16_t)(EVAPTYPE_PROTON << 13U);
 	}else if(((strlen(ejStr)==4)&&(strncmp(&ejStr[1],"PNG",3)==0))||((strlen(ejStr)==3)&&(strncmp(&ejStr[1],"PN",2)==0))){
-		rxn->type = REACTIONTYPE_NUCLTRANSFER_MULTIEJECTILE;
+		rxn->type = REACTIONTYPE_FUSEVAP;
 		rxn->ejectileNucl = 0;
 		uint8_t numPart = (uint8_t)(ejStr[0] - '0');
 		if(numPart <= 7){
@@ -1150,7 +1192,7 @@ uint8_t parseSpecialRxnEjectStr(reaction *rxn, const char *ejStr){
 		rxn->ejectileNucl |= (uint16_t)(1U << 5U);
 		rxn->ejectileNucl |= (uint16_t)(EVAPTYPE_NEUTRON << 8U);
 	}else if((strlen(ejStr)==3)&&(strncmp(&ejStr[1],"NG",2)==0)){
-		rxn->type = REACTIONTYPE_NUCLTRANSFER_MULTIEJECTILE;
+		rxn->type = REACTIONTYPE_FUSEVAP;
 		rxn->ejectileNucl = 0;
 		uint8_t numPart = (uint8_t)(ejStr[0] - '0');
 		if(numPart <= 7){
@@ -1161,7 +1203,7 @@ uint8_t parseSpecialRxnEjectStr(reaction *rxn, const char *ejStr){
 		}
 		rxn->ejectileNucl |= (uint16_t)(EVAPTYPE_NEUTRON << 3U);
 	}else if((strlen(ejStr)==3)&&(strncmp(&ejStr[1],"PG",2)==0)){
-		rxn->type = REACTIONTYPE_NUCLTRANSFER_MULTIEJECTILE;
+		rxn->type = REACTIONTYPE_FUSEVAP;
 		rxn->ejectileNucl = 0;
 		uint8_t numPart = (uint8_t)(ejStr[0] - '0');
 		if(numPart <= 7){
@@ -1178,7 +1220,7 @@ uint8_t parseSpecialRxnEjectStr(reaction *rxn, const char *ejStr){
 			rxn->type = REACTIONTYPE_INELASTICSCATTERING_MULTIEJECTILE;
 			rxn->projectileNucl = RXNPARTICLE_ALPHA;
 		}else{
-			rxn->type = REACTIONTYPE_NUCLTRANSFER_MULTIEJECTILE;
+			rxn->type = REACTIONTYPE_FUSEVAP;
 			//one alpha
 			rxn->ejectileNucl |= (uint16_t)(1U << 5U);
 			rxn->ejectileNucl |= (uint16_t)(EVAPTYPE_ALPHA << 8U);
@@ -1193,18 +1235,18 @@ uint8_t parseSpecialRxnEjectStr(reaction *rxn, const char *ejStr){
 		rxn->ejectileNucl |= (uint16_t)(EVAPTYPE_NEUTRON << 3U);
 	}else if(strcmp(ejStr,"XNYPG")==0){
 		//unknown number of protons and neutrons
-		rxn->type = REACTIONTYPE_NUCLTRANSFER_MULTIEJECTILE;
+		rxn->type = REACTIONTYPE_FUSEVAP;
 		rxn->ejectileNucl = 0;
 		rxn->ejectileNucl |= (uint16_t)(EVAPTYPE_PROTON << 3U);
 		rxn->ejectileNucl |= (uint16_t)(EVAPTYPE_NEUTRON << 8U);
 	}else if(strcmp(ejStr,"PXNG")==0){
-		rxn->type = REACTIONTYPE_NUCLTRANSFER_MULTIEJECTILE;
+		rxn->type = REACTIONTYPE_FUSEVAP;
 		rxn->ejectileNucl = 0;
 		rxn->ejectileNucl |= 1U; //one proton
 		rxn->ejectileNucl |= (uint16_t)(EVAPTYPE_PROTON << 3U);
 		rxn->ejectileNucl |= (uint16_t)(EVAPTYPE_NEUTRON << 8U); //unknown number of neutrons
 	}else if((strlen(ejStr)==5)&&(strncmp(&ejStr[0],"XN",2)==0)&&(strncmp(&ejStr[3],"PG",2)==0)){
-		rxn->type = REACTIONTYPE_NUCLTRANSFER_MULTIEJECTILE;
+		rxn->type = REACTIONTYPE_FUSEVAP;
 		rxn->ejectileNucl = 0;
 		rxn->ejectileNucl |= (uint16_t)(EVAPTYPE_NEUTRON << 8U);
 		uint8_t numPart = (uint8_t)(ejStr[2] - '0');
@@ -1222,7 +1264,7 @@ uint8_t parseSpecialRxnEjectStr(reaction *rxn, const char *ejStr){
 			rxn->type = REACTIONTYPE_INELASTICSCATTERING_MULTIEJECTILE;
 			rxn->projectileNucl = RXNPARTICLE_ALPHA;
 		}else{
-			rxn->type = REACTIONTYPE_NUCLTRANSFER_MULTIEJECTILE;
+			rxn->type = REACTIONTYPE_FUSEVAP;
 			//one alpha
 			rxn->ejectileNucl |= (uint16_t)(1U << 5U);
 			rxn->ejectileNucl |= (uint16_t)(EVAPTYPE_ALPHA << 8U);
@@ -1237,7 +1279,7 @@ uint8_t parseSpecialRxnEjectStr(reaction *rxn, const char *ejStr){
 			rxn->type = REACTIONTYPE_INELASTICSCATTERING_MULTIEJECTILE;
 			rxn->projectileNucl = RXNPARTICLE_ALPHA;
 		}else{
-			rxn->type = REACTIONTYPE_NUCLTRANSFER_MULTIEJECTILE;
+			rxn->type = REACTIONTYPE_FUSEVAP;
 			//one alpha
 			rxn->ejectileNucl |= (uint16_t)(1U << 5U);
 			rxn->ejectileNucl |= (uint16_t)(EVAPTYPE_ALPHA << 8U);
@@ -1252,7 +1294,7 @@ uint8_t parseSpecialRxnEjectStr(reaction *rxn, const char *ejStr){
 			rxn->type = REACTIONTYPE_INELASTICSCATTERING_MULTIEJECTILE;
 			rxn->projectileNucl = RXNPARTICLE_PROTON;
 		}else{
-			rxn->type = REACTIONTYPE_NUCLTRANSFER_MULTIEJECTILE;
+			rxn->type = REACTIONTYPE_FUSEVAP;
 			//one proton
 			rxn->ejectileNucl |= (uint16_t)(1U << 5U);
 			rxn->ejectileNucl |= (uint16_t)(EVAPTYPE_PROTON << 8U);
@@ -1267,7 +1309,7 @@ uint8_t parseSpecialRxnEjectStr(reaction *rxn, const char *ejStr){
 			rxn->type = REACTIONTYPE_INELASTICSCATTERING_MULTIEJECTILE;
 			rxn->projectileNucl = RXNPARTICLE_PROTON;
 		}else{
-			rxn->type = REACTIONTYPE_NUCLTRANSFER_MULTIEJECTILE;
+			rxn->type = REACTIONTYPE_FUSEVAP;
 			//one proton
 			rxn->ejectileNucl |= (uint16_t)(1U << 5U);
 			rxn->ejectileNucl |= (uint16_t)(EVAPTYPE_PROTON << 8U);
@@ -1283,7 +1325,7 @@ uint8_t parseSpecialRxnEjectStr(reaction *rxn, const char *ejStr){
 			rxn->projectileNucl = RXNPARTICLE_PROTON;
 			rxn->ejectileNucl |= 1U;
 		}else{
-			rxn->type = REACTIONTYPE_NUCLTRANSFER_MULTIEJECTILE;
+			rxn->type = REACTIONTYPE_FUSEVAP;
 			rxn->ejectileNucl |= 2U;
 		}
 		rxn->ejectileNucl |= (uint16_t)(EVAPTYPE_PROTON << 3U);
@@ -1506,7 +1548,7 @@ uint8_t parseRxn(reaction *rxn, const char *rxnstring){
 		rxn->projectileNucl = DECAYMODE_SPONTANEOUSFISSION;
 		rxn->ejectileNucl = 0;
 		rxn->ejectileNucl |= (uint16_t)(156U);
-		rxn->ejectileNucl |= (uint16_t)((98U) << 7U);
+		rxn->ejectileNucl |= (uint16_t)((98U) << 8U);
 		return 1;
 	}
 
@@ -1545,16 +1587,16 @@ uint8_t parseRxn(reaction *rxn, const char *rxnstring){
 			//target found
 			rxn->targetNucl = 0;
 			rxn->targetNucl |= (uint16_t)((uint32_t)N & 255U);
-			rxn->targetNucl |= (uint16_t)(((uint32_t)Z & 255U) << 7U);
+			rxn->targetNucl |= (uint16_t)(((uint32_t)Z & 255U) << 8U);
 		}else if(Z>=0){
 			//element only string (eg. 'C')
 			rxn->targetNucl = 0;
 			rxn->targetNucl |= (uint16_t)(255U);
-			rxn->targetNucl |= (uint16_t)(((uint32_t)Z & 255U) << 7U);
+			rxn->targetNucl |= (uint16_t)(((uint32_t)Z & 255U) << 8U);
 		}else if((Z==-2)&&(N==-2)){
 			//unknown heavy nuclide
 			rxn->targetNucl |= (uint16_t)(254U);
-			rxn->targetNucl |= (uint16_t)((254U) << 7U);
+			rxn->targetNucl |= (uint16_t)((254U) << 8U);
 		}else{
 			SDL_Log("WARNING: invalid target in reaction string: %s (tok: %s)\n",rxnstring,tok);
 			return 0;
@@ -1581,12 +1623,12 @@ uint8_t parseRxn(reaction *rxn, const char *rxnstring){
 					//projectile found
 					rxn->projectileNucl = 0;
 					rxn->projectileNucl |= (uint16_t)((uint32_t)N & 255U);
-					rxn->projectileNucl |= (uint16_t)(((uint32_t)Z & 255U) << 7U);
+					rxn->projectileNucl |= (uint16_t)(((uint32_t)Z & 255U) << 8U);
 				}else{
 					//element only string (eg. 'C')
 					rxn->projectileNucl = 0;
 					rxn->projectileNucl |= (uint16_t)(255U);
-					rxn->projectileNucl |= (uint16_t)(((uint32_t)Z & 255U) << 7U);
+					rxn->projectileNucl |= (uint16_t)(((uint32_t)Z & 255U) << 8U);
 				}
 				rxnBuffPos += (uint8_t)(strlen(tok) + 1);
 				strncpy(rxnBuff,rxnstring+rxnBuffPos,30-rxnBuffPos); //reconstitute string (since strtok was called in getENSDFNuclStrNZ)
@@ -1606,7 +1648,7 @@ uint8_t parseRxn(reaction *rxn, const char *rxnstring){
 							//ejectile found
 							rxn->ejectileNucl = 0;
 							rxn->ejectileNucl |= (uint16_t)((uint32_t)N & 255U);
-							rxn->ejectileNucl |= (uint16_t)(((uint32_t)Z & 255U) << 7U);
+							rxn->ejectileNucl |= (uint16_t)(((uint32_t)Z & 255U) << 8U);
 							rxn->type = REACTIONTYPE_NUCLTRANSFER;
 							if(rxn->ejectileNucl == rxn->projectileNucl){
 								//reclassify reaction
@@ -1617,7 +1659,7 @@ uint8_t parseRxn(reaction *rxn, const char *rxnstring){
 							//element only string (eg. 'C')
 							rxn->ejectileNucl = 0;
 							rxn->ejectileNucl |= (uint16_t)(255U);
-							rxn->ejectileNucl |= (uint16_t)(((uint32_t)Z & 255U) << 7U);
+							rxn->ejectileNucl |= (uint16_t)(((uint32_t)Z & 255U) << 8U);
 							rxn->type = REACTIONTYPE_NUCLTRANSFER;
 							if(rxn->ejectileNucl == rxn->projectileNucl){
 								//reclassify reaction
@@ -1643,7 +1685,7 @@ uint8_t parseRxn(reaction *rxn, const char *rxnstring){
 									//ejectile found
 									rxn->ejectileNucl = 0;
 									rxn->ejectileNucl |= (uint16_t)((uint32_t)N & 255U);
-									rxn->ejectileNucl |= (uint16_t)(((uint32_t)Z & 255U) << 7U);
+									rxn->ejectileNucl |= (uint16_t)(((uint32_t)Z & 255U) << 8U);
 									rxn->type = REACTIONTYPE_NUCLTRANSFER;
 									if(rxn->ejectileNucl == rxn->projectileNucl){
 										//reclassify reaction
@@ -1654,7 +1696,7 @@ uint8_t parseRxn(reaction *rxn, const char *rxnstring){
 									//element only string (eg. 'C')
 									rxn->ejectileNucl = 0;
 									rxn->ejectileNucl |= (uint16_t)(255U);
-									rxn->ejectileNucl |= (uint16_t)(((uint32_t)Z & 255U) << 7U);
+									rxn->ejectileNucl |= (uint16_t)(((uint32_t)Z & 255U) << 8U);
 									rxn->type = REACTIONTYPE_NUCLTRANSFER;
 									if(rxn->ejectileNucl == rxn->projectileNucl){
 										//reclassify reaction
@@ -4003,16 +4045,16 @@ int buildDatabase(const char *appBasePath, ndata *nd){
 	//parse ENSDF data files
 	for(uint16_t i=1;i<350;i++){
 		strcpy(filePath,"");
-		strcat(filePath,appBasePath);
-    strcat(filePath,"data/ensdf/");
+		SDL_strlcat(filePath,appBasePath,256);
+    SDL_strlcat(filePath,"data/ensdf/",256);
 		if(i<10)
-			strcat(filePath,"ensdf.00");
+			SDL_strlcat(filePath,"ensdf.00",256);
 		else if(i<100)
-			strcat(filePath,"ensdf.0");
+			SDL_strlcat(filePath,"ensdf.0",256);
 		else
-			strcat(filePath,"ensdf.");
+			SDL_strlcat(filePath,"ensdf.",256);
 		sprintf(str,"%u",i);
-		strcat(filePath,str);
+		SDL_strlcat(filePath,str,256);
 		if(parseENSDFFile(filePath,nd) == -1){ //grab data from the ENSDF file
       return -1;
     }
@@ -4021,8 +4063,8 @@ int buildDatabase(const char *appBasePath, ndata *nd){
 	
 	//parse abundance data file
 	strcpy(filePath,"");
-	strcat(filePath,appBasePath);
-	strcat(filePath,"data/abundances.txt");
+	SDL_strlcat(filePath,appBasePath,256);
+	SDL_strlcat(filePath,"data/abundances.txt",256);
 	if(parseAbundanceData(filePath,nd) == -1){
 		return -1;
 	}
