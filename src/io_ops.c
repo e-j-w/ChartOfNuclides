@@ -28,6 +28,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 static int readConfigFile(FILE *file, app_state *restrict state){
   char fullLine[256],par[256],val[256];
   char *tok;
+  char *saveptr = NULL;
 
   while(!(feof(file))){ //go until the end of file is reached
     if(fgets(fullLine,256,file)!=NULL){
@@ -35,10 +36,10 @@ static int readConfigFile(FILE *file, app_state *restrict state){
       fullLine[strcspn(fullLine, "\r\n")] = 0; //strips newline characters from the string read by fgets
 
       //parse the line
-      tok = strtok(fullLine,"=");
+      tok = SDL_strtok_r(fullLine,"=",&saveptr);
       if(tok != NULL){
         strncpy(par,tok,sizeof(par)-1);
-        tok = strtok(NULL,"=");
+        tok = SDL_strtok_r(NULL,"=",&saveptr);
         if(tok != NULL){
           strncpy(val,tok,sizeof(val)-1);
         }

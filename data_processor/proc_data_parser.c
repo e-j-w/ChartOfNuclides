@@ -38,6 +38,7 @@ static int parseAppRules(app_data *restrict dat, asset_mapping *restrict stringI
   FILE *inp;
   char str[256], str2[256], filePath[528];
   char *tok;
+	char *saveptr = NULL;
   SDL_snprintf(filePath,528,"%sdata/app_rules.txt",appBasePath);
   inp = fopen(filePath, "r");
   if(inp!=NULL){
@@ -45,20 +46,20 @@ static int parseAppRules(app_data *restrict dat, asset_mapping *restrict stringI
       if(fgets(str,256,inp)!=NULL){
         str[strcspn(str,"\r\n")] = 0; //strips newline characters from the string read by fgets
         if(SDL_strcmp(str,"")!=0){
-          tok = strtok(str," ");
+          tok = SDL_strtok_r(str," ",&saveptr);
           if(SDL_strcmp(tok,"app_name") == 0){
-            tok = strtok(NULL,""); //get the rest of the string
+            tok = SDL_strtok_r(NULL,"",&saveptr); //get the rest of the string
             strncpy(dat->rules.appName,tok,63);
           }else if(SDL_strcmp(tok,"bg_col") == 0){
-            tok = strtok(NULL,""); //get the rest of the string
+            tok = SDL_strtok_r(NULL,"",&saveptr); //get the rest of the string
             strncpy(str2,tok,255);
-            tok = strtok(str2,",");
+            tok = SDL_strtok_r(str2,",",&saveptr);
             if(tok!=NULL){
               dat->rules.themeRules.bgCol.r = (float)atof(tok);
-              tok = strtok(NULL,",");
+              tok = SDL_strtok_r(NULL,",",&saveptr);
               if(tok!=NULL){
                 dat->rules.themeRules.bgCol.g = (float)atof(tok);
-                tok = strtok(NULL,",");
+                tok = SDL_strtok_r(NULL,",",&saveptr);
                 if(tok!=NULL){
                   dat->rules.themeRules.bgCol.b = (float)atof(tok);
                   dat->rules.themeRules.bgCol.a = 1.0f;
@@ -75,15 +76,15 @@ static int parseAppRules(app_data *restrict dat, asset_mapping *restrict stringI
               return -1;
             }
           }else if(SDL_strcmp(tok,"text_col") == 0){
-            tok = strtok(NULL,""); //get the rest of the string
+            tok = SDL_strtok_r(NULL,"",&saveptr); //get the rest of the string
             strncpy(str2,tok,255);
-            tok = strtok(str2,",");
+            tok = SDL_strtok_r(str2,",",&saveptr);
             if(tok!=NULL){
               dat->rules.themeRules.textColNormal.r = (Uint8)floor(atof(tok)*255.0);
-              tok = strtok(NULL,",");
+              tok = SDL_strtok_r(NULL,",",&saveptr);
               if(tok!=NULL){
                 dat->rules.themeRules.textColNormal.g = (Uint8)floor(atof(tok)*255.0);
-                tok = strtok(NULL,",");
+                tok = SDL_strtok_r(NULL,",",&saveptr);
                 if(tok!=NULL){
                   dat->rules.themeRules.textColNormal.b = (Uint8)floor(atof(tok)*255.0);
                   dat->rules.themeRules.textColNormal.a = 255;
@@ -100,15 +101,15 @@ static int parseAppRules(app_data *restrict dat, asset_mapping *restrict stringI
               return -1;
             }
           }else if(SDL_strcmp(tok,"text_col_inactive") == 0){
-            tok = strtok(NULL,""); //get the rest of the string
+            tok = SDL_strtok_r(NULL,"",&saveptr); //get the rest of the string
             strncpy(str2,tok,255);
-            tok = strtok(str2,",");
+            tok = SDL_strtok_r(str2,",",&saveptr);
             if(tok!=NULL){
               dat->rules.themeRules.textColInactive.r = (Uint8)floor(atof(tok)*255.0);
-              tok = strtok(NULL,",");
+              tok = SDL_strtok_r(NULL,",",&saveptr);
               if(tok!=NULL){
                 dat->rules.themeRules.textColInactive.g = (Uint8)floor(atof(tok)*255.0);
-                tok = strtok(NULL,",");
+                tok = SDL_strtok_r(NULL,",",&saveptr);
                 if(tok!=NULL){
                   dat->rules.themeRules.textColInactive.b = (Uint8)floor(atof(tok)*255.0);
                   dat->rules.themeRules.textColInactive.a = 255;
@@ -125,15 +126,15 @@ static int parseAppRules(app_data *restrict dat, asset_mapping *restrict stringI
               return -1;
             }
           }else if(SDL_strcmp(tok,"mod_col_normal") == 0){
-            tok = strtok(NULL,""); //get the rest of the string
+            tok = SDL_strtok_r(NULL,"",&saveptr); //get the rest of the string
             strncpy(str2,tok,255);
-            tok = strtok(str2,",");
+            tok = SDL_strtok_r(str2,",",&saveptr);
             if(tok!=NULL){
               dat->rules.themeRules.modNormalCol.r = (float)atof(tok);
-              tok = strtok(NULL,",");
+              tok = SDL_strtok_r(NULL,",",&saveptr);
               if(tok!=NULL){
                 dat->rules.themeRules.modNormalCol.g = (float)atof(tok);
-                tok = strtok(NULL,",");
+                tok = SDL_strtok_r(NULL,",",&saveptr);
                 if(tok!=NULL){
                   dat->rules.themeRules.modNormalCol.b = (float)atof(tok);
                   dat->rules.themeRules.modNormalCol.a = 1.0f;
@@ -150,15 +151,15 @@ static int parseAppRules(app_data *restrict dat, asset_mapping *restrict stringI
               return -1;
             }
           }else if(SDL_strcmp(tok,"mod_col_mouseover") == 0){
-            tok = strtok(NULL,""); //get the rest of the string
+            tok = SDL_strtok_r(NULL,"",&saveptr); //get the rest of the string
             strncpy(str2,tok,255);
-            tok = strtok(str2,",");
+            tok = SDL_strtok_r(str2,",",&saveptr);
             if(tok!=NULL){
               dat->rules.themeRules.modMouseOverCol.r = (float)atof(tok);
-              tok = strtok(NULL,",");
+              tok = SDL_strtok_r(NULL,",",&saveptr);
               if(tok!=NULL){
                 dat->rules.themeRules.modMouseOverCol.g = (float)atof(tok);
-                tok = strtok(NULL,",");
+                tok = SDL_strtok_r(NULL,",",&saveptr);
                 if(tok!=NULL){
                   dat->rules.themeRules.modMouseOverCol.b = (float)atof(tok);
                   dat->rules.themeRules.modMouseOverCol.a = 1.0f;
@@ -175,15 +176,15 @@ static int parseAppRules(app_data *restrict dat, asset_mapping *restrict stringI
               return -1;
             }
           }else if(SDL_strcmp(tok,"mod_col_selected") == 0){
-            tok = strtok(NULL,""); //get the rest of the string
+            tok = SDL_strtok_r(NULL,"",&saveptr); //get the rest of the string
             strncpy(str2,tok,255);
-            tok = strtok(str2,",");
+            tok = SDL_strtok_r(str2,",",&saveptr);
             if(tok!=NULL){
               dat->rules.themeRules.modSelectedCol.r = (float)atof(tok);
-              tok = strtok(NULL,",");
+              tok = SDL_strtok_r(NULL,",",&saveptr);
               if(tok!=NULL){
                 dat->rules.themeRules.modSelectedCol.g = (float)atof(tok);
-                tok = strtok(NULL,",");
+                tok = SDL_strtok_r(NULL,",",&saveptr);
                 if(tok!=NULL){
                   dat->rules.themeRules.modSelectedCol.b = (float)atof(tok);
                   dat->rules.themeRules.modSelectedCol.a = 1.0f;
@@ -280,6 +281,7 @@ static int parseStrings(app_data *restrict dat, asset_mapping *restrict stringID
   FILE *inp;
   char filePath[536], str[256];
   char *tok;
+	char *saveptr = NULL;
   
   SDL_snprintf(filePath,536,"%sdata/strings.txt",appBasePath); //open the string file
   inp = fopen(filePath, "r");
@@ -289,14 +291,14 @@ static int parseStrings(app_data *restrict dat, asset_mapping *restrict stringID
       if(fgets(str,256,inp)!=NULL){
         str[strcspn(str,"\r\n")] = 0; //strips newline characters from the string read by fgets
         if(SDL_strcmp(str,"")!=0){
-          tok = strtok(str,"|");
+          tok = SDL_strtok_r(str,"|",&saveptr);
           if(tok!=NULL){
             if(dat->numStrings >= MAX_NUM_STRINGS){
               SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"maximum number of text strings reached, cannot parse file %s\n",filePath);
               return -1;
             }
             strncpy(stringIDmap->assetID[dat->numStrings],str,256);
-            tok = strtok(NULL,""); //get the rest of the string
+            tok = SDL_strtok_r(NULL,"",&saveptr); //get the rest of the string
             strncpy(dat->strings[dat->numStrings],tok,255);
             dat->numStrings++;
           }else{
@@ -321,20 +323,21 @@ void getENSDFNuclStrNZ(int16_t *N, int16_t *Z, const char *nuclStr){
 	
 	int16_t A = -1;
 	char *tok;
+	char *saveptr = NULL;
 	char str[256];
 	*Z = -1;
 	*N = -1;
 	
 	//get mass number
 	strncpy(str,nuclStr,255); //copy the nucleus name
-	tok=strtok(str,"ABCDEFGHIJKLMNOPQRSTUVWXYZ");
+	tok=SDL_strtok_r(str,"ABCDEFGHIJKLMNOPQRSTUVWXYZ",&saveptr);
 	if(tok!=NULL){
 		A=(int16_t)atoi(tok);
 	}
 	
 	//get proton number
 	strncpy(str,nuclStr,255); //copy the nucleus name
-	tok=strtok(str,"0123456789");
+	tok=SDL_strtok_r(str,"0123456789",&saveptr);
 	if(tok!=NULL){
 		if(strcmp(tok,"NN")==0){
 			*Z=0;
@@ -1562,11 +1565,12 @@ uint8_t parseRxn(reaction *rxn, const char *rxnstring){
 	int16_t Z, N;
 	strncpy(rxnBuff,rxnstring+rxnBuffPos,30-rxnBuffPos); //copy original string
 	char *tok;
+	char *saveptr = NULL;
 	uint8_t isIonStr = 0;
 
-	tok = strtok(rxnBuff,"{[]"); //check for special strings describing ions like '183HF{+71+} IT DECAY'
+	tok = SDL_strtok_r(rxnBuff,"{[]",&saveptr); //check for special strings describing ions like '183HF{+71+} IT DECAY'
 	if(tok!=NULL){
-		tok = strtok(NULL,"}]");
+		tok = SDL_strtok_r(NULL,"}]",&saveptr);
 		if(tok!=NULL){
 			isIonStr = 1;
 			//SDL_Log("Ion flag set\n");
@@ -1574,7 +1578,7 @@ uint8_t parseRxn(reaction *rxn, const char *rxnstring){
 	}
 
 	strncpy(rxnBuff,rxnstring+rxnBuffPos,30-rxnBuffPos); //copy original string
-	tok = strtok(rxnBuff," (,[{"); //extra bracket types here to handle strings like '183HF{+71+} IT DECAY'
+	tok = SDL_strtok_r(rxnBuff," (,[{",&saveptr); //extra bracket types here to handle strings like '183HF{+71+} IT DECAY'
 	if(tok!=NULL){
 
 		rxnBuffPos += (uint8_t)(strlen(tok) + 1);
@@ -1605,7 +1609,7 @@ uint8_t parseRxn(reaction *rxn, const char *rxnstring){
 		//SDL_Log("Target N: %i, Z: %i, from tok: %s\n",N,Z,tok);
 
 		strncpy(rxnBuff,rxnstring+rxnBuffPos,30-rxnBuffPos); //reconstitute string (since strtok was called in getENSDFNuclStrNZ)
-		tok = strtok(rxnBuff,",)");
+		tok = SDL_strtok_r(rxnBuff,",)",&saveptr);
 		
 		if(tok!=NULL){
 			char projStr[16];
@@ -1632,7 +1636,7 @@ uint8_t parseRxn(reaction *rxn, const char *rxnstring){
 				}
 				rxnBuffPos += (uint8_t)(strlen(tok) + 1);
 				strncpy(rxnBuff,rxnstring+rxnBuffPos,30-rxnBuffPos); //reconstitute string (since strtok was called in getENSDFNuclStrNZ)
-				tok = strtok(rxnBuff,")");
+				tok = SDL_strtok_r(rxnBuff,")",&saveptr);
 				if(tok!=NULL){
 					char ejStr[16];
 					if((strlen(tok)>4)&&(strncmp(tok,"POL ",4)==0)){
@@ -1720,9 +1724,9 @@ uint8_t parseRxn(reaction *rxn, const char *rxnstring){
 				//try looking at the rest of the string after the 'target', which might specify a decay mode
 				strncpy(rxnBuff,rxnstring+rxnBuffPos,30-rxnBuffPos); //reconstitute original string (since strtok was called in getENSDFNuclStrNZ)
 				if(isIonStr){
-					tok = strtok(rxnBuff," ");
+					tok = SDL_strtok_r(rxnBuff," ",&saveptr);
 					if(tok!=NULL){
-						tok = strtok(NULL,"(");
+						tok = SDL_strtok_r(NULL,"(",&saveptr);
 						if(tok!=NULL){
 							//remove trailing spaces
 							for(uint8_t i = (uint8_t)(strlen(tok)-1); 1; i--){
@@ -1741,7 +1745,7 @@ uint8_t parseRxn(reaction *rxn, const char *rxnstring){
 						return 0;
 					}
 				}else{
-					tok = strtok(rxnBuff,")");
+					tok = SDL_strtok_r(rxnBuff,")",&saveptr);
 				}
 				if((strlen(tok)>4)&&(strncmp(tok,"POL ",4)==0)){
 					//polarized beam
@@ -1775,6 +1779,7 @@ uint8_t parseRxn(reaction *rxn, const char *rxnstring){
 void parseLevelE(valWithErr * levelEVal, const char * estring, const char * errstring){
 
 	char *tok;
+	char *saveptr = NULL;
 	char eVal[11];
   eVal[0] = '\0';
   memcpy(eVal,&estring[0],10);
@@ -1815,9 +1820,9 @@ void parseLevelE(valWithErr * levelEVal, const char * estring, const char * errs
 	}else if((levEStartPos < 10)&&(isalpha(eVal[levEStartPos]))&&(eVal[levEStartPos+1]=='+')){
 		//level energy in X+number format
 		//SDL_Log("X+number eVal: %s\n",eVal);
-		tok = strtok(eVal,"+");
+		tok = SDL_strtok_r(eVal,"+",&saveptr);
 		if(tok != NULL){
-			tok = strtok(NULL,""); //get the rest of the string
+			tok = SDL_strtok_r(NULL,"",&saveptr); //get the rest of the string
 			if(tok != NULL){
 				levelE = (float)atof(tok);
 				levelEVal->format = 0; //default
@@ -1830,10 +1835,10 @@ void parseLevelE(valWithErr * levelEVal, const char * estring, const char * errs
 	}else if((levEStrLen > 1)&&(eVal[levEStrLen-2]=='+')&&(isalpha(eVal[levEStrLen-1]))){
 		//level energy in number+X format
 		//SDL_Log("number+X eVal: %s\n",eVal);
-		tok = strtok(eVal,"+");
+		tok = SDL_strtok_r(eVal,"+",&saveptr);
 		if(tok != NULL){
 			levelE = (float)atof(tok);
-			tok = strtok(NULL,""); //get the rest of the string
+			tok = SDL_strtok_r(NULL,"",&saveptr); //get the rest of the string
 			if(tok != NULL){
 				levelEVal->format = 0; //default
 				levelEVal->format |= (uint16_t)(VALUETYPE_PLUSX << 5);
@@ -1854,10 +1859,10 @@ void parseLevelE(valWithErr * levelEVal, const char * estring, const char * errs
 	if(levelE >= 0.0f){
 		//get the number of sig figs in the level energy
 		//SDL_Log("eVal: %s\n",eVal);
-		tok = strtok(eVal,".");
+		tok = SDL_strtok_r(eVal,".",&saveptr);
 		if(tok!=NULL){
 			//SDL_Log("%s\n",tok);
-			tok = strtok(NULL,"E+"); //some level energies are specified with exponents, or relative to a variable (eg. 73.0+X)
+			tok = SDL_strtok_r(NULL,"E+",&saveptr); //some level energies are specified with exponents, or relative to a variable (eg. 73.0+X)
 			if(tok!=NULL){
 				
 				//SDL_Log("%s\n",tok);
@@ -1872,7 +1877,7 @@ void parseLevelE(valWithErr * levelEVal, const char * estring, const char * errs
 				levelEVal->format |= (uint16_t)(len & 15U);
 				//SDL_Log("format: %u\n",levelEVal->format);
 				if(((levelEVal->format >> 5U) & 15U) != VALUETYPE_PLUSX){
-					tok = strtok(NULL,""); //get the remaining part of the string (only get past here if the value was expressed in exponent form)
+					tok = SDL_strtok_r(NULL,"",&saveptr); //get the remaining part of the string (only get past here if the value was expressed in exponent form)
 					if(tok!=NULL){
 						//SDL_Log("energy in exponent form: %s\n",eVal);
 						//value was in exponent format
@@ -1885,10 +1890,10 @@ void parseLevelE(valWithErr * levelEVal, const char * estring, const char * errs
 				//potentially an exponent form value with no decimal place
 				memcpy(eVal,&estring[0],10); //re-constitute original buffer
 				eVal[10] = '\0'; //terminate string
-				tok = strtok(eVal,"E");
+				tok = SDL_strtok_r(eVal,"E",&saveptr);
 				//SDL_Log("eVal: %s\n",eVal);
 				if(tok!=NULL){
-					tok = strtok(NULL,""); //get the remaining part of the string (only get past here if the value was expressed in exponent form)
+					tok = SDL_strtok_r(NULL,"",&saveptr); //get the remaining part of the string (only get past here if the value was expressed in exponent form)
 					if(tok!=NULL){
 						//SDL_Log("%s\n",tok);
 						//value was in exponent format
@@ -1917,6 +1922,7 @@ void parseLevelE(valWithErr * levelEVal, const char * estring, const char * errs
 void parseHalfLife(level * lev, const char * hlstring){
 
 	char *tok;
+	char *saveptr = NULL;
   char hlAndUnitVal[11]; //both the half-life and its unit
   char hlVal[11], hlUnitVal[4];
   char hlErrVal[7];
@@ -1925,11 +1931,11 @@ void parseHalfLife(level * lev, const char * hlstring){
   hlErrVal[0] = '\0';
   memcpy(hlAndUnitVal,&hlstring[0],10);
   hlAndUnitVal[10] = '\0'; //terminate string
-  tok = strtok(hlAndUnitVal, " ");
+  tok = SDL_strtok_r(hlAndUnitVal, " ",&saveptr);
   if(tok!=NULL){
     //SDL_Log("%s\n",tok);
     strcpy(hlVal,tok);
-    tok = strtok(NULL, "");
+    tok = SDL_strtok_r(NULL, "",&saveptr);
     if(tok!=NULL){
       //SDL_Log("%s\n",tok);
       strncpy(hlUnitVal,tok,3);
@@ -1964,17 +1970,17 @@ void parseHalfLife(level * lev, const char * hlstring){
 		lev->halfLife.unit = VALUE_UNIT_STABLE;
 	}else{
 		lev->halfLife.val = (float)atof(hlVal);
-    tok = strtok(hlVal,".");
+    tok = SDL_strtok_r(hlVal,".",&saveptr);
     if(tok!=NULL){
       //SDL_Log("%s\n",tok);
-      tok = strtok(NULL,"E+");
+      tok = SDL_strtok_r(NULL,"E+",&saveptr);
       if(tok!=NULL){
         //SDL_Log("%s\n",tok);
         lev->halfLife.format = (uint16_t)strlen(tok);
         if(lev->halfLife.format > 15U){
           lev->halfLife.format = 15U; //only 4 bits available for precision
         }
-        tok = strtok(NULL,""); //get the rest of the string (the part after the exponent, if it exists)
+        tok = SDL_strtok_r(NULL,"",&saveptr); //get the rest of the string (the part after the exponent, if it exists)
         if(tok!=NULL){
           //value was in exponent format
 					lev->halfLife.exponent = (int8_t)atoi(tok);
@@ -1983,9 +1989,9 @@ void parseHalfLife(level * lev, const char * hlstring){
           lev->halfLife.format |= (uint16_t)(1U << 4); //exponent flag
         }
       }else{
-        tok = strtok(hlVal,"E");
+        tok = SDL_strtok_r(hlVal,"E",&saveptr);
         if(tok!=NULL){
-          tok = strtok(NULL,""); //get the rest of the string (the part after the exponent, if it exists)
+          tok = SDL_strtok_r(NULL,"",&saveptr); //get the rest of the string (the part after the exponent, if it exists)
           if(tok!=NULL){
             //value was in exponent format
             lev->halfLife.exponent = (int8_t)atoi(tok);
@@ -2037,10 +2043,10 @@ void parseHalfLife(level * lev, const char * hlstring){
 		if(hlErrVal[0]=='+'){
 			//asymmetric errors
 			//SDL_Log("err: %s\n",hlErrVal);
-			tok = strtok(hlErrVal, "-");
+			tok = SDL_strtok_r(hlErrVal, "-",&saveptr);
 			if(tok != NULL){
 				lev->halfLife.err = (uint8_t)atoi(tok); //positive error
-				tok = strtok(NULL, ""); //get rest of the string
+				tok = SDL_strtok_r(NULL, "",&saveptr); //get rest of the string
 				if(tok!=NULL){
 					uint16_t negErr = ((uint16_t)atoi(tok) & 127U); //negative error
 					//SDL_Log("neg err: %u\n",negErr);
@@ -2050,7 +2056,7 @@ void parseHalfLife(level * lev, const char * hlstring){
 			}
 		}else{
 			//check for special value type
-			tok = strtok(hlErrVal, " ");
+			tok = SDL_strtok_r(hlErrVal, " ",&saveptr);
 			if(tok!=NULL){
 				if(strcmp(tok,"GT")==0){
 					lev->halfLife.format |= (uint16_t)(VALUETYPE_GREATERTHAN << 5);
@@ -2080,6 +2086,7 @@ void parseHalfLife(level * lev, const char * hlstring){
 void parseSpinPar(level * lev, sp_var_data * varDat, char * spstring){
 
 	char *tok;
+	char *saveptr = NULL;
 	char str[256], tmpstr[256], tmpstr2[256], val[MAXNUMPARSERVALS][256];
 	int numTok=0;
 	uint8_t origLevFormat = lev->format;
@@ -2091,7 +2098,7 @@ void parseSpinPar(level * lev, sp_var_data * varDat, char * spstring){
 
 	//check for invalid strings
 	strcpy(str,spstring);
-	tok = strtok(str, " ");
+	tok = SDL_strtok_r(str, " ",&saveptr);
 	if(tok == NULL){
 		//SDL_Log("energy %f, strings: %s,%s\n",lev->energy,spstring,tok);
 		//SDL_Log("Not a valid spin-parity value.\n");
@@ -2205,10 +2212,10 @@ void parseSpinPar(level * lev, sp_var_data * varDat, char * spstring){
 					}
 					lev->spval[lev->numSpinParVals].format = 1;
 					strcpy(tmpstr,val[i]);
-					tok = strtok(tmpstr,"(+");
+					tok = SDL_strtok_r(tmpstr,"(+",&saveptr);
 					if(tok!=NULL){
 						strcpy(tmpstr2,tok);
-						tok = strtok(NULL,")");
+						tok = SDL_strtok_r(NULL,")",&saveptr);
 						if(tok!=NULL){
 							//SDL_Log("variable name (with offset): %s\n",tmpstr2);
 							//check variable name
@@ -2389,7 +2396,7 @@ void parseSpinPar(level * lev, sp_var_data * varDat, char * spstring){
 
 				//check for brackets
 				strcpy(tmpstr,val[i]);
-				tok=strtok(tmpstr,"(");
+				tok=SDL_strtok_r(tmpstr,"(",&saveptr);
 				if(tok!=NULL){
 					if(strcmp(tok,val[i])!=0){
 						//bracket exists on left side
@@ -2398,7 +2405,7 @@ void parseSpinPar(level * lev, sp_var_data * varDat, char * spstring){
 					}
 				}
 				strcpy(tmpstr,val[i]);
-				tok=strtok(tmpstr,")");
+				tok=SDL_strtok_r(tmpstr,")",&saveptr);
 				if(tok!=NULL){
 					if(strcmp(tok,val[i])!=0){
 						//bracket exists on right side
@@ -2426,12 +2433,12 @@ void parseSpinPar(level * lev, sp_var_data * varDat, char * spstring){
 
 				//check for parity
 				strcpy(tmpstr,val[i]);
-				tok=strtok(tmpstr,"+-");
+				tok=SDL_strtok_r(tmpstr,"+-",&saveptr);
 				if(tok!=NULL){
 					if(strcmp(tok,val[i])!=0){
 						//SDL_Log("setting parity marker, tok: %s, val: %s\n",tok,val[i]);
 						//contains parity info
-						tok=strtok(val[i],"/(0123456789GELTAP, ");
+						tok=SDL_strtok_r(val[i],"/(0123456789GELTAP, ",&saveptr);
 						//SDL_Log("tok: %s\n",tok);
 						if((strcmp(tok,"+")==0)||(strcmp(tok,"+)")==0)){
 							lev->spval[lev->numSpinParVals].parVal = 1;
@@ -2475,10 +2482,10 @@ void parseSpinPar(level * lev, sp_var_data * varDat, char * spstring){
 				//extract spin
 				lev->spval[lev->numSpinParVals].spinVal = 255; //default to unknown spin
 				strcpy(tmpstr,val[i]);
-				tok=strtok(tmpstr,"()+-, GELTAP><");
+				tok=SDL_strtok_r(tmpstr,"()+-, GELTAP><",&saveptr);
 				if(tok!=NULL){
 					strcpy(tmpstr2,tok);
-					tok=strtok(tok,"/");
+					tok=SDL_strtok_r(tok,"/",&saveptr);
 					if(strcmp(tok,tmpstr2)!=0){
 						//SDL_Log("Detected half-integer spin.\n");
 						if(atoi(tok) >= 255){
@@ -2613,11 +2620,12 @@ uint8_t getDcyModeFromENSDFSubstr(const char *substr){
 uint8_t parseDcyModeSubstr(ndata *nd, const uint16_t dcyModeInd, const char *substr){
 	
 	char *tok, *tok2;
+	char *saveptr = NULL;
 	char substrCpy[128], valBuff[16], errBuff[16];
 
 	//SDL_Log("Parsing decay mode substring: %s\n",substr);
 	strcpy(substrCpy,substr);
-	tok = strtok(substrCpy," =><");
+	tok = SDL_strtok_r(substrCpy," =><",&saveptr);
 	if(tok!=NULL){
 		uint8_t dcyMode = getDcyModeFromENSDFSubstr(tok);
 		if(dcyMode != DECAYMODE_ENUM_LENGTH){
@@ -2628,52 +2636,52 @@ uint8_t parseDcyModeSubstr(ndata *nd, const uint16_t dcyModeInd, const char *sub
 		}
 		//check for decay modes using '>' or '<'
 		strcpy(substrCpy,substr);
-		tok = strtok(substrCpy,">");
-		tok = strtok(NULL,"$ ,");
+		tok = SDL_strtok_r(substrCpy,">",&saveptr);
+		tok = SDL_strtok_r(NULL,"$ ,",&saveptr);
 		if(tok!=NULL){
 			//SDL_Log("Parsing decay mode with '>'.\n");
 			nd->dcyMode[dcyModeInd].prob.unit = VALUETYPE_GREATERTHAN;
 		}else{
 			strcpy(substrCpy,substr);
-			tok = strtok(substrCpy,"<");
-			tok = strtok(NULL,"$ ,");
+			tok = SDL_strtok_r(substrCpy,"<",&saveptr);
+			tok = SDL_strtok_r(NULL,"$ ,",&saveptr);
 			if(tok!=NULL){
 				//SDL_Log("Parsing decay mode with '<'.\n");
 				nd->dcyMode[dcyModeInd].prob.unit = VALUETYPE_LESSTHAN;
 			}
 		}
 		strcpy(substrCpy,substr);
-		tok = strtok(substrCpy," =><");
-		tok = strtok(NULL,"$ ,");
+		tok = SDL_strtok_r(substrCpy," =><",&saveptr);
+		tok = SDL_strtok_r(NULL,"$ ,",&saveptr);
 		if(tok!=NULL){
 			//SDL_Log("value tok: %s\n",tok);
 			strncpy(valBuff,tok,15); //value
-			tok = strtok(NULL,""); //get the rest of the string
+			tok = SDL_strtok_r(NULL,"",&saveptr); //get the rest of the string
 			if(tok!=NULL){
 				//SDL_Log("err tok: %s\n",tok);
 				strncpy(errBuff,tok,15); //error on value
 			}
-			tok2 = strtok(valBuff," ");
+			tok2 = SDL_strtok_r(valBuff," ",&saveptr);
 			if(tok2 != NULL){
 				//SDL_Log("tok2: %s\n",tok2);
 				if(strcmp(tok2,"GT")==0){
 					nd->dcyMode[dcyModeInd].prob.unit = VALUETYPE_GREATERTHAN;
-					tok2 = strtok(NULL," ");
+					tok2 = SDL_strtok_r(NULL," ",&saveptr);
 				}else if(strcmp(tok2,"GE")==0){
 					nd->dcyMode[dcyModeInd].prob.unit = VALUETYPE_GREATEROREQUALTHAN;
-					tok2 = strtok(NULL," ");
+					tok2 = SDL_strtok_r(NULL," ",&saveptr);
 				}else if(strcmp(tok2,"LT")==0){
 					nd->dcyMode[dcyModeInd].prob.unit = VALUETYPE_LESSTHAN;
-					tok2 = strtok(NULL," ");
+					tok2 = SDL_strtok_r(NULL," ",&saveptr);
 				}else if(strcmp(tok2,"LE")==0){
 					nd->dcyMode[dcyModeInd].prob.unit = VALUETYPE_LESSOREQUALTHAN;
-					tok2 = strtok(NULL," ");
+					tok2 = SDL_strtok_r(NULL," ",&saveptr);
 				}else if(strcmp(tok2,"AP")==0){
 					nd->dcyMode[dcyModeInd].prob.unit = VALUETYPE_APPROX;
-					tok2 = strtok(NULL," ");
+					tok2 = SDL_strtok_r(NULL," ",&saveptr);
 				}else if(strcmp(tok2,"?")==0){
 					nd->dcyMode[dcyModeInd].prob.unit = VALUETYPE_UNKNOWN;
-					tok2 = strtok(NULL," ");
+					tok2 = SDL_strtok_r(NULL," ",&saveptr);
 				}
 				if(tok2!=NULL){
 					nd->dcyMode[dcyModeInd].prob.format = 0;
@@ -2686,10 +2694,10 @@ uint8_t parseDcyModeSubstr(ndata *nd, const uint16_t dcyModeInd, const char *sub
 					if(probVal >= 0.0f){
 						//get the number of sig figs in the decay probability
 						//SDL_Log("valBuff: %s\n",valBuff);
-						tok2 = strtok(valBuff,".");
+						tok2 = SDL_strtok_r(valBuff,".",&saveptr);
 						if(tok2!=NULL){
 							//SDL_Log("%s\n",tok2);
-							tok2 = strtok(NULL,"E+"); //some decay probabilites are specified with exponents
+							tok2 = SDL_strtok_r(NULL,"E+",&saveptr); //some decay probabilites are specified with exponents
 							if(tok2!=NULL){
 								
 									//SDL_Log("%s\n",tok2);
@@ -2704,7 +2712,7 @@ uint8_t parseDcyModeSubstr(ndata *nd, const uint16_t dcyModeInd, const char *sub
 									nd->dcyMode[dcyModeInd].prob.format |= (uint16_t)(len & 15U);
 									//SDL_Log("format: %u\n",nd->dcyMode[dcyModeInd].prob.format);
 									if(((nd->dcyMode[dcyModeInd].prob.format >> 5U) & 15U) != VALUETYPE_PLUSX){
-										tok2 = strtok(NULL,""); //get the remaining part of the string (only get past here if the value was expressed in exponent form)
+										tok2 = SDL_strtok_r(NULL,"",&saveptr); //get the remaining part of the string (only get past here if the value was expressed in exponent form)
 										if(tok2!=NULL){
 											//SDL_Log("decay probability in exponent form: %s\n",valueCpy);
 											//value was in exponent format
@@ -2716,9 +2724,9 @@ uint8_t parseDcyModeSubstr(ndata *nd, const uint16_t dcyModeInd, const char *sub
 							}else{
 								//potentially an exponent form value with no decimal place
 								strcpy(valBuff,valueCpy);
-								tok2 = strtok(valBuff,"E");
+								tok2 = SDL_strtok_r(valBuff,"E",&saveptr);
 								if(tok2!=NULL){
-									tok2 = strtok(NULL,""); //get the remaining part of the string (only get past here if the value was expressed in exponent form)
+									tok2 = SDL_strtok_r(NULL,"",&saveptr); //get the remaining part of the string (only get past here if the value was expressed in exponent form)
 									if(tok2!=NULL){
 										//SDL_Log("%s\n",tok2);
 										//value was in exponent format
@@ -2747,11 +2755,11 @@ uint8_t parseDcyModeSubstr(ndata *nd, const uint16_t dcyModeInd, const char *sub
 						if(errBuff[0]=='+'){
 							//asymmetric errors
 							//SDL_Log("err: %s\n",errBuff);
-							tok2 = strtok(errBuff, "-");
+							tok2 = SDL_strtok_r(errBuff, "-",&saveptr);
 							if(tok2 != NULL){
 								//SDL_Log("pos err: %s\n",tok2);
 								nd->dcyMode[dcyModeInd].prob.err = (uint8_t)atoi(tok2); //positive error
-								tok2 = strtok(NULL, ""); //get rest of the string
+								tok2 = SDL_strtok_r(NULL, "",&saveptr); //get rest of the string
 								if(tok2 != NULL){
 									uint16_t negErr = ((uint16_t)atoi(tok2) & 127U); //negative error
 									//SDL_Log("neg err: %u\n",negErr);
@@ -2773,10 +2781,10 @@ uint8_t parseDcyModeSubstr(ndata *nd, const uint16_t dcyModeInd, const char *sub
 					float probVal = (float)atof(errBuff);
 					
 					//count sig figs
-					tok2 = strtok(errBuff,".");
+					tok2 = SDL_strtok_r(errBuff,".",&saveptr);
 					if(tok2!=NULL){
 						//SDL_Log("%s\n",tok2);
-						tok2 = strtok(NULL,"E+"); //some decay probabilites are specified with exponents
+						tok2 = SDL_strtok_r(NULL,"E+",&saveptr); //some decay probabilites are specified with exponents
 						if(tok2!=NULL){
 							
 								//SDL_Log("%s\n",tok2);
@@ -2791,7 +2799,7 @@ uint8_t parseDcyModeSubstr(ndata *nd, const uint16_t dcyModeInd, const char *sub
 								nd->dcyMode[dcyModeInd].prob.format |= (uint16_t)(len & 15U);
 								//SDL_Log("format: %u\n",nd->dcyMode[dcyModeInd].prob.format);
 								if(((nd->dcyMode[dcyModeInd].prob.format >> 5U) & 15U) != VALUETYPE_PLUSX){
-									tok2 = strtok(NULL,""); //get the remaining part of the string (only get past here if the value was expressed in exponent form)
+									tok2 = SDL_strtok_r(NULL,"",&saveptr); //get the remaining part of the string (only get past here if the value was expressed in exponent form)
 									if(tok2!=NULL){
 										//SDL_Log("decay probability in exponent form: %s\n",valueCpy);
 										//value was in exponent format
@@ -2803,9 +2811,9 @@ uint8_t parseDcyModeSubstr(ndata *nd, const uint16_t dcyModeInd, const char *sub
 						}else{
 							//potentially an exponent form value with no decimal place
 							strcpy(errBuff,valueCpy);
-							tok2 = strtok(errBuff,"E");
+							tok2 = SDL_strtok_r(errBuff,"E",&saveptr);
 							if(tok2!=NULL){
-								tok2 = strtok(NULL,""); //get the remaining part of the string (only get past here if the value was expressed in exponent form)
+								tok2 = SDL_strtok_r(NULL,"",&saveptr); //get the remaining part of the string (only get past here if the value was expressed in exponent form)
 								if(tok2!=NULL){
 									//SDL_Log("%s\n",tok2);
 									//value was in exponent format
@@ -2870,6 +2878,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 
   FILE *efile;
   char *tok;
+	char *saveptr = NULL;
   char str[256];//string to be read from file (will be tokenized)
   char nuclNameStr[10];
   char line[256],val[MAXNUMPARSERVALS][256];
@@ -2910,11 +2919,11 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 				firstQLine = 1;
 				continue;
 			}else{
-				tok=strtok(str," ");
+				tok=SDL_strtok_r(str," ",&saveptr);
 				tokPos=0;
 				strcpy(val[tokPos],tok);
 				while(tok != NULL){
-					tok = strtok(NULL, " ");
+					tok = SDL_strtok_r(NULL, " ",&saveptr);
 					if(tok!=NULL){
 						tokPos++;
 						if(tokPos<MAXNUMPARSERVALS)
@@ -3157,7 +3166,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 								memcpy(dmBuffOrig, &line[decStrStart], 127-decStrStart);
 								dmBuffOrig[127-decStrStart] = '\0';
 								//SDL_Log("Original decay mode buffer: %s\n",dmBuffOrig);
-								tok = strtok(dmBuffOrig,"$,;");
+								tok = SDL_strtok_r(dmBuffOrig,"$,;",&saveptr);
 								while(tok!=NULL){
 									//SDL_Log("tok: %s\n",tok);
 									strcpy(dmBuff,tok);
@@ -3173,11 +3182,11 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 										memcpy(dmBuffOrig, &line[decStrStart], 127-decStrStart);
 										dmBuffOrig[127-decStrStart] = '\0';
 										//SDL_Log("Decay mode buffer after: %s\n",dmBuffOrig);
-										tok = strtok(dmBuffOrig,"$,;");
+										tok = SDL_strtok_r(dmBuffOrig,"$,;",&saveptr);
 										if(tok!=NULL){
 											for(uint8_t i=0;i<nd->levels[nd->numLvls-1].numDecModes;i++){
 												if(tok!=NULL){
-													tok = strtok(NULL,"$,;");
+													tok = SDL_strtok_r(NULL,"$,;",&saveptr);
 												}else{
 													break;
 												}
@@ -3209,11 +3218,11 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 							memcpy(dmBuff, &line[9], 118);
 							dmBuff[118] = '\0';
 							//SDL_Log("dmBuff: %s\n",dmBuff);
-							tok = strtok(dmBuff," =");
+							tok = SDL_strtok_r(dmBuff," =",&saveptr);
 							if(tok!=NULL){
 								//SDL_Log("tok: %s\n",tok);
 								if(strcmp(tok,"$Q(2|b{+-})")==0){
-									tok = strtok(NULL," ;");
+									tok = SDL_strtok_r(NULL," ;",&saveptr);
 									if(tok!=NULL){
 										if(atof(tok) > 0.0){
 											//positive Q-value
@@ -3222,7 +3231,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 										}
 									}
 								}else if(strcmp(tok,"$Q(2|b{++})")==0){
-									tok = strtok(NULL," ;");
+									tok = SDL_strtok_r(NULL," ;",&saveptr);
 									if(tok!=NULL){
 										if(atof(tok) > 0.0){
 											//positive Q-value
@@ -3298,9 +3307,9 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 								}else if((gamEStartPos < 10)&&(isalpha(ebuff[gamEStartPos]))&&(ebuff[gamEStartPos+1]=='+')){
 									//gamma energy in X+number format
 									//SDL_Log("X+number ebuff: %s\n",ebuff);
-									tok = strtok(ebuff,"+");
+									tok = SDL_strtok_r(ebuff,"+",&saveptr);
 									if(tok != NULL){
-										tok = strtok(NULL,""); //get the rest of the string
+										tok = SDL_strtok_r(NULL,"",&saveptr); //get the rest of the string
 										if(tok != NULL){
 											gammaE = (float)atof(tok);
 											nd->tran[tranInd].energy.format = 0; //default
@@ -3313,10 +3322,10 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 								}else if((gamEStrLen > 1)&&(ebuff[gamEStrLen-2]=='+')&&(isalpha(ebuff[gamEStrLen-1]))){
 									//gamma energy in number+X format
 									//SDL_Log("number+X ebuff: %s\n",ebuff);
-									tok = strtok(ebuff,"+");
+									tok = SDL_strtok_r(ebuff,"+",&saveptr);
 									if(tok != NULL){
 										gammaE = (float)atof(tok);
-										tok = strtok(NULL,""); //get the rest of the string
+										tok = SDL_strtok_r(NULL,"",&saveptr); //get the rest of the string
 										if(tok != NULL){
 											nd->tran[tranInd].energy.format = 0; //default
 											nd->tran[tranInd].energy.format |= (uint16_t)(VALUETYPE_PLUSX << 5);
@@ -3337,10 +3346,10 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 
 								//get the number of sig figs
 								//SDL_Log("ebuff: %s\n",ebuff);
-								tok = strtok(ebuff,".");
+								tok = SDL_strtok_r(ebuff,".",&saveptr);
 								if(tok!=NULL){
 									//SDL_Log("%s\n",tok);
-									tok = strtok(NULL,"E"); //some gamma energies are specified with exponents
+									tok = SDL_strtok_r(NULL,"E",&saveptr); //some gamma energies are specified with exponents
 									if(tok!=NULL){
 										//SDL_Log("%s\n",tok);
 										uint16_t len = (uint16_t)strlen(tok);
@@ -3354,7 +3363,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 										nd->tran[tranInd].energy.format |= (uint16_t)(len & 15U);
 										//SDL_Log("format: %u\n",nd->tran[tranInd].energy.format);
 										if(((nd->tran[tranInd].energy.format >> 5U) & 15U) != VALUETYPE_PLUSX){
-											tok = strtok(NULL,""); //get the remaining part of the string (only get past here if the value was expressed in exponent form)
+											tok = SDL_strtok_r(NULL,"",&saveptr); //get the remaining part of the string (only get past here if the value was expressed in exponent form)
 											if(tok!=NULL){
 												//SDL_Log("energy in exponent form: %s\n",ebuff);
 												//value was in exponent format
@@ -3368,10 +3377,10 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 									//potentially an exponent form value with no decimal place
 									memcpy(ebuff, &line[9], 10); //re-copy buffer
 									ebuff[10] = '\0';
-									tok = strtok(ebuff,"E");
+									tok = SDL_strtok_r(ebuff,"E",&saveptr);
 									//SDL_Log("ebuff: %s\n",ebuff);
 									if(tok!=NULL){
-										tok = strtok(NULL,""); //get the remaining part of the string (only get past here if the value was expressed in exponent form)
+										tok = SDL_strtok_r(NULL,"",&saveptr); //get the remaining part of the string (only get past here if the value was expressed in exponent form)
 										if(tok!=NULL){
 											//SDL_Log("%s\n",tok);
 											//value was in exponent format
@@ -3477,10 +3486,10 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 								//get the number of sig figs
 								nd->tran[tranInd].intensity.format = 0; //default
 								//SDL_Log("ebuff: %s\n",ebuff);
-								tok = strtok(iBuff,".");
+								tok = SDL_strtok_r(iBuff,".",&saveptr);
 								if(tok!=NULL){
 									//SDL_Log("%s\n",tok);
-									tok = strtok(NULL,"E"); //some gamma energies are specified with exponents
+									tok = SDL_strtok_r(NULL,"E",&saveptr); //some gamma energies are specified with exponents
 									if(tok!=NULL){
 										//SDL_Log("%s\n",tok);
 										nd->tran[tranInd].intensity.format = (uint16_t)strlen(tok);
@@ -3495,7 +3504,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 											nd->tran[tranInd].intensity.format = 15U; //only 4 bits available for precision
 										}
 										//SDL_Log("format: %u\n",nd->tran[tranInd].intensity.format);
-										tok = strtok(NULL,""); //get the remaining part of the string (only get past here if the value was expressed in exponent form)
+										tok = SDL_strtok_r(NULL,"",&saveptr); //get the remaining part of the string (only get past here if the value was expressed in exponent form)
 										if(tok!=NULL){
 											//SDL_Log("energy in exponent form: %s\n",ebuff);
 											//value was in exponent format
@@ -3508,7 +3517,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 
 								//gamma intensity: check for special value type
 								nd->tran[tranInd].intensity.err=0;
-								tok = strtok(ieBuff, " ");
+								tok = SDL_strtok_r(ieBuff, " ",&saveptr);
 								if(tok!=NULL){
 									if(strcmp(tok,"GT")==0){
 										nd->tran[tranInd].intensity.format |= (uint16_t)(VALUETYPE_GREATERTHAN << 5);
@@ -3531,7 +3540,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 
 								//gamma multipolarity
 								nd->tran[tranInd].numMultipoles = 0;
-								tok = strtok(mBuff," ");
+								tok = SDL_strtok_r(mBuff," ",&saveptr);
 								if(tok != NULL){
 									uint8_t tentative = 0;
 									uint8_t derived = 0;
@@ -3633,17 +3642,17 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 							nd->nuclData[nd->numNucl].qbeta.unit = VALUE_UNIT_KEV;
 
 							//handle expoenents
-							tok = strtok(qbBuff,".");
+							tok = SDL_strtok_r(qbBuff,".",&saveptr);
 							if(tok!=NULL){
 								//SDL_Log("%s\n",tok);
-								tok = strtok(NULL,"E+");
+								tok = SDL_strtok_r(NULL,"E+",&saveptr);
 								if(tok!=NULL){
 									//SDL_Log("%s\n",tok);
 									nd->nuclData[nd->numNucl].qbeta.format = (uint16_t)strlen(tok);
 									if(nd->nuclData[nd->numNucl].qbeta.format > 15U){
 										nd->nuclData[nd->numNucl].qbeta.format = 15U; //only 4 bits available for precision
 									}
-									tok = strtok(NULL,""); //get the rest of the string (the part after the exponent, if it exists)
+									tok = SDL_strtok_r(NULL,"",&saveptr); //get the rest of the string (the part after the exponent, if it exists)
 									if(tok!=NULL){
 										//value was in exponent format
 										nd->nuclData[nd->numNucl].qbeta.exponent = (int8_t)atoi(tok);
@@ -3652,9 +3661,9 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 										nd->nuclData[nd->numNucl].qbeta.format |= (uint16_t)(1U << 4); //exponent flag
 									}
 								}else{
-									tok = strtok(qbBuff,"E");
+									tok = SDL_strtok_r(qbBuff,"E",&saveptr);
 									if(tok!=NULL){
-										tok = strtok(NULL,""); //get the rest of the string (the part after the exponent, if it exists)
+										tok = SDL_strtok_r(NULL,"",&saveptr); //get the rest of the string (the part after the exponent, if it exists)
 										if(tok!=NULL){
 											//value was in exponent format
 											nd->nuclData[nd->numNucl].qbeta.exponent = (int8_t)atoi(tok);
@@ -3689,17 +3698,17 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 							nd->nuclData[nd->numNucl].sn.unit = VALUE_UNIT_KEV;
 
 							//handle expoenents
-							tok = strtok(nsBuff,".");
+							tok = SDL_strtok_r(nsBuff,".",&saveptr);
 							if(tok!=NULL){
 								//SDL_Log("%s\n",tok);
-								tok = strtok(NULL,"E+");
+								tok = SDL_strtok_r(NULL,"E+",&saveptr);
 								if(tok!=NULL){
 									//SDL_Log("%s\n",tok);
 									nd->nuclData[nd->numNucl].sn.format = (uint16_t)strlen(tok);
 									if(nd->nuclData[nd->numNucl].sn.format > 15U){
 										nd->nuclData[nd->numNucl].sn.format = 15U; //only 4 bits available for precision
 									}
-									tok = strtok(NULL,""); //get the rest of the string (the part after the exponent, if it exists)
+									tok = SDL_strtok_r(NULL,"",&saveptr); //get the rest of the string (the part after the exponent, if it exists)
 									if(tok!=NULL){
 										//value was in exponent format
 										nd->nuclData[nd->numNucl].sn.exponent = (int8_t)atoi(tok);
@@ -3708,9 +3717,9 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 										nd->nuclData[nd->numNucl].sn.format |= (uint16_t)(1U << 4); //exponent flag
 									}
 								}else{
-									tok = strtok(nsBuff,"E");
+									tok = SDL_strtok_r(nsBuff,"E",&saveptr);
 									if(tok!=NULL){
-										tok = strtok(NULL,""); //get the rest of the string (the part after the exponent, if it exists)
+										tok = SDL_strtok_r(NULL,"",&saveptr); //get the rest of the string (the part after the exponent, if it exists)
 										if(tok!=NULL){
 											//value was in exponent format
 											nd->nuclData[nd->numNucl].sn.exponent = (int8_t)atoi(tok);
@@ -3745,17 +3754,17 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 							nd->nuclData[nd->numNucl].sp.unit = VALUE_UNIT_KEV;
 
 							//handle expoenents
-							tok = strtok(psBuff,".");
+							tok = SDL_strtok_r(psBuff,".",&saveptr);
 							if(tok!=NULL){
 								//SDL_Log("%s\n",tok);
-								tok = strtok(NULL,"E+");
+								tok = SDL_strtok_r(NULL,"E+",&saveptr);
 								if(tok!=NULL){
 									//SDL_Log("%s\n",tok);
 									nd->nuclData[nd->numNucl].sp.format = (uint16_t)strlen(tok);
 									if(nd->nuclData[nd->numNucl].sp.format > 15U){
 										nd->nuclData[nd->numNucl].sp.format = 15U; //only 4 bits available for precision
 									}
-									tok = strtok(NULL,""); //get the rest of the string (the part after the exponent, if it exists)
+									tok = SDL_strtok_r(NULL,"",&saveptr); //get the rest of the string (the part after the exponent, if it exists)
 									if(tok!=NULL){
 										//value was in exponent format
 										nd->nuclData[nd->numNucl].sp.exponent = (int8_t)atoi(tok);
@@ -3764,9 +3773,9 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 										nd->nuclData[nd->numNucl].sp.format |= (uint16_t)(1U << 4); //exponent flag
 									}
 								}else{
-									tok = strtok(psBuff,"E");
+									tok = SDL_strtok_r(psBuff,"E",&saveptr);
 									if(tok!=NULL){
-										tok = strtok(NULL,""); //get the rest of the string (the part after the exponent, if it exists)
+										tok = SDL_strtok_r(NULL,"",&saveptr); //get the rest of the string (the part after the exponent, if it exists)
 										if(tok!=NULL){
 											//value was in exponent format
 											nd->nuclData[nd->numNucl].sp.exponent = (int8_t)atoi(tok);
@@ -3801,17 +3810,17 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 							nd->nuclData[nd->numNucl].qalpha.unit = VALUE_UNIT_KEV;
 
 							//handle expoenents
-							tok = strtok(qaBuff,".");
+							tok = SDL_strtok_r(qaBuff,".",&saveptr);
 							if(tok!=NULL){
 								//SDL_Log("%s\n",tok);
-								tok = strtok(NULL,"E+");
+								tok = SDL_strtok_r(NULL,"E+",&saveptr);
 								if(tok!=NULL){
 									//SDL_Log("%s\n",tok);
 									nd->nuclData[nd->numNucl].qalpha.format = (uint16_t)strlen(tok);
 									if(nd->nuclData[nd->numNucl].qalpha.format > 15U){
 										nd->nuclData[nd->numNucl].qalpha.format = 15U; //only 4 bits available for precision
 									}
-									tok = strtok(NULL,""); //get the rest of the string (the part after the exponent, if it exists)
+									tok = SDL_strtok_r(NULL,"",&saveptr); //get the rest of the string (the part after the exponent, if it exists)
 									if(tok!=NULL){
 										//value was in exponent format
 										nd->nuclData[nd->numNucl].qalpha.exponent = (int8_t)atoi(tok);
@@ -3820,9 +3829,9 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 										nd->nuclData[nd->numNucl].qalpha.format |= (uint16_t)(1U << 4); //exponent flag
 									}
 								}else{
-									tok = strtok(qaBuff,"E");
+									tok = SDL_strtok_r(qaBuff,"E",&saveptr);
 									if(tok!=NULL){
-										tok = strtok(NULL,""); //get the rest of the string (the part after the exponent, if it exists)
+										tok = SDL_strtok_r(NULL,"",&saveptr); //get the rest of the string (the part after the exponent, if it exists)
 										if(tok!=NULL){
 											//value was in exponent format
 											nd->nuclData[nd->numNucl].qalpha.exponent = (int8_t)atoi(tok);
@@ -3855,7 +3864,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 						//SDL_Log("Reaction buffer: %s\n",rxnBuff);
 						//tokenize reaction string
 						uint8_t numRxnSubStr=0;
-						tok=strtok(rxnBuff,")");
+						tok=SDL_strtok_r(rxnBuff,")",&saveptr);
 						while(tok!=NULL){
 							if(numRxnSubStr<3){
 								//set starting position to remove spaces/commas at start of string
@@ -3874,7 +3883,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 								if((strlen(rxnSubStr[numRxnSubStr]) >= 2)&&(rxnSubStr[numRxnSubStr][0] != ':')&&(rxnSubStr[numRxnSubStr][0] != '(')&&(rxnSubStr[numRxnSubStr][0] != '+')&&(strncmp(rxnSubStr[numRxnSubStr],"E=",2)!=0)&&(strncmp(rxnSubStr[numRxnSubStr],"E ",2)!=0)&&(strncmp(rxnSubStr[numRxnSubStr],"IA",2)!=0)&&(strncmp(rxnSubStr[numRxnSubStr],"RE",2)!=0)&&(strncmp(rxnSubStr[numRxnSubStr],"ST",2)!=0)){
 									numRxnSubStr++;
 								}
-								tok=strtok(NULL,")");
+								tok=SDL_strtok_r(NULL,")",&saveptr);
 							}else{
 								break;
 							}
@@ -3956,6 +3965,7 @@ int parseAbundanceData(const char * filePath, ndata * nd){
 
   FILE *afile;
   char *tok;
+	char *saveptr = NULL;
   char str[256];//string to be read from file (will be tokenized)
   char line[256],val[MAXNUMPARSERVALS][256],tmpVal[256];
   int tokPos;//position when tokenizing
@@ -3977,11 +3987,11 @@ int parseAbundanceData(const char * filePath, ndata * nd){
 			//SDL_Log("%s\n",line);
 
 			//tokenize
-			tok=strtok(str,"=");
+			tok=SDL_strtok_r(str,"=",&saveptr);
 			tokPos=0;
 			strcpy(val[tokPos],tok);
 			while(tok != NULL){
-				tok = strtok(NULL, "=");
+				tok = SDL_strtok_r(NULL, "=",&saveptr);
 				if(tok!=NULL){
 					tokPos++;
 					if(tokPos<MAXNUMPARSERVALS)
@@ -4001,14 +4011,14 @@ int parseAbundanceData(const char * filePath, ndata * nd){
 					uint16_t nuclInd = getNuclInd(nd,N,Z);
 					if(nuclInd < nd->numNucl){
 						strcpy(tmpVal,val[1]);
-						tok=strtok(tmpVal,"(");
+						tok=SDL_strtok_r(tmpVal,"(",&saveptr);
 						if(tok!=NULL){
 							nd->nuclData[nuclInd].abundance.val = (float)(atof(tok)*100.0);
 							nd->nuclData[nuclInd].abundance.format = (uint16_t)(strlen(tok)-5);
 							if(nd->nuclData[nuclInd].abundance.format > 15U){
 								nd->nuclData[nuclInd].abundance.format = 15U; //only 4 bits available for precision
 							}
-							tok=strtok(NULL,")");
+							tok=SDL_strtok_r(NULL,")",&saveptr);
 							if(tok!=NULL){
 								nd->nuclData[nuclInd].abundance.err = (uint8_t)atoi(tok);
 								nd->nuclData[nuclInd].abundance.unit = VALUE_UNIT_PERCENT;

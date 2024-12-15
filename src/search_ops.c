@@ -100,9 +100,10 @@ void sortAndAppendResult(search_state *restrict ss, const search_result *restric
 //breaks the search string down into smaller tokens
 void tokenizeSearchStr(search_state *restrict ss){
 	char searchStrCpy[SEARCH_STRING_MAX_SIZE], *tok;
+	char *saveptr = NULL;
 	uint8_t numTok = 0;
 	memcpy(searchStrCpy,ss->searchString,sizeof(ss->searchString));
-	tok = strtok(searchStrCpy," ,");
+	tok = SDL_strtok_r(searchStrCpy," ,",&saveptr);
 	while(tok!=NULL){
 		if(strlen(tok) > 0){
 			strncpy(ss->searchTok[numTok],tok,15);
@@ -111,7 +112,7 @@ void tokenizeSearchStr(search_state *restrict ss){
 		if(numTok >= MAX_SEARCH_TOKENS){
 			break;
 		}
-		tok=strtok(NULL," ,");
+		tok=SDL_strtok_r(NULL," ,",&saveptr);
 	}
 	ss->numSearchTok = numTok;
 
