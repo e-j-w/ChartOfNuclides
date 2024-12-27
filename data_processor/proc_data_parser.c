@@ -339,15 +339,18 @@ void getENSDFNuclStrNZ(int16_t *N, int16_t *Z, const char *nuclStr){
 	strncpy(str,nuclStr,255); //copy the nucleus name
 	tok=SDL_strtok_r(str,"0123456789",&saveptr);
 	if(tok!=NULL){
-		if(strcmp(tok,"NN")==0){
+		if((strcmp(tok,"N")==0)||(strcmp(tok,"NN")==0)){
 			*Z=0;
 			*N=A;
+		}else if(strcmp(tok,"P")==0){
+			*Z=1;
+			*N=0;
 		}else if(strcmp(tok,"D")==0){
 			*Z=1;
-			*N=2;
+			*N=1;
 		}else if(strcmp(tok,"T")==0){
 			*Z=1;
-			*N=3;
+			*N=2;
 		}else if(strcmp(tok,"A")==0){
 			*Z=2;
 			*N=2;

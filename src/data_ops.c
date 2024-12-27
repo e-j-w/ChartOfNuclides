@@ -1945,6 +1945,28 @@ const char* getEvapParticleStr(const uint8_t evapPartType){
 			return " ";
 	}
 }
+//get strings for targets/projectiles/ejectiles (for reactions)
+//will return strings like 'p' for proton, 'd' for deuteron, etc.
+void getSingleRxnNuclStr(char strOut[16], const uint16_t rxnNucl){
+	const uint8_t Z = getZFromRxnNucl(rxnNucl);
+	const uint8_t N = (uint8_t)(getAFromRxnNucl(rxnNucl) - Z);
+	if(Z==1){
+		if(N==0){
+			SDL_snprintf(strOut,16,"p");
+			return;
+		}else if(N==1){
+			SDL_snprintf(strOut,16,"d");
+			return;
+		}else if(N==2){
+			SDL_snprintf(strOut,16,"t");
+			return;
+		}
+	}else if(Z==2){
+		SDL_snprintf(strOut,16,"α");
+		return;
+	}
+	SDL_snprintf(strOut,32,"%u%s",N+Z,getElemStr(Z));
+}
 void getRxnMultiEjectileStr(char ejStr[16], const uint16_t ejectileNucl){
 	char tmpStr[16];
 	ejStr[0] = '\0'; //terminate string
@@ -1967,7 +1989,7 @@ void getRxnMultiEjectileStr(char ejStr[16], const uint16_t ejectileNucl){
 }
 
 void getRxnStr(char strOut[32], const ndata *restrict nd, const uint32_t rxnInd){
-	char ejStr[16];
+	char prStr[16],tgStr[16],ejStr[16];
 	if(rxnInd < nd->numRxns){
 		switch(nd->rxn[rxnInd].type){
 			case REACTIONTYPE_DECAY:
@@ -2005,8 +2027,10 @@ void getRxnStr(char strOut[32], const ndata *restrict nd, const uint32_t rxnInd)
 				SDL_snprintf(strOut,32,"FRAG_MULTIEJECTILE");
 				break;
 			case REACTIONTYPE_FUSEVAP:
+				getSingleRxnNuclStr(tgStr,nd->rxn[rxnInd].targetNucl);
+				getSingleRxnNuclStr(prStr,nd->rxn[rxnInd].projectileNucl);
 				getRxnMultiEjectileStr(ejStr,nd->rxn[rxnInd].ejectileNucl);
-				SDL_snprintf(strOut,32,"%u%s(%u%s,%s)",getAFromRxnNucl(nd->rxn[rxnInd].targetNucl),getElemStr(getZFromRxnNucl(nd->rxn[rxnInd].targetNucl)),getAFromRxnNucl(nd->rxn[rxnInd].projectileNucl),getElemStr(getZFromRxnNucl(nd->rxn[rxnInd].projectileNucl)),ejStr);
+				SDL_snprintf(strOut,32,"%s(%s,%s)",tgStr,prStr,ejStr);
 				break;
 			case REACTIONTYPE_MISCPARTICLE:
 				SDL_snprintf(strOut,32,"MISCPARTICLE");
