@@ -3884,12 +3884,15 @@ void updateSingleUIElemPosition(const app_data *restrict dat, app_state *restric
 			state->ds.uiElemPosY[UIELEM_NUCL_FULLINFOBOX_BACKBUTTON] = (int16_t)(NUCL_FULLINFOBOX_BACKBUTTON_POS_Y*state->ds.uiUserScale);
 			state->ds.uiElemWidth[UIELEM_NUCL_FULLINFOBOX_BACKBUTTON] = (int16_t)(NUCL_FULLINFOBOX_BACKBUTTON_WIDTH*state->ds.uiUserScale);
 			state->ds.uiElemHeight[UIELEM_NUCL_FULLINFOBOX_BACKBUTTON] = (int16_t)(UI_TILE_SIZE*state->ds.uiUserScale);
+			state->ds.uiElemExtPlusX[UIELEM_NUCL_FULLINFOBOX_BACKBUTTON] = (uint16_t)((NUCL_FULLINFOBOX_BACKBUTTON_POS_XR+1.0f)*state->ds.uiUserScale); //Fitt's law
+			state->ds.uiElemExtMinusY[UIELEM_NUCL_FULLINFOBOX_BACKBUTTON] = (uint16_t)((NUCL_FULLINFOBOX_BACKBUTTON_POS_Y+1.0f)*state->ds.uiUserScale); //Fitt's law
 			break;
 		case UIELEM_NUCL_FULLINFOBOX_RXNBUTTON:
 			state->ds.uiElemPosX[UIELEM_NUCL_FULLINFOBOX_RXNBUTTON] = (int16_t)(state->ds.windowXRes/2.0f-(NUCL_FULLINFOBOX_RXNBUTTON_WIDTH/2.0f)*state->ds.uiUserScale);
 			state->ds.uiElemPosY[UIELEM_NUCL_FULLINFOBOX_RXNBUTTON] = (int16_t)(NUCL_FULLINFOBOX_BACKBUTTON_POS_Y*state->ds.uiUserScale);
 			state->ds.uiElemWidth[UIELEM_NUCL_FULLINFOBOX_RXNBUTTON] = (int16_t)(NUCL_FULLINFOBOX_RXNBUTTON_WIDTH*state->ds.uiUserScale);
 			state->ds.uiElemHeight[UIELEM_NUCL_FULLINFOBOX_RXNBUTTON] = (int16_t)(UI_TILE_SIZE*state->ds.uiUserScale);
+			state->ds.uiElemExtMinusY[UIELEM_NUCL_FULLINFOBOX_RXNBUTTON] = (uint16_t)((NUCL_FULLINFOBOX_BACKBUTTON_POS_Y+1.0f)*state->ds.uiUserScale); //Fitt's law
 			break;
 		case UIELEM_RXN_MENU:
 			state->ds.uiElemPosY[uiElemInd] = (int16_t)(state->ds.uiElemPosY[UIELEM_NUCL_FULLINFOBOX_RXNBUTTON] + state->ds.uiElemHeight[UIELEM_NUCL_FULLINFOBOX_RXNBUTTON]);
