@@ -50,9 +50,9 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #define MAXMULTPERLEVEL          3
 #define MAXNUMNUCL               3500
 #define MAXNUMLVLS               200000
-#define MAXNUMTRAN               300000
+#define MAXNUMTRAN               290000
 #define MAXNUMDECAYMODES         11000
-#define MAXNUMREACTIONS          17000
+#define MAXNUMREACTIONS          16000
 #define MAX_RXN_STRLEN           32
 #define MAX_NEUTRON_NUM          200
 #define MAX_PROTON_NUM           130

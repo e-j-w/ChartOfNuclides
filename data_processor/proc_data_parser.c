@@ -2537,8 +2537,20 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 						//SDL_Log("num nucl: %i\n",nd->numNucl);
 						uint8_t rxnStrLen = parseRxn(&nd->rxn[nd->numRxns],rxnBuff,nd->ensdfStrBuf,nd->ensdfStrBufLen);
 						if((rxnStrLen>0)&&(rxnStrLen <= MAX_RXN_STRLEN)){
-							nd->ensdfStrBufLen += rxnStrLen;
 							if(nd->numRxns < MAXNUMREACTIONS){
+								//check the just-parsed string against previous strings, if an identical string exists, use that one instead
+								uint8_t duplStr = 0;
+								for(uint16_t i=0; i<nd->numRxns; i++){
+									if(SDL_strcmp(&nd->ensdfStrBuf[nd->rxn[nd->numRxns].rxnStrBufStartPos],&nd->ensdfStrBuf[nd->rxn[i].rxnStrBufStartPos])==0){
+										nd->rxn[nd->numRxns].rxnStrBufStartPos = nd->rxn[i].rxnStrBufStartPos;
+										nd->rxn[nd->numRxns].rxnStrLen = nd->rxn[i].rxnStrLen;
+										duplStr = 1;
+										break;
+									}
+								}
+								if(duplStr == 0){
+									nd->ensdfStrBufLen += rxnStrLen;
+								}
 								nd->numRxns++;
 								nd->nuclData[nd->numNucl].numRxns++;
 							}else{

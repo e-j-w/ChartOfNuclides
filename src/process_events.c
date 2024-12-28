@@ -980,7 +980,9 @@ void processSingleEvent(app_data *restrict dat, app_state *restrict state, resou
           break;
         case SDL_SCANCODE_LALT:
         case SDL_SCANCODE_RALT:
-          state->inputFlags |= (1U << INPUT_MENU);
+          if(state->kbdModVal == KBD_MOD_NONE){
+            state->inputFlags |= (1U << INPUT_MENU);
+          }
           break;
         case SDL_SCANCODE_ESCAPE:
           if(SDL_TextInputActive(rdat->window)){
