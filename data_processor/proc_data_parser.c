@@ -407,6 +407,28 @@ uint8_t parseRxn(reaction *rxn, const char *rxnstring, char *ensdfStrBuf, const 
 	}else if(strncmp(rxnstring,"NEUTRON RESONANCES",18)==0){
 		SDL_snprintf(modRxnStr,MAX_RXN_STRLEN,"Neutron Resonances");
 		rxn->type = REACTIONTYPE_NEUTRONRESONANCES;
+	}else{
+		//fix capitalization
+		//letters should be lowercase, unless they are first character, or are preceded by a number
+		for(uint8_t i=0; i<((uint8_t)strlen(modRxnStr)); i++){
+			if(i>0){
+				if(SDL_isalpha(modRxnStr[i])){
+					if((!SDL_isdigit(modRxnStr[i-1]))||((i>1)&&(SDL_isalpha(modRxnStr[i-2]) || (((modRxnStr[i]=='N')||(modRxnStr[i]=='P')||(modRxnStr[i]=='A'))&&(!SDL_isdigit(modRxnStr[i-2])))))){
+						if((!SDL_isspace(modRxnStr[i-1]))||((i>1)&&(SDL_isalpha(modRxnStr[i-2])))){
+							modRxnStr[i] = (char)SDL_tolower(modRxnStr[i]);
+						}
+					}
+				}else if(SDL_isspace(modRxnStr[i])){
+					if(modRxnStr[i-1]==')'){
+						modRxnStr[i] = '\0'; //terminate string prior to any comments
+						break;
+					}
+				}else if(modRxnStr[i]==':'){
+					modRxnStr[i] = '\0'; //terminate string prior to any comments
+					break;
+				}
+			}
+		}
 	}
 
 
@@ -414,6 +436,7 @@ uint8_t parseRxn(reaction *rxn, const char *rxnstring, char *ensdfStrBuf, const 
 	if(rxn->rxnStrLen > MAX_RXN_STRLEN){
 		rxn->rxnStrLen = MAX_RXN_STRLEN;
 	}
+	
 	rxn->rxnStrBufStartPos = currentBufPos;
 	if((currentBufPos + rxn->rxnStrLen) < ENSDFSTRBUFSIZE){
 		strncpy(&ensdfStrBuf[currentBufPos],modRxnStr,MAX_RXN_STRLEN);
@@ -439,7 +462,7 @@ void parseLevelE(valWithErr * levelEVal, const char * estring, const char * errs
 	//get length without trailing spaces
 	uint8_t levEStrLen = 10;
 	for(int i=9;i>=0;i--){
-		if(isspace(eVal[i])){
+		if(SDL_isspace(eVal[i])){
 			levEStrLen=(uint8_t)i;
 		}else{
 			break;
@@ -448,14 +471,14 @@ void parseLevelE(valWithErr * levelEVal, const char * estring, const char * errs
 	//get the position of the first non-space character
 	uint8_t levEStartPos = 10;
 	for(uint8_t i=0;i<10;i++){
-		if(!(isspace(eVal[i]))){
+		if(!(SDL_isspace(eVal[i]))){
 			levEStartPos = i;
 			break;
 		}
 	}
 
 	//check for variables in level energy
-	if(isalpha(eVal[levEStrLen-1])&&((levEStrLen==1) || eVal[levEStrLen-2]==' ')){
+	if(SDL_isalpha(eVal[levEStrLen-1])&&((levEStrLen==1) || eVal[levEStrLen-2]==' ')){
 		//SDL_Log("X eVal: %s\n",eVal);
 		
 		levelEVal->val=0;
@@ -466,7 +489,7 @@ void parseLevelE(valWithErr * levelEVal, const char * estring, const char * errs
 		//record variable index (stored value = variable ASCII code)
 		levelEVal->format |= (uint16_t)(eVal[levEStrLen-1] << 9);
 		
-	}else if((levEStartPos < 10)&&(isalpha(eVal[levEStartPos]))&&(eVal[levEStartPos+1]=='+')){
+	}else if((levEStartPos < 10)&&(SDL_isalpha(eVal[levEStartPos]))&&(eVal[levEStartPos+1]=='+')){
 		//level energy in X+number format
 		//SDL_Log("X+number eVal: %s\n",eVal);
 		tok = SDL_strtok_r(eVal,"+",&saveptr);
@@ -481,7 +504,7 @@ void parseLevelE(valWithErr * levelEVal, const char * estring, const char * errs
 		memcpy(eVal,&estring[0],10); //re-constitute original buffer
 		eVal[10] = '\0'; //terminate string
 		levelEVal->format |= (uint16_t)(eVal[levEStartPos] << 9);
-	}else if((levEStrLen > 1)&&(eVal[levEStrLen-2]=='+')&&(isalpha(eVal[levEStrLen-1]))){
+	}else if((levEStrLen > 1)&&(eVal[levEStrLen-2]=='+')&&(SDL_isalpha(eVal[levEStrLen-1]))){
 		//level energy in number+X format
 		//SDL_Log("number+X eVal: %s\n",eVal);
 		tok = SDL_strtok_r(eVal,"+",&saveptr);
@@ -518,7 +541,7 @@ void parseLevelE(valWithErr * levelEVal, const char * estring, const char * errs
 				uint16_t len = (uint16_t)strlen(tok);
 				//check for trailing empty spaces
 				for(uint16_t i=0;i<len;i++){
-					if(isspace(tok[i])){
+					if(SDL_isspace(tok[i])){
 						len = i;
 						break;
 					}
@@ -589,7 +612,7 @@ void parseHalfLife(level * lev, const char * hlstring){
       //SDL_Log("%s\n",tok);
       strncpy(hlUnitVal,tok,3);
       for(uint8_t i=0;i<3;i++){
-        if(isspace(hlUnitVal[i])){
+        if(SDL_isspace(hlUnitVal[i])){
           hlUnitVal[i] = '\0'; //terminate string at first space
         }
 				if(i==2){
@@ -835,14 +858,14 @@ void parseSpinPar(level * lev, sp_var_data * varDat, char * spstring){
 					if(j<((int)strlen(val[i])-1)){
 						if(j>0){
 							if(val[i][j]=='+'){
-								if(isdigit(val[i][j+1])){
+								if(SDL_isdigit(val[i][j+1])){
 									varSpin=1;
 									break;
 								}
 							}
 						}
 					}
-					if(isalpha(val[i][j])){
+					if(SDL_isalpha(val[i][j])){
 						varSpin=1;
 					}
 				}
@@ -1353,7 +1376,7 @@ uint8_t parseDcyModeSubstr(ndata *nd, const uint16_t dcyModeInd, const char *sub
 									uint16_t len = (uint16_t)strlen(tok2);
 									//check for trailing empty spaces
 									for(uint16_t i=0;i<len;i++){
-										if(isspace(tok2[i])){
+										if(SDL_isspace(tok2[i])){
 											len = i;
 											break;
 										}
@@ -1440,7 +1463,7 @@ uint8_t parseDcyModeSubstr(ndata *nd, const uint16_t dcyModeInd, const char *sub
 								uint16_t len = (uint16_t)strlen(tok2);
 								//check for trailing empty spaces
 								for(uint16_t i=0;i<len;i++){
-									if(isspace(tok2[i])){
+									if(SDL_isspace(tok2[i])){
 										len = i;
 										break;
 									}
@@ -1515,7 +1538,7 @@ void initialize_database(ndata *nd){
 //checks whether a string is all whitespace and returns 1 if true
 int isEmpty(const char *str){
   while(*str != '\0'){
-    if(!isspace((unsigned char)*str)){
+    if(!SDL_isspace((unsigned char)*str)){
 			return 0;
 		}
     str++;
@@ -1927,7 +1950,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 								//get length without trailing spaces
 								uint8_t gamEStrLen = 10;
 								for(int i=9;i>=0;i--){
-									if(isspace(ebuff[i])){
+									if(SDL_isspace(ebuff[i])){
 										gamEStrLen=(uint8_t)i;
 									}else{
 										break;
@@ -1936,7 +1959,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 								//get the position of the first non-space character
 								uint8_t gamEStartPos = 10;
 								for(uint8_t i=0;i<10;i++){
-									if(!(isspace(ebuff[i]))){
+									if(!(SDL_isspace(ebuff[i]))){
 										gamEStartPos = i;
 										break;
 									}
@@ -1944,7 +1967,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 
 								//check for variables in gamma energy
 								float gammaE = 0.0f;
-								if(isalpha(ebuff[gamEStrLen-1])&&((gamEStrLen==1) || ebuff[gamEStrLen-2]==' ')){
+								if(SDL_isalpha(ebuff[gamEStrLen-1])&&((gamEStrLen==1) || ebuff[gamEStrLen-2]==' ')){
 									//SDL_Log("X ebuff: %s\n",ebuff);
 									nd->tran[tranInd].energy.val=0;
 									nd->tran[tranInd].energy.err=0;
@@ -1953,7 +1976,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 									nd->tran[tranInd].energy.format |= (uint16_t)(VALUETYPE_X << 5);
 									//record variable index (stored value = variable ASCII code)
 									nd->tran[tranInd].energy.format |= (uint16_t)(ebuff[gamEStrLen-1] << 9);
-								}else if((gamEStartPos < 10)&&(isalpha(ebuff[gamEStartPos]))&&(ebuff[gamEStartPos+1]=='+')){
+								}else if((gamEStartPos < 10)&&(SDL_isalpha(ebuff[gamEStartPos]))&&(ebuff[gamEStartPos+1]=='+')){
 									//gamma energy in X+number format
 									//SDL_Log("X+number ebuff: %s\n",ebuff);
 									tok = SDL_strtok_r(ebuff,"+",&saveptr);
@@ -1968,7 +1991,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 									memcpy(ebuff, &line[9], 10); //re-constitute original buffer
 									ebuff[10] = '\0';
 									nd->tran[tranInd].energy.format |= (uint16_t)(ebuff[gamEStartPos] << 9);
-								}else if((gamEStrLen > 1)&&(ebuff[gamEStrLen-2]=='+')&&(isalpha(ebuff[gamEStrLen-1]))){
+								}else if((gamEStrLen > 1)&&(ebuff[gamEStrLen-2]=='+')&&(SDL_isalpha(ebuff[gamEStrLen-1]))){
 									//gamma energy in number+X format
 									//SDL_Log("number+X ebuff: %s\n",ebuff);
 									tok = SDL_strtok_r(ebuff,"+",&saveptr);
@@ -2004,7 +2027,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 										uint16_t len = (uint16_t)strlen(tok);
 										//check for trailing empty spaces
 										for(uint16_t i=0;i<len;i++){
-											if(isspace(tok[i])){
+											if(SDL_isspace(tok[i])){
 												len = i;
 												break;
 											}
@@ -2144,7 +2167,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 										nd->tran[tranInd].intensity.format = (uint16_t)strlen(tok);
 										//check for trailing empty spaces
 										for(uint8_t i=0;i<nd->tran[tranInd].intensity.format;i++){
-											if(isspace(tok[i])){
+											if(SDL_isspace(tok[i])){
 												nd->tran[tranInd].intensity.format = i;
 												break;
 											}
@@ -2240,7 +2263,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 											nd->tran[tranInd].multipole[nd->tran[tranInd].numMultipoles] |= (uint8_t)((uint8_t)(2U) << 1);
 											//specify that assignment is 'Q'
 											nd->tran[tranInd].multipole[nd->tran[tranInd].numMultipoles] |= (uint8_t)(1U << 7);
-										}else if(isdigit(tok[i])){
+										}else if(SDL_isdigit(tok[i])){
 											//set multipole order
 											nd->tran[tranInd].multipole[nd->tran[tranInd].numMultipoles] |= (uint8_t)(((uint8_t)(tok[i] - '0') & 15U) << 1);
 										}
@@ -2251,7 +2274,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 									//recopy buffer
 									memcpy(mBuff, &line[31], 10);
 									mBuff[10] = '\0';
-									if(!isspace(mBuff[0])){
+									if(!SDL_isspace(mBuff[0])){
 										//string with no preceding or trailing spaces
 										SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,"Unhandled multipolarity string: %s\n",mBuff);
 									}
@@ -2272,7 +2295,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 							char qbBuff[11];
 							memcpy(qbBuff, &line[9], 10);
 							for(uint8_t i=1;i<10;i++){
-								if((isspace(qbBuff[i])) && (!(isspace(qbBuff[i-1])))){
+								if((SDL_isspace(qbBuff[i])) && (!(SDL_isspace(qbBuff[i-1])))){
 									qbBuff[i] = '\0'; //terminate string at first trailing space
 								}else if(i==9){
 									qbBuff[10] = '\0'; //terminate string at end
@@ -2328,7 +2351,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 							char nsBuff[9];
 							memcpy(nsBuff, &line[21], 8);
 							for(uint8_t i=1;i<8;i++){
-								if((isspace(nsBuff[i])) && (!(isspace(nsBuff[i-1])))){
+								if((SDL_isspace(nsBuff[i])) && (!(SDL_isspace(nsBuff[i-1])))){
 									nsBuff[i] = '\0'; //terminate string at first trailing space
 								}else if(i==7){
 									nsBuff[8] = '\0'; //terminate string at end
@@ -2384,7 +2407,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 							char psBuff[9];
 							memcpy(psBuff, &line[31], 8);
 							for(uint8_t i=1;i<8;i++){
-								if((isspace(psBuff[i])) && (!(isspace(psBuff[i-1])))){
+								if((SDL_isspace(psBuff[i])) && (!(SDL_isspace(psBuff[i-1])))){
 									psBuff[i] = '\0'; //terminate string at first trailing space
 								}else if(i==7){
 									psBuff[8] = '\0'; //terminate string at end
@@ -2440,7 +2463,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 							char qaBuff[9];
 							memcpy(qaBuff, &line[41], 8);
 							for(uint8_t i=1;i<8;i++){
-								if((isspace(qaBuff[i])) && (!(isspace(qaBuff[i-1])))){
+								if((SDL_isspace(qaBuff[i])) && (!(SDL_isspace(qaBuff[i-1])))){
 									qaBuff[i] = '\0'; //terminate string at first trailing space
 								}else if(i==7){
 									qaBuff[8] = '\0'; //terminate string at end
@@ -2504,7 +2527,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 						char rxnBuff[31];
 						memcpy(rxnBuff, &line[9], 30);
 						for(uint8_t i=29; 1; i--){
-							if(!(isspace(rxnBuff[i]))){
+							if(!(SDL_isspace(rxnBuff[i]))){
 								rxnBuff[i+1] = '\0'; //terminate string at end, without trailing whitespace
 								break;
 							}
