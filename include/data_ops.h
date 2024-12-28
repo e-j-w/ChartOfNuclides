@@ -39,8 +39,6 @@ void getSpinParStr(char strOut[32], const ndata *restrict nd, const uint32_t lvl
 double getRawValFromDB(const valWithErr *restrict valStruct);
 double getRawErrFromDB(const valWithErr *restrict valStruct);
 
-uint8_t getNuclNorZFromRxnParticle(const reaction *rxn, const uint8_t particle, const uint8_t getZ);
-
 double getLevelEnergykeV(const ndata *restrict nd, const uint32_t levelInd);
 
 uint32_t get2PlusLvlInd(const ndata *restrict nd, const uint16_t nuclInd);

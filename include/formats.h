@@ -43,6 +43,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 //increasing these numbers will increase the size of 
 //the nuclear database stored in memory (and on disk)
+#define ENSDFSTRBUFSIZE          262144 //2^18
 #define MAXCASCDELENGTH          20
 #define MAXGAMMASPERLEVEL        10
 #define MAXSPPERLEVEL            3
@@ -51,7 +52,8 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #define MAXNUMLVLS               200000
 #define MAXNUMTRAN               300000
 #define MAXNUMDECAYMODES         11000
-#define MAXNUMREACTIONS          16000
+#define MAXNUMREACTIONS          17000
+#define MAX_RXN_STRLEN           32
 #define MAX_NEUTRON_NUM          200
 #define MAX_PROTON_NUM           130
 #define MAX_MASS_NUM             350
@@ -82,23 +84,8 @@ typedef struct
 
 typedef struct
 {
-  uint16_t projectileNucl; //bits 0-7: N, bits 8-15: Z, 65535 if no projectile
-                           //for unknown heavy nuclides, N=Z=254
-                           //for decay, values from decay_mode_enum
-                           //if scattering or misc particle rxn, values from rxnparticle_type_enum
-  uint16_t targetNucl; //bits 0-7: N, bits 8-15: Z, 65535 if no target
-  uint16_t ejectileNucl; //if transfer, same format as target/projectile
-  //if fusion-evaporation, bits 0-2: num particles (=0 if unknown number),
-  //bits 3-4: particle type (from evap_particle_type_enum),
-  //repeat up to 3 times (15 bits total)
-  //if fragmentation, values from rxnparticle_type_enum
-  //if fragmentation with multi ejectile, then same as fusion-evaporation
-  //if scattering with an ejectile, values from rxnparticle_type_enum
-  //if misc particle, values from rxnparticle_type_enum
-  //if misc particle with multi ejectile, then same as fusion-evaporation
-  //if decay, can specify an alternate decay species (same format as targetNucl,
-  //to handle strings like '248CM,252CF SF DECAY'), 0 if no alternate species
-  //65535 if no ejectile
+  uint32_t rxnStrBufStartPos;
+  uint8_t rxnStrLen;
   uint8_t type; //values from reaction_type_enum
 }reaction; //reaction populating a level
 
@@ -179,6 +166,8 @@ typedef struct
   transition tran[MAXNUMTRAN]; //transitions between levels
   decayMode dcyMode[MAXNUMDECAYMODES]; //decay modes of levels
   reaction rxn[MAXNUMREACTIONS]; //reactions populating nuclides
+  char ensdfStrBuf[ENSDFSTRBUFSIZE]; //huge buffer for directly copied ENSDF strings (reaction strings, comments, etc)
+  uint32_t ensdfStrBufLen;
 }ndata; //complete set of gamma data for all nuclides
 
 
