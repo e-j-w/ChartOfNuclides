@@ -321,13 +321,43 @@ static int parseStrings(app_data *restrict dat, asset_mapping *restrict stringID
 //get the N and Z values from an ENSDF formatted nuclide string like '27AL'
 void getENSDFNuclStrNZ(int16_t *N, int16_t *Z, const char *nuclStr){
 	
+	//SDL_Log("Parsing nucl str: %s\n",nuclStr);
 	int16_t A = -1;
 	char *tok;
 	char *saveptr = NULL;
 	char str[256];
 	*Z = -1;
 	*N = -1;
+
+	//check special cases
 	
+	if((strcmp(nuclStr,"N")==0)||(strcmp(nuclStr,"n")==0)){
+		*Z=0;
+		*N=1;
+		return;
+	}else if(strcmp(nuclStr,"P")==0){
+		*Z=1;
+		*N=0;
+	}else if(strcmp(nuclStr,"D")==0){
+		*Z=1;
+		*N=1;
+	}else if(strcmp(nuclStr,"T")==0){
+		*Z=1;
+		*N=2;
+	}else if(strcmp(nuclStr,"A")==0){
+		*Z=2;
+		*N=2;
+	}else if((strlen(nuclStr)==2)&&((strncmp(&nuclStr[1],"P",1)==0)||(strncmp(&nuclStr[1],"N",1)==0))){
+		//need to reject strings like '2P' or '3N' which can be ejectiles
+		//in certain reactions
+		uint8_t numPart = (uint8_t)(nuclStr[0] - '0');
+		if(numPart < 7){
+			*Z=-1; //no element found
+			*N=-1;
+			return;
+		}
+	}
+
 	//get mass number
 	strncpy(str,nuclStr,255); //copy the nucleus name
 	tok=SDL_strtok_r(str,"ABCDEFGHIJKLMNOPQRSTUVWXYZ",&saveptr);
@@ -339,21 +369,9 @@ void getENSDFNuclStrNZ(int16_t *N, int16_t *Z, const char *nuclStr){
 	strncpy(str,nuclStr,255); //copy the nucleus name
 	tok=SDL_strtok_r(str,"0123456789",&saveptr);
 	if(tok!=NULL){
-		if((strcmp(tok,"N")==0)||(strcmp(tok,"NN")==0)){
+		if(strcmp(tok,"NN")==0){
 			*Z=0;
 			*N=A;
-		}else if(strcmp(tok,"P")==0){
-			*Z=1;
-			*N=0;
-		}else if(strcmp(tok,"D")==0){
-			*Z=1;
-			*N=1;
-		}else if(strcmp(tok,"T")==0){
-			*Z=1;
-			*N=2;
-		}else if(strcmp(tok,"A")==0){
-			*Z=2;
-			*N=2;
 		}else{
 			for(int i=1;i<(int)(strlen(tok));i++){
 				tok[i]=(char)SDL_tolower(tok[i]); //elemStrToZ() expects only first character to be uppercase
@@ -376,6 +394,7 @@ void getENSDFNuclStrNZ(int16_t *N, int16_t *Z, const char *nuclStr){
 }
 
 uint8_t parseSpecialRxnProjEjectStr(reaction *rxn, const char *projStr){
+	//SDL_Log("Parsing special rxn projectile/ejectile string: %s\n",projStr);
 	if(strncmp(projStr,"B- DECAY",8)==0){
 		rxn->type = REACTIONTYPE_DECAY;
 		rxn->projectileNucl = DECAYMODE_BETAMINUS;
@@ -469,51 +488,103 @@ uint8_t parseSpecialRxnProjEjectStr(reaction *rxn, const char *projStr){
 		rxn->ejectileNucl = 0;
 		rxn->ejectileNucl |= (uint16_t)(156U);
 		rxn->ejectileNucl |= (uint16_t)((98U) << 8U);	
-	}else if(strncmp(projStr,"A DECAY",7)==0){
+	}else if(strcmp(projStr,"A DECAY")==0){
 		rxn->type = REACTIONTYPE_DECAY;
 		rxn->projectileNucl = DECAYMODE_ALPHA;
-	}else if(strncmp(projStr,"P DECAY",7)==0){
+	}else if(strcmp(projStr,"P DECAY")==0){
 		rxn->type = REACTIONTYPE_DECAY;
 		rxn->projectileNucl = DECAYMODE_PROTON;
-	}else if(strncmp(projStr,"2P DECAY",8)==0){
+	}else if(strcmp(projStr,"2P DECAY")==0){
 		rxn->type = REACTIONTYPE_DECAY;
 		rxn->projectileNucl = DECAYMODE_TWOPROTON;
-	}else if(strncmp(projStr,"14C DECAY",9)==0){
+	}else if(strcmp(projStr,"14C DECAY")==0){
 		rxn->type = REACTIONTYPE_DECAY;
 		rxn->projectileNucl = DECAYMODE_14C;
-	}else if((strncmp(projStr,"G,G'",4)==0)||(strncmp(projStr,"G,G",3)==0)||(strncmp(projStr,"G,POL G'",8)==0)){
+	}else if((strcmp(projStr,"D,P")==0)||(strcmp(projStr,"D,PG")==0)){
+		rxn->type = REACTIONTYPE_MISCPARTICLE;
+		rxn->projectileNucl = RXNPARTICLE_DEUTERON;
+		rxn->ejectileNucl = RXNPARTICLE_PROTON;
+	}else if(strcmp(projStr,"D,PF")==0){
+		rxn->type = REACTIONTYPE_MISCPARTICLE;
+		rxn->projectileNucl = RXNPARTICLE_DEUTERON;
+		rxn->ejectileNucl = RXNPARTICLE_PROTONFISSION;
+	}else if((strcmp(projStr,"D,D'")==0)||(strcmp(projStr,"D,D")==0)){
+		rxn->type = REACTIONTYPE_INELASTICSCATTERING;
+		rxn->projectileNucl = RXNPARTICLE_DEUTERON;
+		rxn->ejectileNucl = 65535;
+	}else if((strcmp(projStr,"D,T")==0)||(strcmp(projStr,"D,TG")==0)){
+		rxn->type = REACTIONTYPE_MISCPARTICLE;
+		rxn->projectileNucl = RXNPARTICLE_DEUTERON;
+		rxn->ejectileNucl = RXNPARTICLE_TRITON;
+	}else if(strcmp(projStr,"T,P")==0){
+		rxn->type = REACTIONTYPE_MISCPARTICLE;
+		rxn->projectileNucl = RXNPARTICLE_TRITON;
+		rxn->ejectileNucl = RXNPARTICLE_PROTON;
+	}else if(strcmp(projStr,"T,D")==0){
+		rxn->type = REACTIONTYPE_MISCPARTICLE;
+		rxn->projectileNucl = RXNPARTICLE_TRITON;
+		rxn->ejectileNucl = RXNPARTICLE_DEUTERON;
+	}else if(strcmp(projStr,"T,A")==0){
+		rxn->type = REACTIONTYPE_MISCPARTICLE;
+		rxn->projectileNucl = RXNPARTICLE_TRITON;
+		rxn->ejectileNucl = RXNPARTICLE_ALPHA;
+	}else if((strcmp(projStr,"T,T'")==0)||(strcmp(projStr,"T,T")==0)){
+		rxn->type = REACTIONTYPE_INELASTICSCATTERING;
+		rxn->projectileNucl = RXNPARTICLE_TRITON;
+		rxn->ejectileNucl = 65535;
+	}else if(strcmp(projStr,"A,T")==0){
+		rxn->type = REACTIONTYPE_MISCPARTICLE;
+		rxn->projectileNucl = RXNPARTICLE_ALPHA;
+		rxn->ejectileNucl = RXNPARTICLE_TRITON;
+	}else if((strcmp(projStr,"A,A'")==0)||(strcmp(projStr,"A,A")==0)){
+		rxn->type = REACTIONTYPE_INELASTICSCATTERING;
+		rxn->projectileNucl = RXNPARTICLE_ALPHA;
+		rxn->ejectileNucl = 65535;
+	}else if((strlen(projStr)>=5)&&(strncmp(projStr,"A,",2)==0)&&(strncmp(&projStr[3],"NG",2)==0)){
+		rxn->type = REACTIONTYPE_MISCPARTICLE_MULTIEJECTILE;
+		rxn->projectileNucl = RXNPARTICLE_ALPHA;
+		rxn->ejectileNucl = 0;
+		uint8_t numPart = (uint8_t)(projStr[2] - '0');
+		if(numPart <= 7){
+			//number of particles is known
+			//(if we don't get here, then the number of particles is kept at 0,
+			//meaning the number is unknown)
+			rxn->ejectileNucl |= numPart;
+		}
+		rxn->ejectileNucl |= (uint16_t)(EVAPTYPE_NEUTRON << 3U);
+	}else if((strcmp(projStr,"G,G'")==0)||(strcmp(projStr,"G,G")==0)||(strcmp(projStr,"G,POL G'")==0)){
 		rxn->type = REACTIONTYPE_INELASTICSCATTERING;
 		rxn->projectileNucl = RXNPARTICLE_GAMMA;
 		rxn->ejectileNucl = 65535;
-	}else if(strncmp(projStr,"G,PI-",5)==0){
+	}else if(strcmp(projStr,"G,PI-")==0){
 		rxn->type = REACTIONTYPE_MISCPARTICLE;
 		rxn->projectileNucl = RXNPARTICLE_GAMMA;
 		rxn->ejectileNucl = RXNPARTICLE_PIMINUS;
-	}else if(strncmp(projStr,"G,PG",4)==0){
+	}else if(strcmp(projStr,"G,PG")==0){
 		rxn->type = REACTIONTYPE_MISCPARTICLE;
 		rxn->projectileNucl = RXNPARTICLE_GAMMA;
 		rxn->ejectileNucl = RXNPARTICLE_PROTON;
-	}else if((strncmp(projStr,"G,NG",4)==0)||(strncmp(projStr,"G,NG'",5)==0)){
+	}else if((strcmp(projStr,"G,NG")==0)||(strcmp(projStr,"G,NG'")==0)){
 		rxn->type = REACTIONTYPE_MISCPARTICLE;
 		rxn->projectileNucl = RXNPARTICLE_GAMMA;
 		rxn->ejectileNucl = RXNPARTICLE_NEUTRON;
-	}else if(strncmp(projStr,"G,PNG",5)==0){
+	}else if(strcmp(projStr,"G,PNG")==0){
 		rxn->type = REACTIONTYPE_MISCPARTICLE;
 		rxn->projectileNucl = RXNPARTICLE_GAMMA;
 		rxn->ejectileNucl = RXNPARTICLE_PROTONNEUTRON;
-	}else if((strncmp(projStr,"E,E'",4)==0)||(strncmp(projStr,"E,E",3)==0)){
+	}else if((strcmp(projStr,"E,E'")==0)||(strcmp(projStr,"E,E")==0)){
 		rxn->type = REACTIONTYPE_INELASTICSCATTERING;
 		rxn->projectileNucl = RXNPARTICLE_ELECTRON;
 		rxn->ejectileNucl = 65535;
-	}else if(strncmp(projStr,"E,E'P",5)==0){
+	}else if(strcmp(projStr,"E,E'P")==0){
 		rxn->type = REACTIONTYPE_INELASTICSCATTERING;
 		rxn->projectileNucl = RXNPARTICLE_ELECTRON;
 		rxn->ejectileNucl = RXNPARTICLE_PROTON;
-	}else if(strncmp(projStr,"E,E'N",5)==0){
+	}else if(strcmp(projStr,"E,E'N")==0){
 		rxn->type = REACTIONTYPE_INELASTICSCATTERING;
 		rxn->projectileNucl = RXNPARTICLE_ELECTRON;
 		rxn->ejectileNucl = RXNPARTICLE_NEUTRON;
-	}else if(strncmp(projStr,"E,E'PI+",7)==0){
+	}else if(strcmp(projStr,"E,E'PI+")==0){
 		rxn->type = REACTIONTYPE_INELASTICSCATTERING;
 		rxn->projectileNucl = RXNPARTICLE_ELECTRON;
 		rxn->ejectileNucl = RXNPARTICLE_PIPLUS;
@@ -958,6 +1029,7 @@ uint8_t parseSpecialRxnProjEjectStr(reaction *rxn, const char *projStr){
 //parse an ejectile string for a reaction where the projectile
 //has already been identified as a nuclide
 uint8_t parseSpecialRxnEjectStr(reaction *rxn, const char *ejStr){
+	//SDL_Log("Parsing special rxn ejectile string: %s\n",ejStr);
 	if(strcmp(ejStr,"PI-")==0){
 		rxn->type = REACTIONTYPE_NUCLTRANSFER_MISCEJECTILE;
 		rxn->ejectileNucl = RXNPARTICLE_PIMINUS;
@@ -1509,15 +1581,16 @@ uint8_t parseSpecialRxnEjectStr(reaction *rxn, const char *ejStr){
 }
 
 //parse reaction strings
-//returns 1 on success, 0 on failure
+//returns 1 on success, 0 on failure, 2 on failure that doesn't require a warning shown
 uint8_t parseRxn(reaction *rxn, const char *rxnstring){
 
+	//SDL_Log("Parsing reaction string: %s\n",rxnstring);
 	rxn->type = REACTIONTYPE_UNASSIGNED;
 
 	if(strcmp(rxnstring,"COMMENTS")==0){
-		return 0;
+		return 2; //unsuccessful, but don't warn
 	}else if(strcmp(rxnstring,"REFERENCES")==0){
-		return 0;
+		return 2; //unsuccessful, but don't warn
 	}else if(strncmp(rxnstring,"COULOMB EXCITATION",18)==0){
 		rxn->type = REACTIONTYPE_COULEX;
 		return 1;
@@ -1561,8 +1634,7 @@ uint8_t parseRxn(reaction *rxn, const char *rxnstring){
 	rxn->projectileNucl = 65535U;
 	rxn->targetNucl = 65535U;
 	rxn->ejectileNucl = 65535U;
-
-	//SDL_Log("Parsing reaction string: %s\n",rxnstring);
+	
 	char rxnBuff[31];
 	uint8_t rxnBuffPos = 0;
 	int16_t Z, N;
@@ -1674,6 +1746,7 @@ uint8_t parseRxn(reaction *rxn, const char *rxnstring){
 								rxn->ejectileNucl = 65535;
 							}
 						}
+						return 1; //successfully parsed reaction
 					}else{
 						//check for and handle some common string endings
 						uint8_t len = (uint8_t)strlen(ejStr);
@@ -1711,17 +1784,23 @@ uint8_t parseRxn(reaction *rxn, const char *rxnstring){
 										rxn->ejectileNucl = 65535;
 									}
 								}
+								return 1; //successfully parsed reaction
 							}else if(parseSpecialRxnEjectStr(rxn, ejStr)==0){
 								SDL_Log("WARNING: invalid ejectile in reaction string: %s (ejStr: %s )\n",rxnstring,ejStr);
 								return 0;
+							}else{
+								return 1; //successfully parsed reaction
 							}
 						}else if(parseSpecialRxnEjectStr(rxn, ejStr)==0){
 							SDL_Log("WARNING: invalid ejectile in reaction string: %s (ejStr: %s )\n",rxnstring,ejStr);
 							return 0;
+						}else{
+							return 1; //successfully parsed reaction
 						}
 					}
 				}else{
 					SDL_Log("WARNING: couldn't parse ejectile from reaction string: %s (pos: %u)\n",rxnstring,rxnBuffPos);
+					return 0;
 				}
 			}else{
 				//try looking at the rest of the string after the 'target', which might specify a decay mode
@@ -1763,20 +1842,20 @@ uint8_t parseRxn(reaction *rxn, const char *rxnstring){
 				}
 
 				rxnBuffPos += (uint8_t)(strlen(tok) + 1);
+				return 1; //successfully parsed reaction
 			}
 
 			
 		}else{
 			SDL_Log("WARNING: couldn't parse projectile from reaction string: %s (pos: %u)\n",rxnstring,rxnBuffPos);
+			return 0;
 		}
 
 	}else{
-		SDL_Log("WARNING: couldn't parse reaction string: %s\n",rxnstring);
 		return 0;
 	}
-
 	
-	return 1;
+	return 0;
 }
 
 void parseLevelE(valWithErr * levelEVal, const char * estring, const char * errstring){
@@ -3892,9 +3971,11 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 							}
 						}
 						//SDL_Log("Number of sub-strings: %u",numRxnSubStr);
+						//SDL_Log("num nucl: %i\n",nd->numNucl);
 						numRxnsinSubSec=0;
 						for(uint8_t i=0;i<numRxnSubStr;i++){
-							if(parseRxn(&nd->rxn[nd->numRxns],rxnSubStr[i])==1){
+							uint8_t rxnParsed = parseRxn(&nd->rxn[nd->numRxns],rxnSubStr[i]);
+							if(rxnParsed==1){
 								if(nd->numRxns < MAXNUMREACTIONS){
 									nd->numRxns++;
 									nd->nuclData[nd->numNucl].numRxns++;
@@ -3903,6 +3984,8 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 									SDL_Log("ERROR: number of reactions parsed exceeds the maximum (%i).\n",MAXNUMREACTIONS);
 									return -1;
 								}
+							}else if(rxnParsed==0){
+								SDL_Log("WARNING: couldn't parse reaction string: %s\n",rxnSubStr[i]);
 							}
 						}
 						

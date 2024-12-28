@@ -2015,7 +2015,10 @@ void getRxnStr(char strOut[32], const ndata *restrict nd, const uint32_t rxnInd)
 				SDL_snprintf(strOut,32,"Coulomb Excitation");
 				break;
 			case REACTIONTYPE_NUCLTRANSFER:
-				SDL_snprintf(strOut,32,"NUCLTRANSFER");
+				getSingleRxnNuclStr(tgStr,nd->rxn[rxnInd].targetNucl);
+				getSingleRxnNuclStr(prStr,nd->rxn[rxnInd].projectileNucl);
+				getSingleRxnNuclStr(ejStr,nd->rxn[rxnInd].ejectileNucl);
+				SDL_snprintf(strOut,32,"tr - %s(%s,%s)",tgStr,prStr,ejStr);
 				break;
 			case REACTIONTYPE_NUCLTRANSFER_MISCEJECTILE:
 				SDL_snprintf(strOut,32,"NT_MISCEJECTILE");
@@ -2030,7 +2033,7 @@ void getRxnStr(char strOut[32], const ndata *restrict nd, const uint32_t rxnInd)
 				getSingleRxnNuclStr(tgStr,nd->rxn[rxnInd].targetNucl);
 				getSingleRxnNuclStr(prStr,nd->rxn[rxnInd].projectileNucl);
 				getRxnMultiEjectileStr(ejStr,nd->rxn[rxnInd].ejectileNucl);
-				SDL_snprintf(strOut,32,"%s(%s,%s)",tgStr,prStr,ejStr);
+				SDL_snprintf(strOut,32,"fe - %s(%s,%s)",tgStr,prStr,ejStr);
 				break;
 			case REACTIONTYPE_MISCPARTICLE:
 				SDL_snprintf(strOut,32,"MISCPARTICLE");
