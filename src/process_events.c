@@ -393,7 +393,7 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
         for(uint8_t i=1; i<10; i++){ //skip empty entries in the chart if they exist
           uint16_t selNucl = getNuclInd(&dat->ndat,(int16_t)(dat->ndat.nuclData[state->chartSelectedNucl].N-i),(int16_t)(dat->ndat.nuclData[state->chartSelectedNucl].Z));
           if(selNucl != MAXNUMNUCL){
-            setSelectedNuclOnLevelList(dat,state,rdat,(uint16_t)(dat->ndat.nuclData[state->chartSelectedNucl].N-i),(uint16_t)(dat->ndat.nuclData[state->chartSelectedNucl].Z));
+            setSelectedNuclOnLevelList(dat,state,rdat,(uint16_t)(dat->ndat.nuclData[state->chartSelectedNucl].N-i),(uint16_t)(dat->ndat.nuclData[state->chartSelectedNucl].Z),0);
             break;
           }
         }
@@ -401,7 +401,7 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
         for(uint8_t i=1; i<10; i++){ //skip empty entries in the chart if they exist
           uint16_t selNucl = getNuclInd(&dat->ndat,(int16_t)(dat->ndat.nuclData[state->chartSelectedNucl].N+i),(int16_t)(dat->ndat.nuclData[state->chartSelectedNucl].Z));
           if(selNucl != MAXNUMNUCL){
-            setSelectedNuclOnLevelList(dat,state,rdat,(uint16_t)(dat->ndat.nuclData[state->chartSelectedNucl].N+i),(uint16_t)(dat->ndat.nuclData[state->chartSelectedNucl].Z));
+            setSelectedNuclOnLevelList(dat,state,rdat,(uint16_t)(dat->ndat.nuclData[state->chartSelectedNucl].N+i),(uint16_t)(dat->ndat.nuclData[state->chartSelectedNucl].Z),0);
             break;
           }
         }
@@ -410,7 +410,7 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
         for(uint8_t i=1; i<10; i++){ //skip empty entries in the chart if they exist
           uint16_t selNucl = getNuclInd(&dat->ndat,(int16_t)(dat->ndat.nuclData[state->chartSelectedNucl].N),(int16_t)(dat->ndat.nuclData[state->chartSelectedNucl].Z+i));
           if(selNucl != MAXNUMNUCL){
-            setSelectedNuclOnLevelList(dat,state,rdat,(uint16_t)(dat->ndat.nuclData[state->chartSelectedNucl].N),(uint16_t)(dat->ndat.nuclData[state->chartSelectedNucl].Z+i));
+            setSelectedNuclOnLevelList(dat,state,rdat,(uint16_t)(dat->ndat.nuclData[state->chartSelectedNucl].N),(uint16_t)(dat->ndat.nuclData[state->chartSelectedNucl].Z+i),0);
             break;
           }
         }
@@ -418,7 +418,7 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
         for(uint8_t i=1; i<10; i++){ //skip empty entries in the chart if they exist
           uint16_t selNucl = getNuclInd(&dat->ndat,(int16_t)(dat->ndat.nuclData[state->chartSelectedNucl].N),(int16_t)(dat->ndat.nuclData[state->chartSelectedNucl].Z-i));
           if(selNucl != MAXNUMNUCL){
-            setSelectedNuclOnLevelList(dat,state,rdat,(uint16_t)(dat->ndat.nuclData[state->chartSelectedNucl].N),(uint16_t)(dat->ndat.nuclData[state->chartSelectedNucl].Z-i));
+            setSelectedNuclOnLevelList(dat,state,rdat,(uint16_t)(dat->ndat.nuclData[state->chartSelectedNucl].N),(uint16_t)(dat->ndat.nuclData[state->chartSelectedNucl].Z-i),0);
             break;
           }
         }
@@ -636,23 +636,52 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
     state->mouseholdElement = UIELEM_ENUM_LENGTH;
 
     if(state->ds.dragInProgress == 0){
-      for(uint8_t i=0; i<UIELEM_ENUM_LENGTH; i++){ //ordering in ui_element_enum defines order in which UI elements receive input
-        if(state->interactableElement & (uint64_t)(1LU << i)){
-          if((state->mouseHoldStartPosXPx >= (state->ds.uiElemPosX[i]-state->ds.uiElemExtMinusX[i]))&&(state->mouseHoldStartPosXPx < (state->ds.uiElemPosX[i]+state->ds.uiElemWidth[i]+state->ds.uiElemExtPlusX[i]))&&(state->mouseHoldStartPosYPx >= (state->ds.uiElemPosY[i]-state->ds.uiElemExtMinusY[i]))&&(state->mouseHoldStartPosYPx < (state->ds.uiElemPosY[i]+state->ds.uiElemHeight[i]+state->ds.uiElemExtPlusY[i]))){
-            state->mouseholdElement = i;
-            //SDL_Log("Holding element %u\n",i);
-            uiElemHoldAction(dat,state,state->mouseholdElement);
-          }
-          if((state->mouseXPx >= (state->ds.uiElemPosX[i]-state->ds.uiElemExtMinusX[i]))&&(state->mouseXPx < (state->ds.uiElemPosX[i]+state->ds.uiElemWidth[i]+state->ds.uiElemExtPlusX[i]))&&(state->mouseYPx >= (state->ds.uiElemPosY[i]-state->ds.uiElemExtMinusY[i]))&&(state->mouseYPx < (state->ds.uiElemPosY[i]+state->ds.uiElemHeight[i]+state->ds.uiElemExtPlusY[i]))){
-            state->mouseoverElement = i;
-            //SDL_Log("mouseover element: %u\n",i);
-            if((state->mouseClickPosXPx >= (state->ds.uiElemPosX[i]-state->ds.uiElemExtMinusX[i]))&&(state->mouseClickPosXPx < (state->ds.uiElemPosX[i]+state->ds.uiElemWidth[i]+state->ds.uiElemExtPlusX[i]))&&(state->mouseClickPosYPx >= (state->ds.uiElemPosY[i]-state->ds.uiElemExtMinusY[i]))&&(state->mouseClickPosYPx < (state->ds.uiElemPosY[i]+state->ds.uiElemHeight[i]+state->ds.uiElemExtPlusY[i]))){
-              //take action
-              uiElemClickAction(dat,state,rdat,0,i); //data_ops.c
-              //SDL_Log("Clicked element %u\n",i);
-              return;
+      //first, handle dynamic menu (menus without a fixed number of entries) selections
+      uint8_t dynamicMenuItemInteracted = 0;
+      if(state->ds.shownElements & (1UL << UIELEM_RXN_MENU)){
+        uint8_t numRxnPerCol = getRxnMenuNumRxnsPerColumn(dat,state);
+        SDL_FRect buttonRect;
+        if(state->ds.timeLeftInUIAnimation[UIANIM_RXN_MENU_HIDE]==0.0f){
+          //SDL_Log("Mouse-over reaction: %u, selected reaction: %u.\n",state->ds.mouseOverRxn,state->ds.selectedRxn);
+          for(uint8_t i=0;i<(dat->ndat.nuclData[state->chartSelectedNucl].numRxns+1);i++){
+            buttonRect = getRxnMenuButtonRect(state,numRxnPerCol,i);
+            if((state->mouseXPx >= buttonRect.x)&&(state->mouseXPx < (buttonRect.x + buttonRect.w))){
+              if((state->mouseYPx >= buttonRect.y)&&(state->mouseYPx < (buttonRect.y + buttonRect.h))){
+                state->ds.mouseOverRxn = i;
+                if((state->mouseClickPosXPx >= buttonRect.x)&&(state->mouseClickPosXPx < (buttonRect.x + buttonRect.w))){
+                  if((state->mouseClickPosYPx >= buttonRect.y)&&(state->mouseClickPosYPx < (buttonRect.y + buttonRect.h))){
+                    state->ds.selectedRxn = i;
+                    //SDL_Log("Clicked reaction menu item %u.\n",state->ds.selectedRxn);
+                    setSelectedNuclOnLevelList(dat,state,rdat,(uint16_t)(dat->ndat.nuclData[state->chartSelectedNucl].N),(uint16_t)(dat->ndat.nuclData[state->chartSelectedNucl].Z),1);
+                    break;
+                  }
+                }
+                dynamicMenuItemInteracted = 1;
+                break;
+              }
             }
-            break;
+          }
+        }
+      }
+      if(dynamicMenuItemInteracted == 0){
+        for(uint8_t i=0; i<UIELEM_ENUM_LENGTH; i++){ //ordering in ui_element_enum defines order in which UI elements receive input
+          if(state->interactableElement & (uint64_t)(1LU << i)){
+            if((state->mouseHoldStartPosXPx >= (state->ds.uiElemPosX[i]-state->ds.uiElemExtMinusX[i]))&&(state->mouseHoldStartPosXPx < (state->ds.uiElemPosX[i]+state->ds.uiElemWidth[i]+state->ds.uiElemExtPlusX[i]))&&(state->mouseHoldStartPosYPx >= (state->ds.uiElemPosY[i]-state->ds.uiElemExtMinusY[i]))&&(state->mouseHoldStartPosYPx < (state->ds.uiElemPosY[i]+state->ds.uiElemHeight[i]+state->ds.uiElemExtPlusY[i]))){
+              state->mouseholdElement = i;
+              //SDL_Log("Holding element %u\n",i);
+              uiElemHoldAction(dat,state,state->mouseholdElement);
+            }
+            if((state->mouseXPx >= (state->ds.uiElemPosX[i]-state->ds.uiElemExtMinusX[i]))&&(state->mouseXPx < (state->ds.uiElemPosX[i]+state->ds.uiElemWidth[i]+state->ds.uiElemExtPlusX[i]))&&(state->mouseYPx >= (state->ds.uiElemPosY[i]-state->ds.uiElemExtMinusY[i]))&&(state->mouseYPx < (state->ds.uiElemPosY[i]+state->ds.uiElemHeight[i]+state->ds.uiElemExtPlusY[i]))){
+              state->mouseoverElement = i;
+              //SDL_Log("mouseover element: %u\n",i);
+              if((state->mouseClickPosXPx >= (state->ds.uiElemPosX[i]-state->ds.uiElemExtMinusX[i]))&&(state->mouseClickPosXPx < (state->ds.uiElemPosX[i]+state->ds.uiElemWidth[i]+state->ds.uiElemExtPlusX[i]))&&(state->mouseClickPosYPx >= (state->ds.uiElemPosY[i]-state->ds.uiElemExtMinusY[i]))&&(state->mouseClickPosYPx < (state->ds.uiElemPosY[i]+state->ds.uiElemHeight[i]+state->ds.uiElemExtPlusY[i]))){
+                //take action
+                uiElemClickAction(dat,state,rdat,0,i); //data_ops.c
+                //SDL_Log("Clicked element %u\n",i);
+                return;
+              }
+              break;
+            }
           }
         }
       }

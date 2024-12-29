@@ -75,6 +75,8 @@ void initializeTempState(const app_data *restrict dat, app_state *restrict state
 	state->ds.infoBoxJpiColOffset = NUCL_INFOBOX_JPI_COL_MIN_OFFSET;
 	state->ds.infoBoxHlColOffset = NUCL_INFOBOX_HALFLIFE_COL_MIN_OFFSET;
 	state->ds.infoBoxDcyModeColOffset = NUCL_INFOBOX_DECAYMODE_COL_MIN_OFFSET;
+	state->ds.mouseOverRxn = 255;
+	state->ds.selectedRxn = 0;
 	state->ds.totalPanTime = CHART_KEY_PAN_TIME;
 	state->ds.zoomFinished = 0;
 	state->ds.zoomInProgress = 0;
@@ -2331,7 +2333,11 @@ uint16_t getNumScreenLvlDispLines(const drawing_state *restrict ds){
 uint16_t getNumTotalLvlDispLines(const ndata *restrict nd, const app_state *restrict state){
 	uint16_t numLines = 0;
 	for(uint32_t lvlInd = nd->nuclData[state->chartSelectedNucl].firstLevel; lvlInd<(nd->nuclData[state->chartSelectedNucl].firstLevel + nd->nuclData[state->chartSelectedNucl].numLevels); lvlInd++){
-		numLines += getNumDispLinesForLvl(nd,lvlInd);
+		if(state->ds.selectedRxn == 0){
+			numLines += getNumDispLinesForLvl(nd,lvlInd);
+		}else if(nd->levels[lvlInd].populatingRxns & (uint64_t)(1ULL << (state->ds.selectedRxn-1))){
+			numLines += getNumDispLinesForLvl(nd,lvlInd);
+		}
 	}
 	return numLines;
 }
@@ -2821,10 +2827,10 @@ void setInfoBoxDimensions(const app_data *restrict dat, app_state *restrict stat
 	updateSingleUIElemPosition(dat,state,rdat,UIELEM_RXN_MENU);
 }
 
-void setSelectedNuclOnLevelList(const app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat, const uint16_t N, const uint16_t Z){
+void setSelectedNuclOnLevelList(const app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat, const uint16_t N, const uint16_t Z, const uint8_t updateRxn){
 	uint16_t selNucl = getNuclInd(&dat->ndat,(int16_t)N,(int16_t)Z);
 	//SDL_Log("Selected nucleus: %u\n",state->chartSelectedNucl);
-	if((selNucl < MAXNUMNUCL)&&(selNucl != state->chartSelectedNucl)){
+	if(((selNucl < MAXNUMNUCL)&&(selNucl != state->chartSelectedNucl)) || updateRxn){
 		state->chartSelectedNucl = selNucl;
 		setFullLevelInfoDimensions(dat,state,rdat,selNucl);
 		setInfoBoxDimensions(dat,state,rdat,selNucl);
@@ -2836,6 +2842,12 @@ void setSelectedNuclOnLevelList(const app_data *restrict dat, app_state *restric
 		state->ds.timeSinceFCNuclChangeStart = 0.0f;
 		state->ds.fcNuclChangeInProgress = 1;
 		state->ds.fcNuclChangeFinished = 0;
+		if(updateRxn){
+			state->ds.selectedRxn = state->ds.selectedRxn;
+		}else{
+			state->ds.selectedRxn = 0;
+		}
+		state->ds.mouseOverRxn = 255;
 		startUIAnimation(dat,state,UIANIM_NUCLINFOBOX_TXTFADEIN);
 
 		//also pan the chart 'behind the scenes'
@@ -3469,6 +3481,19 @@ uint16_t getNumTextCharsUnderWidth(resource_data *restrict rdat, const uint16_t 
 	return txtDrawLen;
 }
 
+uint8_t getRxnMenuNumRxnsPerColumn(const app_data *restrict dat, const app_state *restrict state){
+	return (uint8_t)(SDL_ceilf((dat->ndat.nuclData[state->chartSelectedNucl].numRxns+1.0f)/(state->ds.rxnMenuColumns*1.0f)));
+}
+
+SDL_FRect getRxnMenuButtonRect(const app_state *restrict state, const uint8_t numRxnPerCol, const uint8_t menuItem){
+	SDL_FRect rect;
+	rect.x = state->ds.uiElemPosX[UIELEM_RXN_MENU] + (float)(2*PANEL_EDGE_SIZE + RXN_MENU_COLUMN_WIDTH*((menuItem)/numRxnPerCol))*state->ds.uiUserScale;
+	rect.y = (float)state->ds.uiElemPosY[UIELEM_RXN_MENU] + (PANEL_EDGE_SIZE + ((float)((menuItem)%numRxnPerCol) + 0.1f)*RXN_MENU_ITEM_SPACING)*state->ds.uiUserScale;
+	rect.w = RXN_MENU_COLUMN_WIDTH*state->ds.uiUserScale;
+	rect.h = RXN_MENU_ITEM_SPACING*state->ds.uiUserScale;
+	return rect;
+}
+
 
 //updates UI element (buttons etc.) positions, based on the screen resolution and other factors
 //positioning constants are defined in gui_constants.h
@@ -3758,7 +3783,7 @@ void updateSingleUIElemPosition(const app_data *restrict dat, app_state *restric
 				state->ds.rxnMenuColumns = 1;
 			}
 			//SDL_Log("numRxns: %u, columns: %u\n",dat->ndat.nuclData[state->chartSelectedNucl].numRxns,state->ds.rxnMenuColumns);
-			state->ds.uiElemWidth[uiElemInd] = (int16_t)(RXN_MENU_COLUMN_WIDTH*state->ds.rxnMenuColumns*state->ds.uiUserScale);
+			state->ds.uiElemWidth[uiElemInd] = (int16_t)((RXN_MENU_COLUMN_WIDTH*state->ds.rxnMenuColumns + 4.0f*PANEL_EDGE_SIZE)*state->ds.uiUserScale);
 			state->ds.uiElemHeight[uiElemInd] = (int16_t)((SDL_ceilf((dat->ndat.nuclData[state->chartSelectedNucl].numRxns+1.0f)/(state->ds.rxnMenuColumns*1.0f))*RXN_MENU_ITEM_SPACING + 2*PANEL_EDGE_SIZE + 4*UI_PADDING_SIZE)*state->ds.uiUserScale);
 			state->ds.uiElemPosX[uiElemInd] = (int16_t)(state->ds.uiElemPosX[UIELEM_NUCL_FULLINFOBOX_RXNBUTTON] + state->ds.uiElemWidth[UIELEM_NUCL_FULLINFOBOX_RXNBUTTON]/2 - state->ds.uiElemWidth[UIELEM_RXN_MENU]/2);
 			//SDL_Log("position: %i %i, dimensions: %i %i\n",state->ds.uiElemPosX[uiElemInd],state->ds.uiElemPosY[uiElemInd],state->ds.uiElemWidth[uiElemInd],state->ds.uiElemHeight[uiElemInd]);

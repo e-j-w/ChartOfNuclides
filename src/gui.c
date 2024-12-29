@@ -1073,6 +1073,14 @@ void drawNuclFullInfoBox(const app_data *restrict dat, const app_state *restrict
   //SDL_Log("drawYPos: %f\n",(double)drawYPos);
   float levelStartDrawPos;
   for(uint32_t lvlInd = dat->ndat.nuclData[nuclInd].firstLevel; lvlInd<(dat->ndat.nuclData[nuclInd].firstLevel+dat->ndat.nuclData[nuclInd].numLevels); lvlInd++){
+    
+    //skip all levels which are not part of the selected reaction
+    if(state->ds.selectedRxn > 0){
+      if(!(dat->ndat.levels[lvlInd].populatingRxns & (uint64_t)(1ULL << (state->ds.selectedRxn-1)))){
+        continue;
+      }
+    }
+
     drawXPos = origDrawXPos;
     uint16_t numLines = getNumDispLinesForLvl(&dat->ndat,lvlInd);
     if(((drawYPos + NUCL_INFOBOX_SMALLLINE_HEIGHT*state->ds.uiUserScale*numLines) >= NUCL_FULLINFOBOX_LEVELLIST_POS_Y)&&(drawYPos <= state->ds.windowYRes)){
@@ -1269,7 +1277,14 @@ void drawNuclFullInfoBox(const app_data *restrict dat, const app_state *restrict
   //back button
   drawIconAndTextButton(&dat->rules.themeRules,rdat,state->ds.uiElemPosX[UIELEM_NUCL_FULLINFOBOX_BACKBUTTON],state->ds.uiElemPosY[UIELEM_NUCL_FULLINFOBOX_BACKBUTTON],state->ds.uiElemWidth[UIELEM_NUCL_FULLINFOBOX_BACKBUTTON],getHighlightState(state,UIELEM_NUCL_FULLINFOBOX_BACKBUTTON),255,UIICON_DOWNARROWS,dat->strings[dat->locStringIDs[LOCSTR_BACKTOSUMMARY]]);
   //reaction selector button
-  drawDropDownTextButton(&dat->rules.themeRules,rdat,state->ds.uiElemPosX[UIELEM_NUCL_FULLINFOBOX_RXNBUTTON],(int16_t)(state->ds.uiElemPosY[UIELEM_NUCL_FULLINFOBOX_RXNBUTTON] - txtYOffset),state->ds.uiElemWidth[UIELEM_NUCL_FULLINFOBOX_RXNBUTTON],getHighlightState(state,UIELEM_NUCL_FULLINFOBOX_RXNBUTTON),txtAlpha,dat->strings[dat->locStringIDs[LOCSTR_ALLREACTIONS]]);
+  if(state->ds.selectedRxn == 0){
+    drawDropDownTextButton(&dat->rules.themeRules,rdat,state->ds.uiElemPosX[UIELEM_NUCL_FULLINFOBOX_RXNBUTTON],(int16_t)(state->ds.uiElemPosY[UIELEM_NUCL_FULLINFOBOX_RXNBUTTON] - txtYOffset),state->ds.uiElemWidth[UIELEM_NUCL_FULLINFOBOX_RXNBUTTON],getHighlightState(state,UIELEM_NUCL_FULLINFOBOX_RXNBUTTON),txtAlpha,dat->strings[dat->locStringIDs[LOCSTR_ALLREACTIONS]]);
+  }else{
+    char rxnStr[32];
+    getRxnStr(rxnStr,&dat->ndat,dat->ndat.nuclData[state->chartSelectedNucl].firstRxn + (uint32_t)(state->ds.selectedRxn-1));
+    drawDropDownTextButton(&dat->rules.themeRules,rdat,state->ds.uiElemPosX[UIELEM_NUCL_FULLINFOBOX_RXNBUTTON],(int16_t)(state->ds.uiElemPosY[UIELEM_NUCL_FULLINFOBOX_RXNBUTTON] - txtYOffset),state->ds.uiElemWidth[UIELEM_NUCL_FULLINFOBOX_RXNBUTTON],getHighlightState(state,UIELEM_NUCL_FULLINFOBOX_RXNBUTTON),txtAlpha,rxnStr);
+  }
+  
 }
 
 void drawNuclInfoBox(const app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat, const uint16_t nuclInd){
@@ -1617,13 +1632,39 @@ void drawRxnMenu(const app_data *restrict dat, const app_state *restrict state, 
   drawRect.h = state->ds.uiElemHeight[UIELEM_RXN_MENU];
   drawPanelBG(&dat->rules.themeRules,rdat,drawRect,alpha);
 
+  uint8_t numRxnPerCol = getRxnMenuNumRxnsPerColumn(dat,state);
+
+  //draw menu item highlight
+  SDL_FColor highlightCol;
+  if(state->ds.timeLeftInUIAnimation[UIANIM_RXN_MENU_HIDE]==0.0f){
+    //SDL_Log("Mouse-over reaction: %u, selected reaction: %u.\n",state->ds.mouseOverRxn,state->ds.selectedRxn);
+    for(uint8_t i=0;i<(dat->ndat.nuclData[state->chartSelectedNucl].numRxns+1);i++){
+      if(state->ds.selectedRxn == i){
+        drawRect = getRxnMenuButtonRect(state,numRxnPerCol,i);
+        drawRect.y += yOffset;
+        highlightCol = dat->rules.themeRules.modSelectedCol;
+        highlightCol.a = alpha;
+        drawFlatRect(rdat,drawRect,highlightCol);
+      }
+      if((state->ds.mouseOverRxn == i)&&(state->ds.mouseOverRxn != state->ds.selectedRxn)){
+        drawRect = getRxnMenuButtonRect(state,numRxnPerCol,i);
+        drawRect.y += yOffset;
+        highlightCol = dat->rules.themeRules.modMouseOverCol;
+        highlightCol.a = alpha;
+        drawFlatRect(rdat,drawRect,highlightCol);
+      }
+      if((i>state->ds.mouseOverRxn)&&(i>state->ds.selectedRxn)){
+        break;
+      }
+    }
+  }
+
   //draw menu item text
   drawRect.x = state->ds.uiElemPosX[UIELEM_RXN_MENU] + (PANEL_EDGE_SIZE + 3*UI_PADDING_SIZE)*state->ds.uiUserScale;
   drawRect.w = state->ds.uiElemWidth[UIELEM_RXN_MENU];
   drawRect.h = state->ds.uiElemHeight[UIELEM_RXN_MENU];
   drawTextAlignedSized(rdat,drawRect.x,((float)state->ds.uiElemPosY[UIELEM_RXN_MENU] + PANEL_EDGE_SIZE*state->ds.uiUserScale + 0.4f*RXN_MENU_ITEM_SPACING*state->ds.uiUserScale + yOffset),blackCol8Bit,FONTSIZE_NORMAL,alpha8,dat->strings[dat->locStringIDs[LOCSTR_ALLREACTIONS]],ALIGN_LEFT,(Uint16)(RXN_MENU_COLUMN_WIDTH*state->ds.uiUserScale));
   char rxnStr[32];
-  uint8_t numRxnPerCol = (uint8_t)(SDL_ceilf((dat->ndat.nuclData[state->chartSelectedNucl].numRxns+1.0f)/(state->ds.rxnMenuColumns*1.0f)));
   for(uint8_t i=0; i<dat->ndat.nuclData[state->chartSelectedNucl].numRxns; i++){
     getRxnStr(rxnStr,&dat->ndat,dat->ndat.nuclData[state->chartSelectedNucl].firstRxn + (uint32_t)i);
     drawRect.x = state->ds.uiElemPosX[UIELEM_RXN_MENU] + (float)(PANEL_EDGE_SIZE + 3*UI_PADDING_SIZE + RXN_MENU_COLUMN_WIDTH*((i+1)/numRxnPerCol))*state->ds.uiUserScale;

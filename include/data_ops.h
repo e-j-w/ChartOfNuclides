@@ -78,7 +78,7 @@ float getChartHeightZAfterZoom(const drawing_state *restrict ds);
 void changeUIState(const app_data *restrict dat, app_state *restrict state, const uint8_t newState);
 void panChartToPos(const app_data *restrict dat, drawing_state *restrict ds, const uint16_t posN, const uint16_t posZ, float panTime);
 uint16_t getNearestNuclInd(const app_data *restrict dat, const int16_t N, const int16_t Z);
-void setSelectedNuclOnLevelList(const app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat, const uint16_t N, const uint16_t Z);
+void setSelectedNuclOnLevelList(const app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat, const uint16_t N, const uint16_t Z, const uint8_t updateRxn);
 void setSelectedNuclOnChart(const app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat, const uint16_t N, const uint16_t Z, const uint8_t forcePan);
 void setSelectedNuclOnChartDirect(const app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat, const uint16_t selNucl, const uint8_t forcePan);
 void updateSearchUIState(const app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat);
@@ -87,6 +87,9 @@ void uiElemMouseoverAction(resource_data *restrict rdat, const uint8_t uiElemID)
 void uiElemClickAction(app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat, const uint8_t doubleClick, const uint8_t uiElemID);
 
 uint16_t getNumTextCharsUnderWidth(resource_data *restrict rdat, const uint16_t widthPx, const char *text, const uint16_t txtStartChar);
+
+uint8_t getRxnMenuNumRxnsPerColumn(const app_data *restrict dat, const app_state *restrict state);
+SDL_FRect getRxnMenuButtonRect(const app_state *restrict state, const uint8_t numRxnPerCol, const uint8_t menuItem);
 
 void updateSingleUIElemPosition(const app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat, const uint8_t uiElemInd);
 void updateUIElemPositions(const app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat);
