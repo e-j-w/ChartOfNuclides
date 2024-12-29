@@ -2579,11 +2579,21 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 							
 							//check against known levels in the same nuclide
 							for(uint32_t i=nd->nuclData[nd->numNucl].firstLevel; i<(nd->nuclData[nd->numNucl].firstLevel+nd->nuclData[nd->numNucl].numLevels); i++){
-								if(fabs(getRawValFromDB(&nd->levels[i].energy) - getRawValFromDB(&levelEVal)) < 0.05){
+								uint8_t matchingE = 0;
+								if(fabs(getRawValFromDB(&nd->levels[i].energy) - getRawValFromDB(&levelEVal)) < getRawErrFromDB(&levelEVal)){
+									matchingE = 1;
+								}else if(fabs(getRawValFromDB(&nd->levels[i].energy) - getRawValFromDB(&levelEVal)) < 0.05){
+									matchingE = 1;
+								}
+								if(matchingE){
 									//flag level as belonging to reaction(s) from this subsection
 									//SDL_Log("Matching energies: [%f, %f]\n",getRawValFromDB(&nd->levels[i].energy),getRawValFromDB(&levelEVal));
-									uint16_t rxnInd = (uint16_t)(nd->numRxns - nd->nuclData[nd->numNucl].firstRxn);
+									uint16_t rxnInd = (uint16_t)(nd->numRxns - nd->nuclData[nd->numNucl].firstRxn - 1);
+									if(rxnInd > 63){
+										SDL_Log("WARNING: rxnInd too large to be represented in a 64-bit pattern (%u).\n",rxnInd);
+									}
 									nd->levels[i].populatingRxns |= (1UL << rxnInd);
+									break;
 								}
 							}
 							
