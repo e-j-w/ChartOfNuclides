@@ -1563,12 +1563,12 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 	double longestIsomerHl = 0.0; //longest isomeric state half-life for a given nucleus
 	uint8_t isomerMValInNucl = 0;
 	sp_var_data varDat;
+	reaction_mapping rxnMap;
   
   //subsection of the entry for a particular nucleus that the parser is at
   //each nucleus has multiple entries, including adopted gammas, and gammas 
   //associated with a particlular reaction mechanism
   int subSec=0;
-	uint8_t startedParsingSec=0;
   
   //open the file and read all parameters
   if((efile=fopen(filePath,"r"))==NULL){
@@ -1587,7 +1587,6 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 			//SDL_Log("%s\n",line);
 			if(isEmpty(str)){
 				subSec++; //empty line, increment which subsection we're on
-				startedParsingSec=0;
 				firstQLine = 1;
 				continue;
 			}else{
@@ -1634,7 +1633,6 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 				if(nd->numNucl<MAXNUMNUCL){
 					nd->numNucl++;
 					subSec=0; //we're at the beginning of the entry for this nuclide
-					startedParsingSec=1;
 					longestIsomerHl = 0.0;
 					isomerMValInNucl = 0;
 					qValDecModeFlag = 0;
@@ -1702,17 +1700,131 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 			memcpy(typebuff, &line[5], 3);
 			typebuff[3] = '\0';
 
-			//parse the energy
-			char ebuff[11];
-			memcpy(ebuff, &line[9], 10);
-			ebuff[10] = '\0';
+			
 
-			//add levels
+			//parse
 			if(nd->numNucl>=0){ //check that indices are valid
 				if(subSec==0){ //adopted levels subsection
 
+					//add reactions
+					if(strcmp(typebuff,"  X")==0){
+						if(nd->nuclData[nd->numNucl].numRxns < MAXRXNSPERNUCL){
+							rxnMap.rxnChar[nd->nuclData[nd->numNucl].numRxns] = line[8];
+							rxnMap.rxnInd[nd->nuclData[nd->numNucl].numRxns] = nd->numRxns;
+							char rxnBuff[31];
+							memcpy(rxnBuff, &line[9], 30);
+							for(uint8_t i=29; 1; i--){
+								if(!(SDL_isspace(rxnBuff[i]))){
+									rxnBuff[i+1] = '\0'; //terminate string at end, without trailing whitespace
+									break;
+								}
+							}
+							uint8_t rxnStrLen = parseRxn(&nd->rxn[nd->numRxns],rxnBuff,nd->ensdfStrBuf,nd->ensdfStrBufLen);
+							if((rxnStrLen>0)&&(rxnStrLen <= MAX_RXN_STRLEN)){
+								if(nd->numRxns < MAXNUMREACTIONS){
+									//check the just-parsed string against previous strings, if an identical string exists, use that one instead
+									uint8_t duplStr = 0;
+									for(uint16_t i=0; i<nd->numRxns; i++){
+										if(SDL_strcmp(&nd->ensdfStrBuf[nd->rxn[nd->numRxns].rxnStrBufStartPos],&nd->ensdfStrBuf[nd->rxn[i].rxnStrBufStartPos])==0){
+											nd->rxn[nd->numRxns].rxnStrBufStartPos = nd->rxn[i].rxnStrBufStartPos;
+											nd->rxn[nd->numRxns].rxnStrLen = nd->rxn[i].rxnStrLen;
+											duplStr = 1;
+											break;
+										}
+									}
+									if(duplStr == 0){
+										nd->ensdfStrBufLen += rxnStrLen;
+									}
+									nd->numRxns++;
+									nd->nuclData[nd->numNucl].numRxns++;
+								}else{
+									SDL_Log("ERROR: number of reactions parsed exceeds the maximum (%i).\n",MAXNUMREACTIONS);
+									return -1;
+								}
+							}else if(rxnStrLen!=255){
+								SDL_Log("ERROR: couldn't parse reaction string: %s\n",rxnBuff);
+								return -1;
+							}
+						}
+					}else if(strcmp(typebuff,"X L")==0){
+						if(nd->numLvls > 0){
+							char hdbuff[6];
+							memcpy(hdbuff, &line[9], 5);
+							hdbuff[5] = '\0';
+							if(strcmp(hdbuff,"XREF=")==0){
+								//reaction list for the last parsed level
+								//SDL_Log("Found reaction list for level %u.\n",nd->numLvls);
+								char rxnListBuf[128];
+								memcpy(rxnListBuf, &line[14], 127);
+								for(uint8_t i=126; 1; i--){
+									if(!(SDL_isspace(rxnListBuf[i]))){
+										rxnListBuf[i+1] = '\0'; //terminate string at end, without trailing whitespace
+										break;
+									}
+								}
+								if(rxnListBuf[0]=='+'){
+									//level appears in all reactions/datasets
+									for(uint8_t j=0; j<nd->nuclData[nd->numNucl].numRxns; j++){
+										if(j<MAXRXNSPERNUCL){
+											nd->levels[nd->numLvls-1].populatingRxns |= (1UL << j);
+										}
+									}
+								}else if((rxnListBuf[0]=='-')&&(rxnListBuf[1]=='(')){
+									//level appears in all reactions/datasets except the ones specified in parantheses
+									for(uint8_t j=0; j<nd->nuclData[nd->numNucl].numRxns; j++){
+										if(j<MAXRXNSPERNUCL){
+											nd->levels[nd->numLvls-1].populatingRxns |= (1UL << j);
+										}
+									}
+									for(uint8_t i=2; i<((uint8_t)strlen(rxnListBuf)); i++){
+										char lvlRxnChar = rxnListBuf[i];
+										if(lvlRxnChar == ')'){
+											break;
+										}
+										for(uint8_t j=0; j<nd->nuclData[nd->numNucl].numRxns; j++){
+											if(j<MAXRXNSPERNUCL){
+												if(rxnMap.rxnChar[j] == lvlRxnChar){
+													nd->levels[nd->numLvls-1].populatingRxns &= ~(1UL << j); //unset reaction
+													break;
+												}
+											}
+										}
+									}
+								}else{
+									//standard reaction parsing
+									uint8_t skipChar = 0;
+									for(uint8_t i=0; i<((uint8_t)strlen(rxnListBuf)); i++){
+										char lvlRxnChar = rxnListBuf[i];
+										//skip sections in parantheses
+										if(lvlRxnChar == '('){
+											skipChar = 1;
+										}else if(lvlRxnChar == ')'){
+											skipChar = 0;
+										}
+										if(skipChar == 0){
+											for(uint8_t j=0; j<nd->nuclData[nd->numNucl].numRxns; j++){
+												if(j<MAXRXNSPERNUCL){
+													if(rxnMap.rxnChar[j] == lvlRxnChar){
+														nd->levels[nd->numLvls-1].populatingRxns |= (1UL << j);
+														break;
+													}
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+
+					//add levels
 					if(nd->numLvls<MAXNUMLVLS){
 						if(strcmp(typebuff,"  L")==0){
+
+							//parse the energy
+							char ebuff[11];
+							memcpy(ebuff, &line[9], 10);
+							ebuff[10] = '\0';
 
 							//parse the energy error
 							char eeBuff[3];
@@ -1937,6 +2049,10 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 								char mBuff[11];
 								memcpy(mBuff, &line[31], 10);
 								mBuff[10] = '\0';
+								//parse the energy
+								char ebuff[11];
+								memcpy(ebuff, &line[9], 10);
+								ebuff[10] = '\0';
 								//parse the energy error
 								char eeBuff[3];
 								memcpy(eeBuff, &line[19], 2);
@@ -2518,88 +2634,6 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 						}
 						firstQLine = 0;
 					}
-				}else if(subSec > 0){
-					//reaction subsection
-					//reaction hasn't been parsed yet
-					if(startedParsingSec == 0){
-						//SDL_Log("subSec: %u\n",subSec);
-						startedParsingSec=1;
-						char rxnBuff[31];
-						memcpy(rxnBuff, &line[9], 30);
-						for(uint8_t i=29; 1; i--){
-							if(!(SDL_isspace(rxnBuff[i]))){
-								rxnBuff[i+1] = '\0'; //terminate string at end, without trailing whitespace
-								break;
-							}
-						}
-						//SDL_Log("Reaction buffer: %s\n",rxnBuff);
-						//SDL_Log("Number of sub-strings: %u",numRxnSubStr);
-						//SDL_Log("num nucl: %i\n",nd->numNucl);
-						uint8_t rxnStrLen = parseRxn(&nd->rxn[nd->numRxns],rxnBuff,nd->ensdfStrBuf,nd->ensdfStrBufLen);
-						if((rxnStrLen>0)&&(rxnStrLen <= MAX_RXN_STRLEN)){
-							if(nd->numRxns < MAXNUMREACTIONS){
-								//check the just-parsed string against previous strings, if an identical string exists, use that one instead
-								uint8_t duplStr = 0;
-								for(uint16_t i=0; i<nd->numRxns; i++){
-									if(SDL_strcmp(&nd->ensdfStrBuf[nd->rxn[nd->numRxns].rxnStrBufStartPos],&nd->ensdfStrBuf[nd->rxn[i].rxnStrBufStartPos])==0){
-										nd->rxn[nd->numRxns].rxnStrBufStartPos = nd->rxn[i].rxnStrBufStartPos;
-										nd->rxn[nd->numRxns].rxnStrLen = nd->rxn[i].rxnStrLen;
-										duplStr = 1;
-										break;
-									}
-								}
-								if(duplStr == 0){
-									nd->ensdfStrBufLen += rxnStrLen;
-								}
-								nd->numRxns++;
-								nd->nuclData[nd->numNucl].numRxns++;
-							}else{
-								SDL_Log("ERROR: number of reactions parsed exceeds the maximum (%i).\n",MAXNUMREACTIONS);
-								return -1;
-							}
-						}else if(rxnStrLen!=255){
-							SDL_Log("ERROR: couldn't parse reaction string: %s\n",rxnBuff);
-							return -1;
-						}
-						
-					}else{
-						//look for levels and assign them to the reaction
-						if(strcmp(typebuff,"  L")==0){
-
-							valWithErr levelEVal;
-							memset(&levelEVal,0,sizeof(levelEVal));
-
-							//parse the energy error
-							char eeBuff[3];
-							memcpy(eeBuff, &line[19], 2);
-							eeBuff[2] = '\0';
-
-							//parse the level energy
-							parseLevelE(&levelEVal,ebuff,eeBuff);
-							
-							//check against known levels in the same nuclide
-							for(uint32_t i=nd->nuclData[nd->numNucl].firstLevel; i<(nd->nuclData[nd->numNucl].firstLevel+nd->nuclData[nd->numNucl].numLevels); i++){
-								uint8_t matchingE = 0;
-								if(fabs(getRawValFromDB(&nd->levels[i].energy) - getRawValFromDB(&levelEVal)) < getRawErrFromDB(&levelEVal)){
-									matchingE = 1;
-								}else if(fabs(getRawValFromDB(&nd->levels[i].energy) - getRawValFromDB(&levelEVal)) < 0.05){
-									matchingE = 1;
-								}
-								if(matchingE){
-									//flag level as belonging to reaction(s) from this subsection
-									//SDL_Log("Matching energies: [%f, %f]\n",getRawValFromDB(&nd->levels[i].energy),getRawValFromDB(&levelEVal));
-									uint16_t rxnInd = (uint16_t)(nd->numRxns - nd->nuclData[nd->numNucl].firstRxn - 1);
-									if(rxnInd > 63){
-										SDL_Log("WARNING: rxnInd too large to be represented in a 64-bit pattern (%u).\n",rxnInd);
-									}
-									nd->levels[i].populatingRxns |= (1UL << rxnInd);
-									break;
-								}
-							}
-							
-						}
-					}
-					
 				}
 			}
 
@@ -2805,6 +2839,9 @@ int parseAppData(app_data *restrict dat, const char *appBasePath){
     return -1;
   }else if(MAX_RXN_STRLEN >= /* DISABLES CODE */ (255)){
     SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"MAX_RXN_STRLEN is too large, can't use 255 as a special return value in parseRxn().\n");
+    return -1;
+  }else if(MAXRXNSPERNUCL > /* DISABLES CODE */ (64)){
+    SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"MAXRXNSPERNUCL is too large, can't index reactions in a 64-bit bit-pattern (level->populatingRxns).\n");
     return -1;
   }
 

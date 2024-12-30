@@ -37,6 +37,12 @@ typedef struct
 
 typedef struct
 {
+  uint32_t rxnInd[MAXRXNSPERNUCL]; //index of parsed reaction
+  char rxnChar[MAXRXNSPERNUCL]; //which character is used in the ENSDF file to represent each reaction
+}reaction_mapping;
+
+typedef struct
+{
   char spVars[MAX_SPIN_VARS][16];
 	uint8_t numSpVars; //number of variables (eg. J1, J2, J3...) parsed in spin parity values
 }sp_var_data; //spin-parity variable data

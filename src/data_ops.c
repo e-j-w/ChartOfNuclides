@@ -3182,6 +3182,7 @@ void uiElemClickAction(app_data *restrict dat, app_state *restrict state, resour
 			break;
 		case UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON:
 				state->ds.nuclFullInfoScrollY = 0.0f;
+				state->ds.selectedRxn = 0;
 				state->lastOpenedMenu = UIELEM_PRIMARY_MENU;
 				startUIAnimation(dat,state,UIANIM_NUCLINFOBOX_EXPAND);
 				setFullLevelInfoDimensions(dat,state,rdat,state->chartSelectedNucl);

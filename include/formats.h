@@ -53,6 +53,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #define MAXNUMTRAN               290000
 #define MAXNUMDECAYMODES         11000
 #define MAXNUMREACTIONS          16000
+#define MAXRXNSPERNUCL           64
 #define MAX_RXN_STRLEN           32
 #define MAX_NEUTRON_NUM          200
 #define MAX_PROTON_NUM           130
