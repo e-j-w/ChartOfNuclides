@@ -1746,7 +1746,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 								return -1;
 							}
 						}
-					}else if(strcmp(typebuff,"X L")==0){
+					}else if((strcmp(&typebuff[1]," L")==0)&&(!(SDL_isspace(typebuff[0])))){
 						if(nd->numLvls > 0){
 							char hdbuff[6];
 							memcpy(hdbuff, &line[9], 5);
