@@ -1118,7 +1118,7 @@ Uint8 FC_LoadFontFromTTF(FC_Font* font, SDL_Renderer* renderer, TTF_Font* ttf, S
     return 1;
 }
 
-Uint8 FC_LoadFont(FC_Font* font, FC_Target* renderer, const char* filename_ttf, Uint32 pointSize, SDL_Color color, int style)
+Uint8 FC_LoadFont(FC_Font* font, FC_Target* renderer, const char* filename_ttf, Uint32 pointSize, SDL_Color color, unsigned int style)
 {
     SDL_IOStream* iostream;
 
@@ -1136,7 +1136,7 @@ Uint8 FC_LoadFont(FC_Font* font, FC_Target* renderer, const char* filename_ttf, 
     return FC_LoadFont_RW(font, renderer, iostream, 1, pointSize, color, style);
 }
 
-Uint8 FC_LoadFont_RW(FC_Font* font, FC_Target* renderer, SDL_IOStream* file_iostream_ttf, Uint8 own_rwops, Uint32 pointSize, SDL_Color color, int style)
+Uint8 FC_LoadFont_RW(FC_Font* font, FC_Target* renderer, SDL_IOStream* file_iostream_ttf, Uint8 own_rwops, Uint32 pointSize, SDL_Color color, unsigned int style)
 {
     Uint8 result;
     TTF_Font* ttf;
@@ -1168,7 +1168,7 @@ Uint8 FC_LoadFont_RW(FC_Font* font, FC_Target* renderer, SDL_IOStream* file_iost
     outline = (style & TTF_STYLE_OUTLINE);
     if(outline)
     {
-        style &= ~TTF_STYLE_OUTLINE;
+        style = style & ~TTF_STYLE_OUTLINE;
         TTF_SetFontOutline(ttf, 1);
     }
     TTF_SetFontStyle(ttf, style);
