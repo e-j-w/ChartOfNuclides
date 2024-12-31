@@ -363,7 +363,7 @@ void getENSDFNuclStrNZ(int16_t *N, int16_t *Z, const char *nuclStr){
 			*Z=0;
 			*N=A;
 		}else{
-			for(int i=1;i<(int)(strlen(tok));i++){
+			for(int i=1;i<(int)(SDL_strlen(tok));i++){
 				tok[i]=(char)SDL_tolower(tok[i]); //elemStrToZ() expects only first character to be uppercase
 			}
 			*Z=elemStrToZ(tok);
@@ -410,7 +410,7 @@ uint8_t parseRxn(reaction *rxn, const char *rxnstring, char *ensdfStrBuf, const 
 	}else{
 		//fix capitalization
 		//letters should be lowercase, unless they are first character, or are preceded by a number
-		for(uint8_t i=0; i<((uint8_t)strlen(modRxnStr)); i++){
+		for(uint8_t i=0; i<((uint8_t)SDL_strlen(modRxnStr)); i++){
 			if(i>0){
 				if(SDL_isalpha(modRxnStr[i])){
 					if((!SDL_isdigit(modRxnStr[i-1]))||((i>1)&&(SDL_isalpha(modRxnStr[i-2]) || (((modRxnStr[i]=='N')||(modRxnStr[i]=='P')||(modRxnStr[i]=='A'))&&(!SDL_isdigit(modRxnStr[i-2])))))){
@@ -432,7 +432,7 @@ uint8_t parseRxn(reaction *rxn, const char *rxnstring, char *ensdfStrBuf, const 
 	}
 
 
-	rxn->rxnStrLen = (uint8_t)(strlen(modRxnStr) + 1); //include NULL terminator
+	rxn->rxnStrLen = (uint8_t)(SDL_strlen(modRxnStr) + 1); //include NULL terminator
 	if(rxn->rxnStrLen > MAX_RXN_STRLEN){
 		rxn->rxnStrLen = MAX_RXN_STRLEN;
 	}
@@ -538,7 +538,7 @@ void parseLevelE(valWithErr * levelEVal, const char * estring, const char * errs
 			if(tok!=NULL){
 				
 				//SDL_Log("%s\n",tok);
-				uint16_t len = (uint16_t)strlen(tok);
+				uint16_t len = (uint16_t)SDL_strlen(tok);
 				//check for trailing empty spaces
 				for(uint16_t i=0;i<len;i++){
 					if(SDL_isspace(tok[i])){
@@ -648,7 +648,7 @@ void parseHalfLife(level * lev, const char * hlstring){
       tok = SDL_strtok_r(NULL,"E+",&saveptr);
       if(tok!=NULL){
         //SDL_Log("%s\n",tok);
-        lev->halfLife.format = (uint16_t)strlen(tok);
+        lev->halfLife.format = (uint16_t)SDL_strlen(tok);
         if(lev->halfLife.format > 15U){
           lev->halfLife.format = 15U; //only 4 bits available for precision
         }
@@ -854,8 +854,8 @@ void parseSpinPar(level * lev, sp_var_data * varDat, char * spstring){
 
 				//check for J+number variable spin case
 				uint8_t varSpin=0;
-				for(int j=((int)strlen(val[i])-1); j>=0; j--){
-					if(j<((int)strlen(val[i])-1)){
+				for(int j=((int)SDL_strlen(val[i])-1); j>=0; j--){
+					if(j<((int)SDL_strlen(val[i])-1)){
 						if(j>0){
 							if(val[i][j]=='+'){
 								if(SDL_isdigit(val[i][j+1])){
@@ -878,7 +878,7 @@ void parseSpinPar(level * lev, sp_var_data * varDat, char * spstring){
 						lsBrak = 1;
 						lsBrakStart = (uint16_t)lev->numSpinParVals;
 					}
-					int len = (int)strlen(val[i]);
+					int len = (int)SDL_strlen(val[i]);
 					if(val[i][len-1]==')'){
 						rsBrak = 1;
 					}
@@ -920,7 +920,7 @@ void parseSpinPar(level * lev, sp_var_data * varDat, char * spstring){
 							//check for variable value types
 							char varValType[3];
 							uint8_t varValTypePos = 255;
-							for(int j=2;j<=((int)strlen(tmpstr2));j++){
+							for(int j=2;j<=((int)SDL_strlen(tmpstr2));j++){
 								memcpy(varValType, &tmpstr2[j-2], 2);
 								tmpstr2[2] = '\0';
 								if(strcmp(varValType,"GT")==0){
@@ -1002,7 +1002,7 @@ void parseSpinPar(level * lev, sp_var_data * varDat, char * spstring){
 								//SDL_Log("non-variable spin string: %s, tmpstr2: %s\n",spstring,tmpstr2);
 								lev->spval[lev->numSpinParVals].format = (uint16_t)(lev->spval[lev->numSpinParVals].format & ~(1U)); //remove variable spin flag
 								lev->format = origLevFormat; //restore original level format (including whether spins should be half-integer)
-								if(strlen(tmpstr2) == 2){
+								if(SDL_strlen(tmpstr2) == 2){
 									//only have the variable value type, the spin value was separated into the next value
 									//i++;
 								}
@@ -1373,7 +1373,7 @@ uint8_t parseDcyModeSubstr(ndata *nd, const uint16_t dcyModeInd, const char *sub
 							if(tok2!=NULL){
 								
 									//SDL_Log("%s\n",tok2);
-									uint16_t len = (uint16_t)strlen(tok2);
+									uint16_t len = (uint16_t)SDL_strlen(tok2);
 									//check for trailing empty spaces
 									for(uint16_t i=0;i<len;i++){
 										if(SDL_isspace(tok2[i])){
@@ -1460,7 +1460,7 @@ uint8_t parseDcyModeSubstr(ndata *nd, const uint16_t dcyModeInd, const char *sub
 						if(tok2!=NULL){
 							
 								//SDL_Log("%s\n",tok2);
-								uint16_t len = (uint16_t)strlen(tok2);
+								uint16_t len = (uint16_t)SDL_strlen(tok2);
 								//check for trailing empty spaces
 								for(uint16_t i=0;i<len;i++){
 									if(SDL_isspace(tok2[i])){
@@ -1776,7 +1776,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 											nd->levels[nd->numLvls-1].populatingRxns |= (1UL << j);
 										}
 									}
-									for(uint8_t i=2; i<((uint8_t)strlen(rxnListBuf)); i++){
+									for(uint8_t i=2; i<((uint8_t)SDL_strlen(rxnListBuf)); i++){
 										char lvlRxnChar = rxnListBuf[i];
 										if(lvlRxnChar == ')'){
 											break;
@@ -1793,7 +1793,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 								}else{
 									//standard reaction parsing
 									uint8_t skipChar = 0;
-									for(uint8_t i=0; i<((uint8_t)strlen(rxnListBuf)); i++){
+									for(uint8_t i=0; i<((uint8_t)SDL_strlen(rxnListBuf)); i++){
 										char lvlRxnChar = rxnListBuf[i];
 										//skip sections in parantheses
 										if(lvlRxnChar == '('){
@@ -2140,7 +2140,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 									tok = SDL_strtok_r(NULL,"E",&saveptr); //some gamma energies are specified with exponents
 									if(tok!=NULL){
 										//SDL_Log("%s\n",tok);
-										uint16_t len = (uint16_t)strlen(tok);
+										uint16_t len = (uint16_t)SDL_strlen(tok);
 										//check for trailing empty spaces
 										for(uint16_t i=0;i<len;i++){
 											if(SDL_isspace(tok[i])){
@@ -2280,7 +2280,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 									tok = SDL_strtok_r(NULL,"E",&saveptr); //some gamma energies are specified with exponents
 									if(tok!=NULL){
 										//SDL_Log("%s\n",tok);
-										nd->tran[tranInd].intensity.format = (uint16_t)strlen(tok);
+										nd->tran[tranInd].intensity.format = (uint16_t)SDL_strlen(tok);
 										//check for trailing empty spaces
 										for(uint8_t i=0;i<nd->tran[tranInd].intensity.format;i++){
 											if(SDL_isspace(tok[i])){
@@ -2334,7 +2334,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 									uint8_t derived = 0;
 									//SDL_Log("%s\n",tok);
 									nd->tran[tranInd].multipole[0] = 0; //default
-									for(int i=0;i<(int)strlen(tok);i++){
+									for(int i=0;i<(int)SDL_strlen(tok);i++){
 										if(nd->tran[tranInd].numMultipoles >= MAXMULTPERLEVEL){
 											SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"parseENSDFFile - too many multipoles in string: %s\n",tok);
 											return -1;
@@ -2436,7 +2436,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 								tok = SDL_strtok_r(NULL,"E+",&saveptr);
 								if(tok!=NULL){
 									//SDL_Log("%s\n",tok);
-									nd->nuclData[nd->numNucl].qbeta.format = (uint16_t)strlen(tok);
+									nd->nuclData[nd->numNucl].qbeta.format = (uint16_t)SDL_strlen(tok);
 									if(nd->nuclData[nd->numNucl].qbeta.format > 15U){
 										nd->nuclData[nd->numNucl].qbeta.format = 15U; //only 4 bits available for precision
 									}
@@ -2492,7 +2492,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 								tok = SDL_strtok_r(NULL,"E+",&saveptr);
 								if(tok!=NULL){
 									//SDL_Log("%s\n",tok);
-									nd->nuclData[nd->numNucl].sn.format = (uint16_t)strlen(tok);
+									nd->nuclData[nd->numNucl].sn.format = (uint16_t)SDL_strlen(tok);
 									if(nd->nuclData[nd->numNucl].sn.format > 15U){
 										nd->nuclData[nd->numNucl].sn.format = 15U; //only 4 bits available for precision
 									}
@@ -2548,7 +2548,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 								tok = SDL_strtok_r(NULL,"E+",&saveptr);
 								if(tok!=NULL){
 									//SDL_Log("%s\n",tok);
-									nd->nuclData[nd->numNucl].sp.format = (uint16_t)strlen(tok);
+									nd->nuclData[nd->numNucl].sp.format = (uint16_t)SDL_strlen(tok);
 									if(nd->nuclData[nd->numNucl].sp.format > 15U){
 										nd->nuclData[nd->numNucl].sp.format = 15U; //only 4 bits available for precision
 									}
@@ -2604,7 +2604,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 								tok = SDL_strtok_r(NULL,"E+",&saveptr);
 								if(tok!=NULL){
 									//SDL_Log("%s\n",tok);
-									nd->nuclData[nd->numNucl].qalpha.format = (uint16_t)strlen(tok);
+									nd->nuclData[nd->numNucl].qalpha.format = (uint16_t)SDL_strlen(tok);
 									if(nd->nuclData[nd->numNucl].qalpha.format > 15U){
 										nd->nuclData[nd->numNucl].qalpha.format = 15U; //only 4 bits available for precision
 									}
@@ -2715,7 +2715,7 @@ int parseAbundanceData(const char * filePath, ndata * nd){
 						tok=SDL_strtok_r(tmpVal,"(",&saveptr);
 						if(tok!=NULL){
 							nd->nuclData[nuclInd].abundance.val = (float)(atof(tok)*100.0);
-							nd->nuclData[nuclInd].abundance.format = (uint16_t)(strlen(tok)-5);
+							nd->nuclData[nuclInd].abundance.format = (uint16_t)(SDL_strlen(tok)-5);
 							if(nd->nuclData[nuclInd].abundance.format > 15U){
 								nd->nuclData[nuclInd].abundance.format = 15U; //only 4 bits available for precision
 							}
