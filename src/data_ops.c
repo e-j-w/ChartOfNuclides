@@ -2653,6 +2653,8 @@ uint16_t getNearestNuclInd(const app_data *restrict dat, const int16_t N, const 
 
 void setFullLevelInfoDimensions(const app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat, const uint16_t selNucl){
 	
+	updateSingleUIElemPosition(dat,state,rdat,UIELEM_NUCL_FULLINFOBOX_RXNBUTTON); //width depends on selected reaction
+
 	char tmpStr[32];
 	float tmpWidth = 0.0f;
 	state->ds.fullInfoElevelColWidth = NUCL_FULLINFOBOX_ENERGY_COL_MIN_WIDTH;
@@ -2832,6 +2834,11 @@ void setSelectedNuclOnLevelList(const app_data *restrict dat, app_state *restric
 	//SDL_Log("Selected nucleus: %u\n",state->chartSelectedNucl);
 	if(((selNucl < MAXNUMNUCL)&&(selNucl != state->chartSelectedNucl)) || updateRxn){
 		state->chartSelectedNucl = selNucl;
+		if(updateRxn){
+			state->ds.selectedRxn = state->ds.selectedRxn;
+		}else{
+			state->ds.selectedRxn = 0;
+		}
 		setFullLevelInfoDimensions(dat,state,rdat,selNucl);
 		setInfoBoxDimensions(dat,state,rdat,selNucl);
 		state->ds.nuclFullInfoScrollY = 0.0f;
@@ -2842,12 +2849,6 @@ void setSelectedNuclOnLevelList(const app_data *restrict dat, app_state *restric
 		state->ds.timeSinceFCNuclChangeStart = 0.0f;
 		state->ds.fcNuclChangeInProgress = 1;
 		state->ds.fcNuclChangeFinished = 0;
-		if(updateRxn){
-			state->ds.selectedRxn = state->ds.selectedRxn;
-			updateSingleUIElemPosition(dat,state,rdat,UIELEM_NUCL_FULLINFOBOX_RXNBUTTON);
-		}else{
-			state->ds.selectedRxn = 0;
-		}
 		state->ds.mouseOverRxn = 255;
 		startUIAnimation(dat,state,UIANIM_NUCLINFOBOX_TXTFADEIN);
 
@@ -3772,7 +3773,6 @@ void updateSingleUIElemPosition(const app_data *restrict dat, app_state *restric
 			state->ds.uiElemExtMinusY[UIELEM_NUCL_FULLINFOBOX_BACKBUTTON] = (uint16_t)((NUCL_FULLINFOBOX_BACKBUTTON_POS_Y+1.0f)*state->ds.uiUserScale); //Fitt's law
 			break;
 		case UIELEM_NUCL_FULLINFOBOX_RXNBUTTON:
-			
 			if(state->ds.selectedRxn == 0){
 				state->ds.uiElemWidth[UIELEM_NUCL_FULLINFOBOX_RXNBUTTON] = (int16_t)(NUCL_FULLINFOBOX_RXNBUTTON_WIDTH*state->ds.uiUserScale);
 			}else{
