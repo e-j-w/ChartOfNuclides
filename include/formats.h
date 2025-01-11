@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2017-2024 J. Williams
+Copyright (C) 2017-2025 J. Williams
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -54,7 +54,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #define MAXNUMDECAYMODES         11000
 #define MAXNUMREACTIONS          16000
 #define MAXRXNSPERNUCL           64
-#define MAX_RXN_STRLEN           32
+#define MAX_RXN_STRLEN           64
 #define MAX_NEUTRON_NUM          200
 #define MAX_PROTON_NUM           130
 #define MAX_MASS_NUM             350

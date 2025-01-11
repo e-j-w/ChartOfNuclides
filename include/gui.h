@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2017-2024 J. Williams
+Copyright (C) 2017-2025 J. Williams
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -21,6 +21,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #define GUI_H
 
 #include "formats.h"
+#include "strops.h"
 
 //function prototypes
 void drawPerformanceStats(const ui_theme_rules *restrict uirules, const app_state *restrict state, const thread_manager_state *restrict tms, resource_data *restrict rdat, const float deltaTime);

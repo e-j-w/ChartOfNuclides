@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2017-2024 J. Williams
+Copyright (C) 2017-2025 J. Williams
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -24,6 +24,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "formats.h" //includes data formats (structs) used in the game
 #include "data_ops.h"
+#include "strops.h"
 
 #define MAXNUMPARSERVALS 10 //maximum number of values that can parsed at once on a line
 

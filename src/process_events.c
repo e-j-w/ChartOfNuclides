@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2017-2024 J. Williams
+Copyright (C) 2017-2025 J. Williams
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -1023,7 +1023,7 @@ void processSingleEvent(app_data *restrict dat, app_state *restrict state, resou
           if(!(SDL_TextInputActive(rdat->window))){
             state->inputFlags |= (1U << INPUT_BACK);
           }else{
-            if(strdelchar(state->ss.searchString,SEARCH_STRING_MAX_SIZE,(size_t)state->searchCursorPos) >= 0){
+            if(strDelChar(state->ss.searchString,SEARCH_STRING_MAX_SIZE,(size_t)state->searchCursorPos) >= 0){
               state->searchCursorPos -= 1;
               if(state->searchCursorPos > 0){
                 if((state->searchCursorPos-1) < state->ds.searchEntryDispStartChar){
@@ -1299,7 +1299,7 @@ void processSingleEvent(app_data *restrict dat, app_state *restrict state, resou
     case SDL_EVENT_TEXT_INPUT:
       //SDL_Log("text input: %s\n",evt.text.text);
       // Add new text onto the end of the search string
-      if(strinsert(state->ss.searchString,SEARCH_STRING_MAX_SIZE,evt.text.text,(size_t)state->searchCursorPos) >= 0){
+      if(strInsert(state->ss.searchString,SEARCH_STRING_MAX_SIZE,evt.text.text,(size_t)state->searchCursorPos) >= 0){
         state->searchCursorPos += (int)strlen(evt.text.text);
         if(state->searchCursorPos > (SEARCH_STRING_MAX_SIZE-1)){
           state->searchCursorPos = (SEARCH_STRING_MAX_SIZE-1);

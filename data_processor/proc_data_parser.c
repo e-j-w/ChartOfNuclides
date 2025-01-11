@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2017-2024 J. Williams
+Copyright (C) 2017-2025 J. Williams
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -390,7 +390,7 @@ uint8_t parseRxn(reaction *rxn, const char *rxnstring, char *ensdfStrBuf, const 
 	//SDL_Log("Parsing reaction string: %s\n",rxnstring);
 	rxn->type = REACTIONTYPE_UNASSIGNED;
 
-	char modRxnStr[MAX_RXN_STRLEN]; //buffer to hold modified reaction strings
+	char modRxnStr[MAX_RXN_STRLEN]; //buffers to hold modified reaction strings
 	SDL_snprintf(modRxnStr,MAX_RXN_STRLEN,"%s",rxnstring); //by default, just use the reaction string as provided by ENSDF
 
 	//modify string and reaction info as neccessary
@@ -429,6 +429,70 @@ uint8_t parseRxn(reaction *rxn, const char *rxnstring, char *ensdfStrBuf, const 
 				}
 			}
 		}
+
+		//use find and replace to de-uglify strings
+		char *modRxnStrCpy;
+		modRxnStrCpy = findReplaceAllUTF8("Decay","decay",modRxnStr);
+		strncpy(modRxnStr,modRxnStrCpy,MAX_RXN_STRLEN-1);
+		free(modRxnStrCpy);
+		modRxnStrCpy = findReplaceAllUTF8(" ec"," ε",modRxnStr);
+		strncpy(modRxnStr,modRxnStrCpy,MAX_RXN_STRLEN-1);
+		free(modRxnStrCpy);
+		modRxnStrCpy = findReplaceAllUTF8(" EC"," ε",modRxnStr);
+		strncpy(modRxnStr,modRxnStrCpy,MAX_RXN_STRLEN-1);
+		free(modRxnStrCpy);
+		modRxnStrCpy = findReplaceAllUTF8(" b-"," β-",modRxnStr);
+		strncpy(modRxnStr,modRxnStrCpy,MAX_RXN_STRLEN-1);
+		free(modRxnStrCpy);
+		modRxnStrCpy = findReplaceAllUTF8(" b+"," β+",modRxnStr);
+		strncpy(modRxnStr,modRxnStrCpy,MAX_RXN_STRLEN-1);
+		free(modRxnStrCpy);
+		modRxnStrCpy = findReplaceAllUTF8(" it "," IT ",modRxnStr);
+		strncpy(modRxnStr,modRxnStrCpy,MAX_RXN_STRLEN-1);
+		free(modRxnStrCpy);
+		modRxnStrCpy = findReplaceAllUTF8(" D)"," day)",modRxnStr);
+		strncpy(modRxnStr,modRxnStrCpy,MAX_RXN_STRLEN-1);
+		free(modRxnStrCpy);
+		modRxnStrCpy = findReplaceAllUTF8(" M)"," min)",modRxnStr);
+		strncpy(modRxnStr,modRxnStrCpy,MAX_RXN_STRLEN-1);
+		free(modRxnStrCpy);
+		modRxnStrCpy = findReplaceAllUTF8(" S)"," s)",modRxnStr);
+		strncpy(modRxnStr,modRxnStrCpy,MAX_RXN_STRLEN-1);
+		free(modRxnStrCpy);
+		modRxnStrCpy = findReplaceAllUTF8(" Ms)"," ms)",modRxnStr);
+		strncpy(modRxnStr,modRxnStrCpy,MAX_RXN_STRLEN-1);
+		free(modRxnStrCpy);
+		modRxnStrCpy = findReplaceAllUTF8(" Us)"," μs)",modRxnStr);
+		strncpy(modRxnStr,modRxnStrCpy,MAX_RXN_STRLEN-1);
+		free(modRxnStrCpy);
+		modRxnStrCpy = findReplaceAllUTF8(" Ns)"," ns)",modRxnStr);
+		strncpy(modRxnStr,modRxnStrCpy,MAX_RXN_STRLEN-1);
+		free(modRxnStrCpy);
+		modRxnStrCpy = findReplaceAllUTF8("mu-","μ-",modRxnStr);
+		strncpy(modRxnStr,modRxnStrCpy,MAX_RXN_STRLEN-1);
+		free(modRxnStrCpy);
+		modRxnStrCpy = findReplaceAllUTF8("(hi,","(HI,",modRxnStr);
+		strncpy(modRxnStr,modRxnStrCpy,MAX_RXN_STRLEN-1);
+		free(modRxnStrCpy);
+		modRxnStrCpy = findReplaceAllUTF8(",g)",",γ)",modRxnStr);
+		strncpy(modRxnStr,modRxnStrCpy,MAX_RXN_STRLEN-1);
+		free(modRxnStrCpy);
+		modRxnStrCpy = findReplaceAllUTF8("g,g')","γ,γ')",modRxnStr);
+		strncpy(modRxnStr,modRxnStrCpy,MAX_RXN_STRLEN-1);
+		free(modRxnStrCpy);
+		modRxnStrCpy = findReplaceAllUTF8("g)",")",modRxnStr);
+		strncpy(modRxnStr,modRxnStrCpy,MAX_RXN_STRLEN-1);
+		free(modRxnStrCpy);
+		modRxnStrCpy = findReplaceAllUTF8("(a,","(α,",modRxnStr);
+		strncpy(modRxnStr,modRxnStrCpy,MAX_RXN_STRLEN-1);
+		free(modRxnStrCpy);
+		modRxnStrCpy = findReplaceAllUTF8(",a)",",α)",modRxnStr);
+		strncpy(modRxnStr,modRxnStrCpy,MAX_RXN_STRLEN-1);
+		free(modRxnStrCpy);
+		modRxnStrCpy = findReplaceAllUTF8(",a')",",α')",modRxnStr);
+		strncpy(modRxnStr,modRxnStrCpy,MAX_RXN_STRLEN-1);
+		free(modRxnStrCpy);
+
 	}
 
 
