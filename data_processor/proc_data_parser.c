@@ -407,6 +407,9 @@ uint8_t parseRxn(reaction *rxn, const char *rxnstring, char *ensdfStrBuf, const 
 	}else if(strncmp(rxnstring,"NEUTRON RESONANCES",18)==0){
 		SDL_snprintf(modRxnStr,MAX_RXN_STRLEN,"Neutron Resonances");
 		rxn->type = REACTIONTYPE_NEUTRONRESONANCES;
+	}else if(strncmp(rxnstring,"MUONIC ATOM",11)==0){
+		SDL_snprintf(modRxnStr,MAX_RXN_STRLEN,"Muonic Atom");
+		rxn->type = REACTIONTYPE_NEUTRONRESONANCES;
 	}else{
 		//fix capitalization
 		//letters should be lowercase, unless they are first character, or are preceded by a number
@@ -430,6 +433,11 @@ uint8_t parseRxn(reaction *rxn, const char *rxnstring, char *ensdfStrBuf, const 
 			}
 		}
 
+		//get rid of trailing commas that appear in some reaction strings
+		if(modRxnStr[SDL_strlen(modRxnStr)-1] == ','){
+			modRxnStr[SDL_strlen(modRxnStr)-1] = '\0'; //terminate string
+		}
+
 		//use find and replace to de-uglify strings
 		char *modRxnStrCpy;
 		modRxnStrCpy = findReplaceAllUTF8("Decay","decay",modRxnStr);
@@ -445,6 +453,9 @@ uint8_t parseRxn(reaction *rxn, const char *rxnstring, char *ensdfStrBuf, const 
 		strncpy(modRxnStr,modRxnStrCpy,MAX_RXN_STRLEN-1);
 		free(modRxnStrCpy);
 		modRxnStrCpy = findReplaceAllUTF8(" b+"," β+",modRxnStr);
+		strncpy(modRxnStr,modRxnStrCpy,MAX_RXN_STRLEN-1);
+		free(modRxnStrCpy);
+		modRxnStrCpy = findReplaceAllUTF8("a dec","α dec",modRxnStr);
 		strncpy(modRxnStr,modRxnStrCpy,MAX_RXN_STRLEN-1);
 		free(modRxnStrCpy);
 		modRxnStrCpy = findReplaceAllUTF8(" it "," IT ",modRxnStr);
@@ -471,13 +482,22 @@ uint8_t parseRxn(reaction *rxn, const char *rxnstring, char *ensdfStrBuf, const 
 		modRxnStrCpy = findReplaceAllUTF8("mu-","μ-",modRxnStr);
 		strncpy(modRxnStr,modRxnStrCpy,MAX_RXN_STRLEN-1);
 		free(modRxnStrCpy);
+		modRxnStrCpy = findReplaceAllUTF8("pi","π",modRxnStr);
+		strncpy(modRxnStr,modRxnStrCpy,MAX_RXN_STRLEN-1);
+		free(modRxnStrCpy);
+		modRxnStrCpy = findReplaceAllUTF8(",nu",",ν",modRxnStr);
+		strncpy(modRxnStr,modRxnStrCpy,MAX_RXN_STRLEN-1);
+		free(modRxnStrCpy);
 		modRxnStrCpy = findReplaceAllUTF8("(hi,","(HI,",modRxnStr);
 		strncpy(modRxnStr,modRxnStrCpy,MAX_RXN_STRLEN-1);
 		free(modRxnStrCpy);
-		modRxnStrCpy = findReplaceAllUTF8(",g)",",γ)",modRxnStr);
+		modRxnStrCpy = findReplaceAllUTF8("g,g')","γ,γ')",modRxnStr);
 		strncpy(modRxnStr,modRxnStrCpy,MAX_RXN_STRLEN-1);
 		free(modRxnStrCpy);
-		modRxnStrCpy = findReplaceAllUTF8("g,g')","γ,γ')",modRxnStr);
+		modRxnStrCpy = findReplaceAllUTF8("(g,",",(γ,",modRxnStr);
+		strncpy(modRxnStr,modRxnStrCpy,MAX_RXN_STRLEN-1);
+		free(modRxnStrCpy);
+		modRxnStrCpy = findReplaceAllUTF8(",g)",",γ)",modRxnStr);
 		strncpy(modRxnStr,modRxnStrCpy,MAX_RXN_STRLEN-1);
 		free(modRxnStrCpy);
 		modRxnStrCpy = findReplaceAllUTF8("g)",")",modRxnStr);
@@ -486,10 +506,19 @@ uint8_t parseRxn(reaction *rxn, const char *rxnstring, char *ensdfStrBuf, const 
 		modRxnStrCpy = findReplaceAllUTF8("(a,","(α,",modRxnStr);
 		strncpy(modRxnStr,modRxnStrCpy,MAX_RXN_STRLEN-1);
 		free(modRxnStrCpy);
-		modRxnStrCpy = findReplaceAllUTF8(",a)",",α)",modRxnStr);
+		modRxnStrCpy = findReplaceAllUTF8(",pa",",pα",modRxnStr);
 		strncpy(modRxnStr,modRxnStrCpy,MAX_RXN_STRLEN-1);
 		free(modRxnStrCpy);
-		modRxnStrCpy = findReplaceAllUTF8(",a')",",α')",modRxnStr);
+		modRxnStrCpy = findReplaceAllUTF8("pa)","pα)",modRxnStr);
+		strncpy(modRxnStr,modRxnStrCpy,MAX_RXN_STRLEN-1);
+		free(modRxnStrCpy);
+		modRxnStrCpy = findReplaceAllUTF8("'a","'α",modRxnStr);
+		strncpy(modRxnStr,modRxnStrCpy,MAX_RXN_STRLEN-1);
+		free(modRxnStrCpy);
+		modRxnStrCpy = findReplaceAllUTF8(",2a",",2α",modRxnStr);
+		strncpy(modRxnStr,modRxnStrCpy,MAX_RXN_STRLEN-1);
+		free(modRxnStrCpy);
+		modRxnStrCpy = findReplaceAllUTF8(",a",",α",modRxnStr);
 		strncpy(modRxnStr,modRxnStrCpy,MAX_RXN_STRLEN-1);
 		free(modRxnStrCpy);
 
