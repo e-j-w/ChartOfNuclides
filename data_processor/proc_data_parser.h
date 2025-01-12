@@ -27,6 +27,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include "strops.h"
 
 #define MAXNUMPARSERVALS 10 //maximum number of values that can parsed at once on a line
+#define MAXCHARSPERRXN   8
 
 //struct which is used temporarily during data import to map names to indices 
 typedef struct
@@ -38,8 +39,9 @@ typedef struct
 
 typedef struct
 {
-  uint32_t rxnInd[MAXRXNSPERNUCL]; //index of parsed reaction
-  char rxnChar[MAXRXNSPERNUCL]; //which character is used in the ENSDF file to represent each reaction
+  char rxnChar[MAXRXNSPERNUCL][MAXCHARSPERRXN]; //which character is used in the ENSDF file to represent each reaction
+  uint8_t numRxnChars[MAXRXNSPERNUCL]; //number of characters assigned to each reaction
+  uint16_t rxnPopulatedLvls[MAXRXNSPERNUCL]; //number of levels populated per reaction
 }reaction_mapping;
 
 typedef struct

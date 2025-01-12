@@ -521,6 +521,9 @@ uint8_t parseRxn(reaction *rxn, const char *rxnstring, char *ensdfStrBuf, const 
 		modRxnStrCpy = findReplaceAllUTF8(",a",",α",modRxnStr);
 		strncpy(modRxnStr,modRxnStrCpy,MAX_RXN_STRLEN-1);
 		free(modRxnStrCpy);
+		modRxnStrCpy = findReplaceAllUTF8(",,",",",modRxnStr);
+		strncpy(modRxnStr,modRxnStrCpy,MAX_RXN_STRLEN-1);
+		free(modRxnStrCpy);
 
 	}
 
@@ -1706,22 +1709,38 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 				//new nuclide
 
 				//first handle any business arising from the previous nuclide
-				if(qValDecModeFlag){
-					if(nd->levels[nd->nuclData[nd->numNucl].firstLevel].numDecModes == 0){
-						nd->levels[nd->nuclData[nd->numNucl].firstLevel].numDecModes = 1;
-						nd->levels[nd->nuclData[nd->numNucl].firstLevel].firstDecMode = nd->numDecModes;
-						nd->dcyMode[nd->numDecModes].type = qValDecModeType;
-						nd->dcyMode[nd->numDecModes].prob.val = 100.0f;
-						nd->dcyMode[nd->numDecModes].prob.err = 0;
-						nd->dcyMode[nd->numDecModes].prob.format = 0;
-						//SDL_Log("Assigned decay mode %u\n",nd->dcyMode[nd->numDecModes].type);
-						nd->numDecModes++;
-						if(nd->numDecModes > MAXNUMDECAYMODES){
-							SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"Maximum number of decay modes (%i) exceeded!\n",MAXNUMDECAYMODES);
-							return -1;
+				if(nd->numNucl > 0){
+					if(qValDecModeFlag){
+						if(nd->levels[nd->nuclData[nd->numNucl].firstLevel].numDecModes == 0){
+							nd->levels[nd->nuclData[nd->numNucl].firstLevel].numDecModes = 1;
+							nd->levels[nd->nuclData[nd->numNucl].firstLevel].firstDecMode = nd->numDecModes;
+							nd->dcyMode[nd->numDecModes].type = qValDecModeType;
+							nd->dcyMode[nd->numDecModes].prob.val = 100.0f;
+							nd->dcyMode[nd->numDecModes].prob.err = 0;
+							nd->dcyMode[nd->numDecModes].prob.format = 0;
+							//SDL_Log("Assigned decay mode %u\n",nd->dcyMode[nd->numDecModes].type);
+							nd->numDecModes++;
+							if(nd->numDecModes > MAXNUMDECAYMODES){
+								SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"Maximum number of decay modes (%i) exceeded!\n",MAXNUMDECAYMODES);
+								return -1;
+							}
+						}
+					}
+					for(uint8_t i=0; i<nd->nuclData[nd->numNucl].numRxns; i++){
+						//SDL_Log("Reaction %u, %u levels.\n",i,rxnMap.rxnPopulatedLvls[i]);
+						if(rxnMap.rxnPopulatedLvls[i] == 0){
+							//reaction with no populated levels
+							//delet it
+							for(uint8_t j=i; j<(nd->nuclData[nd->numNucl].numRxns-1); j++){
+								SDL_memcpy(&nd->rxn[nd->nuclData[nd->numNucl].firstRxn + j],&nd->rxn[nd->nuclData[nd->numNucl].firstRxn + j + 1],sizeof(reaction));
+							}
+							nd->nuclData[nd->numNucl].numRxns--;
+							nd->numRxns--;
+							i-=1;
 						}
 					}
 				}
+				
 
 				if(nd->numNucl<MAXNUMNUCL){
 					nd->numNucl++;
@@ -1802,8 +1821,9 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 					//add reactions
 					if(strcmp(typebuff,"  X")==0){
 						if(nd->nuclData[nd->numNucl].numRxns < MAXRXNSPERNUCL){
-							rxnMap.rxnChar[nd->nuclData[nd->numNucl].numRxns] = line[8];
-							rxnMap.rxnInd[nd->nuclData[nd->numNucl].numRxns] = nd->numRxns;
+							rxnMap.rxnChar[nd->nuclData[nd->numNucl].numRxns][0] = line[8];
+							rxnMap.numRxnChars[nd->nuclData[nd->numNucl].numRxns] = 1;
+							rxnMap.rxnPopulatedLvls[nd->nuclData[nd->numNucl].numRxns] = 0;
 							char rxnBuff[31];
 							memcpy(rxnBuff, &line[9], 30);
 							for(uint8_t i=29; 1; i--){
@@ -1828,8 +1848,23 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 									if(duplStr == 0){
 										nd->ensdfStrBufLen += rxnStrLen;
 									}
-									nd->numRxns++;
-									nd->nuclData[nd->numNucl].numRxns++;
+									//also check if the reaction is a duplicate of a previous reaction from the same
+									//nuclide, if so, flag it to point to that reaction instead
+									uint8_t duplRxn = 0;
+									for(uint16_t i=0; i<nd->nuclData[nd->numNucl].numRxns; i++){
+										if(SDL_strcmp(&nd->ensdfStrBuf[nd->rxn[nd->numRxns].rxnStrBufStartPos],&nd->ensdfStrBuf[nd->rxn[nd->nuclData[nd->numNucl].firstRxn + i].rxnStrBufStartPos])==0){
+											if(rxnMap.numRxnChars[i] < MAXCHARSPERRXN){
+												rxnMap.rxnChar[i][rxnMap.numRxnChars[i]] = rxnMap.rxnChar[nd->nuclData[nd->numNucl].numRxns][0];
+												rxnMap.numRxnChars[i]++;
+												duplRxn = 1;
+											}
+											break;
+										}
+									}
+									if(duplRxn == 0){
+										nd->numRxns++;
+										nd->nuclData[nd->numNucl].numRxns++;
+									}
 								}else{
 									SDL_Log("ERROR: number of reactions parsed exceeds the maximum (%i).\n",MAXNUMREACTIONS);
 									return -1;
@@ -1860,6 +1895,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 									for(uint8_t j=0; j<nd->nuclData[nd->numNucl].numRxns; j++){
 										if(j<MAXRXNSPERNUCL){
 											nd->levels[nd->numLvls-1].populatingRxns |= (1UL << j);
+											rxnMap.rxnPopulatedLvls[j]++;
 										}
 									}
 								}else if((rxnListBuf[0]=='-')&&(rxnListBuf[1]=='(')){
@@ -1867,6 +1903,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 									for(uint8_t j=0; j<nd->nuclData[nd->numNucl].numRxns; j++){
 										if(j<MAXRXNSPERNUCL){
 											nd->levels[nd->numLvls-1].populatingRxns |= (1UL << j);
+											rxnMap.rxnPopulatedLvls[j]++;
 										}
 									}
 									for(uint8_t i=2; i<((uint8_t)SDL_strlen(rxnListBuf)); i++){
@@ -1876,9 +1913,12 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 										}
 										for(uint8_t j=0; j<nd->nuclData[nd->numNucl].numRxns; j++){
 											if(j<MAXRXNSPERNUCL){
-												if(rxnMap.rxnChar[j] == lvlRxnChar){
-													nd->levels[nd->numLvls-1].populatingRxns &= ~(1UL << j); //unset reaction
-													break;
+												for(uint8_t k=0; k<rxnMap.numRxnChars[j]; k++){
+													if(rxnMap.rxnChar[j][k] == lvlRxnChar){
+														nd->levels[nd->numLvls-1].populatingRxns &= ~(1UL << j); //unset reaction
+														rxnMap.rxnPopulatedLvls[j]--;
+														break;
+													}
 												}
 											}
 										}
@@ -1897,9 +1937,12 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 										if(skipChar == 0){
 											for(uint8_t j=0; j<nd->nuclData[nd->numNucl].numRxns; j++){
 												if(j<MAXRXNSPERNUCL){
-													if(rxnMap.rxnChar[j] == lvlRxnChar){
-														nd->levels[nd->numLvls-1].populatingRxns |= (1UL << j);
-														break;
+													for(uint8_t k=0; k<rxnMap.numRxnChars[j]; k++){
+														if(rxnMap.rxnChar[j][k] == lvlRxnChar){
+															nd->levels[nd->numLvls-1].populatingRxns |= (1UL << j);
+															rxnMap.rxnPopulatedLvls[j]++;
+															break;
+														}
 													}
 												}
 											}
