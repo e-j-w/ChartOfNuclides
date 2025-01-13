@@ -1667,10 +1667,10 @@ void drawRxnMenu(const app_data *restrict dat, const app_state *restrict state, 
   char rxnStr[32];
   for(uint8_t i=0; i<dat->ndat.nuclData[state->chartSelectedNucl].numRxns; i++){
     getRxnStr(rxnStr,&dat->ndat,dat->ndat.nuclData[state->chartSelectedNucl].firstRxn + (uint32_t)i);
-    if(SDL_strlen(rxnStr) > 23){
+    if(SDL_strlen(rxnStr) > RXN_MENU_ITEM_MAXCHARS){
       //truncate string so that it fits on the button
       //but don't truncate on a non-ASCII character
-      uint8_t strTruncInd=20;
+      const uint8_t strTruncInd=(uint8_t)(RXN_MENU_ITEM_MAXCHARS-3);
       uint8_t lastAsciiInd=0;
       for(uint8_t j=0;j<=strTruncInd;j++){
         if(charIsAscii(rxnStr[j])){

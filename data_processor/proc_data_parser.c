@@ -461,7 +461,7 @@ uint8_t parseRxn(reaction *rxn, const char *rxnstring, char *ensdfStrBuf, const 
 		modRxnStrCpy = findReplaceAllUTF8(" it "," IT ",modRxnStr);
 		strncpy(modRxnStr,modRxnStrCpy,MAX_RXN_STRLEN-1);
 		free(modRxnStrCpy);
-		modRxnStrCpy = findReplaceAllUTF8(" D)"," day)",modRxnStr);
+		modRxnStrCpy = findReplaceAllUTF8(" D)"," days)",modRxnStr);
 		strncpy(modRxnStr,modRxnStrCpy,MAX_RXN_STRLEN-1);
 		free(modRxnStrCpy);
 		modRxnStrCpy = findReplaceAllUTF8(" M)"," min)",modRxnStr);

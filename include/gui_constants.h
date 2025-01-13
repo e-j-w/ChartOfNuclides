@@ -106,7 +106,8 @@ static const float uiScales[UISCALE_ENUM_LENGTH] = {1.0f,1.20f,1.60f,1.85f};
 #define SEARCH_MENU_ENTRYBOX_ENTRY_WIDTH   (SEARCH_MENU_ENTRYBOX_WIDTH - UI_TILE_SIZE - 4*UI_PADDING_SIZE)  //in unscaled pixels
 
 #define RXN_MENU_ITEM_SPACING        40 //in unscaled pixels
-#define RXN_MENU_COLUMN_WIDTH        180 //in unscaled pixels
+#define RXN_MENU_COLUMN_WIDTH        200 //in unscaled pixels
+#define RXN_MENU_ITEM_MAXCHARS       27
 
 //zoom buttons
 #define ZOOM_BUTTON_POS_XR           UI_PADDING_SIZE   //in unscaled pixels

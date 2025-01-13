@@ -317,14 +317,14 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
         }
       }else if(state->clickedUIElem == UIELEM_CHARTVIEW_BUTTON){
         //chart view menu navigation using arrow keys
-        if((state->mouseoverElement >= UIELEM_CHARTVIEW_MENU)||(state->mouseoverElement < (UIELEM_CHARTVIEW_MENU-CHARTVIEW_ENUM_LENGTH))){
+        if((state->mouseoverElement >= UIELEM_CHARTVIEW_MENU)||(state->mouseoverElement < ((int16_t)UIELEM_CHARTVIEW_MENU-(int16_t)CHARTVIEW_ENUM_LENGTH))){
           //no menu item was selected with the keyboard or highlighted with the mouse previously
           //select the first menu item
-          state->mouseoverElement = (uint8_t)(UIELEM_CHARTVIEW_MENU-CHARTVIEW_ENUM_LENGTH);
+          state->mouseoverElement = (uint8_t)((int16_t)UIELEM_CHARTVIEW_MENU-(int16_t)CHARTVIEW_ENUM_LENGTH);
         }else{
           uint8_t selMenuElem = (uint8_t)(CHARTVIEW_ENUM_LENGTH - (UIELEM_CHARTVIEW_MENU - state->mouseoverElement));
           if(selMenuElem >= CHARTVIEW_ENUM_LENGTH){
-            state->mouseoverElement = (uint8_t)(UIELEM_CHARTVIEW_MENU-CHARTVIEW_ENUM_LENGTH);
+            state->mouseoverElement = (uint8_t)((int16_t)UIELEM_CHARTVIEW_MENU-(int16_t)CHARTVIEW_ENUM_LENGTH);
           }
           if(up && !down){
             if(selMenuElem > 0){
@@ -336,7 +336,7 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
             if(selMenuElem < (CHARTVIEW_ENUM_LENGTH-1)){
               state->mouseoverElement++;
             }else{
-              state->mouseoverElement = (uint8_t)(UIELEM_CHARTVIEW_MENU-CHARTVIEW_ENUM_LENGTH);
+              state->mouseoverElement = (uint8_t)((int16_t)UIELEM_CHARTVIEW_MENU-(int16_t)CHARTVIEW_ENUM_LENGTH);
             }
           }else if(right && !left){
             if((state->ds.shownElements & (1UL << UIELEM_CHARTVIEW_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_CHARTVIEW_MENU_SHOW]==0.0f)){
@@ -430,14 +430,14 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
       if((state->ds.shownElements & (1UL << UIELEM_PREFS_UISCALE_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_UISCALE_MENU_HIDE]==0.0f)){
         //UI scale dropdown navigation using arrow keys
         state->mouseholdElement = UIELEM_ENUM_LENGTH; //remove any previous selection highlight
-        if((state->mouseoverElement >= UIELEM_PREFS_UISCALE_MENU)||(state->mouseoverElement < (UIELEM_PREFS_UISCALE_MENU-UISCALE_ENUM_LENGTH))){
+        if((state->mouseoverElement >= UIELEM_PREFS_UISCALE_MENU)||(state->mouseoverElement < ((int16_t)UIELEM_PREFS_UISCALE_MENU-(int16_t)UISCALE_ENUM_LENGTH))){
           //no menu item was selected with the keyboard or highlighted with the mouse previously
           //select the first menu item
-          state->mouseoverElement = (uint8_t)(UIELEM_PREFS_UISCALE_MENU-UISCALE_ENUM_LENGTH);
+          state->mouseoverElement = (uint8_t)((int16_t)UIELEM_PREFS_UISCALE_MENU-(int16_t)UISCALE_ENUM_LENGTH);
         }else{
           uint8_t selMenuElem = (uint8_t)(UISCALE_ENUM_LENGTH - (UIELEM_PREFS_UISCALE_MENU - state->mouseoverElement));
           if(selMenuElem >= UISCALE_ENUM_LENGTH){
-            state->mouseoverElement = (uint8_t)(UIELEM_PREFS_UISCALE_MENU-UISCALE_ENUM_LENGTH);
+            state->mouseoverElement = (uint8_t)((int16_t)UIELEM_PREFS_UISCALE_MENU-(int16_t)UISCALE_ENUM_LENGTH);
           }
           if(up && !down){
             if(selMenuElem > 0){
@@ -449,7 +449,7 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
             if(selMenuElem < (UISCALE_ENUM_LENGTH-1)){
               state->mouseoverElement++;
             }else{
-              state->mouseoverElement = (uint8_t)(UIELEM_PREFS_UISCALE_MENU-UISCALE_ENUM_LENGTH);
+              state->mouseoverElement = (uint8_t)((int16_t)UIELEM_PREFS_UISCALE_MENU-(int16_t)UISCALE_ENUM_LENGTH);
             }
           }
         }
@@ -513,13 +513,13 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
       }
     }else if((state->ds.shownElements & (1UL << UIELEM_CHARTVIEW_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_CHARTVIEW_MENU_HIDE]==0.0f)){
       //select chart view menu button
-      if((state->mouseoverElement < UIELEM_CHARTVIEW_MENU)&&(state->mouseoverElement >= (UIELEM_CHARTVIEW_MENU-CHARTVIEW_ENUM_LENGTH))){
+      if((state->mouseoverElement < UIELEM_CHARTVIEW_MENU)&&(state->mouseoverElement >= ((int16_t)UIELEM_CHARTVIEW_MENU-(int16_t)CHARTVIEW_ENUM_LENGTH))){
         state->mouseholdElement = state->mouseoverElement;
         uiElemClickAction(dat,state,rdat,0,state->mouseoverElement);
       }
     }else if((state->ds.shownElements & (1UL << UIELEM_PREFS_UISCALE_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_UISCALE_MENU_HIDE]==0.0f)){
       //select UI scale dropdown menu button
-      if((state->mouseoverElement < UIELEM_PREFS_UISCALE_MENU)&&(state->mouseoverElement >= (UIELEM_PREFS_UISCALE_MENU-UISCALE_ENUM_LENGTH))){
+      if((state->mouseoverElement < UIELEM_PREFS_UISCALE_MENU)&&(state->mouseoverElement >= ((int16_t)UIELEM_PREFS_UISCALE_MENU-(int16_t)UISCALE_ENUM_LENGTH))){
         state->mouseholdElement = state->mouseoverElement;
         uiElemClickAction(dat,state,rdat,0,state->mouseoverElement);
       }

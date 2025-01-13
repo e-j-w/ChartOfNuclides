@@ -2451,12 +2451,12 @@ void changeUIState(const app_data *restrict dat, app_state *restrict state, cons
 				state->interactableElement |= (uint64_t)(1UL << UIELEM_PREFS_UISCALE_MENU);
 				if(state->lastInputType != INPUT_TYPE_MOUSE){
 					//keyboard/gamepad navigation of the menu
-					state->mouseoverElement = (uint8_t)(UIELEM_PREFS_UISCALE_MENU - UISCALE_ENUM_LENGTH); //select the first menu item
+					state->mouseoverElement = (uint8_t)((int16_t)UIELEM_PREFS_UISCALE_MENU - (int16_t)UISCALE_ENUM_LENGTH); //select the first menu item
 				}
 			}else{
 				if(state->lastInputType != INPUT_TYPE_MOUSE){
 					//keyboard/gamepad navigation of the menu
-					if((prevMouseover < UIELEM_PREFS_UISCALE_MENU)&&(prevMouseover >= (UIELEM_PREFS_UISCALE_MENU-UISCALE_ENUM_LENGTH))){
+					if((prevMouseover < UIELEM_PREFS_UISCALE_MENU)&&(prevMouseover >= (uint8_t)((int16_t)UIELEM_PREFS_UISCALE_MENU-(int16_t)UISCALE_ENUM_LENGTH))){
 						//was just in the UI scale dropdown
 						state->mouseoverElement = (uint8_t)(UIELEM_PREFS_DIALOG_UISCALE_DROPDOWN);
 					}else{
@@ -2518,7 +2518,7 @@ void changeUIState(const app_data *restrict dat, app_state *restrict state, cons
 				state->interactableElement |= (uint64_t)(1UL << UIELEM_CHARTVIEW_MENU);
 				if(state->lastInputType != INPUT_TYPE_MOUSE){
 					//keyboard/gamepad navigation of the menu
-					state->mouseoverElement = (uint8_t)(UIELEM_CHARTVIEW_MENU - CHARTVIEW_ENUM_LENGTH); //select the first menu item
+					state->mouseoverElement = (uint8_t)((int16_t)UIELEM_CHARTVIEW_MENU - (int16_t)CHARTVIEW_ENUM_LENGTH); //select the first menu item
 				}
 			}
 			if((state->ds.shownElements & (1UL << UIELEM_SEARCH_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_SEARCH_MENU_HIDE]==0.0f)){
@@ -3778,7 +3778,7 @@ void updateSingleUIElemPosition(const app_data *restrict dat, app_state *restric
 			}else{
 				char rxnStr[32];
     		getRxnStr(rxnStr,&dat->ndat,dat->ndat.nuclData[state->chartSelectedNucl].firstRxn + (uint32_t)(state->ds.selectedRxn-1));
-				state->ds.uiElemWidth[UIELEM_NUCL_FULLINFOBOX_RXNBUTTON] = (int16_t)(getTextWidth(rdat,FONTSIZE_NORMAL,rxnStr)/rdat->uiDPIScale + 80);
+				state->ds.uiElemWidth[UIELEM_NUCL_FULLINFOBOX_RXNBUTTON] = (int16_t)(getTextWidth(rdat,FONTSIZE_NORMAL,rxnStr)/rdat->uiDPIScale + 60*state->ds.uiUserScale);
 			}
 			state->ds.uiElemHeight[UIELEM_NUCL_FULLINFOBOX_RXNBUTTON] = (int16_t)(UI_TILE_SIZE*state->ds.uiUserScale);
 			state->ds.uiElemPosX[UIELEM_NUCL_FULLINFOBOX_RXNBUTTON] = (int16_t)(state->ds.windowXRes/2.0f-(state->ds.uiElemWidth[UIELEM_NUCL_FULLINFOBOX_RXNBUTTON]/2.0f));
@@ -3787,13 +3787,17 @@ void updateSingleUIElemPosition(const app_data *restrict dat, app_state *restric
 			break;
 		case UIELEM_RXN_MENU:
 			state->ds.uiElemPosY[uiElemInd] = (int16_t)(state->ds.uiElemPosY[UIELEM_NUCL_FULLINFOBOX_RXNBUTTON] + state->ds.uiElemHeight[UIELEM_NUCL_FULLINFOBOX_RXNBUTTON]);
-			state->ds.rxnMenuColumns = (uint8_t)(SDL_ceilf((dat->ndat.nuclData[state->chartSelectedNucl].numRxns+1.0f)/SDL_floorf((float)(state->ds.windowYRes - state->ds.uiElemPosY[uiElemInd])/(RXN_MENU_ITEM_SPACING*state->ds.uiUserScale) - 1.0f)));
+			float effResY = (float)(state->ds.windowYRes);
+			if(effResY > 650.0f*state->ds.uiUserScale){
+				effResY = 650.0f*state->ds.uiUserScale; //limit vertical size of the menu
+			}
+			state->ds.rxnMenuColumns = (uint8_t)(SDL_ceilf((dat->ndat.nuclData[state->chartSelectedNucl].numRxns+1.0f)/SDL_floorf((float)(effResY - state->ds.uiElemPosY[uiElemInd])/(RXN_MENU_ITEM_SPACING*state->ds.uiUserScale) - 1.0f)));
 			if(state->ds.rxnMenuColumns == 0){
 				state->ds.rxnMenuColumns = 1;
 			}
 			//SDL_Log("numRxns: %u, columns: %u\n",dat->ndat.nuclData[state->chartSelectedNucl].numRxns,state->ds.rxnMenuColumns);
 			state->ds.uiElemWidth[uiElemInd] = (int16_t)((RXN_MENU_COLUMN_WIDTH*state->ds.rxnMenuColumns + 4.0f*PANEL_EDGE_SIZE)*state->ds.uiUserScale);
-			state->ds.uiElemHeight[uiElemInd] = (int16_t)((SDL_ceilf((dat->ndat.nuclData[state->chartSelectedNucl].numRxns+1.0f)/(state->ds.rxnMenuColumns*1.0f))*RXN_MENU_ITEM_SPACING + 2*PANEL_EDGE_SIZE + 4*UI_PADDING_SIZE)*state->ds.uiUserScale);
+			state->ds.uiElemHeight[uiElemInd] = (int16_t)((SDL_ceilf((dat->ndat.nuclData[state->chartSelectedNucl].numRxns+1.0f)/(state->ds.rxnMenuColumns*1.0f))*RXN_MENU_ITEM_SPACING + PANEL_EDGE_SIZE + 4*UI_PADDING_SIZE)*state->ds.uiUserScale);
 			state->ds.uiElemPosX[uiElemInd] = (int16_t)(state->ds.uiElemPosX[UIELEM_NUCL_FULLINFOBOX_RXNBUTTON] + state->ds.uiElemWidth[UIELEM_NUCL_FULLINFOBOX_RXNBUTTON]/2 - state->ds.uiElemWidth[UIELEM_RXN_MENU]/2);
 			//SDL_Log("position: %i %i, dimensions: %i %i\n",state->ds.uiElemPosX[uiElemInd],state->ds.uiElemPosY[uiElemInd],state->ds.uiElemWidth[uiElemInd],state->ds.uiElemHeight[uiElemInd]);
 			break;
