@@ -212,8 +212,10 @@ void stopUIAnimation(const app_data *restrict dat, app_state *restrict state, co
 		case UIANIM_RXN_MENU_HIDE:
 			state->ds.shownElements &= (uint64_t)(~(1UL << UIELEM_RXN_MENU)); //close the menu
 			if(!(state->ds.shownElements & (1UL << UIELEM_PRIMARY_MENU))){
-				if((state->mouseoverElement != UIELEM_NUCL_FULLINFOBOX_BACKBUTTON)||(state->lastOpenedMenu != UIELEM_NUCL_FULLINFOBOX_BACKBUTTON)||(state->lastInputType != INPUT_TYPE_KEYBOARD)){
-					changeUIState(dat,state,UISTATE_FULLLEVELINFO);
+				if(!(state->ds.shownElements & (1UL << UIELEM_CHARTOFNUCLIDES))){ //in case the menu was hidden by going back to the main chart
+					if((state->mouseoverElement != UIELEM_NUCL_FULLINFOBOX_BACKBUTTON)||(state->lastOpenedMenu != UIELEM_NUCL_FULLINFOBOX_BACKBUTTON)||(state->lastInputType != INPUT_TYPE_KEYBOARD)){
+						changeUIState(dat,state,UISTATE_FULLLEVELINFO);
+					}
 				}
 			}
 			break;
