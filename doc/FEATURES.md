@@ -1,8 +1,6 @@
 # Feature list
 
-The overall goal of this project is to make a simple, performant, and multiplatform tool that will be useful in both professional (nuclear structure research) and educational contexts.
-
-## Current
+The overall goal of this project is to make a simple, performant, and multiplatform tool that will be useful in both professional (nuclear structure research) and educational contexts. Currently implemented features include:
 
 - Display nuclear chart with various color schemes: half-life / lifetime, decay mode, E(2+) ...
 - Select individual nuclides to browse ground and excited state data, including:

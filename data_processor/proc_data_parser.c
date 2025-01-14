@@ -525,6 +525,11 @@ uint8_t parseRxn(reaction *rxn, const char *rxnstring, char *ensdfStrBuf, const 
 		strncpy(modRxnStr,modRxnStrCpy,MAX_RXN_STRLEN-1);
 		free(modRxnStrCpy);
 
+		if(SDL_strstr(modRxnStr,"decay")!=NULL){
+			//SDL_Log("Found decay type reaction: %s\n",modRxnStr);
+			rxn->type = REACTIONTYPE_DECAY;
+		}
+
 	}
 
 
@@ -1737,6 +1742,50 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 							nd->nuclData[nd->numNucl].numRxns--;
 							nd->numRxns--;
 							i-=1;
+						}
+					}
+					//re-order reactions
+					uint8_t reorderedRxns = 0;
+					reaction tmpRxn;
+					//first, bring decay reactions to the top of the list
+					for(uint8_t i=0; i<nd->nuclData[nd->numNucl].numRxns; i++){
+						if(nd->rxn[nd->nuclData[nd->numNucl].firstRxn + i].type == REACTIONTYPE_DECAY){
+							if(i!=reorderedRxns){
+								//swap reactions
+								SDL_memcpy(&tmpRxn,&nd->rxn[nd->nuclData[nd->numNucl].firstRxn + reorderedRxns],sizeof(reaction));
+								SDL_memcpy(&nd->rxn[nd->nuclData[nd->numNucl].firstRxn + reorderedRxns],&nd->rxn[nd->nuclData[nd->numNucl].firstRxn + i],sizeof(reaction));
+								SDL_memcpy(&nd->rxn[nd->nuclData[nd->numNucl].firstRxn + i],&tmpRxn,sizeof(reaction));
+								//swap bits in reaction patterns
+								for(uint32_t j=nd->nuclData[nd->numNucl].firstLevel; j<nd->nuclData[nd->numNucl].firstLevel+nd->nuclData[nd->numNucl].numLevels; j++){
+									uint64_t bit1 = (uint64_t)((nd->levels[j].populatingRxns >> i) & 1UL);
+									uint64_t bit2 = (uint64_t)((nd->levels[j].populatingRxns >> reorderedRxns) & 1UL);
+									nd->levels[j].populatingRxns &= ~(1UL << i); //unset
+									nd->levels[j].populatingRxns &= ~(1UL << reorderedRxns); //unset
+									nd->levels[j].populatingRxns |= (bit1 << reorderedRxns);
+									nd->levels[j].populatingRxns |= (bit2 << i);
+								}
+							}
+							reorderedRxns++;
+						}
+					}
+					//then Coulex
+					for(uint8_t i=reorderedRxns; i<nd->nuclData[nd->numNucl].numRxns; i++){
+						if(nd->rxn[nd->nuclData[nd->numNucl].firstRxn + i].type == REACTIONTYPE_COULEX){
+							if(i!=reorderedRxns){
+								SDL_memcpy(&tmpRxn,&nd->rxn[nd->nuclData[nd->numNucl].firstRxn + reorderedRxns],sizeof(reaction));
+								SDL_memcpy(&nd->rxn[nd->nuclData[nd->numNucl].firstRxn + reorderedRxns],&nd->rxn[nd->nuclData[nd->numNucl].firstRxn + i],sizeof(reaction));
+								SDL_memcpy(&nd->rxn[nd->nuclData[nd->numNucl].firstRxn + i],&tmpRxn,sizeof(reaction));
+								//swap bits in reaction patterns
+								for(uint32_t j=nd->nuclData[nd->numNucl].firstLevel; j<nd->nuclData[nd->numNucl].firstLevel+nd->nuclData[nd->numNucl].numLevels; j++){
+									uint64_t bit1 = (uint64_t)((nd->levels[j].populatingRxns >> i) & 1UL);
+									uint64_t bit2 = (uint64_t)((nd->levels[j].populatingRxns >> reorderedRxns) & 1UL);
+									nd->levels[j].populatingRxns &= ~(1UL << i); //unset
+									nd->levels[j].populatingRxns &= ~(1UL << reorderedRxns); //unset
+									nd->levels[j].populatingRxns |= (bit1 << reorderedRxns);
+									nd->levels[j].populatingRxns |= (bit2 << i);
+								}
+							}
+							reorderedRxns++;
 						}
 					}
 				}
