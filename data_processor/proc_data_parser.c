@@ -200,6 +200,31 @@ static int parseAppRules(app_data *restrict dat, asset_mapping *restrict stringI
               SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"could not parse mod_col_selected color string in file: %s.\n",filePath);
               return -1;
             }
+          }else if(SDL_strcmp(tok,"mod_col_selected_and_mouseover") == 0){
+            tok = SDL_strtok_r(NULL,"",&saveptr); //get the rest of the string
+            strncpy(str2,tok,255);
+            tok = SDL_strtok_r(str2,",",&saveptr);
+            if(tok!=NULL){
+              dat->rules.themeRules.modSelectedAndMouseOverCol.r = (float)atof(tok);
+              tok = SDL_strtok_r(NULL,",",&saveptr);
+              if(tok!=NULL){
+                dat->rules.themeRules.modSelectedAndMouseOverCol.g = (float)atof(tok);
+                tok = SDL_strtok_r(NULL,",",&saveptr);
+                if(tok!=NULL){
+                  dat->rules.themeRules.modSelectedAndMouseOverCol.b = (float)atof(tok);
+                  dat->rules.themeRules.modSelectedAndMouseOverCol.a = 1.0f;
+                }else{
+                  SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"could not parse mod_col_selected_and_mouseover color string in file: %s.\n",filePath);
+                  return -1;
+                }
+              }else{
+                SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"could not parse mod_col_selected_and_mouseover color string in file: %s.\n",filePath);
+                return -1;
+              }
+            }else{
+              SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"could not parse mod_col_selected_and_mouseover color string in file: %s.\n",filePath);
+              return -1;
+            }
           }else{
 						SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"unknown app rule (%s).\n",tok);
 						return -1;

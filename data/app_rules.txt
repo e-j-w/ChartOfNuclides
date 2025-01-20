@@ -5,3 +5,4 @@ text_col_inactive 0.5,0.5,0.5
 mod_col_normal 0.96,0.96,0.96
 mod_col_mouseover 0.86,0.86,0.86
 mod_col_selected 0.78,0.78,0.78
+mod_col_selected_and_mouseover 0.70,0.70,0.70

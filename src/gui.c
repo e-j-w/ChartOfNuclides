@@ -1642,7 +1642,11 @@ void drawRxnMenu(const app_data *restrict dat, const app_state *restrict state, 
       if(state->ds.selectedRxn == i){
         drawRect = getRxnMenuButtonRect(state,numRxnPerCol,i);
         drawRect.y += yOffset;
-        highlightCol = dat->rules.themeRules.modSelectedCol;
+        if(state->ds.mouseOverRxn == i){
+          highlightCol = dat->rules.themeRules.modSelectedAndMouseOverCol;
+        }else{
+          highlightCol = dat->rules.themeRules.modSelectedCol;
+        }
         highlightCol.a = alpha;
         drawFlatRect(rdat,drawRect,highlightCol);
       }
