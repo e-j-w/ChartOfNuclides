@@ -1636,10 +1636,10 @@ void drawRxnMenu(const app_data *restrict dat, const app_state *restrict state, 
 
   //draw menu item highlight
   SDL_FColor highlightCol;
-  if(state->ds.timeLeftInUIAnimation[UIANIM_RXN_MENU_HIDE]==0.0f){
-    //SDL_Log("Mouse-over reaction: %u, selected reaction: %u.\n",state->ds.mouseOverRxn,state->ds.selectedRxn);
-    for(uint8_t i=0;i<(dat->ndat.nuclData[state->chartSelectedNucl].numRxns+1);i++){
-      if(state->ds.selectedRxn == i){
+  //SDL_Log("Mouse-over reaction: %u, selected reaction: %u.\n",state->ds.mouseOverRxn,state->ds.selectedRxn);
+  for(uint8_t i=0;i<(dat->ndat.nuclData[state->chartSelectedNucl].numRxns+1);i++){
+    if(state->lastInputType == INPUT_TYPE_MOUSE){
+      if((state->ds.selectedRxn == i)||(state->ds.mouseHoldRxn == i)){
         drawRect = getRxnMenuButtonRect(state,numRxnPerCol,i);
         drawRect.y += yOffset;
         if(state->ds.mouseOverRxn == i){
@@ -1649,17 +1649,31 @@ void drawRxnMenu(const app_data *restrict dat, const app_state *restrict state, 
         }
         highlightCol.a = alpha;
         drawFlatRect(rdat,drawRect,highlightCol);
-      }
-      if((state->ds.mouseOverRxn == i)&&(state->ds.mouseOverRxn != state->ds.selectedRxn)){
+      }else if(state->ds.mouseOverRxn == i){
         drawRect = getRxnMenuButtonRect(state,numRxnPerCol,i);
         drawRect.y += yOffset;
         highlightCol = dat->rules.themeRules.modMouseOverCol;
         highlightCol.a = alpha;
         drawFlatRect(rdat,drawRect,highlightCol);
       }
-      if((i>state->ds.mouseOverRxn)&&(i>state->ds.selectedRxn)){
-        break;
+    }else{
+      if(state->ds.mouseHoldRxn == i){
+        drawRect = getRxnMenuButtonRect(state,numRxnPerCol,i);
+        drawRect.y += yOffset;
+        highlightCol = dat->rules.themeRules.modSelectedCol;
+        highlightCol.a = alpha;
+        drawFlatRect(rdat,drawRect,highlightCol);
+      }else if(state->ds.mouseOverRxn == i){
+        drawRect = getRxnMenuButtonRect(state,numRxnPerCol,i);
+        drawRect.y += yOffset;
+        highlightCol = dat->rules.themeRules.modMouseOverCol;
+        highlightCol.a = alpha;
+        drawFlatRect(rdat,drawRect,highlightCol);
       }
+    }
+    
+    if((i>state->ds.mouseOverRxn)&&(i>state->ds.selectedRxn)){
+      break;
     }
   }
 

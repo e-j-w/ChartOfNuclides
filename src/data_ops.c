@@ -76,6 +76,7 @@ void initializeTempState(const app_data *restrict dat, app_state *restrict state
 	state->ds.infoBoxHlColOffset = NUCL_INFOBOX_HALFLIFE_COL_MIN_OFFSET;
 	state->ds.infoBoxDcyModeColOffset = NUCL_INFOBOX_DECAYMODE_COL_MIN_OFFSET;
 	state->ds.mouseOverRxn = 255;
+	state->ds.mouseHoldRxn = 255;
 	state->ds.selectedRxn = 0;
 	state->ds.totalPanTime = CHART_KEY_PAN_TIME;
 	state->ds.zoomFinished = 0;
@@ -3204,6 +3205,8 @@ void uiElemClickAction(app_data *restrict dat, app_state *restrict state, resour
       }else if(state->ds.timeLeftInUIAnimation[UIANIM_RXN_MENU_SHOW]==0.0f){
 				state->ds.shownElements |= (1UL << UIELEM_RXN_MENU);
 				state->lastOpenedMenu = UIELEM_RXN_MENU;
+				state->ds.mouseOverRxn = 255;
+				state->ds.mouseHoldRxn = 255;
 				startUIAnimation(dat,state,UIANIM_RXN_MENU_SHOW);
 				changeUIState(dat,state,UISTATE_FULLLEVELINFOWITHMENU);
 				state->clickedUIElem = UIELEM_NUCL_FULLINFOBOX_RXNBUTTON;
@@ -3796,6 +3799,9 @@ void updateSingleUIElemPosition(const app_data *restrict dat, app_state *restric
 			state->ds.rxnMenuColumns = (uint8_t)(SDL_ceilf((dat->ndat.nuclData[state->chartSelectedNucl].numRxns+1.0f)/SDL_floorf((float)(effResY - state->ds.uiElemPosY[uiElemInd])/(RXN_MENU_ITEM_SPACING*state->ds.uiUserScale) - 1.0f)));
 			if(state->ds.rxnMenuColumns == 0){
 				state->ds.rxnMenuColumns = 1;
+			}
+			if((state->ds.rxnMenuColumns < 3)&&(((dat->ndat.nuclData[state->chartSelectedNucl].numRxns+1.0f)/state->ds.rxnMenuColumns) > 8.5f)){
+				state->ds.rxnMenuColumns++;
 			}
 			//SDL_Log("numRxns: %u, columns: %u\n",dat->ndat.nuclData[state->chartSelectedNucl].numRxns,state->ds.rxnMenuColumns);
 			state->ds.uiElemWidth[uiElemInd] = (int16_t)((RXN_MENU_COLUMN_WIDTH*state->ds.rxnMenuColumns + 4.0f*PANEL_EDGE_SIZE)*state->ds.uiUserScale);

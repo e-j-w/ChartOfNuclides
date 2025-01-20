@@ -216,7 +216,7 @@ typedef struct
   float nuclFullInfoScrollStartY, nuclFullInfoScrollToY, nuclFullInfoScrollY; //full level info view: number of lines scrolled in the y-direction
   uint16_t nuclFullInfoMaxScrollY; //maximum scroll position, in lines
   uint8_t rxnMenuColumns; //how many columns to use in the reaction menu
-  uint8_t mouseOverRxn, selectedRxn; //which item in the reaction menu is moused-over/selected, =255 if none
+  uint8_t mouseOverRxn, mouseHoldRxn, selectedRxn; //which item in the reaction menu is moused-over/selected, =255 if none
   uint64_t shownElements; //bit pattern describing which UI elements are being shown, values from ui_element_enum
   uint32_t uiAnimPlaying; //bit pattern describing which UI animations are playing
   float timeLeftInUIAnimation[UIANIM_ENUM_LENGTH]; //time left in each UI animation

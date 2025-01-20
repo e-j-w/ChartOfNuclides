@@ -377,20 +377,38 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
           }
         }else{
           uint8_t numRxnPerCol = getRxnMenuNumRxnsPerColumn(dat,state);
+          uint8_t oddLastCol = (uint8_t)(((dat->ndat.nuclData[state->chartSelectedNucl].numRxns + 1) % numRxnPerCol) != 0); //to handle cases where the last column has fewer reactions
+          //SDL_Log("numRxnPerCol: %u, oddLastCol: %u",numRxnPerCol,oddLastCol);
           if(right && !left){
             if((state->ds.mouseOverRxn + numRxnPerCol) <= dat->ndat.nuclData[state->chartSelectedNucl].numRxns){
               state->ds.mouseOverRxn += numRxnPerCol;
             }else{
-              state->ds.mouseOverRxn = (uint8_t)(state->ds.mouseOverRxn + numRxnPerCol - dat->ndat.nuclData[state->chartSelectedNucl].numRxns - 1);
+              if(oddLastCol){
+                state->ds.mouseOverRxn = (uint8_t)(state->ds.mouseOverRxn + numRxnPerCol - dat->ndat.nuclData[state->chartSelectedNucl].numRxns - 2);
+              }else{
+                state->ds.mouseOverRxn = (uint8_t)(state->ds.mouseOverRxn + numRxnPerCol - dat->ndat.nuclData[state->chartSelectedNucl].numRxns - 1);
+              }
+              if(state->ds.mouseOverRxn > dat->ndat.nuclData[state->chartSelectedNucl].numRxns){
+                state->ds.mouseOverRxn = dat->ndat.nuclData[state->chartSelectedNucl].numRxns;
+              }
             }
           }else if(left && !right){
             if(state->ds.mouseOverRxn < numRxnPerCol){
-              state->ds.mouseOverRxn = (uint8_t)((dat->ndat.nuclData[state->chartSelectedNucl].numRxns + 1) - numRxnPerCol + state->ds.mouseOverRxn);
+              if(oddLastCol){
+                state->ds.mouseOverRxn = (uint8_t)((dat->ndat.nuclData[state->chartSelectedNucl].numRxns + 2) - numRxnPerCol + state->ds.mouseOverRxn);
+              }else{
+                state->ds.mouseOverRxn = (uint8_t)((dat->ndat.nuclData[state->chartSelectedNucl].numRxns + 1) - numRxnPerCol + state->ds.mouseOverRxn);
+              }
+              if(state->ds.mouseOverRxn > dat->ndat.nuclData[state->chartSelectedNucl].numRxns){
+                state->ds.mouseOverRxn = dat->ndat.nuclData[state->chartSelectedNucl].numRxns;
+              }
             }else{
               state->ds.mouseOverRxn -= numRxnPerCol;
             }
           }else if(down && !up){
-            if((state->ds.mouseOverRxn % numRxnPerCol)==(numRxnPerCol-1)){
+            if((oddLastCol)&&(state->ds.mouseOverRxn == dat->ndat.nuclData[state->chartSelectedNucl].numRxns)){
+              state->ds.mouseOverRxn -= (uint8_t)(numRxnPerCol-2);
+            }else if((state->ds.mouseOverRxn % numRxnPerCol)==(numRxnPerCol-1)){
               state->ds.mouseOverRxn -= (uint8_t)(numRxnPerCol-1);
             }else{
               state->ds.mouseOverRxn += 1;
@@ -583,6 +601,7 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
     }else if((state->ds.shownElements & (1UL << UIELEM_RXN_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_RXN_MENU_HIDE]==0.0f)){
       //select reaction menu item
       if(state->ds.mouseOverRxn < (dat->ndat.nuclData[state->chartSelectedNucl].numRxns+1)){
+        state->ds.mouseHoldRxn = state->ds.mouseOverRxn;
         state->ds.selectedRxn = state->ds.mouseOverRxn;
         //SDL_Log("Clicked reaction menu item %u.\n",state->ds.selectedRxn);
         setSelectedNuclOnLevelList(dat,state,rdat,(uint16_t)(dat->ndat.nuclData[state->chartSelectedNucl].N),(uint16_t)(dat->ndat.nuclData[state->chartSelectedNucl].Z),1);
@@ -692,6 +711,11 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
           //SDL_Log("Mouse-over reaction: %u, selected reaction: %u.\n",state->ds.mouseOverRxn,state->ds.selectedRxn);
           for(uint8_t i=0;i<(dat->ndat.nuclData[state->chartSelectedNucl].numRxns+1);i++){
             buttonRect = getRxnMenuButtonRect(state,numRxnPerCol,i);
+            if((state->mouseHoldStartPosXPx >= buttonRect.x)&&(state->mouseHoldStartPosXPx < (buttonRect.x + buttonRect.w))){
+              if((state->mouseHoldStartPosYPx >= buttonRect.y)&&(state->mouseHoldStartPosYPx < (buttonRect.y + buttonRect.h))){
+                state->ds.mouseHoldRxn = i;
+              }
+            }
             if((state->mouseXPx >= buttonRect.x)&&(state->mouseXPx < (buttonRect.x + buttonRect.w))){
               if((state->mouseYPx >= buttonRect.y)&&(state->mouseYPx < (buttonRect.y + buttonRect.h))){
                 state->ds.mouseOverRxn = i;
