@@ -50,9 +50,10 @@ int tpFunc(void *data){
             }
             //SDL_Log("Searching for nuclides...\n");
             searchNuclides(&tdat->dat->ndat,&tdat->state->ss);
+            tdat->state->ss.finishedSearchAgents |= (uint32_t)(1U << SEARCHAGENT_NUCLIDE); //flag search agent as finished
             break;
           case SEARCHAGENT_EGAMMA:
-            while(!(tdat->state->ss.finishedSearchAgents & (uint32_t)(1U << SEARCHAGENT_TOKENIZE))){
+            while(!(tdat->state->ss.finishedSearchAgents & (uint32_t)(1U << SEARCHAGENT_NUCLIDE))){
               if(tdat->threadState == THREADSTATE_KILL){
                 break; //kill waiting thread, if requested
               }
@@ -62,7 +63,7 @@ int tpFunc(void *data){
             searchEGamma(&tdat->dat->ndat,&tdat->state->ss);
             break;
           case SEARCHAGENT_ELEVEL:
-            while(!(tdat->state->ss.finishedSearchAgents & (uint32_t)(1U << SEARCHAGENT_TOKENIZE))){
+            while(!(tdat->state->ss.finishedSearchAgents & (uint32_t)(1U << SEARCHAGENT_NUCLIDE))){
               if(tdat->threadState == THREADSTATE_KILL){
                 break; //kill waiting thread, if requested
               }
