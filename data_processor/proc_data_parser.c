@@ -1964,6 +1964,13 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 										break;
 									}
 								}
+								//check for early end of reaction list ('$' character)
+								for(uint8_t i=0; i<((uint8_t)SDL_strlen(rxnListBuf)); i++){
+									if(rxnListBuf[i] == '$'){
+										rxnListBuf[i] = '\0'; //terminate string
+										break;
+									}
+								}
 								if(rxnListBuf[0]=='+'){
 									//level appears in all reactions/datasets
 									for(uint8_t j=0; j<nd->nuclData[nd->numNucl].numRxns; j++){

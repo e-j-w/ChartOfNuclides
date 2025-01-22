@@ -43,6 +43,8 @@ int main(int argc, char *argv[]){
 
   setlocale(LC_ALL, "en_ca.UTF-8");
 
+  
+
   //parse command line arguments
   uint8_t cliArgs = 0;
   for(int i=1; i<argc; i++){
@@ -153,6 +155,9 @@ int main(int argc, char *argv[]){
   }
   SDL_SetWindowIcon(gdat->rdat.window,gdat->rdat.iconSurface);
   SDL_SetWindowTitle(gdat->rdat.window,gdat->dat.rules.appName);
+  if(SDL_SetAppMetadata(gdat->dat.rules.appName,"0.3","io.github.e_j_w.ChartOfNuclides")==false){
+    SDL_Log("WARNING: couldn't set app metadata.\n");
+  }
   updateUIElemPositions(&gdat->dat,&gdat->state,&gdat->rdat); //some UI element positions depend on info only available after importAppData(), like font sizes
 
   //timing
