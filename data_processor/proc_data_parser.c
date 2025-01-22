@@ -2171,14 +2171,15 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 								while(tok!=NULL){
 									//SDL_Log("tok: %s\n",tok);
 									strcpy(dmBuff,tok);
+									if(nd->numDecModes >= MAXNUMDECAYMODES){
+										SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"Maximum number of decay modes (%i) exceeded!\n",MAXNUMDECAYMODES);
+										return -1;
+									}
 									if(parseDcyModeSubstr(nd,nd->numDecModes,dmBuff)==1){
 										decModeLineParsed = 1;
 										nd->levels[nd->numLvls-1].numDecModes++;
 										nd->numDecModes++;
-										if(nd->numDecModes > MAXNUMDECAYMODES){
-											SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"Maximum number of decay modes (%i) exceeded!\n",MAXNUMDECAYMODES);
-											return -1;
-										}
+
 										//reconstitute buffer
 										memcpy(dmBuffOrig, &line[decStrStart], 127-decStrStart);
 										dmBuffOrig[127-decStrStart] = '\0';
@@ -2194,6 +2195,26 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 											}
 										}
 										//SDL_Log("tok after: %s\n",tok);
+
+										//check if latest parsed decay mode is equal to any others, discard if so
+										for(int8_t levDecMode=2;levDecMode<=(nd->levels[nd->numLvls-1].numDecModes);levDecMode++){
+											if(nd->dcyMode[nd->numDecModes-1].type == nd->dcyMode[nd->numDecModes-levDecMode].type){
+												if(nd->dcyMode[nd->numDecModes-1].prob.val == nd->dcyMode[nd->numDecModes-levDecMode].prob.val){
+													if(nd->dcyMode[nd->numDecModes-1].prob.err == nd->dcyMode[nd->numDecModes-levDecMode].prob.err){
+														if(nd->dcyMode[nd->numDecModes-1].prob.exponent == nd->dcyMode[nd->numDecModes-levDecMode].prob.exponent){
+															if(nd->dcyMode[nd->numDecModes-1].prob.unit == nd->dcyMode[nd->numDecModes-levDecMode].prob.unit){
+																if(nd->dcyMode[nd->numDecModes-1].prob.format == nd->dcyMode[nd->numDecModes-levDecMode].prob.format){
+																	//GET 'EM OUTTA HERE
+																	nd->levels[nd->numLvls-1].numDecModes--;
+																	nd->numDecModes--;
+																}
+															}
+														}
+													}
+												}
+											}
+										}
+
 										if((tok==NULL)||(isEmpty(tok))){
 											break; //no need to process empty substring at end
 										}
