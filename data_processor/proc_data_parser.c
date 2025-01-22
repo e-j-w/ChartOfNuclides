@@ -2295,7 +2295,6 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 								char eeBuff[3];
 								memcpy(eeBuff, &line[19], 2);
 								eeBuff[2] = '\0';
-								uint8_t gammaEerr = (uint8_t)atoi(eeBuff);
 								
 								uint32_t tranInd = nd->levels[nd->numLvls-1].firstTran + (uint32_t)(nd->levels[nd->numLvls-1].numTran);
 
@@ -2321,10 +2320,10 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 
 								//check for variables in gamma energy
 								float gammaE = 0.0f;
+								nd->tran[tranInd].energy.err=0;
 								if(SDL_isalpha(ebuff[gamEStrLen-1])&&((gamEStrLen==1) || ebuff[gamEStrLen-2]==' ')){
 									//SDL_Log("X ebuff: %s\n",ebuff);
 									nd->tran[tranInd].energy.val=0;
-									nd->tran[tranInd].energy.err=0;
 									nd->tran[tranInd].energy.unit=VALUE_UNIT_NOVAL;
 									nd->tran[tranInd].energy.format = 0; //default
 									nd->tran[tranInd].energy.format |= (uint16_t)(VALUETYPE_X << 5);
@@ -2418,7 +2417,23 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 								}
 
 								nd->tran[tranInd].energy.val=gammaE;
-								nd->tran[tranInd].energy.err=gammaEerr;
+								if(strcmp(eeBuff,"GT")==0){
+									nd->tran[tranInd].energy.format |= (uint16_t)(VALUETYPE_GREATERTHAN << 5);
+								}else if(strcmp(eeBuff,"GT")==0){
+									nd->tran[tranInd].energy.format |= (uint16_t)(VALUETYPE_GREATERTHAN << 5);
+								}else if(strcmp(eeBuff,"GE")==0){
+									nd->tran[tranInd].energy.format |= (uint16_t)(VALUETYPE_GREATEROREQUALTHAN << 5);
+								}else if(strcmp(eeBuff,"LT")==0){
+									nd->tran[tranInd].energy.format |= (uint16_t)(VALUETYPE_LESSTHAN << 5);
+								}else if(strcmp(eeBuff,"LE")==0){
+									nd->tran[tranInd].energy.format |= (uint16_t)(VALUETYPE_LESSOREQUALTHAN << 5);
+								}else if(strcmp(eeBuff,"AP")==0){
+									nd->tran[tranInd].energy.format |= (uint16_t)(VALUETYPE_APPROX << 5);
+								}else if(strcmp(eeBuff,"?")==0){
+									nd->tran[tranInd].energy.format |= (uint16_t)(VALUETYPE_UNKNOWN << 5);
+								}else{
+									nd->tran[tranInd].energy.err=(uint8_t)atoi(ieBuff);
+								}
 								if(nd->tran[tranInd].energy.unit != VALUE_UNIT_NOVAL){
 									nd->tran[tranInd].energy.unit=VALUE_UNIT_KEV;
 								}

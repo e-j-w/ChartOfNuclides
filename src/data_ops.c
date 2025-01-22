@@ -1643,10 +1643,18 @@ void getGammaEnergyStr(char strOut[32], const ndata *restrict nd, const uint32_t
 			SDL_snprintf(strOut,32,"%.*fE%i+%c",ePrecision,(double)(nd->tran[tranInd].energy.val),nd->tran[tranInd].energy.exponent,variable);
 		}
 	}else if((showErr == 0)||(nd->tran[tranInd].energy.err == 0)){
-		if(eExponent == 0){
-			SDL_snprintf(strOut,32,"%.*f",ePrecision,(double)(nd->tran[tranInd].energy.val));
+		if(eValueType == VALUETYPE_NUMBER){
+			if(eExponent == 0){
+				SDL_snprintf(strOut,32,"%.*f",ePrecision,(double)(nd->tran[tranInd].energy.val));
+			}else{
+				SDL_snprintf(strOut,32,"%.*fE%i",ePrecision,(double)(nd->tran[tranInd].energy.val),nd->tran[tranInd].energy.exponent);
+			}
 		}else{
-			SDL_snprintf(strOut,32,"%.*fE%i",ePrecision,(double)(nd->tran[tranInd].energy.val),nd->tran[tranInd].energy.exponent);
+			if(eExponent == 0){
+				SDL_snprintf(strOut,32,"%s%.*f",getValueTypeShortStr(eValueType),ePrecision,(double)(nd->tran[tranInd].energy.val));
+			}else{
+				SDL_snprintf(strOut,32,"%s%.*fE%i",getValueTypeShortStr(eValueType),ePrecision,(double)(nd->tran[tranInd].energy.val),nd->tran[tranInd].energy.exponent);
+			}
 		}
 	}else{
 		if(eExponent == 0){
