@@ -26,15 +26,15 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 float getAxisTickSpacing(float range){
   //SDL_Log("range: %f\n",(double)range);
-  if(range < 12.0f){
+  if(range < 10.0f){
     return 1.0f;
-  }else if(range < 30.0f){
+  }else if(range < 20.0f){
     return 2.0f;
-  }else if(range < 60.0f){
-    return 5.0f;
-  }else if(range < 90.0f){
+  }else if(range < 40.0f){
+    return 4.0f;
+  }else if(range < 75.0f){
     return 10.0f;
-  }else if(range < 200.0f){
+  }else if(range < 120.0f){
     return 20.0f;
   }else{
     return 40.0f;
@@ -680,7 +680,7 @@ void drawNuclBoxLabel(const app_data *restrict dat, const app_state *restrict st
   float drawXPos, drawYPos;
   const float labelMargin = NUCLBOX_LABEL_MARGIN*state->ds.chartZoomScale*state->ds.uiUserScale;
   const uint16_t Z = (uint16_t)dat->ndat.nuclData[nuclInd].Z;
-  if(state->ds.chartZoomScale >= 8.0f){
+  if(state->ds.chartZoomScale >= 7.3f){
     const uint16_t N = (uint16_t)dat->ndat.nuclData[nuclInd].N;
     snprintf(tmpStr,32,"%u",N+Z);
     float totalLblWidth = (getTextWidth(rdat,FONTSIZE_SMALL,tmpStr) + getTextWidth(rdat,FONTSIZE_LARGE,getElemStr((uint8_t)Z)))/rdat->uiDPIScale;
@@ -943,7 +943,7 @@ void drawChartOfNuclides(const app_data *restrict dat, const app_state *restrict
   //draw ticks
   char tmpStr[32];
   rect.y = state->ds.windowYRes - (CHART_AXIS_DEPTH*0.5f*state->ds.uiUserScale);
-  float tickSpacing = getAxisTickSpacing(roundf(maxX - minX)); //round to remove jitter when panning the chart and the axis range is very close to an integer value
+  float tickSpacing = getAxisTickSpacing(roundf(maxX - minX)*state->ds.windowYRes/(1.0f*state->ds.windowXRes)); //round to remove jitter when panning the chart and the axis range is very close to an integer value
   for(float i=(minX-fmodf(minX,tickSpacing));i<maxX;i+=tickSpacing){
     if(i >= 0.0f){
       uint16_t numInd = (uint16_t)(SDL_floorf(i));
@@ -979,8 +979,8 @@ void drawPerformanceStats(const ui_theme_rules *restrict uirules, const app_stat
   //draw background
   SDL_FRect perfOvRect;
   perfOvRect.w = (628.0f*rdat->uiScale);
-  perfOvRect.h = (192.0f*rdat->uiScale);
-  perfOvRect.x = 0.0f;
+  perfOvRect.h = (140.0f*rdat->uiScale);
+  perfOvRect.x = (CHART_AXIS_DEPTH*rdat->uiScale);
   perfOvRect.y = 0.0f;
   
   SDL_SetRenderDrawColor(rdat->renderer,255,255,255,150);
@@ -992,7 +992,7 @@ void drawPerformanceStats(const ui_theme_rules *restrict uirules, const app_stat
   drawDefaultText(uirules,rdat,PERF_OVERLAY_BUTTON_X_ANCHOR,PERF_OVERLAY_BUTTON_Y_ANCHOR,txtStr);
   SDL_snprintf(txtStr,256,"UI scale: %0.2f, DPI scale: %0.2f, Resolution: %u x %u (logical), %u x %u (actual)",(double)rdat->uiScale,(double)rdat->uiDPIScale,state->ds.windowXRes,state->ds.windowYRes,state->ds.windowXRenderRes,state->ds.windowYRenderRes);
   drawDefaultText(uirules,rdat,PERF_OVERLAY_BUTTON_X_ANCHOR,PERF_OVERLAY_BUTTON_Y_ANCHOR+PERF_OVERLAY_Y_SPACING*state->ds.uiUserScale,txtStr);
-  SDL_snprintf(txtStr,256,"Zoom scale: %4.1f, UI state: %u",(double)state->ds.chartZoomScale,state->uiState);
+  SDL_snprintf(txtStr,256,"Zoom scale: %4.1f, UI status: %u",(double)state->ds.chartZoomScale,state->uiState);
   drawDefaultText(uirules,rdat,PERF_OVERLAY_BUTTON_X_ANCHOR,PERF_OVERLAY_BUTTON_Y_ANCHOR+2*PERF_OVERLAY_Y_SPACING*state->ds.uiUserScale,txtStr);
   SDL_snprintf(txtStr,256,"Active threads: %2u",tms->numThreads);
   drawDefaultText(uirules,rdat,PERF_OVERLAY_BUTTON_X_ANCHOR,PERF_OVERLAY_BUTTON_Y_ANCHOR+3*PERF_OVERLAY_Y_SPACING*state->ds.uiUserScale,txtStr);

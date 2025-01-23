@@ -200,9 +200,9 @@ static const float uiScales[UISCALE_ENUM_LENGTH] = {1.0f,1.20f,1.60f,1.85f};
 #define NUCL_FULLINFOBOX_SCROLLBAR_POS_XR               (4*UI_PADDING_SIZE)
 
 //performance overlay
-#define PERF_OVERLAY_BUTTON_X_ANCHOR  16
-#define PERF_OVERLAY_BUTTON_Y_ANCHOR  16
-#define PERF_OVERLAY_Y_SPACING        28
+#define PERF_OVERLAY_BUTTON_X_ANCHOR  (CHART_AXIS_DEPTH+16)
+#define PERF_OVERLAY_BUTTON_Y_ANCHOR  10
+#define PERF_OVERLAY_Y_SPACING        20
 
 //colors for drawing
 static const SDL_FColor blackCol = {0.0f,0.0f,0.0f,1.0f};
