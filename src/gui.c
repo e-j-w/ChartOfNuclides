@@ -26,7 +26,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 float getAxisTickSpacing(float range){
   //SDL_Log("range: %f\n",(double)range);
-  if(range < 10.0f){
+  if(range < 8.0f){
     return 1.0f;
   }else if(range < 20.0f){
     return 2.0f;
@@ -988,8 +988,8 @@ void drawPerformanceStats(const ui_theme_rules *restrict uirules, const app_stat
 
   //draw text
   char txtStr[256];
-  SDL_snprintf(txtStr,256,"Debug stats (press <P> to toggle this display)");
-  drawDefaultText(uirules,rdat,PERF_OVERLAY_BUTTON_X_ANCHOR,PERF_OVERLAY_BUTTON_Y_ANCHOR,txtStr);
+  SDL_snprintf(txtStr,256,"Debug stats (press P to toggle this display)");
+  drawText(rdat,PERF_OVERLAY_BUTTON_X_ANCHOR,PERF_OVERLAY_BUTTON_Y_ANCHOR,blackCol8Bit,FONTSIZE_NORMAL_BOLD,txtStr);
   SDL_snprintf(txtStr,256,"UI scale: %0.2f, DPI scale: %0.2f, Resolution: %u x %u (logical), %u x %u (actual)",(double)rdat->uiScale,(double)rdat->uiDPIScale,state->ds.windowXRes,state->ds.windowYRes,state->ds.windowXRenderRes,state->ds.windowYRenderRes);
   drawDefaultText(uirules,rdat,PERF_OVERLAY_BUTTON_X_ANCHOR,PERF_OVERLAY_BUTTON_Y_ANCHOR+PERF_OVERLAY_Y_SPACING*state->ds.uiUserScale,txtStr);
   SDL_snprintf(txtStr,256,"Zoom scale: %4.1f, UI status: %u",(double)state->ds.chartZoomScale,state->uiState);
@@ -1685,7 +1685,7 @@ void drawRxnMenu(const app_data *restrict dat, const app_state *restrict state, 
   char rxnStr[32];
   for(uint8_t i=0; i<dat->ndat.nuclData[state->chartSelectedNucl].numRxns; i++){
     getRxnStr(rxnStr,&dat->ndat,dat->ndat.nuclData[state->chartSelectedNucl].firstRxn + (uint32_t)i);
-    if(SDL_strlen(rxnStr) > RXN_MENU_ITEM_MAXCHARS){
+    if(UTF8Strlen(rxnStr) > RXN_MENU_ITEM_MAXCHARS){
       //truncate string so that it fits on the button
       //but don't truncate on a non-ASCII character
       const uint8_t strTruncInd=(uint8_t)(RXN_MENU_ITEM_MAXCHARS-3);

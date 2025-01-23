@@ -12,6 +12,7 @@ int strInsert(char *dest, size_t destsize, const char *ins, size_t position);
 int strDelChar(char *dest, size_t destsize, size_t position);
 char* findReplaceUTF8(const char *findstr, const char *replacestr, const char *origstr);
 char* findReplaceAllUTF8(const char *findstr, const char *replacestr, const char *origstr);
+size_t UTF8Strlen(const char *utf8str);
 int charIsAscii(const char c);
 
 #endif

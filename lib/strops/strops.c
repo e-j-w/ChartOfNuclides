@@ -123,6 +123,17 @@ char* findReplaceAllUTF8(const char *findstr, const char *replacestr, const char
   return new_string;
 }
 
+size_t UTF8Strlen(const char *utf8str){
+  size_t i = 0, len = 0;
+  while(utf8str[i]){ //ends at NULL terminator
+    if(!((utf8str[i] & 0xc0) == 0x80)){
+      len++;
+    } 
+    i++;
+  }
+  return len;
+}
+
 //in case the isacii() function is unavailable...
 int charIsAscii(const char c){
   return (!((c & 0x80) == 0x80));
