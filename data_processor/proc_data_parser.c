@@ -468,6 +468,9 @@ uint8_t parseRxn(reaction *rxn, const char *rxnstring, char *ensdfStrBuf, const 
 		modRxnStrCpy = findReplaceAllUTF8("Decay","decay",modRxnStr);
 		strncpy(modRxnStr,modRxnStrCpy,MAX_RXN_STRLEN-1);
 		free(modRxnStrCpy);
+		modRxnStrCpy = findReplaceAllUTF8(" sf d"," SF d",modRxnStr);
+		strncpy(modRxnStr,modRxnStrCpy,MAX_RXN_STRLEN-1);
+		free(modRxnStrCpy);
 		modRxnStrCpy = findReplaceAllUTF8(" ec"," ε",modRxnStr);
 		strncpy(modRxnStr,modRxnStrCpy,MAX_RXN_STRLEN-1);
 		free(modRxnStrCpy);

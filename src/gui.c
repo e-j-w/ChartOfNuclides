@@ -24,17 +24,17 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include "drawing.h"
 #include "data_ops.h"
 
-float getAxisTickSpacing(float range){
+float getAxisTickSpacing(float zoomScale){
   //SDL_Log("range: %f\n",(double)range);
-  if(range < 8.0f){
+  if(zoomScale > 12.0f){
     return 1.0f;
-  }else if(range < 20.0f){
+  }else if(zoomScale > 6.0f){
     return 2.0f;
-  }else if(range < 40.0f){
+  }else if(zoomScale > 3.5f){
     return 4.0f;
-  }else if(range < 75.0f){
+  }else if(zoomScale > 1.5f){
     return 10.0f;
-  }else if(range < 120.0f){
+  }else if(zoomScale > 0.9f){
     return 20.0f;
   }else{
     return 40.0f;
@@ -675,11 +675,16 @@ void drawNuclBoxLabelDetails(const app_data *restrict dat, const app_state *rest
 }
 
 //draws the main label for a box on the chart of nuclides
-void drawNuclBoxLabel(const app_data *restrict dat, const app_state *restrict state, resource_data *restrict rdat, const float xPos, const float yPos, const float boxWidth, const float boxHeight, SDL_Color col, const uint16_t nuclInd){
+void drawNuclBoxLabel(const app_data *restrict dat, const app_state *restrict state, resource_data *restrict rdat, const float xPos, const float yPos, const float boxWidth, const float boxHeight, const SDL_Color col, const uint16_t nuclInd){
   char tmpStr[32];
   float drawXPos, drawYPos;
   const float labelMargin = NUCLBOX_LABEL_MARGIN*state->ds.chartZoomScale*state->ds.uiUserScale;
   const uint16_t Z = (uint16_t)dat->ndat.nuclData[nuclInd].Z;
+  Uint8 alpha = 255;
+  if(state->ds.chartZoomScale < 4.0f){
+    //handle fade-in of text
+    alpha = (Uint8)((1.0f - 2.0f*(4.0f - state->ds.chartZoomScale))*255.0f);
+  }
   if(state->ds.chartZoomScale >= 7.3f){
     const uint16_t N = (uint16_t)dat->ndat.nuclData[nuclInd].N;
     snprintf(tmpStr,32,"%u",N+Z);
@@ -691,13 +696,13 @@ void drawNuclBoxLabel(const app_data *restrict dat, const app_state *restrict st
       float totalLblHeight = (getTextHeight(rdat,FONTSIZE_SMALL,tmpStr) - (10.0f*state->ds.uiUserScale) + getTextHeight(rdat,FONTSIZE_LARGE,getElemStr((uint8_t)Z)))/rdat->uiDPIScale;
       drawYPos = yPos+boxWidth*0.5f - totalLblHeight*0.5f;
     }
-    drawXPos += (drawTextAlignedSized(rdat,drawXPos,drawYPos,col,FONTSIZE_SMALL,255,tmpStr,ALIGN_LEFT,16384)).w; //draw number label
-    drawTextAlignedSized(rdat,drawXPos,drawYPos+(10.0f*state->ds.uiUserScale),col,FONTSIZE_LARGE,255,getElemStr((uint8_t)Z),ALIGN_LEFT,16384); //draw element label
+    drawXPos += (drawTextAlignedSized(rdat,drawXPos,drawYPos,col,FONTSIZE_SMALL,alpha,tmpStr,ALIGN_LEFT,16384)).w; //draw number label
+    drawTextAlignedSized(rdat,drawXPos,drawYPos+(10.0f*state->ds.uiUserScale),col,FONTSIZE_LARGE,alpha,getElemStr((uint8_t)Z),ALIGN_LEFT,16384); //draw element label
     if(state->ds.chartZoomScale >= 12.0f){
       drawNuclBoxLabelDetails(dat,state,rdat,xPos,yPos,boxWidth,boxHeight,col,nuclInd);
     }
   }else{
-    drawTextAlignedSized(rdat,xPos+boxWidth*0.5f,yPos+boxWidth*0.5f,col,FONTSIZE_NORMAL,255,getElemStr((uint8_t)Z),ALIGN_CENTER,16384); //draw element label only
+    drawTextAlignedSized(rdat,xPos+boxWidth*0.5f,yPos+boxWidth*0.5f,col,FONTSIZE_NORMAL,alpha,getElemStr((uint8_t)Z),ALIGN_CENTER,16384); //draw element label only
   }
 }
 
@@ -753,7 +758,7 @@ void drawChartOfNuclides(const app_data *restrict dat, const app_state *restrict
                 drawFlatRect(rdat,rect,getR42Col(getR42(&dat->ndat,(uint16_t)i)));
               }
               
-              if(state->ds.chartZoomScale >= 4.0f){
+              if(state->ds.chartZoomScale >= 3.5f){
                 uint8_t drawingLowBox = 0;
                 if(state->ds.chartZoomScale >= 4.5f){
                   //setup low box rect
@@ -943,7 +948,7 @@ void drawChartOfNuclides(const app_data *restrict dat, const app_state *restrict
   //draw ticks
   char tmpStr[32];
   rect.y = state->ds.windowYRes - (CHART_AXIS_DEPTH*0.5f*state->ds.uiUserScale);
-  float tickSpacing = getAxisTickSpacing(roundf(maxX - minX)*state->ds.windowYRes/(1.0f*state->ds.windowXRes)); //round to remove jitter when panning the chart and the axis range is very close to an integer value
+  float tickSpacing = getAxisTickSpacing(state->ds.chartZoomScale);
   for(float i=(minX-fmodf(minX,tickSpacing));i<maxX;i+=tickSpacing){
     if(i >= 0.0f){
       uint16_t numInd = (uint16_t)(SDL_floorf(i));
@@ -957,7 +962,6 @@ void drawChartOfNuclides(const app_data *restrict dat, const app_state *restrict
     }
   }
   rect.x = CHART_AXIS_DEPTH*0.5f*state->ds.uiUserScale;
-  tickSpacing = getAxisTickSpacing(roundf(maxY - minY));
   for(float i=(minY-fmodf(minY,tickSpacing));i<maxY;i+=tickSpacing){
     if(i >= 0.0f){
       uint16_t numInd = (uint16_t)(SDL_floorf(i));
