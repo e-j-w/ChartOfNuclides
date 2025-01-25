@@ -3822,6 +3822,7 @@ void updateSingleUIElemPosition(const app_data *restrict dat, app_state *restric
 			state->ds.uiElemPosY[UIELEM_NUCL_FULLINFOBOX_SCROLLBAR] = (int16_t)((NUCL_FULLINFOBOX_LEVELLIST_POS_Y + UI_PADDING_SIZE)*state->ds.uiUserScale);
 			state->ds.uiElemWidth[UIELEM_NUCL_FULLINFOBOX_SCROLLBAR] = (int16_t)(0.5f*UI_TILE_SIZE*state->ds.uiUserScale);
 			state->ds.uiElemHeight[UIELEM_NUCL_FULLINFOBOX_SCROLLBAR] = (int16_t)(state->ds.windowYRes - state->ds.uiElemPosY[UIELEM_NUCL_FULLINFOBOX_SCROLLBAR] - 2*UI_PADDING_SIZE*state->ds.uiUserScale);
+			state->ds.uiElemExtPlusX[UIELEM_NUCL_FULLINFOBOX_SCROLLBAR] = (uint16_t)(NUCL_FULLINFOBOX_SCROLLBAR_POS_XR*state->ds.uiUserScale); //Fitts' law
 			break;
 		case UIELEM_ZOOMIN_BUTTON:
 			state->ds.uiElemPosX[uiElemInd] = (int16_t)(state->ds.windowXRes-((UI_TILE_SIZE+ZOOM_BUTTON_POS_XR)*state->ds.uiUserScale));

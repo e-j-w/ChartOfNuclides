@@ -2435,7 +2435,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 								}else if(strcmp(eeBuff,"?")==0){
 									nd->tran[tranInd].energy.format |= (uint16_t)(VALUETYPE_UNKNOWN << 5);
 								}else{
-									nd->tran[tranInd].energy.err=(uint8_t)atoi(ieBuff);
+									nd->tran[tranInd].energy.err=(uint8_t)atoi(eeBuff);
 								}
 								if(nd->tran[tranInd].energy.unit != VALUE_UNIT_NOVAL){
 									nd->tran[tranInd].energy.unit=VALUE_UNIT_KEV;
