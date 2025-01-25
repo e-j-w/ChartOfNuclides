@@ -562,8 +562,8 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
       }
     }else if((state->ds.shownElements & (1UL << UIELEM_ABOUT_BOX))&&(state->ds.timeLeftInUIAnimation[UIANIM_MODAL_BOX_HIDE]==0.0f)){
       //close the about box
-      state->mouseholdElement = UIELEM_ABOUT_BOX_OK_BUTTON;
-      uiElemClickAction(dat,state,rdat,0,UIELEM_ABOUT_BOX_OK_BUTTON);
+      state->mouseholdElement = UIELEM_ABOUT_BOX_CLOSEBUTTON;
+      uiElemClickAction(dat,state,rdat,0,UIELEM_ABOUT_BOX_CLOSEBUTTON);
     }else if((state->ds.shownElements & (1UL << UIELEM_PRIMARY_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_PRIMARY_MENU_HIDE]==0.0f)){
       //select primary menu button
       if((state->mouseoverElement < UIELEM_PRIMARY_MENU)&&(state->mouseoverElement >= (UIELEM_PRIMARY_MENU-PRIMARY_MENU_NUM_UIELEMENTS))){
@@ -621,8 +621,8 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
     //handle modal dialogs first
     if((state->ds.shownElements & (1UL << UIELEM_ABOUT_BOX))&&(state->ds.timeLeftInUIAnimation[UIANIM_MODAL_BOX_HIDE]==0.0f)){
       //close the about box
-      state->mouseholdElement = UIELEM_ABOUT_BOX_OK_BUTTON;
-      uiElemClickAction(dat,state,rdat,0,UIELEM_ABOUT_BOX_OK_BUTTON);
+      state->mouseholdElement = UIELEM_ABOUT_BOX_CLOSEBUTTON;
+      uiElemClickAction(dat,state,rdat,0,UIELEM_ABOUT_BOX_CLOSEBUTTON);
     }else if((state->ds.shownElements & (1UL << UIELEM_PREFS_UISCALE_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_UISCALE_MENU_HIDE]==0.0f)){
       //close the UI scale menu
       uiElemClickAction(dat,state,rdat,0,UIELEM_PREFS_DIALOG_UISCALE_DROPDOWN);

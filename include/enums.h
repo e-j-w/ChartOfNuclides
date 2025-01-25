@@ -83,7 +83,7 @@ enum ui_element_enum{
 UIELEM_CHARTOFNUCLIDES, //some parts of the code assume this is the first enum entry, don't change
 UIELEM_MSG_BOX_OK_BUTTON,
 UIELEM_MSG_BOX, //used to show warnings or errors
-UIELEM_ABOUT_BOX_OK_BUTTON,
+UIELEM_ABOUT_BOX_CLOSEBUTTON,
 UIELEM_ABOUT_BOX,
 UIELEM_UISM_SMALL_BUTTON,
 UIELEM_UISM_DEFAULT_BUTTON,

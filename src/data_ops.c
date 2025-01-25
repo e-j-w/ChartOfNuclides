@@ -2446,7 +2446,7 @@ void changeUIState(const app_data *restrict dat, app_state *restrict state, cons
       state->interactableElement |= (uint64_t)(1UL << UIELEM_MSG_BOX_OK_BUTTON);
       break;
 		case UISTATE_ABOUT_BOX:
-			state->interactableElement |= (uint64_t)(1UL << UIELEM_ABOUT_BOX_OK_BUTTON);
+			state->interactableElement |= (uint64_t)(1UL << UIELEM_ABOUT_BOX_CLOSEBUTTON);
 			break;
 		case UISTATE_PREFS_DIALOG:
 			state->interactableElement |= (uint64_t)(1UL << UIELEM_PREFS_DIALOG_CLOSEBUTTON);
@@ -3161,7 +3161,7 @@ void uiElemClickAction(app_data *restrict dat, app_state *restrict state, resour
       changeUIState(dat,state,state->lastUIState); //restore previous interactable elements
       startUIAnimation(dat,state,UIANIM_MODAL_BOX_HIDE); //message box will be closed after animation finishes
       break;
-		case UIELEM_ABOUT_BOX_OK_BUTTON:
+		case UIELEM_ABOUT_BOX_CLOSEBUTTON:
       changeUIState(dat,state,state->lastUIState); //restore previous interactable elements
       startUIAnimation(dat,state,UIANIM_MODAL_BOX_HIDE); //about box will be closed after animation finishes
       break;
@@ -3646,12 +3646,14 @@ void updateSingleUIElemPosition(const app_data *restrict dat, app_state *restric
 			state->ds.uiElemPosY[uiElemInd] = (int16_t)((state->ds.windowYRes - ABOUT_BOX_HEIGHT*state->ds.uiUserScale)/2);
 			state->ds.uiElemWidth[uiElemInd] = (int16_t)(ABOUT_BOX_WIDTH*state->ds.uiUserScale);
 			state->ds.uiElemHeight[uiElemInd] = (int16_t)(ABOUT_BOX_HEIGHT*state->ds.uiUserScale);
+			//update child/dependant UI elements
+			updateSingleUIElemPosition(dat,state,rdat,UIELEM_ABOUT_BOX_CLOSEBUTTON);
 			break;
-		case UIELEM_ABOUT_BOX_OK_BUTTON:
-			state->ds.uiElemPosX[uiElemInd] = (int16_t)((state->ds.windowXRes - ABOUT_BOX_OK_BUTTON_WIDTH*state->ds.uiUserScale)/2);
-			state->ds.uiElemPosY[uiElemInd] = (int16_t)((state->ds.windowYRes + ABOUT_BOX_HEIGHT*state->ds.uiUserScale)/2 - ((ABOUT_BOX_OK_BUTTON_YB + UI_TILE_SIZE)*state->ds.uiUserScale));
-			state->ds.uiElemWidth[uiElemInd] = (int16_t)(ABOUT_BOX_OK_BUTTON_WIDTH*state->ds.uiUserScale);
-			state->ds.uiElemHeight[uiElemInd] = (int16_t)(UI_TILE_SIZE*state->ds.uiUserScale);
+		case UIELEM_ABOUT_BOX_CLOSEBUTTON:
+			state->ds.uiElemWidth[UIELEM_ABOUT_BOX_CLOSEBUTTON] = (int16_t)(UI_TILE_SIZE*state->ds.uiUserScale);
+			state->ds.uiElemHeight[UIELEM_ABOUT_BOX_CLOSEBUTTON] = state->ds.uiElemWidth[UIELEM_ABOUT_BOX_CLOSEBUTTON];
+			state->ds.uiElemPosX[UIELEM_ABOUT_BOX_CLOSEBUTTON] = (int16_t)((float)(state->ds.uiElemPosX[UIELEM_ABOUT_BOX] + state->ds.uiElemWidth[UIELEM_ABOUT_BOX] - state->ds.uiElemWidth[UIELEM_ABOUT_BOX_CLOSEBUTTON]) - 4*UI_PADDING_SIZE*state->ds.uiUserScale);
+			state->ds.uiElemPosY[UIELEM_ABOUT_BOX_CLOSEBUTTON] = state->ds.uiElemPosY[UIELEM_ABOUT_BOX] + (int16_t)(4*UI_PADDING_SIZE*state->ds.uiUserScale);
 			break;
 		case UIELEM_PREFS_DIALOG:
 			state->ds.uiElemPosX[uiElemInd] = (int16_t)((state->ds.windowXRes - PREFS_DIALOG_WIDTH*state->ds.uiUserScale)/2);
