@@ -548,6 +548,39 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
     }
   }
 
+  if(state->inputFlags & (1U << INPUT_CYCLELEFT)){
+    if(state->ds.shownElements & (1UL << UIELEM_CHARTOFNUCLIDES)){
+      if(state->chartView == 0){
+        state->chartView = (uint8_t)(CHARTVIEW_ENUM_LENGTH - 1);
+      }else{
+        state->chartView--;
+      }
+    }else if(state->uiState == UISTATE_FULLLEVELINFO){
+      if(state->ds.selectedRxn == 0){
+        state->ds.selectedRxn = dat->ndat.nuclData[state->chartSelectedNucl].numRxns;
+      }else{
+        state->ds.selectedRxn--;
+      }
+      //SDL_Log("Changed selected reaction to %u.\n",state->ds.selectedRxn);
+      setSelectedNuclOnLevelList(dat,state,rdat,(uint16_t)(dat->ndat.nuclData[state->chartSelectedNucl].N),(uint16_t)(dat->ndat.nuclData[state->chartSelectedNucl].Z),1);
+    }
+  }else if(state->inputFlags & (1U << INPUT_CYCLERIGHT)){
+    if(state->ds.shownElements & (1UL << UIELEM_CHARTOFNUCLIDES)){
+      if(state->chartView == (uint8_t)(CHARTVIEW_ENUM_LENGTH - 1)){
+        state->chartView = 0;
+      }else{
+        state->chartView++;
+      }
+    }else if(state->uiState == UISTATE_FULLLEVELINFO){
+      if(state->ds.selectedRxn == dat->ndat.nuclData[state->chartSelectedNucl].numRxns){
+        state->ds.selectedRxn = 0;
+      }else{
+        state->ds.selectedRxn++;
+      }
+      //SDL_Log("Changed selected reaction to %u.\n",state->ds.selectedRxn);
+      setSelectedNuclOnLevelList(dat,state,rdat,(uint16_t)(dat->ndat.nuclData[state->chartSelectedNucl].N),(uint16_t)(dat->ndat.nuclData[state->chartSelectedNucl].Z),1);
+    }
+  }
 
   if(state->inputFlags & (1U << INPUT_SELECT)){
     if((state->ds.shownElements & (1UL << UIELEM_SEARCH_MENU))&&(state->ss.numResults > 0)){
@@ -828,21 +861,41 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
           }
         }
         if(state->ds.zoomInProgress == 0){
-          //zoom using mouse wheel/touchpad, zoom to cursor location
+          if(state->lastInputType == INPUT_TYPE_MOUSE){
+            //zoom using mouse wheel/touchpad, zoom to cursor location
+            state->ds.chartZoomStartMouseX = mouseXPxToN(&state->ds,state->mouseXPx);
+            state->ds.chartZoomStartMouseY = mouseYPxToZ(&state->ds,state->mouseYPx);
+            if(state->ds.chartZoomStartMouseX > (dat->ndat.maxN+(0.25f*getChartWidthNAfterZoom(&state->ds)))){
+              state->ds.chartZoomStartMouseX = (float)dat->ndat.maxN+(0.25f*getChartWidthNAfterZoom(&state->ds));
+            }else if(state->ds.chartZoomStartMouseX < (-0.25f*getChartWidthNAfterZoom(&state->ds))){
+              state->ds.chartZoomStartMouseX = (-0.25f*getChartWidthNAfterZoom(&state->ds));
+            }
+            if(state->ds.chartZoomStartMouseY > (dat->ndat.maxZ+(0.25f*getChartHeightZAfterZoom(&state->ds)))){
+              state->ds.chartZoomStartMouseY = (float)dat->ndat.maxZ+(0.25f*getChartHeightZAfterZoom(&state->ds));
+            }else if(state->ds.chartZoomStartMouseY < (-0.25f*getChartHeightZAfterZoom(&state->ds))){
+              state->ds.chartZoomStartMouseY = (-0.25f*getChartHeightZAfterZoom(&state->ds));
+            }
+          }else{
+            //zoom with gamepad trigger
+            //zoom to center of screen
+            state->ds.chartZoomStartMouseX = state->ds.chartPosX;
+            if(state->chartSelectedNucl != MAXNUMNUCL){
+              state->ds.chartZoomStartMouseY = state->ds.chartPosY + (16.0f/state->ds.chartZoomScale); //corrected for position of selected nuclide
+            }else{
+              state->ds.chartZoomStartMouseY = state->ds.chartPosY; //centred on screen
+            }
+            if(state->ds.chartZoomStartMouseX > (dat->ndat.maxN+(0.25f*getChartWidthNAfterZoom(&state->ds)))){
+              state->ds.chartZoomStartMouseX = (float)dat->ndat.maxN+(0.25f*getChartWidthNAfterZoom(&state->ds));
+            }else if(state->ds.chartZoomStartMouseX < (-0.25f*getChartWidthNAfterZoom(&state->ds))){
+              state->ds.chartZoomStartMouseX = (-0.25f*getChartWidthNAfterZoom(&state->ds));
+            }
+            if(state->ds.chartZoomStartMouseY > (dat->ndat.maxZ+(0.25f*getChartHeightZAfterZoom(&state->ds)))){
+              state->ds.chartZoomStartMouseY = (float)dat->ndat.maxZ+(0.25f*getChartHeightZAfterZoom(&state->ds));
+            }else if(state->ds.chartZoomStartMouseY < (-0.25f*getChartHeightZAfterZoom(&state->ds))){
+              state->ds.chartZoomStartMouseY = (-0.25f*getChartHeightZAfterZoom(&state->ds));
+            }
+          }
           //(other input methods just call the zoom button interaction code in data_ops.c)
-          state->ds.chartZoomStartMouseX = mouseXPxToN(&state->ds,state->mouseXPx);
-          state->ds.chartZoomStartMouseY = mouseYPxToZ(&state->ds,state->mouseYPx);
-
-          if(state->ds.chartZoomStartMouseX > (dat->ndat.maxN+(0.25f*getChartWidthNAfterZoom(&state->ds)))){
-            state->ds.chartZoomStartMouseX = (float)dat->ndat.maxN+(0.25f*getChartWidthNAfterZoom(&state->ds));
-          }else if(state->ds.chartZoomStartMouseX < (-0.25f*getChartWidthNAfterZoom(&state->ds))){
-            state->ds.chartZoomStartMouseX = (-0.25f*getChartWidthNAfterZoom(&state->ds));
-          }
-          if(state->ds.chartZoomStartMouseY > (dat->ndat.maxZ+(0.25f*getChartHeightZAfterZoom(&state->ds)))){
-            state->ds.chartZoomStartMouseY = (float)dat->ndat.maxZ+(0.25f*getChartHeightZAfterZoom(&state->ds));
-          }else if(state->ds.chartZoomStartMouseY < (-0.25f*getChartHeightZAfterZoom(&state->ds))){
-            state->ds.chartZoomStartMouseY = (-0.25f*getChartHeightZAfterZoom(&state->ds));
-          }
         }
         state->ds.chartZoomStartMouseXFrac = (state->ds.chartZoomStartMouseX - getMinChartN(&state->ds))/getChartWidthN(&state->ds);
         float afterZoomMinN = state->ds.chartZoomStartMouseX - getChartWidthNAfterZoom(&state->ds)*state->ds.chartZoomStartMouseXFrac;
@@ -938,12 +991,10 @@ void processSingleEvent(app_data *restrict dat, app_state *restrict state, resou
           }
           break;
         case SDL_GAMEPAD_BUTTON_LEFT_SHOULDER:
-          state->mouseholdElement = UIELEM_ZOOMOUT_BUTTON;
-          uiElemClickAction(dat,state,rdat,0,UIELEM_ZOOMOUT_BUTTON);
+          state->inputFlags |= (1U << INPUT_CYCLELEFT);
           break;
         case SDL_GAMEPAD_BUTTON_RIGHT_SHOULDER:
-          state->mouseholdElement = UIELEM_ZOOMIN_BUTTON;
-          uiElemClickAction(dat,state,rdat,0,UIELEM_ZOOMIN_BUTTON);
+          state->inputFlags |= (1U << INPUT_CYCLERIGHT);
           break;
         case SDL_GAMEPAD_BUTTON_START:
         case SDL_GAMEPAD_BUTTON_NORTH:
@@ -1125,20 +1176,12 @@ void processSingleEvent(app_data *restrict dat, app_state *restrict state, resou
           break;
         case SDL_SCANCODE_LEFTBRACKET:
           if(!(SDL_TextInputActive(rdat->window))){
-            if(state->chartView == 0){
-              state->chartView = (uint8_t)(CHARTVIEW_ENUM_LENGTH - 1);
-            }else{
-              state->chartView--;
-            }
+            state->inputFlags |= (1U << INPUT_CYCLELEFT);
           }
           break;
         case SDL_SCANCODE_RIGHTBRACKET:
           if(!(SDL_TextInputActive(rdat->window))){
-            if(state->chartView == (uint8_t)(CHARTVIEW_ENUM_LENGTH - 1)){
-              state->chartView = 0;
-            }else{
-              state->chartView++;
-            }
+            state->inputFlags |= (1U << INPUT_CYCLERIGHT);
           }
           break;
         case SDL_SCANCODE_F:
@@ -1363,6 +1406,22 @@ void processSingleEvent(app_data *restrict dat, app_state *restrict state, resou
             state->inputFlags &= ~(1U << INPUT_DOWN);
           }
           break;
+        case SDL_GAMEPAD_AXIS_LEFT_TRIGGER:
+          //SDL_Log("Left trigger axis val: %i\n",evt.gaxis.value);
+          if(evt.gaxis.value > state->gamepadTriggerDeadzone){
+            state->lastInputType = INPUT_TYPE_GAMEPAD; //set gamepad input
+            state->zoomDeltaVal = (-0.25f*(evt.gaxis.value-state->gamepadTriggerDeadzone))/(32768.0f-state->gamepadTriggerDeadzone);
+            state->inputFlags |= (1U << INPUT_ZOOM);
+          }
+          break;
+        case SDL_GAMEPAD_AXIS_RIGHT_TRIGGER:
+          //SDL_Log("Right trigger axis val: %i\n",evt.gaxis.value);
+          if(evt.gaxis.value > state->gamepadTriggerDeadzone){
+            state->lastInputType = INPUT_TYPE_GAMEPAD; //set gamepad input
+            state->zoomDeltaVal = (0.25f*(evt.gaxis.value-state->gamepadTriggerDeadzone))/(32768.0f-state->gamepadTriggerDeadzone);
+            state->inputFlags |= (1U << INPUT_ZOOM);
+          }
+          break;
         default:
           break;
       }
@@ -1407,10 +1466,15 @@ void processFrameEvents(app_data *restrict dat, app_state *restrict state, resou
     //reset values
     state->mouseClickPosXPx = -1.0f;
     state->mouseClickPosYPx = -1.0f;
-    state->inputFlags &= ~(1U << INPUT_ZOOM);
+    if((state->lastInputType != INPUT_TYPE_GAMEPAD)||(fabsf(state->zoomDeltaVal) < 0.2f)){
+      //when gamepad trigger is fully down, there are no events sent, so don't cancel zoom in that case
+      state->inputFlags &= ~(1U << INPUT_ZOOM);
+    }
     state->inputFlags &= ~(1U << INPUT_SELECT);
     state->inputFlags &= ~(1U << INPUT_BACK);
     state->inputFlags &= ~(1U << INPUT_MENU);
+    state->inputFlags &= ~(1U << INPUT_CYCLELEFT);
+    state->inputFlags &= ~(1U << INPUT_CYCLERIGHT);
     //whenever the directional inputs are not used for continuous actions such as chart navigation,
     //make sure that they don't persist across frames (keys will still repeat, just want to avoid
     //case where the input flag is not reset)

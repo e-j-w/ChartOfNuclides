@@ -137,6 +137,14 @@ static int readConfigFile(FILE *file, app_state *restrict state){
           SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,"invalid gamepad deadzone (%i) in config file, setting to default.\n",dz);
           state->gamepadDeadzone = 16000;
         }
+      }else if(strcmp(par,"gamepad_trigger_deadzone") == 0){
+        int dz = atoi(val);
+        if((dz > 1000)&&(dz < 32768)){
+          state->gamepadTriggerDeadzone = (uint16_t)dz;
+        }else{
+          SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,"invalid gamepad deadzone (%i) in config file, setting to default.\n",dz);
+          state->gamepadTriggerDeadzone = 4000;
+        }
       }
 
     }
@@ -198,6 +206,7 @@ static int writeConfigFile(FILE *file, const app_rules *restrict rules, const ap
 
   fprintf(file,"\n### Gamepad Settings ###\n");
   fprintf(file,"gamepad_deadzone=%i\n",state->gamepadDeadzone);
+  fprintf(file,"gamepad_trigger_deadzone=%i\n",state->gamepadTriggerDeadzone);
 
   fprintf(file,"\n### Other Settings ###\n");
   if(state->ds.drawPerformanceStats == 1){

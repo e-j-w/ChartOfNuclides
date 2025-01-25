@@ -18,21 +18,22 @@ Zoom and pan with the mouse, the controls are basically identical to Google Maps
 
 ### Keyboard shortcuts
 
-This program is also designed to be fully navigable with a keyboard.
+This program is also designed to be fully navigable with a keyboard and/or gamepad.
 
-| Key                | Action |
-| :----------------- | :----- |
-| Arrow keys         | Pan chart view, navigate menus |
-| W / A / S / D      | Pan selected nuclide (in chart and level list views) |
-| + / -              | Zoom in/out on chart |
-| ] / [              | Cycle between view modes for the chart (half-life, 2+ energy, etc.) |
-| Enter              | Select menu items |
-| Alt                | Open menu |
-| Escape / backspace | Exit out of open menus, cancel selection, etc. |
-| Ctrl+F             | Search |
-| F11                | Toggle fullscreen mode |
-| P                  | Toggle performance stats debug overlay |
-| Ctrl+Q             | Quit application |
+| Key                | Gamepad button              | Action |
+| :----------------- | :-------------------------- |:----- |
+| Arrow keys         | Analog thumbsticks          | Pan chart view, navigate menus |
+| W / A / S / D      | D-pad                       | Pan selected nuclide (in chart and level list views) |
+| + / -              | Left/right triggers         | Zoom in/out on chart |
+| ] / [              | Left/right shoulder buttons | Cycle between view modes for the chart (half-life, 2+ energy, etc.), or between reaction datasets in the detail view |
+| Enter              | A / Circle (right button)   | Select menu items |
+| Alt                | X / Triangle (top button)   | Open menu |
+| Escape / backspace | B / Cross (bottom button)   | Exit out of open menus, cancel selection, etc. |
+| Ctrl+F             | N/A                         | Search |
+| F11                | Home button                 | Toggle fullscreen mode |
+| P                  | N/A                         | Toggle debug overlay |
+| Ctrl+Q             | N/A                         | Quit application |
+
 
 ## Disclaimer
 

@@ -274,7 +274,7 @@ typedef struct
   float zoomDeltaVal; //amount to zoom by, equivalent to mouse wheel or touchpad scroll delta, can be very small for subtle touchpad events
   float scrollSpeedMultiplier;
   uint32_t inputFlags;
-  uint16_t gamepadDeadzone;
+  uint16_t gamepadDeadzone,gamepadTriggerDeadzone;
   int16_t lastAxisValLX, lastAxisValLY, lastAxisValRX, lastAxisValRY; //used to mask out spurious events in the gamepad axis deadzone
   uint8_t activeAxisX, activeAxisY; //the last used analog stick axis
   uint8_t chartView; //values from chart_view_enum

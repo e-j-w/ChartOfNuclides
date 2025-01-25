@@ -49,6 +49,7 @@ void initializeTempState(const app_data *restrict dat, app_state *restrict state
 	state->chartView = CHARTVIEW_HALFLIFE;
   state->quitAppFlag = 0;
 	state->gamepadDeadzone = 16000;
+	state->gamepadTriggerDeadzone = 4000;
   state->ds.windowXRes = 880;
   state->ds.windowYRes = 580;
   state->ds.drawPerformanceStats = 0;
