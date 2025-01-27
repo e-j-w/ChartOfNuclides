@@ -577,7 +577,7 @@ uint8_t parseRxn(reaction *rxn, const char *rxnstring, char *ensdfStrBuf, const 
 	}
 }
 
-void parseLevelE(valWithErr * levelEVal, const char * estring, const char * errstring){
+void parseLevelE(valWithErr * levelEVal, const nucl *nuclideData, const char * estring, const char * errstring){
 
 	char *tok;
 	char *saveptr = NULL;
@@ -618,6 +618,33 @@ void parseLevelE(valWithErr * levelEVal, const char * estring, const char * errs
 		//record variable index (stored value = variable ASCII code)
 		levelEVal->format |= (uint16_t)(eVal[levEStrLen-1] << 9);
 		
+	}else if((levEStartPos < 9)&&(SDL_isalpha(eVal[levEStartPos]))&&(eVal[levEStartPos+2]=='+')){
+		//level energy in XX+number format
+		//SDL_Log("X+number eVal: %s\n",eVal);
+
+		tok = SDL_strtok_r(eVal,"+",&saveptr);
+		if(tok != NULL){
+			tok = SDL_strtok_r(NULL,"",&saveptr); //get the rest of the string
+			if(tok != NULL){
+				levelE = (float)atof(tok);
+				levelEVal->format = 0; //default
+				if(SDL_strncmp(estring,"SP",2)==0){
+					levelE += nuclideData->sp.val;
+				}else if(SDL_strncmp(estring,"SN",2)==0){
+					levelE += nuclideData->sn.val;
+				}else{
+					SDL_Log("WARNING: unknown XX+number level energy: %s\n",estring);
+				}
+			}else{
+				SDL_Log("ERROR: parseLevelE - bad XX+number level energy string: %s\n",estring);
+				exit(-1);
+			}
+		}else{
+			SDL_Log("ERROR: parseLevelE - bad XX+number level energy string: %s\n",estring);
+			exit(-1);
+		}
+		memcpy(eVal,&estring[0],10); //re-constitute original buffer
+		eVal[10] = '\0'; //terminate string
 	}else if((levEStartPos < 10)&&(SDL_isalpha(eVal[levEStartPos]))&&(eVal[levEStartPos+1]=='+')){
 		//level energy in X+number format
 		//SDL_Log("X+number eVal: %s\n",eVal);
@@ -628,7 +655,13 @@ void parseLevelE(valWithErr * levelEVal, const char * estring, const char * errs
 				levelE = (float)atof(tok);
 				levelEVal->format = 0; //default
 				levelEVal->format |= (uint16_t)(VALUETYPE_PLUSX << 5);
+			}else{
+				SDL_Log("ERROR: parseLevelE - bad X+number level energy string: %s\n",estring);
+				exit(-1);
 			}
+		}else{
+			SDL_Log("ERROR: parseLevelE - bad X+number level energy string: %s\n",estring);
+			exit(-1);
 		}
 		memcpy(eVal,&estring[0],10); //re-constitute original buffer
 		eVal[10] = '\0'; //terminate string
@@ -2052,7 +2085,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 							eeBuff[2] = '\0';
 
 							//parse the level energy
-							parseLevelE(&nd->levels[nd->numLvls].energy,ebuff,eeBuff);
+							parseLevelE(&nd->levels[nd->numLvls].energy,&nd->nuclData[nd->numNucl],ebuff,eeBuff);
 							nd->nuclData[nd->numNucl].numLevels++;
 							nd->numLvls++;
 							if(nd->nuclData[nd->numNucl].numLevels == 1){
