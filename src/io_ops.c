@@ -77,14 +77,6 @@ static int readConfigFile(FILE *file, app_state *restrict state){
           SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,"invalid window y-resolution (%i) in config file, setting to default.\n",res);
           state->ds.windowYRes = MIN_RENDER_HEIGHT;
         }
-      }else if(strcmp(par,"scroll_speed") == 0){
-        float ss = (float)atof(val);
-        if((fabsf(ss)<=2.0f)&&((fabsf(ss)>=0.1f))){
-          state->scrollSpeedMultiplier = ss;
-        }else{
-          SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,"invalid scroll speed (%f) in config file, setting to default.\n",(double)ss);
-          state->scrollSpeedMultiplier = 1.0f;
-        }
       }else if(strcmp(par,"chart_pos_x") == 0){
         float posx = (float)atof(val);
         state->ds.chartPosX = posx;
@@ -178,9 +170,6 @@ static int writeConfigFile(FILE *file, const app_rules *restrict rules, const ap
   }
   fprintf(file,"window_res_x=%u\n",state->ds.windowXRes);
   fprintf(file,"window_res_y=%u\n",state->ds.windowYRes);
-
-  fprintf(file,"\n### Input Settings ###\n");
-  fprintf(file,"scroll_speed=%0.3f\n",(double)state->scrollSpeedMultiplier);
 
   fprintf(file,"\n### Display Settings ###\n");
   fprintf(file,"chart_pos_x=%0.3f\n",(double)state->ds.chartPosX);

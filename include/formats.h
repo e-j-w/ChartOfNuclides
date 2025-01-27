@@ -272,7 +272,6 @@ typedef struct
   float mouseClickPosXPx, mouseClickPosYPx; //mouse position at the start of a mouse (left) button up event, in pixels
   float mouseScrollbarClickPosYPx;
   float zoomDeltaVal; //amount to zoom by, equivalent to mouse wheel or touchpad scroll delta, can be very small for subtle touchpad events
-  float scrollSpeedMultiplier;
   uint32_t inputFlags;
   uint16_t gamepadDeadzone,gamepadTriggerDeadzone;
   int16_t lastAxisValLX, lastAxisValLY, lastAxisValRX, lastAxisValRY; //used to mask out spurious events in the gamepad axis deadzone

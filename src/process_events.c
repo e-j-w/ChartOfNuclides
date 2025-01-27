@@ -27,11 +27,20 @@ void fcScrollAction(app_state *restrict state, const float deltaVal){
   //SDL_Log("scroll delta: %f\n",(double)deltaVal);
   const float screenNumLines = (float)(getNumScreenLvlDispLines(&state->ds));
   state->ds.nuclFullInfoScrollStartY = state->ds.nuclFullInfoScrollY;
-  state->ds.nuclFullInfoScrollToY = state->ds.nuclFullInfoScrollY - 0.25f*state->scrollSpeedMultiplier*screenNumLines*deltaVal;
-  if(state->ds.nuclFullInfoScrollToY < 0.0f){
+  if(deltaVal <= -500.0f){
+    //scroll to start
+    state->ds.nuclFullInfoScrollToY = state->ds.nuclFullInfoMaxScrollY;
+  }else if(deltaVal >= 500.0f){
+    //scroll to start
     state->ds.nuclFullInfoScrollToY = 0.0f;
-  }else if(state->ds.nuclFullInfoScrollToY > state->ds.nuclFullInfoMaxScrollY){
-    state->ds.nuclFullInfoScrollToY = (float)state->ds.nuclFullInfoMaxScrollY;
+  }else{
+    //normal scrolling
+    state->ds.nuclFullInfoScrollToY = state->ds.nuclFullInfoScrollY - screenNumLines*deltaVal;
+    if(state->ds.nuclFullInfoScrollToY < 0.0f){
+      state->ds.nuclFullInfoScrollToY = 0.0f;
+    }else if(state->ds.nuclFullInfoScrollToY > state->ds.nuclFullInfoMaxScrollY){
+      state->ds.nuclFullInfoScrollToY = (float)state->ds.nuclFullInfoMaxScrollY;
+    }
   }
   state->ds.timeSinceFCScollStart = 0.0f;
   state->ds.fcScrollInProgress = 1;
@@ -442,9 +451,17 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
   }else if(state->uiState == UISTATE_FULLLEVELINFO){
 
     if(up && !down){
-      fcScrollAction(state,1.0f);
+      fcScrollAction(state,0.25f);
     }else if(down && !up){
+      fcScrollAction(state,-0.25f);
+    }else if(state->inputFlags & (1U << INPUT_PAGEUP)){
+      fcScrollAction(state,1.0f);
+    }else if(state->inputFlags & (1U << INPUT_PAGEDOWN)){
       fcScrollAction(state,-1.0f);
+    }else if(state->inputFlags & (1U << INPUT_SCROLLSTART)){
+      fcScrollAction(state,1000.0f);
+    }else if(state->inputFlags & (1U << INPUT_SCROLLEND)){
+      fcScrollAction(state,-1000.0f);
     }else if(state->ds.fcNuclChangeInProgress == 0){
       change_lvl_list_nucl:
       //change selected nucleus
@@ -921,7 +938,7 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
       }
       //SDL_Log("scale: %0.2f\n",(double)state->ds.chartZoomScale);
     }else if(state->uiState == UISTATE_FULLLEVELINFO){
-      fcScrollAction(state,state->zoomDeltaVal*2.0f);
+      fcScrollAction(state,state->zoomDeltaVal*0.55f);
     }
     
   }
@@ -1129,6 +1146,18 @@ void processSingleEvent(app_data *restrict dat, app_state *restrict state, resou
             state->inputFlags |= (1U << INPUT_ALTDOWN);
           }
           break;
+        case SDL_SCANCODE_PAGEUP:
+          state->inputFlags |= (1U << INPUT_PAGEUP);
+          break;
+        case SDL_SCANCODE_PAGEDOWN:
+          state->inputFlags |= (1U << INPUT_PAGEDOWN);
+          break;
+        case SDL_SCANCODE_HOME:
+          state->inputFlags |= (1U << INPUT_SCROLLSTART);
+          break;
+        case SDL_SCANCODE_END:
+          state->inputFlags |= (1U << INPUT_SCROLLEND);
+          break;
         case SDL_SCANCODE_LALT:
         case SDL_SCANCODE_RALT:
           if(state->kbdModVal == KBD_MOD_NONE){
@@ -1286,6 +1315,12 @@ void processSingleEvent(app_data *restrict dat, app_state *restrict state, resou
           break;
         case SDL_SCANCODE_S:
           state->inputFlags &= ~(1U << INPUT_ALTDOWN);
+          break;
+        case SDL_SCANCODE_PAGEUP:
+          state->inputFlags &= ~(1U << INPUT_PAGEUP);
+          break;
+        case SDL_SCANCODE_PAGEDOWN:
+          state->inputFlags &= ~(1U << INPUT_PAGEDOWN);
           break;
         case SDL_SCANCODE_LCTRL:
         case SDL_SCANCODE_RCTRL:
@@ -1475,6 +1510,8 @@ void processFrameEvents(app_data *restrict dat, app_state *restrict state, resou
     state->inputFlags &= ~(1U << INPUT_MENU);
     state->inputFlags &= ~(1U << INPUT_CYCLELEFT);
     state->inputFlags &= ~(1U << INPUT_CYCLERIGHT);
+    state->inputFlags &= ~(1U << INPUT_SCROLLSTART);
+    state->inputFlags &= ~(1U << INPUT_SCROLLEND);
     //whenever the directional inputs are not used for continuous actions such as chart navigation,
     //make sure that they don't persist across frames (keys will still repeat, just want to avoid
     //case where the input flag is not reset)
@@ -1483,6 +1520,8 @@ void processFrameEvents(app_data *restrict dat, app_state *restrict state, resou
       state->inputFlags &= ~(1U << INPUT_DOWN);
       state->inputFlags &= ~(1U << INPUT_LEFT);
       state->inputFlags &= ~(1U << INPUT_RIGHT);
+      state->inputFlags &= ~(1U << INPUT_PAGEDOWN);
+      state->inputFlags &= ~(1U << INPUT_PAGEUP);
     }
     if(state->inputFlags & (1U << INPUT_DOUBLECLICK)){
       state->inputFlags &= ~(1U << INPUT_DOUBLECLICK);
