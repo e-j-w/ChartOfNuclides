@@ -288,6 +288,7 @@ static int parseAppRules(app_data *restrict dat, asset_mapping *restrict stringI
 	dat->locStringIDs[LOCSTR_SEARCHRES_NUCLIDE] = (uint16_t)nameToAssetID("search_result_nuclide",stringIDmap);
 	dat->locStringIDs[LOCSTR_SEARCHRES_EGAMMA] = (uint16_t)nameToAssetID("search_result_egamma",stringIDmap);
 	dat->locStringIDs[LOCSTR_SEARCHRES_ELEVEL] = (uint16_t)nameToAssetID("search_result_elevel",stringIDmap);
+	dat->locStringIDs[LOCSTR_SEARCHRES_GAMMACASCADE] = (uint16_t)nameToAssetID("search_result_gammacascade",stringIDmap);
 	dat->locStringIDs[LOCSTR_PREF_UISCALE] = (uint16_t)nameToAssetID("interface_size",stringIDmap);
 	dat->locStringIDs[LOCSTR_SMALL] = (uint16_t)nameToAssetID("small",stringIDmap);
 	dat->locStringIDs[LOCSTR_LARGE] = (uint16_t)nameToAssetID("large",stringIDmap);

@@ -72,6 +72,16 @@ int tpFunc(void *data){
             //SDL_Log("Searching for levels...\n");
             searchELevel(&tdat->dat->ndat,&tdat->state->ss);
             break;
+          case SEARCHAGENT_GAMMACASCADE:
+            while(!(tdat->state->ss.finishedSearchAgents & (uint32_t)(1U << SEARCHAGENT_NUCLIDE))){
+              if(tdat->threadState == THREADSTATE_KILL){
+                break; //kill waiting thread, if requested
+              }
+              SDL_Delay(THREAD_UPDATE_DELAY); //wait for tokenization to complete
+            }
+            //SDL_Log("Searching for gamma cascades...\n");
+            searchGammaCascade(&tdat->dat->ndat,&tdat->state->ss);
+            break;
           default:
             break;
         }

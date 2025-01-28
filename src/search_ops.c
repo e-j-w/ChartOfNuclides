@@ -20,6 +20,8 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include "search_ops.h"
 #include "data_ops.h"
 
+#define MAX_CASCADE_GAMMAS 8 //if raised, need to change gammasMatched bit-pattern to a larger size type
+
 int SDLCALL compareRelevance(const void *a, const void *b){
 	search_result *resA = ((search_result*)(intptr_t)(a)); //get the search result (double cast to avoid warning)
 	search_result *resB = ((search_result*)(intptr_t)(b)); //get the search result (double cast to avoid warning)
@@ -74,7 +76,7 @@ void sortAndAppendResult(search_state *restrict ss, const search_result *restric
 		ss->updatedResults[i].corrRes = 0;
 		for(uint8_t j=0; j<ss->numUpdatedResults; j++){
 			if(i != j){
-				if((ss->updatedResults[i].resultType == SEARCHAGENT_EGAMMA)||(ss->updatedResults[i].resultType == SEARCHAGENT_ELEVEL)){
+				if((ss->updatedResults[i].resultType == SEARCHAGENT_EGAMMA)||(ss->updatedResults[i].resultType == SEARCHAGENT_ELEVEL)||(ss->updatedResults[i].resultType == SEARCHAGENT_GAMMACASCADE)){
 					if(ss->updatedResults[j].resultType == SEARCHAGENT_NUCLIDE){
 						if(ss->updatedResults[i].resultVal == ss->updatedResults[j].resultVal){
 							//gamma matching a nuclide
@@ -139,7 +141,7 @@ void searchELevel(const ndata *restrict ndat, search_state *restrict ss){
 			continue; //check next search token
 		}
 
-		double eSearch = atof(ss->searchTok[i]);
+		double eSearch = SDL_atof(ss->searchTok[i]);
 		if(eSearch > 0.0){
 			//valid energy
 			for(int16_t j=0; j<ndat->numNucl; j++){
@@ -188,7 +190,7 @@ void searchEGamma(const ndata *restrict ndat, search_state *restrict ss){
 			continue; //check next search token
 		}
 
-		double eSearch = atof(ss->searchTok[i]);
+		double eSearch = SDL_atof(ss->searchTok[i]);
 		if(eSearch > 0.0){
 			//valid energy
 			for(int16_t j=0; j<ndat->numNucl; j++){
@@ -222,6 +224,129 @@ void searchEGamma(const ndata *restrict ndat, search_state *restrict ss){
 			}
 		}
 	}
+}
+
+void searchGammaCascade(const ndata *restrict ndat, search_state *restrict ss){
+	
+	uint8_t numCascadeGammas = 0;
+	double cascadeGammas[MAX_CASCADE_GAMMAS];
+
+	for(uint8_t i=0; i<ss->numSearchTok; i++){
+
+		//first, filter out any tokens with characters
+		uint8_t isNum = 1;
+		for(uint16_t j=0; j<strlen(ss->searchTok[i]); j++){
+			if(isalpha(ss->searchTok[i][j])){
+				isNum = 0;
+				break;
+			}
+		}
+
+		if(isNum == 0){
+			continue; //check next search token
+		}else{
+			cascadeGammas[numCascadeGammas] = SDL_atof(ss->searchTok[i]);
+			if(cascadeGammas[numCascadeGammas] > 0.0){
+				numCascadeGammas++;
+				if(numCascadeGammas >= MAX_CASCADE_GAMMAS){
+					break; //array is full
+				}
+			}
+		}
+
+	}
+
+	if(numCascadeGammas > 1){
+		//search for nuclides containing all of the cascade's gammas in coincidence
+		for(int16_t i=0; i<ndat->numNucl; i++){
+			if(ndat->nuclData[i].numLevels > 1){
+				for(uint32_t j=(ndat->nuclData[i].firstLevel + (uint32_t)(ndat->nuclData[i].numLevels - 1)); j>=ndat->nuclData[i].firstLevel; j--){
+					if(j==0){
+						break; //safety valve
+					}
+					for(uint32_t k=ndat->levels[j].firstTran; k<(ndat->levels[j].firstTran + (uint32_t)ndat->levels[j].numTran); k++){
+						if((((ndat->tran[k].energy.format >> 5U) & 15U)) != VALUETYPE_X){ //ignore variable energy
+							double rawEVal = getRawValFromDB(&ndat->tran[k].energy);
+							double rawErrVal = getRawErrFromDB(&ndat->tran[k].energy);
+							if(rawEVal > 0.0){
+								double errBound = 3.0*rawErrVal;
+								if(errBound < 5.0){
+									errBound = 5.0;
+								}
+								
+								for(uint8_t l=0; l<numCascadeGammas; l++){
+									uint8_t numGammasMatched = 0;
+									uint8_t gammasMatched = 0; //bit-pattern of matched gammas
+									if(((rawEVal - errBound) <= cascadeGammas[l])&&((rawEVal + errBound) >= cascadeGammas[l])){
+										//energy matches query
+										numGammasMatched++;
+										gammasMatched |= (uint8_t)(1U << l);
+										double rawLvlE = getRawValFromDB(&ndat->levels[j].energy) - rawEVal;
+										//search the lower levels for other cascade members
+										for(uint32_t m=(uint32_t)(j-1); m>=ndat->nuclData[i].firstLevel; m--){
+											if(numGammasMatched < numCascadeGammas){
+												uint8_t nextCascMemberFound = 0;
+												if(SDL_fabs(getRawValFromDB(&ndat->levels[m].energy) - rawLvlE) < errBound){
+													for(uint32_t n=ndat->levels[m].firstTran; n<(ndat->levels[m].firstTran + (uint32_t)ndat->levels[m].numTran); n++){
+														if((((ndat->tran[n].energy.format >> 5U) & 15U)) != VALUETYPE_X){ //ignore variable energy
+															rawEVal = getRawValFromDB(&ndat->tran[n].energy);
+															rawErrVal = getRawErrFromDB(&ndat->tran[n].energy);
+															if(rawEVal > 0.0){
+																errBound = 3.0*rawErrVal;
+																if(errBound < 5.0){
+																	errBound = 5.0;
+																}
+															}
+															
+															for(uint8_t p=0; p<numCascadeGammas; p++){
+																if(!(gammasMatched & (1U << p))){
+																	//matches energy of cascade member not previously found
+																	if(((rawEVal - errBound) <= cascadeGammas[p])&&((rawEVal + errBound) >= cascadeGammas[p])){
+																		//energy matches query
+																		nextCascMemberFound = 1;
+																		numGammasMatched++;
+																		gammasMatched |= (uint8_t)(1U << p);
+																		rawLvlE = getRawValFromDB(&ndat->levels[m].energy) - rawEVal;
+																		break;
+																	}
+																}
+															}
+														}
+														if(nextCascMemberFound){
+															break;
+														}
+													}
+												}
+												if(nextCascMemberFound == 0){
+													//cascade broken, abandon this search
+													break;
+												}
+											}
+										}
+									}
+									if(numGammasMatched == numCascadeGammas){
+										//full cascade identified
+										search_result res;
+										res.relevance = 1.5f; //base value
+										res.relevance += (float)(0.5f*numCascadeGammas); //weight by multiplicity of cascade
+										res.resultType = SEARCHAGENT_GAMMACASCADE;
+										res.resultVal = (uint32_t)i; //nuclide index
+										res.resultVal2 = (uint32_t)k; //transition index (first cascade member)
+										res.corrRes = 0;
+										SDL_Log("Found cascade in nuclide %u starting with transition %u\n",res.resultVal,res.resultVal2);
+										sortAndAppendResult(ss,&res);
+									}
+								}
+
+							}
+						}
+					}
+				}
+			}
+			
+		}
+	}
+
 }
 
 void searchNuclides(const ndata *restrict ndat, search_state *restrict ss){
