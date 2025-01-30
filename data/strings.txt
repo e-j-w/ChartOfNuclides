@@ -26,7 +26,7 @@ back_to_summary|Back to summary
 all_reactions|All Reactions
 menuitem_preferences|Preferences
 menuitem_about|About Chart of Nuclides
-about_string_version|Version 0.3.1 - "There Is No Hope In This Building"
+about_string_version|Version 0.3.2 - "There Is No Hope In This Building"
 about_string_1|Developed by Jonathan Williams
 about_string_2|Nuclear structure data is sourced from ENSDF (https://www.nndc.bnl.gov/ensdf/). Isotope abundance data is sourced from NIST (https://www.nist.gov/pml/atomic-weights- and-isotopic-compositions-relative-atomic-masses).
 about_string_3|This is an independently developed program not endorsed by the above entities. The accuracy or completeness of the information provided is not guaranteed.

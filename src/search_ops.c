@@ -283,6 +283,7 @@ void searchGammaCascade(const ndata *restrict ndat, search_state *restrict ss){
 										uint8_t gammasMatched = 0; //bit-pattern of matched gammas
 										gammasMatched |= (uint8_t)(1U << l);
 										double intensityFactor = getRawValFromDB(&ndat->tran[k].intensity);
+										double energyFactor = (1.0 + fabs(0.1*(cascadeGammas[l] - rawEVal)));
 										double rawLvlE = getRawValFromDB(&ndat->levels[j].energy) - rawEVal;
 										//search the lower levels for other cascade members
 										for(uint32_t m=(uint32_t)(j-1); m>=ndat->nuclData[i].firstLevel; m--){
@@ -310,6 +311,7 @@ void searchGammaCascade(const ndata *restrict ndat, search_state *restrict ss){
 																		numGammasMatched++;
 																		gammasMatched |= (uint8_t)(1U << p);
 																		intensityFactor += getRawValFromDB(&ndat->tran[n].intensity);
+																		energyFactor *= (1.0 + fabs(0.1*(cascadeGammas[p] - rawEVal)));
 																		rawLvlE = getRawValFromDB(&ndat->levels[m].energy) - rawEVal;
 																		break;
 																	}
@@ -326,8 +328,9 @@ void searchGammaCascade(const ndata *restrict ndat, search_state *restrict ss){
 										if(numGammasMatched == numCascadeGammas){
 											//full cascade identified
 											search_result res;
-											res.relevance = 1.5f; //base value
+											res.relevance = 1.0f; //base value
 											res.relevance += (float)intensityFactor/100.0f; //weight by intensity of gammas (and implicitly by multiplicity of cascade)
+											res.relevance /= (float)(energyFactor); //weight by distance of energies from search values
 											res.resultType = SEARCHAGENT_GAMMACASCADE;
 											res.resultVal[0] = (uint32_t)i; //nuclide index
 											for(uint8_t ind=1; ind<=numGammasMatched; ind++){
