@@ -27,8 +27,8 @@ int SDLCALL compareRelevance(const void *a, const void *b){
 	search_result *resB = ((search_result*)(intptr_t)(b)); //get the search result (double cast to avoid warning)
 	float relA = resA->relevance;
 	float relB = resB->relevance;
-	//printf("A: val %u rel %f\n",resA->resultVal,(double)resA->relevance);
-	//printf("B: val %u rel %f\n",resB->resultVal,(double)resB->relevance);
+	//printf("A: val %u rel %f\n",resA->resultVal[0],(double)resA->relevance);
+	//printf("B: val %u rel %f\n",resB->resultVal[0],(double)resB->relevance);
 	for(uint8_t i=0; i<32; i++){
 		if(resA->corrRes & (uint32_t)(1U << i)){
 			relA += 1.0f;
@@ -51,15 +51,15 @@ void sortAndAppendResult(search_state *restrict ss, const search_result *restric
 	//check that the result isn't identical to an existing one
 	for(uint8_t i=0; i<ss->numUpdatedResults;i++){
 		if(res->resultType == ss->updatedResults[i].resultType){
-			if(res->resultVal == ss->updatedResults[i].resultVal){
-				if(res->resultVal2 == ss->updatedResults[i].resultVal2){
+			if(res->resultVal[0] == ss->updatedResults[i].resultVal[0]){
+				if(res->resultVal[1] == ss->updatedResults[i].resultVal[1]){
 					SDL_SignalSemaphore(ss->canUpdateResults); //signal that other threads can now update the results
 					return; //don't append identical results
 				}
 			}
 		}
 	}
-	//SDL_Log("Appending result with type %u, values [%u %u], relevance %0.3f.\n",res->resultType,res->resultVal,res->resultVal2,(double)res->relevance);
+	//SDL_Log("Appending result with type %u, values [%u %u], relevance %0.3f.\n",res->resultType,res->resultVal[0],res->resultVal[1],(double)res->relevance);
 	//add the result to the list, if possible
 	if(ss->numUpdatedResults < MAX_SEARCH_RESULTS){
 		//append the result
@@ -78,7 +78,7 @@ void sortAndAppendResult(search_state *restrict ss, const search_result *restric
 			if(i != j){
 				if((ss->updatedResults[i].resultType == SEARCHAGENT_EGAMMA)||(ss->updatedResults[i].resultType == SEARCHAGENT_ELEVEL)||(ss->updatedResults[i].resultType == SEARCHAGENT_GAMMACASCADE)){
 					if(ss->updatedResults[j].resultType == SEARCHAGENT_NUCLIDE){
-						if(ss->updatedResults[i].resultVal == ss->updatedResults[j].resultVal){
+						if(ss->updatedResults[i].resultVal[0] == ss->updatedResults[j].resultVal[0]){
 							//gamma matching a nuclide
 							//SDL_Log("Correlated result %u with result %u\n",i,j);
 							ss->updatedResults[i].corrRes |= (uint32_t)(1U << j);
@@ -161,10 +161,10 @@ void searchELevel(const ndata *restrict ndat, search_state *restrict ss){
 								res.relevance -= (float)(rawErrVal/rawEVal); //weight by size of error bars
 								res.relevance /= (1.0f + (float)fabs(0.1*(eSearch - rawEVal))); //weight by distance from value
 								res.resultType = SEARCHAGENT_ELEVEL;
-								res.resultVal = (uint32_t)j; //nuclide index
-								res.resultVal2 = (uint32_t)k; //level index
+								res.resultVal[0] = (uint32_t)j; //nuclide index
+								res.resultVal[1] = (uint32_t)k; //level index
 								res.corrRes = 0;
-								//SDL_Log("Found level %u\n",res.resultVal2);
+								//SDL_Log("Found level %u\n",res.resultVal[1]);
 								sortAndAppendResult(ss,&res);
 							}
 						}
@@ -211,10 +211,10 @@ void searchEGamma(const ndata *restrict ndat, search_state *restrict ss){
 									res.relevance -= (float)(rawErrVal/rawEVal); //weight by size of error bars
 									res.relevance /= (1.0f + (float)fabs(0.1*(eSearch - rawEVal))); //weight by distance from value
 									res.resultType = SEARCHAGENT_EGAMMA;
-									res.resultVal = (uint32_t)j; //nuclide index
-									res.resultVal2 = (uint32_t)l; //transition index
+									res.resultVal[0] = (uint32_t)j; //nuclide index
+									res.resultVal[1] = (uint32_t)l; //transition index
 									res.corrRes = 0;
-									//SDL_Log("Found transition %u\n",res.resultVal2);
+									//SDL_Log("Found transition %u\n",res.resultVal[1]);
 									sortAndAppendResult(ss,&res);
 								}
 							}
@@ -230,6 +230,7 @@ void searchGammaCascade(const ndata *restrict ndat, search_state *restrict ss){
 	
 	uint8_t numCascadeGammas = 0;
 	double cascadeGammas[MAX_CASCADE_GAMMAS];
+	uint32_t matchedTran[MAX_CASCADE_GAMMAS];
 
 	for(uint8_t i=0; i<ss->numSearchTok; i++){
 
@@ -277,6 +278,7 @@ void searchGammaCascade(const ndata *restrict ndat, search_state *restrict ss){
 								for(uint8_t l=0; l<numCascadeGammas; l++){
 									if(((rawEVal - errBound) <= cascadeGammas[l])&&((rawEVal + errBound) >= cascadeGammas[l])){
 										//energy matches query
+										matchedTran[0] = k;
 										uint8_t numGammasMatched = 1;
 										uint8_t gammasMatched = 0; //bit-pattern of matched gammas
 										gammasMatched |= (uint8_t)(1U << l);
@@ -304,6 +306,7 @@ void searchGammaCascade(const ndata *restrict ndat, search_state *restrict ss){
 																	if(((rawEVal - errBound) <= cascadeGammas[p])&&((rawEVal + errBound) >= cascadeGammas[p])){
 																		//energy matches query
 																		nextCascMemberFound = 1;
+																		matchedTran[numGammasMatched] = n;
 																		numGammasMatched++;
 																		gammasMatched |= (uint8_t)(1U << p);
 																		intensityFactor += getRawValFromDB(&ndat->tran[n].intensity);
@@ -326,10 +329,17 @@ void searchGammaCascade(const ndata *restrict ndat, search_state *restrict ss){
 											res.relevance = 1.5f; //base value
 											res.relevance += (float)intensityFactor/100.0f; //weight by intensity of gammas (and implicitly by multiplicity of cascade)
 											res.resultType = SEARCHAGENT_GAMMACASCADE;
-											res.resultVal = (uint32_t)i; //nuclide index
-											res.resultVal2 = (uint32_t)k; //transition index (first cascade member)
+											res.resultVal[0] = (uint32_t)i; //nuclide index
+											for(uint8_t ind=1; ind<=numGammasMatched; ind++){
+												if((ind < SEARCH_RESULT_DATASIZE)&&(ind <= MAX_CASCADE_GAMMAS)){
+													res.resultVal[ind] = matchedTran[ind-1]; //transition index (first cascade member)
+												}
+											}
+											if((numGammasMatched+1) < SEARCH_RESULT_DATASIZE){
+												res.resultVal[numGammasMatched+1] = UNUSED_SEARCH_RESULT; //truncate results
+											}
 											res.corrRes = 0;
-											//SDL_Log("Found cascade in nuclide %u starting with transition %u\n",res.resultVal,res.resultVal2);
+											//SDL_Log("Found cascade in nuclide %u starting with transition %u\n",res.resultVal[0],res.resultVal[1]);
 											sortAndAppendResult(ss,&res);
 										}
 									}
@@ -456,10 +466,10 @@ void searchNuclides(const ndata *restrict ndat, search_state *restrict ss){
 						search_result res;
 						res.relevance = 1.0f; //exact match
 						res.resultType = SEARCHAGENT_NUCLIDE;
-						res.resultVal = (uint32_t)j;
-						res.resultVal2 = 0;
+						res.resultVal[0] = (uint32_t)j;
+						res.resultVal[1] = 0;
 						res.corrRes = 0;
-						//SDL_Log("Found nuclide %u\n",res.resultVal);
+						//SDL_Log("Found nuclide %u\n",res.resultVal[0]);
 						sortAndAppendResult(ss,&res);
 					}
 				}
@@ -471,10 +481,10 @@ void searchNuclides(const ndata *restrict ndat, search_state *restrict ss){
 						search_result res;
 						res.relevance = 0.8f; //uppercase match
 						res.resultType = SEARCHAGENT_NUCLIDE;
-						res.resultVal = (uint32_t)j;
-						res.resultVal2 = 0;
+						res.resultVal[0] = (uint32_t)j;
+						res.resultVal[1] = 0;
 						res.corrRes = 0;
-						//SDL_Log("Found nuclide %u\n",res.resultVal);
+						//SDL_Log("Found nuclide %u\n",res.resultVal[0]);
 						sortAndAppendResult(ss,&res);
 					}
 				}

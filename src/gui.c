@@ -430,9 +430,9 @@ void drawDecayModeBoxLabel(const app_data *restrict dat, const drawing_state *re
   uint16_t N = (uint16_t)dat->ndat.nuclData[nuclInd].N;
   if(boxHeight > 38.0f){
     if((isomerMVal==0)||(dat->ndat.nuclData[nuclInd].numIsomerMVals <= 1)){
-      snprintf(tmpStr,32,"%um",N+Z);
+      SDL_snprintf(tmpStr,32,"%um",N+Z);
     }else{
-      snprintf(tmpStr,32,"%um%u",N+Z,isomerMVal);
+      SDL_snprintf(tmpStr,32,"%um%u",N+Z,isomerMVal);
     }
     drawXPos = xPos + labelMargin;
     float totalLblHeight = (getTextHeight(rdat,FONTSIZE_SMALL,tmpStr) + getTextHeight(rdat,FONTSIZE_LARGE,getElemStr((uint8_t)Z)))/rdat->uiDPIScale;
@@ -447,7 +447,7 @@ void drawDecayModeBoxLabel(const app_data *restrict dat, const drawing_state *re
       getSpinParStr(tmpStr,&dat->ndat,isomerLvl);
       drawTextAlignedSized(rdat,drawXPos,drawYPos-(2.0f*ds->uiUserScale),col,FONTSIZE_NORMAL,255,tmpStr,ALIGN_RIGHT,16384); //draw spin-parity label
       if(dcyMode >= DECAYMODE_ENUM_LENGTH){
-        snprintf(tmpStr,32,"%s",dat->strings[dat->locStringIDs[LOCSTR_UNKNOWN]]);
+        SDL_snprintf(tmpStr,32,"%s",dat->strings[dat->locStringIDs[LOCSTR_UNKNOWN]]);
       }else{
         getMostProbableDecayModeStr(tmpStr,&dat->ndat,isomerLvl);
       }
@@ -459,7 +459,7 @@ void drawDecayModeBoxLabel(const app_data *restrict dat, const drawing_state *re
     }else{
       //only decay mode known
       if(dcyMode >= DECAYMODE_ENUM_LENGTH){
-        snprintf(tmpStr,32,"%s",dat->strings[dat->locStringIDs[LOCSTR_UNKNOWN]]);
+        SDL_snprintf(tmpStr,32,"%s",dat->strings[dat->locStringIDs[LOCSTR_UNKNOWN]]);
       }else{
         getMostProbableDecayModeStr(tmpStr,&dat->ndat,isomerLvl);
       }
@@ -482,9 +482,9 @@ void drawisomerBoxLabel(const app_data *restrict dat, const drawing_state *restr
   uint16_t N = (uint16_t)dat->ndat.nuclData[nuclInd].N;
   if(boxHeight > 38.0f){
     if((isomerMVal==0)||(dat->ndat.nuclData[nuclInd].numIsomerMVals <= 1)){
-      snprintf(tmpStr,32,"%um",N+Z);
+      SDL_snprintf(tmpStr,32,"%um",N+Z);
     }else{
-      snprintf(tmpStr,32,"%um%u",N+Z,isomerMVal);
+      SDL_snprintf(tmpStr,32,"%um%u",N+Z,isomerMVal);
     }
     drawXPos = xPos + labelMargin;
     float totalLblHeight = (getTextHeight(rdat,FONTSIZE_SMALL,tmpStr) + getTextHeight(rdat,FONTSIZE_LARGE,getElemStr((uint8_t)Z)))/rdat->uiDPIScale;
@@ -667,7 +667,7 @@ void drawNuclBoxLabelDetails(const app_data *restrict dat, const app_state *rest
   }else if(state->chartView == CHARTVIEW_R42){
     double r42 = getR42(&dat->ndat,nuclInd);
     if(r42 > 0.0){
-      snprintf(tmpStr,32,"%0.2f",r42);
+      SDL_snprintf(tmpStr,32,"%0.2f",r42);
       drawTextAlignedSized(rdat,drawXPos,drawYPos+((yOffsets*19.0f + 40.0f)*state->ds.uiUserScale),col,FONTSIZE_NORMAL,255,tmpStr,ALIGN_CENTER,maxLblWidth); //draw R42 label
     }
   }
@@ -687,7 +687,7 @@ void drawNuclBoxLabel(const app_data *restrict dat, const app_state *restrict st
   }
   if(state->ds.chartZoomScale >= 7.3f){
     const uint16_t N = (uint16_t)dat->ndat.nuclData[nuclInd].N;
-    snprintf(tmpStr,32,"%u",N+Z);
+    SDL_snprintf(tmpStr,32,"%u",N+Z);
     float totalLblWidth = (getTextWidth(rdat,FONTSIZE_SMALL,tmpStr) + getTextWidth(rdat,FONTSIZE_LARGE,getElemStr((uint8_t)Z)))/rdat->uiDPIScale;
     drawXPos = xPos+boxWidth*0.5f - totalLblWidth*0.5f;
     if(state->ds.chartZoomScale >= 12.0f){
@@ -955,7 +955,7 @@ void drawChartOfNuclides(const app_data *restrict dat, const app_state *restrict
       if((i<MAX_MASS_NUM)&&(i<=MAX_NEUTRON_NUM)){
         rect.x = (i + 0.5f - minX)*DEFAULT_NUCLBOX_DIM*state->ds.chartZoomScale*state->ds.uiUserScale;
         if(rect.x < (state->ds.windowXRes - CHART_AXIS_DEPTH*state->ds.uiUserScale)){ //dodge axis label
-          snprintf(tmpStr,32,"%u",numInd); //is this slow?
+          SDL_snprintf(tmpStr,32,"%u",numInd); //is this slow?
           drawTextAlignedSized(rdat,rect.x,rect.y,blackCol8Bit,FONTSIZE_NORMAL,255,tmpStr,ALIGN_CENTER,16384); //draw number label
         }
       }
@@ -968,7 +968,7 @@ void drawChartOfNuclides(const app_data *restrict dat, const app_state *restrict
       if((i<MAX_MASS_NUM)&&(i<MAX_PROTON_NUM)){
         rect.y = (maxY - i + 0.5f)*DEFAULT_NUCLBOX_DIM*state->ds.chartZoomScale*state->ds.uiUserScale;
         if(rect.y > CHART_AXIS_DEPTH*state->ds.uiUserScale){ //dodge axis label
-          snprintf(tmpStr,32,"%u",numInd); //is this slow?
+          SDL_snprintf(tmpStr,32,"%u",numInd); //is this slow?
           drawTextAlignedSized(rdat,rect.x,rect.y,blackCol8Bit,FONTSIZE_NORMAL,255,tmpStr,ALIGN_CENTER,16384); //draw number label
         }
       }
@@ -1030,14 +1030,14 @@ void drawInfoBoxHeader(const app_data *restrict dat, const drawing_state *restri
   float drawXPos = (float)(x + (PANEL_EDGE_SIZE + 3*UI_PADDING_SIZE)*ds->uiUserScale);
   float drawYPos = (float)(y + (PANEL_EDGE_SIZE + 2*UI_PADDING_SIZE)*ds->uiUserScale);
   uint16_t nucA = (uint16_t)(dat->ndat.nuclData[nuclInd].Z + dat->ndat.nuclData[nuclInd].N);
-  snprintf(tmpStr,32,"%u",nucA);
+  SDL_snprintf(tmpStr,32,"%u",nucA);
   drawXPos += (drawTextAlignedSized(rdat,drawXPos,drawYPos,blackCol8Bit,FONTSIZE_SMALL,alpha,tmpStr,ALIGN_LEFT,16384)).w; //draw number label
   if((uint16_t)(dat->ndat.nuclData[nuclInd].Z <= 1)&&(dat->ndat.nuclData[nuclInd].N <= 2)){
-    snprintf(tmpStr,32,"%s (%s)",getElemStr((uint8_t)dat->ndat.nuclData[nuclInd].Z),getFullElemStr((uint8_t)dat->ndat.nuclData[nuclInd].Z,(uint8_t)dat->ndat.nuclData[nuclInd].N));
+    SDL_snprintf(tmpStr,32,"%s (%s)",getElemStr((uint8_t)dat->ndat.nuclData[nuclInd].Z),getFullElemStr((uint8_t)dat->ndat.nuclData[nuclInd].Z,(uint8_t)dat->ndat.nuclData[nuclInd].N));
   }else if((uint16_t)(dat->ndat.nuclData[nuclInd].Z == 0)&&(dat->ndat.nuclData[nuclInd].N <= 5)){
-    snprintf(tmpStr,32,"%s (%s)",getElemStr((uint8_t)dat->ndat.nuclData[nuclInd].Z),getFullElemStr((uint8_t)dat->ndat.nuclData[nuclInd].Z,(uint8_t)dat->ndat.nuclData[nuclInd].N));
+    SDL_snprintf(tmpStr,32,"%s (%s)",getElemStr((uint8_t)dat->ndat.nuclData[nuclInd].Z),getFullElemStr((uint8_t)dat->ndat.nuclData[nuclInd].Z,(uint8_t)dat->ndat.nuclData[nuclInd].N));
   }else{
-    snprintf(tmpStr,32,"%s (%s-%u)",getElemStr((uint8_t)dat->ndat.nuclData[nuclInd].Z),getFullElemStr((uint8_t)dat->ndat.nuclData[nuclInd].Z,(uint8_t)dat->ndat.nuclData[nuclInd].N),nucA);
+    SDL_snprintf(tmpStr,32,"%s (%s-%u)",getElemStr((uint8_t)dat->ndat.nuclData[nuclInd].Z),getFullElemStr((uint8_t)dat->ndat.nuclData[nuclInd].Z,(uint8_t)dat->ndat.nuclData[nuclInd].N),nucA);
   }
   drawTextAlignedSized(rdat,drawXPos,drawYPos+(10.0f*ds->uiUserScale),blackCol8Bit,FONTSIZE_LARGE,alpha,tmpStr,ALIGN_LEFT,16384); //draw element label
 }
@@ -1755,40 +1755,54 @@ void drawSearchMenu(const app_data *restrict dat, const app_state *restrict stat
       drawButtonBG(&dat->rules.themeRules,rdat,drawRect,getHighlightState(state,UIELEM_SEARCH_RESULT+i),alpha);
       switch(state->ss.results[i].resultType){
         case SEARCHAGENT_NUCLIDE:
-          Z = (uint16_t)dat->ndat.nuclData[state->ss.results[i].resultVal].Z;
-          N = (uint16_t)dat->ndat.nuclData[state->ss.results[i].resultVal].N;
-          snprintf(tmpStr,64,"%u",N+Z);
+          Z = (uint16_t)dat->ndat.nuclData[state->ss.results[i].resultVal[0]].Z;
+          N = (uint16_t)dat->ndat.nuclData[state->ss.results[i].resultVal[0]].N;
+          SDL_snprintf(tmpStr,64,"%u",N+Z);
           numWidth = drawTextAlignedSized(rdat,drawRect.x+12.0f*state->ds.uiUserScale,drawRect.y+12.0f*state->ds.uiUserScale,blackCol8Bit,FONTSIZE_SMALL,alpha8,tmpStr,ALIGN_LEFT,16384).w; //draw number label
           drawTextAlignedSized(rdat,drawRect.x+12.0f*state->ds.uiUserScale+numWidth,drawRect.y+(20.0f*state->ds.uiUserScale),blackCol8Bit,FONTSIZE_LARGE,alpha8,getElemStr((uint8_t)Z),ALIGN_LEFT,16384); //draw element label
           drawTextAlignedSized(rdat,drawRect.x+12.0f*state->ds.uiUserScale,drawRect.y+(SEARCH_MENU_RESULT_HEIGHT-32.0f)*state->ds.uiUserScale,grayCol8Bit,FONTSIZE_NORMAL,alpha8,dat->strings[dat->locStringIDs[LOCSTR_SEARCHRES_NUCLIDE]],ALIGN_LEFT,16384);
           break;
         case SEARCHAGENT_EGAMMA:
-          Z = (uint16_t)dat->ndat.nuclData[state->ss.results[i].resultVal].Z;
-          N = (uint16_t)dat->ndat.nuclData[state->ss.results[i].resultVal].N;
-          snprintf(tmpStr,64,"%u",N+Z);
+          Z = (uint16_t)dat->ndat.nuclData[state->ss.results[i].resultVal[0]].Z;
+          N = (uint16_t)dat->ndat.nuclData[state->ss.results[i].resultVal[0]].N;
+          SDL_snprintf(tmpStr,64,"%u",N+Z);
           numWidth = drawTextAlignedSized(rdat,drawRect.x+12.0f*state->ds.uiUserScale,drawRect.y+12.0f*state->ds.uiUserScale,blackCol8Bit,FONTSIZE_SMALL,alpha8,tmpStr,ALIGN_LEFT,16384).w; //draw number label
-          getGammaEnergyStr(eStr,&dat->ndat,state->ss.results[i].resultVal2,1);
-          snprintf(tmpStr,64,"%s - %s keV",getElemStr((uint8_t)Z),eStr);
+          getGammaEnergyStr(eStr,&dat->ndat,state->ss.results[i].resultVal[1],1);
+          SDL_snprintf(tmpStr,64,"%s - %s keV",getElemStr((uint8_t)Z),eStr);
           drawTextAlignedSized(rdat,drawRect.x+12.0f*state->ds.uiUserScale+numWidth,drawRect.y+(20.0f*state->ds.uiUserScale),blackCol8Bit,FONTSIZE_LARGE,alpha8,tmpStr,ALIGN_LEFT,16384); //draw element and gamma label
           drawTextAlignedSized(rdat,drawRect.x+12.0f*state->ds.uiUserScale,drawRect.y+(SEARCH_MENU_RESULT_HEIGHT-32.0f)*state->ds.uiUserScale,grayCol8Bit,FONTSIZE_NORMAL,alpha8,dat->strings[dat->locStringIDs[LOCSTR_SEARCHRES_EGAMMA]],ALIGN_LEFT,16384);
           break;
         case SEARCHAGENT_ELEVEL:
-          Z = (uint16_t)dat->ndat.nuclData[state->ss.results[i].resultVal].Z;
-          N = (uint16_t)dat->ndat.nuclData[state->ss.results[i].resultVal].N;
-          snprintf(tmpStr,64,"%u",N+Z);
+          Z = (uint16_t)dat->ndat.nuclData[state->ss.results[i].resultVal[0]].Z;
+          N = (uint16_t)dat->ndat.nuclData[state->ss.results[i].resultVal[0]].N;
+          SDL_snprintf(tmpStr,64,"%u",N+Z);
           numWidth = drawTextAlignedSized(rdat,drawRect.x+12.0f*state->ds.uiUserScale,drawRect.y+12.0f*state->ds.uiUserScale,blackCol8Bit,FONTSIZE_SMALL,alpha8,tmpStr,ALIGN_LEFT,16384).w; //draw number label
-          getLvlEnergyStr(eStr,&dat->ndat,state->ss.results[i].resultVal2,1);
-          snprintf(tmpStr,64,"%s - %s keV",getElemStr((uint8_t)Z),eStr);
+          getLvlEnergyStr(eStr,&dat->ndat,state->ss.results[i].resultVal[1],1);
+          SDL_snprintf(tmpStr,64,"%s - %s keV",getElemStr((uint8_t)Z),eStr);
           drawTextAlignedSized(rdat,drawRect.x+12.0f*state->ds.uiUserScale+numWidth,drawRect.y+(20.0f*state->ds.uiUserScale),blackCol8Bit,FONTSIZE_LARGE,alpha8,tmpStr,ALIGN_LEFT,16384); //draw element and level label
           drawTextAlignedSized(rdat,drawRect.x+12.0f*state->ds.uiUserScale,drawRect.y+(SEARCH_MENU_RESULT_HEIGHT-32.0f)*state->ds.uiUserScale,grayCol8Bit,FONTSIZE_NORMAL,alpha8,dat->strings[dat->locStringIDs[LOCSTR_SEARCHRES_ELEVEL]],ALIGN_LEFT,16384);
           break;
         case SEARCHAGENT_GAMMACASCADE:
-          Z = (uint16_t)dat->ndat.nuclData[state->ss.results[i].resultVal].Z;
-          N = (uint16_t)dat->ndat.nuclData[state->ss.results[i].resultVal].N;
-          snprintf(tmpStr,64,"%u",N+Z);
+          Z = (uint16_t)dat->ndat.nuclData[state->ss.results[i].resultVal[0]].Z;
+          N = (uint16_t)dat->ndat.nuclData[state->ss.results[i].resultVal[0]].N;
+          SDL_snprintf(tmpStr,64,"%u",N+Z);
           numWidth = drawTextAlignedSized(rdat,drawRect.x+12.0f*state->ds.uiUserScale,drawRect.y+12.0f*state->ds.uiUserScale,blackCol8Bit,FONTSIZE_SMALL,alpha8,tmpStr,ALIGN_LEFT,16384).w; //draw number label
-          getGammaEnergyStr(eStr,&dat->ndat,state->ss.results[i].resultVal2,1);
-          snprintf(tmpStr,64,"%s - %s keV",getElemStr((uint8_t)Z),eStr);
+          int32_t length = 0;
+          uint8_t numCascadeGammas = 0;
+          for(uint8_t j=1; j<SEARCH_RESULT_DATASIZE; j++){
+            if(state->ss.results[i].resultVal[j] == UNUSED_SEARCH_RESULT){
+              break;
+            }
+            numCascadeGammas++;
+          }
+          if(numCascadeGammas > 3){
+            numCascadeGammas = 3; //truncate the string so it fits in the box
+          }
+          length += SDL_snprintf(tmpStr+length,64,"%s - ",getElemStr((uint8_t)Z));
+          for(uint8_t j=1; j<numCascadeGammas; j++){
+            length += SDL_snprintf(tmpStr+length,(uint64_t)(64-length),"%0.0f, ",(double)(dat->ndat.tran[state->ss.results[i].resultVal[j]].energy.val));
+          }
+          length += SDL_snprintf(tmpStr+length,(uint64_t)(64-length),"%0.0f keV",(double)(dat->ndat.tran[state->ss.results[i].resultVal[numCascadeGammas]].energy.val));
           drawTextAlignedSized(rdat,drawRect.x+12.0f*state->ds.uiUserScale+numWidth,drawRect.y+(20.0f*state->ds.uiUserScale),blackCol8Bit,FONTSIZE_LARGE,alpha8,tmpStr,ALIGN_LEFT,16384); //draw element and cascade label
           drawTextAlignedSized(rdat,drawRect.x+12.0f*state->ds.uiUserScale,drawRect.y+(SEARCH_MENU_RESULT_HEIGHT-32.0f)*state->ds.uiUserScale,grayCol8Bit,FONTSIZE_NORMAL,alpha8,dat->strings[dat->locStringIDs[LOCSTR_SEARCHRES_GAMMACASCADE]],ALIGN_LEFT,16384);
           break;

@@ -3002,16 +3002,17 @@ void searchResultClickAction(app_data *restrict dat, app_state *restrict state, 
 	uint16_t nuclLevel = 65535U;
 	switch(state->ss.results[resultInd].resultType){
 		case SEARCHAGENT_NUCLIDE:
-			setSelectedNuclOnChartDirect(dat,state,rdat,(uint16_t)(state->ss.results[resultInd].resultVal),1);
+			setSelectedNuclOnChartDirect(dat,state,rdat,(uint16_t)(state->ss.results[resultInd].resultVal[0]),1);
 			break;
+		case SEARCHAGENT_GAMMACASCADE:
 		case SEARCHAGENT_EGAMMA:
-			setSelectedNuclOnChartDirect(dat,state,rdat,(uint16_t)(state->ss.results[resultInd].resultVal),1);
+			setSelectedNuclOnChartDirect(dat,state,rdat,(uint16_t)(state->ss.results[resultInd].resultVal[0]),1);
 			uiElemClickAction(dat,state,rdat,0,UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON);
 			//get the level corresponding to the transition
-			for(uint16_t i=0; i<dat->ndat.nuclData[state->ss.results[resultInd].resultVal].numLevels; i++){
-				uint32_t firstTran = dat->ndat.levels[dat->ndat.nuclData[state->ss.results[resultInd].resultVal].firstLevel + i].firstTran;
-				for(uint32_t j=firstTran; j<(firstTran + dat->ndat.levels[dat->ndat.nuclData[state->ss.results[resultInd].resultVal].firstLevel + i].numTran); j++){
-					if(j==state->ss.results[resultInd].resultVal2){
+			for(uint16_t i=0; i<dat->ndat.nuclData[state->ss.results[resultInd].resultVal[0]].numLevels; i++){
+				uint32_t firstTran = dat->ndat.levels[dat->ndat.nuclData[state->ss.results[resultInd].resultVal[0]].firstLevel + i].firstTran;
+				for(uint32_t j=firstTran; j<(firstTran + dat->ndat.levels[dat->ndat.nuclData[state->ss.results[resultInd].resultVal[0]].firstLevel + i].numTran); j++){
+					if(j==state->ss.results[resultInd].resultVal[1]){
 						nuclLevel = i;
 						break;
 					}
@@ -3023,10 +3024,11 @@ void searchResultClickAction(app_data *restrict dat, app_state *restrict state, 
 			state->ds.nuclFullInfoScrollY = getNumDispLinesUpToLvl(&dat->ndat,state,nuclLevel); //scroll to the level of interest
 			break;
 		case SEARCHAGENT_ELEVEL:
-			setSelectedNuclOnChartDirect(dat,state,rdat,(uint16_t)(state->ss.results[resultInd].resultVal),1);
+			setSelectedNuclOnChartDirect(dat,state,rdat,(uint16_t)(state->ss.results[resultInd].resultVal[0]),1);
 			uiElemClickAction(dat,state,rdat,0,UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON);
-			nuclLevel = (uint16_t)(state->ss.results[resultInd].resultVal2 - dat->ndat.nuclData[state->ss.results[resultInd].resultVal].firstLevel);
+			nuclLevel = (uint16_t)(state->ss.results[resultInd].resultVal[1] - dat->ndat.nuclData[state->ss.results[resultInd].resultVal[0]].firstLevel);
 			state->ds.nuclFullInfoScrollY = getNumDispLinesUpToLvl(&dat->ndat,state,nuclLevel); //scroll to the level of interest
+			break;
 		default:
 			break;
 	}
