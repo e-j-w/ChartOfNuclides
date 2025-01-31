@@ -137,6 +137,7 @@ typedef struct
 {
   valWithErr qbeta, qalpha; //Q(beta-),Q(alpha) 
   valWithErr sp, sn; //proton and neutron separation energies
+  valWithErr massExcess;
   int16_t N; //neutrons in nuclide
   int16_t Z; //protons in nuclide
   uint32_t firstLevel; //index of first level in this nuclide

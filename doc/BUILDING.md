@@ -129,6 +129,7 @@ If you don't have the `con.dat` data file, it can be built from the original dat
 | Data       | Source location | Instructions |
 | :--------- | :---------------| :----------- |
 | Nuclear structure data    |  [ENSDF](https://www.nndc.bnl.gov/ensarchivals/) | Download the zip archive from the link in the 'Latest Dataset' section. Unzip it in the source tree into the directory `data/ensdf/` (such that the `ensdf` subdirectory contains the files `ensdf.001`, `ensdf.002`, etc.). |
+| Mass data                 | [AME2020](https://amdc.impcas.ac.cn/web/masseval.html) | This data is already provided in this repo (at `data/masses.txt`).  If you want to retreive/update the data yourself, go to the source website, then download the first ASCII file (`mass_1.mas20`).  Save/rename this file at `data/masses.txt`. |
 | Isotope abundance data    | [NIST](https://www.nist.gov/pml/atomic-weights-and-isotopic-compositions-relative-atomic-masses) | This data is already provided in this repo (at `data/abundances.txt`).  If you want to retreive/update the data yourself, go to the source website, then under 'Search the Database', select 'All Elements', output type 'Linearized ASCII Output', with the option 'Most common isotopes'.  Select 'Get Data'.  Copy the resulting plaintext data into a text file, save the text file in the source tree under `data/abundances.txt`. |
 
 Once the data files are properly set up, run: 

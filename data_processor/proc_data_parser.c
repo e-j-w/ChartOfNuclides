@@ -3037,6 +3037,93 @@ int parseAbundanceData(const char * filePath, ndata * nd){
   return 0;
 }
 
+//function to parse AME2020 mass data file
+//assumes ENSDF data has already been parsed
+/*int parseMassData(const char * filePath, ndata * nd){
+
+  FILE *mfile;
+  char *tok;
+	char *saveptr = NULL;
+  char str[256];//string to be read from file (will be tokenized)
+  char line[256],val[MAXNUMPARSERVALS][256],tmpVal[256];
+  int tokPos;//position when tokenizing
+  
+  int16_t Z = 0;
+	int16_t A = 0;
+	int16_t N = 0;
+  
+  //open the file and read all parameters
+  if((mfile=fopen(filePath,"r"))==NULL){
+		SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"Cannot open the mass data file %s\n",filePath);
+		return -1;
+	}
+  while(!(feof(mfile))){ //go until the end of file is reached
+
+		if(fgets(str,256,mfile)!=NULL){ //get an entire line
+
+			strcpy(line,str); //store the entire line
+			//SDL_Log("%s\n",line);
+
+			//tokenize
+			tok=SDL_strtok_r(str," ",&saveptr);
+			tokPos=0;
+			strcpy(val[tokPos],tok);
+			while(tok != NULL){
+				tok = SDL_strtok_r(NULL, " ",&saveptr);
+				if(tok!=NULL){
+					tokPos++;
+					if(tokPos<MAXNUMPARSERVALS)
+						strcpy(val[tokPos],tok);
+					else
+						break;
+				}
+			}
+
+			if(tokPos == 1){
+				if(strcmp(val[0],"Atomic Number ")==0){
+					Z = (int16_t)atoi(val[1]);
+				}else if(strcmp(val[0],"Mass Number ")==0){
+					A = (int16_t)atoi(val[1]);
+					N = (int16_t)(A - Z);
+				}else if(strcmp(val[0],"Isotopic Composition ")==0){
+					uint16_t nuclInd = getNuclInd(nd,N,Z);
+					if(nuclInd < nd->numNucl){
+						strcpy(tmpVal,val[1]);
+						tok=SDL_strtok_r(tmpVal,"(",&saveptr);
+						if(tok!=NULL){
+							nd->nuclData[nuclInd].abundance.val = (float)(atof(tok)*100.0);
+							nd->nuclData[nuclInd].abundance.format = (uint16_t)(SDL_strlen(tok)-5);
+							if(nd->nuclData[nuclInd].abundance.format > 15U){
+								nd->nuclData[nuclInd].abundance.format = 15U; //only 4 bits available for precision
+							}
+							tok=SDL_strtok_r(NULL,")",&saveptr);
+							if(tok!=NULL){
+								nd->nuclData[nuclInd].abundance.err = (uint8_t)atoi(tok);
+								nd->nuclData[nuclInd].abundance.unit = VALUE_UNIT_PERCENT;
+								//SDL_Log("Abundance for N,Z = [%i %i]: %.*f %u\n",N,Z,nd->nuclData[nuclInd].abundance.format,(double)nd->nuclData[nuclInd].abundance.val,nd->nuclData[nuclInd].abundance.err);
+							}else{
+								//check special cases
+								if(atoi(val[1])==1){
+									//100% abundance case
+									nd->nuclData[nuclInd].abundance.val = 100.0f;
+									nd->nuclData[nuclInd].abundance.format = 0;
+									nd->nuclData[nuclInd].abundance.err = 0;
+									nd->nuclData[nuclInd].abundance.unit = VALUE_UNIT_PERCENT;
+								}
+							}
+						}
+					}
+				}
+			}
+
+		}
+	}
+	fclose(mfile);
+	
+	SDL_Log("Finished reading abundance data file: %s\n",filePath);
+  return 0;
+}*/
+
 int buildDatabase(const char *appBasePath, ndata *nd){
 
 	char filePath[256],str[8];
