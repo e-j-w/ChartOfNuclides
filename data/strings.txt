@@ -7,6 +7,7 @@ qalpha|Q(α)
 q_betaminus|Q(β-)
 protonsep_energy|S(p)
 neutronsep_energy|S(n)
+mass_unknown|Mass Unknown
 unknown|Unknown
 level_info_header|Levels and gammas:
 energy_kev|Energy (keV)

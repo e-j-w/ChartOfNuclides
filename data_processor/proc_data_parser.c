@@ -248,6 +248,7 @@ static int parseAppRules(app_data *restrict dat, asset_mapping *restrict stringI
 	dat->locStringIDs[LOCSTR_QBETAMNUS] = (uint16_t)nameToAssetID("q_betaminus",stringIDmap);
 	dat->locStringIDs[LOCSTR_SP] = (uint16_t)nameToAssetID("protonsep_energy",stringIDmap);
 	dat->locStringIDs[LOCSTR_SN] = (uint16_t)nameToAssetID("neutronsep_energy",stringIDmap);
+	dat->locStringIDs[LOCSTR_MASS_UNKNOWN] = (uint16_t)nameToAssetID("mass_unknown",stringIDmap);
 	dat->locStringIDs[LOCSTR_UNKNOWN] = (uint16_t)nameToAssetID("unknown",stringIDmap);
 	dat->locStringIDs[LOCSTR_LEVELINFO_HEADER] = (uint16_t)nameToAssetID("level_info_header",stringIDmap);
 	dat->locStringIDs[LOCSTR_ENERGY_KEV] = (uint16_t)nameToAssetID("energy_kev",stringIDmap);
@@ -3039,17 +3040,13 @@ int parseAbundanceData(const char * filePath, ndata * nd){
 
 //function to parse AME2020 mass data file
 //assumes ENSDF data has already been parsed
-/*int parseMassData(const char * filePath, ndata * nd){
+int parseMassData(const char * filePath, ndata * nd){
 
   FILE *mfile;
-  char *tok;
-	char *saveptr = NULL;
-  char str[256];//string to be read from file (will be tokenized)
-  char line[256],val[MAXNUMPARSERVALS][256],tmpVal[256];
-  int tokPos;//position when tokenizing
+  char str[256];//string to be read from file
+  char line[256],tmpVal[256];
   
   int16_t Z = 0;
-	int16_t A = 0;
 	int16_t N = 0;
   
   //open the file and read all parameters
@@ -3061,68 +3058,186 @@ int parseAbundanceData(const char * filePath, ndata * nd){
 
 		if(fgets(str,256,mfile)!=NULL){ //get an entire line
 
+			str[strcspn(str,"\r\n")] = 0; //strips newline characters from the string read by fgets
+
 			strcpy(line,str); //store the entire line
 			//SDL_Log("%s\n",line);
 
-			//tokenize
-			tok=SDL_strtok_r(str," ",&saveptr);
-			tokPos=0;
-			strcpy(val[tokPos],tok);
-			while(tok != NULL){
-				tok = SDL_strtok_r(NULL, " ",&saveptr);
-				if(tok!=NULL){
-					tokPos++;
-					if(tokPos<MAXNUMPARSERVALS)
-						strcpy(val[tokPos],tok);
-					else
-						break;
-				}
-			}
+			memcpy(tmpVal,&line[6],3);
+			tmpVal[3] = '\0'; //terminate string
+			N = (int16_t)SDL_atoi(tmpVal);
+			memcpy(tmpVal,&line[11],3);
+			tmpVal[3] = '\0'; //terminate string
+			Z = (int16_t)SDL_atoi(tmpVal);
 
-			if(tokPos == 1){
-				if(strcmp(val[0],"Atomic Number ")==0){
-					Z = (int16_t)atoi(val[1]);
-				}else if(strcmp(val[0],"Mass Number ")==0){
-					A = (int16_t)atoi(val[1]);
-					N = (int16_t)(A - Z);
-				}else if(strcmp(val[0],"Isotopic Composition ")==0){
-					uint16_t nuclInd = getNuclInd(nd,N,Z);
-					if(nuclInd < nd->numNucl){
-						strcpy(tmpVal,val[1]);
-						tok=SDL_strtok_r(tmpVal,"(",&saveptr);
-						if(tok!=NULL){
-							nd->nuclData[nuclInd].abundance.val = (float)(atof(tok)*100.0);
-							nd->nuclData[nuclInd].abundance.format = (uint16_t)(SDL_strlen(tok)-5);
-							if(nd->nuclData[nuclInd].abundance.format > 15U){
-								nd->nuclData[nuclInd].abundance.format = 15U; //only 4 bits available for precision
-							}
-							tok=SDL_strtok_r(NULL,")",&saveptr);
-							if(tok!=NULL){
-								nd->nuclData[nuclInd].abundance.err = (uint8_t)atoi(tok);
-								nd->nuclData[nuclInd].abundance.unit = VALUE_UNIT_PERCENT;
-								//SDL_Log("Abundance for N,Z = [%i %i]: %.*f %u\n",N,Z,nd->nuclData[nuclInd].abundance.format,(double)nd->nuclData[nuclInd].abundance.val,nd->nuclData[nuclInd].abundance.err);
-							}else{
-								//check special cases
-								if(atoi(val[1])==1){
-									//100% abundance case
-									nd->nuclData[nuclInd].abundance.val = 100.0f;
-									nd->nuclData[nuclInd].abundance.format = 0;
-									nd->nuclData[nuclInd].abundance.err = 0;
-									nd->nuclData[nuclInd].abundance.unit = VALUE_UNIT_PERCENT;
-								}
-							}
+			uint16_t nuclInd = getNuclInd(nd,N,Z);
+			if(nuclInd < nd->numNucl){
+
+				//mass excess
+				uint8_t systematic = 0;
+				memcpy(tmpVal,&line[29],12);
+				tmpVal[12] = '\0'; //terminate string
+				for(uint8_t i=0; i<12; i++){
+					if(tmpVal[i] == '#'){
+						tmpVal[i] = '\0'; //re-terminate string
+						systematic = 1;
+					}
+				}
+				double rawVal = SDL_atof(tmpVal);
+
+				memcpy(tmpVal,&line[43],12);
+				tmpVal[12] = '\0'; //terminate string
+				for(uint8_t i=0; i<12; i++){
+					if(tmpVal[i] == '#'){
+						tmpVal[i] = '\0'; //re-terminate string
+						systematic = 1;
+					}
+				}
+				uint8_t numSigFigs = 0;
+				int8_t exponent = 0;
+				double rawErr = SDL_atof(tmpVal);
+				//SDL_Log("rawErr: %f\n",rawErr);
+				if(rawErr > 0.0){
+					if(rawErr < 20.0){
+						while(rawErr < 2.0){
+							rawErr *= 10.0;
+							numSigFigs++;
+						}
+					}else{
+						while(rawErr >= 20.0){
+							rawErr /= 10.0;
+							rawVal /= 10.0;
+							exponent++;
 						}
 					}
 				}
+
+				nd->nuclData[nuclInd].massExcess.val = (float)rawVal;
+				nd->nuclData[nuclInd].massExcess.err = (uint8_t)SDL_round(rawErr);
+				nd->nuclData[nuclInd].massExcess.unit = VALUE_UNIT_KEV;
+				nd->nuclData[nuclInd].massExcess.format = (uint16_t)(numSigFigs & 15U);
+				if(exponent != 0){
+					nd->nuclData[nuclInd].massExcess.format |= (uint16_t)(1U << 4); //exponent flag
+					nd->nuclData[nuclInd].massExcess.exponent = exponent;
+				}
+				if(systematic){
+					nd->nuclData[nuclInd].massExcess.format |= (uint16_t)(VALUETYPE_UNKNOWN << 5);
+				}
+
+				//BE/A
+				systematic = 0;
+				memcpy(tmpVal,&line[56],12);
+				tmpVal[12] = '\0'; //terminate string
+				for(uint8_t i=0; i<12; i++){
+					if(tmpVal[i] == '#'){
+						tmpVal[i] = '\0'; //re-terminate string
+						systematic = 1;
+					}
+				}
+				rawVal = SDL_atof(tmpVal);
+
+				memcpy(tmpVal,&line[68],12);
+				tmpVal[12] = '\0'; //terminate string
+				for(uint8_t i=0; i<12; i++){
+					if(tmpVal[i] == '#'){
+						tmpVal[i] = '\0'; //re-terminate string
+						systematic = 1;
+					}
+				}
+				numSigFigs = 0;
+				exponent = 0;
+				rawErr = SDL_atof(tmpVal);
+				//SDL_Log("rawErr2: %f\n",rawErr);
+				if(rawErr > 0.0){
+					if(rawErr < 20.0){
+						while(rawErr < 2.0){
+							rawErr *= 10.0;
+							numSigFigs++;
+						}
+					}else{
+						while(rawErr >= 20.0){
+							rawErr /= 10.0;
+							rawVal /= 10.0;
+							exponent++;
+						}
+					}
+				}
+
+				nd->nuclData[nuclInd].beA.val = (float)rawVal;
+				nd->nuclData[nuclInd].beA.err = (uint8_t)SDL_round(rawErr);
+				nd->nuclData[nuclInd].beA.unit = VALUE_UNIT_KEV;
+				nd->nuclData[nuclInd].beA.format = (uint16_t)(numSigFigs & 15U);
+				if(exponent != 0){
+					nd->nuclData[nuclInd].beA.format |= (uint16_t)(1U << 4); //exponent flag
+					nd->nuclData[nuclInd].beA.exponent = exponent;
+				}
+				if(systematic){
+					nd->nuclData[nuclInd].beA.format |= (uint16_t)(VALUETYPE_UNKNOWN << 5);
+				}
+
+				//mass in amu
+				systematic = 0;
+				memcpy(tmpVal,&line[106],3);
+				tmpVal[3] = '\0'; //terminate string
+				rawVal = SDL_atof(tmpVal);
+				memcpy(tmpVal,&line[110],13);
+				tmpVal[13] = '\0'; //terminate string
+				for(uint8_t i=0; i<13; i++){
+					if(tmpVal[i] == '#'){
+						tmpVal[i] = '\0'; //re-terminate string
+						systematic = 1;
+					}
+				}
+				rawVal += SDL_atof(tmpVal)/1000000.0;
+
+				memcpy(tmpVal,&line[124],12);
+				tmpVal[12] = '\0'; //terminate string
+				for(uint8_t i=0; i<12; i++){
+					if(tmpVal[i] == '#'){
+						tmpVal[i] = '\0'; //re-terminate string
+						systematic = 1;
+					}
+				}
+				numSigFigs = 0;
+				exponent = 0;
+				rawErr = SDL_atof(tmpVal)/1000000.0;
+				//SDL_Log("rawErr3: %f\n",rawErr);
+				if(rawErr > 0.0){
+					if(rawErr < 20.0){
+						while(rawErr < 2.0){
+							rawErr *= 10.0;
+							numSigFigs++;
+						}
+					}else{
+						while(rawErr >= 20.0){
+							rawErr /= 10.0;
+							rawVal /= 10.0;
+							exponent++;
+						}
+					}
+				}
+
+				nd->nuclData[nuclInd].massAMU.val = (float)rawVal;
+				nd->nuclData[nuclInd].massAMU.err = (uint8_t)SDL_round(rawErr);
+				nd->nuclData[nuclInd].massAMU.unit = VALUE_UNIT_AMU;
+				nd->nuclData[nuclInd].massAMU.format = (uint16_t)(numSigFigs & 15U);
+				if(exponent != 0){
+					nd->nuclData[nuclInd].massAMU.format |= (uint16_t)(1U << 4); //exponent flag
+					nd->nuclData[nuclInd].massAMU.exponent = exponent;
+				}
+				if(systematic){
+					nd->nuclData[nuclInd].massAMU.format |= (uint16_t)(VALUETYPE_UNKNOWN << 5);
+				}
+
 			}
 
 		}
 	}
 	fclose(mfile);
 	
-	SDL_Log("Finished reading abundance data file: %s\n",filePath);
+	SDL_Log("Finished reading mass data file: %s\n",filePath);
   return 0;
-}*/
+}
 
 int buildDatabase(const char *appBasePath, ndata *nd){
 
@@ -3154,6 +3269,12 @@ int buildDatabase(const char *appBasePath, ndata *nd){
 	SDL_strlcat(filePath,appBasePath,256);
 	SDL_strlcat(filePath,"data/abundances.txt",256);
 	if(parseAbundanceData(filePath,nd) == -1){
+		return -1;
+	}
+	strcpy(filePath,"");
+	SDL_strlcat(filePath,appBasePath,256);
+	SDL_strlcat(filePath,"data/masses.txt",256);
+	if(parseMassData(filePath,nd) == -1){
 		return -1;
 	}
 

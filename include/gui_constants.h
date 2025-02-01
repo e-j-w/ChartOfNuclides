@@ -180,10 +180,10 @@ static const float uiScales[UISCALE_ENUM_LENGTH] = {1.0f,1.20f,1.60f,1.85f};
 #define NUCL_FULLINFOBOX_BACKBUTTON_POS_Y               MENU_BUTTON_POS_Y
 #define NUCL_FULLINFOBOX_BACKBUTTON_WIDTH               NUCL_INFOBOX_ALLLEVELS_BUTTON_WIDTH
 #define NUCL_FULLINFOBOX_RXNBUTTON_WIDTH                200 //in unscaled pixels (only when showing all reactions... when a reaction is selected, adaptive width will be used instead)
-#define NUCL_FULLINFOBOX_NZVALS_POS_X                   (PANEL_EDGE_SIZE + 3*UI_PADDING_SIZE) //minimum distance from header text, in unscaled pixels
+#define NUCL_FULLINFOBOX_NZVALS_POS_X                   (PANEL_EDGE_SIZE + 4*UI_PADDING_SIZE) //minimum distance from header text, in unscaled pixels
 #define NUCL_FULLINFOBOX_NZVALS_POS_Y                   42.0f //in unscaled pixels
 #define NUCL_FULLINFOBOX_QVAL_POS_XR                    (2*MENU_BUTTON_POS_XR) //in unscaled pixels
-#define NUCL_FULLINFOBOX_QVAL_POS_Y                     40.0f //in unscaled pixels
+#define NUCL_FULLINFOBOX_QVAL_POS_Y                     38.0f //in unscaled pixels
 #define NUCL_FULLINFOBOX_ENERGY_COL_MIN_WIDTH           120.0f //in unscaled pixels
 #define NUCL_FULLINFOBOX_JPI_COL_MIN_WIDTH              60.0f //in unscaled pixels
 #define NUCL_FULLINFOBOX_HALFLIFE_COL_MIN_WIDTH         130.0f //in unscaled pixels
@@ -193,7 +193,7 @@ static const float uiScales[UISCALE_ENUM_LENGTH] = {1.0f,1.20f,1.60f,1.85f};
 #define NUCL_FULLINFOBOX_DIVIDER_LINE_THICKNESS         1.0f //in unscaled pixels
 #define NUCL_FULLINFOBOX_FINALLEVEL_E_COL_MIN_WIDTH     60.0f //in unscaled pixels
 #define NUCL_FULLINFOBOX_FINALLEVEL_JPI_COL_MIN_WIDTH   40.0f //in unscaled pixels
-#define NUCL_FULLINFOBOX_LEVELLIST_HEADER_POS_Y         94.0f //in unscaled pixels
+#define NUCL_FULLINFOBOX_LEVELLIST_HEADER_POS_Y         112.0f //in unscaled pixels
 #define NUCL_FULLINFOBOX_LEVELLIST_POS_Y                (NUCL_FULLINFOBOX_LEVELLIST_HEADER_POS_Y + 46.0f) //in unscaled pixels
 #define NUCL_FULLINFOBOX_SCROLLBAR_POS_XR               (4*UI_PADDING_SIZE)
 

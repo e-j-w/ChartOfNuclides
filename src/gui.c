@@ -1223,10 +1223,20 @@ void drawNuclFullInfoBox(const app_data *restrict dat, const app_state *restrict
   }else{
     drawTextAlignedSized(rdat,NUCL_FULLINFOBOX_NZVALS_POS_X*state->ds.uiUserScale,drawYPos,blackCol8Bit,FONTSIZE_SMALL,txtAlpha,dat->strings[dat->locStringIDs[LOCSTR_NOTNATURAL]],ALIGN_LEFT,16384);
   }
+  drawYPos += 18.0f*state->ds.uiUserScale;
+  drawTextAlignedSized(rdat,NUCL_FULLINFOBOX_NZVALS_POS_X*state->ds.uiUserScale,drawYPos,blackCol8Bit,FONTSIZE_SMALL,txtAlpha,getElementFamilyStr(dat->ndat.nuclData[nuclInd].Z),ALIGN_LEFT,16384);
   
-  //Q-values
+  //Q-values and masses
   drawXPos = state->ds.windowXRes - NUCL_FULLINFOBOX_QVAL_POS_XR*state->ds.uiUserScale;
   drawYPos = NUCL_FULLINFOBOX_QVAL_POS_Y*state->ds.uiUserScale + txtYOffset;
+  if(dat->ndat.nuclData[nuclInd].massAMU.val != 0.0f){
+    getMassValStr(descStr,dat->ndat.nuclData[nuclInd].massAMU,1);
+    SDL_snprintf(tmpStr,32,"%s %s",descStr,getValueUnitShortStr(dat->ndat.nuclData[nuclInd].massAMU.unit));
+  }else{
+    SDL_snprintf(tmpStr,32,"%s",dat->strings[dat->locStringIDs[LOCSTR_MASS_UNKNOWN]]);
+  }
+  drawTextAlignedSized(rdat,drawXPos,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_RIGHT,16384);
+  drawYPos += 20.0f*state->ds.uiUserScale;
   if(dat->ndat.nuclData[nuclInd].sp.val != 0.0f){
     getQValStr(descStr,dat->ndat.nuclData[nuclInd].sp,1);
     SDL_snprintf(tmpStr,32,"%s=%s %s",dat->strings[dat->locStringIDs[LOCSTR_SP]],descStr,getValueUnitShortStr(dat->ndat.nuclData[nuclInd].sp.unit));

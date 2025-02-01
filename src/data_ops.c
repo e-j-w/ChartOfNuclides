@@ -1468,6 +1468,8 @@ const char* getValueUnitShortStr(const uint8_t unit){
 			return "keV";
 		case VALUE_UNIT_MEV:
 			return "MeV";
+		case VALUE_UNIT_AMU:
+			return "amu";
 		case VALUE_UNIT_NOVAL:
 		default:
 			return "";																						
@@ -1596,6 +1598,62 @@ uint8_t multsCanMix(const uint8_t mult1, const uint8_t mult2){
 			return 0;
 		}else{
 			return 1;
+		}
+	}
+}
+
+const char* getElementFamilyStr(const int16_t Z){
+	if(Z == 0){
+		return "Non-element";
+	}else if((Z==1)||(Z>=5 && Z <= 8)||(Z>=14 && Z<=16)||(Z>=33 && Z<=34)||(Z==52)){
+		return "Non-metal element";
+	}else if(Z==3 || Z==11 || Z==19 || Z==37 || Z==55 || Z==87){
+		return "Alkali metal";
+	}else if(Z==4 || Z==12 || Z==20 || Z==38 || Z==56 || Z==88){
+		return "Alkaline earth metal";
+	}else if((Z>=21 && Z<=29)||(Z>=39 && Z<=47)||(Z>=72 && Z<=79)){
+		return "Transition metal";
+	}else if((Z==13)||(Z>=30 && Z<=32)||(Z>=48 && Z<=51)||(Z>=80 && Z<= 84)){
+		return "Metal element";
+	}else if(Z==9 || Z==17 || Z==35 || Z==53 || Z==85){
+		return "Halogen";
+	}else if(Z==2 || Z==10 || Z==18 || Z==36 || Z==54 || Z==86){
+		return "Noble gas";
+	}else if(Z>=57 && Z<=71){
+		return "Lanthanide element";
+	}else if(Z>=89 && Z<=103){
+		return "Actinide element";
+	}else if(Z>=104){
+		return "Super heavy element";
+	}else{
+		return "Unknown element";
+	}
+}
+
+void getMassValStr(char strOut[32], const valWithErr mVal, const uint8_t showErr){
+	uint8_t mPrecision = (uint8_t)(mVal.format & 15U);
+	uint8_t mExponent = (uint8_t)((mVal.format >> 4U) & 1U);
+	uint8_t mValueType = (uint8_t)((mVal.format >> 5U) & 15U);
+	if((showErr == 0)||(mVal.err == 0)){
+		if(mExponent == 0){
+			SDL_snprintf(strOut,32,"%.*f",mPrecision,(double)(mVal.val));
+		}else{
+			SDL_snprintf(strOut,32,"%.*fE%i",mPrecision,(double)(mVal.val),mVal.exponent);
+		}
+	}else{
+		if(mExponent == 0){
+			if(mValueType == VALUETYPE_UNKNOWN){
+				//estimated
+				SDL_snprintf(strOut,32,"%.*f(%u) (est.)",mPrecision,(double)(mVal.val),mVal.err);
+			}else{
+				SDL_snprintf(strOut,32,"%.*f(%u)",mPrecision,(double)(mVal.val),mVal.err);
+			}
+		}else{
+			if(mValueType == VALUETYPE_UNKNOWN){
+				SDL_snprintf(strOut,32,"%.*f(%u)E%i (est.)",mPrecision,(double)(mVal.val),mVal.err,mVal.exponent);
+			}else{
+				SDL_snprintf(strOut,32,"%.*f(%u)E%i",mPrecision,(double)(mVal.val),mVal.err,mVal.exponent);
+			}
 		}
 	}
 }
