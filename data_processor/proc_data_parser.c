@@ -238,7 +238,7 @@ static int parseAppRules(app_data *restrict dat, asset_mapping *restrict stringI
   }
   fclose(inp);
 
-  //setup string ids for mandatory strings
+  //setup string ids for mandatory localization strings
   dat->locStringIDs[LOCSTR_APPLY] = (uint16_t)nameToAssetID("apply",stringIDmap);
   dat->locStringIDs[LOCSTR_CANCEL] = (uint16_t)nameToAssetID("cancel",stringIDmap);
   dat->locStringIDs[LOCSTR_OK] = (uint16_t)nameToAssetID("ok",stringIDmap);
@@ -250,6 +250,18 @@ static int parseAppRules(app_data *restrict dat, asset_mapping *restrict stringI
 	dat->locStringIDs[LOCSTR_SN] = (uint16_t)nameToAssetID("neutronsep_energy",stringIDmap);
 	dat->locStringIDs[LOCSTR_ATOMIC_MASS] = (uint16_t)nameToAssetID("atomic_mass",stringIDmap);
 	dat->locStringIDs[LOCSTR_MASS_UNKNOWN] = (uint16_t)nameToAssetID("mass_unknown",stringIDmap);
+	dat->locStringIDs[LOCSTR_ELEM_TYPE] = (uint16_t)nameToAssetID("element_type",stringIDmap);
+	dat->locStringIDs[LOCSTR_ELEMTYPE_NONELEMENT] = (uint16_t)nameToAssetID("elemtype_nonelement",stringIDmap);
+	dat->locStringIDs[LOCSTR_ELEMTYPE_NONMETAL] = (uint16_t)nameToAssetID("elemtype_nonmetal",stringIDmap);
+	dat->locStringIDs[LOCSTR_ELEMTYPE_ALKALI] = (uint16_t)nameToAssetID("elemtype_alkali",stringIDmap);
+	dat->locStringIDs[LOCSTR_ELEMTYPE_ALKALIEARTH] = (uint16_t)nameToAssetID("elemtype_alkaliearth",stringIDmap);
+	dat->locStringIDs[LOCSTR_ELEMTYPE_TRANSITIONMETAL] = (uint16_t)nameToAssetID("elemtype_transitionmetal",stringIDmap);
+	dat->locStringIDs[LOCSTR_ELEMTYPE_METAL] = (uint16_t)nameToAssetID("elemtype_metal",stringIDmap);
+	dat->locStringIDs[LOCSTR_ELEMTYPE_HALOGEN] = (uint16_t)nameToAssetID("elemtype_halogen",stringIDmap);
+	dat->locStringIDs[LOCSTR_ELEMTYPE_NOBLEGAS] = (uint16_t)nameToAssetID("elemtype_noblegas",stringIDmap);
+	dat->locStringIDs[LOCSTR_ELEMTYPE_LANTHANIDE] = (uint16_t)nameToAssetID("elemtype_lanthanide",stringIDmap);
+	dat->locStringIDs[LOCSTR_ELEMTYPE_ACTINIDE] = (uint16_t)nameToAssetID("elemtype_actinide",stringIDmap);
+	dat->locStringIDs[LOCSTR_ELEMTYPE_SUPERHEAVY] = (uint16_t)nameToAssetID("elemtype_superheavy",stringIDmap);
 	dat->locStringIDs[LOCSTR_UNKNOWN] = (uint16_t)nameToAssetID("unknown",stringIDmap);
 	dat->locStringIDs[LOCSTR_LEVELINFO_HEADER] = (uint16_t)nameToAssetID("level_info_header",stringIDmap);
 	dat->locStringIDs[LOCSTR_ENERGY_KEV] = (uint16_t)nameToAssetID("energy_kev",stringIDmap);

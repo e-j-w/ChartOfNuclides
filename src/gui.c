@@ -1323,7 +1323,8 @@ void drawNuclFullInfoBox(const app_data *restrict dat, const app_state *restrict
     drawTextAlignedSized(rdat,NUCL_FULLINFOBOX_NZVALS_POS_X*state->ds.uiUserScale,drawYPos,blackCol8Bit,FONTSIZE_SMALL,txtAlpha,dat->strings[dat->locStringIDs[LOCSTR_NOTNATURAL]],ALIGN_LEFT,16384);
   }
   drawYPos += 18.0f*state->ds.uiUserScale;
-  drawTextAlignedSized(rdat,NUCL_FULLINFOBOX_NZVALS_POS_X*state->ds.uiUserScale,drawYPos,blackCol8Bit,FONTSIZE_SMALL,txtAlpha,getElementFamilyStr(dat->ndat.nuclData[nuclInd].Z),ALIGN_LEFT,16384);
+  SDL_snprintf(descStr,64,"%s: %s",dat->strings[dat->locStringIDs[LOCSTR_ELEM_TYPE]],getElementFamilyStr(dat,dat->ndat.nuclData[nuclInd].Z));
+  drawTextAlignedSized(rdat,NUCL_FULLINFOBOX_NZVALS_POS_X*state->ds.uiUserScale,drawYPos,blackCol8Bit,FONTSIZE_SMALL,txtAlpha,descStr,ALIGN_LEFT,16384);
   
   //Q-values and masses
   drawXPos = state->ds.windowXRes - NUCL_FULLINFOBOX_QVAL_POS_XR*state->ds.uiUserScale;

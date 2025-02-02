@@ -1602,29 +1602,29 @@ uint8_t multsCanMix(const uint8_t mult1, const uint8_t mult2){
 	}
 }
 
-const char* getElementFamilyStr(const int16_t Z){
+const char* getElementFamilyStr(const app_data *restrict dat, const int16_t Z){
 	if(Z == 0){
-		return "Non-element";
+		return dat->strings[dat->locStringIDs[LOCSTR_ELEMTYPE_NONELEMENT]];
 	}else if((Z==1)||(Z>=5 && Z <= 8)||(Z>=14 && Z<=16)||(Z>=33 && Z<=34)||(Z==52)){
-		return "Non-metal element";
+		return dat->strings[dat->locStringIDs[LOCSTR_ELEMTYPE_NONMETAL]];
 	}else if(Z==3 || Z==11 || Z==19 || Z==37 || Z==55 || Z==87){
-		return "Alkali metal";
+		return dat->strings[dat->locStringIDs[LOCSTR_ELEMTYPE_ALKALI]];
 	}else if(Z==4 || Z==12 || Z==20 || Z==38 || Z==56 || Z==88){
-		return "Alkaline earth metal";
+		return dat->strings[dat->locStringIDs[LOCSTR_ELEMTYPE_ALKALIEARTH]];
 	}else if((Z>=21 && Z<=29)||(Z>=39 && Z<=47)||(Z>=72 && Z<=79)){
-		return "Transition metal";
+		return dat->strings[dat->locStringIDs[LOCSTR_ELEMTYPE_TRANSITIONMETAL]];
 	}else if((Z==13)||(Z>=30 && Z<=32)||(Z>=48 && Z<=51)||(Z>=80 && Z<= 84)){
-		return "Metal element";
+		return dat->strings[dat->locStringIDs[LOCSTR_ELEMTYPE_METAL]];
 	}else if(Z==9 || Z==17 || Z==35 || Z==53 || Z==85){
-		return "Halogen";
+		return dat->strings[dat->locStringIDs[LOCSTR_ELEMTYPE_HALOGEN]];
 	}else if(Z==2 || Z==10 || Z==18 || Z==36 || Z==54 || Z==86){
-		return "Noble gas";
+		return dat->strings[dat->locStringIDs[LOCSTR_ELEMTYPE_NOBLEGAS]];
 	}else if(Z>=57 && Z<=71){
-		return "Lanthanide element";
+		return dat->strings[dat->locStringIDs[LOCSTR_ELEMTYPE_LANTHANIDE]];
 	}else if(Z>=89 && Z<=103){
-		return "Actinide element";
+		return dat->strings[dat->locStringIDs[LOCSTR_ELEMTYPE_ACTINIDE]];
 	}else if(Z>=104){
-		return "Super heavy element";
+		return dat->strings[dat->locStringIDs[LOCSTR_ELEMTYPE_SUPERHEAVY]];
 	}else{
 		return "Unknown element";
 	}

@@ -9,6 +9,18 @@ protonsep_energy|S(p)
 neutronsep_energy|S(n)
 atomic_mass|Atomic Mass
 mass_unknown|Mass Unknown
+element_type|Element type
+elemtype_nonelement|Non-element
+elemtype_nonmetal|Non-metal
+elemtype_alkali|Alkali metal
+elemtype_alkaliearth|Alkaline earth metal
+elemtype_transitionmetal|Transition metal
+elemtype_metal|Metal
+elemtype_halogen|Halogen
+elemtype_noblegas|Noble gas
+elemtype_lanthanide|Lanthanide
+elemtype_actinide|Actinide
+elemtype_superheavy|Super heavy
 unknown|Unknown
 level_info_header|Levels and gammas:
 energy_kev|Energy (keV)
