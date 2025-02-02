@@ -1469,7 +1469,7 @@ const char* getValueUnitShortStr(const uint8_t unit){
 		case VALUE_UNIT_MEV:
 			return "MeV";
 		case VALUE_UNIT_AMU:
-			return "amu";
+			return "u";
 		case VALUE_UNIT_NOVAL:
 		default:
 			return "";																						
@@ -1630,29 +1630,29 @@ const char* getElementFamilyStr(const int16_t Z){
 	}
 }
 
-void getMassValStr(char strOut[32], const valWithErr mVal, const uint8_t showErr){
+void getMassValStr(char strOut[32], const dblValWithErr mVal, const uint8_t showErr){
 	uint8_t mPrecision = (uint8_t)(mVal.format & 15U);
 	uint8_t mExponent = (uint8_t)((mVal.format >> 4U) & 1U);
 	uint8_t mValueType = (uint8_t)((mVal.format >> 5U) & 15U);
 	if((showErr == 0)||(mVal.err == 0)){
 		if(mExponent == 0){
-			SDL_snprintf(strOut,32,"%.*f",mPrecision,(double)(mVal.val));
+			SDL_snprintf(strOut,32,"%.*f",mPrecision,mVal.val);
 		}else{
-			SDL_snprintf(strOut,32,"%.*fE%i",mPrecision,(double)(mVal.val),mVal.exponent);
+			SDL_snprintf(strOut,32,"%.*fE%i",mPrecision,mVal.val,mVal.exponent);
 		}
 	}else{
 		if(mExponent == 0){
 			if(mValueType == VALUETYPE_UNKNOWN){
 				//estimated
-				SDL_snprintf(strOut,32,"%.*f(%u) (est.)",mPrecision,(double)(mVal.val),mVal.err);
+				SDL_snprintf(strOut,32,"%.*f(%u) (est.)",mPrecision,mVal.val,mVal.err);
 			}else{
-				SDL_snprintf(strOut,32,"%.*f(%u)",mPrecision,(double)(mVal.val),mVal.err);
+				SDL_snprintf(strOut,32,"%.*f(%u)",mPrecision,mVal.val,mVal.err);
 			}
 		}else{
 			if(mValueType == VALUETYPE_UNKNOWN){
-				SDL_snprintf(strOut,32,"%.*f(%u)E%i (est.)",mPrecision,(double)(mVal.val),mVal.err,mVal.exponent);
+				SDL_snprintf(strOut,32,"%.*f(%u)E%i (est.)",mPrecision,mVal.val,mVal.err,mVal.exponent);
 			}else{
-				SDL_snprintf(strOut,32,"%.*f(%u)E%i",mPrecision,(double)(mVal.val),mVal.err,mVal.exponent);
+				SDL_snprintf(strOut,32,"%.*f(%u)E%i",mPrecision,mVal.val,mVal.err,mVal.exponent);
 			}
 		}
 	}
@@ -2140,6 +2140,14 @@ void getSpinParStr(char strOut[32], const ndata *restrict nd, const uint32_t lvl
 	}
 }
 
+double getRawDblValFromDB(const dblValWithErr *restrict valStruct){
+	double val = valStruct->val;
+	if(((valStruct->format >> 4U) & 1U) != 0){
+		//value in exponent form
+		val = val * pow(10.0,(double)(valStruct->exponent));
+	}
+	return val;
+}
 double getRawValFromDB(const valWithErr *restrict valStruct){
 	double val = (double)(valStruct->val);
 	if(((valStruct->format >> 4U) & 1U) != 0){
@@ -2234,6 +2242,11 @@ uint32_t get2PlusLvlInd(const ndata *restrict nd, const uint16_t nuclInd){
 		}
 	}
 	return MAXNUMLVLS;
+}
+
+//get the binding energy per nucleon
+double getBEA(const ndata *restrict nd, const uint16_t nuclInd){
+	return getRawDblValFromDB(&nd->nuclData[nuclInd].beA);
 }
 
 //get the energy ratio of the first 4+ state to the first 2+ state, for even-even nuclei
@@ -2584,6 +2597,7 @@ void changeUIState(const app_data *restrict dat, app_state *restrict state, cons
 				state->interactableElement |= (uint64_t)(1UL << UIELEM_CVM_DECAYMODE_BUTTON);
 				state->interactableElement |= (uint64_t)(1UL << UIELEM_CVM_2PLUS_BUTTON);
 				state->interactableElement |= (uint64_t)(1UL << UIELEM_CVM_R42_BUTTON);
+				state->interactableElement |= (uint64_t)(1UL << UIELEM_CVM_BEA_BUTTON);
 				state->interactableElement |= (uint64_t)(1UL << UIELEM_CHARTVIEW_MENU);
 				if(state->lastInputType != INPUT_TYPE_MOUSE){
 					//keyboard/gamepad navigation of the menu
@@ -3105,7 +3119,7 @@ void uiElemClickAction(app_data *restrict dat, app_state *restrict state, resour
 			state->clickedUIElem = UIELEM_ENUM_LENGTH; //'unclick' the menu button
 		}
 	}
-	if((uiElemID != UIELEM_CHARTVIEW_BUTTON)&&(uiElemID != UIELEM_CHARTVIEW_MENU)&&(uiElemID != UIELEM_CVM_HALFLIFE_BUTTON)&&(uiElemID != UIELEM_CVM_DECAYMODE_BUTTON)&&(uiElemID != UIELEM_CVM_2PLUS_BUTTON)&&(uiElemID != UIELEM_CVM_R42_BUTTON)){
+	if((uiElemID != UIELEM_CHARTVIEW_BUTTON)&&(uiElemID != UIELEM_CHARTVIEW_MENU)&&(uiElemID != UIELEM_CVM_HALFLIFE_BUTTON)&&(uiElemID != UIELEM_CVM_DECAYMODE_BUTTON)&&(uiElemID != UIELEM_CVM_2PLUS_BUTTON)&&(uiElemID != UIELEM_CVM_R42_BUTTON)&&(uiElemID != UIELEM_CVM_BEA_BUTTON)){
 		if((state->ds.shownElements & (1UL << UIELEM_CHARTVIEW_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_CHARTVIEW_MENU_HIDE]==0.0f)){
 			startUIAnimation(dat,state,UIANIM_CHARTVIEW_MENU_HIDE); //menu will be closed after animation finishes
 			state->clickedUIElem = UIELEM_ENUM_LENGTH; //'unclick' the menu button
@@ -3318,6 +3332,12 @@ void uiElemClickAction(app_data *restrict dat, app_state *restrict state, resour
 			startUIAnimation(dat,state,UIANIM_CHARTVIEW_MENU_HIDE); //menu will be closed after animation finishes
 			state->clickedUIElem = UIELEM_ENUM_LENGTH; //'unclick' the menu button
 			state->chartView = CHARTVIEW_R42;
+			changeUIState(dat,state,UISTATE_CHARTONLY); //prevents mouseover from still highlighting buttons while the menu closes
+			break;
+		case UIELEM_CVM_BEA_BUTTON:
+			startUIAnimation(dat,state,UIANIM_CHARTVIEW_MENU_HIDE); //menu will be closed after animation finishes
+			state->clickedUIElem = UIELEM_ENUM_LENGTH; //'unclick' the menu button
+			state->chartView = CHARTVIEW_BEA;
 			changeUIState(dat,state,UISTATE_CHARTONLY); //prevents mouseover from still highlighting buttons while the menu closes
 			break;
 		case UIELEM_SEARCH_ENTRYBOX:
@@ -3646,6 +3666,12 @@ void updateSingleUIElemPosition(const app_data *restrict dat, app_state *restric
 		case UIELEM_CVM_R42_BUTTON:
 			state->ds.uiElemPosX[uiElemInd] = (int16_t)(state->ds.windowXRes-((CHARTVIEW_MENU_WIDTH+CHARTVIEW_MENU_POS_XR - PANEL_EDGE_SIZE - 2*UI_PADDING_SIZE)*state->ds.uiUserScale));
 			state->ds.uiElemPosY[uiElemInd] = (int16_t)((CHARTVIEW_MENU_POS_Y + PANEL_EDGE_SIZE + 2*UI_PADDING_SIZE + 4*CHARTVIEW_MENU_ITEM_SPACING)*state->ds.uiUserScale);
+			state->ds.uiElemWidth[uiElemInd] = (int16_t)((CHARTVIEW_MENU_WIDTH - 2*PANEL_EDGE_SIZE - 4*UI_PADDING_SIZE)*state->ds.uiUserScale);
+			state->ds.uiElemHeight[uiElemInd] = (int16_t)((CHARTVIEW_MENU_ITEM_SPACING - UI_PADDING_SIZE)*state->ds.uiUserScale);
+			break;
+		case UIELEM_CVM_BEA_BUTTON:
+			state->ds.uiElemPosX[uiElemInd] = (int16_t)(state->ds.windowXRes-((CHARTVIEW_MENU_WIDTH+CHARTVIEW_MENU_POS_XR - PANEL_EDGE_SIZE - 2*UI_PADDING_SIZE)*state->ds.uiUserScale));
+			state->ds.uiElemPosY[uiElemInd] = (int16_t)((CHARTVIEW_MENU_POS_Y + PANEL_EDGE_SIZE + 2*UI_PADDING_SIZE + 5*CHARTVIEW_MENU_ITEM_SPACING)*state->ds.uiUserScale);
 			state->ds.uiElemWidth[uiElemInd] = (int16_t)((CHARTVIEW_MENU_WIDTH - 2*PANEL_EDGE_SIZE - 4*UI_PADDING_SIZE)*state->ds.uiUserScale);
 			state->ds.uiElemHeight[uiElemInd] = (int16_t)((CHARTVIEW_MENU_ITEM_SPACING - UI_PADDING_SIZE)*state->ds.uiUserScale);
 			break;

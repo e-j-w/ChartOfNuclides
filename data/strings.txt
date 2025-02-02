@@ -7,6 +7,7 @@ qalpha|Q(α)
 q_betaminus|Q(β-)
 protonsep_energy|S(p)
 neutronsep_energy|S(n)
+atomic_mass|Atomic Mass
 mass_unknown|Mass Unknown
 unknown|Unknown
 level_info_header|Levels and gammas:
@@ -44,6 +45,7 @@ chartview_halflife|Half-life
 chartview_decaymode|Decay Mode
 chartview_2plus|E(2+)
 chartview_r42|E(4+)/E(2+)
+chartview_beA|Bind. E / A
 search_placeholder|Type to search (eg. '32Si')
 search_result_nuclide|Nuclide / Isotope
 search_result_egamma|Transition

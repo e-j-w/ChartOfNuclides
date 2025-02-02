@@ -95,7 +95,7 @@ SDL_FColor getHalfLifeCol(const double halflifeSeconds){
   }else if(halflifeSeconds > 1.0E-3){
     col.r = 1.0f;
     col.g = 1.0f;
-    col.b = 0.2f;
+    col.b = 0.3f;
   }else if(halflifeSeconds > 1.0E-4){
     col.r = 1.0f;
     col.g = 0.8f;
@@ -288,7 +288,7 @@ SDL_FColor get2PlusCol(const double e2PlusKeV){
   }else if(e2PlusKeV >= 700.0){
     col.r = 1.0f;
     col.g = 1.0f;
-    col.b = 0.2f;
+    col.b = 0.3f;
   }else if(e2PlusKeV >= 500.0){
     col.r = 1.0f;
     col.g = 0.8f;
@@ -374,7 +374,7 @@ SDL_FColor getR42Col(const double r42){
   }else if(r42 >= 2.0){
     col.r = 1.0f;
     col.g = 1.0f;
-    col.b = 0.2f;
+    col.b = 0.3f;
   }else if(r42 >= 1.9){
     col.r = 1.0f;
     col.g = 0.8f;
@@ -400,6 +400,92 @@ SDL_FColor getR42Col(const double r42){
     col.g = 0.8f;
     col.b = 0.9f;
   }else if(r42 > 0.0){
+    col.r = 1.0f;
+    col.g = 0.8f;
+    col.b = 0.9f;
+  }
+  return col;
+}
+
+SDL_FColor getBEACol(const double beA){
+  SDL_FColor col;
+  col.r = 0.9f;
+  col.g = 0.9f;
+  col.b = 0.9f;
+  col.a = 1.0f;
+  if(beA >= 8750.0){
+    col.r = 0.0f;
+    col.g = 0.0f;
+    col.b = 0.0f;
+  }else if(beA >= 8700.0){
+    col.r = 0.0f;
+    col.g = 0.1f;
+    col.b = 0.4f;
+  }else if(beA >= 8600.0){
+    col.r = 0.1f;
+    col.g = 0.2f;
+    col.b = 0.5f;
+  }else if(beA >= 8500.0){
+    col.r = 0.1f;
+    col.g = 0.3f;
+    col.b = 0.7f;
+  }else if(beA >= 8300.0){
+    col.r = 0.2f;
+    col.g = 0.4f;
+    col.b = 0.8f;
+  }else if(beA >= 8100.0){ //box color inversion point
+    col.r = 0.3f;
+    col.g = 0.5f;
+    col.b = 0.8f;
+  }else if(beA >= 7900.0){
+    col.r = 0.3f;
+    col.g = 0.7f;
+    col.b = 0.7f;
+  }else if(beA >= 7700.0){
+    col.r = 0.3f;
+    col.g = 0.9f;
+    col.b = 0.7f;
+  }else if(beA >= 7500.0){
+    col.r = 0.5f;
+    col.g = 1.0f;
+    col.b = 0.7f;
+  }else if(beA >= 7300.0){
+    col.r = 0.7f;
+    col.g = 0.9f;
+    col.b = 0.5f;
+  }else if(beA >= 7100.0){
+    col.r = 0.9f;
+    col.g = 0.9f;
+    col.b = 0.4f;
+  }else if(beA >= 6800.0){
+    col.r = 1.0f;
+    col.g = 1.0f;
+    col.b = 0.3f;
+  }else if(beA >= 6500.0){
+    col.r = 1.0f;
+    col.g = 0.8f;
+    col.b = 0.4f;
+  }else if(beA >= 6200.0){
+    col.r = 1.0f;
+    col.g = 0.7f;
+    col.b = 0.5f;
+  }else if(beA >= 5900.0){
+    col.r = 1.0f;
+    col.g = 0.6f;
+    col.b = 0.6f;
+  }else if(beA >= 5600.0){
+    col.r = 1.0f;
+    col.g = 0.6f;
+    col.b = 0.7f;
+  }else if(beA >= 5300.0){
+    col.r = 1.0f;
+    col.g = 0.7f;
+    col.b = 0.8f;
+  }else if(beA >= 4500.0){
+    col.r = 1.0f;
+    col.g = 0.8f;
+    col.b = 0.9f;
+  }else if(beA > 0.0){
     col.r = 1.0f;
     col.g = 0.8f;
     col.b = 0.9f;
@@ -670,6 +756,13 @@ void drawNuclBoxLabelDetails(const app_data *restrict dat, const app_state *rest
       SDL_snprintf(tmpStr,32,"%0.2f",r42);
       drawTextAlignedSized(rdat,drawXPos,drawYPos+((yOffsets*19.0f + 40.0f)*state->ds.uiUserScale),col,FONTSIZE_NORMAL,255,tmpStr,ALIGN_CENTER,maxLblWidth); //draw R42 label
     }
+  }else if(state->chartView == CHARTVIEW_BEA){
+    double beA = getBEA(&dat->ndat,nuclInd);
+    if(beA > 0.0){
+      getMassValStr(tmpStr,dat->ndat.nuclData[nuclInd].beA,1);
+      SDL_strlcat(tmpStr," keV",32);
+      drawTextAlignedSized(rdat,drawXPos,drawYPos+((yOffsets*19.0f + 40.0f)*state->ds.uiUserScale),col,FONTSIZE_NORMAL,255,tmpStr,ALIGN_CENTER,maxLblWidth); //draw BE/A label
+    }
   }
   
 }
@@ -756,6 +849,8 @@ void drawChartOfNuclides(const app_data *restrict dat, const app_state *restrict
                 drawFlatRect(rdat,rect,get2PlusCol(get2PlusEnergy(&dat->ndat,(uint16_t)i)));
               }else if(state->chartView == CHARTVIEW_R42){
                 drawFlatRect(rdat,rect,getR42Col(getR42(&dat->ndat,(uint16_t)i)));
+              }else if(state->chartView == CHARTVIEW_BEA){
+                drawFlatRect(rdat,rect,getBEACol(getBEA(&dat->ndat,(uint16_t)i)));
               }
               
               if(state->ds.chartZoomScale >= 3.5f){
@@ -823,6 +918,8 @@ void drawChartOfNuclides(const app_data *restrict dat, const app_state *restrict
                     drawNuclBoxLabel(dat,state,rdat,rect.x,rect.y,rect.w,(rect.h-lowBoxHeight-(2.0f*lowBoxPadding)),(get2PlusEnergy(&dat->ndat,(uint16_t)i) >= 3000.0) ? whiteCol8Bit : blackCol8Bit,(uint16_t)i);
                   }else if(state->chartView == CHARTVIEW_R42){
                     drawNuclBoxLabel(dat,state,rdat,rect.x,rect.y,rect.w,(rect.h-lowBoxHeight-(2.0f*lowBoxPadding)),(getR42(&dat->ndat,(uint16_t)i) >= 3.2) ? whiteCol8Bit : blackCol8Bit,(uint16_t)i);
+                  }else if(state->chartView == CHARTVIEW_BEA){
+                    drawNuclBoxLabel(dat,state,rdat,rect.x,rect.y,rect.w,(rect.h-lowBoxHeight-(2.0f*lowBoxPadding)),(getBEA(&dat->ndat,(uint16_t)i) >= 8100.0) ? whiteCol8Bit : blackCol8Bit,(uint16_t)i);
                   }
                 }else{
                   if(state->chartView == CHARTVIEW_HALFLIFE){
@@ -833,6 +930,8 @@ void drawChartOfNuclides(const app_data *restrict dat, const app_state *restrict
                     drawNuclBoxLabel(dat,state,rdat,rect.x,rect.y,rect.w,rect.h,(get2PlusEnergy(&dat->ndat,(uint16_t)i) >= 3000.0) ? whiteCol8Bit : blackCol8Bit,(uint16_t)i);
                   }else if(state->chartView == CHARTVIEW_R42){
                     drawNuclBoxLabel(dat,state,rdat,rect.x,rect.y,rect.w,rect.h,(getR42(&dat->ndat,(uint16_t)i) >= 3.2) ? whiteCol8Bit : blackCol8Bit,(uint16_t)i);
+                  }else if(state->chartView == CHARTVIEW_BEA){
+                    drawNuclBoxLabel(dat,state,rdat,rect.x,rect.y,rect.w,rect.h,(getBEA(&dat->ndat,(uint16_t)i) >= 8100.0) ? whiteCol8Bit : blackCol8Bit,(uint16_t)i);
                   }
                 }
               }
@@ -1229,9 +1328,9 @@ void drawNuclFullInfoBox(const app_data *restrict dat, const app_state *restrict
   //Q-values and masses
   drawXPos = state->ds.windowXRes - NUCL_FULLINFOBOX_QVAL_POS_XR*state->ds.uiUserScale;
   drawYPos = NUCL_FULLINFOBOX_QVAL_POS_Y*state->ds.uiUserScale + txtYOffset;
-  if(dat->ndat.nuclData[nuclInd].massAMU.val != 0.0f){
+  if(dat->ndat.nuclData[nuclInd].massAMU.val != 0.0){
     getMassValStr(descStr,dat->ndat.nuclData[nuclInd].massAMU,1);
-    SDL_snprintf(tmpStr,32,"%s %s",descStr,getValueUnitShortStr(dat->ndat.nuclData[nuclInd].massAMU.unit));
+    SDL_snprintf(tmpStr,32,"%s: %s %s",dat->strings[dat->locStringIDs[LOCSTR_ATOMIC_MASS]],descStr,getValueUnitShortStr(dat->ndat.nuclData[nuclInd].massAMU.unit));
   }else{
     SDL_snprintf(tmpStr,32,"%s",dat->strings[dat->locStringIDs[LOCSTR_MASS_UNKNOWN]]);
   }
@@ -1969,6 +2068,8 @@ void drawUI(const app_data *restrict dat, app_state *restrict state, resource_da
       drawIconAndTextButton(&dat->rules.themeRules,rdat,state->ds.uiElemPosX[UIELEM_CHARTVIEW_BUTTON],state->ds.uiElemPosY[UIELEM_CHARTVIEW_BUTTON],state->ds.uiElemWidth[UIELEM_CHARTVIEW_BUTTON],getHighlightState(state,UIELEM_CHARTVIEW_BUTTON),255,UIICON_CHARTVIEW,dat->strings[dat->locStringIDs[LOCSTR_CHARTVIEW_2PLUS]]);
     }else if(state->chartView == CHARTVIEW_R42){
       drawIconAndTextButton(&dat->rules.themeRules,rdat,state->ds.uiElemPosX[UIELEM_CHARTVIEW_BUTTON],state->ds.uiElemPosY[UIELEM_CHARTVIEW_BUTTON],state->ds.uiElemWidth[UIELEM_CHARTVIEW_BUTTON],getHighlightState(state,UIELEM_CHARTVIEW_BUTTON),255,UIICON_CHARTVIEW,dat->strings[dat->locStringIDs[LOCSTR_CHARTVIEW_R42]]);
+    }else if(state->chartView == CHARTVIEW_BEA){
+      drawIconAndTextButton(&dat->rules.themeRules,rdat,state->ds.uiElemPosX[UIELEM_CHARTVIEW_BUTTON],state->ds.uiElemPosY[UIELEM_CHARTVIEW_BUTTON],state->ds.uiElemWidth[UIELEM_CHARTVIEW_BUTTON],getHighlightState(state,UIELEM_CHARTVIEW_BUTTON),255,UIICON_CHARTVIEW,dat->strings[dat->locStringIDs[LOCSTR_CHARTVIEW_BEA]]);
     }
     drawIconButton(&dat->rules.themeRules,rdat,state->ds.uiElemPosX[UIELEM_SEARCH_BUTTON],state->ds.uiElemPosY[UIELEM_SEARCH_BUTTON],state->ds.uiElemWidth[UIELEM_SEARCH_BUTTON],getHighlightState(state,UIELEM_SEARCH_BUTTON),1.0f,UIICON_SEARCH);
     drawIcon(&dat->rules.themeRules,rdat,state->ds.uiElemPosX[UIELEM_ZOOMIN_BUTTON],state->ds.uiElemPosY[UIELEM_ZOOMIN_BUTTON],state->ds.uiElemWidth[UIELEM_ZOOMIN_BUTTON],getHighlightState(state,UIELEM_ZOOMIN_BUTTON),1.0f,UIICON_ZOOMIN);

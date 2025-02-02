@@ -41,7 +41,7 @@ const char* getValueUnitShortStr(const uint8_t unit);
 const char* getValueTypeShortStr(const uint8_t type);
 const char* getDecayTypeShortStr(const uint8_t type);
 const char* getElementFamilyStr(const int16_t Z);
-void getMassValStr(char strOut[32], const valWithErr mVal, const uint8_t showErr);
+void getMassValStr(char strOut[32], const dblValWithErr mVal, const uint8_t showErr);
 void getQValStr(char strOut[32], const valWithErr qVal, const uint8_t showErr);
 void getGammaEnergyStr(char strOut[32], const ndata *restrict nd, const uint32_t tranInd, const uint8_t showErr);
 void getGammaIntensityStr(char strOut[32], const ndata *restrict nd, const uint32_t tranInd, const uint8_t showErr);
@@ -55,11 +55,13 @@ void getRxnStr(char strOut[32], const ndata *restrict nd, const uint32_t rxnInd)
 void getAbundanceStr(char strOut[32], const ndata *restrict nd, const uint16_t nuclInd);
 void getSpinParStr(char strOut[32], const ndata *restrict nd, const uint32_t lvlInd);
 
+double getRawDblValFromDB(const dblValWithErr *restrict valStruct);
 double getRawValFromDB(const valWithErr *restrict valStruct);
 double getRawErrFromDB(const valWithErr *restrict valStruct);
 
 double getLevelEnergykeV(const ndata *restrict nd, const uint32_t levelInd);
 
+double getBEA(const ndata *restrict nd, const uint16_t nuclInd);
 uint32_t get2PlusLvlInd(const ndata *restrict nd, const uint16_t nuclInd);
 double getR42(const ndata *restrict nd, const uint16_t nuclInd);
 double get2PlusEnergy(const ndata *restrict nd, const uint16_t nuclInd);

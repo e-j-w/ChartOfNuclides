@@ -248,6 +248,7 @@ static int parseAppRules(app_data *restrict dat, asset_mapping *restrict stringI
 	dat->locStringIDs[LOCSTR_QBETAMNUS] = (uint16_t)nameToAssetID("q_betaminus",stringIDmap);
 	dat->locStringIDs[LOCSTR_SP] = (uint16_t)nameToAssetID("protonsep_energy",stringIDmap);
 	dat->locStringIDs[LOCSTR_SN] = (uint16_t)nameToAssetID("neutronsep_energy",stringIDmap);
+	dat->locStringIDs[LOCSTR_ATOMIC_MASS] = (uint16_t)nameToAssetID("atomic_mass",stringIDmap);
 	dat->locStringIDs[LOCSTR_MASS_UNKNOWN] = (uint16_t)nameToAssetID("mass_unknown",stringIDmap);
 	dat->locStringIDs[LOCSTR_UNKNOWN] = (uint16_t)nameToAssetID("unknown",stringIDmap);
 	dat->locStringIDs[LOCSTR_LEVELINFO_HEADER] = (uint16_t)nameToAssetID("level_info_header",stringIDmap);
@@ -285,6 +286,7 @@ static int parseAppRules(app_data *restrict dat, asset_mapping *restrict stringI
 	dat->locStringIDs[LOCSTR_CHARTVIEW_DECAYMODE] = (uint16_t)nameToAssetID("chartview_decaymode",stringIDmap);
 	dat->locStringIDs[LOCSTR_CHARTVIEW_2PLUS] = (uint16_t)nameToAssetID("chartview_2plus",stringIDmap);
 	dat->locStringIDs[LOCSTR_CHARTVIEW_R42] = (uint16_t)nameToAssetID("chartview_r42",stringIDmap);
+	dat->locStringIDs[LOCSTR_CHARTVIEW_BEA] = (uint16_t)nameToAssetID("chartview_beA",stringIDmap);
 	dat->locStringIDs[LOCSTR_SEARCH_PLACEHOLDER] = (uint16_t)nameToAssetID("search_placeholder",stringIDmap);
 	dat->locStringIDs[LOCSTR_SEARCHRES_NUCLIDE] = (uint16_t)nameToAssetID("search_result_nuclide",stringIDmap);
 	dat->locStringIDs[LOCSTR_SEARCHRES_EGAMMA] = (uint16_t)nameToAssetID("search_result_egamma",stringIDmap);
@@ -3112,7 +3114,7 @@ int parseMassData(const char * filePath, ndata * nd){
 					}
 				}
 
-				nd->nuclData[nuclInd].massExcess.val = (float)rawVal;
+				nd->nuclData[nuclInd].massExcess.val = rawVal;
 				nd->nuclData[nuclInd].massExcess.err = (uint8_t)SDL_round(rawErr);
 				nd->nuclData[nuclInd].massExcess.unit = VALUE_UNIT_KEV;
 				nd->nuclData[nuclInd].massExcess.format = (uint16_t)(numSigFigs & 15U);
@@ -3163,7 +3165,7 @@ int parseMassData(const char * filePath, ndata * nd){
 					}
 				}
 
-				nd->nuclData[nuclInd].beA.val = (float)rawVal;
+				nd->nuclData[nuclInd].beA.val = rawVal;
 				nd->nuclData[nuclInd].beA.err = (uint8_t)SDL_round(rawErr);
 				nd->nuclData[nuclInd].beA.unit = VALUE_UNIT_KEV;
 				nd->nuclData[nuclInd].beA.format = (uint16_t)(numSigFigs & 15U);
@@ -3217,7 +3219,7 @@ int parseMassData(const char * filePath, ndata * nd){
 					}
 				}
 
-				nd->nuclData[nuclInd].massAMU.val = (float)rawVal;
+				nd->nuclData[nuclInd].massAMU.val = rawVal;
 				nd->nuclData[nuclInd].massAMU.err = (uint8_t)SDL_round(rawErr);
 				nd->nuclData[nuclInd].massAMU.unit = VALUE_UNIT_AMU;
 				nd->nuclData[nuclInd].massAMU.format = (uint16_t)(numSigFigs & 15U);

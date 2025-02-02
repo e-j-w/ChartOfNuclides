@@ -72,6 +72,20 @@ static const uint16_t shellClosureValues[NUMSHELLCLOSURES] = {2,8,20,28,50,82,12
 #define THREAD_UPDATE_DELAY 10 //delay (in ms) for each thread to update its state
 
 //structures
+
+typedef struct
+{
+  double val;
+  uint8_t unit; //unit, (from halflife_unit_enum for half-lives)
+  uint8_t err; //uncertainty value (on trailing sig figs)
+  int8_t exponent; //value after exponent (eg. -5 for 4.2E-5), if value is in exponent form
+  uint16_t format; //bits 0-3: number of sig figs after the decimal place
+  //bit 4: whether or not to use exponent
+  //bits:5-8 value type (from value_type_enum)
+  //bits 9-15: reserve value dependent on value type (-ve error if VALUETYPE_ASYMERROR,
+  //X index if VALUETYPE_X or VALUETYPE_PLUSX)
+}dblValWithErr; //parsed value with an error (double precision)
+
 typedef struct
 {
   float val;
@@ -137,9 +151,9 @@ typedef struct
 {
   valWithErr qbeta, qalpha; //Q(beta-),Q(alpha) 
   valWithErr sp, sn; //proton and neutron separation energies
-  valWithErr massExcess; //mass excess (keV)
-  valWithErr beA; //binding energy per nucleon (keV)
-  valWithErr massAMU; //mass in atomic mass units (u)
+  dblValWithErr massExcess; //mass excess (keV), double precision needed 'cause that's how well masses are known
+  dblValWithErr beA; //binding energy per nucleon (keV), double precision needed 'cause that's how well masses are known
+  dblValWithErr massAMU; //mass in atomic mass units (u), double precision needed 'cause that's how well masses are known
   int16_t N; //neutrons in nuclide
   int16_t Z; //protons in nuclide
   uint32_t firstLevel; //index of first level in this nuclide
