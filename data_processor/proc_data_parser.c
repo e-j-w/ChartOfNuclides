@@ -320,7 +320,7 @@ static int parseAppRules(app_data *restrict dat, asset_mapping *restrict stringI
 static int parseStrings(app_data *restrict dat, asset_mapping *restrict stringIDmap, const char *appBasePath){
 	
   FILE *inp;
-  char filePath[536], str[256];
+  char filePath[536], str[512];
   char *tok;
 	char *saveptr = NULL;
   
@@ -329,7 +329,7 @@ static int parseStrings(app_data *restrict dat, asset_mapping *restrict stringID
   if(inp!=NULL){
     //SDL_Log("Opened file: %s\n",filePath);
     while(!(feof(inp))){ //go until the end of file is reached
-      if(fgets(str,256,inp)!=NULL){
+      if(fgets(str,512,inp)!=NULL){
         str[strcspn(str,"\r\n")] = 0; //strips newline characters from the string read by fgets
         if(SDL_strcmp(str,"")!=0){
           tok = SDL_strtok_r(str,"|",&saveptr);
@@ -338,9 +338,9 @@ static int parseStrings(app_data *restrict dat, asset_mapping *restrict stringID
               SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"maximum number of text strings reached, cannot parse file %s\n",filePath);
               return -1;
             }
-            strncpy(stringIDmap->assetID[dat->numStrings],str,256);
+            SDL_memcpy(stringIDmap->assetID[dat->numStrings],str,256);
             tok = SDL_strtok_r(NULL,"",&saveptr); //get the rest of the string
-            strncpy(dat->strings[dat->numStrings],tok,255);
+            SDL_memcpy(dat->strings[dat->numStrings],tok,255);
             dat->numStrings++;
           }else{
             SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"improperly formatted string in file %s\n",filePath);

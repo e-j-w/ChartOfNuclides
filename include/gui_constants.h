@@ -127,10 +127,10 @@ static const float uiScales[UISCALE_ENUM_LENGTH] = {1.0f,1.20f,1.60f,1.85f};
 #define ABOUT_BOX_HEIGHT           366 //in unscaled pixels
 #define ABOUT_BOX_HEADERTXT_Y      (8*UI_PADDING_SIZE)
 #define ABOUT_BOX_VERSION_Y        (14*UI_PADDING_SIZE)
-#define ABOUT_BOX_STR1_Y           102 //in unscaled pixels
-#define ABOUT_BOX_STR2_Y           142 //in unscaled pixels
-#define ABOUT_BOX_STR3_Y           226 //in unscaled pixels
-#define ABOUT_BOX_STR4_Y           294 //in unscaled pixels
+#define ABOUT_BOX_STR1_Y           108 //in unscaled pixels
+#define ABOUT_BOX_STR2_Y           154 //in unscaled pixels
+#define ABOUT_BOX_STR3_Y           210 //in unscaled pixels
+#define ABOUT_BOX_STR4_Y           282 //in unscaled pixels
 
 //preferences dialog
 #define PREFS_DIALOG_NUM_UIELEMENTS             5
