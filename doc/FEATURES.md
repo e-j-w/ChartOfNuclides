@@ -6,6 +6,7 @@ The overall goal of this project is to make a simple, performant, and multiplatf
 - Select individual nuclides to browse ground and excited state data, including:
   - Level energies, half-lives/lifetimes, decay modes, spin-parities ...
   - Gamma energies, branching fractions, multipolarities ...
+  - Atomic masses.
 - Fast, multithreaded search interface for nuclide, level, gamma, and gamma cascade data.
 - Runs locally, with no network connection needed.
 - Mouse, keyboard, and gamepad (!) support.

@@ -14,7 +14,7 @@ Detailed instructions for building from source are [here](doc/BUILDING.md).
 
 ## Using the program
 
-Detailed documentation can be found in the [user manual](doc/MANUAL.md).
+See the [user manual](doc/MANUAL.md) for documentation.
 
 ## Disclaimer
 
