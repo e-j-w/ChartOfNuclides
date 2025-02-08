@@ -1,6 +1,6 @@
 <h1 align="center">Chart of Nuclides</h1>
 
-<div align = center><img src="https://github.com/e-j-w/ChartOfNuclides-flatpak/blob/e439f2caf5547e928186a42330e6cc07dea57bc5/assets/con_screenshot.png?raw=true" width="188" height="124" alt="main interface"><img src="https://github.com/e-j-w/ChartOfNuclides-flatpak/blob/e439f2caf5547e928186a42330e6cc07dea57bc5/assets/con_screenshot2.png?raw=true" width="188" height="124" alt="zoomed in interface"><img src="https://github.com/e-j-w/ChartOfNuclides-flatpak/blob/e439f2caf5547e928186a42330e6cc07dea57bc5/assets/con_screenshot3.png?raw=true" width="188" height="124" alt="level list view"><img src="https://github.com/e-j-w/ChartOfNuclides-flatpak/blob/e439f2caf5547e928186a42330e6cc07dea57bc5/assets/con_screenshot4.png?raw=true" width="188" height="124" alt="alternate color scheme view"></div>
+<div align = center><img src="https://github.com/e-j-w/ChartOfNuclides-flatpak/blob/master/assets/con_screenshot.png?raw=true" width="188" height="124" alt="main interface"><img src="https://github.com/e-j-w/ChartOfNuclides-flatpak/blob/master/assets/con_screenshot2.png?raw=true" width="188" height="124" alt="zoomed in interface"><img src="https://github.com/e-j-w/ChartOfNuclides-flatpak/blob/master/assets/con_screenshot3.png?raw=true" width="188" height="124" alt="level list view"><img src="https://github.com/e-j-w/ChartOfNuclides-flatpak/blob/master/assets/con_screenshot5.png?raw=true" width="188" height="124" alt="alternate color scheme view"></div>
 
 An offline viewer of isotope and nuclear structure data in the [Chart of Nuclides / Segrè chart](https://en.wikipedia.org/wiki/Table_of_nuclides) format. Uses nuclear structure data from [ENSDF](https://www.nndc.bnl.gov/ensdf/about.jsp), masses from [AME2020](https://amdc.impcas.ac.cn/web/masseval.html), and isotopic abundance data from [NIST](https://www.nist.gov/pml/atomic-weights-and-isotopic-compositions-relative-atomic-masses). A full list of features is [here](doc/FEATURES.md).
 
@@ -8,13 +8,14 @@ An offline viewer of isotope and nuclear structure data in the [Chart of Nuclide
 
 Get the latest [release](https://github.com/e-j-w/ChartOfNuclides/releases) and follow the installation instructions there. Only Linux is supported for now.
 
-## Building from source
-
-Detailed instructions for building from source are [here](doc/BUILDING.md).
-
 ## Using the program
 
 See the [user manual](doc/MANUAL.md) for documentation.
+
+## Building from source
+
+Detailed instructions are [here](doc/BUILDING.md).
+
 
 ## Disclaimer
 
