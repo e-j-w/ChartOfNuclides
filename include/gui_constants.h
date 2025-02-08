@@ -179,6 +179,7 @@ static const float uiScales[UISCALE_ENUM_LENGTH] = {1.0f,1.20f,1.60f,1.85f};
 #define NUCL_FULLINFOBOX_BACKBUTTON_POS_XR              (2*MENU_BUTTON_POS_XR + MENU_BUTTON_WIDTH)
 #define NUCL_FULLINFOBOX_BACKBUTTON_POS_Y               MENU_BUTTON_POS_Y
 #define NUCL_FULLINFOBOX_BACKBUTTON_WIDTH               NUCL_INFOBOX_ALLLEVELS_BUTTON_WIDTH
+#define NUCL_FULLINFOBOX_RXNBUTTON_POS_XR               (NUCL_FULLINFOBOX_BACKBUTTON_POS_XR + NUCL_FULLINFOBOX_BACKBUTTON_WIDTH + MENU_BUTTON_POS_XR)
 #define NUCL_FULLINFOBOX_RXNBUTTON_WIDTH                200 //in unscaled pixels (only when showing all reactions... when a reaction is selected, adaptive width will be used instead)
 #define NUCL_FULLINFOBOX_NZVALS_POS_X                   (PANEL_EDGE_SIZE + 4*UI_PADDING_SIZE) //minimum distance from header text, in unscaled pixels
 #define NUCL_FULLINFOBOX_NZVALS_POS_Y                   42.0f //in unscaled pixels

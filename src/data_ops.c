@@ -2736,7 +2736,8 @@ uint16_t getNearestNuclInd(const app_data *restrict dat, const int16_t N, const 
 
 void setFullLevelInfoDimensions(const app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat, const uint16_t selNucl){
 	
-	updateSingleUIElemPosition(dat,state,rdat,UIELEM_NUCL_FULLINFOBOX_RXNBUTTON); //width depends on selected reaction
+	updateSingleUIElemPosition(dat,state,rdat,UIELEM_NUCL_FULLINFOBOX_RXNBUTTON); //width/position depends on selected reaction
+	updateSingleUIElemPosition(dat,state,rdat,UIELEM_RXN_MENU); //menu position depends on above button position
 
 	char tmpStr[32];
 	float tmpWidth = 0.0f;
@@ -2909,6 +2910,7 @@ void setInfoBoxDimensions(const app_data *restrict dat, app_state *restrict stat
 
 	updateSingleUIElemPosition(dat,state,rdat,UIELEM_NUCL_INFOBOX);
 	updateSingleUIElemPosition(dat,state,rdat,UIELEM_NUCL_INFOBOX_CLOSEBUTTON);
+	updateSingleUIElemPosition(dat,state,rdat,UIELEM_NUCL_FULLINFOBOX_RXNBUTTON);
 	updateSingleUIElemPosition(dat,state,rdat,UIELEM_RXN_MENU);
 }
 
@@ -3885,7 +3887,7 @@ void updateSingleUIElemPosition(const app_data *restrict dat, app_state *restric
 				state->ds.uiElemWidth[UIELEM_NUCL_FULLINFOBOX_RXNBUTTON] = (int16_t)(getTextWidth(rdat,FONTSIZE_NORMAL,rxnStr)/rdat->uiDPIScale + 60*state->ds.uiUserScale);
 			}
 			state->ds.uiElemHeight[UIELEM_NUCL_FULLINFOBOX_RXNBUTTON] = (int16_t)(UI_TILE_SIZE*state->ds.uiUserScale);
-			state->ds.uiElemPosX[UIELEM_NUCL_FULLINFOBOX_RXNBUTTON] = (int16_t)(state->ds.windowXRes/2.0f-(state->ds.uiElemWidth[UIELEM_NUCL_FULLINFOBOX_RXNBUTTON]/2.0f));
+			state->ds.uiElemPosX[UIELEM_NUCL_FULLINFOBOX_RXNBUTTON] = (int16_t)(state->ds.windowXRes-state->ds.uiElemWidth[UIELEM_NUCL_FULLINFOBOX_RXNBUTTON]-(NUCL_FULLINFOBOX_RXNBUTTON_POS_XR*state->ds.uiUserScale));
 			state->ds.uiElemPosY[UIELEM_NUCL_FULLINFOBOX_RXNBUTTON] = (int16_t)(NUCL_FULLINFOBOX_BACKBUTTON_POS_Y*state->ds.uiUserScale);
 			state->ds.uiElemExtMinusY[UIELEM_NUCL_FULLINFOBOX_RXNBUTTON] = (uint16_t)((NUCL_FULLINFOBOX_BACKBUTTON_POS_Y+1.0f)*state->ds.uiUserScale); //Fitt's law
 			break;
@@ -3903,9 +3905,22 @@ void updateSingleUIElemPosition(const app_data *restrict dat, app_state *restric
 				state->ds.rxnMenuColumns++;
 			}
 			//SDL_Log("numRxns: %u, columns: %u\n",dat->ndat.nuclData[state->chartSelectedNucl].numRxns,state->ds.rxnMenuColumns);
-			state->ds.uiElemWidth[uiElemInd] = (int16_t)((RXN_MENU_COLUMN_WIDTH*state->ds.rxnMenuColumns + 4.0f*PANEL_EDGE_SIZE)*state->ds.uiUserScale);
+			int16_t menuWidth = (int16_t)((RXN_MENU_COLUMN_WIDTH*state->ds.rxnMenuColumns + 4.0f*PANEL_EDGE_SIZE)*state->ds.uiUserScale);
+			while(menuWidth > (state->ds.windowXRes - 2*UI_PADDING_SIZE*state->ds.uiUserScale)){
+				if(state->ds.rxnMenuColumns > 1){
+					state->ds.rxnMenuColumns--;
+					menuWidth = (int16_t)((RXN_MENU_COLUMN_WIDTH*state->ds.rxnMenuColumns + 4.0f*PANEL_EDGE_SIZE)*state->ds.uiUserScale);
+				}else{
+					break;
+				}
+			}
+			state->ds.uiElemWidth[uiElemInd] = menuWidth;
 			state->ds.uiElemHeight[uiElemInd] = (int16_t)((SDL_ceilf((dat->ndat.nuclData[state->chartSelectedNucl].numRxns+1.0f)/(state->ds.rxnMenuColumns*1.0f))*RXN_MENU_ITEM_SPACING + PANEL_EDGE_SIZE + 4*UI_PADDING_SIZE)*state->ds.uiUserScale);
 			state->ds.uiElemPosX[uiElemInd] = (int16_t)(state->ds.uiElemPosX[UIELEM_NUCL_FULLINFOBOX_RXNBUTTON] + state->ds.uiElemWidth[UIELEM_NUCL_FULLINFOBOX_RXNBUTTON]/2 - state->ds.uiElemWidth[UIELEM_RXN_MENU]/2);
+			if((state->ds.uiElemPosX[uiElemInd] + state->ds.uiElemWidth[uiElemInd]) > state->ds.windowXRes){
+				//offset menu to keep it on-screen
+				state->ds.uiElemPosX[uiElemInd] = (int16_t)(state->ds.windowXRes - state->ds.uiElemWidth[uiElemInd] - UI_PADDING_SIZE*state->ds.uiUserScale);
+			}
 			//SDL_Log("position: %i %i, dimensions: %i %i\n",state->ds.uiElemPosX[uiElemInd],state->ds.uiElemPosY[uiElemInd],state->ds.uiElemWidth[uiElemInd],state->ds.uiElemHeight[uiElemInd]);
 			break;
 		case UIELEM_NUCL_FULLINFOBOX_SCROLLBAR:

@@ -1690,7 +1690,8 @@ void drawUIScaleMenu(const app_data *restrict dat, const app_state *restrict sta
   drawRect.y = ((float)state->ds.uiElemPosY[UIELEM_PREFS_UISCALE_MENU] + yOffset);
   drawRect.w = state->ds.uiElemWidth[UIELEM_PREFS_UISCALE_MENU];
   drawRect.h = state->ds.uiElemHeight[UIELEM_PREFS_UISCALE_MENU];
-  drawPanelBG(&dat->rules.themeRules,rdat,drawRect,alpha);
+  int16_t arrowX = (int16_t)(state->ds.uiElemPosX[UIELEM_PREFS_DIALOG_UISCALE_DROPDOWN] + 0.39f*state->ds.uiElemWidth[UIELEM_PREFS_DIALOG_UISCALE_DROPDOWN]);
+  drawMenuBGWithArrow(&dat->rules.themeRules,rdat,drawRect,arrowX,alpha);
   
   //draw menu item highlight
   if(state->ds.timeLeftInUIAnimation[UIANIM_UISCALE_MENU_HIDE]==0.0f){
@@ -1745,7 +1746,8 @@ void drawRxnMenu(const app_data *restrict dat, const app_state *restrict state, 
   drawRect.y = ((float)state->ds.uiElemPosY[UIELEM_RXN_MENU] + yOffset);
   drawRect.w = state->ds.uiElemWidth[UIELEM_RXN_MENU];
   drawRect.h = state->ds.uiElemHeight[UIELEM_RXN_MENU];
-  drawPanelBG(&dat->rules.themeRules,rdat,drawRect,alpha);
+  int16_t arrowX = (int16_t)(state->ds.uiElemPosX[UIELEM_NUCL_FULLINFOBOX_RXNBUTTON] + 0.42f*state->ds.uiElemWidth[UIELEM_NUCL_FULLINFOBOX_RXNBUTTON]);
+  drawMenuBGWithArrow(&dat->rules.themeRules,rdat,drawRect,arrowX,alpha);
 
   uint8_t numRxnPerCol = getRxnMenuNumRxnsPerColumn(dat,state);
 
