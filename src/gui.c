@@ -407,6 +407,127 @@ SDL_FColor getR42Col(const double r42){
   return col;
 }
 
+SDL_FColor getSpinCol(const double spin){
+  SDL_FColor col;
+  col.r = 0.9f;
+  col.g = 0.9f;
+  col.b = 0.9f;
+  col.a = 1.0f;
+  if(spin <= 0.0){
+    col.r = 0.0f;
+    col.g = 0.1f;
+    col.b = 0.4f;
+  }else if(spin <= 0.5){
+    col.r = 0.1f;
+    col.g = 0.2f;
+    col.b = 0.5f;
+  }else if(spin <= 1.0){
+    col.r = 0.1f;
+    col.g = 0.3f;
+    col.b = 0.7f;
+  }else if(spin <= 1.5){
+    col.r = 0.2f;
+    col.g = 0.4f;
+    col.b = 0.8f;
+  }else if(spin <= 2.0){ //box color inversion point
+    col.r = 0.3f;
+    col.g = 0.5f;
+    col.b = 0.8f;
+  }else if(spin <= 2.5){
+    col.r = 0.3f;
+    col.g = 0.7f;
+    col.b = 0.7f;
+  }else if(spin <= 3.0){
+    col.r = 0.3f;
+    col.g = 0.9f;
+    col.b = 0.7f;
+  }else if(spin <= 3.5){
+    col.r = 0.5f;
+    col.g = 1.0f;
+    col.b = 0.7f;
+  }else if(spin <= 4.0){
+    col.r = 0.7f;
+    col.g = 0.9f;
+    col.b = 0.5f;
+  }else if(spin <= 5.0){
+    col.r = 0.9f;
+    col.g = 0.9f;
+    col.b = 0.4f;
+  }else if(spin <= 6.0){
+    col.r = 0.95f;
+    col.g = 0.95f;
+    col.b = 0.35f;
+  }else if(spin <= 7.0){
+    col.r = 1.0f;
+    col.g = 1.0f;
+    col.b = 0.3f;
+  }else if(spin <= 8.0){
+    col.r = 1.0f;
+    col.g = 0.9f;
+    col.b = 0.35f;
+  }else if(spin <= 9.0){
+    col.r = 1.0f;
+    col.g = 0.8f;
+    col.b = 0.4f;
+  }else if(spin <= 11.0){
+    col.r = 1.0f;
+    col.g = 0.75f;
+    col.b = 0.45f;
+  }else if(spin <= 13.0){
+    col.r = 1.0f;
+    col.g = 0.7f;
+    col.b = 0.5f;
+  }else if(spin <= 15.0){
+    col.r = 1.0f;
+    col.g = 0.65f;
+    col.b = 0.55f;
+  }else if(spin <= 17.0){
+    col.r = 1.0f;
+    col.g = 0.6f;
+    col.b = 0.6f;
+  }else if(spin <= 20.0){
+    col.r = 1.0f;
+    col.g = 0.6f;
+    col.b = 0.7f;
+  }else if(spin <= 25.0){
+    col.r = 1.0f;
+    col.g = 0.7f;
+    col.b = 0.8f;
+  }else if(spin < 255.0){
+    col.r = 1.0f;
+    col.g = 0.8f;
+    col.b = 0.9f;
+  }else{
+    //unknown spin
+    col.r = 1.0f;
+    col.g = 0.8f;
+    col.b = 0.9f;
+  }
+  return col;
+}
+
+SDL_FColor getParCol(const int8_t par){
+  SDL_FColor col;
+  col.r = 0.9f;
+  col.g = 0.9f;
+  col.b = 0.9f;
+  col.a = 1.0f;
+  if(par <= -1.0){
+    col.r = 0.2f;
+    col.g = 0.2f;
+    col.b = 0.2f;
+  }else if(par >= 1.0){
+    col.r = 0.8f;
+    col.g = 0.8f;
+    col.b = 0.8f;
+  }else{
+    col.r = 1.0f;
+    col.g = 0.8f;
+    col.b = 0.9f;
+  }
+  return col;
+}
+
 SDL_FColor getBEACol(const double beA){
   SDL_FColor col;
   col.r = 0.9f;
@@ -507,8 +628,40 @@ uint8_t getNuclBoxLabelNumLines(const app_data *restrict dat, const uint16_t nuc
   return numLines;
 }
 
-//draws label for the decay mode box
-void drawDecayModeBoxLabel(const app_data *restrict dat, const drawing_state *restrict ds, resource_data *restrict rdat, const float xPos, const float yPos, const float boxWidth, const float boxHeight, SDL_Color col, const uint16_t nuclInd, const uint32_t isomerLvl, const uint8_t isomerMVal, const uint8_t dcyMode){
+//draws label for the isomer spin box
+void drawIsomerSpinBoxLabel(const app_data *restrict dat, const drawing_state *restrict ds, resource_data *restrict rdat, const float xPos, const float yPos, const float boxWidth, const float boxHeight, SDL_Color col, const uint16_t nuclInd, const uint32_t isomerLvl, const uint8_t isomerMVal){
+  char tmpStr[32];
+  float drawXPos, drawYPos;
+  float labelMargin = NUCLBOX_LABEL_SMALLMARGIN*ds->chartZoomScale*ds->uiUserScale;
+  uint16_t Z = (uint16_t)dat->ndat.nuclData[nuclInd].Z;
+  uint16_t N = (uint16_t)dat->ndat.nuclData[nuclInd].N;
+  if(boxHeight > 38.0f){
+    if((isomerMVal==0)||(dat->ndat.nuclData[nuclInd].numIsomerMVals <= 1)){
+      SDL_snprintf(tmpStr,32,"%um",N+Z);
+    }else{
+      SDL_snprintf(tmpStr,32,"%um%u",N+Z,isomerMVal);
+    }
+    drawXPos = xPos + labelMargin;
+    float totalLblHeight = (getTextHeight(rdat,FONTSIZE_SMALL,tmpStr) + getTextHeight(rdat,FONTSIZE_LARGE,getElemStr((uint8_t)Z)))/rdat->uiDPIScale;
+    drawYPos = yPos+boxHeight*0.5f - totalLblHeight*0.5f + 4.0f*ds->uiUserScale;
+    drawXPos += (drawTextAlignedSized(rdat,drawXPos,drawYPos,col,FONTSIZE_SMALL,255,tmpStr,ALIGN_LEFT,16384)).w; //draw number label
+    drawTextAlignedSized(rdat,drawXPos,drawYPos+(10.0f*ds->uiUserScale),col,FONTSIZE_LARGE,255,getElemStr((uint8_t)Z),ALIGN_LEFT,16384); //draw element label
+    //handle decay mode, spin-parity labels
+    drawXPos = xPos + boxWidth - labelMargin;
+    if(dat->ndat.levels[isomerLvl].numSpinParVals > 0){
+      //spin-parity is known
+      char jPiStr[64];
+      getSpinParStr(tmpStr,&dat->ndat,isomerLvl);
+      SDL_snprintf(jPiStr,64,"%s: %s",dat->strings[dat->locStringIDs[LOCSTR_JPI]],tmpStr);
+      drawTextAlignedSized(rdat,drawXPos,drawYPos+(10.0f*ds->uiUserScale),col,FONTSIZE_NORMAL,255,jPiStr,ALIGN_RIGHT,16384); //draw spin-parity label
+    }else{
+      drawTextAlignedSized(rdat,drawXPos,drawYPos+(10.0f*ds->uiUserScale),col,FONTSIZE_NORMAL,255,dat->strings[dat->locStringIDs[LOCSTR_UNKNOWN]],ALIGN_RIGHT,16384); //draw unknown label
+    }
+  }
+}
+
+//draws label for the isomer decay mode box
+void drawIsomerDecayModeBoxLabel(const app_data *restrict dat, const drawing_state *restrict ds, resource_data *restrict rdat, const float xPos, const float yPos, const float boxWidth, const float boxHeight, SDL_Color col, const uint16_t nuclInd, const uint32_t isomerLvl, const uint8_t isomerMVal, const uint8_t dcyMode){
   char tmpStr[32];
   float drawXPos, drawYPos;
   float labelMargin = NUCLBOX_LABEL_SMALLMARGIN*ds->chartZoomScale*ds->uiUserScale;
@@ -756,6 +909,48 @@ void drawNuclBoxLabelDetails(const app_data *restrict dat, const app_state *rest
       SDL_snprintf(tmpStr,32,"%0.2f",r42);
       drawTextAlignedSized(rdat,drawXPos,drawYPos+((yOffsets*19.0f + 40.0f)*state->ds.uiUserScale),col,FONTSIZE_NORMAL,255,tmpStr,ALIGN_CENTER,maxLblWidth); //draw R42 label
     }
+  }else if(state->chartView == CHARTVIEW_SPIN){
+    //draw spin-parity only
+    if(getMostProbableSpin(&dat->ndat,gsLevInd) >= 255.0){
+      drawYOffsets = 1;
+      drawTextAlignedSized(rdat,drawXPos,drawYPos+((yOffsets*19.0f + 36.0f)*state->ds.uiUserScale),col,FONTSIZE_NORMAL,255,dat->strings[dat->locStringIDs[LOCSTR_UNKNOWN]],ALIGN_CENTER,maxLblWidth); //draw unknown label
+    }else{
+      char jPiStr[64];
+      getSpinParStr(tmpStr,&dat->ndat,gsLevInd);
+      SDL_snprintf(jPiStr,64,"%s: %s",dat->strings[dat->locStringIDs[LOCSTR_JPI]],tmpStr);
+      drawYOffsets = 1;
+      if(getTextWidth(rdat,FONTSIZE_NORMAL,jPiStr) > (maxLblWidth*rdat->uiDPIScale)){
+        drawYOffsets = 2;
+      }
+      if((yOffsets+drawYOffsets) <= yOffsetLimit){
+        drawTextAlignedSized(rdat,drawXPos,drawYPos+((yOffsets*19.0f + 36.0f)*state->ds.uiUserScale),col,FONTSIZE_NORMAL,255,jPiStr,ALIGN_CENTER,maxLblWidth); //draw spin-parity label
+        //SDL_Log("height: %f\n",(double)height);
+        yOffsets += drawYOffsets;
+      }else{
+        drawTextAlignedSized(rdat,drawXPos,drawYPos+((yOffsets*19.0f + 36.0f)*state->ds.uiUserScale),col,FONTSIZE_NORMAL,255,"(...)",ALIGN_CENTER,maxLblWidth);
+      }
+    }
+  }else if(state->chartView == CHARTVIEW_PARITY){
+    //draw spin-parity only
+    if(getMostProbableParity(&dat->ndat,gsLevInd) == 0){
+      drawYOffsets = 1;
+      drawTextAlignedSized(rdat,drawXPos,drawYPos+((yOffsets*19.0f + 36.0f)*state->ds.uiUserScale),col,FONTSIZE_NORMAL,255,dat->strings[dat->locStringIDs[LOCSTR_UNKNOWN]],ALIGN_CENTER,maxLblWidth); //draw unknown label
+    }else{
+      char jPiStr[64];
+      getSpinParStr(tmpStr,&dat->ndat,gsLevInd);
+      SDL_snprintf(jPiStr,64,"%s: %s",dat->strings[dat->locStringIDs[LOCSTR_JPI]],tmpStr);
+      drawYOffsets = 1;
+      if(getTextWidth(rdat,FONTSIZE_NORMAL,jPiStr) > (maxLblWidth*rdat->uiDPIScale)){
+        drawYOffsets = 2;
+      }
+      if((yOffsets+drawYOffsets) <= yOffsetLimit){
+        drawTextAlignedSized(rdat,drawXPos,drawYPos+((yOffsets*19.0f + 36.0f)*state->ds.uiUserScale),col,FONTSIZE_NORMAL,255,jPiStr,ALIGN_CENTER,maxLblWidth); //draw spin-parity label
+        //SDL_Log("height: %f\n",(double)height);
+        yOffsets += drawYOffsets;
+      }else{
+        drawTextAlignedSized(rdat,drawXPos,drawYPos+((yOffsets*19.0f + 36.0f)*state->ds.uiUserScale),col,FONTSIZE_NORMAL,255,"(...)",ALIGN_CENTER,maxLblWidth);
+      }
+    }
   }else if(state->chartView == CHARTVIEW_BEA){
     double beA = getBEA(&dat->ndat,nuclInd);
     if(beA > 0.0){
@@ -849,6 +1044,10 @@ void drawChartOfNuclides(const app_data *restrict dat, const app_state *restrict
                 drawFlatRect(rdat,rect,get2PlusCol(get2PlusEnergy(&dat->ndat,(uint16_t)i)));
               }else if(state->chartView == CHARTVIEW_R42){
                 drawFlatRect(rdat,rect,getR42Col(getR42(&dat->ndat,(uint16_t)i)));
+              }else if(state->chartView == CHARTVIEW_SPIN){
+                drawFlatRect(rdat,rect,getSpinCol(getMostProbableSpin(&dat->ndat,dat->ndat.nuclData[i].firstLevel + dat->ndat.nuclData[i].gsLevel)));
+              }else if(state->chartView == CHARTVIEW_PARITY){
+                drawFlatRect(rdat,rect,getParCol(getMostProbableParity(&dat->ndat,dat->ndat.nuclData[i].firstLevel + dat->ndat.nuclData[i].gsLevel)));
               }else if(state->chartView == CHARTVIEW_BEA){
                 drawFlatRect(rdat,rect,getBEACol(getBEA(&dat->ndat,(uint16_t)i)));
               }
@@ -892,7 +1091,7 @@ void drawChartOfNuclides(const app_data *restrict dat, const app_state *restrict
                             boxCol.a =  1.0f - (5.5f-state->ds.chartZoomScale);
                           }
                           drawFlatRect(rdat,lowBoxRect,boxCol);
-                          drawDecayModeBoxLabel(dat,&state->ds,rdat,lowBoxRect.x,lowBoxRect.y,lowBoxRect.w,lowBoxRect.h,getDecayModeTextCol(isomerDcyMode),(uint16_t)i,isomerLvl,dat->ndat.nuclData[i].longestIsomerMVal,isomerDcyMode);
+                          drawIsomerDecayModeBoxLabel(dat,&state->ds,rdat,lowBoxRect.x,lowBoxRect.y,lowBoxRect.w,lowBoxRect.h,getDecayModeTextCol(isomerDcyMode),(uint16_t)i,isomerLvl,dat->ndat.nuclData[i].longestIsomerMVal,isomerDcyMode);
                         }else if(isomerHl > 1.0E15){
                           //'stable' isomer with no known decay mode
                           //draw its box using the half-life color
@@ -903,8 +1102,42 @@ void drawChartOfNuclides(const app_data *restrict dat, const app_state *restrict
                             boxCol.a =  1.0f - (5.5f-state->ds.chartZoomScale);
                           }
                           drawFlatRect(rdat,lowBoxRect,boxCol);
-                          drawDecayModeBoxLabel(dat,&state->ds,rdat,lowBoxRect.x,lowBoxRect.y,lowBoxRect.w,lowBoxRect.h,getDecayModeTextCol(isomerDcyMode),(uint16_t)i,isomerLvl,dat->ndat.nuclData[i].longestIsomerMVal,isomerDcyMode);
+                          drawIsomerDecayModeBoxLabel(dat,&state->ds,rdat,lowBoxRect.x,lowBoxRect.y,lowBoxRect.w,lowBoxRect.h,getDecayModeTextCol(isomerDcyMode),(uint16_t)i,isomerLvl,dat->ndat.nuclData[i].longestIsomerMVal,isomerDcyMode);
                         }
+                      }
+                    }
+                  }else if(state->chartView == CHARTVIEW_SPIN){
+                    //draw spin box
+                    uint32_t isomerLvl = dat->ndat.nuclData[i].longestIsomerLevel;
+                    const double isomerHl = getLevelHalfLifeSeconds(&dat->ndat,isomerLvl);
+                    if((isomerLvl != MAXNUMLVLS)&&(isomerLvl != (dat->ndat.nuclData[i].firstLevel + dat->ndat.nuclData[i].gsLevel))){
+                      if((isomerHl >= 1.0E-1)||(isomerHl > getNuclGSHalfLifeSeconds(&dat->ndat,(uint16_t)i))){ //only show 'important' isomers on chart
+                        double isomerSpin = getMostProbableSpin(&dat->ndat,dat->ndat.nuclData[i].longestIsomerLevel);
+                        drawingLowBox = 1;
+                        SDL_FColor boxCol = getSpinCol(isomerSpin);
+                        if(state->ds.chartZoomScale < 5.5f){
+                          //handle fading in of isomer boxes
+                          boxCol.a =  1.0f - (5.5f-state->ds.chartZoomScale);
+                        }
+                        drawFlatRect(rdat,lowBoxRect,boxCol);
+                        drawIsomerSpinBoxLabel(dat,&state->ds,rdat,lowBoxRect.x,lowBoxRect.y,lowBoxRect.w,lowBoxRect.h,(isomerSpin <= 2.0) ? whiteCol8Bit : blackCol8Bit,(uint16_t)i,isomerLvl,dat->ndat.nuclData[i].longestIsomerMVal);
+                      }
+                    }
+                  }else if(state->chartView == CHARTVIEW_PARITY){
+                    //draw spin box
+                    uint32_t isomerLvl = dat->ndat.nuclData[i].longestIsomerLevel;
+                    const double isomerHl = getLevelHalfLifeSeconds(&dat->ndat,isomerLvl);
+                    if((isomerLvl != MAXNUMLVLS)&&(isomerLvl != (dat->ndat.nuclData[i].firstLevel + dat->ndat.nuclData[i].gsLevel))){
+                      if((isomerHl >= 1.0E-1)||(isomerHl > getNuclGSHalfLifeSeconds(&dat->ndat,(uint16_t)i))){ //only show 'important' isomers on chart
+                        int8_t isomerPar = getMostProbableParity(&dat->ndat,dat->ndat.nuclData[i].longestIsomerLevel);
+                        drawingLowBox = 1;
+                        SDL_FColor boxCol = getParCol(isomerPar);
+                        if(state->ds.chartZoomScale < 5.5f){
+                          //handle fading in of isomer boxes
+                          boxCol.a =  1.0f - (5.5f-state->ds.chartZoomScale);
+                        }
+                        drawFlatRect(rdat,lowBoxRect,boxCol);
+                        drawIsomerSpinBoxLabel(dat,&state->ds,rdat,lowBoxRect.x,lowBoxRect.y,lowBoxRect.w,lowBoxRect.h,(isomerPar < 0) ? whiteCol8Bit : blackCol8Bit,(uint16_t)i,isomerLvl,dat->ndat.nuclData[i].longestIsomerMVal);
                       }
                     }
                   }
@@ -918,6 +1151,12 @@ void drawChartOfNuclides(const app_data *restrict dat, const app_state *restrict
                     drawNuclBoxLabel(dat,state,rdat,rect.x,rect.y,rect.w,(rect.h-lowBoxHeight-(2.0f*lowBoxPadding)),(get2PlusEnergy(&dat->ndat,(uint16_t)i) >= 3000.0) ? whiteCol8Bit : blackCol8Bit,(uint16_t)i);
                   }else if(state->chartView == CHARTVIEW_R42){
                     drawNuclBoxLabel(dat,state,rdat,rect.x,rect.y,rect.w,(rect.h-lowBoxHeight-(2.0f*lowBoxPadding)),(getR42(&dat->ndat,(uint16_t)i) >= 3.2) ? whiteCol8Bit : blackCol8Bit,(uint16_t)i);
+                  }else if(state->chartView == CHARTVIEW_SPIN){
+                    double spin = getMostProbableSpin(&dat->ndat,dat->ndat.nuclData[i].firstLevel + dat->ndat.nuclData[i].gsLevel);
+                    drawNuclBoxLabel(dat,state,rdat,rect.x,rect.y,rect.w,(rect.h-lowBoxHeight-(2.0f*lowBoxPadding)),(spin <= 2.0) ? whiteCol8Bit : blackCol8Bit,(uint16_t)i);
+                  }else if(state->chartView == CHARTVIEW_PARITY){
+                    int8_t par = getMostProbableParity(&dat->ndat,dat->ndat.nuclData[i].firstLevel + dat->ndat.nuclData[i].gsLevel);
+                    drawNuclBoxLabel(dat,state,rdat,rect.x,rect.y,rect.w,(rect.h-lowBoxHeight-(2.0f*lowBoxPadding)),(par < 0) ? whiteCol8Bit : blackCol8Bit,(uint16_t)i);
                   }else if(state->chartView == CHARTVIEW_BEA){
                     drawNuclBoxLabel(dat,state,rdat,rect.x,rect.y,rect.w,(rect.h-lowBoxHeight-(2.0f*lowBoxPadding)),(getBEA(&dat->ndat,(uint16_t)i) >= 8100.0) ? whiteCol8Bit : blackCol8Bit,(uint16_t)i);
                   }
@@ -930,6 +1169,12 @@ void drawChartOfNuclides(const app_data *restrict dat, const app_state *restrict
                     drawNuclBoxLabel(dat,state,rdat,rect.x,rect.y,rect.w,rect.h,(get2PlusEnergy(&dat->ndat,(uint16_t)i) >= 3000.0) ? whiteCol8Bit : blackCol8Bit,(uint16_t)i);
                   }else if(state->chartView == CHARTVIEW_R42){
                     drawNuclBoxLabel(dat,state,rdat,rect.x,rect.y,rect.w,rect.h,(getR42(&dat->ndat,(uint16_t)i) >= 3.2) ? whiteCol8Bit : blackCol8Bit,(uint16_t)i);
+                  }else if(state->chartView == CHARTVIEW_SPIN){
+                    double spin = getMostProbableSpin(&dat->ndat,dat->ndat.nuclData[i].firstLevel + dat->ndat.nuclData[i].gsLevel);
+                    drawNuclBoxLabel(dat,state,rdat,rect.x,rect.y,rect.w,rect.h,(spin <= 2.0) ? whiteCol8Bit : blackCol8Bit,(uint16_t)i);
+                  }else if(state->chartView == CHARTVIEW_PARITY){
+                    int8_t par = getMostProbableParity(&dat->ndat,dat->ndat.nuclData[i].firstLevel + dat->ndat.nuclData[i].gsLevel);
+                    drawNuclBoxLabel(dat,state,rdat,rect.x,rect.y,rect.w,rect.h,(par < 0) ? whiteCol8Bit : blackCol8Bit,(uint16_t)i);
                   }else if(state->chartView == CHARTVIEW_BEA){
                     drawNuclBoxLabel(dat,state,rdat,rect.x,rect.y,rect.w,rect.h,(getBEA(&dat->ndat,(uint16_t)i) >= 8100.0) ? whiteCol8Bit : blackCol8Bit,(uint16_t)i);
                   }
@@ -2071,6 +2316,10 @@ void drawUI(const app_data *restrict dat, app_state *restrict state, resource_da
       drawIconAndTextButton(&dat->rules.themeRules,rdat,state->ds.uiElemPosX[UIELEM_CHARTVIEW_BUTTON],state->ds.uiElemPosY[UIELEM_CHARTVIEW_BUTTON],state->ds.uiElemWidth[UIELEM_CHARTVIEW_BUTTON],getHighlightState(state,UIELEM_CHARTVIEW_BUTTON),255,UIICON_CHARTVIEW,dat->strings[dat->locStringIDs[LOCSTR_CHARTVIEW_2PLUS]]);
     }else if(state->chartView == CHARTVIEW_R42){
       drawIconAndTextButton(&dat->rules.themeRules,rdat,state->ds.uiElemPosX[UIELEM_CHARTVIEW_BUTTON],state->ds.uiElemPosY[UIELEM_CHARTVIEW_BUTTON],state->ds.uiElemWidth[UIELEM_CHARTVIEW_BUTTON],getHighlightState(state,UIELEM_CHARTVIEW_BUTTON),255,UIICON_CHARTVIEW,dat->strings[dat->locStringIDs[LOCSTR_CHARTVIEW_R42]]);
+    }else if(state->chartView == CHARTVIEW_SPIN){
+      drawIconAndTextButton(&dat->rules.themeRules,rdat,state->ds.uiElemPosX[UIELEM_CHARTVIEW_BUTTON],state->ds.uiElemPosY[UIELEM_CHARTVIEW_BUTTON],state->ds.uiElemWidth[UIELEM_CHARTVIEW_BUTTON],getHighlightState(state,UIELEM_CHARTVIEW_BUTTON),255,UIICON_CHARTVIEW,dat->strings[dat->locStringIDs[LOCSTR_CHARTVIEW_SPIN]]);
+    }else if(state->chartView == CHARTVIEW_PARITY){
+      drawIconAndTextButton(&dat->rules.themeRules,rdat,state->ds.uiElemPosX[UIELEM_CHARTVIEW_BUTTON],state->ds.uiElemPosY[UIELEM_CHARTVIEW_BUTTON],state->ds.uiElemWidth[UIELEM_CHARTVIEW_BUTTON],getHighlightState(state,UIELEM_CHARTVIEW_BUTTON),255,UIICON_CHARTVIEW,dat->strings[dat->locStringIDs[LOCSTR_CHARTVIEW_PARITY]]);
     }else if(state->chartView == CHARTVIEW_BEA){
       drawIconAndTextButton(&dat->rules.themeRules,rdat,state->ds.uiElemPosX[UIELEM_CHARTVIEW_BUTTON],state->ds.uiElemPosY[UIELEM_CHARTVIEW_BUTTON],state->ds.uiElemWidth[UIELEM_CHARTVIEW_BUTTON],getHighlightState(state,UIELEM_CHARTVIEW_BUTTON),255,UIICON_CHARTVIEW,dat->strings[dat->locStringIDs[LOCSTR_CHARTVIEW_BEA]]);
     }

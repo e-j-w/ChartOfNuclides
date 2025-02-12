@@ -61,6 +61,8 @@ double getRawErrFromDB(const valWithErr *restrict valStruct);
 
 double getLevelEnergykeV(const ndata *restrict nd, const uint32_t levelInd);
 
+int8_t getMostProbableParity(const ndata *restrict nd, const uint32_t lvlInd);
+double getMostProbableSpin(const ndata *restrict nd, const uint32_t lvlInd);
 double getBEA(const ndata *restrict nd, const uint16_t nuclInd);
 uint32_t get2PlusLvlInd(const ndata *restrict nd, const uint16_t nuclInd);
 double getR42(const ndata *restrict nd, const uint16_t nuclInd);

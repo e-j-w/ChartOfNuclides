@@ -298,6 +298,8 @@ static int parseAppRules(app_data *restrict dat, asset_mapping *restrict stringI
 	dat->locStringIDs[LOCSTR_CHARTVIEW_DECAYMODE] = (uint16_t)nameToAssetID("chartview_decaymode",stringIDmap);
 	dat->locStringIDs[LOCSTR_CHARTVIEW_2PLUS] = (uint16_t)nameToAssetID("chartview_2plus",stringIDmap);
 	dat->locStringIDs[LOCSTR_CHARTVIEW_R42] = (uint16_t)nameToAssetID("chartview_r42",stringIDmap);
+	dat->locStringIDs[LOCSTR_CHARTVIEW_SPIN] = (uint16_t)nameToAssetID("chartview_spin",stringIDmap);
+	dat->locStringIDs[LOCSTR_CHARTVIEW_PARITY] = (uint16_t)nameToAssetID("chartview_parity",stringIDmap);
 	dat->locStringIDs[LOCSTR_CHARTVIEW_BEA] = (uint16_t)nameToAssetID("chartview_beA",stringIDmap);
 	dat->locStringIDs[LOCSTR_SEARCH_PLACEHOLDER] = (uint16_t)nameToAssetID("search_placeholder",stringIDmap);
 	dat->locStringIDs[LOCSTR_SEARCHRES_NUCLIDE] = (uint16_t)nameToAssetID("search_result_nuclide",stringIDmap);

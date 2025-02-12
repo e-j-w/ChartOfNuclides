@@ -2244,6 +2244,54 @@ uint32_t get2PlusLvlInd(const ndata *restrict nd, const uint16_t nuclInd){
 	return MAXNUMLVLS;
 }
 
+int8_t getMostProbableParity(const ndata *restrict nd, const uint32_t lvlInd){
+	if(nd->levels[lvlInd].numSpinParVals == 1){
+		return nd->levels[lvlInd].spval[0].parVal;
+	}else if(nd->levels[lvlInd].numSpinParVals > 0){
+		int8_t par = nd->levels[lvlInd].spval[0].parVal;
+		for(uint8_t i=1;i<nd->levels[lvlInd].numSpinParVals;i++){
+			if(nd->levels[lvlInd].spval[i].parVal != par){
+				//unknown parity
+				return 0;
+			}
+		}
+		return par;
+	}
+	return 0; //unknown parity
+}
+
+double getMostProbableSpin(const ndata *restrict nd, const uint32_t lvlInd){
+	if(nd->levels[lvlInd].numSpinParVals == 1){
+		if(nd->levels[lvlInd].spval[0].spinVal == 255){
+			//unknown spin
+			return 255.0;
+		}
+		if(nd->levels[lvlInd].format & 1U){
+			//half-integer spin
+			return 0.5*(nd->levels[lvlInd].spval[0].spinVal);
+		}else{
+			return 1.0*(nd->levels[lvlInd].spval[0].spinVal);
+		}
+	}else if(nd->levels[lvlInd].numSpinParVals > 0){
+		//return average of multiple spins
+		double avgSpin = 0.0;
+		for(uint8_t i=0;i<nd->levels[lvlInd].numSpinParVals;i++){
+			if(nd->levels[lvlInd].spval[i].spinVal == 255){
+				//unknown spin
+				return 255.0;
+			}
+			if(nd->levels[lvlInd].format & 1U){
+				//half-integer spin
+				avgSpin += 0.5*(nd->levels[lvlInd].spval[i].spinVal);
+			}else{
+				avgSpin += 1.0*(nd->levels[lvlInd].spval[i].spinVal);
+			}
+		}
+		return avgSpin/(1.0*nd->levels[lvlInd].numSpinParVals);
+	}
+	return 255.0; //unknown spin
+}
+
 //get the binding energy per nucleon
 double getBEA(const ndata *restrict nd, const uint16_t nuclInd){
 	return getRawDblValFromDB(&nd->nuclData[nuclInd].beA);
@@ -2597,6 +2645,8 @@ void changeUIState(const app_data *restrict dat, app_state *restrict state, cons
 				state->interactableElement |= (uint64_t)(1UL << UIELEM_CVM_DECAYMODE_BUTTON);
 				state->interactableElement |= (uint64_t)(1UL << UIELEM_CVM_2PLUS_BUTTON);
 				state->interactableElement |= (uint64_t)(1UL << UIELEM_CVM_R42_BUTTON);
+				state->interactableElement |= (uint64_t)(1UL << UIELEM_CVM_SPIN_BUTTON);
+				state->interactableElement |= (uint64_t)(1UL << UIELEM_CVM_PARITY_BUTTON);
 				state->interactableElement |= (uint64_t)(1UL << UIELEM_CVM_BEA_BUTTON);
 				state->interactableElement |= (uint64_t)(1UL << UIELEM_CHARTVIEW_MENU);
 				if(state->lastInputType != INPUT_TYPE_MOUSE){
@@ -3121,7 +3171,7 @@ void uiElemClickAction(app_data *restrict dat, app_state *restrict state, resour
 			state->clickedUIElem = UIELEM_ENUM_LENGTH; //'unclick' the menu button
 		}
 	}
-	if((uiElemID != UIELEM_CHARTVIEW_BUTTON)&&(uiElemID != UIELEM_CHARTVIEW_MENU)&&(uiElemID != UIELEM_CVM_HALFLIFE_BUTTON)&&(uiElemID != UIELEM_CVM_DECAYMODE_BUTTON)&&(uiElemID != UIELEM_CVM_2PLUS_BUTTON)&&(uiElemID != UIELEM_CVM_R42_BUTTON)&&(uiElemID != UIELEM_CVM_BEA_BUTTON)){
+	if((uiElemID != UIELEM_CHARTVIEW_BUTTON)&&(uiElemID != UIELEM_CHARTVIEW_MENU)&&(uiElemID != UIELEM_CVM_HALFLIFE_BUTTON)&&(uiElemID != UIELEM_CVM_DECAYMODE_BUTTON)&&(uiElemID != UIELEM_CVM_2PLUS_BUTTON)&&(uiElemID != UIELEM_CVM_R42_BUTTON)&&(uiElemID != UIELEM_CVM_SPIN_BUTTON)&&(uiElemID != UIELEM_CVM_PARITY_BUTTON)&&(uiElemID != UIELEM_CVM_BEA_BUTTON)){
 		if((state->ds.shownElements & (1UL << UIELEM_CHARTVIEW_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_CHARTVIEW_MENU_HIDE]==0.0f)){
 			startUIAnimation(dat,state,UIANIM_CHARTVIEW_MENU_HIDE); //menu will be closed after animation finishes
 			state->clickedUIElem = UIELEM_ENUM_LENGTH; //'unclick' the menu button
@@ -3337,6 +3387,18 @@ void uiElemClickAction(app_data *restrict dat, app_state *restrict state, resour
 			startUIAnimation(dat,state,UIANIM_CHARTVIEW_MENU_HIDE); //menu will be closed after animation finishes
 			state->clickedUIElem = UIELEM_ENUM_LENGTH; //'unclick' the menu button
 			state->chartView = CHARTVIEW_R42;
+			changeUIState(dat,state,UISTATE_CHARTONLY); //prevents mouseover from still highlighting buttons while the menu closes
+			break;
+		case UIELEM_CVM_SPIN_BUTTON:
+			startUIAnimation(dat,state,UIANIM_CHARTVIEW_MENU_HIDE); //menu will be closed after animation finishes
+			state->clickedUIElem = UIELEM_ENUM_LENGTH; //'unclick' the menu button
+			state->chartView = CHARTVIEW_SPIN;
+			changeUIState(dat,state,UISTATE_CHARTONLY); //prevents mouseover from still highlighting buttons while the menu closes
+			break;
+		case UIELEM_CVM_PARITY_BUTTON:
+			startUIAnimation(dat,state,UIANIM_CHARTVIEW_MENU_HIDE); //menu will be closed after animation finishes
+			state->clickedUIElem = UIELEM_ENUM_LENGTH; //'unclick' the menu button
+			state->chartView = CHARTVIEW_PARITY;
 			changeUIState(dat,state,UISTATE_CHARTONLY); //prevents mouseover from still highlighting buttons while the menu closes
 			break;
 		case UIELEM_CVM_BEA_BUTTON:
@@ -3674,9 +3736,21 @@ void updateSingleUIElemPosition(const app_data *restrict dat, app_state *restric
 			state->ds.uiElemWidth[uiElemInd] = (int16_t)((CHARTVIEW_MENU_WIDTH - 2*PANEL_EDGE_SIZE - 4*UI_PADDING_SIZE)*state->ds.uiUserScale);
 			state->ds.uiElemHeight[uiElemInd] = (int16_t)((CHARTVIEW_MENU_ITEM_SPACING - UI_PADDING_SIZE)*state->ds.uiUserScale);
 			break;
-		case UIELEM_CVM_BEA_BUTTON:
+		case UIELEM_CVM_SPIN_BUTTON:
 			state->ds.uiElemPosX[uiElemInd] = (int16_t)(state->ds.windowXRes-((CHARTVIEW_MENU_WIDTH+CHARTVIEW_MENU_POS_XR - PANEL_EDGE_SIZE - 2*UI_PADDING_SIZE)*state->ds.uiUserScale));
 			state->ds.uiElemPosY[uiElemInd] = (int16_t)((CHARTVIEW_MENU_POS_Y + PANEL_EDGE_SIZE + 2*UI_PADDING_SIZE + 5*CHARTVIEW_MENU_ITEM_SPACING)*state->ds.uiUserScale);
+			state->ds.uiElemWidth[uiElemInd] = (int16_t)((CHARTVIEW_MENU_WIDTH - 2*PANEL_EDGE_SIZE - 4*UI_PADDING_SIZE)*state->ds.uiUserScale);
+			state->ds.uiElemHeight[uiElemInd] = (int16_t)((CHARTVIEW_MENU_ITEM_SPACING - UI_PADDING_SIZE)*state->ds.uiUserScale);
+			break;
+		case UIELEM_CVM_PARITY_BUTTON:
+			state->ds.uiElemPosX[uiElemInd] = (int16_t)(state->ds.windowXRes-((CHARTVIEW_MENU_WIDTH+CHARTVIEW_MENU_POS_XR - PANEL_EDGE_SIZE - 2*UI_PADDING_SIZE)*state->ds.uiUserScale));
+			state->ds.uiElemPosY[uiElemInd] = (int16_t)((CHARTVIEW_MENU_POS_Y + PANEL_EDGE_SIZE + 2*UI_PADDING_SIZE + 6*CHARTVIEW_MENU_ITEM_SPACING)*state->ds.uiUserScale);
+			state->ds.uiElemWidth[uiElemInd] = (int16_t)((CHARTVIEW_MENU_WIDTH - 2*PANEL_EDGE_SIZE - 4*UI_PADDING_SIZE)*state->ds.uiUserScale);
+			state->ds.uiElemHeight[uiElemInd] = (int16_t)((CHARTVIEW_MENU_ITEM_SPACING - UI_PADDING_SIZE)*state->ds.uiUserScale);
+			break;
+		case UIELEM_CVM_BEA_BUTTON:
+			state->ds.uiElemPosX[uiElemInd] = (int16_t)(state->ds.windowXRes-((CHARTVIEW_MENU_WIDTH+CHARTVIEW_MENU_POS_XR - PANEL_EDGE_SIZE - 2*UI_PADDING_SIZE)*state->ds.uiUserScale));
+			state->ds.uiElemPosY[uiElemInd] = (int16_t)((CHARTVIEW_MENU_POS_Y + PANEL_EDGE_SIZE + 2*UI_PADDING_SIZE + 7*CHARTVIEW_MENU_ITEM_SPACING)*state->ds.uiUserScale);
 			state->ds.uiElemWidth[uiElemInd] = (int16_t)((CHARTVIEW_MENU_WIDTH - 2*PANEL_EDGE_SIZE - 4*UI_PADDING_SIZE)*state->ds.uiUserScale);
 			state->ds.uiElemHeight[uiElemInd] = (int16_t)((CHARTVIEW_MENU_ITEM_SPACING - UI_PADDING_SIZE)*state->ds.uiUserScale);
 			break;
