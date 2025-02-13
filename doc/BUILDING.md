@@ -124,6 +124,7 @@ In order for the application to run, it requires a data file (`con.dat`) contain
 
 If you don't have the `con.dat` data file, it can be built from the original data files using the `proc_data` program (built during the [previous step](#build-the-application)).  First you must obtain the required data files:
 
+#### Acquire data files
 
 <a id="data_sources"></a>
 | Data       | Source location | Instructions |

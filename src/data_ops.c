@@ -2049,6 +2049,15 @@ void getSpinParStr(char strOut[32], const ndata *restrict nd, const uint32_t lvl
 						SDL_strlcat(strOut,"(",32);
 					}
 				}
+			}else if((tentative == TENTATIVESP_ASSUMED)||(tentative == TENTATIVESP_ASSUMEDSPINONLY)){
+				if((i==0)||((i>0)&&((prevTentative != TENTATIVESP_ASSUMED)&&(prevTentative != TENTATIVESP_ASSUMEDSPINONLY)))){
+					if((i>0)&&(prevTentative == TENTATIVESP_RANGE)){
+						//previous spin parity value specified a range
+						SDL_strlcat(strOut," ",32);
+					}else{
+						SDL_strlcat(strOut,"[",32);
+					}
+				}
 			}
 
 			if(spinIsVar){
@@ -2125,6 +2134,32 @@ void getSpinParStr(char strOut[32], const ndata *restrict nd, const uint32_t lvl
 					SDL_strlcat(strOut,"(-)",32);
 				}else if(nd->levels[lvlInd].spval[i].parVal == 1){
 					SDL_strlcat(strOut,"(+)",32);
+				}
+			}else if((tentative == TENTATIVESP_ASSUMED)||(tentative == TENTATIVESP_ASSUMEDSPINONLY)){
+				if(i==nd->levels[lvlInd].numSpinParVals-1){
+					SDL_strlcat(strOut,"]",32);
+					if(tentative == TENTATIVESP_ASSUMEDSPINONLY){
+						if(nd->levels[lvlInd].spval[i].parVal == -1){
+							SDL_strlcat(strOut,"-",32);
+						}else if(nd->levels[lvlInd].spval[i].parVal == 1){
+							SDL_strlcat(strOut,"+",32);
+						}
+					}
+				}else if(i<nd->levels[lvlInd].numSpinParVals-1){
+					if(nextTentative != TENTATIVESP_RANGE){
+						if(nextTentative != TENTATIVESP_ASSUMED){
+							if(nextTentative != TENTATIVESP_ASSUMEDSPINONLY){
+								SDL_strlcat(strOut,"]",32);
+								if(tentative == TENTATIVESP_ASSUMEDSPINONLY){
+									if(nd->levels[lvlInd].spval[i].parVal == -1){
+										SDL_strlcat(strOut,"-",32);
+									}else if(nd->levels[lvlInd].spval[i].parVal == 1){
+										SDL_strlcat(strOut,"+",32);
+									}
+								}
+							}
+						}
+					}
 				}
 			}
 			if(i!=nd->levels[lvlInd].numSpinParVals-1){

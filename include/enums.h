@@ -294,6 +294,8 @@ TENTATIVESP_SPINONLY, //first quantity only (eg. spin), or D for multipoles
 TENTATIVESP_PARITYONLY, //second quantity only (eg. parity), or Q for multipoles
 TENTATIVESP_NOSPIN,
 TENTATIVESP_RANGE,
+TENTATIVESP_ASSUMED, //assumed value (enclosed by square brackets)
+TENTATIVESP_ASSUMEDSPINONLY,
 TENTATIVESP_ENUM_LENGTH
 };
 enum tentative_mult_enum{
