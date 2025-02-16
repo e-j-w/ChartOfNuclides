@@ -1321,35 +1321,6 @@ void drawChartOfNuclides(const app_data *restrict dat, const app_state *restrict
 
 }
 
-//draw some stats, ie. FPS overlay and further diagnostic info
-void drawPerformanceStats(const ui_theme_rules *restrict uirules, const app_state *restrict state, const thread_manager_state *restrict tms, resource_data *restrict rdat, const float deltaTime){
-
-  //draw background
-  SDL_FRect perfOvRect;
-  perfOvRect.w = (628.0f*rdat->uiScale);
-  perfOvRect.h = (140.0f*rdat->uiScale);
-  perfOvRect.x = (CHART_AXIS_DEPTH*rdat->uiScale);
-  perfOvRect.y = 0.0f;
-  
-  SDL_SetRenderDrawColor(rdat->renderer,255,255,255,150);
-  SDL_RenderFillRect(rdat->renderer,&perfOvRect);
-
-  //draw text
-  char txtStr[256];
-  SDL_snprintf(txtStr,256,"Debug stats (press P to toggle this display)");
-  drawText(rdat,PERF_OVERLAY_BUTTON_X_ANCHOR,PERF_OVERLAY_BUTTON_Y_ANCHOR,blackCol8Bit,FONTSIZE_NORMAL_BOLD,txtStr);
-  SDL_snprintf(txtStr,256,"UI scale: %0.2f, DPI scale: %0.2f, Resolution: %u x %u (logical), %u x %u (actual)",(double)rdat->uiScale,(double)rdat->uiDPIScale,state->ds.windowXRes,state->ds.windowYRes,state->ds.windowXRenderRes,state->ds.windowYRenderRes);
-  drawDefaultText(uirules,rdat,PERF_OVERLAY_BUTTON_X_ANCHOR,PERF_OVERLAY_BUTTON_Y_ANCHOR+PERF_OVERLAY_Y_SPACING*state->ds.uiUserScale,txtStr);
-  SDL_snprintf(txtStr,256,"Zoom scale: %4.1f, UI status: %u",(double)state->ds.chartZoomScale,state->uiState);
-  drawDefaultText(uirules,rdat,PERF_OVERLAY_BUTTON_X_ANCHOR,PERF_OVERLAY_BUTTON_Y_ANCHOR+2*PERF_OVERLAY_Y_SPACING*state->ds.uiUserScale,txtStr);
-  SDL_snprintf(txtStr,256,"Active threads: %2u",tms->numThreads);
-  drawDefaultText(uirules,rdat,PERF_OVERLAY_BUTTON_X_ANCHOR,PERF_OVERLAY_BUTTON_Y_ANCHOR+3*PERF_OVERLAY_Y_SPACING*state->ds.uiUserScale,txtStr);
-  SDL_snprintf(txtStr,256,"FPS: %4.1f",1.0/((double)deltaTime));
-  drawDefaultText(uirules,rdat,PERF_OVERLAY_BUTTON_X_ANCHOR,PERF_OVERLAY_BUTTON_Y_ANCHOR+4*PERF_OVERLAY_Y_SPACING*state->ds.uiUserScale,txtStr);
-  SDL_snprintf(txtStr,256,"Frame time (ms): %4.3f",(double)(deltaTime*1000.0f));
-  drawDefaultText(uirules,rdat,PERF_OVERLAY_BUTTON_X_ANCHOR,PERF_OVERLAY_BUTTON_Y_ANCHOR+5*PERF_OVERLAY_Y_SPACING*state->ds.uiUserScale,txtStr);
-}
-
 uint8_t getHighlightState(const app_state *restrict state, const uint8_t uiElem){
   if(state->clickedUIElem == uiElem){
     return HIGHLIGHT_SELECTED;
@@ -1386,7 +1357,7 @@ void drawInfoBoxHeader(const app_data *restrict dat, const drawing_state *restri
   drawTextAlignedSized(rdat,drawXPos,drawYPos+(10.0f*ds->uiUserScale),blackCol8Bit,FONTSIZE_LARGE,alpha,tmpStr,ALIGN_LEFT,16384); //draw element label
 }
 
-void drawNuclFullInfoBox(const app_data *restrict dat, const app_state *restrict state, resource_data *restrict rdat, const uint16_t nuclInd){
+void drawNuclFullInfoBox(const app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat, const uint16_t nuclInd){
 
   float txtYOffset = 0.0f;
   Uint8 txtAlpha = 255;
@@ -1456,7 +1427,7 @@ void drawNuclFullInfoBox(const app_data *restrict dat, const app_state *restrict
       }else{
         getLvlEnergyStr(tmpStr,&dat->ndat,lvlInd,1);
       }
-      drawTextAlignedSized(rdat,drawXPos,drawYPos,(hl > 1.0E3) ? whiteCol8Bit : blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_LEFT,16384);
+      drawSelectableTextAlignedSized(rdat,&state->tss,drawXPos,drawYPos,(hl > 1.0E3) ? whiteCol8Bit : blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_LEFT,16384);
       //handle special level info
       uint8_t slInd = (uint8_t)((dat->ndat.levels[lvlInd].format >> 1U) & 127U);
       if(slInd > 0){
@@ -1464,21 +1435,21 @@ void drawNuclFullInfoBox(const app_data *restrict dat, const app_state *restrict
         char slStr[64];
         SDL_snprintf(slStr,64,"  (%s)",getSpecialLvlStr(dat,slInd));
         //SDL_Log("%s\n",tmpStr);
-        drawTextAlignedSized(rdat,drawXPos,drawYPos,(hl > 1.0E3) ? whiteCol8Bit : blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,slStr,ALIGN_LEFT,16384);
+        drawSelectableTextAlignedSized(rdat,&state->tss,drawXPos,drawYPos,(hl > 1.0E3) ? whiteCol8Bit : blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,slStr,ALIGN_LEFT,16384);
         drawYPos = levelStartDrawPos;
       }
       drawXPos += state->ds.fullInfoElevelColWidth*state->ds.uiUserScale;
       getSpinParStr(tmpStr,&dat->ndat,lvlInd);
-      drawTextAlignedSized(rdat,drawXPos,drawYPos,(hl > 1.0E3) ? whiteCol8Bit : blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_LEFT,16384);
+      drawSelectableTextAlignedSized(rdat,&state->tss,drawXPos,drawYPos,(hl > 1.0E3) ? whiteCol8Bit : blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_LEFT,16384);
       drawXPos += state->ds.fullInfoJpiColWidth*state->ds.uiUserScale;
       getHalfLifeStr(tmpStr,dat,lvlInd,1,0,state->ds.useLifetimes);
-      drawTextAlignedSized(rdat,drawXPos,drawYPos,(hl > 1.0E3) ? whiteCol8Bit : blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_LEFT,16384);
+      drawSelectableTextAlignedSized(rdat,&state->tss,drawXPos,drawYPos,(hl > 1.0E3) ? whiteCol8Bit : blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_LEFT,16384);
       if(dat->ndat.levels[lvlInd].numDecModes > 0){
         for(int8_t i=0; i<dat->ndat.levels[lvlInd].numDecModes; i++){
           drawYPos += (NUCL_INFOBOX_SMALLLINE_HEIGHT*state->ds.uiUserScale + txtYOffset);
           getDecayModeStr(tmpStr,&dat->ndat,dat->ndat.levels[lvlInd].firstDecMode + (uint32_t)i);
           //SDL_Log("%s\n",tmpStr);
-          drawTextAlignedSized(rdat,drawXPos+(2*UI_PADDING_SIZE*state->ds.uiUserScale),drawYPos,(hl > 1.0E3) ? whiteCol8Bit : blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_LEFT,16384); //draw decay mode label
+          drawSelectableTextAlignedSized(rdat,&state->tss,drawXPos+(2*UI_PADDING_SIZE*state->ds.uiUserScale),drawYPos,(hl > 1.0E3) ? whiteCol8Bit : blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_LEFT,16384); //draw decay mode label
         }
       }
       drawXPos += state->ds.fullInfoHlColWidth*state->ds.uiUserScale;
@@ -1487,25 +1458,25 @@ void drawNuclFullInfoBox(const app_data *restrict dat, const app_state *restrict
         for(uint16_t i=0; i<dat->ndat.levels[lvlInd].numTran; i++){
           float drawXPosTran = drawXPos;
           getGammaEnergyStr(tmpStr,&dat->ndat,(uint32_t)(dat->ndat.levels[lvlInd].firstTran + i),1);
-          drawTextAlignedSized(rdat,drawXPosTran,drawYPos,(hl > 1.0E3) ? whiteCol8Bit : blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_LEFT,16384); //draw transition energy label
+          drawSelectableTextAlignedSized(rdat,&state->tss,drawXPosTran,drawYPos,(hl > 1.0E3) ? whiteCol8Bit : blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_LEFT,16384); //draw transition energy label
           drawXPosTran += state->ds.fullInfoEgammaColWidth*state->ds.uiUserScale;
           getGammaIntensityStr(tmpStr,&dat->ndat,(uint32_t)(dat->ndat.levels[lvlInd].firstTran + i),1);
-          drawTextAlignedSized(rdat,drawXPosTran,drawYPos,(hl > 1.0E3) ? whiteCol8Bit : blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_LEFT,16384); //draw transition intensity label
+          drawSelectableTextAlignedSized(rdat,&state->tss,drawXPosTran,drawYPos,(hl > 1.0E3) ? whiteCol8Bit : blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_LEFT,16384); //draw transition intensity label
           drawXPosTran += state->ds.fullInfoIgammaColWidth*state->ds.uiUserScale;
           if(drawMode == 0){
             getGammaMultipolarityStr(tmpStr,&dat->ndat,(uint32_t)(dat->ndat.levels[lvlInd].firstTran + i));
-            drawTextAlignedSized(rdat,drawXPosTran,drawYPos,(hl > 1.0E3) ? whiteCol8Bit : blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_LEFT,16384); //draw transition multipolarity label
+            drawSelectableTextAlignedSized(rdat,&state->tss,drawXPosTran,drawYPos,(hl > 1.0E3) ? whiteCol8Bit : blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_LEFT,16384); //draw transition multipolarity label
             drawXPosTran += state->ds.fullInfoMgammaColWidth*state->ds.uiUserScale;
           }
           if(dat->ndat.tran[(uint32_t)(dat->ndat.levels[lvlInd].firstTran + i)].finalLvlOffset != 0){
             float drawXPosFL = drawXPosTran;
             uint32_t finalLvlInd = getFinalLvlInd(&dat->ndat,lvlInd,(uint32_t)(dat->ndat.levels[lvlInd].firstTran + i));
             getLvlEnergyStr(tmpStr,&dat->ndat,finalLvlInd,0);
-            drawTextAlignedSized(rdat,drawXPosFL,drawYPos,(hl > 1.0E3) ? whiteCol8Bit : blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_LEFT,16384); //draw final level energy label
+            drawSelectableTextAlignedSized(rdat,&state->tss,drawXPosFL,drawYPos,(hl > 1.0E3) ? whiteCol8Bit : blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_LEFT,16384); //draw final level energy label
             if(drawMode <= 1){
               drawXPosFL += (state->ds.fullInfoFinalElevelColWidth+state->ds.fullInfoFinalJpiColWidth)*state->ds.uiUserScale;
               getSpinParStr(tmpStr,&dat->ndat,finalLvlInd);
-              drawTextAlignedSized(rdat,drawXPosFL,drawYPos,(hl > 1.0E3) ? whiteCol8Bit : blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_RIGHT,16384); //draw final level spin-parity label
+              drawSelectableTextAlignedSized(rdat,&state->tss,drawXPosFL,drawYPos,(hl > 1.0E3) ? whiteCol8Bit : blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_RIGHT,16384); //draw final level spin-parity label
             }
           }
 
@@ -1580,31 +1551,31 @@ void drawNuclFullInfoBox(const app_data *restrict dat, const app_state *restrict
   }else{
     SDL_snprintf(tmpStr,32,"%s",dat->strings[dat->locStringIDs[LOCSTR_MASS_UNKNOWN]]);
   }
-  drawTextAlignedSized(rdat,drawXPos,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_RIGHT,16384);
+  drawSelectableTextAlignedSized(rdat,&state->tss,drawXPos,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_RIGHT,16384);
   drawYPos += 20.0f*state->ds.uiUserScale;
   if(dat->ndat.nuclData[nuclInd].sp.val != 0.0f){
     getQValStr(descStr,dat->ndat.nuclData[nuclInd].sp,1);
     SDL_snprintf(tmpStr,32,"%s=%s %s",dat->strings[dat->locStringIDs[LOCSTR_SP]],descStr,getValueUnitShortStr(dat->ndat.nuclData[nuclInd].sp.unit));
-    rect = drawTextAlignedSized(rdat,drawXPos,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_RIGHT,16384);
+    rect = drawSelectableTextAlignedSized(rdat,&state->tss,drawXPos,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_RIGHT,16384);
     drawXPos -= rect.w + 4*UI_PADDING_SIZE*state->ds.uiUserScale;
   }
   if(dat->ndat.nuclData[nuclInd].sn.val != 0.0f){
     getQValStr(descStr,dat->ndat.nuclData[nuclInd].sn,1);
     SDL_snprintf(tmpStr,32,"%s=%s %s",dat->strings[dat->locStringIDs[LOCSTR_SN]],descStr,getValueUnitShortStr(dat->ndat.nuclData[nuclInd].sn.unit));
-    drawTextAlignedSized(rdat,drawXPos,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_RIGHT,16384);
+    drawSelectableTextAlignedSized(rdat,&state->tss,drawXPos,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_RIGHT,16384);
   }
   drawXPos = state->ds.windowXRes - NUCL_FULLINFOBOX_QVAL_POS_XR*state->ds.uiUserScale;
   drawYPos += 20.0f*state->ds.uiUserScale;
   if(dat->ndat.nuclData[nuclInd].qbeta.val != 0.0f){
     getQValStr(descStr,dat->ndat.nuclData[nuclInd].qbeta,1);
     SDL_snprintf(tmpStr,32,"%s=%s %s",dat->strings[dat->locStringIDs[LOCSTR_QBETAMNUS]],descStr,getValueUnitShortStr(dat->ndat.nuclData[nuclInd].qbeta.unit));
-    rect = drawTextAlignedSized(rdat,drawXPos,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_RIGHT,16384);
+    rect = drawSelectableTextAlignedSized(rdat,&state->tss,drawXPos,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_RIGHT,16384);
     drawXPos -= rect.w + 4*UI_PADDING_SIZE*state->ds.uiUserScale;
   }
   if(dat->ndat.nuclData[nuclInd].qalpha.val != 0.0f){
     getQValStr(descStr,dat->ndat.nuclData[nuclInd].qalpha,1);
     SDL_snprintf(tmpStr,32,"%s=%s %s",dat->strings[dat->locStringIDs[LOCSTR_QALPHA]],descStr,getValueUnitShortStr(dat->ndat.nuclData[nuclInd].qalpha.unit));
-    drawTextAlignedSized(rdat,drawXPos,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_RIGHT,16384);
+    drawSelectableTextAlignedSized(rdat,&state->tss,drawXPos,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_RIGHT,16384);
   }
   
 
@@ -2295,6 +2266,35 @@ void drawPrimaryMenu(const app_data *restrict dat, const app_state *restrict sta
 
 }
 
+//draw some stats, ie. FPS overlay and further diagnostic info
+void drawPerformanceStats(const ui_theme_rules *restrict uirules, const app_state *restrict state, const thread_manager_state *restrict tms, resource_data *restrict rdat, const float deltaTime){
+
+  //draw background
+  SDL_FRect perfOvRect;
+  perfOvRect.w = (628.0f*rdat->uiScale);
+  perfOvRect.h = (140.0f*rdat->uiScale);
+  perfOvRect.x = (CHART_AXIS_DEPTH*rdat->uiScale);
+  perfOvRect.y = 0.0f;
+  
+  SDL_SetRenderDrawColor(rdat->renderer,255,255,255,150);
+  SDL_RenderFillRect(rdat->renderer,&perfOvRect);
+
+  //draw text
+  char txtStr[256];
+  SDL_snprintf(txtStr,256,"Debug stats (press P to toggle this display)");
+  drawText(rdat,PERF_OVERLAY_BUTTON_X_ANCHOR,PERF_OVERLAY_BUTTON_Y_ANCHOR,blackCol8Bit,FONTSIZE_NORMAL_BOLD,txtStr);
+  SDL_snprintf(txtStr,256,"UI scale: %0.2f, DPI scale: %0.2f, Resolution: %u x %u (logical), %u x %u (actual)",(double)rdat->uiScale,(double)rdat->uiDPIScale,state->ds.windowXRes,state->ds.windowYRes,state->ds.windowXRenderRes,state->ds.windowYRenderRes);
+  drawDefaultText(uirules,rdat,PERF_OVERLAY_BUTTON_X_ANCHOR,PERF_OVERLAY_BUTTON_Y_ANCHOR+PERF_OVERLAY_Y_SPACING*state->ds.uiUserScale,txtStr);
+  SDL_snprintf(txtStr,256,"Zoom scale: %4.1f, UI status: %u",(double)state->ds.chartZoomScale,state->uiState);
+  drawDefaultText(uirules,rdat,PERF_OVERLAY_BUTTON_X_ANCHOR,PERF_OVERLAY_BUTTON_Y_ANCHOR+2*PERF_OVERLAY_Y_SPACING*state->ds.uiUserScale,txtStr);
+  SDL_snprintf(txtStr,256,"Active threads: %2u, Selection strings: %3u",tms->numThreads,state->tss.numSelStrs);
+  drawDefaultText(uirules,rdat,PERF_OVERLAY_BUTTON_X_ANCHOR,PERF_OVERLAY_BUTTON_Y_ANCHOR+3*PERF_OVERLAY_Y_SPACING*state->ds.uiUserScale,txtStr);
+  SDL_snprintf(txtStr,256,"FPS: %4.1f",1.0/((double)deltaTime));
+  drawDefaultText(uirules,rdat,PERF_OVERLAY_BUTTON_X_ANCHOR,PERF_OVERLAY_BUTTON_Y_ANCHOR+4*PERF_OVERLAY_Y_SPACING*state->ds.uiUserScale,txtStr);
+  SDL_snprintf(txtStr,256,"Frame time (ms): %4.3f",(double)(deltaTime*1000.0f));
+  drawDefaultText(uirules,rdat,PERF_OVERLAY_BUTTON_X_ANCHOR,PERF_OVERLAY_BUTTON_Y_ANCHOR+5*PERF_OVERLAY_Y_SPACING*state->ds.uiUserScale,txtStr);
+}
+
 //meta-function which draws any UI menus, if applicable
 void drawUI(const app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat){
 
@@ -2371,5 +2371,9 @@ void drawUI(const app_data *restrict dat, app_state *restrict state, resource_da
     white.a = (float)(1.0f*juice_smoothStart2(state->ds.timeLeftInUIAnimation[UIANIM_CHART_FADEIN]/UI_ANIM_LENGTH));
     drawFlatBG(&state->ds,rdat,white);
   }
+
+  //all text is now drawn (and any applicable selection strings defined),
+  //disable selection string updates (until re-enabled by some later event)
+  state->tss.selStrsModifiable = 0;
   
 }

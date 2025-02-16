@@ -27,6 +27,8 @@ using game data/state */
 //function prototypes
 void initializeTempState(const app_data *restrict dat, app_state *restrict state, thread_manager_state *restrict tms);
 
+void clearSelectionStrs(text_selection_state *restrict tss, const uint8_t modifiableAfter);
+
 void startUIAnimation(const app_data *restrict dat, app_state *restrict state, const uint8_t uiAnim);
 void stopUIAnimation(const app_data *restrict dat, app_state *restrict state, const uint8_t uiAnim);
 void updateUIAnimationTimes(const app_data *restrict dat, app_state *restrict state, const float deltaTime);

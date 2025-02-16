@@ -434,6 +434,29 @@ SDL_FRect drawTextAlignedSized(resource_data *restrict rdat, const float xPos, c
   drawRect.h /= rdat->uiDPIScale;
   return drawRect;
 }
+SDL_FRect drawSelectableTextAlignedSized(resource_data *restrict rdat, text_selection_state *restrict tss, const float xPos, const float yPos, const SDL_Color textColor, const uint8_t fontSizeInd, const Uint8 alpha, const char *txt, const uint8_t alignment, const Uint16 maxWidth){
+  
+  SDL_FRect rect = drawTextAlignedSized(rdat,xPos,yPos,textColor,fontSizeInd,alpha,txt,alignment,maxWidth);
+
+  //add the string to the list of selectable strings
+  char subStr[MAX_SELECTABLE_STR_LEN];
+  if(tss->selStrsModifiable){
+    if(tss->numSelStrs < MAX_SELECTABLE_STRS){
+      tss->selectableStrRect[tss->numSelStrs] = rect;
+      SDL_strlcpy(tss->selectableStrTxt[tss->numSelStrs],txt,MAX_SELECTABLE_STR_LEN);
+      for(size_t i=1; i<SDL_strlen(txt); i++){
+        if(i<MAX_SELECTABLE_STR_LEN){
+          SDL_strlcpy(subStr,txt,i);
+          tss->selectableStrLen[tss->numSelStrs][i-1] = getTextWidth(rdat,fontSizeInd,subStr);
+        }
+      }
+      tss->numSelStrs++;
+    }
+  }
+
+  return rect;
+
+}
 void drawTextAligned(resource_data *restrict rdat, const float xPos, const float yPos, const SDL_Color textColor, const uint8_t fontSizeInd, const char *txt, const uint8_t alignment){
   drawTextAlignedSized(rdat,xPos,yPos,textColor,fontSizeInd,255,txt,alignment,16384);
 }

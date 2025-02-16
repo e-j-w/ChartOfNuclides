@@ -43,6 +43,10 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #define SEARCH_RESULT_DATASIZE   4
 #define UNUSED_SEARCH_RESULT     4294967295U
 
+//text selection parameters
+#define MAX_SELECTABLE_STRS      256 //maximum number of onscreen text strings that can be selectable at once
+#define MAX_SELECTABLE_STR_LEN   128 //maximum length of selectable text strings
+
 //increasing these numbers will increase the size of 
 //the nuclear database stored in memory (and on disk)
 #define ENSDFSTRBUFSIZE          262144 //2^18
@@ -280,8 +284,20 @@ typedef struct
 
 typedef struct
 {
+  SDL_FRect selectableStrRect[MAX_SELECTABLE_STRS]; //position and size of selectable text
+  char selectableStrTxt[MAX_SELECTABLE_STRS][MAX_SELECTABLE_STR_LEN];
+  float selectableStrLen[MAX_SELECTABLE_STRS][MAX_SELECTABLE_STR_LEN]; //length (from the start of the string) to each character in the string
+  uint16_t numSelStrs;
+  uint16_t selectedStr; //65535 if nothing selected
+  uint8_t selStartPos, selEndPos; //which character indices correspond to the start and end of the selected text
+  uint8_t selStrsModifiable; //flag which is set whenever the selection strings can be updated, and is cleared at the end of each frame
+}text_selection_state; //struct containing search data
+
+typedef struct
+{
   drawing_state ds;          //the state information for drawing
   search_state ss;           //the state information for search queries
+  text_selection_state tss;  //the state information for text selection
   char msgBoxHeaderTxt[32]; //text to show at the top of the message box
   char msgBoxTxt[256];      //main text to show in the message box
   int searchCursorPos, searchSelectionLen; //for search query text editing

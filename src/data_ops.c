@@ -91,6 +91,7 @@ void initializeTempState(const app_data *restrict dat, app_state *restrict state
 	state->ds.interfaceSizeInd = UISCALE_NORMAL;
 	state->ss.numResults = 0;
 	state->ss.canUpdateResults = SDL_CreateSemaphore(1);
+	clearSelectionStrs(&state->tss,0);
 	memset(state->ds.uiElemExtPlusX,0,sizeof(state->ds.uiElemExtPlusX));
 	memset(state->ds.uiElemExtPlusY,0,sizeof(state->ds.uiElemExtPlusY));
 	memset(state->ds.uiElemExtMinusX,0,sizeof(state->ds.uiElemExtMinusX));
@@ -114,6 +115,15 @@ void initializeTempState(const app_data *restrict dat, app_state *restrict state
     exit(-1);
 	}
 
+}
+
+//resets the text selection state, should be called on frames where selectable text changes position
+void clearSelectionStrs(text_selection_state *restrict tss, const uint8_t modifiableAfter){
+	tss->selStartPos = 0;
+	tss->selEndPos = 0;
+	tss->selectedStr = 65535; //no string selected
+	tss->numSelStrs = 0; //no selectable strings defined
+	tss->selStrsModifiable = modifiableAfter;
 }
 
 void startUIAnimation(const app_data *restrict dat, app_state *restrict state, const uint8_t uiAnim){
@@ -244,12 +254,16 @@ void stopUIAnimation(const app_data *restrict dat, app_state *restrict state, co
 			startUIAnimation(dat,state,UIANIM_NUCLINFOBOX_TXTFADEIN);
 			changeUIState(dat,state,UISTATE_FULLLEVELINFO); //update UI state now that the full info box is visible
 			break;
+		case UIANIM_NUCLINFOBOX_TXTFADEIN:
+			state->tss.selStrsModifiable = 1; //allow strings on the full info box to be selectable
+			break;
 		case UIANIM_NUCLINFOBOX_TXTFADEOUT:
 			state->ds.shownElements &= (uint64_t)(~(1UL << UIELEM_NUCL_FULLINFOBOX)); //close the full info box
 			state->ds.shownElements |= (1UL << UIELEM_NUCL_INFOBOX); //show the info box
 			state->ds.shownElements |= (1UL << UIELEM_CHARTOFNUCLIDES); //show the chart
 			startUIAnimation(dat,state,UIANIM_NUCLINFOBOX_CONTRACT);
 			changeUIState(dat,state,UISTATE_INFOBOX); //update UI state now that the regular info box is visible
+			clearSelectionStrs(&state->tss,0); //strings on full level list are no longer selectable
 			break;
     default:
       break;
@@ -3000,6 +3014,7 @@ void setInfoBoxDimensions(const app_data *restrict dat, app_state *restrict stat
 }
 
 void setSelectedNuclOnLevelList(const app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat, const uint16_t N, const uint16_t Z, const uint8_t updateRxn){
+	clearSelectionStrs(&state->tss,0); //strings on previous full level list are no longer selectable
 	uint16_t selNucl = getNuclInd(&dat->ndat,(int16_t)N,(int16_t)Z);
 	//SDL_Log("Selected nucleus: %u\n",state->chartSelectedNucl);
 	if(((selNucl < MAXNUMNUCL)&&(selNucl != state->chartSelectedNucl)) || updateRxn){
