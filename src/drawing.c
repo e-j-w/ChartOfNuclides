@@ -430,6 +430,14 @@ SDL_FRect drawTextAlignedSized(resource_data *restrict rdat, const float xPos, c
   }else{
     drawRect = FC_DrawColumnColorAlign(rdat->font[fontSizeInd],rdat->renderer,drawX,drawY,(Uint16)(maxWidth*rdat->uiDPIScale),textColor,alignFC,txt);
   }
+  if(alignment == ALIGN_RIGHT){
+    drawRect.x = xPos - (drawRect.w/rdat->uiDPIScale);
+  }else if(alignment == ALIGN_CENTER){
+    drawRect.x = xPos - (0.5f*drawRect.w/rdat->uiDPIScale);
+  }else{
+    drawRect.x /= rdat->uiDPIScale;
+  }
+  drawRect.y = yPos;
   drawRect.w /= rdat->uiDPIScale;
   drawRect.h /= rdat->uiDPIScale;
   return drawRect;
@@ -439,17 +447,12 @@ SDL_FRect drawSelectableTextAlignedSized(resource_data *restrict rdat, text_sele
   SDL_FRect rect = drawTextAlignedSized(rdat,xPos,yPos,textColor,fontSizeInd,alpha,txt,alignment,maxWidth);
 
   //add the string to the list of selectable strings
-  char subStr[MAX_SELECTABLE_STR_LEN];
   if(tss->selStrsModifiable){
     if(tss->numSelStrs < MAX_SELECTABLE_STRS){
+      //SDL_Log("Adding selection string %u: %s\n",tss->numSelStrs,txt);
+      //SDL_Log("  Rect: %0.3f %0.3f %0.3f %0.3f\n",(double)rect.x,(double)rect.y,(double)rect.w,(double)rect.h);
       tss->selectableStrRect[tss->numSelStrs] = rect;
       SDL_strlcpy(tss->selectableStrTxt[tss->numSelStrs],txt,MAX_SELECTABLE_STR_LEN);
-      for(size_t i=1; i<SDL_strlen(txt); i++){
-        if(i<MAX_SELECTABLE_STR_LEN){
-          SDL_strlcpy(subStr,txt,i);
-          tss->selectableStrLen[tss->numSelStrs][i-1] = getTextWidth(rdat,fontSizeInd,subStr);
-        }
-      }
       tss->numSelStrs++;
     }
   }

@@ -44,7 +44,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #define UNUSED_SEARCH_RESULT     4294967295U
 
 //text selection parameters
-#define MAX_SELECTABLE_STRS      256 //maximum number of onscreen text strings that can be selectable at once
+#define MAX_SELECTABLE_STRS      512 //maximum number of onscreen text strings that can be selectable at once
 #define MAX_SELECTABLE_STR_LEN   128 //maximum length of selectable text strings
 
 //increasing these numbers will increase the size of 
@@ -285,8 +285,7 @@ typedef struct
 typedef struct
 {
   SDL_FRect selectableStrRect[MAX_SELECTABLE_STRS]; //position and size of selectable text
-  char selectableStrTxt[MAX_SELECTABLE_STRS][MAX_SELECTABLE_STR_LEN];
-  float selectableStrLen[MAX_SELECTABLE_STRS][MAX_SELECTABLE_STR_LEN]; //length (from the start of the string) to each character in the string
+  char selectableStrTxt[MAX_SELECTABLE_STRS][MAX_SELECTABLE_STR_LEN]; //the actual strings that are selectable
   uint16_t numSelStrs;
   uint16_t selectedStr; //65535 if nothing selected
   uint8_t selStartPos, selEndPos; //which character indices correspond to the start and end of the selected text

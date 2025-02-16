@@ -820,6 +820,17 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
         state->ds.dragInProgress = 1;
         //SDL_Log("start drag\n");
       }
+
+      //handle selectable text strings
+      for(uint16_t i=0; i<state->tss.numSelStrs; i++){
+        if((state->mouseXPx >= state->tss.selectableStrRect[i].x)&&(state->mouseXPx < (state->tss.selectableStrRect[i].x + state->tss.selectableStrRect[i].w))){
+          if((state->mouseYPx >= state->tss.selectableStrRect[i].y)&&(state->mouseYPx < (state->tss.selectableStrRect[i].y + state->tss.selectableStrRect[i].h))){
+            //mouse is over selectable text
+            SDL_SetCursor(rdat->textEntryCursor);
+            break;
+          }
+        }
+      }
     }
 
     //check for mouse release
