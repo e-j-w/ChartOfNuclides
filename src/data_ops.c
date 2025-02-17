@@ -81,8 +81,10 @@ void initializeTempState(const app_data *restrict dat, app_state *restrict state
 	state->ds.totalPanTime = CHART_KEY_PAN_TIME;
 	state->ds.zoomFinished = 0;
 	state->ds.zoomInProgress = 0;
-	state->ds.dragFinished = 0;
-	state->ds.dragInProgress = 0;
+	state->ds.chartDragFinished = 0;
+	state->ds.textDragFinished = 0;
+	state->ds.chartDragInProgress = 0;
+	state->ds.textDragInProgress = 0;
 	state->ds.fcScrollFinished = 0;
 	state->ds.fcScrollInProgress = 0;
 	state->ds.fcNuclChangeInProgress = 0;
@@ -295,9 +297,14 @@ void updateDrawingState(const app_data *restrict dat, app_state *restrict state,
 		state->ds.zoomFinished = 0; //reset flag
 		changeUIState(dat,state,state->uiState); //update interactable elements (specifically zoom buttons)
 	}
-	if(state->ds.dragFinished){
-		state->ds.dragInProgress = 0;
-		state->ds.dragFinished = 0; //reset flag
+	if(state->ds.chartDragFinished){
+		state->ds.chartDragInProgress = 0;
+		state->ds.chartDragFinished = 0; //reset flag
+		SDL_SetCursor(rdat->defaultCursor); //set cursor back to default
+	}
+	if(state->ds.textDragFinished){
+		state->ds.textDragInProgress = 0;
+		state->ds.textDragFinished = 0; //reset flag
 		SDL_SetCursor(rdat->defaultCursor); //set cursor back to default
 	}
 	if(state->ds.panFinished){
@@ -330,7 +337,12 @@ void updateDrawingState(const app_data *restrict dat, app_state *restrict state,
 		}
 		//SDL_Log("zoom scale: %0.4f\n",(double)state->ds.chartZoomScale);
 	}
-	if(state->ds.dragInProgress){
+	if(state->ds.textDragInProgress){
+		if(state->lastInputType == INPUT_TYPE_MOUSE){
+      SDL_SetCursor(rdat->textEntryCursor); //set mouse cursor
+    }
+	}
+	if(state->ds.chartDragInProgress){
 		if((state->lastInputType == INPUT_TYPE_MOUSE)&&((state->ds.chartPosX != state->ds.chartDragStartX)||(state->ds.chartPosY != state->ds.chartDragStartY))){
       SDL_SetCursor(rdat->dragCursor); //set mouse cursor
     }
@@ -354,6 +366,7 @@ void updateDrawingState(const app_data *restrict dat, app_state *restrict state,
 		if(state->ds.timeSinceFCScollStart >= NUCL_FULLINFOBOX_SCROLL_TIME){
 			state->ds.nuclFullInfoScrollY = state->ds.nuclFullInfoScrollToY;
 			state->ds.fcScrollFinished = 1;
+			state->tss.selStrsModifiable = 1; //now that scroll is finished, allow selection strings to be regenerated
 		}
 		//SDL_Log("scroll t: %0.3f, pos: %f\n",(double)state->ds.timeSinceFCScollStart,(double)state->ds.nuclFullInfoScrollY);
 	}
@@ -4079,6 +4092,7 @@ void updateUIElemPositions(const app_data *restrict dat, app_state *restrict sta
   for(uint8_t i=0; i<UIELEM_ENUM_LENGTH; i++){
     updateSingleUIElemPosition(dat,state,rdat,i);
   }
+	clearSelectionStrs(&state->tss,1); //update selection strings if needed
 }
 
 float getUIthemeScale(const float uiScale){

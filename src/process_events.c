@@ -45,6 +45,7 @@ void fcScrollAction(app_state *restrict state, const float deltaVal){
   state->ds.timeSinceFCScollStart = 0.0f;
   state->ds.fcScrollInProgress = 1;
   state->ds.fcScrollFinished = 0;
+  clearSelectionStrs(&state->tss,0); //selection string positions are changed on scroll
   //SDL_Log("scroll pos: %f, scroll to: %f\n",(double)state->ds.nuclFullInfoScrollY,(double)state->ds.nuclFullInfoScrollToY);
 }
 
@@ -753,7 +754,7 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
     state->mouseoverElement = UIELEM_ENUM_LENGTH; //by default, no element is moused over
     state->mouseholdElement = UIELEM_ENUM_LENGTH;
 
-    if(state->ds.dragInProgress == 0){
+    if(state->ds.chartDragInProgress == 0){
       //first, handle dynamic menu (menus without a fixed number of entries) selections
       uint8_t dynamicMenuItemInteracted = 0;
       if(state->ds.shownElements & (1UL << UIELEM_RXN_MENU)){
@@ -817,7 +818,7 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
         state->ds.chartDragStartY = state->ds.chartPosY;
         state->ds.chartDragStartMouseX = state->mouseXPx;
         state->ds.chartDragStartMouseY = state->mouseYPx;
-        state->ds.dragInProgress = 1;
+        state->ds.chartDragInProgress = 1;
         //SDL_Log("start drag\n");
       }
 
@@ -827,6 +828,11 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
           if((state->mouseYPx >= state->tss.selectableStrRect[i].y)&&(state->mouseYPx < (state->tss.selectableStrRect[i].y + state->tss.selectableStrRect[i].h))){
             //mouse is over selectable text
             SDL_SetCursor(rdat->textEntryCursor);
+            if((state->ds.textDragInProgress == 0)&&(state->mouseholdElement == UIELEM_ENUM_LENGTH)&&(state->mouseHoldStartPosXPx >= 0.0f)){
+              state->ds.textDragStartMouseX = state->mouseXPx;
+              state->ds.textDragInProgress = 1;
+              SDL_Log("start drag on selectable text\n");
+            }
             break;
           }
         }
@@ -835,9 +841,13 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
 
     //check for mouse release
     if(state->mouseHoldStartPosXPx < 0.0f){
-      if(state->ds.dragInProgress){
+      if(state->ds.chartDragInProgress){
         //SDL_Log("Mouse released.\n");
-        state->ds.dragFinished = 1;
+        state->ds.chartDragFinished = 1;
+      }
+      if(state->ds.textDragInProgress){
+        SDL_Log("Mouse released.\n");
+        state->ds.textDragFinished = 1;
       }
     }
 
@@ -1540,7 +1550,7 @@ void processFrameEvents(app_data *restrict dat, app_state *restrict state, resou
       state->inputFlags &= ~(1U << INPUT_DOUBLECLICK);
     }
 
-    if((state->ds.uiAnimPlaying != 0)||(state->ds.zoomInProgress)||(state->ds.dragInProgress)||(state->ds.panInProgress)||(state->ds.fcScrollInProgress)||(state->ds.fcNuclChangeInProgress)){
+    if((state->ds.uiAnimPlaying != 0)||(state->ds.zoomInProgress)||(state->ds.chartDragInProgress)||(state->ds.panInProgress)||(state->ds.fcScrollInProgress)||(state->ds.fcNuclChangeInProgress)){
       //a UI animation is playing, don't block the main thread
       state->ds.forceRedraw = 1;
     }

@@ -229,6 +229,7 @@ typedef struct
   float chartPanStartX, chartPanStartY;
   float chartDragStartX, chartDragStartY;
   float chartDragStartMouseX, chartDragStartMouseY; //in scaled pixels
+  float textDragStartMouseX; //in scaled pixels
   float timeSinceZoomStart, timeSincePanStart, totalPanTime, timeSinceFCScollStart, timeSinceFCNuclChangeStart;
   float infoBoxTableHeight; //the height in unscaled pixels needed to show the info box ground and isomeric state info
   float infoBoxWidth, infoBoxEColOffset, infoBoxJpiColOffset, infoBoxHlColOffset, infoBoxDcyModeColOffset;
@@ -254,8 +255,10 @@ typedef struct
   unsigned int fcNuclChangeFinished : 1;
   unsigned int panInProgress : 1;
   unsigned int panFinished : 1;
-  unsigned int dragInProgress : 1;
-  unsigned int dragFinished : 1;
+  unsigned int chartDragInProgress : 1;
+  unsigned int textDragInProgress : 1;
+  unsigned int chartDragFinished : 1;
+  unsigned int textDragFinished : 1;
   unsigned int zoomInProgress : 1;
   unsigned int zoomFinished : 1;
   unsigned int useLifetimes : 1;

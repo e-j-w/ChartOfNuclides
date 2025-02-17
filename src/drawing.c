@@ -402,7 +402,7 @@ float getTextWidthScaleIndependent(resource_data *restrict rdat, const uint8_t f
   return getTextWidth(rdat,fontSizeInd,str)/rdat->uiScale;
 }
 
-//returns a rect containing dimensions of the drawn text (can be used for alignment purposes)
+//returns a rect containing dimensions of the drawn text (can be used for alignment and text selection purposes)
 //fontSizeInd: values from font_size_enum
 SDL_FRect drawTextAlignedSized(resource_data *restrict rdat, const float xPos, const float yPos, const SDL_Color textColor, const uint8_t fontSizeInd, const Uint8 alpha, const char *txt, const uint8_t alignment, const Uint16 maxWidth){
   float drawX = xPos*rdat->uiDPIScale;
