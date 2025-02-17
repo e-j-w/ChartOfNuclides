@@ -2266,6 +2266,39 @@ void drawPrimaryMenu(const app_data *restrict dat, const app_state *restrict sta
 
 }
 
+void drawTextSelHighlight(const app_state *restrict state, resource_data *restrict rdat){
+
+  if(state->tss.selectedStr >= state->tss.numSelStrs){
+    //no string selected
+    return;
+  }
+  
+  uint8_t charIndStart = state->tss.selStartPos;
+  uint8_t charIndEnd = state->tss.selEndPos;
+  if(charIndStart == charIndEnd){
+    return; //width of selection is 0
+  }else if(charIndStart > charIndEnd){
+    //swap start and end for the purposes of drawing
+    uint8_t tmp = charIndEnd;
+    charIndEnd = charIndStart;
+    charIndStart = tmp;
+  }
+  uint8_t selLen = (uint8_t)(charIndEnd - charIndStart);
+  if(selLen < MAX_SELECTABLE_STR_LEN){
+    char selSubStr[MAX_SELECTABLE_STR_LEN], selPreStr[MAX_SELECTABLE_STR_LEN];
+    SDL_strlcpy(selSubStr,&state->tss.selectableStrTxt[state->tss.selectedStr][charIndStart],selLen+1);
+    SDL_strlcpy(selPreStr,state->tss.selectableStrTxt[state->tss.selectedStr],charIndStart+1);
+    SDL_FRect rawSelRect = state->tss.selectableStrRect[state->tss.selectedStr];
+    //SDL_Log("Selected text: %s, prior text: %s, selected chars %u to %u\n",selSubStr,selPreStr,charIndStart,charIndEnd);
+    //SDL_Log("Original text rect: %0.2f %0.2f %0.2f %0.2f\n",(double)rawSelRect.x,(double)rawSelRect.y,(double)rawSelRect.w,(double)rawSelRect.h);
+    rawSelRect.x = rawSelRect.x + getTextWidth(rdat,FONTSIZE_NORMAL,selPreStr);
+    rawSelRect.w = getTextWidth(rdat,FONTSIZE_NORMAL,selSubStr);
+    //SDL_Log("Highlight rect: %0.2f %0.2f %0.2f %0.2f\n",(double)rawSelRect.x,(double)rawSelRect.y,(double)rawSelRect.w,(double)rawSelRect.h);
+    drawFlatRect(rdat,rawSelRect,txtSelCol);
+  }
+
+}
+
 //draw some stats, ie. FPS overlay and further diagnostic info
 void drawPerformanceStats(const ui_theme_rules *restrict uirules, const app_state *restrict state, const thread_manager_state *restrict tms, resource_data *restrict rdat, const float deltaTime){
 
@@ -2364,6 +2397,9 @@ void drawUI(const app_data *restrict dat, app_state *restrict state, resource_da
       drawUIScaleMenu(dat,state,rdat);
     }
   }
+
+  //draw highlight over selected text
+  drawTextSelHighlight(state,rdat);
 
   if(state->ds.uiAnimPlaying & (1U << UIANIM_CHART_FADEIN)){
     

@@ -822,6 +822,17 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
         //SDL_Log("start drag\n");
       }
 
+      if(state->ds.textDragInProgress){
+        //update text selection drag state
+        if(state->mouseXPx >= 0.0f){ //only update the selection position if the mouse is still in the window
+          float cursorRelPos = (state->mouseXPx - state->tss.selectableStrRect[state->tss.selectedStr].x)/state->ds.uiUserScale; //position of the cursor relative to the start of the selectable text
+          if(cursorRelPos < 0.0f){
+            cursorRelPos = 0.0f;
+          }
+          state->tss.selEndPos = (uint8_t)(getNumTextCharsUnderWidth(rdat,(uint16_t)(cursorRelPos),state->tss.selectableStrTxt[state->tss.selectedStr],0));
+        }
+      }
+
       //handle selectable text strings
       for(uint16_t i=0; i<state->tss.numSelStrs; i++){
         if((state->mouseXPx >= state->tss.selectableStrRect[i].x)&&(state->mouseXPx < (state->tss.selectableStrRect[i].x + state->tss.selectableStrRect[i].w))){
@@ -829,9 +840,15 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
             //mouse is over selectable text
             SDL_SetCursor(rdat->textEntryCursor);
             if((state->ds.textDragInProgress == 0)&&(state->mouseholdElement == UIELEM_ENUM_LENGTH)&&(state->mouseHoldStartPosXPx >= 0.0f)){
-              state->ds.textDragStartMouseX = state->mouseXPx;
-              state->ds.textDragInProgress = 1;
-              SDL_Log("start drag on selectable text\n");
+              float cursorRelPos = (state->mouseXPx - state->tss.selectableStrRect[i].x)/state->ds.uiUserScale; //position of the cursor relative to the start of the selectable text
+              if(cursorRelPos >= 0){
+                state->ds.textDragStartMouseX = state->mouseXPx;
+                state->ds.textDragInProgress = 1;
+                state->tss.selectedStr = i;
+                state->tss.selStartPos = (uint8_t)(getNumTextCharsUnderWidth(rdat,(uint16_t)(cursorRelPos),state->tss.selectableStrTxt[i],0));
+                state->tss.selEndPos = state->tss.selStartPos;
+                //SDL_Log("start drag on selectable text at character %u\n",state->tss.selStartPos);
+              }
             }
             break;
           }
@@ -846,8 +863,15 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
         state->ds.chartDragFinished = 1;
       }
       if(state->ds.textDragInProgress){
-        SDL_Log("Mouse released.\n");
+        if(state->mouseXPx >= 0.0f){ //only update the selection position if the mouse is still in the window
+          float cursorRelPos = (state->mouseXPx - state->tss.selectableStrRect[state->tss.selectedStr].x)/state->ds.uiUserScale; //position of the cursor relative to the start of the selectable text
+          if(cursorRelPos < 0.0f){
+            cursorRelPos = 0.0f;
+          }
+          state->tss.selEndPos = (uint8_t)(getNumTextCharsUnderWidth(rdat,(uint16_t)(cursorRelPos),state->tss.selectableStrTxt[state->tss.selectedStr],0));
+        }
         state->ds.textDragFinished = 1;
+        //SDL_Log("Text selection released, started at char %u, ended at char %u (mouse pos %f).\n",state->tss.selStartPos,state->tss.selEndPos,(double)state->mouseXPx);
       }
     }
 

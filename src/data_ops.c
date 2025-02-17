@@ -18,6 +18,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 /* Functions handling low-level operations on ENSDF database, or calculations using app data/state */
 
 #include "juicer.h"
+#include "strops.h"
 #include "data_ops.h"
 #include "drawing.h"
 #include "load_data.h"
@@ -3694,15 +3695,51 @@ uint16_t getNumTextCharsUnderWidth(resource_data *restrict rdat, const uint16_t 
 		return 0;
 	}
 
-	uint16_t txtDrawLen = 0;
-	char tmpTxt[256];
-	for(uint16_t i=(uint16_t)textLen; i>0; i--){
-		memcpy(tmpTxt,text+txtStartChar,sizeof(char)*(i-txtStartChar));
-		tmpTxt[i-txtStartChar] = '\0'; //null terminate string
-		if(getTextWidthScaleIndependent(rdat,FONTSIZE_NORMAL,tmpTxt) <= widthPx){
-			txtDrawLen = (uint16_t)(i-txtStartChar);
+	uint16_t utf8StartChar = txtStartChar;
+	while((charIsAscii(text[utf8StartChar])) == 0){
+		if(utf8StartChar > 0){
+			utf8StartChar--;
+		}else{
 			break;
 		}
+	}
+
+	uint16_t txtDrawLen = 0;
+	char tmpTxt[256];
+	float lastTxtWidth = -1.0f;
+	uint16_t lastutf8Len = 0;
+	for(uint16_t i=(uint16_t)textLen; i>0; i--){
+		memcpy(tmpTxt,text+utf8StartChar,sizeof(char)*(i-utf8StartChar));
+
+		//figure out where to terminate the string, without lopping off partial UTF-8 characters
+		uint16_t utf8Len = (uint16_t)(i-utf8StartChar);
+		if((utf8Len > 0) && (!(charIsAscii(tmpTxt[utf8Len-1])))){
+			while(utf8Len > 0){
+				if(charIsAscii(tmpTxt[utf8Len-1])){
+					break;
+				}
+				utf8Len--;
+			}
+		}
+		tmpTxt[utf8Len] = '\0'; //null terminate string
+		
+		float currentTxtWidth = getTextWidthScaleIndependent(rdat,FONTSIZE_NORMAL,tmpTxt);
+		if(lastTxtWidth > 0.0f){
+			//make the selection boundaries for characters halfway across the characters
+			//helps with less precise mouse selections
+			if((currentTxtWidth + 0.5f*(lastTxtWidth-currentTxtWidth)) <= widthPx){
+				txtDrawLen = (uint16_t)(lastutf8Len);
+				break;
+			}else if(currentTxtWidth <= widthPx){
+				txtDrawLen = (uint16_t)(utf8Len);
+				break;
+			}
+		}else if(currentTxtWidth <= widthPx){
+			txtDrawLen = (uint16_t)(utf8Len);
+			break;
+		}
+		lastTxtWidth = currentTxtWidth;
+		lastutf8Len = utf8Len;
 	}
 	return txtDrawLen;
 }
