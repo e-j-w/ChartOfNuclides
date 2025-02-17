@@ -293,6 +293,7 @@ typedef struct
   uint16_t selectedStr; //65535 if nothing selected
   uint8_t selStartPos, selEndPos; //which character indices correspond to the start and end of the selected text
   uint8_t selStrsModifiable; //flag which is set whenever the selection strings can be updated, and is cleared at the end of each frame
+  char *clipboardData; //pointer to any text that has been copied to the clipboard
 }text_selection_state; //struct containing search data
 
 typedef struct

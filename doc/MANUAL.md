@@ -17,6 +17,7 @@ The program is also designed to be fully navigable with a keyboard and/or gamepa
 | Enter              | A / Circle (right button)   | Select menu items |
 | Alt                | X / Triangle (top button)   | Open menu |
 | Escape / backspace | B / Cross (bottom button)   | Exit out of open menus, cancel selection, etc. |
+| Ctrl+C             | N/A                         | Copy selected text to clipboard |
 | Ctrl+F             | N/A                         | Search |
 | F11                | Home button                 | Toggle fullscreen mode |
 | P                  | N/A                         | Toggle debug overlay (shows FPS and other stats) |

@@ -23,6 +23,66 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include "strops.h" //for search query editing
 #include "gui_constants.h" //to compute mouse/pointer interactions
 
+void setSelTxtPrimarySelection(const text_selection_state *restrict tss){
+  if(strcmp(SDL_GetPlatform(),"Linux")==0){
+    uint8_t charIndStart = tss->selStartPos;
+    uint8_t charIndEnd = tss->selEndPos;
+    if(charIndStart != charIndEnd){
+      if(charIndStart > charIndEnd){
+        //swap start and end for the purposes of drawing
+        uint8_t tmp = charIndEnd;
+        charIndEnd = charIndStart;
+        charIndStart = tmp;
+      }
+      uint8_t selLen = (uint8_t)(charIndEnd - charIndStart);
+      if(selLen < MAX_SELECTABLE_STR_LEN){
+        char selSubStr[MAX_SELECTABLE_STR_LEN];
+        SDL_strlcpy(selSubStr,&tss->selectableStrTxt[tss->selectedStr][charIndStart],selLen+1);
+        if(SDL_SetPrimarySelectionText(selSubStr)==false){
+          SDL_Log("WARNING: setSelTxtPrimarySelection - couln't set primary selection text. Error: %s\n",SDL_GetError());
+        }
+      }
+    }
+  }
+}
+
+const void* setSelTxtClipboardData(void *data, const char *mime_type, size_t *size){
+  
+  (void)mime_type;
+  
+  text_selection_state *tss = ((text_selection_state*)(intptr_t)(data)); //get the text selection state (double cast to avoid warning)
+  tss->clipboardData = (char*)SDL_calloc(MAX_SELECTABLE_STR_LEN,sizeof(char)); //allocate output str
+  size_t selLen = 0;
+
+  uint8_t charIndStart = tss->selStartPos;
+  uint8_t charIndEnd = tss->selEndPos;
+  if(charIndStart != charIndEnd){
+    if(charIndStart > charIndEnd){
+      //swap start and end for the purposes of drawing
+      uint8_t tmp = charIndEnd;
+      charIndEnd = charIndStart;
+      charIndStart = tmp;
+    }
+    selLen = (size_t)(charIndEnd - charIndStart);
+    if(selLen < MAX_SELECTABLE_STR_LEN){
+      SDL_strlcpy(tss->clipboardData,&tss->selectableStrTxt[tss->selectedStr][charIndStart],selLen+1);
+    }
+  }
+
+  *size = selLen; //output str size
+
+  return (void *)(intptr_t)(tss->clipboardData);
+}
+
+void cleanupSelTxtClipboardData(void *data){
+  
+  text_selection_state *tss = ((text_selection_state*)(intptr_t)(data)); //get the text selection state (double cast to avoid warning)
+  if(tss->clipboardData != NULL){
+    SDL_free(tss->clipboardData);
+  }
+
+}
+
 void fcScrollAction(app_state *restrict state, const float deltaVal){
   //SDL_Log("scroll delta: %f\n",(double)deltaVal);
   const float screenNumLines = (float)(getNumScreenLvlDispLines(&state->ds));
@@ -870,8 +930,16 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
           }
           state->tss.selEndPos = (uint8_t)(getNumTextCharsUnderWidth(rdat,(uint16_t)(cursorRelPos),state->tss.selectableStrTxt[state->tss.selectedStr],0));
         }
+        setSelTxtPrimarySelection(&state->tss); //support primary selection on Linux
         state->ds.textDragFinished = 1;
         //SDL_Log("Text selection released, started at char %u, ended at char %u (mouse pos %f).\n",state->tss.selStartPos,state->tss.selEndPos,(double)state->mouseXPx);
+      }
+    }
+
+    //check for mouse click, outside of buttons
+    if(state->mouseHoldStartPosXPx >= 0.0f){
+      if(state->ds.textDragInProgress == 0){
+        state->tss.selectedStr = 65535; //de-select text
       }
     }
 
@@ -1264,6 +1332,18 @@ void processSingleEvent(app_data *restrict dat, app_state *restrict state, resou
           if(state->kbdModVal == KBD_MOD_CTRL){
             if(state->ds.shownElements & (1UL << UIELEM_CHARTOFNUCLIDES)){
               uiElemClickAction(dat,state,rdat,0,UIELEM_SEARCH_BUTTON); //open search, also activates text input
+            }
+          }
+          break;
+        case SDL_SCANCODE_C:
+          if(state->kbdModVal == KBD_MOD_CTRL){
+            if(state->tss.selectedStr < 65535){
+              //copy selected text to clipboard
+              const char *mimeType = "text/plain";
+              if(SDL_SetClipboardData(setSelTxtClipboardData,cleanupSelTxtClipboardData,(void *)(intptr_t)(&state->tss),&mimeType,1) == false){
+                SDL_Log("WARNING: processSingleEvent - couldn't copy text to clipboard. Error: %s\n",SDL_GetError());
+              }
+              //SDL_Log("Copied text to clipboard: %s\n",SDL_GetClipboardText());
             }
           }
           break;

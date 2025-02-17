@@ -2675,6 +2675,11 @@ void changeUIState(const app_data *restrict dat, app_state *restrict state, cons
 					state->mouseoverElement = (uint8_t)(UIELEM_PRIMARY_MENU - PRIMARY_MENU_NUM_UIELEMENTS); //select the first menu item
 				}
 			}
+			if(state->uiState == UISTATE_FULLLEVELINFOWITHMENU){
+				clearSelectionStrs(&state->tss,0); //strings on full level list are no longer selectable
+			}else{
+				clearSelectionStrs(&state->tss,1);
+			}
 			break;
 		case UISTATE_INFOBOX:
 			state->interactableElement |= (uint64_t)(1UL << UIELEM_MENU_BUTTON);
@@ -3144,6 +3149,7 @@ void uiElemHoldAction(const app_data *restrict dat, app_state *restrict state, c
 			}else if(state->ds.nuclFullInfoScrollY > state->ds.nuclFullInfoMaxScrollY){
 				state->ds.nuclFullInfoScrollY = state->ds.nuclFullInfoMaxScrollY;
 			}
+			clearSelectionStrs(&state->tss,1); //selection string positions are changed on scroll
 			break;
 		default:
 			break;
