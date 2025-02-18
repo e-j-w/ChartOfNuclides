@@ -2291,8 +2291,8 @@ void drawTextSelHighlight(const app_state *restrict state, resource_data *restri
     SDL_FRect rawSelRect = state->tss.selectableStrRect[state->tss.selectedStr];
     //SDL_Log("Selected text: %s, prior text: %s, selected chars %u to %u\n",selSubStr,selPreStr,charIndStart,charIndEnd);
     //SDL_Log("Original text rect: %0.2f %0.2f %0.2f %0.2f\n",(double)rawSelRect.x,(double)rawSelRect.y,(double)rawSelRect.w,(double)rawSelRect.h);
-    rawSelRect.x = rawSelRect.x + getTextWidth(rdat,FONTSIZE_NORMAL,selPreStr);
-    rawSelRect.w = getTextWidth(rdat,FONTSIZE_NORMAL,selSubStr);
+    rawSelRect.x = rawSelRect.x + getTextWidth(rdat,FONTSIZE_NORMAL,selPreStr)/rdat->uiDPIScale;
+    rawSelRect.w = getTextWidth(rdat,FONTSIZE_NORMAL,selSubStr)/rdat->uiDPIScale;
     //SDL_Log("Highlight rect: %0.2f %0.2f %0.2f %0.2f\n",(double)rawSelRect.x,(double)rawSelRect.y,(double)rawSelRect.w,(double)rawSelRect.h);
     drawFlatRect(rdat,rawSelRect,txtSelCol);
   }
