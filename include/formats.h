@@ -256,7 +256,7 @@ typedef struct
   unsigned int panInProgress : 1;
   unsigned int panFinished : 1;
   unsigned int chartDragInProgress : 1;
-  unsigned int textDragInProgress : 1;
+  unsigned int textDragInProgress : 2; //0=no text drag, 1=dragging over text, 2=mouse hover over text
   unsigned int chartDragFinished : 1;
   unsigned int textDragFinished : 1;
   unsigned int zoomInProgress : 1;

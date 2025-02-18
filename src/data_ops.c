@@ -246,6 +246,9 @@ void stopUIAnimation(const app_data *restrict dat, app_state *restrict state, co
 			}
 			//SDL_Log("UI state: %u\n",state->uiState);
       break;
+		case UIANIM_NUCLINFOBOX_SHOW:
+			clearSelectionStrs(&state->tss,1); //allow strings on the info box to be selectable
+			break;
 		case UIANIM_NUCLINFOBOX_HIDE:
 			state->ds.shownElements &= (uint64_t)(~(1UL << UIELEM_NUCL_INFOBOX)); //close the info box
 			state->chartSelectedNucl = MAXNUMNUCL;
@@ -257,8 +260,11 @@ void stopUIAnimation(const app_data *restrict dat, app_state *restrict state, co
 			startUIAnimation(dat,state,UIANIM_NUCLINFOBOX_TXTFADEIN);
 			changeUIState(dat,state,UISTATE_FULLLEVELINFO); //update UI state now that the full info box is visible
 			break;
+		case UIANIM_NUCLINFOBOX_CONTRACT:
+			clearSelectionStrs(&state->tss,1); //allow strings on the info box to be selectable
+			break;
 		case UIANIM_NUCLINFOBOX_TXTFADEIN:
-			state->tss.selStrsModifiable = 1; //allow strings on the full info box to be selectable
+			clearSelectionStrs(&state->tss,1); //allow strings on the full info box to be selectable
 			break;
 		case UIANIM_NUCLINFOBOX_TXTFADEOUT:
 			state->ds.shownElements &= (uint64_t)(~(1UL << UIELEM_NUCL_FULLINFOBOX)); //close the full info box
@@ -338,7 +344,7 @@ void updateDrawingState(const app_data *restrict dat, app_state *restrict state,
 		}
 		//SDL_Log("zoom scale: %0.4f\n",(double)state->ds.chartZoomScale);
 	}
-	if(state->ds.textDragInProgress){
+	if(state->ds.textDragInProgress == 1){
 		if(state->lastInputType == INPUT_TYPE_MOUSE){
       SDL_SetCursor(rdat->textEntryCursor); //set mouse cursor
     }
@@ -367,7 +373,7 @@ void updateDrawingState(const app_data *restrict dat, app_state *restrict state,
 		if(state->ds.timeSinceFCScollStart >= NUCL_FULLINFOBOX_SCROLL_TIME){
 			state->ds.nuclFullInfoScrollY = state->ds.nuclFullInfoScrollToY;
 			state->ds.fcScrollFinished = 1;
-			state->tss.selStrsModifiable = 1; //now that scroll is finished, allow selection strings to be regenerated
+			clearSelectionStrs(&state->tss,1); //now that scroll is finished, allow selection strings to be regenerated
 		}
 		//SDL_Log("scroll t: %0.3f, pos: %f\n",(double)state->ds.timeSinceFCScollStart,(double)state->ds.nuclFullInfoScrollY);
 	}
@@ -2678,7 +2684,7 @@ void changeUIState(const app_data *restrict dat, app_state *restrict state, cons
 			if(state->uiState == UISTATE_FULLLEVELINFOWITHMENU){
 				clearSelectionStrs(&state->tss,0); //strings on full level list are no longer selectable
 			}else{
-				clearSelectionStrs(&state->tss,1);
+				clearSelectionStrs(&state->tss,1); //allow strings on the full info box to be selectable
 			}
 			break;
 		case UISTATE_INFOBOX:
@@ -2738,6 +2744,7 @@ void changeUIState(const app_data *restrict dat, app_state *restrict state, cons
 			if(state->ds.chartZoomToScale < MAX_CHART_ZOOM_SCALE){
 				state->interactableElement |= (uint64_t)(1UL << UIELEM_ZOOMIN_BUTTON);
 			}
+			clearSelectionStrs(&state->tss,0); //strings on the info box are no longer selectable
       break;
   }
 	//SDL_Log("Mouseover element: %u\n",state->mouseoverElement);
@@ -3072,6 +3079,7 @@ void setSelectedNuclOnChart(const app_data *restrict dat, app_state *restrict st
 	if((selNucl < MAXNUMNUCL)&&(selNucl != state->chartSelectedNucl)){
 		state->chartSelectedNucl = selNucl;
 		setInfoBoxDimensions(dat,state,rdat,selNucl);
+		clearSelectionStrs(&state->tss,1); //allow strings on the info box to be selectable
 		if(!(state->ds.shownElements & (1UL << UIELEM_NUCL_INFOBOX))){
 			state->ds.shownElements |= (1UL << UIELEM_NUCL_INFOBOX);
 			changeUIState(dat,state,UISTATE_INFOBOX); //make info box interactable
@@ -3086,7 +3094,6 @@ void setSelectedNuclOnChart(const app_data *restrict dat, app_state *restrict st
 			}else{
 				panChartToPos(dat,&state->ds,N,Z,CHART_KEY_PAN_TIME);
 			}
-			
 		}else{
 			//check occlusion by info box
 			float xOcclLeft = chartNtoXPx(&state->ds,(float)(N+1));
@@ -3156,13 +3163,18 @@ void uiElemHoldAction(const app_data *restrict dat, app_state *restrict state, c
 	}
 }
 
-void uiElemMouseoverAction(resource_data *restrict rdat, const uint8_t uiElemID){
-	switch(uiElemID){
+void uiElemMouseoverAction(const app_state *restrict state, resource_data *restrict rdat){
+	//SDL_Log("Mouseover element %u\n",state->mouseoverElement);
+	switch(state->mouseoverElement){
 		case UIELEM_SEARCH_ENTRYBOX:
 			SDL_SetCursor(rdat->textEntryCursor);
 			break;
 		default:
-			SDL_SetCursor(rdat->defaultCursor);
+			if(state->ds.textDragInProgress == 0){
+				SDL_SetCursor(rdat->defaultCursor);
+			}else{
+				SDL_SetCursor(rdat->textEntryCursor);
+			}
 			break;
 	}
 }
