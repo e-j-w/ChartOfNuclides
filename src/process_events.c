@@ -39,6 +39,10 @@ void setSelTxtPrimarySelection(const text_selection_state *restrict tss){
       if(selLen < MAX_SELECTABLE_STR_LEN){
         char selSubStr[MAX_SELECTABLE_STR_LEN];
         SDL_strlcpy(selSubStr,&tss->selectableStrTxt[tss->selectedStr][charIndStart],selLen+1);
+        //filter the string to copy
+        char *selSubStrCpy = findReplaceAllUTF8("%%","%",selSubStr);
+        SDL_strlcpy(selSubStr,selSubStrCpy,selLen+1);
+        free(selSubStrCpy);
         if(SDL_SetPrimarySelectionText(selSubStr)==false){
           SDL_Log("WARNING: setSelTxtPrimarySelection - couln't set primary selection text. Error: %s\n",SDL_GetError());
         }
@@ -69,11 +73,13 @@ const void* setSelTxtClipboardData(void *data, const char *mime_type, size_t *si
     selLen = (size_t)(charIndEnd - charIndStart);
     if(selLen < MAX_SELECTABLE_STR_LEN){
       SDL_strlcpy(tss->clipboardData,&tss->selectableStrTxt[tss->selectedStr][charIndStart],selLen+1);
-
+      char *selSubStrCpy = findReplaceAllUTF8("%%","%",tss->clipboardData);
+      SDL_strlcpy(tss->clipboardData,selSubStrCpy,selLen+1);
+      free(selSubStrCpy);
     }
   }
 
-  *size = selLen; //output str size
+  *size = SDL_strlen(tss->clipboardData); //output str size
 
   return (void *)(intptr_t)(tss->clipboardData);
 }
@@ -118,7 +124,7 @@ void fcScrollAction(app_state *restrict state, const float deltaVal){
 void processInputFlags(app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat){
 
   /* Handle directional input */
-  uint32_t up,down,left,right,altup,altdown,altleft,altright;
+  uint32_t up,down,left,right,altup,altdown,altleft,altright,doubleClick;
   up = (state->inputFlags & (1U << INPUT_UP));
   down = (state->inputFlags & (1U << INPUT_DOWN));
   left = (state->inputFlags & (1U << INPUT_LEFT));
@@ -127,6 +133,7 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
   altdown = (state->inputFlags & (1U << INPUT_ALTDOWN));
   altleft = (state->inputFlags & (1U << INPUT_ALTLEFT));
   altright = (state->inputFlags & (1U << INPUT_ALTRIGHT));
+  doubleClick = (state->inputFlags & (1U << INPUT_DOUBLECLICK));
   
   const uint8_t chartDraggable = ((state->uiState == UISTATE_CHARTONLY)||(state->uiState == UISTATE_CHARTWITHMENU)||(state->uiState == UISTATE_INFOBOX));
   const uint8_t chartPannable =  ((state->uiState == UISTATE_CHARTONLY)||(state->uiState == UISTATE_INFOBOX));
@@ -817,6 +824,53 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
 
     SDL_ShowCursor();
 
+    //handle selectable text strings
+    if(state->ds.textDragInProgress == 1){
+      //update text selection drag state
+      if(state->mouseXPx >= 0.0f){ //only update the selection position if the mouse is still in the window
+        float cursorRelPos = (state->mouseXPx - state->tss.selectableStrRect[state->tss.selectedStr].x)/state->ds.uiUserScale; //position of the cursor relative to the start of the selectable text
+        if(cursorRelPos < 0.0f){
+          cursorRelPos = 0.0f;
+        }
+        state->tss.selEndPos = (uint8_t)(getNumTextCharsUnderWidth(rdat,(uint16_t)(cursorRelPos),state->tss.selectableStrTxt[state->tss.selectedStr],0));
+      }
+    }else{
+      state->ds.textDragInProgress = 0;
+    }
+    if((state->ds.textDragInProgress == 0)||(doubleClick)){
+      for(uint16_t i=0; i<state->tss.numSelStrs; i++){
+        if((state->mouseXPx >= state->tss.selectableStrRect[i].x)&&(state->mouseXPx < (state->tss.selectableStrRect[i].x + state->tss.selectableStrRect[i].w))){
+          if((state->mouseYPx >= state->tss.selectableStrRect[i].y)&&(state->mouseYPx < (state->tss.selectableStrRect[i].y + state->tss.selectableStrRect[i].h))){
+            //mouse is over selectable text
+            //SDL_Log("Mouse over selectable string %u.\n",i);
+            state->ds.textDragInProgress = 2;
+            if((state->mouseHoldStartPosXPx >= 0.0f)||(doubleClick)){
+              float cursorRelPos = (state->mouseXPx - state->tss.selectableStrRect[i].x)/state->ds.uiUserScale; //position of the cursor relative to the start of the selectable text
+              //SDL_Log("rel pos: %0.3f\n",(double)cursorRelPos);
+              if(cursorRelPos >= 0){
+                state->tss.selectedStr = i;
+                if(doubleClick){
+                  //select entire string
+                  //SDL_Log("Selecting entire string.\n");
+                  state->ds.textDragInProgress = 0;
+                  state->tss.selStartPos = 0;
+                  state->tss.selEndPos = (uint8_t)SDL_strlen(state->tss.selectableStrTxt[i]);
+                }else{
+                  //start drag over text
+                  state->ds.textDragStartMouseX = state->mouseXPx;
+                  state->ds.textDragInProgress = 1;
+                  state->tss.selStartPos = (uint8_t)(getNumTextCharsUnderWidth(rdat,(uint16_t)(cursorRelPos),state->tss.selectableStrTxt[i],0));
+                  state->tss.selEndPos = state->tss.selStartPos;
+                }
+                //SDL_Log("start drag on selectable text at character %u\n",state->tss.selStartPos);
+              }
+            }
+            break;
+          }
+        }
+      }
+    }
+
     state->mouseoverElement = UIELEM_ENUM_LENGTH; //by default, no element is moused over
     state->mouseholdElement = UIELEM_ENUM_LENGTH;
 
@@ -890,43 +944,6 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
       
     }
 
-    //handle selectable text strings
-    if(state->ds.textDragInProgress == 1){
-      //update text selection drag state
-      if(state->mouseXPx >= 0.0f){ //only update the selection position if the mouse is still in the window
-        float cursorRelPos = (state->mouseXPx - state->tss.selectableStrRect[state->tss.selectedStr].x)/state->ds.uiUserScale; //position of the cursor relative to the start of the selectable text
-        if(cursorRelPos < 0.0f){
-          cursorRelPos = 0.0f;
-        }
-        state->tss.selEndPos = (uint8_t)(getNumTextCharsUnderWidth(rdat,(uint16_t)(cursorRelPos),state->tss.selectableStrTxt[state->tss.selectedStr],0));
-      }
-    }else{
-      state->ds.textDragInProgress = 0;
-    }
-    if(state->ds.textDragInProgress == 0){
-      for(uint16_t i=0; i<state->tss.numSelStrs; i++){
-        if((state->mouseXPx >= state->tss.selectableStrRect[i].x)&&(state->mouseXPx < (state->tss.selectableStrRect[i].x + state->tss.selectableStrRect[i].w))){
-          if((state->mouseYPx >= state->tss.selectableStrRect[i].y)&&(state->mouseYPx < (state->tss.selectableStrRect[i].y + state->tss.selectableStrRect[i].h))){
-            //mouse is over selectable text
-            state->ds.textDragInProgress = 2;
-            if(state->mouseHoldStartPosXPx >= 0.0f){
-              float cursorRelPos = (state->mouseXPx - state->tss.selectableStrRect[i].x)/state->ds.uiUserScale; //position of the cursor relative to the start of the selectable text
-              if(cursorRelPos >= 0){
-                state->ds.textDragStartMouseX = state->mouseXPx;
-                state->ds.textDragInProgress = 1;
-                state->tss.selectedStr = i;
-                state->tss.selStartPos = (uint8_t)(getNumTextCharsUnderWidth(rdat,(uint16_t)(cursorRelPos),state->tss.selectableStrTxt[i],0));
-                state->tss.selEndPos = state->tss.selStartPos;
-                //SDL_Log("start drag on selectable text at character %u\n",state->tss.selStartPos);
-              }
-            }
-            break;
-          }
-        }
-      }
-    }
-    
-
     //check for mouse release
     if(state->mouseHoldStartPosXPx < 0.0f){
       if(state->ds.chartDragInProgress){
@@ -954,7 +971,7 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
       }
     }
 
-    uint32_t doubleClick = (state->inputFlags & (1U << INPUT_DOUBLECLICK));
+    
 
     //only get here if no button was clicked
     //check if a click was made outside of any button

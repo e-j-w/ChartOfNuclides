@@ -3708,7 +3708,7 @@ void uiElemClickAction(app_data *restrict dat, app_state *restrict state, resour
 //starting at txtStartChar
 uint16_t getNumTextCharsUnderWidth(resource_data *restrict rdat, const uint16_t widthPx, const char *text, const uint16_t txtStartChar){
 	
-	int textLen = (int)strlen(text);
+	int textLen = (int)SDL_strlen(text);
 	if((textLen < 1)||(txtStartChar > textLen)){
 		return 0;
 	}
