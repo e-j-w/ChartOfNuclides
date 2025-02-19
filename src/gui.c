@@ -1491,7 +1491,7 @@ void drawNuclFullInfoBox(const app_data *restrict dat, app_state *restrict state
       drawYPos += (numLines*(NUCL_INFOBOX_SMALLLINE_HEIGHT*state->ds.uiUserScale + txtYOffset));
     }
     //draw divider line
-    drawLine(rdat,rect.x,drawYPos,rect.x+rect.w,drawYPos,NUCL_FULLINFOBOX_DIVIDER_LINE_THICKNESS*state->ds.uiUserScale,dividerLineCol,dividerLineCol);
+    drawLine(rdat,floorf(rect.x),ceilf(drawYPos),ceilf(rect.x+rect.w),ceilf(drawYPos),ceilf(NUCL_FULLINFOBOX_DIVIDER_LINE_THICKNESS*state->ds.uiUserScale),dividerLineCol,dividerLineCol);
     
   }
 

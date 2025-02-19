@@ -23,6 +23,8 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include "strops.h" //for search query editing
 #include "gui_constants.h" //to compute mouse/pointer interactions
 
+#define CLICK_MOVE_MAX_RADIUS   20 //maximum distance the mouse can travel between button click and release for it to be considered a stationary click
+
 //helper function to handle primary selection (auto copy highlighted text for middle click paste) on Linux 
 void setSelTxtPrimarySelection(const text_selection_state *restrict tss){
   if(strcmp(SDL_GetPlatform(),"Linux")==0){
@@ -824,6 +826,12 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
 
     SDL_ShowCursor();
 
+    if(state->mouseHoldStartPosXPx >= 0.0f){
+      if((fabsf(state->mouseHoldStartPosXPx - state->mouseXPx) > CLICK_MOVE_MAX_RADIUS) || (fabsf(state->mouseHoldStartPosYPx - state->mouseYPx) > CLICK_MOVE_MAX_RADIUS)){
+        state->mouseMovedDuringClick = 1;
+      }
+    }
+
     //handle selectable text strings
     if(state->ds.textDragInProgress == 1){
       //update text selection drag state
@@ -841,36 +849,44 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
       for(uint16_t i=0; i<state->tss.numSelStrs; i++){
         if((state->mouseXPx >= state->tss.selectableStrRect[i].x)&&(state->mouseXPx < (state->tss.selectableStrRect[i].x + state->tss.selectableStrRect[i].w))){
           if((state->mouseYPx >= state->tss.selectableStrRect[i].y)&&(state->mouseYPx < (state->tss.selectableStrRect[i].y + state->tss.selectableStrRect[i].h))){
-            //mouse is over selectable text
-            //SDL_Log("Mouse over selectable string %u.\n",i);
-            state->ds.textDragInProgress = 2;
-            if((state->mouseHoldStartPosXPx >= 0.0f)||(doubleClick)){
-              float cursorRelPos = (state->mouseXPx - state->tss.selectableStrRect[i].x)/state->ds.uiUserScale; //position of the cursor relative to the start of the selectable text
-              //SDL_Log("rel pos: %0.3f\n",(double)cursorRelPos);
-              if(cursorRelPos >= 0){
-                state->tss.selectedStr = i;
-                if(doubleClick){
-                  //select entire string
-                  //SDL_Log("Selecting entire string.\n");
-                  state->ds.textDragInProgress = 0;
-                  state->tss.selStartPos = 0;
-                  state->tss.selEndPos = (uint8_t)SDL_strlen(state->tss.selectableStrTxt[i]);
-                }else{
-                  //start drag over text
-                  state->ds.textDragStartMouseX = state->mouseXPx;
-                  state->ds.textDragInProgress = 1;
-                  state->tss.selStartPos = (uint8_t)(getNumTextCharsUnderWidth(rdat,(uint16_t)(cursorRelPos),state->tss.selectableStrTxt[i],0));
-                  state->tss.selEndPos = state->tss.selStartPos;
+            if(state->mouseMovedDuringClick == 0){
+              //mouse is over selectable text
+              //SDL_Log("Mouse over selectable string %u.\n",i);
+              state->ds.textDragInProgress = 2;
+              if((state->mouseHoldStartPosXPx >= 0.0f)||(doubleClick)){
+                float cursorRelPos = (state->mouseXPx - state->tss.selectableStrRect[i].x)/state->ds.uiUserScale; //position of the cursor relative to the start of the selectable text
+                //SDL_Log("rel pos: %0.3f\n",(double)cursorRelPos);
+                if(cursorRelPos >= 0){
+                  state->tss.selectedStr = i;
+                  if(doubleClick){
+                    //select entire string
+                    //SDL_Log("Selecting entire string.\n");
+                    state->ds.textDragInProgress = 0;
+                    state->tss.selStartPos = 0;
+                    state->tss.selEndPos = (uint8_t)SDL_strlen(state->tss.selectableStrTxt[i]);
+                  }else{
+                    //start drag over text
+                    state->ds.textDragStartMouseX = state->mouseXPx;
+                    state->ds.textDragInProgress = 1;
+                    state->tss.selStartPos = (uint8_t)(getNumTextCharsUnderWidth(rdat,(uint16_t)(cursorRelPos),state->tss.selectableStrTxt[i],0));
+                    state->tss.selEndPos = state->tss.selStartPos;
+                  }
+                  //SDL_Log("start drag on selectable text at character %u\n",state->tss.selStartPos);
                 }
-                //SDL_Log("start drag on selectable text at character %u\n",state->tss.selStartPos);
               }
+              break;
             }
-            break;
           }
         }
       }
     }
 
+    uint8_t mouseReleaseElement = UIELEM_ENUM_LENGTH;
+    if((state->mouseHoldStartPosXPx < 0.0f)&&(state->mouseholdElement < UIELEM_ENUM_LENGTH)){
+      //just released the mouse button this frame, while hovering over a UI element
+      mouseReleaseElement = state->mouseholdElement;
+    }
+    //reset values
     state->mouseoverElement = UIELEM_ENUM_LENGTH; //by default, no element is moused over
     state->mouseholdElement = UIELEM_ENUM_LENGTH;
 
@@ -894,10 +910,12 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
                 state->ds.mouseOverRxn = i;
                 if((state->mouseClickPosXPx >= buttonRect.x)&&(state->mouseClickPosXPx < (buttonRect.x + buttonRect.w))){
                   if((state->mouseClickPosYPx >= buttonRect.y)&&(state->mouseClickPosYPx < (buttonRect.y + buttonRect.h))){
-                    state->ds.selectedRxn = i;
-                    //SDL_Log("Clicked reaction menu item %u.\n",state->ds.selectedRxn);
-                    setSelectedNuclOnLevelList(dat,state,rdat,(uint16_t)(dat->ndat.nuclData[state->chartSelectedNucl].N),(uint16_t)(dat->ndat.nuclData[state->chartSelectedNucl].Z),1);
-                    break;
+                    if((state->mouseMovedDuringClick == 0)||(i == state->ds.mouseHoldRxn)){
+                      state->ds.selectedRxn = i;
+                      //SDL_Log("Clicked reaction menu item %u.\n",state->ds.selectedRxn);
+                      setSelectedNuclOnLevelList(dat,state,rdat,(uint16_t)(dat->ndat.nuclData[state->chartSelectedNucl].N),(uint16_t)(dat->ndat.nuclData[state->chartSelectedNucl].Z),1);
+                      break;
+                    }
                   }
                 }
                 dynamicMenuItemInteracted = 1;
@@ -919,10 +937,12 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
               state->mouseoverElement = i;
               //SDL_Log("mouseover element: %u\n",i);
               if((state->mouseClickPosXPx >= (state->ds.uiElemPosX[i]-state->ds.uiElemExtMinusX[i]))&&(state->mouseClickPosXPx < (state->ds.uiElemPosX[i]+state->ds.uiElemWidth[i]+state->ds.uiElemExtPlusX[i]))&&(state->mouseClickPosYPx >= (state->ds.uiElemPosY[i]-state->ds.uiElemExtMinusY[i]))&&(state->mouseClickPosYPx < (state->ds.uiElemPosY[i]+state->ds.uiElemHeight[i]+state->ds.uiElemExtPlusY[i]))){
-                //take action
-                uiElemClickAction(dat,state,rdat,0,i); //data_ops.c
-                //SDL_Log("Clicked element %u\n",i);
-                return;
+                if((state->mouseMovedDuringClick == 0)||(i == mouseReleaseElement)){
+                  //take action
+                  uiElemClickAction(dat,state,rdat,0,i); //data_ops.c
+                  //SDL_Log("Clicked element %u\n",i);
+                  return;
+                }
               }
               break;
             }
@@ -1198,6 +1218,7 @@ void processSingleEvent(app_data *restrict dat, app_state *restrict state, resou
           SDL_GetMouseState(&state->mouseXPx,&state->mouseYPx); //update mouse position
           state->mouseHoldStartPosXPx = state->mouseXPx;
           state->mouseHoldStartPosYPx = state->mouseYPx;
+          state->mouseMovedDuringClick = 0; //will be set if the mouse is moved outside CLICK_MOVE_MAX_RADIUS
           break;
         default:
           break;
@@ -1207,8 +1228,8 @@ void processSingleEvent(app_data *restrict dat, app_state *restrict state, resou
       state->lastInputType = INPUT_TYPE_MOUSE; //set mouse input
       switch(evt.button.button){
         case SDL_BUTTON_LEFT:
-          state->mouseHoldStartPosXPx = -1.0f;
-          state->mouseHoldStartPosYPx = -1.0f;
+          state->mouseHoldStartPosXPx = -1000.0f;
+          state->mouseHoldStartPosYPx = -1000.0f;
           state->mouseClickPosXPx = state->mouseXPx;
           state->mouseClickPosYPx = state->mouseYPx;
           if(evt.button.clicks > 1){

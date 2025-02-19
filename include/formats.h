@@ -44,7 +44,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #define UNUSED_SEARCH_RESULT     4294967295U
 
 //text selection parameters
-#define MAX_SELECTABLE_STRS      512 //maximum number of onscreen text strings that can be selectable at once
+#define MAX_SELECTABLE_STRS      1024 //maximum number of onscreen text strings that can be selectable at once
 #define MAX_SELECTABLE_STR_LEN   128 //maximum length of selectable text strings
 
 //increasing these numbers will increase the size of 
@@ -323,6 +323,7 @@ typedef struct
   uint8_t uiState, lastUIState; //modal state of the UI, values from ui_state_enum
   uint16_t chartSelectedNucl; //nucleus selected on the chart, =MAXNUMNUCL if none selected
   uint64_t interactableElement; //bit pattern describing which UI elements are interactable, values from ui_element_enum
+  unsigned int mouseMovedDuringClick : 1; //whether or not the mouse was moved significantly while the mouse button is held down
   unsigned int searchStrUpdated : 1;
   unsigned int kbdModVal : 2; //values from kbd_mod_enum
   unsigned int lastInputType : 2; //0=keyboard, 1=apppad, 2=mouse
