@@ -3722,6 +3722,11 @@ uint16_t getNumTextCharsUnderWidth(resource_data *restrict rdat, const uint16_t 
 		}
 	}
 
+	//deal with '%%' sequences in some snprintf'd strings where the '% character needs to be displayed
+	/*if((utf8StartChar > 0)&&(text[utf8StartChar] == '%')&&(text[utf8StartChar-1] == '%')){
+		utf8StartChar--;
+	}*/
+
 	uint16_t txtDrawLen = 0;
 	char tmpTxt[256];
 	float lastTxtWidth = -1.0f;

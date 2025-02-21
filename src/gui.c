@@ -2288,7 +2288,12 @@ void drawTextSelHighlight(const app_state *restrict state, resource_data *restri
   if(selLen < MAX_SELECTABLE_STR_LEN){
     char selSubStr[MAX_SELECTABLE_STR_LEN], selPreStr[MAX_SELECTABLE_STR_LEN];
     SDL_strlcpy(selSubStr,&state->tss.selectableStrTxt[state->tss.selectedStr][charIndStart],selLen+1);
+    //deal with '%%' sequences in some snprintf'd strings where the '% character needs to be displayed
+    if((charIndStart > 0)&&(selSubStr[0] == '%')&&(selSubStr[1] != '%')){
+      SDL_strlcpy(selSubStr,&state->tss.selectableStrTxt[state->tss.selectedStr][charIndStart-1],selLen+2);
+    }
     SDL_strlcpy(selPreStr,state->tss.selectableStrTxt[state->tss.selectedStr],charIndStart+1);
+    
     SDL_FRect rawSelRect = state->tss.selectableStrRect[state->tss.selectedStr];
     //SDL_Log("Selected text: %s, prior text: %s, selected chars %u to %u\n",selSubStr,selPreStr,charIndStart,charIndEnd);
     //SDL_Log("Original text rect: %0.2f %0.2f %0.2f %0.2f\n",(double)rawSelRect.x,(double)rawSelRect.y,(double)rawSelRect.w,(double)rawSelRect.h);
