@@ -177,17 +177,17 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
           if(state->searchCursorPos > 0){
             if((state->searchCursorPos-1) < state->ds.searchEntryDispStartChar){
               state->ds.searchEntryDispStartChar = (uint16_t)(state->searchCursorPos-1);
-              state->ds.searchEntryDispNumChars = getNumTextCharsUnderWidth(rdat,SEARCH_MENU_ENTRYBOX_ENTRY_WIDTH,state->ss.searchString,state->ds.searchEntryDispStartChar);
+              state->ds.searchEntryDispNumChars = getNumTextCharsUnderWidth(rdat,SEARCH_MENU_ENTRYBOX_ENTRY_WIDTH,state->ss.searchString,state->ds.searchEntryDispStartChar,FONTSIZE_NORMAL);
             }
           }else{
             state->ds.searchEntryDispStartChar = 0;
-            state->ds.searchEntryDispNumChars = getNumTextCharsUnderWidth(rdat,SEARCH_MENU_ENTRYBOX_ENTRY_WIDTH,state->ss.searchString,state->ds.searchEntryDispStartChar);
+            state->ds.searchEntryDispNumChars = getNumTextCharsUnderWidth(rdat,SEARCH_MENU_ENTRYBOX_ENTRY_WIDTH,state->ss.searchString,state->ds.searchEntryDispStartChar,FONTSIZE_NORMAL);
           }
         }
       }else if((right && !left)&&((state->mouseoverElement < UIELEM_SEARCH_RESULT)||(state->mouseoverElement > UIELEM_SEARCH_RESULT_4))){
         if(state->searchCursorPos < (int)strlen(state->ss.searchString)){
           state->searchCursorPos += 1;
-          state->ds.searchEntryDispNumChars = getNumTextCharsUnderWidth(rdat,SEARCH_MENU_ENTRYBOX_ENTRY_WIDTH,state->ss.searchString,state->ds.searchEntryDispStartChar);
+          state->ds.searchEntryDispNumChars = getNumTextCharsUnderWidth(rdat,SEARCH_MENU_ENTRYBOX_ENTRY_WIDTH,state->ss.searchString,state->ds.searchEntryDispStartChar,FONTSIZE_NORMAL);
           while((state->searchCursorPos - state->ds.searchEntryDispStartChar) > state->ds.searchEntryDispNumChars){
             state->ds.searchEntryDispStartChar++;
             if(state->ds.searchEntryDispStartChar == 0){
@@ -206,17 +206,17 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
           if(state->searchCursorPos > 0){
             if((state->searchCursorPos-1) < state->ds.searchEntryDispStartChar){
               state->ds.searchEntryDispStartChar = (uint16_t)(state->searchCursorPos-1);
-              state->ds.searchEntryDispNumChars = getNumTextCharsUnderWidth(rdat,SEARCH_MENU_ENTRYBOX_ENTRY_WIDTH,state->ss.searchString,state->ds.searchEntryDispStartChar);
+              state->ds.searchEntryDispNumChars = getNumTextCharsUnderWidth(rdat,SEARCH_MENU_ENTRYBOX_ENTRY_WIDTH,state->ss.searchString,state->ds.searchEntryDispStartChar,FONTSIZE_NORMAL);
             }
           }else{
             state->ds.searchEntryDispStartChar = 0;
-            state->ds.searchEntryDispNumChars = getNumTextCharsUnderWidth(rdat,SEARCH_MENU_ENTRYBOX_ENTRY_WIDTH,state->ss.searchString,state->ds.searchEntryDispStartChar);
+            state->ds.searchEntryDispNumChars = getNumTextCharsUnderWidth(rdat,SEARCH_MENU_ENTRYBOX_ENTRY_WIDTH,state->ss.searchString,state->ds.searchEntryDispStartChar,FONTSIZE_NORMAL);
           }
         }
       }else if(right && !left){
         if(state->searchCursorPos < (int)strlen(state->ss.searchString)){
           state->searchCursorPos += 1;
-          state->ds.searchEntryDispNumChars = getNumTextCharsUnderWidth(rdat,SEARCH_MENU_ENTRYBOX_ENTRY_WIDTH,state->ss.searchString,state->ds.searchEntryDispStartChar);
+          state->ds.searchEntryDispNumChars = getNumTextCharsUnderWidth(rdat,SEARCH_MENU_ENTRYBOX_ENTRY_WIDTH,state->ss.searchString,state->ds.searchEntryDispStartChar,FONTSIZE_NORMAL);
           while((state->searchCursorPos - state->ds.searchEntryDispStartChar) > state->ds.searchEntryDispNumChars){
             state->ds.searchEntryDispStartChar++;
             if(state->ds.searchEntryDispStartChar == 0){
@@ -840,7 +840,7 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
         if(cursorRelPos < 0.0f){
           cursorRelPos = 0.0f;
         }
-        state->tss.selEndPos = (uint8_t)(getNumTextCharsUnderWidth(rdat,(uint16_t)(cursorRelPos),state->tss.selectableStrTxt[state->tss.selectedStr],0));
+        state->tss.selEndPos = (uint8_t)(getNumTextCharsUnderWidth(rdat,(uint16_t)(cursorRelPos),state->tss.selectableStrTxt[state->tss.selectedStr],0,state->tss.selectableStrFontSize[state->tss.selectedStr]));
       }
     }else{
       state->ds.textDragInProgress = 0;
@@ -868,7 +868,7 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
                     //start drag over text
                     state->ds.textDragStartMouseX = state->mouseXPx;
                     state->ds.textDragInProgress = 1;
-                    state->tss.selStartPos = (uint8_t)(getNumTextCharsUnderWidth(rdat,(uint16_t)(cursorRelPos),state->tss.selectableStrTxt[i],0));
+                    state->tss.selStartPos = (uint8_t)(getNumTextCharsUnderWidth(rdat,(uint16_t)(cursorRelPos),state->tss.selectableStrTxt[i],0,state->tss.selectableStrFontSize[i]));
                     state->tss.selEndPos = state->tss.selStartPos;
                   }
                   //SDL_Log("start drag on selectable text at character %u\n",state->tss.selStartPos);
@@ -976,7 +976,7 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
           if(cursorRelPos < 0.0f){
             cursorRelPos = 0.0f;
           }
-          state->tss.selEndPos = (uint8_t)(getNumTextCharsUnderWidth(rdat,(uint16_t)(cursorRelPos),state->tss.selectableStrTxt[state->tss.selectedStr],0));
+          state->tss.selEndPos = (uint8_t)(getNumTextCharsUnderWidth(rdat,(uint16_t)(cursorRelPos),state->tss.selectableStrTxt[state->tss.selectedStr],0,state->tss.selectableStrFontSize[state->tss.selectedStr]));
         }
         setSelTxtPrimarySelection(&state->tss); //support primary selection on Linux
         state->ds.textDragFinished = 1;
@@ -1343,11 +1343,11 @@ void processSingleEvent(app_data *restrict dat, app_state *restrict state, resou
               if(state->searchCursorPos > 0){
                 if((state->searchCursorPos-1) < state->ds.searchEntryDispStartChar){
                   state->ds.searchEntryDispStartChar = (uint16_t)(state->searchCursorPos-1);
-                  state->ds.searchEntryDispNumChars = getNumTextCharsUnderWidth(rdat,SEARCH_MENU_ENTRYBOX_ENTRY_WIDTH,state->ss.searchString,state->ds.searchEntryDispStartChar);
+                  state->ds.searchEntryDispNumChars = getNumTextCharsUnderWidth(rdat,SEARCH_MENU_ENTRYBOX_ENTRY_WIDTH,state->ss.searchString,state->ds.searchEntryDispStartChar,FONTSIZE_NORMAL);
                 }
               }else{
                 state->ds.searchEntryDispStartChar = 0;
-                state->ds.searchEntryDispNumChars = getNumTextCharsUnderWidth(rdat,SEARCH_MENU_ENTRYBOX_ENTRY_WIDTH,state->ss.searchString,state->ds.searchEntryDispStartChar);
+                state->ds.searchEntryDispNumChars = getNumTextCharsUnderWidth(rdat,SEARCH_MENU_ENTRYBOX_ENTRY_WIDTH,state->ss.searchString,state->ds.searchEntryDispStartChar,FONTSIZE_NORMAL);
               }
               state->searchStrUpdated = 1;
               //SDL_Log("cursor pos: %u, start disp: %u\n",state->searchCursorPos,state->ds.searchEntryDispStartChar);
@@ -1645,7 +1645,7 @@ void processSingleEvent(app_data *restrict dat, app_state *restrict state, resou
         if(state->searchCursorPos > (SEARCH_STRING_MAX_SIZE-1)){
           state->searchCursorPos = (SEARCH_STRING_MAX_SIZE-1);
         }
-        state->ds.searchEntryDispNumChars = getNumTextCharsUnderWidth(rdat,SEARCH_MENU_ENTRYBOX_ENTRY_WIDTH,state->ss.searchString,state->ds.searchEntryDispStartChar);
+        state->ds.searchEntryDispNumChars = getNumTextCharsUnderWidth(rdat,SEARCH_MENU_ENTRYBOX_ENTRY_WIDTH,state->ss.searchString,state->ds.searchEntryDispStartChar,FONTSIZE_NORMAL);
         while((state->searchCursorPos - state->ds.searchEntryDispStartChar) > state->ds.searchEntryDispNumChars){
           state->ds.searchEntryDispStartChar++;
           if(state->ds.searchEntryDispStartChar == 0){

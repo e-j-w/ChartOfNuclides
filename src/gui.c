@@ -1529,18 +1529,18 @@ void drawNuclFullInfoBox(const app_data *restrict dat, app_state *restrict state
   //proton and neutron numbers, abundance
   drawYPos = NUCL_FULLINFOBOX_NZVALS_POS_Y*state->ds.uiUserScale + txtYOffset;
   SDL_snprintf(descStr,64,"%s: %3i, %s: %3i",dat->strings[dat->locStringIDs[LOCSTR_PROTONSDESC]],dat->ndat.nuclData[nuclInd].Z,dat->strings[dat->locStringIDs[LOCSTR_NEUTRONSDESC]],dat->ndat.nuclData[nuclInd].N);
-  drawTextAlignedSized(rdat,NUCL_FULLINFOBOX_NZVALS_POS_X*state->ds.uiUserScale,drawYPos,blackCol8Bit,FONTSIZE_SMALL,txtAlpha,descStr,ALIGN_LEFT,16384);
+  drawSelectableTextAlignedSized(rdat,&state->tss,NUCL_FULLINFOBOX_NZVALS_POS_X*state->ds.uiUserScale,drawYPos,blackCol8Bit,FONTSIZE_SMALL,txtAlpha,descStr,ALIGN_LEFT,16384);
   drawYPos += 18.0f*state->ds.uiUserScale;
   if(dat->ndat.nuclData[nuclInd].abundance.val > 0.0f){
     getAbundanceStr(tmpStr,&dat->ndat,nuclInd);
     SDL_snprintf(descStr,64,"%s of %s on Earth",tmpStr,getFullElemStr((uint8_t)dat->ndat.nuclData[nuclInd].Z,255));
-    drawTextAlignedSized(rdat,NUCL_FULLINFOBOX_NZVALS_POS_X*state->ds.uiUserScale,drawYPos,blackCol8Bit,FONTSIZE_SMALL,txtAlpha,descStr,ALIGN_LEFT,16384);
+    drawSelectableTextAlignedSized(rdat,&state->tss,NUCL_FULLINFOBOX_NZVALS_POS_X*state->ds.uiUserScale,drawYPos,blackCol8Bit,FONTSIZE_SMALL,txtAlpha,descStr,ALIGN_LEFT,16384);
   }else{
-    drawTextAlignedSized(rdat,NUCL_FULLINFOBOX_NZVALS_POS_X*state->ds.uiUserScale,drawYPos,blackCol8Bit,FONTSIZE_SMALL,txtAlpha,dat->strings[dat->locStringIDs[LOCSTR_NOTNATURAL]],ALIGN_LEFT,16384);
+    drawSelectableTextAlignedSized(rdat,&state->tss,NUCL_FULLINFOBOX_NZVALS_POS_X*state->ds.uiUserScale,drawYPos,blackCol8Bit,FONTSIZE_SMALL,txtAlpha,dat->strings[dat->locStringIDs[LOCSTR_NOTNATURAL]],ALIGN_LEFT,16384);
   }
   drawYPos += 18.0f*state->ds.uiUserScale;
   SDL_snprintf(descStr,64,"%s: %s",dat->strings[dat->locStringIDs[LOCSTR_ELEM_TYPE]],getElementFamilyStr(dat,dat->ndat.nuclData[nuclInd].Z));
-  drawTextAlignedSized(rdat,NUCL_FULLINFOBOX_NZVALS_POS_X*state->ds.uiUserScale,drawYPos,blackCol8Bit,FONTSIZE_SMALL,txtAlpha,descStr,ALIGN_LEFT,16384);
+  drawSelectableTextAlignedSized(rdat,&state->tss,NUCL_FULLINFOBOX_NZVALS_POS_X*state->ds.uiUserScale,drawYPos,blackCol8Bit,FONTSIZE_SMALL,txtAlpha,descStr,ALIGN_LEFT,16384);
   
   //Q-values and masses
   drawXPos = state->ds.windowXRes - NUCL_FULLINFOBOX_QVAL_POS_XR*state->ds.uiUserScale;
@@ -1665,7 +1665,7 @@ void drawNuclInfoBox(const app_data *restrict dat, app_state *restrict state, re
     char abundanceStr[64];
     getAbundanceStr(tmpStr,&dat->ndat,nuclInd);
     SDL_snprintf(abundanceStr,64,"...is %s of %s on Earth.",tmpStr,getFullElemStr((uint8_t)dat->ndat.nuclData[nuclInd].Z,255));
-    drawTextAlignedSized(rdat,drawXPos,drawYPos,blackCol8Bit,FONTSIZE_SMALL,alpha,abundanceStr,ALIGN_LEFT,(Uint16)(state->ds.uiElemWidth[UIELEM_NUCL_INFOBOX]));
+    drawSelectableTextAlignedSized(rdat,&state->tss,drawXPos,drawYPos,blackCol8Bit,FONTSIZE_SMALL,alpha,abundanceStr,ALIGN_LEFT,(Uint16)(state->ds.uiElemWidth[UIELEM_NUCL_INFOBOX]));
 		drawYPos += NUCL_INFOBOX_ABUNDANCE_LINE_HEIGHT*state->ds.uiUserScale;
 	}else{
     drawYPos += 6.0f*state->ds.uiUserScale;
@@ -2291,8 +2291,8 @@ void drawTextSelHighlight(const app_state *restrict state, resource_data *restri
     SDL_FRect rawSelRect = state->tss.selectableStrRect[state->tss.selectedStr];
     //SDL_Log("Selected text: %s, prior text: %s, selected chars %u to %u\n",selSubStr,selPreStr,charIndStart,charIndEnd);
     //SDL_Log("Original text rect: %0.2f %0.2f %0.2f %0.2f\n",(double)rawSelRect.x,(double)rawSelRect.y,(double)rawSelRect.w,(double)rawSelRect.h);
-    rawSelRect.x = rawSelRect.x + getTextWidth(rdat,FONTSIZE_NORMAL,selPreStr)/rdat->uiDPIScale;
-    rawSelRect.w = getTextWidth(rdat,FONTSIZE_NORMAL,selSubStr)/rdat->uiDPIScale;
+    rawSelRect.x = rawSelRect.x + getTextWidth(rdat,state->tss.selectableStrFontSize[state->tss.selectedStr],selPreStr)/rdat->uiDPIScale;
+    rawSelRect.w = getTextWidth(rdat,state->tss.selectableStrFontSize[state->tss.selectedStr],selSubStr)/rdat->uiDPIScale;
     //SDL_Log("Highlight rect: %0.2f %0.2f %0.2f %0.2f\n",(double)rawSelRect.x,(double)rawSelRect.y,(double)rawSelRect.w,(double)rawSelRect.h);
     drawFlatRect(rdat,rawSelRect,txtSelCol);
   }

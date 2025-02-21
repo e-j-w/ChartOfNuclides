@@ -289,6 +289,7 @@ typedef struct
 {
   SDL_FRect selectableStrRect[MAX_SELECTABLE_STRS]; //position and size of selectable text
   char selectableStrTxt[MAX_SELECTABLE_STRS][MAX_SELECTABLE_STR_LEN]; //the actual strings that are selectable
+  uint8_t selectableStrFontSize[MAX_SELECTABLE_STRS]; //font sioze of each selectable string
   uint16_t numSelStrs;
   uint16_t selectedStr; //65535 if nothing selected
   uint8_t selStartPos, selEndPos; //which character indices correspond to the start and end of the selected text

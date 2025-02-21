@@ -3494,7 +3494,7 @@ void uiElemClickAction(app_data *restrict dat, app_state *restrict state, resour
 				//reposition the cursor using the mouse
 				float relXPos = ((state->mouseXPx-state->ds.uiElemPosX[UIELEM_SEARCH_ENTRYBOX])/state->ds.uiUserScale)-33.0f;
 				if(relXPos > 0.0f){
-					uint16_t mousePosChar = getNumTextCharsUnderWidth(rdat,(uint16_t)relXPos,state->ss.searchString,state->ds.searchEntryDispStartChar);
+					uint16_t mousePosChar = getNumTextCharsUnderWidth(rdat,(uint16_t)relXPos,state->ss.searchString,state->ds.searchEntryDispStartChar,FONTSIZE_NORMAL);
 					state->searchCursorPos = state->ds.searchEntryDispStartChar + mousePosChar;
 					//SDL_Log("Repositioned cursor to position %u (rel pos %f).\n",state->searchCursorPos,(double)relXPos);
 				}
@@ -3706,7 +3706,7 @@ void uiElemClickAction(app_data *restrict dat, app_state *restrict state, resour
 
 //get the number of characters in a string which can be drawn below a certain width,
 //starting at txtStartChar
-uint16_t getNumTextCharsUnderWidth(resource_data *restrict rdat, const uint16_t widthPx, const char *text, const uint16_t txtStartChar){
+uint16_t getNumTextCharsUnderWidth(resource_data *restrict rdat, const uint16_t widthPx, const char *text, const uint16_t txtStartChar, const uint8_t fontSizeInd){
 	
 	int textLen = (int)SDL_strlen(text);
 	if((textLen < 1)||(txtStartChar > textLen)){
@@ -3741,7 +3741,7 @@ uint16_t getNumTextCharsUnderWidth(resource_data *restrict rdat, const uint16_t 
 		}
 		tmpTxt[utf8Len] = '\0'; //null terminate string
 		
-		float currentTxtWidth = getTextWidthScaleIndependent(rdat,FONTSIZE_NORMAL,tmpTxt);
+		float currentTxtWidth = getTextWidthScaleIndependent(rdat,fontSizeInd,tmpTxt);
 		if(lastTxtWidth > 0.0f){
 			//make the selection boundaries for characters halfway across the characters
 			//helps with less precise mouse selections
