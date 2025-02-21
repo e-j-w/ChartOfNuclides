@@ -1543,15 +1543,16 @@ void drawNuclFullInfoBox(const app_data *restrict dat, app_state *restrict state
   drawSelectableTextAlignedSized(rdat,&state->tss,NUCL_FULLINFOBOX_NZVALS_POS_X*state->ds.uiUserScale,drawYPos,blackCol8Bit,FONTSIZE_SMALL,txtAlpha,descStr,ALIGN_LEFT,16384);
   
   //Q-values and masses
+  char massStr[48]; //need a longer string, some masses have many decimal places!
   drawXPos = state->ds.windowXRes - NUCL_FULLINFOBOX_QVAL_POS_XR*state->ds.uiUserScale;
   drawYPos = NUCL_FULLINFOBOX_QVAL_POS_Y*state->ds.uiUserScale + txtYOffset;
   if(dat->ndat.nuclData[nuclInd].massAMU.val != 0.0){
     getMassValStr(descStr,dat->ndat.nuclData[nuclInd].massAMU,1);
-    SDL_snprintf(tmpStr,32,"%s: %s %s",dat->strings[dat->locStringIDs[LOCSTR_ATOMIC_MASS]],descStr,getValueUnitShortStr(dat->ndat.nuclData[nuclInd].massAMU.unit));
+    SDL_snprintf(massStr,48,"%s: %s %s",dat->strings[dat->locStringIDs[LOCSTR_ATOMIC_MASS]],descStr,getValueUnitShortStr(VALUE_UNIT_AMU));
   }else{
-    SDL_snprintf(tmpStr,32,"%s",dat->strings[dat->locStringIDs[LOCSTR_MASS_UNKNOWN]]);
+    SDL_snprintf(massStr,48,"%s",dat->strings[dat->locStringIDs[LOCSTR_MASS_UNKNOWN]]);
   }
-  drawSelectableTextAlignedSized(rdat,&state->tss,drawXPos,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_RIGHT,16384);
+  drawSelectableTextAlignedSized(rdat,&state->tss,drawXPos,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,massStr,ALIGN_RIGHT,16384);
   drawYPos += 20.0f*state->ds.uiUserScale;
   if(dat->ndat.nuclData[nuclInd].sp.val != 0.0f){
     getQValStr(descStr,dat->ndat.nuclData[nuclInd].sp,1);

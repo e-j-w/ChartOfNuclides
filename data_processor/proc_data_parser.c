@@ -1329,69 +1329,79 @@ void parseSpinPar(level * lev, sp_var_data * varDat, char * spstring){
 					if(strcmp(tok,val[i])!=0){
 						//SDL_Log("setting parity marker, tok: %s, val: %s\n",tok,val[i]);
 						//contains parity info
-						tok=SDL_strtok_r(val[i],"/([0123456789GELTAP, ",&saveptr);
-						//SDL_Log("tok: %s\n",tok);
-						if((strcmp(tok,"+")==0)||(strcmp(tok,"+)")==0)||(strcmp(tok,"+]")==0)){
-							lev->spval[lev->numSpinParVals].parVal = 1;
-						}else if((strcmp(tok,"-")==0)||(strcmp(tok,"-)")==0)||(strcmp(tok,"-]")==0)){
-							lev->spval[lev->numSpinParVals].parVal = -1;
-						}else if(strcmp(tok,"(+)")==0){
-							lev->spval[lev->numSpinParVals].parVal = 1;
-							lev->spval[lev->numSpinParVals].format |= ((TENTATIVESP_PARITYONLY & 7U) << 9U); //only parity is tentative
-						}else if(strcmp(tok,"(-)")==0){
-							lev->spval[lev->numSpinParVals].parVal = -1;
-							lev->spval[lev->numSpinParVals].format |= ((TENTATIVESP_PARITYONLY & 7U) << 9U); //only parity is tentative
-						}else if(strcmp(tok,")-")==0){
-							//all spin values negative parity
-							for(int j=lsBrakStart;j<lev->numSpinParVals;j++){
-								lev->spval[j].parVal = -1;
-								uint8_t prevTentative = (uint8_t)((uint16_t)(lev->spval[j].format >> 9U) & 7U);
-								if(prevTentative != TENTATIVESP_RANGE){
-									lev->spval[j].format = (uint16_t)(lev->spval[j].format & ~(7U << 9U)); //unset tentative type for previous spin-parity values
-									lev->spval[j].format |= ((TENTATIVESP_SPINONLY & 7U) << 9U); //only spin is tentative
+						strcpy(tmpstr,val[i]);
+						tok=SDL_strtok_r(tmpstr,"/0123456789GELTAP, ",&saveptr);
+						if(tok!=NULL){
+							if(strcmp(tok,"(+)")==0){
+								lev->spval[lev->numSpinParVals].parVal = 1;
+								lev->spval[lev->numSpinParVals].format |= ((TENTATIVESP_PARITYONLY & 7U) << 9U); //only parity is tentative
+							}else if(strcmp(tok,"(-)")==0){
+								lev->spval[lev->numSpinParVals].parVal = -1;
+								lev->spval[lev->numSpinParVals].format |= ((TENTATIVESP_PARITYONLY & 7U) << 9U); //only parity is tentative
+							}else{
+								strcpy(tmpstr,val[i]);
+								tok=SDL_strtok_r(tmpstr,"/([0123456789GELTAP, ",&saveptr);
+								if(tok!=NULL){
+									//SDL_Log("tok: %s\n",tok);
+									if((strcmp(tok,"+")==0)||(strcmp(tok,"+)")==0)||(strcmp(tok,"+]")==0)){
+										lev->spval[lev->numSpinParVals].parVal = 1;
+									}else if((strcmp(tok,"-")==0)||(strcmp(tok,"-)")==0)||(strcmp(tok,"-]")==0)){
+										lev->spval[lev->numSpinParVals].parVal = -1;
+									}else if(strcmp(tok,")-")==0){
+										//all spin values negative parity
+										for(int j=lsBrakStart;j<lev->numSpinParVals;j++){
+											lev->spval[j].parVal = -1;
+											uint8_t prevTentative = (uint8_t)((uint16_t)(lev->spval[j].format >> 9U) & 7U);
+											if(prevTentative != TENTATIVESP_RANGE){
+												lev->spval[j].format = (uint16_t)(lev->spval[j].format & ~(7U << 9U)); //unset tentative type for previous spin-parity values
+												lev->spval[j].format |= ((TENTATIVESP_SPINONLY & 7U) << 9U); //only spin is tentative
+											}
+										}
+										lev->spval[lev->numSpinParVals].parVal = -1;
+										tentative = TENTATIVESP_SPINONLY; //only spin is tentative
+									}else if(strcmp(tok,")+")==0){
+										//all spin values positive parity
+										//SDL_Log("Setting all spin values to +ve parity.\n");
+										for(int j=lsBrakStart;j<lev->numSpinParVals;j++){
+											lev->spval[j].parVal = 1;
+											uint8_t prevTentative = (uint8_t)((uint16_t)(lev->spval[j].format >> 9U) & 7U);
+											if(prevTentative != TENTATIVESP_RANGE){
+												lev->spval[j].format = (uint16_t)(lev->spval[j].format & ~(7U << 9U)); //unset tentative type for previous spin-parity values
+												lev->spval[j].format |= ((TENTATIVESP_SPINONLY & 7U) << 9U); //only spin is tentative
+											}
+										}
+										lev->spval[lev->numSpinParVals].parVal = 1;
+										tentative = TENTATIVESP_SPINONLY; //only spin is tentative
+									}else if(strcmp(tok,"]-")==0){
+										//all spin values negative parity
+										for(int j=lsSqBrakStart;j<lev->numSpinParVals;j++){
+											lev->spval[j].parVal = -1;
+											uint8_t prevTentative = (uint8_t)((uint16_t)(lev->spval[j].format >> 9U) & 7U);
+											if(prevTentative != TENTATIVESP_RANGE){
+												lev->spval[j].format = (uint16_t)(lev->spval[j].format & ~(7U << 9U)); //unset tentative type for previous spin-parity values
+												lev->spval[j].format |= ((TENTATIVESP_ASSUMEDSPINONLY & 7U) << 9U); //only spin is tentative
+											}
+										}
+										lev->spval[lev->numSpinParVals].parVal = -1;
+										tentative = TENTATIVESP_ASSUMEDSPINONLY; //only spin is tentative
+									}else if(strcmp(tok,"]+")==0){
+										//all spin values positive parity
+										//SDL_Log("Setting all spin values to +ve parity.\n");
+										for(int j=lsSqBrakStart;j<lev->numSpinParVals;j++){
+											lev->spval[j].parVal = 1;
+											uint8_t prevTentative = (uint8_t)((uint16_t)(lev->spval[j].format >> 9U) & 7U);
+											if(prevTentative != TENTATIVESP_RANGE){
+												lev->spval[j].format = (uint16_t)(lev->spval[j].format & ~(7U << 9U)); //unset tentative type for previous spin-parity values
+												lev->spval[j].format |= ((TENTATIVESP_ASSUMEDSPINONLY & 7U) << 9U); //only spin is tentative
+											}
+										}
+										lev->spval[lev->numSpinParVals].parVal = 1;
+										tentative = TENTATIVESP_ASSUMEDSPINONLY; //only spin is tentative
+									}
 								}
 							}
-							lev->spval[lev->numSpinParVals].parVal = -1;
-							tentative = TENTATIVESP_SPINONLY; //only spin is tentative
-						}else if(strcmp(tok,")+")==0){
-							//all spin values positive parity
-							//SDL_Log("Setting all spin values to +ve parity.\n");
-							for(int j=lsBrakStart;j<lev->numSpinParVals;j++){
-								lev->spval[j].parVal = 1;
-								uint8_t prevTentative = (uint8_t)((uint16_t)(lev->spval[j].format >> 9U) & 7U);
-								if(prevTentative != TENTATIVESP_RANGE){
-									lev->spval[j].format = (uint16_t)(lev->spval[j].format & ~(7U << 9U)); //unset tentative type for previous spin-parity values
-									lev->spval[j].format |= ((TENTATIVESP_SPINONLY & 7U) << 9U); //only spin is tentative
-								}
-							}
-							lev->spval[lev->numSpinParVals].parVal = 1;
-							tentative = TENTATIVESP_SPINONLY; //only spin is tentative
-						}else if(strcmp(tok,"]-")==0){
-							//all spin values negative parity
-							for(int j=lsSqBrakStart;j<lev->numSpinParVals;j++){
-								lev->spval[j].parVal = -1;
-								uint8_t prevTentative = (uint8_t)((uint16_t)(lev->spval[j].format >> 9U) & 7U);
-								if(prevTentative != TENTATIVESP_RANGE){
-									lev->spval[j].format = (uint16_t)(lev->spval[j].format & ~(7U << 9U)); //unset tentative type for previous spin-parity values
-									lev->spval[j].format |= ((TENTATIVESP_ASSUMEDSPINONLY & 7U) << 9U); //only spin is tentative
-								}
-							}
-							lev->spval[lev->numSpinParVals].parVal = -1;
-							tentative = TENTATIVESP_ASSUMEDSPINONLY; //only spin is tentative
-						}else if(strcmp(tok,"]+")==0){
-							//all spin values positive parity
-							//SDL_Log("Setting all spin values to +ve parity.\n");
-							for(int j=lsSqBrakStart;j<lev->numSpinParVals;j++){
-								lev->spval[j].parVal = 1;
-								uint8_t prevTentative = (uint8_t)((uint16_t)(lev->spval[j].format >> 9U) & 7U);
-								if(prevTentative != TENTATIVESP_RANGE){
-									lev->spval[j].format = (uint16_t)(lev->spval[j].format & ~(7U << 9U)); //unset tentative type for previous spin-parity values
-									lev->spval[j].format |= ((TENTATIVESP_ASSUMEDSPINONLY & 7U) << 9U); //only spin is tentative
-								}
-							}
-							lev->spval[lev->numSpinParVals].parVal = 1;
-							tentative = TENTATIVESP_ASSUMEDSPINONLY; //only spin is tentative
 						}
+						
 					}
 				}
 
