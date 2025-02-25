@@ -2361,6 +2361,23 @@ double getMostProbableSpin(const ndata *restrict nd, const uint32_t lvlInd){
 	return 255.0; //unknown spin
 }
 
+//gets the number of levels which don't have an assigned level energy
+uint16_t getNumUnknownLvls(const ndata *restrict nd, const uint16_t nuclInd){
+	uint16_t numUnknowns = 0;
+	for(uint32_t i=nd->nuclData[nuclInd].firstLevel; i<(uint32_t)(nd->nuclData[nuclInd].firstLevel + nd->nuclData[nuclInd].numLevels); i++){
+		uint8_t eValueType = (uint8_t)((nd->levels[i].energy.format >> 5U) & 15U);
+		if(eValueType == VALUETYPE_X){
+			numUnknowns++;
+		}else if(eValueType == VALUETYPE_PLUSX){
+			if(nd->levels[i].energy.val <= 0.0f){
+				//energy of 0+X
+				numUnknowns++;
+			}
+		}
+	}
+	return numUnknowns;
+}
+
 //get the binding energy per nucleon
 double getBEA(const ndata *restrict nd, const uint16_t nuclInd){
 	return getRawDblValFromDB(&nd->nuclData[nuclInd].beA);
@@ -2722,6 +2739,8 @@ void changeUIState(const app_data *restrict dat, app_state *restrict state, cons
 				state->interactableElement |= (uint64_t)(1UL << UIELEM_CVM_SPIN_BUTTON);
 				state->interactableElement |= (uint64_t)(1UL << UIELEM_CVM_PARITY_BUTTON);
 				state->interactableElement |= (uint64_t)(1UL << UIELEM_CVM_BEA_BUTTON);
+				state->interactableElement |= (uint64_t)(1UL << UIELEM_CVM_NUMLVLS);
+				state->interactableElement |= (uint64_t)(1UL << UIELEM_CVM_UNKNOWN_ENERGY_BUTTON);
 				state->interactableElement |= (uint64_t)(1UL << UIELEM_CHARTVIEW_MENU);
 				if(state->lastInputType != INPUT_TYPE_MOUSE){
 					//keyboard/gamepad navigation of the menu
@@ -3253,7 +3272,7 @@ void uiElemClickAction(app_data *restrict dat, app_state *restrict state, resour
 			state->clickedUIElem = UIELEM_ENUM_LENGTH; //'unclick' the menu button
 		}
 	}
-	if((uiElemID != UIELEM_CHARTVIEW_BUTTON)&&(uiElemID != UIELEM_CHARTVIEW_MENU)&&(uiElemID != UIELEM_CVM_HALFLIFE_BUTTON)&&(uiElemID != UIELEM_CVM_DECAYMODE_BUTTON)&&(uiElemID != UIELEM_CVM_2PLUS_BUTTON)&&(uiElemID != UIELEM_CVM_R42_BUTTON)&&(uiElemID != UIELEM_CVM_SPIN_BUTTON)&&(uiElemID != UIELEM_CVM_PARITY_BUTTON)&&(uiElemID != UIELEM_CVM_BEA_BUTTON)){
+	if((uiElemID != UIELEM_CHARTVIEW_BUTTON)&&(uiElemID != UIELEM_CHARTVIEW_MENU)&&(uiElemID != UIELEM_CVM_HALFLIFE_BUTTON)&&(uiElemID != UIELEM_CVM_DECAYMODE_BUTTON)&&(uiElemID != UIELEM_CVM_2PLUS_BUTTON)&&(uiElemID != UIELEM_CVM_R42_BUTTON)&&(uiElemID != UIELEM_CVM_SPIN_BUTTON)&&(uiElemID != UIELEM_CVM_PARITY_BUTTON)&&(uiElemID != UIELEM_CVM_BEA_BUTTON)&&(uiElemID != UIELEM_CVM_NUMLVLS)&&(uiElemID != UIELEM_CVM_UNKNOWN_ENERGY_BUTTON)){
 		if((state->ds.shownElements & (1UL << UIELEM_CHARTVIEW_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_CHARTVIEW_MENU_HIDE]==0.0f)){
 			startUIAnimation(dat,state,UIANIM_CHARTVIEW_MENU_HIDE); //menu will be closed after animation finishes
 			state->clickedUIElem = UIELEM_ENUM_LENGTH; //'unclick' the menu button
@@ -3487,6 +3506,18 @@ void uiElemClickAction(app_data *restrict dat, app_state *restrict state, resour
 			startUIAnimation(dat,state,UIANIM_CHARTVIEW_MENU_HIDE); //menu will be closed after animation finishes
 			state->clickedUIElem = UIELEM_ENUM_LENGTH; //'unclick' the menu button
 			state->chartView = CHARTVIEW_BEA;
+			changeUIState(dat,state,UISTATE_CHARTONLY); //prevents mouseover from still highlighting buttons while the menu closes
+			break;
+		case UIELEM_CVM_NUMLVLS:
+			startUIAnimation(dat,state,UIANIM_CHARTVIEW_MENU_HIDE); //menu will be closed after animation finishes
+			state->clickedUIElem = UIELEM_ENUM_LENGTH; //'unclick' the menu button
+			state->chartView = CHARTVIEW_NUMLVLS;
+			changeUIState(dat,state,UISTATE_CHARTONLY); //prevents mouseover from still highlighting buttons while the menu closes
+			break;
+		case UIELEM_CVM_UNKNOWN_ENERGY_BUTTON:
+			startUIAnimation(dat,state,UIANIM_CHARTVIEW_MENU_HIDE); //menu will be closed after animation finishes
+			state->clickedUIElem = UIELEM_ENUM_LENGTH; //'unclick' the menu button
+			state->chartView = CHARTVIEW_UNKNOWN_ENERGY;
 			changeUIState(dat,state,UISTATE_CHARTONLY); //prevents mouseover from still highlighting buttons while the menu closes
 			break;
 		case UIELEM_SEARCH_ENTRYBOX:
@@ -3874,6 +3905,18 @@ void updateSingleUIElemPosition(const app_data *restrict dat, app_state *restric
 		case UIELEM_CVM_BEA_BUTTON:
 			state->ds.uiElemPosX[uiElemInd] = (int16_t)(state->ds.windowXRes-((CHARTVIEW_MENU_WIDTH+CHARTVIEW_MENU_POS_XR - PANEL_EDGE_SIZE - 2*UI_PADDING_SIZE)*state->ds.uiUserScale));
 			state->ds.uiElemPosY[uiElemInd] = (int16_t)((CHARTVIEW_MENU_POS_Y + PANEL_EDGE_SIZE + 2*UI_PADDING_SIZE + 7*CHARTVIEW_MENU_ITEM_SPACING)*state->ds.uiUserScale);
+			state->ds.uiElemWidth[uiElemInd] = (int16_t)((CHARTVIEW_MENU_WIDTH - 2*PANEL_EDGE_SIZE - 4*UI_PADDING_SIZE)*state->ds.uiUserScale);
+			state->ds.uiElemHeight[uiElemInd] = (int16_t)((CHARTVIEW_MENU_ITEM_SPACING - UI_PADDING_SIZE)*state->ds.uiUserScale);
+			break;
+		case UIELEM_CVM_NUMLVLS:
+			state->ds.uiElemPosX[uiElemInd] = (int16_t)(state->ds.windowXRes-((CHARTVIEW_MENU_WIDTH+CHARTVIEW_MENU_POS_XR - PANEL_EDGE_SIZE - 2*UI_PADDING_SIZE)*state->ds.uiUserScale));
+			state->ds.uiElemPosY[uiElemInd] = (int16_t)((CHARTVIEW_MENU_POS_Y + PANEL_EDGE_SIZE + 2*UI_PADDING_SIZE + 8*CHARTVIEW_MENU_ITEM_SPACING)*state->ds.uiUserScale);
+			state->ds.uiElemWidth[uiElemInd] = (int16_t)((CHARTVIEW_MENU_WIDTH - 2*PANEL_EDGE_SIZE - 4*UI_PADDING_SIZE)*state->ds.uiUserScale);
+			state->ds.uiElemHeight[uiElemInd] = (int16_t)((CHARTVIEW_MENU_ITEM_SPACING - UI_PADDING_SIZE)*state->ds.uiUserScale);
+			break;
+		case UIELEM_CVM_UNKNOWN_ENERGY_BUTTON:
+			state->ds.uiElemPosX[uiElemInd] = (int16_t)(state->ds.windowXRes-((CHARTVIEW_MENU_WIDTH+CHARTVIEW_MENU_POS_XR - PANEL_EDGE_SIZE - 2*UI_PADDING_SIZE)*state->ds.uiUserScale));
+			state->ds.uiElemPosY[uiElemInd] = (int16_t)((CHARTVIEW_MENU_POS_Y + PANEL_EDGE_SIZE + 2*UI_PADDING_SIZE + 9*CHARTVIEW_MENU_ITEM_SPACING)*state->ds.uiUserScale);
 			state->ds.uiElemWidth[uiElemInd] = (int16_t)((CHARTVIEW_MENU_WIDTH - 2*PANEL_EDGE_SIZE - 4*UI_PADDING_SIZE)*state->ds.uiUserScale);
 			state->ds.uiElemHeight[uiElemInd] = (int16_t)((CHARTVIEW_MENU_ITEM_SPACING - UI_PADDING_SIZE)*state->ds.uiUserScale);
 			break;

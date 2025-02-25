@@ -60,6 +60,8 @@ chartview_r42|E(4+)/E(2+)
 chartview_beA|Bind. E / A
 chartview_spin|GS spin
 chartview_parity|GS parity
+chartview_num_levels|Known Lvls
+chartview_unknown_energy|Unknown Lvls
 search_placeholder|Type to search (eg. '32Si')
 search_result_nuclide|Nuclide / Isotope
 search_result_egamma|Transition
