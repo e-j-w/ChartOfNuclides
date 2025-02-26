@@ -298,6 +298,7 @@ static int parseAppRules(app_data *restrict dat, asset_mapping *restrict stringI
 	dat->locStringIDs[LOCSTR_CHARTVIEW_DECAYMODE] = (uint16_t)nameToAssetID("chartview_decaymode",stringIDmap);
 	dat->locStringIDs[LOCSTR_CHARTVIEW_2PLUS] = (uint16_t)nameToAssetID("chartview_2plus",stringIDmap);
 	dat->locStringIDs[LOCSTR_CHARTVIEW_R42] = (uint16_t)nameToAssetID("chartview_r42",stringIDmap);
+	dat->locStringIDs[LOCSTR_CHARTVIEW_BETA2] = (uint16_t)nameToAssetID("chartview_beta2",stringIDmap);
 	dat->locStringIDs[LOCSTR_CHARTVIEW_SPIN] = (uint16_t)nameToAssetID("chartview_spin",stringIDmap);
 	dat->locStringIDs[LOCSTR_CHARTVIEW_PARITY] = (uint16_t)nameToAssetID("chartview_parity",stringIDmap);
 	dat->locStringIDs[LOCSTR_CHARTVIEW_BEA] = (uint16_t)nameToAssetID("chartview_beA",stringIDmap);
@@ -2417,6 +2418,14 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 								char mBuff[11];
 								memcpy(mBuff, &line[31], 10);
 								mBuff[10] = '\0';
+								//parse the internal conversion coefficient
+								char iccBuff[8];
+								memcpy(iccBuff, &line[55], 7);
+								iccBuff[7] = '\0';
+								//parse the internal conversion coefficient error
+								char icceBuff[3];
+								memcpy(icceBuff, &line[62], 2);
+								icceBuff[2] = '\0';
 								//parse the energy
 								char ebuff[11];
 								memcpy(ebuff, &line[9], 10);
@@ -2709,6 +2718,63 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 									}
 								}
 
+								//gamma conversion coeff
+								float gammaICC = (float)atof(iccBuff);
+								//get the number of sig figs
+								nd->tran[tranInd].icc.format = 0; //default
+								//SDL_Log("iccBuff: %s\n",iccBuff);
+								tok = SDL_strtok_r(iccBuff,".",&saveptr);
+								if(tok!=NULL){
+									//SDL_Log("%s\n",tok);
+									tok = SDL_strtok_r(NULL,"E",&saveptr); //some values are specified with exponents
+									if(tok!=NULL){
+										//SDL_Log("%s\n",tok);
+										nd->tran[tranInd].icc.format = (uint16_t)SDL_strlen(tok);
+										//check for trailing empty spaces
+										for(uint8_t i=0;i<nd->tran[tranInd].icc.format;i++){
+											if(SDL_isspace(tok[i])){
+												nd->tran[tranInd].icc.format = i;
+												break;
+											}
+										}
+										if(nd->tran[tranInd].icc.format > 15U){
+											nd->tran[tranInd].icc.format = 15U; //only 4 bits available for precision
+										}
+										//SDL_Log("format: %u\n",nd->tran[tranInd].icc.format);
+										tok = SDL_strtok_r(NULL,"",&saveptr); //get the remaining part of the string (only get past here if the value was expressed in exponent form)
+										if(tok!=NULL){
+											//SDL_Log("ICC in exponent form: %s\n",ebuff);
+											//value was in exponent format
+											nd->tran[tranInd].icc.exponent = (int8_t)atoi(tok);
+											gammaICC = gammaICC / powf(10.0f,(float)(nd->tran[tranInd].icc.exponent));
+											nd->tran[tranInd].icc.format |= (uint16_t)(1U << 4); //exponent flag
+										}
+									}
+								}
+
+								//gamma conversion coeff: check for special value type
+								nd->tran[tranInd].icc.err=0;
+								tok = SDL_strtok_r(icceBuff, " ",&saveptr);
+								if(tok!=NULL){
+									if(strcmp(tok,"GT")==0){
+										nd->tran[tranInd].icc.format |= (uint16_t)(VALUETYPE_GREATERTHAN << 5);
+									}else if(strcmp(tok,"GT")==0){
+										nd->tran[tranInd].icc.format |= (uint16_t)(VALUETYPE_GREATERTHAN << 5);
+									}else if(strcmp(tok,"GE")==0){
+										nd->tran[tranInd].icc.format |= (uint16_t)(VALUETYPE_GREATEROREQUALTHAN << 5);
+									}else if(strcmp(tok,"LT")==0){
+										nd->tran[tranInd].icc.format |= (uint16_t)(VALUETYPE_LESSTHAN << 5);
+									}else if(strcmp(tok,"LE")==0){
+										nd->tran[tranInd].icc.format |= (uint16_t)(VALUETYPE_LESSOREQUALTHAN << 5);
+									}else if(strcmp(tok,"AP")==0){
+										nd->tran[tranInd].icc.format |= (uint16_t)(VALUETYPE_APPROX << 5);
+									}else if(strcmp(tok,"?")==0){
+										nd->tran[tranInd].icc.format |= (uint16_t)(VALUETYPE_UNKNOWN << 5);
+									}else{
+										nd->tran[tranInd].icc.err=(uint8_t)atoi(icceBuff);
+									}
+								}
+
 								//gamma multipolarity
 								nd->tran[tranInd].numMultipoles = 0;
 								tok = SDL_strtok_r(mBuff," ",&saveptr);
@@ -2780,6 +2846,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 								}
 
 								nd->tran[tranInd].intensity.val=gammaI;
+								nd->tran[tranInd].icc.val=gammaICC;
 								nd->levels[nd->numLvls-1].numTran++;
 								nd->numTran++;
 									

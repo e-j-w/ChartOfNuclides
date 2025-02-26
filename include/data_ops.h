@@ -68,6 +68,7 @@ double getMostProbableSpin(const ndata *restrict nd, const uint32_t lvlInd);
 uint16_t getNumUnknownLvls(const ndata *restrict nd, const uint16_t nuclInd);
 double getBEA(const ndata *restrict nd, const uint16_t nuclInd);
 uint32_t get2PlusLvlInd(const ndata *restrict nd, const uint16_t nuclInd);
+double getBeta2(const ndata *restrict nd, const uint16_t nuclInd);
 double getR42(const ndata *restrict nd, const uint16_t nuclInd);
 double get2PlusEnergy(const ndata *restrict nd, const uint16_t nuclInd);
 

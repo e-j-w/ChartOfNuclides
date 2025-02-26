@@ -130,6 +130,7 @@ typedef struct
 {
   valWithErr energy; //transition energy, in keV
   valWithErr intensity; //relative intensity
+  valWithErr icc; //internal conversion coefficient
   uint8_t numMultipoles; //only uses the first couple bits
   uint8_t multipole[MAXMULTPERLEVEL]; //bit 0: E (unset) or M (set), bits 1-4: multipole order, bits 5-6: values from tentative_mult_enum, bit 7: if set, bit 0 corresponds to quadrupole/dipole
   uint8_t finalLvlOffset; //offset of the index of the final level from the initial level

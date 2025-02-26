@@ -353,7 +353,7 @@ SDL_FColor getR42Col(const double r42, const double halflifeSeconds){
     col.r = 0.2f;
     col.g = 0.4f;
     col.b = 0.8f;
-  }else if(r42 >= 3.2){
+  }else if(r42 >= 3.2){ //box color inversion point
     col.r = 0.3f;
     col.g = 0.5f;
     col.b = 0.8f;
@@ -406,6 +406,94 @@ SDL_FColor getR42Col(const double r42, const double halflifeSeconds){
     col.g = 0.8f;
     col.b = 0.9f;
   }else if(r42 > 0.0){
+    col.r = 1.0f;
+    col.g = 0.8f;
+    col.b = 0.9f;
+  }
+  //slightly darken stable nuclides
+  if(halflifeSeconds > 1.0E15){
+    col.r -= 0.1f;
+    col.g -= 0.1f;
+    col.b -= 0.1f;
+  }
+  return col;
+}
+
+SDL_FColor getBeta2Col(const double beta2, const double halflifeSeconds){
+  SDL_FColor col;
+  col.r = 0.9f;
+  col.g = 0.9f;
+  col.b = 0.9f;
+  col.a = 1.0f;
+  if(beta2 >= 0.8){
+    col.r = 0.0f;
+    col.g = 0.0f;
+    col.b = 0.0f;
+  }else if(beta2 >= 0.7){
+    col.r = 0.0f;
+    col.g = 0.1f;
+    col.b = 0.4f;
+  }else if(beta2 >= 0.6){
+    col.r = 0.1f;
+    col.g = 0.2f;
+    col.b = 0.5f;
+  }else if(beta2 >= 0.5){
+    col.r = 0.1f;
+    col.g = 0.3f;
+    col.b = 0.7f;
+  }else if(beta2 >= 0.4){
+    col.r = 0.2f;
+    col.g = 0.4f;
+    col.b = 0.8f;
+  }else if(beta2 >= 0.35){ //box color inversion point
+    col.r = 0.3f;
+    col.g = 0.5f;
+    col.b = 0.8f;
+  }else if(beta2 >= 0.3){
+    col.r = 0.3f;
+    col.g = 0.7f;
+    col.b = 0.7f;
+  }else if(beta2 >= 0.28){
+    col.r = 0.3f;
+    col.g = 0.9f;
+    col.b = 0.7f;
+  }else if(beta2 >= 0.26){
+    col.r = 0.5f;
+    col.g = 1.0f;
+    col.b = 0.7f;
+  }else if(beta2 >= 0.24){
+    col.r = 0.7f;
+    col.g = 0.9f;
+    col.b = 0.5f;
+  }else if(beta2 >= 0.22){
+    col.r = 0.9f;
+    col.g = 0.9f;
+    col.b = 0.4f;
+  }else if(beta2 >= 0.2){
+    col.r = 1.0f;
+    col.g = 1.0f;
+    col.b = 0.3f;
+  }else if(beta2 >= 0.15){
+    col.r = 1.0f;
+    col.g = 0.8f;
+    col.b = 0.4f;
+  }else if(beta2 >= 0.1){
+    col.r = 1.0f;
+    col.g = 0.7f;
+    col.b = 0.5f;
+  }else if(beta2 >= 0.08){
+    col.r = 1.0f;
+    col.g = 0.6f;
+    col.b = 0.6f;
+  }else if(beta2 >= 0.06){
+    col.r = 1.0f;
+    col.g = 0.6f;
+    col.b = 0.7f;
+  }else if(beta2 >= 0.04){
+    col.r = 1.0f;
+    col.g = 0.7f;
+    col.b = 0.8f;
+  }else if(beta2 >= 0.0){
     col.r = 1.0f;
     col.g = 0.8f;
     col.b = 0.9f;
@@ -733,21 +821,21 @@ SDL_FColor getUnknownLvlsCol(const uint16_t unknownLvls, const double halflifeSe
     col.g = 0.6f;
     col.b = 0.9f;
   }else if(unknownLvls == 2){
-    col.r = 0.9f;
+    col.r = 0.4f;
     col.g = 0.9f;
-    col.b = 0.4f;
+    col.b = 0.6f;
   }else if(unknownLvls == 3){
-    col.r = 0.6f;
-    col.g = 1.0f;
-    col.b = 0.7f;
+    col.r = 0.8f;
+    col.g = 0.9f;
+    col.b = 0.2f;
   }else if(unknownLvls == 4){
     col.r = 1.0f;
-    col.g = 0.7f;
-    col.b = 0.8f;
+    col.g = 1.0f;
+    col.b = 0.5f;
   }else if(unknownLvls == 5){
     col.r = 1.0f;
-    col.g = 0.8f;
-    col.b = 0.9f;
+    col.g = 0.7f;
+    col.b = 0.5f;
   }else{
     col.r = 1.0f;
     col.g = 0.8f;
@@ -1057,6 +1145,12 @@ void drawNuclBoxLabelDetails(const app_data *restrict dat, const app_state *rest
       SDL_snprintf(tmpStr,32,"%0.2f",r42);
       drawTextAlignedSized(rdat,drawXPos,drawYPos+((yOffsets*19.0f + 40.0f)*state->ds.uiUserScale),col,FONTSIZE_NORMAL,255,tmpStr,ALIGN_CENTER,maxLblWidth); //draw R42 label
     }
+  }else if(state->chartView == CHARTVIEW_BETA2){
+    double beta2 = getBeta2(&dat->ndat,nuclInd);
+    if(beta2 > 0.0){
+      SDL_snprintf(tmpStr,32,"%0.3f",beta2);
+      drawTextAlignedSized(rdat,drawXPos,drawYPos+((yOffsets*19.0f + 40.0f)*state->ds.uiUserScale),col,FONTSIZE_NORMAL,255,tmpStr,ALIGN_CENTER,maxLblWidth); //draw beta2 label
+    }
   }else if(state->chartView == CHARTVIEW_SPIN){
     //draw spin-parity only
     if(getMostProbableSpin(&dat->ndat,gsLevInd) >= 255.0){
@@ -1235,6 +1329,8 @@ void drawChartOfNuclides(const app_data *restrict dat, const app_state *restrict
                 drawFlatRect(rdat,rect,get2PlusCol(get2PlusEnergy(&dat->ndat,(uint16_t)i),getNuclGSHalfLifeSeconds(&dat->ndat,(uint16_t)i)));
               }else if(state->chartView == CHARTVIEW_R42){
                 drawFlatRect(rdat,rect,getR42Col(getR42(&dat->ndat,(uint16_t)i),getNuclGSHalfLifeSeconds(&dat->ndat,(uint16_t)i)));
+              }else if(state->chartView == CHARTVIEW_BETA2){
+                drawFlatRect(rdat,rect,getBeta2Col(getBeta2(&dat->ndat,(uint16_t)i),getNuclGSHalfLifeSeconds(&dat->ndat,(uint16_t)i)));
               }else if(state->chartView == CHARTVIEW_SPIN){
                 drawFlatRect(rdat,rect,getSpinCol(getMostProbableSpin(&dat->ndat,dat->ndat.nuclData[i].firstLevel + dat->ndat.nuclData[i].gsLevel)));
               }else if(state->chartView == CHARTVIEW_PARITY){
@@ -1360,6 +1456,8 @@ void drawChartOfNuclides(const app_data *restrict dat, const app_state *restrict
                     drawNuclBoxLabel(dat,state,rdat,rect.x,rect.y,rect.w,rect.h,(get2PlusEnergy(&dat->ndat,(uint16_t)i) >= 3000.0) ? whiteCol8Bit : blackCol8Bit,(uint16_t)i);
                   }else if(state->chartView == CHARTVIEW_R42){
                     drawNuclBoxLabel(dat,state,rdat,rect.x,rect.y,rect.w,rect.h,(getR42(&dat->ndat,(uint16_t)i) >= 3.2) ? whiteCol8Bit : blackCol8Bit,(uint16_t)i);
+                  }else if(state->chartView == CHARTVIEW_BETA2){
+                    drawNuclBoxLabel(dat,state,rdat,rect.x,rect.y,rect.w,rect.h,(getBeta2(&dat->ndat,(uint16_t)i) >= 0.35) ? whiteCol8Bit : blackCol8Bit,(uint16_t)i);
                   }else if(state->chartView == CHARTVIEW_SPIN){
                     double spin = getMostProbableSpin(&dat->ndat,dat->ndat.nuclData[i].firstLevel + dat->ndat.nuclData[i].gsLevel);
                     drawNuclBoxLabel(dat,state,rdat,rect.x,rect.y,rect.w,rect.h,(spin <= 2.0) ? whiteCol8Bit : blackCol8Bit,(uint16_t)i);
@@ -2550,6 +2648,8 @@ void drawUI(const app_data *restrict dat, app_state *restrict state, resource_da
       drawIconAndTextButton(&dat->rules.themeRules,rdat,state->ds.uiElemPosX[UIELEM_CHARTVIEW_BUTTON],state->ds.uiElemPosY[UIELEM_CHARTVIEW_BUTTON],state->ds.uiElemWidth[UIELEM_CHARTVIEW_BUTTON],getHighlightState(state,UIELEM_CHARTVIEW_BUTTON),255,UIICON_CHARTVIEW,dat->strings[dat->locStringIDs[LOCSTR_CHARTVIEW_2PLUS]]);
     }else if(state->chartView == CHARTVIEW_R42){
       drawIconAndTextButton(&dat->rules.themeRules,rdat,state->ds.uiElemPosX[UIELEM_CHARTVIEW_BUTTON],state->ds.uiElemPosY[UIELEM_CHARTVIEW_BUTTON],state->ds.uiElemWidth[UIELEM_CHARTVIEW_BUTTON],getHighlightState(state,UIELEM_CHARTVIEW_BUTTON),255,UIICON_CHARTVIEW,dat->strings[dat->locStringIDs[LOCSTR_CHARTVIEW_R42]]);
+    }else if(state->chartView == CHARTVIEW_BETA2){
+      drawIconAndTextButton(&dat->rules.themeRules,rdat,state->ds.uiElemPosX[UIELEM_CHARTVIEW_BUTTON],state->ds.uiElemPosY[UIELEM_CHARTVIEW_BUTTON],state->ds.uiElemWidth[UIELEM_CHARTVIEW_BUTTON],getHighlightState(state,UIELEM_CHARTVIEW_BUTTON),255,UIICON_CHARTVIEW,dat->strings[dat->locStringIDs[LOCSTR_CHARTVIEW_BETA2]]);
     }else if(state->chartView == CHARTVIEW_SPIN){
       drawIconAndTextButton(&dat->rules.themeRules,rdat,state->ds.uiElemPosX[UIELEM_CHARTVIEW_BUTTON],state->ds.uiElemPosY[UIELEM_CHARTVIEW_BUTTON],state->ds.uiElemWidth[UIELEM_CHARTVIEW_BUTTON],getHighlightState(state,UIELEM_CHARTVIEW_BUTTON),255,UIICON_CHARTVIEW,dat->strings[dat->locStringIDs[LOCSTR_CHARTVIEW_SPIN]]);
     }else if(state->chartView == CHARTVIEW_PARITY){
