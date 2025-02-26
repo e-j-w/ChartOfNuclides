@@ -1142,13 +1142,13 @@ void drawNuclBoxLabelDetails(const app_data *restrict dat, const app_state *rest
   }else if(state->chartView == CHARTVIEW_R42){
     double r42 = getR42(&dat->ndat,nuclInd);
     if(r42 > 0.0){
-      SDL_snprintf(tmpStr,32,"%0.2f",r42);
+      SDL_snprintf(tmpStr,32,"R₄₂ = %0.2f",r42);
       drawTextAlignedSized(rdat,drawXPos,drawYPos+((yOffsets*19.0f + 40.0f)*state->ds.uiUserScale),col,FONTSIZE_NORMAL,255,tmpStr,ALIGN_CENTER,maxLblWidth); //draw R42 label
     }
   }else if(state->chartView == CHARTVIEW_BETA2){
     double beta2 = getBeta2(&dat->ndat,nuclInd);
     if(beta2 > 0.0){
-      SDL_snprintf(tmpStr,32,"%0.3f",beta2);
+      SDL_snprintf(tmpStr,32,"%s = %0.3f",dat->strings[dat->locStringIDs[LOCSTR_CHARTVIEW_BETA2]],beta2);
       drawTextAlignedSized(rdat,drawXPos,drawYPos+((yOffsets*19.0f + 40.0f)*state->ds.uiUserScale),col,FONTSIZE_NORMAL,255,tmpStr,ALIGN_CENTER,maxLblWidth); //draw beta2 label
     }
   }else if(state->chartView == CHARTVIEW_SPIN){

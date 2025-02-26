@@ -57,7 +57,7 @@ chartview_halflife|Half-life
 chartview_decaymode|Decay Mode
 chartview_2plus|E(2+)
 chartview_r42|E(4+)/E(2+)
-chartview_beta2|β2
+chartview_beta2|β₂
 chartview_beA|Bind. E / A
 chartview_spin|GS spin
 chartview_parity|GS parity
