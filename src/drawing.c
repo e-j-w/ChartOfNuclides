@@ -316,7 +316,7 @@ void drawIconAndTextEntryBox(const ui_theme_rules *restrict uirules, resource_da
         memcpy(tmpTxt,text+txtDrawStartPos,sizeof(char)*txtDrawNumChars);
         tmpTxt[txtDrawNumChars] = '\0'; //null terminate string
       }else{
-        strncpy(tmpTxt,text,255);
+        SDL_strlcpy(tmpTxt,text,255);
       }
       //draw text
       drawTextAlignedSized(rdat,textX,textY,uirules->textColNormal,FONTSIZE_NORMAL,alpha,tmpTxt,ALIGN_LEFT,65535U);

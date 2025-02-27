@@ -49,10 +49,10 @@ static int parseAppRules(app_data *restrict dat, asset_mapping *restrict stringI
           tok = SDL_strtok_r(str," ",&saveptr);
           if(SDL_strcmp(tok,"app_name") == 0){
             tok = SDL_strtok_r(NULL,"",&saveptr); //get the rest of the string
-            strncpy(dat->rules.appName,tok,63);
+            SDL_strlcpy(dat->rules.appName,tok,63);
           }else if(SDL_strcmp(tok,"bg_col") == 0){
             tok = SDL_strtok_r(NULL,"",&saveptr); //get the rest of the string
-            strncpy(str2,tok,255);
+            SDL_strlcpy(str2,tok,255);
             tok = SDL_strtok_r(str2,",",&saveptr);
             if(tok!=NULL){
               dat->rules.themeRules.bgCol.r = (float)atof(tok);
@@ -77,7 +77,7 @@ static int parseAppRules(app_data *restrict dat, asset_mapping *restrict stringI
             }
           }else if(SDL_strcmp(tok,"text_col") == 0){
             tok = SDL_strtok_r(NULL,"",&saveptr); //get the rest of the string
-            strncpy(str2,tok,255);
+            SDL_strlcpy(str2,tok,255);
             tok = SDL_strtok_r(str2,",",&saveptr);
             if(tok!=NULL){
               dat->rules.themeRules.textColNormal.r = (Uint8)floor(atof(tok)*255.0);
@@ -102,7 +102,7 @@ static int parseAppRules(app_data *restrict dat, asset_mapping *restrict stringI
             }
           }else if(SDL_strcmp(tok,"text_col_inactive") == 0){
             tok = SDL_strtok_r(NULL,"",&saveptr); //get the rest of the string
-            strncpy(str2,tok,255);
+            SDL_strlcpy(str2,tok,255);
             tok = SDL_strtok_r(str2,",",&saveptr);
             if(tok!=NULL){
               dat->rules.themeRules.textColInactive.r = (Uint8)floor(atof(tok)*255.0);
@@ -127,7 +127,7 @@ static int parseAppRules(app_data *restrict dat, asset_mapping *restrict stringI
             }
           }else if(SDL_strcmp(tok,"mod_col_normal") == 0){
             tok = SDL_strtok_r(NULL,"",&saveptr); //get the rest of the string
-            strncpy(str2,tok,255);
+            SDL_strlcpy(str2,tok,255);
             tok = SDL_strtok_r(str2,",",&saveptr);
             if(tok!=NULL){
               dat->rules.themeRules.modNormalCol.r = (float)atof(tok);
@@ -152,7 +152,7 @@ static int parseAppRules(app_data *restrict dat, asset_mapping *restrict stringI
             }
           }else if(SDL_strcmp(tok,"mod_col_mouseover") == 0){
             tok = SDL_strtok_r(NULL,"",&saveptr); //get the rest of the string
-            strncpy(str2,tok,255);
+            SDL_strlcpy(str2,tok,255);
             tok = SDL_strtok_r(str2,",",&saveptr);
             if(tok!=NULL){
               dat->rules.themeRules.modMouseOverCol.r = (float)atof(tok);
@@ -177,7 +177,7 @@ static int parseAppRules(app_data *restrict dat, asset_mapping *restrict stringI
             }
           }else if(SDL_strcmp(tok,"mod_col_selected") == 0){
             tok = SDL_strtok_r(NULL,"",&saveptr); //get the rest of the string
-            strncpy(str2,tok,255);
+            SDL_strlcpy(str2,tok,255);
             tok = SDL_strtok_r(str2,",",&saveptr);
             if(tok!=NULL){
               dat->rules.themeRules.modSelectedCol.r = (float)atof(tok);
@@ -202,7 +202,7 @@ static int parseAppRules(app_data *restrict dat, asset_mapping *restrict stringI
             }
           }else if(SDL_strcmp(tok,"mod_col_selected_and_mouseover") == 0){
             tok = SDL_strtok_r(NULL,"",&saveptr); //get the rest of the string
-            strncpy(str2,tok,255);
+            SDL_strlcpy(str2,tok,255);
             tok = SDL_strtok_r(str2,",",&saveptr);
             if(tok!=NULL){
               dat->rules.themeRules.modSelectedAndMouseOverCol.r = (float)atof(tok);
@@ -395,14 +395,14 @@ void getENSDFNuclStrNZ(int16_t *N, int16_t *Z, const char *nuclStr){
 	}
 
 	//get mass number
-	strncpy(str,nuclStr,255); //copy the nucleus name
+	SDL_strlcpy(str,nuclStr,255); //copy the nucleus name
 	tok=SDL_strtok_r(str,"ABCDEFGHIJKLMNOPQRSTUVWXYZ",&saveptr);
 	if(tok!=NULL){
 		A=(int16_t)atoi(tok);
 	}
 	
 	//get proton number
-	strncpy(str,nuclStr,255); //copy the nucleus name
+	SDL_strlcpy(str,nuclStr,255); //copy the nucleus name
 	tok=SDL_strtok_r(str,"0123456789",&saveptr);
 	if(tok!=NULL){
 		if(strcmp(tok,"NN")==0){
@@ -487,91 +487,91 @@ uint8_t parseRxn(reaction *rxn, const char *rxnstring, char *ensdfStrBuf, const 
 		//use find and replace to de-uglify strings
 		char *modRxnStrCpy;
 		modRxnStrCpy = findReplaceAllUTF8("Decay","decay",modRxnStr);
-		strncpy(modRxnStr,modRxnStrCpy,MAX_RXN_STRLEN-1);
+		SDL_strlcpy(modRxnStr,modRxnStrCpy,MAX_RXN_STRLEN-1);
 		free(modRxnStrCpy);
 		modRxnStrCpy = findReplaceAllUTF8(" sf d"," SF d",modRxnStr);
-		strncpy(modRxnStr,modRxnStrCpy,MAX_RXN_STRLEN-1);
+		SDL_strlcpy(modRxnStr,modRxnStrCpy,MAX_RXN_STRLEN-1);
 		free(modRxnStrCpy);
 		modRxnStrCpy = findReplaceAllUTF8(" ec"," ε",modRxnStr);
-		strncpy(modRxnStr,modRxnStrCpy,MAX_RXN_STRLEN-1);
+		SDL_strlcpy(modRxnStr,modRxnStrCpy,MAX_RXN_STRLEN-1);
 		free(modRxnStrCpy);
 		modRxnStrCpy = findReplaceAllUTF8(" EC"," ε",modRxnStr);
-		strncpy(modRxnStr,modRxnStrCpy,MAX_RXN_STRLEN-1);
+		SDL_strlcpy(modRxnStr,modRxnStrCpy,MAX_RXN_STRLEN-1);
 		free(modRxnStrCpy);
 		modRxnStrCpy = findReplaceAllUTF8(" b-"," β-",modRxnStr);
-		strncpy(modRxnStr,modRxnStrCpy,MAX_RXN_STRLEN-1);
+		SDL_strlcpy(modRxnStr,modRxnStrCpy,MAX_RXN_STRLEN-1);
 		free(modRxnStrCpy);
 		modRxnStrCpy = findReplaceAllUTF8(" b+"," β+",modRxnStr);
-		strncpy(modRxnStr,modRxnStrCpy,MAX_RXN_STRLEN-1);
+		SDL_strlcpy(modRxnStr,modRxnStrCpy,MAX_RXN_STRLEN-1);
 		free(modRxnStrCpy);
 		modRxnStrCpy = findReplaceAllUTF8("a dec","α dec",modRxnStr);
-		strncpy(modRxnStr,modRxnStrCpy,MAX_RXN_STRLEN-1);
+		SDL_strlcpy(modRxnStr,modRxnStrCpy,MAX_RXN_STRLEN-1);
 		free(modRxnStrCpy);
 		modRxnStrCpy = findReplaceAllUTF8(" it "," IT ",modRxnStr);
-		strncpy(modRxnStr,modRxnStrCpy,MAX_RXN_STRLEN-1);
+		SDL_strlcpy(modRxnStr,modRxnStrCpy,MAX_RXN_STRLEN-1);
 		free(modRxnStrCpy);
 		modRxnStrCpy = findReplaceAllUTF8(" D)"," days)",modRxnStr);
-		strncpy(modRxnStr,modRxnStrCpy,MAX_RXN_STRLEN-1);
+		SDL_strlcpy(modRxnStr,modRxnStrCpy,MAX_RXN_STRLEN-1);
 		free(modRxnStrCpy);
 		modRxnStrCpy = findReplaceAllUTF8(" M)"," min)",modRxnStr);
-		strncpy(modRxnStr,modRxnStrCpy,MAX_RXN_STRLEN-1);
+		SDL_strlcpy(modRxnStr,modRxnStrCpy,MAX_RXN_STRLEN-1);
 		free(modRxnStrCpy);
 		modRxnStrCpy = findReplaceAllUTF8(" S)"," s)",modRxnStr);
-		strncpy(modRxnStr,modRxnStrCpy,MAX_RXN_STRLEN-1);
+		SDL_strlcpy(modRxnStr,modRxnStrCpy,MAX_RXN_STRLEN-1);
 		free(modRxnStrCpy);
 		modRxnStrCpy = findReplaceAllUTF8(" Ms)"," ms)",modRxnStr);
-		strncpy(modRxnStr,modRxnStrCpy,MAX_RXN_STRLEN-1);
+		SDL_strlcpy(modRxnStr,modRxnStrCpy,MAX_RXN_STRLEN-1);
 		free(modRxnStrCpy);
 		modRxnStrCpy = findReplaceAllUTF8(" Us)"," μs)",modRxnStr);
-		strncpy(modRxnStr,modRxnStrCpy,MAX_RXN_STRLEN-1);
+		SDL_strlcpy(modRxnStr,modRxnStrCpy,MAX_RXN_STRLEN-1);
 		free(modRxnStrCpy);
 		modRxnStrCpy = findReplaceAllUTF8(" Ns)"," ns)",modRxnStr);
-		strncpy(modRxnStr,modRxnStrCpy,MAX_RXN_STRLEN-1);
+		SDL_strlcpy(modRxnStr,modRxnStrCpy,MAX_RXN_STRLEN-1);
 		free(modRxnStrCpy);
 		modRxnStrCpy = findReplaceAllUTF8("mu-","μ-",modRxnStr);
-		strncpy(modRxnStr,modRxnStrCpy,MAX_RXN_STRLEN-1);
+		SDL_strlcpy(modRxnStr,modRxnStrCpy,MAX_RXN_STRLEN-1);
 		free(modRxnStrCpy);
 		modRxnStrCpy = findReplaceAllUTF8("pi","π",modRxnStr);
-		strncpy(modRxnStr,modRxnStrCpy,MAX_RXN_STRLEN-1);
+		SDL_strlcpy(modRxnStr,modRxnStrCpy,MAX_RXN_STRLEN-1);
 		free(modRxnStrCpy);
 		modRxnStrCpy = findReplaceAllUTF8(",nu",",ν",modRxnStr);
-		strncpy(modRxnStr,modRxnStrCpy,MAX_RXN_STRLEN-1);
+		SDL_strlcpy(modRxnStr,modRxnStrCpy,MAX_RXN_STRLEN-1);
 		free(modRxnStrCpy);
 		modRxnStrCpy = findReplaceAllUTF8("(hi,","(HI,",modRxnStr);
-		strncpy(modRxnStr,modRxnStrCpy,MAX_RXN_STRLEN-1);
+		SDL_strlcpy(modRxnStr,modRxnStrCpy,MAX_RXN_STRLEN-1);
 		free(modRxnStrCpy);
 		modRxnStrCpy = findReplaceAllUTF8("g,g')","γ,γ')",modRxnStr);
-		strncpy(modRxnStr,modRxnStrCpy,MAX_RXN_STRLEN-1);
+		SDL_strlcpy(modRxnStr,modRxnStrCpy,MAX_RXN_STRLEN-1);
 		free(modRxnStrCpy);
 		modRxnStrCpy = findReplaceAllUTF8("(g,",",(γ,",modRxnStr);
-		strncpy(modRxnStr,modRxnStrCpy,MAX_RXN_STRLEN-1);
+		SDL_strlcpy(modRxnStr,modRxnStrCpy,MAX_RXN_STRLEN-1);
 		free(modRxnStrCpy);
 		modRxnStrCpy = findReplaceAllUTF8(",g)",",γ)",modRxnStr);
-		strncpy(modRxnStr,modRxnStrCpy,MAX_RXN_STRLEN-1);
+		SDL_strlcpy(modRxnStr,modRxnStrCpy,MAX_RXN_STRLEN-1);
 		free(modRxnStrCpy);
 		modRxnStrCpy = findReplaceAllUTF8("g)",")",modRxnStr);
-		strncpy(modRxnStr,modRxnStrCpy,MAX_RXN_STRLEN-1);
+		SDL_strlcpy(modRxnStr,modRxnStrCpy,MAX_RXN_STRLEN-1);
 		free(modRxnStrCpy);
 		modRxnStrCpy = findReplaceAllUTF8("(a,","(α,",modRxnStr);
-		strncpy(modRxnStr,modRxnStrCpy,MAX_RXN_STRLEN-1);
+		SDL_strlcpy(modRxnStr,modRxnStrCpy,MAX_RXN_STRLEN-1);
 		free(modRxnStrCpy);
 		modRxnStrCpy = findReplaceAllUTF8(",pa",",pα",modRxnStr);
-		strncpy(modRxnStr,modRxnStrCpy,MAX_RXN_STRLEN-1);
+		SDL_strlcpy(modRxnStr,modRxnStrCpy,MAX_RXN_STRLEN-1);
 		free(modRxnStrCpy);
 		modRxnStrCpy = findReplaceAllUTF8("pa)","pα)",modRxnStr);
-		strncpy(modRxnStr,modRxnStrCpy,MAX_RXN_STRLEN-1);
+		SDL_strlcpy(modRxnStr,modRxnStrCpy,MAX_RXN_STRLEN-1);
 		free(modRxnStrCpy);
 		modRxnStrCpy = findReplaceAllUTF8("'a","'α",modRxnStr);
-		strncpy(modRxnStr,modRxnStrCpy,MAX_RXN_STRLEN-1);
+		SDL_strlcpy(modRxnStr,modRxnStrCpy,MAX_RXN_STRLEN-1);
 		free(modRxnStrCpy);
 		modRxnStrCpy = findReplaceAllUTF8(",2a",",2α",modRxnStr);
-		strncpy(modRxnStr,modRxnStrCpy,MAX_RXN_STRLEN-1);
+		SDL_strlcpy(modRxnStr,modRxnStrCpy,MAX_RXN_STRLEN-1);
 		free(modRxnStrCpy);
 		modRxnStrCpy = findReplaceAllUTF8(",a",",α",modRxnStr);
-		strncpy(modRxnStr,modRxnStrCpy,MAX_RXN_STRLEN-1);
+		SDL_strlcpy(modRxnStr,modRxnStrCpy,MAX_RXN_STRLEN-1);
 		free(modRxnStrCpy);
 		modRxnStrCpy = findReplaceAllUTF8(",,",",",modRxnStr);
-		strncpy(modRxnStr,modRxnStrCpy,MAX_RXN_STRLEN-1);
+		SDL_strlcpy(modRxnStr,modRxnStrCpy,MAX_RXN_STRLEN-1);
 		free(modRxnStrCpy);
 
 		if(SDL_strstr(modRxnStr,"decay")!=NULL){
@@ -589,7 +589,7 @@ uint8_t parseRxn(reaction *rxn, const char *rxnstring, char *ensdfStrBuf, const 
 	
 	rxn->rxnStrBufStartPos = currentBufPos;
 	if((currentBufPos + rxn->rxnStrLen) < ENSDFSTRBUFSIZE){
-		strncpy(&ensdfStrBuf[currentBufPos],modRxnStr,MAX_RXN_STRLEN);
+		SDL_strlcpy(&ensdfStrBuf[currentBufPos],modRxnStr,MAX_RXN_STRLEN);
 		ensdfStrBuf[currentBufPos+rxn->rxnStrLen] = '\0'; //terminate string manually
 		return rxn->rxnStrLen;
 	}else{
@@ -789,11 +789,11 @@ void parseHalfLife(level * lev, const char * hlstring){
   tok = SDL_strtok_r(hlAndUnitVal, " ",&saveptr);
   if(tok!=NULL){
     //SDL_Log("%s\n",tok);
-    strcpy(hlVal,tok);
+    SDL_strlcpy(hlVal,tok,11);
     tok = SDL_strtok_r(NULL, "",&saveptr);
     if(tok!=NULL){
       //SDL_Log("%s\n",tok);
-      strncpy(hlUnitVal,tok,3);
+      SDL_strlcpy(hlUnitVal,tok,3);
       for(uint8_t i=0;i<3;i++){
         if(SDL_isspace(hlUnitVal[i])){
           hlUnitVal[i] = '\0'; //terminate string at first space
@@ -953,7 +953,7 @@ void parseSpinPar(level * lev, sp_var_data * varDat, char * spstring){
 	//SDL_Log("--------\nstring: %s\n",spstring);
 
 	//check for invalid strings
-	strcpy(str,spstring);
+	SDL_strlcpy(str,spstring,256);
 	tok = SDL_strtok_r(str, " ",&saveptr);
 	if(tok == NULL){
 		//SDL_Log("energy %f, strings: %s,%s\n",lev->energy,spstring,tok);
@@ -961,7 +961,7 @@ void parseSpinPar(level * lev, sp_var_data * varDat, char * spstring){
 		//getc(stdin);
 		return;
 	}
-	/*strcpy(str,spstring);
+	/*SDL_strlcpy(str,spstring,256);
 	tok = strtok (str, ".");
 	if((tok == NULL)||(strcmp(tok,spstring)!=0)){
 		//SDL_Log("%s\n",tok);
@@ -970,15 +970,15 @@ void parseSpinPar(level * lev, sp_var_data * varDat, char * spstring){
 		return;
 	}*/
 
-	strcpy(str,spstring);
+	SDL_strlcpy(str,spstring,256);
 	tok = strtok (str, " ,");
-	strcpy(val[numTok],tok);
+	SDL_strlcpy(val[numTok],tok,256);
 	while(tok != NULL){
 		tok = strtok (NULL, " ,");
 		if(tok!=NULL){
 			numTok++;
 			if(numTok<MAXNUMPARSERVALS){
-				strcpy(val[numTok],tok);
+				SDL_strlcpy(val[numTok],tok,256);
 			}else{
 				numTok--;
 				break;
@@ -1070,10 +1070,10 @@ void parseSpinPar(level * lev, sp_var_data * varDat, char * spstring){
 						rsBrak = 1;
 					}
 					lev->spval[lev->numSpinParVals].format = 1;
-					strcpy(tmpstr,val[i]);
+					SDL_strlcpy(tmpstr,val[i],256);
 					tok = SDL_strtok_r(tmpstr,"(+",&saveptr);
 					if(tok!=NULL){
-						strcpy(tmpstr2,tok);
+						SDL_strlcpy(tmpstr2,tok,256);
 						tok = SDL_strtok_r(NULL,")",&saveptr);
 						if(tok!=NULL){
 							//SDL_Log("variable name (with offset): %s\n",tmpstr2);
@@ -1093,14 +1093,14 @@ void parseSpinPar(level * lev, sp_var_data * varDat, char * spstring){
 								if(varDat->numSpVars < MAX_SPIN_VARS){
 									lev->spval[lev->numSpinParVals].format |= (VALUETYPE_NUMBER << 1U);
 									lev->spval[lev->numSpinParVals].format |= (uint16_t)(varDat->numSpVars << 5U); //set variable index
-									strcpy(varDat->spVars[varDat->numSpVars],tmpstr2);
+									SDL_strlcpy(varDat->spVars[varDat->numSpVars],tmpstr2,16);
 									varDat->numSpVars++;
 								}else{
 									SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"parseSpinPar - too many spin variables could not parse value %s, need to increase MAX_SPIN_VARS!\n",val[i]);
 									exit(-1);
 								}
 							}
-							strcpy(val[i],tok); //for further parsing, only give spin value after + sign
+							SDL_strlcpy(val[i],tok,256); //for further parsing, only give spin value after + sign
 						}else{
 							//non-offset variable spin value
 							//SDL_Log("non offset: %s\n",tmpstr2);
@@ -1149,7 +1149,7 @@ void parseSpinPar(level * lev, sp_var_data * varDat, char * spstring){
 									//couldn't match to a previous spin variable, make a new one
 									if(varDat->numSpVars < MAX_SPIN_VARS){
 										lev->spval[lev->numSpinParVals].format |= (uint16_t)(varDat->numSpVars << 5U); //set variable index
-										strcpy(varDat->spVars[varDat->numSpVars],tmpstr2);
+										SDL_strlcpy(varDat->spVars[varDat->numSpVars],tmpstr2,16);
 										varDat->numSpVars++;
 									}else{
 										SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"parseSpinPar - too many spin variables could not parse value %s, need to increase MAX_SPIN_VARS!\n",val[i]);
@@ -1175,7 +1175,7 @@ void parseSpinPar(level * lev, sp_var_data * varDat, char * spstring){
 										//couldn't match to a previous spin variable, make a new one
 										if(varDat->numSpVars < MAX_SPIN_VARS){
 											lev->spval[lev->numSpinParVals].format |= (uint16_t)(varDat->numSpVars << 5U); //set variable index
-											strcpy(varDat->spVars[varDat->numSpVars],varName);
+											SDL_strlcpy(varDat->spVars[varDat->numSpVars],varName,16);
 											varDat->numSpVars++;
 										}else{
 											SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"parseSpinPar - too many spin variables could not parse value %s, need to increase MAX_SPIN_VARS!\n",val[i]);
@@ -1254,7 +1254,7 @@ void parseSpinPar(level * lev, sp_var_data * varDat, char * spstring){
 				}
 
 				//check for brackets
-				strcpy(tmpstr,val[i]);
+				SDL_strlcpy(tmpstr,val[i],256);
 				tok=SDL_strtok_r(tmpstr,"(",&saveptr);
 				if(tok!=NULL){
 					if(strcmp(tok,val[i])!=0){
@@ -1263,7 +1263,7 @@ void parseSpinPar(level * lev, sp_var_data * varDat, char * spstring){
 						lsBrakStart = (uint16_t)lev->numSpinParVals;
 					}
 				}
-				strcpy(tmpstr,val[i]);
+				SDL_strlcpy(tmpstr,val[i],256);
 				tok=SDL_strtok_r(tmpstr,")",&saveptr);
 				if(tok!=NULL){
 					if(strcmp(tok,val[i])!=0){
@@ -1290,7 +1290,7 @@ void parseSpinPar(level * lev, sp_var_data * varDat, char * spstring){
 				}
 
 				//check for square brackets
-				strcpy(tmpstr,val[i]);
+				SDL_strlcpy(tmpstr,val[i],256);
 				tok=SDL_strtok_r(tmpstr,"[",&saveptr);
 				if(tok!=NULL){
 					if(strcmp(tok,val[i])!=0){
@@ -1299,7 +1299,7 @@ void parseSpinPar(level * lev, sp_var_data * varDat, char * spstring){
 						lsSqBrakStart = (uint16_t)lev->numSpinParVals;
 					}
 				}
-				strcpy(tmpstr,val[i]);
+				SDL_strlcpy(tmpstr,val[i],256);
 				tok=SDL_strtok_r(tmpstr,"]",&saveptr);
 				if(tok!=NULL){
 					if(strcmp(tok,val[i])!=0){
@@ -1326,13 +1326,13 @@ void parseSpinPar(level * lev, sp_var_data * varDat, char * spstring){
 				}
 
 				//check for parity
-				strcpy(tmpstr,val[i]);
+				SDL_strlcpy(tmpstr,val[i],256);
 				tok=SDL_strtok_r(tmpstr,"+-",&saveptr);
 				if(tok!=NULL){
 					if(strcmp(tok,val[i])!=0){
 						//SDL_Log("setting parity marker, tok: %s, val: %s\n",tok,val[i]);
 						//contains parity info
-						strcpy(tmpstr,val[i]);
+						SDL_strlcpy(tmpstr,val[i],256);
 						tok=SDL_strtok_r(tmpstr,"/0123456789GELTAP, ",&saveptr);
 						if(tok!=NULL){
 							if(strcmp(tok,"(+)")==0){
@@ -1342,7 +1342,7 @@ void parseSpinPar(level * lev, sp_var_data * varDat, char * spstring){
 								lev->spval[lev->numSpinParVals].parVal = -1;
 								lev->spval[lev->numSpinParVals].format |= ((TENTATIVESP_PARITYONLY & 7U) << 9U); //only parity is tentative
 							}else{
-								strcpy(tmpstr,val[i]);
+								SDL_strlcpy(tmpstr,val[i],256);
 								tok=SDL_strtok_r(tmpstr,"/([0123456789GELTAP, ",&saveptr);
 								if(tok!=NULL){
 									//SDL_Log("tok: %s\n",tok);
@@ -1410,10 +1410,10 @@ void parseSpinPar(level * lev, sp_var_data * varDat, char * spstring){
 
 				//extract spin
 				lev->spval[lev->numSpinParVals].spinVal = 255; //default to unknown spin
-				strcpy(tmpstr,val[i]);
+				SDL_strlcpy(tmpstr,val[i],256);
 				tok=SDL_strtok_r(tmpstr,"()[]+-, GELTAP><",&saveptr);
 				if(tok!=NULL){
-					strcpy(tmpstr2,tok);
+					SDL_strlcpy(tmpstr2,tok,256);
 					tok=SDL_strtok_r(tok,"/",&saveptr);
 					if(strcmp(tok,tmpstr2)!=0){
 						//SDL_Log("Detected half-integer spin.\n");
@@ -1553,7 +1553,7 @@ uint8_t parseDcyModeSubstr(ndata *nd, const uint16_t dcyModeInd, const char *sub
 	char substrCpy[128], valBuff[16], errBuff[16];
 
 	//SDL_Log("Parsing decay mode substring: %s\n",substr);
-	strcpy(substrCpy,substr);
+	SDL_strlcpy(substrCpy,substr,128);
 	tok = SDL_strtok_r(substrCpy," =><",&saveptr);
 	if(tok!=NULL){
 		uint8_t dcyMode = getDcyModeFromENSDFSubstr(tok);
@@ -1564,14 +1564,14 @@ uint8_t parseDcyModeSubstr(ndata *nd, const uint16_t dcyModeInd, const char *sub
 			return 0;
 		}
 		//check for decay modes using '>' or '<'
-		strcpy(substrCpy,substr);
+		SDL_strlcpy(substrCpy,substr,128);
 		tok = SDL_strtok_r(substrCpy,">",&saveptr);
 		tok = SDL_strtok_r(NULL,"$ ,",&saveptr);
 		if(tok!=NULL){
 			//SDL_Log("Parsing decay mode with '>'.\n");
 			nd->dcyMode[dcyModeInd].prob.unit = VALUETYPE_GREATERTHAN;
 		}else{
-			strcpy(substrCpy,substr);
+			SDL_strlcpy(substrCpy,substr,128);
 			tok = SDL_strtok_r(substrCpy,"<",&saveptr);
 			tok = SDL_strtok_r(NULL,"$ ,",&saveptr);
 			if(tok!=NULL){
@@ -1579,16 +1579,16 @@ uint8_t parseDcyModeSubstr(ndata *nd, const uint16_t dcyModeInd, const char *sub
 				nd->dcyMode[dcyModeInd].prob.unit = VALUETYPE_LESSTHAN;
 			}
 		}
-		strcpy(substrCpy,substr);
+		SDL_strlcpy(substrCpy,substr,128);
 		tok = SDL_strtok_r(substrCpy," =><",&saveptr);
 		tok = SDL_strtok_r(NULL,"$ ,",&saveptr);
 		if(tok!=NULL){
 			//SDL_Log("value tok: %s\n",tok);
-			strncpy(valBuff,tok,15); //value
+			SDL_strlcpy(valBuff,tok,15); //value
 			tok = SDL_strtok_r(NULL,"",&saveptr); //get the rest of the string
 			if(tok!=NULL){
 				//SDL_Log("err tok: %s\n",tok);
-				strncpy(errBuff,tok,15); //error on value
+				SDL_strlcpy(errBuff,tok,15); //error on value
 			}
 			tok2 = SDL_strtok_r(valBuff," ",&saveptr);
 			if(tok2 != NULL){
@@ -1615,8 +1615,8 @@ uint8_t parseDcyModeSubstr(ndata *nd, const uint16_t dcyModeInd, const char *sub
 				if(tok2!=NULL){
 					nd->dcyMode[dcyModeInd].prob.format = 0;
 					char valueCpy[16];
-					strncpy(valueCpy,tok2,15);
-					strcpy(valBuff,valueCpy);
+					SDL_strlcpy(valueCpy,tok2,15);
+					SDL_strlcpy(valBuff,valueCpy,16);
 					//SDL_Log("%s\n",tok2);
 					float probVal = (float)atof(tok2);
 
@@ -1652,7 +1652,7 @@ uint8_t parseDcyModeSubstr(ndata *nd, const uint16_t dcyModeInd, const char *sub
 									}
 							}else{
 								//potentially an exponent form value with no decimal place
-								strcpy(valBuff,valueCpy);
+								SDL_strlcpy(valBuff,valueCpy,16);
 								tok2 = SDL_strtok_r(valBuff,"E",&saveptr);
 								if(tok2!=NULL){
 									tok2 = SDL_strtok_r(NULL,"",&saveptr); //get the remaining part of the string (only get past here if the value was expressed in exponent form)
@@ -1706,7 +1706,7 @@ uint8_t parseDcyModeSubstr(ndata *nd, const uint16_t dcyModeInd, const char *sub
 					//in this case, we have a string like '%SF LE 12.5',
 					//where '12.5' was put into errBuff
 					char valueCpy[16];
-					strcpy(valueCpy,errBuff);
+					SDL_strlcpy(valueCpy,errBuff,16);
 					float probVal = (float)atof(errBuff);
 					
 					//count sig figs
@@ -1739,7 +1739,7 @@ uint8_t parseDcyModeSubstr(ndata *nd, const uint16_t dcyModeInd, const char *sub
 								}
 						}else{
 							//potentially an exponent form value with no decimal place
-							strcpy(errBuff,valueCpy);
+							SDL_strlcpy(errBuff,valueCpy,16);
 							tok2 = SDL_strtok_r(errBuff,"E",&saveptr);
 							if(tok2!=NULL){
 								tok2 = SDL_strtok_r(NULL,"",&saveptr); //get the remaining part of the string (only get past here if the value was expressed in exponent form)
@@ -1840,7 +1840,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 
 		if(fgets(str,256,efile)!=NULL){ //get an entire line
 
-			strncpy(line,str,256); //store the entire line
+			SDL_strlcpy(line,str,256); //store the entire line
 			//SDL_Log("%s\n",line);
 			if(isEmpty(str)){
 				subSec++; //empty line, increment which subsection we're on
@@ -1849,13 +1849,13 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 			}else{
 				tok=SDL_strtok_r(str," ",&saveptr);
 				tokPos=0;
-				strcpy(val[tokPos],tok);
+				SDL_strlcpy(val[tokPos],tok,256);
 				while(tok != NULL){
 					tok = SDL_strtok_r(NULL, " ",&saveptr);
 					if(tok!=NULL){
 						tokPos++;
 						if(tokPos<MAXNUMPARSERVALS)
-							strcpy(val[tokPos],tok);
+							SDL_strlcpy(val[tokPos],tok,256);
 						else
 							break;
 					}
@@ -2301,7 +2301,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 								tok = SDL_strtok_r(dmBuffOrig,"$,;",&saveptr);
 								while(tok!=NULL){
 									//SDL_Log("tok: %s\n",tok);
-									strcpy(dmBuff,tok);
+									SDL_strlcpy(dmBuff,tok,128);
 									if(nd->numDecModes >= MAXNUMDECAYMODES){
 										SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"Maximum number of decay modes (%i) exceeded!\n",MAXNUMDECAYMODES);
 										return -1;
@@ -3134,19 +3134,19 @@ int parseAbundanceData(const char * filePath, ndata * nd){
 
 		if(fgets(str,256,afile)!=NULL){ //get an entire line
 
-			strcpy(line,str); //store the entire line
+			SDL_strlcpy(line,str,256); //store the entire line
 			//SDL_Log("%s\n",line);
 
 			//tokenize
 			tok=SDL_strtok_r(str,"=",&saveptr);
 			tokPos=0;
-			strcpy(val[tokPos],tok);
+			SDL_strlcpy(val[tokPos],tok,256);
 			while(tok != NULL){
 				tok = SDL_strtok_r(NULL, "=",&saveptr);
 				if(tok!=NULL){
 					tokPos++;
 					if(tokPos<MAXNUMPARSERVALS)
-						strcpy(val[tokPos],tok);
+						SDL_strlcpy(val[tokPos],tok,256);
 					else
 						break;
 				}
@@ -3161,7 +3161,7 @@ int parseAbundanceData(const char * filePath, ndata * nd){
 				}else if(strcmp(val[0],"Isotopic Composition ")==0){
 					uint16_t nuclInd = getNuclInd(nd,N,Z);
 					if(nuclInd < nd->numNucl){
-						strcpy(tmpVal,val[1]);
+						SDL_strlcpy(tmpVal,val[1],256);
 						tok=SDL_strtok_r(tmpVal,"(",&saveptr);
 						if(tok!=NULL){
 							nd->nuclData[nuclInd].abundance.val = (float)(atof(tok)*100.0);
@@ -3219,7 +3219,7 @@ int parseMassData(const char * filePath, ndata * nd){
 
 			str[strcspn(str,"\r\n")] = 0; //strips newline characters from the string read by fgets
 
-			strcpy(line,str); //store the entire line
+			SDL_strlcpy(line,str,256); //store the entire line
 			//SDL_Log("%s\n",line);
 
 			memcpy(tmpVal,&line[6],3);
@@ -3406,7 +3406,7 @@ int buildDatabase(const char *appBasePath, ndata *nd){
 	
 	//parse ENSDF data files
 	for(uint16_t i=1;i<350;i++){
-		strcpy(filePath,"");
+		SDL_strlcpy(filePath,"",256);
 		SDL_strlcat(filePath,appBasePath,256);
     SDL_strlcat(filePath,"data/ensdf/",256);
 		if(i<10)
@@ -3424,13 +3424,13 @@ int buildDatabase(const char *appBasePath, ndata *nd){
 	SDL_Log("Data imported for %i nuclei, containing:\n  %u levels (max %u)\n  %u transitions (max %u)\n  %u decay branches (max %u)\n  %u reactions (max %u)\n",nd->numNucl,nd->numLvls,MAXNUMLVLS,nd->numTran,MAXNUMTRAN,nd->numDecModes,MAXNUMDECAYMODES,nd->numRxns,MAXNUMREACTIONS);
 	
 	//parse abundance data file
-	strcpy(filePath,"");
+	SDL_strlcpy(filePath,"",256);
 	SDL_strlcat(filePath,appBasePath,256);
 	SDL_strlcat(filePath,"data/abundances.txt",256);
 	if(parseAbundanceData(filePath,nd) == -1){
 		return -1;
 	}
-	strcpy(filePath,"");
+	SDL_strlcpy(filePath,"",256);
 	SDL_strlcat(filePath,appBasePath,256);
 	SDL_strlcat(filePath,"data/masses.txt",256);
 	if(parseMassData(filePath,nd) == -1){

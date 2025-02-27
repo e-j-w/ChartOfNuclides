@@ -1259,9 +1259,8 @@ void drawNuclBoxLabel(const app_data *restrict dat, const app_state *restrict st
     alpha = (Uint8)((1.0f - 2.0f*(4.0f - state->ds.chartZoomScale))*255.0f);
   }
   if(state->ds.chartZoomScale >= 7.3f){
-    const uint16_t N = (uint16_t)dat->ndat.nuclData[nuclInd].N;
-    SDL_snprintf(tmpStr,32,"%u",N+Z);
-    float totalLblWidth = (getTextWidth(rdat,FONTSIZE_SMALL,tmpStr) + getTextWidth(rdat,FONTSIZE_LARGE,getElemStr((uint8_t)Z)))/rdat->uiDPIScale;
+    getNuclNameStr(tmpStr,&dat->ndat.nuclData[nuclInd]);
+    float totalLblWidth = getTextWidth(rdat,FONTSIZE_LARGE,tmpStr)/rdat->uiDPIScale;
     drawXPos = xPos+boxWidth*0.5f - totalLblWidth*0.5f;
     if(state->ds.chartZoomScale >= 12.0f){
       drawYPos = yPos + labelMargin;
@@ -1269,8 +1268,7 @@ void drawNuclBoxLabel(const app_data *restrict dat, const app_state *restrict st
       float totalLblHeight = (getTextHeight(rdat,FONTSIZE_SMALL,tmpStr) - (10.0f*state->ds.uiUserScale) + getTextHeight(rdat,FONTSIZE_LARGE,getElemStr((uint8_t)Z)))/rdat->uiDPIScale;
       drawYPos = yPos+boxWidth*0.5f - totalLblHeight*0.5f;
     }
-    drawXPos += (drawTextAlignedSized(rdat,drawXPos,drawYPos,col,FONTSIZE_SMALL,alpha,tmpStr,ALIGN_LEFT,16384)).w; //draw number label
-    drawTextAlignedSized(rdat,drawXPos,drawYPos+(10.0f*state->ds.uiUserScale),col,FONTSIZE_LARGE,alpha,getElemStr((uint8_t)Z),ALIGN_LEFT,16384); //draw element label
+    drawTextAlignedSized(rdat,drawXPos,drawYPos+(10.0f*state->ds.uiUserScale),col,FONTSIZE_LARGE,alpha,tmpStr,ALIGN_LEFT,16384); //draw number and element label
     if(state->ds.chartZoomScale >= 12.0f){
       drawNuclBoxLabelDetails(dat,state,rdat,xPos,yPos,boxWidth,boxHeight,col,nuclInd);
     }
@@ -1632,22 +1630,20 @@ uint8_t getHighlightState(const app_state *restrict state, const uint8_t uiElem)
   }
 }
 
-//return value: width of header text
-void drawInfoBoxHeader(const app_data *restrict dat, const drawing_state *restrict ds, resource_data *restrict rdat, const float x, const float y, const Uint8 alpha, const uint16_t nuclInd){
-  char tmpStr[32];
-  float drawXPos = (float)(x + (PANEL_EDGE_SIZE + 3*UI_PADDING_SIZE)*ds->uiUserScale);
-  float drawYPos = (float)(y + (PANEL_EDGE_SIZE + 2*UI_PADDING_SIZE)*ds->uiUserScale);
+void drawInfoBoxHeader(const app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat, const float x, const float y, const Uint8 alpha, const uint16_t nuclInd){
+  char tmpStr[32], nuclStr[32];
+  float drawXPos = (float)(x + (PANEL_EDGE_SIZE + 3*UI_PADDING_SIZE)*state->ds.uiUserScale);
+  float drawYPos = (float)(y + (PANEL_EDGE_SIZE + 1.5f*UI_PADDING_SIZE)*state->ds.uiUserScale);
   uint16_t nucA = (uint16_t)(dat->ndat.nuclData[nuclInd].Z + dat->ndat.nuclData[nuclInd].N);
-  SDL_snprintf(tmpStr,32,"%u",nucA);
-  drawXPos += (drawTextAlignedSized(rdat,drawXPos,drawYPos,blackCol8Bit,FONTSIZE_SMALL,alpha,tmpStr,ALIGN_LEFT,16384)).w; //draw number label
+  getNuclNameStr(nuclStr,&dat->ndat.nuclData[nuclInd]);
   if((uint16_t)(dat->ndat.nuclData[nuclInd].Z <= 1)&&(dat->ndat.nuclData[nuclInd].N <= 2)){
-    SDL_snprintf(tmpStr,32,"%s (%s)",getElemStr((uint8_t)dat->ndat.nuclData[nuclInd].Z),getFullElemStr((uint8_t)dat->ndat.nuclData[nuclInd].Z,(uint8_t)dat->ndat.nuclData[nuclInd].N));
+    SDL_snprintf(tmpStr,32,"%s (%s)",nuclStr,getFullElemStr((uint8_t)dat->ndat.nuclData[nuclInd].Z,(uint8_t)dat->ndat.nuclData[nuclInd].N));
   }else if((uint16_t)(dat->ndat.nuclData[nuclInd].Z == 0)&&(dat->ndat.nuclData[nuclInd].N <= 5)){
-    SDL_snprintf(tmpStr,32,"%s (%s)",getElemStr((uint8_t)dat->ndat.nuclData[nuclInd].Z),getFullElemStr((uint8_t)dat->ndat.nuclData[nuclInd].Z,(uint8_t)dat->ndat.nuclData[nuclInd].N));
+    SDL_snprintf(tmpStr,32,"%s (%s)",nuclStr,getFullElemStr((uint8_t)dat->ndat.nuclData[nuclInd].Z,(uint8_t)dat->ndat.nuclData[nuclInd].N));
   }else{
-    SDL_snprintf(tmpStr,32,"%s (%s-%u)",getElemStr((uint8_t)dat->ndat.nuclData[nuclInd].Z),getFullElemStr((uint8_t)dat->ndat.nuclData[nuclInd].Z,(uint8_t)dat->ndat.nuclData[nuclInd].N),nucA);
+    SDL_snprintf(tmpStr,32,"%s (%s-%u)",nuclStr,getFullElemStr((uint8_t)dat->ndat.nuclData[nuclInd].Z,(uint8_t)dat->ndat.nuclData[nuclInd].N),nucA);
   }
-  drawTextAlignedSized(rdat,drawXPos,drawYPos+(10.0f*ds->uiUserScale),blackCol8Bit,FONTSIZE_LARGE,alpha,tmpStr,ALIGN_LEFT,16384); //draw element label
+  drawSelectableTextAlignedSized(rdat,&state->tss,drawXPos,drawYPos+(10.0f*state->ds.uiUserScale),blackCol8Bit,FONTSIZE_LARGE,alpha,tmpStr,ALIGN_LEFT,16384); //draw element label
 }
 
 void drawNuclFullInfoBox(const app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat, const uint16_t nuclInd){
@@ -1818,7 +1814,7 @@ void drawNuclFullInfoBox(const app_data *restrict dat, app_state *restrict state
 
   //header
   char descStr[64];
-  drawInfoBoxHeader(dat,&state->ds,rdat,0.0f,NUCL_FULLINFOBOX_HEADER_POS_Y*state->ds.uiUserScale,255,nuclInd);
+  drawInfoBoxHeader(dat,state,rdat,0.0f,NUCL_FULLINFOBOX_HEADER_POS_Y*state->ds.uiUserScale,255,nuclInd);
   //proton and neutron numbers, abundance
   drawYPos = NUCL_FULLINFOBOX_NZVALS_POS_Y*state->ds.uiUserScale + txtYOffset;
   SDL_snprintf(descStr,64,"%s: %3i, %s: %3i",dat->strings[dat->locStringIDs[LOCSTR_PROTONSDESC]],dat->ndat.nuclData[nuclInd].Z,dat->strings[dat->locStringIDs[LOCSTR_NEUTRONSDESC]],dat->ndat.nuclData[nuclInd].N);
@@ -2030,7 +2026,7 @@ void drawNuclInfoBox(const app_data *restrict dat, app_state *restrict state, re
   }
 
   //header
-  drawInfoBoxHeader(dat,&state->ds,rdat,infoBoxPanelRect.x,infoBoxPanelRect.y,255,nuclInd);
+  drawInfoBoxHeader(dat,state,rdat,infoBoxPanelRect.x,infoBoxPanelRect.y,255,nuclInd);
 
   //all level info button
   updateSingleUIElemPosition(dat,state,rdat,UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON);

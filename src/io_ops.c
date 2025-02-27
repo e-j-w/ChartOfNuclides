@@ -38,10 +38,10 @@ static int readConfigFile(FILE *file, app_state *restrict state){
       //parse the line
       tok = SDL_strtok_r(fullLine,"=",&saveptr);
       if(tok != NULL){
-        strncpy(par,tok,sizeof(par)-1);
+        SDL_strlcpy(par,tok,sizeof(par)-1);
         tok = SDL_strtok_r(NULL,"=",&saveptr);
         if(tok != NULL){
-          strncpy(val,tok,sizeof(val)-1);
+          SDL_strlcpy(val,tok,sizeof(val)-1);
         }
         
       }

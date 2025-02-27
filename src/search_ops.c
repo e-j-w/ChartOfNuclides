@@ -108,7 +108,7 @@ void tokenizeSearchStr(search_state *restrict ss){
 	tok = SDL_strtok_r(searchStrCpy," ,",&saveptr);
 	while(tok!=NULL){
 		if(strlen(tok) > 0){
-			strncpy(ss->searchTok[numTok],tok,15);
+			SDL_strlcpy(ss->searchTok[numTok],tok,15);
 			numTok++;
 		}
 		if(numTok >= MAX_SEARCH_TOKENS){
@@ -394,8 +394,8 @@ void searchNuclides(const ndata *restrict ndat, search_state *restrict ss){
 			}
 			if(foundNucl == 0){
 				//try looking at the full string, for special cases
-				strncpy(nuclElemName,ss->searchTok[i],31);
-				strncpy(nuclAStr,"-1",7); //mark special case
+				SDL_strlcpy(nuclElemName,ss->searchTok[i],31);
+				SDL_strlcpy(nuclAStr,"-1",7); //mark special case
 				//SDL_Log("Parsing special case: %s\n",ss->searchTok[i]);
 			}
 		}else if(isalpha(ss->searchTok[i][0])){
@@ -426,8 +426,8 @@ void searchNuclides(const ndata *restrict ndat, search_state *restrict ss){
 			}
 			if(foundNucl == 0){
 				//try looking at the full string, for special cases
-				strncpy(nuclElemName,ss->searchTok[i],31);
-				strncpy(nuclAStr,"-1",7); //mark special case
+				SDL_strlcpy(nuclElemName,ss->searchTok[i],31);
+				SDL_strlcpy(nuclAStr,"-1",7); //mark special case
 				//SDL_Log("Parsing special case: %s\n",ss->searchTok[i]);
 			}
 		}

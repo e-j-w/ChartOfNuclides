@@ -425,8 +425,8 @@ void updateDrawingState(const app_data *restrict dat, app_state *restrict state,
 
 //sets everything needed to show a message box
 void setupMessageBox(const app_data *restrict dat, app_state *restrict state, const char *headerTxt, const char *msgTxt){
-  strncpy(state->msgBoxHeaderTxt,headerTxt,31);
-  strncpy(state->msgBoxTxt,msgTxt,255);
+  SDL_strlcpy(state->msgBoxHeaderTxt,headerTxt,31);
+  SDL_strlcpy(state->msgBoxTxt,msgTxt,255);
   state->ds.shownElements |= (uint64_t)(1UL << UIELEM_MSG_BOX);
   startUIAnimation(dat,state,UIANIM_MODAL_BOX_SHOW);
   changeUIState(dat,state,UISTATE_MSG_BOX);
@@ -986,6 +986,42 @@ const char* getElemStr(const uint8_t Z){
 		default:
 			return "Unknown";
 	}
+}
+
+void getNuclNameStr(char strOut[32], const nucl *restrict nuclide){
+	char *nameStrCpy;
+	SDL_snprintf(strOut,32,"%u%s",nuclide->Z + nuclide->N,getElemStr((uint8_t)(nuclide->Z)));
+	//convert mass number to superscript
+	nameStrCpy = findReplaceAllUTF8("0","⁰",strOut);
+	SDL_strlcpy(strOut,nameStrCpy,32);
+	free(nameStrCpy);
+	nameStrCpy = findReplaceAllUTF8("1","¹",strOut);
+	SDL_strlcpy(strOut,nameStrCpy,32);
+	free(nameStrCpy);
+	nameStrCpy = findReplaceAllUTF8("2","²",strOut);
+	SDL_strlcpy(strOut,nameStrCpy,32);
+	free(nameStrCpy);
+	nameStrCpy = findReplaceAllUTF8("3","³",strOut);
+	SDL_strlcpy(strOut,nameStrCpy,32);
+	free(nameStrCpy);
+	nameStrCpy = findReplaceAllUTF8("4","⁴",strOut);
+	SDL_strlcpy(strOut,nameStrCpy,32);
+	free(nameStrCpy);
+	nameStrCpy = findReplaceAllUTF8("5","⁵",strOut);
+	SDL_strlcpy(strOut,nameStrCpy,32);
+	free(nameStrCpy);
+	nameStrCpy = findReplaceAllUTF8("6","⁶",strOut);
+	SDL_strlcpy(strOut,nameStrCpy,32);
+	free(nameStrCpy);
+	nameStrCpy = findReplaceAllUTF8("7","⁷",strOut);
+	SDL_strlcpy(strOut,nameStrCpy,32);
+	free(nameStrCpy);
+	nameStrCpy = findReplaceAllUTF8("8","⁸",strOut);
+	SDL_strlcpy(strOut,nameStrCpy,32);
+	free(nameStrCpy);
+	nameStrCpy = findReplaceAllUTF8("9","⁹",strOut);
+	SDL_strlcpy(strOut,nameStrCpy,32);
+	free(nameStrCpy);
 }
 
 uint8_t elemStrToZ(const char *elemStr){
@@ -1783,7 +1819,7 @@ void getGammaIntensityStr(char strOut[32], const ndata *restrict nd, const uint3
 
 void getGammaMultipolarityStr(char strOut[32], const ndata *restrict nd, const uint32_t tranInd){
 
-	strcpy(strOut,""); //clear the string
+	SDL_strlcpy(strOut,"",32); //clear the string
 	uint8_t tentative = 0;
 	uint8_t derived = 0;
 
@@ -2050,7 +2086,7 @@ void getSpinParStr(char strOut[32], const ndata *restrict nd, const uint32_t lvl
 
 	char val[16];
 
-	strcpy(strOut,""); //clear the string
+	SDL_strlcpy(strOut,"",32); //clear the string
 
 	for(int i=0;i<nd->levels[lvlInd].numSpinParVals;i++){
 		
