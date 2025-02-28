@@ -341,6 +341,7 @@ void updateDrawingState(const app_data *restrict dat, app_state *restrict state,
 			state->ds.chartPosY = state->ds.chartZoomToY;
 			state->ds.zoomFinished = 1;
 			state->mouseholdElement = UIELEM_ENUM_LENGTH; //remove highlight from zoom buttons
+			clearSelectionStrs(&state->tss,1); //allow strings on the chart to be selectable
 		}
 		//SDL_Log("zoom scale: %0.4f\n",(double)state->ds.chartZoomScale);
 	}
@@ -364,6 +365,7 @@ void updateDrawingState(const app_data *restrict dat, app_state *restrict state,
 			state->ds.chartPosX = state->ds.chartPanToX;
 			state->ds.chartPosY = state->ds.chartPanToY;
 			state->ds.panFinished = 1;
+			clearSelectionStrs(&state->tss,1); //allow strings on the chart to be selectable
 		}
 		//SDL_Log("pan t: %0.3f\n",(double)state->ds.timeSincePanStart);
 	}
@@ -4117,7 +4119,7 @@ void updateSingleUIElemPosition(const app_data *restrict dat, app_state *restric
 			break;
 		case UIELEM_PREFS_UISCALE_MENU:
 			state->ds.uiElemWidth[UIELEM_PREFS_UISCALE_MENU] = (int16_t)(PREFS_DIALOG_UISCALE_MENU_WIDTH*state->ds.uiUserScale);
-			state->ds.uiElemHeight[UIELEM_PREFS_UISCALE_MENU] = (int16_t)(((PREFS_DIALOG_UISCALE_MENU_ITEM_SPACING + UI_PADDING_SIZE)*UISCALE_ENUM_LENGTH + 2*PANEL_EDGE_SIZE)*state->ds.uiUserScale);
+			state->ds.uiElemHeight[UIELEM_PREFS_UISCALE_MENU] = (int16_t)(((PREFS_DIALOG_UISCALE_MENU_ITEM_SPACING)*UISCALE_ENUM_LENGTH + 2*PANEL_EDGE_SIZE + 3*UI_PADDING_SIZE)*state->ds.uiUserScale);
 			state->ds.uiElemPosX[UIELEM_PREFS_UISCALE_MENU] = (int16_t)(state->ds.uiElemPosX[UIELEM_PREFS_DIALOG_UISCALE_DROPDOWN] + state->ds.uiElemWidth[UIELEM_PREFS_DIALOG_UISCALE_DROPDOWN]/2 - state->ds.uiElemWidth[UIELEM_PREFS_UISCALE_MENU]/2);
 			state->ds.uiElemPosY[UIELEM_PREFS_UISCALE_MENU] = (int16_t)(state->ds.uiElemPosY[UIELEM_PREFS_DIALOG_UISCALE_DROPDOWN] + state->ds.uiElemHeight[UIELEM_PREFS_DIALOG_UISCALE_DROPDOWN]);
 			break;

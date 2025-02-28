@@ -143,7 +143,7 @@ static const float uiScales[UISCALE_ENUM_LENGTH] = {1.0f,1.20f,1.60f,1.85f};
 #define PREFS_DIALOG_PREFCOL1_Y                 80 //in unscaled pixels
 #define PREFS_DIALOG_UISCALE_BUTTON_WIDTH       120 //in unscaled pixels
 #define PREFS_DIALOG_UISCALE_MENU_WIDTH         140 //in unscaled pixels
-#define PREFS_DIALOG_UISCALE_MENU_ITEM_SPACING  40 //in unscaled pixels
+#define PREFS_DIALOG_UISCALE_MENU_ITEM_SPACING  36 //in unscaled pixels
 
 //chart of nuclides
 #define DEFAULT_NUCLBOX_DIM                8.0f
