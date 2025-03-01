@@ -38,7 +38,7 @@ void updateDrawingState(const app_data *restrict dat, app_state *restrict state,
 const char* getSpecialLvlStr(const app_data *restrict dat, const uint8_t specialLvlInd);
 const char* getFullElemStr(const uint8_t Z, const uint8_t N);
 const char* getElemStr(const uint8_t Z);
-void getNuclNameStr(char strOut[32], const nucl *restrict nuclide);
+void getNuclNameStr(char strOut[32], const nucl *restrict nuclide, const uint8_t isomerMVal);
 uint8_t elemStrToZ(const char *elemStr);
 const char* getValueUnitShortStr(const uint8_t unit);
 const char* getValueTypeShortStr(const uint8_t type);

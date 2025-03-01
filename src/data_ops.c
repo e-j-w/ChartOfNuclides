@@ -990,9 +990,16 @@ const char* getElemStr(const uint8_t Z){
 	}
 }
 
-void getNuclNameStr(char strOut[32], const nucl *restrict nuclide){
+//isomerMVal = 255 for non-isomers, 0 for isomers where the m-index is not drawn
+void getNuclNameStr(char strOut[32], const nucl *restrict nuclide, const uint8_t isomerMVal){
 	char *nameStrCpy;
-	SDL_snprintf(strOut,32,"%u%s",nuclide->Z + nuclide->N,getElemStr((uint8_t)(nuclide->Z)));
+	if(isomerMVal == 255){
+		SDL_snprintf(strOut,32,"%u%s",nuclide->Z + nuclide->N,getElemStr((uint8_t)(nuclide->Z)));
+	}else if(isomerMVal == 0){
+		SDL_snprintf(strOut,32,"%uᵐ%s",nuclide->Z + nuclide->N,getElemStr((uint8_t)(nuclide->Z)));
+	}else{
+		SDL_snprintf(strOut,32,"%uᵐ%u%s",nuclide->Z + nuclide->N,isomerMVal,getElemStr((uint8_t)(nuclide->Z)));
+	}
 	//convert mass number to superscript
 	nameStrCpy = findReplaceAllUTF8("0","⁰",strOut);
 	SDL_strlcpy(strOut,nameStrCpy,32);

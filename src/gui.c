@@ -870,18 +870,12 @@ void drawIsomerSpinBoxLabel(const app_data *restrict dat, app_state *restrict st
   float drawXPos, drawYPos;
   float labelMargin = NUCLBOX_LABEL_SMALLMARGIN*state->ds.chartZoomScale*state->ds.uiUserScale;
   uint16_t Z = (uint16_t)dat->ndat.nuclData[nuclInd].Z;
-  uint16_t N = (uint16_t)dat->ndat.nuclData[nuclInd].N;
   if(boxHeight > 38.0f){
-    if((isomerMVal==0)||(dat->ndat.nuclData[nuclInd].numIsomerMVals <= 1)){
-      SDL_snprintf(tmpStr,32,"%um",N+Z);
-    }else{
-      SDL_snprintf(tmpStr,32,"%um%u",N+Z,isomerMVal);
-    }
     drawXPos = xPos + labelMargin;
-    float totalLblHeight = (getTextHeight(rdat,FONTSIZE_SMALL,tmpStr) + getTextHeight(rdat,FONTSIZE_LARGE,getElemStr((uint8_t)Z)))/rdat->uiDPIScale;
-    drawYPos = yPos+boxHeight*0.5f - totalLblHeight*0.5f + 4.0f*state->ds.uiUserScale;
-    drawXPos += (drawTextAlignedSized(rdat,drawXPos,drawYPos,col,FONTSIZE_SMALL,255,tmpStr,ALIGN_LEFT,16384)).w; //draw number label
-    drawTextAlignedSized(rdat,drawXPos,drawYPos+(10.0f*state->ds.uiUserScale),col,FONTSIZE_LARGE,255,getElemStr((uint8_t)Z),ALIGN_LEFT,16384); //draw element label
+    float totalLblHeight = getTextHeight(rdat,FONTSIZE_LARGE,getElemStr((uint8_t)Z))/rdat->uiDPIScale;
+    drawYPos = yPos+boxHeight*0.5f - totalLblHeight*0.5f - 5.0f*state->ds.uiUserScale;
+    getNuclNameStr(tmpStr,&dat->ndat.nuclData[nuclInd],(dat->ndat.nuclData[nuclInd].numIsomerMVals > 1) ? isomerMVal : 0);
+    drawTextAlignedSized(rdat,drawXPos,drawYPos+(10.0f*state->ds.uiUserScale),col,FONTSIZE_LARGE,255,tmpStr,ALIGN_LEFT,16384); //draw element label
     //handle decay mode, spin-parity labels
     drawXPos = xPos + boxWidth - labelMargin;
     if(dat->ndat.levels[isomerLvl].numSpinParVals > 0){
@@ -902,18 +896,12 @@ void drawIsomerDecayModeBoxLabel(const app_data *restrict dat, app_state *restri
   float drawXPos, drawYPos;
   float labelMargin = NUCLBOX_LABEL_SMALLMARGIN*state->ds.chartZoomScale*state->ds.uiUserScale;
   uint16_t Z = (uint16_t)dat->ndat.nuclData[nuclInd].Z;
-  uint16_t N = (uint16_t)dat->ndat.nuclData[nuclInd].N;
   if(boxHeight > 38.0f){
-    if((isomerMVal==0)||(dat->ndat.nuclData[nuclInd].numIsomerMVals <= 1)){
-      SDL_snprintf(tmpStr,32,"%um",N+Z);
-    }else{
-      SDL_snprintf(tmpStr,32,"%um%u",N+Z,isomerMVal);
-    }
     drawXPos = xPos + labelMargin;
-    float totalLblHeight = (getTextHeight(rdat,FONTSIZE_SMALL,tmpStr) + getTextHeight(rdat,FONTSIZE_LARGE,getElemStr((uint8_t)Z)))/rdat->uiDPIScale;
-    drawYPos = yPos+boxHeight*0.5f - totalLblHeight*0.5f + 4.0f*state->ds.uiUserScale;
-    drawXPos += (drawTextAlignedSized(rdat,drawXPos,drawYPos,col,FONTSIZE_SMALL,255,tmpStr,ALIGN_LEFT,16384)).w; //draw number label
-    drawTextAlignedSized(rdat,drawXPos,drawYPos+(10.0f*state->ds.uiUserScale),col,FONTSIZE_LARGE,255,getElemStr((uint8_t)Z),ALIGN_LEFT,16384); //draw element label
+    float totalLblHeight = getTextHeight(rdat,FONTSIZE_LARGE,getElemStr((uint8_t)Z))/rdat->uiDPIScale;
+    drawYPos = yPos+boxHeight*0.5f - totalLblHeight*0.5f - 5.0f*state->ds.uiUserScale;
+    getNuclNameStr(tmpStr,&dat->ndat.nuclData[nuclInd],(dat->ndat.nuclData[nuclInd].numIsomerMVals > 1) ? isomerMVal : 0);
+    drawTextAlignedSized(rdat,drawXPos,drawYPos+(10.0f*state->ds.uiUserScale),col,FONTSIZE_LARGE,255,tmpStr,ALIGN_LEFT,16384); //draw element label
     float drawSpace = boxWidth - (10.0f*state->ds.uiUserScale) - getTextWidth(rdat,FONTSIZE_LARGE,tmpStr)/rdat->uiDPIScale;
     //handle decay mode, spin-parity labels
     drawXPos = xPos + boxWidth - labelMargin;
@@ -954,18 +942,12 @@ void drawisomerBoxLabel(const app_data *restrict dat, app_state *restrict state,
   float drawXPos, drawYPos;
   float labelMargin = NUCLBOX_LABEL_SMALLMARGIN*state->ds.chartZoomScale*state->ds.uiUserScale;
   uint16_t Z = (uint16_t)dat->ndat.nuclData[nuclInd].Z;
-  uint16_t N = (uint16_t)dat->ndat.nuclData[nuclInd].N;
   if(boxHeight > 38.0f){
-    if((isomerMVal==0)||(dat->ndat.nuclData[nuclInd].numIsomerMVals <= 1)){
-      SDL_snprintf(tmpStr,32,"%um",N+Z);
-    }else{
-      SDL_snprintf(tmpStr,32,"%um%u",N+Z,isomerMVal);
-    }
     drawXPos = xPos + labelMargin;
-    float totalLblHeight = (getTextHeight(rdat,FONTSIZE_SMALL,tmpStr) + getTextHeight(rdat,FONTSIZE_LARGE,getElemStr((uint8_t)Z)))/rdat->uiDPIScale;
-    drawYPos = yPos+boxHeight*0.5f - totalLblHeight*0.5f + 4.0f*state->ds.uiUserScale;
-    drawXPos += (drawTextAlignedSized(rdat,drawXPos,drawYPos,col,FONTSIZE_SMALL,255,tmpStr,ALIGN_LEFT,16384)).w; //draw number label
-    drawTextAlignedSized(rdat,drawXPos,drawYPos+(10.0f*state->ds.uiUserScale),col,FONTSIZE_LARGE,255,getElemStr((uint8_t)Z),ALIGN_LEFT,16384); //draw element label
+    float totalLblHeight = getTextHeight(rdat,FONTSIZE_LARGE,getElemStr((uint8_t)Z))/rdat->uiDPIScale;
+    drawYPos = yPos+boxHeight*0.5f - totalLblHeight*0.5f - 5.0f*state->ds.uiUserScale;
+    getNuclNameStr(tmpStr,&dat->ndat.nuclData[nuclInd],(dat->ndat.nuclData[nuclInd].numIsomerMVals > 1) ? isomerMVal : 0);
+    drawTextAlignedSized(rdat,drawXPos,drawYPos+(10.0f*state->ds.uiUserScale),col,FONTSIZE_LARGE,255,tmpStr,ALIGN_LEFT,16384); //draw element label
     //handle half-life, spin-parity labels
     drawXPos = xPos + boxWidth - labelMargin;
     if(dat->ndat.levels[isomerLvl].numSpinParVals > 0){
@@ -1259,7 +1241,7 @@ void drawNuclBoxLabel(const app_data *restrict dat, app_state *restrict state, r
     alpha = (Uint8)((1.0f - 2.0f*(4.0f - state->ds.chartZoomScale))*255.0f);
   }
   if(state->ds.chartZoomScale >= 7.3f){
-    getNuclNameStr(tmpStr,&dat->ndat.nuclData[nuclInd]);
+    getNuclNameStr(tmpStr,&dat->ndat.nuclData[nuclInd],255);
     float totalLblWidth = getTextWidth(rdat,FONTSIZE_LARGE,tmpStr)/rdat->uiDPIScale;
     drawXPos = xPos+boxWidth*0.5f - totalLblWidth*0.5f;
     if(state->ds.chartZoomScale >= 12.0f){
@@ -1635,7 +1617,7 @@ void drawInfoBoxHeader(const app_data *restrict dat, app_state *restrict state, 
   float drawXPos = (float)(x + (PANEL_EDGE_SIZE + 3*UI_PADDING_SIZE)*state->ds.uiUserScale);
   float drawYPos = (float)(y + (PANEL_EDGE_SIZE + 1.5f*UI_PADDING_SIZE)*state->ds.uiUserScale);
   uint16_t nucA = (uint16_t)(dat->ndat.nuclData[nuclInd].Z + dat->ndat.nuclData[nuclInd].N);
-  getNuclNameStr(nuclStr,&dat->ndat.nuclData[nuclInd]);
+  getNuclNameStr(nuclStr,&dat->ndat.nuclData[nuclInd],255);
   if((uint16_t)(dat->ndat.nuclData[nuclInd].Z <= 1)&&(dat->ndat.nuclData[nuclInd].N <= 2)){
     SDL_snprintf(tmpStr,32,"%s (%s)",nuclStr,getFullElemStr((uint8_t)dat->ndat.nuclData[nuclInd].Z,(uint8_t)dat->ndat.nuclData[nuclInd].N));
   }else if((uint16_t)(dat->ndat.nuclData[nuclInd].Z == 0)&&(dat->ndat.nuclData[nuclInd].N <= 5)){
