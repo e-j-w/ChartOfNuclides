@@ -24,3 +24,4 @@ list
 *.code-workspace
 sample_parameters
 octave-workspace
+*flatpak*

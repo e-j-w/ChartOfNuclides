@@ -1301,27 +1301,29 @@ void drawChartOfNuclides(const app_data *restrict dat, app_state *restrict state
               rect.y = (maxY - (float)dat->ndat.nuclData[i].Z)*rect.h;
               //SDL_Log("N: %i, Z: %i, i: %i, pos: [%0.2f %0.2f %0.2f %0.2f]\n",dat->ndat.nuclData[i].N,dat->ndat.nuclData[i].Z,i,(double)rect.x,(double)rect.y,(double)rect.w,(double)rect.h);
               //const double hl = getNuclGSHalfLifeSeconds(&dat->ndat,(uint16_t)i);
+              SDL_FColor boxCol = {0.0f,0.0f,0.0f,1.0f};
               if(state->chartView == CHARTVIEW_HALFLIFE){
-                drawFlatRect(rdat,rect,getHalfLifeCol(getNuclGSHalfLifeSeconds(&dat->ndat,(uint16_t)i)));
+                boxCol = getHalfLifeCol(getNuclGSHalfLifeSeconds(&dat->ndat,(uint16_t)i));
               }else if(state->chartView == CHARTVIEW_DECAYMODE){
-                drawFlatRect(rdat,rect,getDecayModeCol(getNuclGSMostProbableDcyMode(&dat->ndat,(uint16_t)i)));
+                boxCol = getDecayModeCol(getNuclGSMostProbableDcyMode(&dat->ndat,(uint16_t)i));
               }else if(state->chartView == CHARTVIEW_2PLUS){
-                drawFlatRect(rdat,rect,get2PlusCol(get2PlusEnergy(&dat->ndat,(uint16_t)i),getNuclGSHalfLifeSeconds(&dat->ndat,(uint16_t)i)));
+                boxCol = get2PlusCol(get2PlusEnergy(&dat->ndat,(uint16_t)i),getNuclGSHalfLifeSeconds(&dat->ndat,(uint16_t)i));
               }else if(state->chartView == CHARTVIEW_R42){
-                drawFlatRect(rdat,rect,getR42Col(getR42(&dat->ndat,(uint16_t)i),getNuclGSHalfLifeSeconds(&dat->ndat,(uint16_t)i)));
+                boxCol = getR42Col(getR42(&dat->ndat,(uint16_t)i),getNuclGSHalfLifeSeconds(&dat->ndat,(uint16_t)i));
               }else if(state->chartView == CHARTVIEW_BETA2){
-                drawFlatRect(rdat,rect,getBeta2Col(getBeta2(&dat->ndat,(uint16_t)i),getNuclGSHalfLifeSeconds(&dat->ndat,(uint16_t)i)));
+                boxCol = getBeta2Col(getBeta2(&dat->ndat,(uint16_t)i),getNuclGSHalfLifeSeconds(&dat->ndat,(uint16_t)i));
               }else if(state->chartView == CHARTVIEW_SPIN){
-                drawFlatRect(rdat,rect,getSpinCol(getMostProbableSpin(&dat->ndat,dat->ndat.nuclData[i].firstLevel + dat->ndat.nuclData[i].gsLevel)));
+                boxCol = getSpinCol(getMostProbableSpin(&dat->ndat,dat->ndat.nuclData[i].firstLevel + dat->ndat.nuclData[i].gsLevel));
               }else if(state->chartView == CHARTVIEW_PARITY){
-                drawFlatRect(rdat,rect,getParCol(getMostProbableParity(&dat->ndat,dat->ndat.nuclData[i].firstLevel + dat->ndat.nuclData[i].gsLevel)));
+                boxCol = getParCol(getMostProbableParity(&dat->ndat,dat->ndat.nuclData[i].firstLevel + dat->ndat.nuclData[i].gsLevel));
               }else if(state->chartView == CHARTVIEW_BEA){
-                drawFlatRect(rdat,rect,getBEACol(getBEA(&dat->ndat,(uint16_t)i)));
+                boxCol = getBEACol(getBEA(&dat->ndat,(uint16_t)i));
               }else if(state->chartView == CHARTVIEW_NUMLVLS){
-                drawFlatRect(rdat,rect,getNumLvlsCol(dat->ndat.nuclData[i].numLevels,getNuclGSHalfLifeSeconds(&dat->ndat,(uint16_t)i)));
+                boxCol = getNumLvlsCol(dat->ndat.nuclData[i].numLevels,getNuclGSHalfLifeSeconds(&dat->ndat,(uint16_t)i));
               }else if(state->chartView == CHARTVIEW_UNKNOWN_ENERGY){
-                drawFlatRect(rdat,rect,getUnknownLvlsCol(getNumUnknownLvls(&dat->ndat,(uint16_t)i),getNuclGSHalfLifeSeconds(&dat->ndat,(uint16_t)i)));
+                boxCol = getUnknownLvlsCol(getNumUnknownLvls(&dat->ndat,(uint16_t)i),getNuclGSHalfLifeSeconds(&dat->ndat,(uint16_t)i));
               }
+              drawFlatRect(rdat,rect,boxCol);
               
               if(state->ds.chartZoomScale >= 3.5f){
                 uint8_t drawingLowBox = 0;
@@ -1338,12 +1340,25 @@ void drawChartOfNuclides(const app_data *restrict dat, app_state *restrict state
                     if((isomerLvl != MAXNUMLVLS)&&(isomerLvl != (dat->ndat.nuclData[i].firstLevel + dat->ndat.nuclData[i].gsLevel))){
                       if((isomerHl >= 1.0E-1)||(isomerHl > getNuclGSHalfLifeSeconds(&dat->ndat,(uint16_t)i))){ //only show 'important' isomers on chart
                         drawingLowBox = 1;
-                        SDL_FColor boxCol = getHalfLifeCol(isomerHl);
+                        SDL_FColor iboxCol = getHalfLifeCol(isomerHl);
+                        if((iboxCol.r == boxCol.r)&&(iboxCol.g == iboxCol.g)&&(iboxCol.b == boxCol.b)){
+                          //make isomer box colors slightly different, to distinguish them from
+                          //ground states of similar half-life
+                          if(getNuclGSHalfLifeSeconds(&dat->ndat,(uint16_t)i) > isomerHl){
+                            iboxCol.r *= 1.10f;
+                            iboxCol.g *= 1.10f;
+                            iboxCol.b *= 1.10f;
+                          }else{
+                            iboxCol.r *= 0.91f;
+                            iboxCol.g *= 0.91f;
+                            iboxCol.b *= 0.91f;
+                          }
+                        }
                         if(state->ds.chartZoomScale < 5.5f){
                           //handle fading in of isomer boxes
-                          boxCol.a =  1.0f - (5.5f-state->ds.chartZoomScale);
+                          iboxCol.a =  1.0f - (5.5f-state->ds.chartZoomScale);
                         }
-                        drawFlatRect(rdat,lowBoxRect,boxCol);
+                        drawFlatRect(rdat,lowBoxRect,iboxCol);
                         drawisomerBoxLabel(dat,state,rdat,lowBoxRect.x,lowBoxRect.y,lowBoxRect.w,lowBoxRect.h,(isomerHl > 1.0E3) ? whiteCol8Bit : blackCol8Bit,(uint16_t)i,isomerLvl,dat->ndat.nuclData[i].longestIsomerMVal);
                       }
                     }
@@ -1356,23 +1371,37 @@ void drawChartOfNuclides(const app_data *restrict dat, app_state *restrict state
                         uint8_t isomerDcyMode = getLevelMostProbableDcyMode(&dat->ndat,dat->ndat.nuclData[i].longestIsomerLevel);
                         if(isomerDcyMode < (DECAYMODE_ENUM_LENGTH+1)){
                           drawingLowBox = 1;
-                          SDL_FColor boxCol = getDecayModeCol(isomerDcyMode);
+                          SDL_FColor iboxCol = getDecayModeCol(isomerDcyMode);
+                          if((iboxCol.r == boxCol.r)&&(iboxCol.g == iboxCol.g)&&(iboxCol.b == boxCol.b)){
+                            //make isomer box colors slightly different, to distinguish them from
+                            //ground states of the same decay mode
+                            iboxCol.r *= 1.20f;
+                            iboxCol.g *= 1.20f;
+                            iboxCol.b *= 1.20f;
+                          }
                           if(state->ds.chartZoomScale < 5.5f){
                             //handle fading in of isomer boxes
-                            boxCol.a =  1.0f - (5.5f-state->ds.chartZoomScale);
+                            iboxCol.a =  1.0f - (5.5f-state->ds.chartZoomScale);
                           }
-                          drawFlatRect(rdat,lowBoxRect,boxCol);
+                          drawFlatRect(rdat,lowBoxRect,iboxCol);
                           drawIsomerDecayModeBoxLabel(dat,state,rdat,lowBoxRect.x,lowBoxRect.y,lowBoxRect.w,lowBoxRect.h,getDecayModeTextCol(isomerDcyMode),(uint16_t)i,isomerLvl,dat->ndat.nuclData[i].longestIsomerMVal,isomerDcyMode);
                         }else if(isomerHl > 1.0E15){
                           //'stable' isomer with no known decay mode
                           //draw its box using the half-life color
                           drawingLowBox = 1;
-                          SDL_FColor boxCol = getHalfLifeCol(isomerHl);
+                          SDL_FColor iboxCol = getHalfLifeCol(isomerHl);
+                          if((iboxCol.r == boxCol.r)&&(iboxCol.g == iboxCol.g)&&(iboxCol.b == boxCol.b)){
+                            //make isomer box colors slightly different, to distinguish them from
+                            //ground states of the same decay mode
+                            iboxCol.r += 0.1f;
+                            iboxCol.g += 0.1f;
+                            iboxCol.b += 0.1f;
+                          }
                           if(state->ds.chartZoomScale < 5.5f){
                             //handle fading in of isomer boxes
-                            boxCol.a =  1.0f - (5.5f-state->ds.chartZoomScale);
+                            iboxCol.a =  1.0f - (5.5f-state->ds.chartZoomScale);
                           }
-                          drawFlatRect(rdat,lowBoxRect,boxCol);
+                          drawFlatRect(rdat,lowBoxRect,iboxCol);
                           drawIsomerDecayModeBoxLabel(dat,state,rdat,lowBoxRect.x,lowBoxRect.y,lowBoxRect.w,lowBoxRect.h,getDecayModeTextCol(isomerDcyMode),(uint16_t)i,isomerLvl,dat->ndat.nuclData[i].longestIsomerMVal,isomerDcyMode);
                         }
                       }
@@ -1385,12 +1414,12 @@ void drawChartOfNuclides(const app_data *restrict dat, app_state *restrict state
                       if((isomerHl >= 1.0E-1)||(isomerHl > getNuclGSHalfLifeSeconds(&dat->ndat,(uint16_t)i))){ //only show 'important' isomers on chart
                         double isomerSpin = getMostProbableSpin(&dat->ndat,dat->ndat.nuclData[i].longestIsomerLevel);
                         drawingLowBox = 1;
-                        SDL_FColor boxCol = getSpinCol(isomerSpin);
+                        SDL_FColor iboxCol = getSpinCol(isomerSpin);
                         if(state->ds.chartZoomScale < 5.5f){
                           //handle fading in of isomer boxes
-                          boxCol.a =  1.0f - (5.5f-state->ds.chartZoomScale);
+                          iboxCol.a =  1.0f - (5.5f-state->ds.chartZoomScale);
                         }
-                        drawFlatRect(rdat,lowBoxRect,boxCol);
+                        drawFlatRect(rdat,lowBoxRect,iboxCol);
                         drawIsomerSpinBoxLabel(dat,state,rdat,lowBoxRect.x,lowBoxRect.y,lowBoxRect.w,lowBoxRect.h,(isomerSpin <= 2.0) ? whiteCol8Bit : blackCol8Bit,(uint16_t)i,isomerLvl,dat->ndat.nuclData[i].longestIsomerMVal);
                       }
                     }
@@ -1402,12 +1431,12 @@ void drawChartOfNuclides(const app_data *restrict dat, app_state *restrict state
                       if((isomerHl >= 1.0E-1)||(isomerHl > getNuclGSHalfLifeSeconds(&dat->ndat,(uint16_t)i))){ //only show 'important' isomers on chart
                         int8_t isomerPar = getMostProbableParity(&dat->ndat,dat->ndat.nuclData[i].longestIsomerLevel);
                         drawingLowBox = 1;
-                        SDL_FColor boxCol = getParCol(isomerPar);
+                        SDL_FColor iboxCol = getParCol(isomerPar);
                         if(state->ds.chartZoomScale < 5.5f){
                           //handle fading in of isomer boxes
-                          boxCol.a =  1.0f - (5.5f-state->ds.chartZoomScale);
+                          iboxCol.a =  1.0f - (5.5f-state->ds.chartZoomScale);
                         }
-                        drawFlatRect(rdat,lowBoxRect,boxCol);
+                        drawFlatRect(rdat,lowBoxRect,iboxCol);
                         drawIsomerSpinBoxLabel(dat,state,rdat,lowBoxRect.x,lowBoxRect.y,lowBoxRect.w,lowBoxRect.h,(isomerPar < 0) ? whiteCol8Bit : blackCol8Bit,(uint16_t)i,isomerLvl,dat->ndat.nuclData[i].longestIsomerMVal);
                       }
                     }
