@@ -101,6 +101,7 @@ typedef struct
   //bits:5-8 value type (from value_type_enum)
   //bits 9-15: reserve value dependent on value type (-ve error if VALUETYPE_ASYMERROR,
   //X index if VALUETYPE_X or VALUETYPE_PLUSX)
+  //For non-variable gamma energies, bit 9 specifies whether the value is tentative
 }valWithErr; //parsed value with an error
 
 typedef struct
@@ -123,7 +124,7 @@ typedef struct
   uint16_t format; //bit 0: whether or not spin is variable
   //bits 1-4: value type (from value_type_enum)
   //bits 5-9: variable index if bit 0 is set
-  //bits 9-11: whether value is tentative (values from tentative_sp_enum)
+  //bits 10-12: whether value is tentative (values from tentative_sp_enum)
 }spinparval; //spin parity value
 
 typedef struct

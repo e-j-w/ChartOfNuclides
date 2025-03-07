@@ -1779,25 +1779,52 @@ void getGammaEnergyStr(char strOut[32], const ndata *restrict nd, const uint32_t
 		}else{
 			SDL_snprintf(strOut,32,"%.*fE%i+%c",ePrecision,(double)(nd->tran[tranInd].energy.val),nd->tran[tranInd].energy.exponent,variable);
 		}
-	}else if((showErr == 0)||(nd->tran[tranInd].energy.err == 0)){
-		if(eValueType == VALUETYPE_NUMBER){
-			if(eExponent == 0){
-				SDL_snprintf(strOut,32,"%.*f",ePrecision,(double)(nd->tran[tranInd].energy.val));
-			}else{
-				SDL_snprintf(strOut,32,"%.*fE%i",ePrecision,(double)(nd->tran[tranInd].energy.val),nd->tran[tranInd].energy.exponent);
-			}
-		}else{
-			if(eExponent == 0){
-				SDL_snprintf(strOut,32,"%s%.*f",getValueTypeShortStr(eValueType),ePrecision,(double)(nd->tran[tranInd].energy.val));
-			}else{
-				SDL_snprintf(strOut,32,"%s%.*fE%i",getValueTypeShortStr(eValueType),ePrecision,(double)(nd->tran[tranInd].energy.val),nd->tran[tranInd].energy.exponent);
-			}
-		}
 	}else{
-		if(eExponent == 0){
-			SDL_snprintf(strOut,32,"%.*f(%u)",ePrecision,(double)(nd->tran[tranInd].energy.val),nd->tran[tranInd].energy.err);
+		uint8_t eTentative = (uint8_t)((nd->tran[tranInd].energy.format >> 9U) & 1U);
+		if((showErr == 0)||(nd->tran[tranInd].energy.err == 0)){
+			if(eValueType == VALUETYPE_NUMBER){
+				if(eExponent == 0){
+					if(eTentative == 0){
+						SDL_snprintf(strOut,32,"%.*f",ePrecision,(double)(nd->tran[tranInd].energy.val));
+					}else{
+						SDL_snprintf(strOut,32,"(%.*f)",ePrecision,(double)(nd->tran[tranInd].energy.val));
+					}
+				}else{
+					if(eTentative == 0){
+						SDL_snprintf(strOut,32,"%.*fE%i",ePrecision,(double)(nd->tran[tranInd].energy.val),nd->tran[tranInd].energy.exponent);
+					}else{
+						SDL_snprintf(strOut,32,"(%.*fE%i)",ePrecision,(double)(nd->tran[tranInd].energy.val),nd->tran[tranInd].energy.exponent);
+					}
+				}
+			}else{
+				if(eExponent == 0){
+					if(eTentative == 0){
+						SDL_snprintf(strOut,32,"%s%.*f",getValueTypeShortStr(eValueType),ePrecision,(double)(nd->tran[tranInd].energy.val));
+					}else{
+						SDL_snprintf(strOut,32,"(%s%.*f)",getValueTypeShortStr(eValueType),ePrecision,(double)(nd->tran[tranInd].energy.val));
+					}
+				}else{
+					if(eTentative == 0){
+						SDL_snprintf(strOut,32,"%s%.*fE%i",getValueTypeShortStr(eValueType),ePrecision,(double)(nd->tran[tranInd].energy.val),nd->tran[tranInd].energy.exponent);
+					}else{
+						SDL_snprintf(strOut,32,"(%s%.*fE%i)",getValueTypeShortStr(eValueType),ePrecision,(double)(nd->tran[tranInd].energy.val),nd->tran[tranInd].energy.exponent);
+					}
+				}
+			}
 		}else{
-			SDL_snprintf(strOut,32,"%.*f(%u)E%i",ePrecision,(double)(nd->tran[tranInd].energy.val),nd->tran[tranInd].energy.err,nd->tran[tranInd].energy.exponent);
+			if(eExponent == 0){
+				if(eTentative == 0){
+					SDL_snprintf(strOut,32,"%.*f(%u)",ePrecision,(double)(nd->tran[tranInd].energy.val),nd->tran[tranInd].energy.err);
+				}else{
+					SDL_snprintf(strOut,32,"(%.*f(%u))",ePrecision,(double)(nd->tran[tranInd].energy.val),nd->tran[tranInd].energy.err);
+				}
+			}else{
+				if(eTentative == 0){
+					SDL_snprintf(strOut,32,"%.*f(%u)E%i",ePrecision,(double)(nd->tran[tranInd].energy.val),nd->tran[tranInd].energy.err,nd->tran[tranInd].energy.exponent);
+				}else{
+					SDL_snprintf(strOut,32,"(%.*f(%u)E%i)",ePrecision,(double)(nd->tran[tranInd].energy.val),nd->tran[tranInd].energy.err,nd->tran[tranInd].energy.exponent);
+				}
+			}
 		}
 	}
 	
@@ -2101,23 +2128,23 @@ void getSpinParStr(char strOut[32], const ndata *restrict nd, const uint32_t lvl
 		
 		//SDL_Log("Spin: %i, parity: %i, tentative: %u\n\n",nd->levels[lvlInd].spval[i].spinVal,nd->levels[lvlInd].spval[i].parVal,tentative);
 		
-		uint8_t tentative = (uint8_t)((uint16_t)(nd->levels[lvlInd].spval[i].format >> 9U) & 7U);
+		const uint8_t tentative = (uint8_t)((uint16_t)(nd->levels[lvlInd].spval[i].format >> 10U) & 7U);
 		uint8_t prevTentative = 0;
 		if(i>0){
-			prevTentative = (uint8_t)((uint16_t)(nd->levels[lvlInd].spval[i-1].format >> 9U) & 7U);
+			prevTentative = (uint8_t)((uint16_t)(nd->levels[lvlInd].spval[i-1].format >> 10U) & 7U);
 		}
 		uint8_t nextTentative = 0;
 		if(i<nd->levels[lvlInd].numSpinParVals-1){
-			nextTentative = (uint8_t)((uint16_t)(nd->levels[lvlInd].spval[i+1].format >> 9U) & 7U);
+			nextTentative = (uint8_t)((uint16_t)(nd->levels[lvlInd].spval[i+1].format >> 10U) & 7U);
 		}
 
 		if(tentative == TENTATIVESP_RANGE){
 			SDL_strlcat(strOut,"to",32);
 		}else{
 
-			uint8_t spinIsVar = (uint8_t)(nd->levels[lvlInd].spval[i].format & 1U);
-			uint8_t spinVarInd = (uint8_t)((nd->levels[lvlInd].spval[i].format >> 5U) & 31U);
-			uint8_t spinValType = (uint8_t)((nd->levels[lvlInd].spval[i].format >> 1U) & 15U);
+			const uint8_t spinIsVar = (uint8_t)(nd->levels[lvlInd].spval[i].format & 1U);
+			const uint8_t spinVarInd = (uint8_t)((nd->levels[lvlInd].spval[i].format >> 5U) & 15U);
+			const uint8_t spinValType = (uint8_t)((nd->levels[lvlInd].spval[i].format >> 1U) & 15U);
 			
 			if((tentative == TENTATIVESP_SPINANDPARITY)||(tentative == TENTATIVESP_SPINONLY)){
 				if((i==0)||((i>0)&&((prevTentative != TENTATIVESP_SPINANDPARITY)&&(prevTentative != TENTATIVESP_SPINONLY)))){
@@ -2153,6 +2180,7 @@ void getSpinParStr(char strOut[32], const ndata *restrict nd, const uint32_t lvl
 					}
 				}else{
 					//variable + offset
+					//SDL_Log("spin variable index: %u\n",spinVarInd);
 					if(spinVarInd == 0){
 						SDL_strlcat(strOut,"J+",32);
 					}else{
@@ -4256,7 +4284,9 @@ void updateSingleUIElemPosition(const app_data *restrict dat, app_state *restric
 			state->ds.uiElemPosY[UIELEM_NUCL_FULLINFOBOX_SCROLLBAR] = (int16_t)((NUCL_FULLINFOBOX_LEVELLIST_POS_Y + UI_PADDING_SIZE)*state->ds.uiUserScale);
 			state->ds.uiElemWidth[UIELEM_NUCL_FULLINFOBOX_SCROLLBAR] = (int16_t)(0.5f*UI_TILE_SIZE*state->ds.uiUserScale);
 			state->ds.uiElemHeight[UIELEM_NUCL_FULLINFOBOX_SCROLLBAR] = (int16_t)(state->ds.windowYRes - state->ds.uiElemPosY[UIELEM_NUCL_FULLINFOBOX_SCROLLBAR] - 2*UI_PADDING_SIZE*state->ds.uiUserScale);
-			state->ds.uiElemExtPlusX[UIELEM_NUCL_FULLINFOBOX_SCROLLBAR] = (uint16_t)(NUCL_FULLINFOBOX_SCROLLBAR_POS_XR*state->ds.uiUserScale); //Fitts' law
+			state->ds.uiElemExtMinusX[UIELEM_NUCL_FULLINFOBOX_SCROLLBAR] = (uint16_t)(0.5f*NUCL_FULLINFOBOX_SCROLLBAR_POS_XR*state->ds.uiUserScale); //make mouse target a bit bigger
+			state->ds.uiElemExtPlusX[UIELEM_NUCL_FULLINFOBOX_SCROLLBAR] = (uint16_t)(NUCL_FULLINFOBOX_SCROLLBAR_POS_XR*state->ds.uiUserScale); //Fitts' law (extend to screen edge)
+			state->ds.uiElemExtPlusY[UIELEM_NUCL_FULLINFOBOX_SCROLLBAR] = (uint16_t)(NUCL_FULLINFOBOX_LEVELLIST_POS_Y*state->ds.uiUserScale); //Fitts' law (extend to screen edge)
 			break;
 		case UIELEM_ZOOMIN_BUTTON:
 			state->ds.uiElemPosX[uiElemInd] = (int16_t)(state->ds.windowXRes-((UI_TILE_SIZE+ZOOM_BUTTON_POS_XR)*state->ds.uiUserScale));
