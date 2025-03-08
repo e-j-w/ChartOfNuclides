@@ -841,6 +841,7 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
           cursorRelPos = 0.0f;
         }
         state->tss.selEndPos = (uint8_t)(getNumTextCharsUnderWidth(rdat,(uint16_t)(cursorRelPos),state->tss.selectableStrTxt[state->tss.selectedStr],0,state->tss.selectableStrFontSize[state->tss.selectedStr]));
+        state->ds.forceRedraw = 1;
       }
     }else{
       state->ds.textDragInProgress = 0;
@@ -849,12 +850,15 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
       for(uint16_t i=0; i<state->tss.numSelStrs; i++){
         if((state->mouseXPx >= state->tss.selectableStrRect[i].x)&&(state->mouseXPx < (state->tss.selectableStrRect[i].x + state->tss.selectableStrRect[i].w))){
           if((state->mouseYPx >= state->tss.selectableStrRect[i].y)&&(state->mouseYPx < (state->tss.selectableStrRect[i].y + state->tss.selectableStrRect[i].h))){
-            if(state->mouseMovedDuringClick == 0){
+            //if(state->mouseMovedDuringClick == 0){
               //mouse is over selectable text
               //SDL_Log("Mouse over selectable string %u.\n",i);
               state->ds.textDragInProgress = 2;
               if((state->mouseHoldStartPosXPx >= 0.0f)||(doubleClick)){
-                float cursorRelPos = (state->mouseXPx - state->tss.selectableStrRect[i].x)/state->ds.uiUserScale; //position of the cursor relative to the start of the selectable text
+                float cursorRelPos = (state->mouseHoldStartPosXPx - state->tss.selectableStrRect[i].x)/state->ds.uiUserScale; //position of the cursor relative to the start of the selectable text
+                if(cursorRelPos < 0.0f){
+                  cursorRelPos = 0.0f;
+                }
                 //SDL_Log("rel pos: %0.3f\n",(double)cursorRelPos);
                 if(cursorRelPos >= 0){
                   state->tss.selectedStr = i;
@@ -875,7 +879,7 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
                 }
               }
               break;
-            }
+            //}
           }
         }
       }
@@ -981,6 +985,7 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
         }
         setSelTxtPrimarySelection(&state->tss); //support primary selection on Linux
         state->ds.textDragFinished = 1;
+        state->ds.forceRedraw = 1;
         //SDL_Log("Text selection released, started at char %u, ended at char %u (mouse pos %f).\n",state->tss.selStartPos,state->tss.selEndPos,(double)state->mouseXPx);
       }
     }
@@ -991,7 +996,6 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
         state->tss.selectedStr = 65535; //de-select text
       }
     }
-
     
 
     //only get here if no button was clicked
