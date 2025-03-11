@@ -432,16 +432,21 @@ SDL_FRect drawTextAlignedSized(resource_data *restrict rdat, const float xPos, c
   }
   if(alignment == ALIGN_RIGHT){
     drawRect.x = xPos - (drawRect.w/rdat->uiDPIScale);
+    drawRect.y = yPos;
   }else if(alignment == ALIGN_CENTER){
     drawRect.x = xPos - (0.5f*drawRect.w/rdat->uiDPIScale);
+    drawRect.y = yPos - (0.5f*drawRect.h/rdat->uiDPIScale);
   }else{
     drawRect.x /= rdat->uiDPIScale;
+    drawRect.y = yPos;
   }
-  drawRect.y = yPos;
   drawRect.w /= rdat->uiDPIScale;
   drawRect.h /= rdat->uiDPIScale;
   return drawRect;
 }
+
+//draw text which will be marked selectable
+//checkOverlap: if true, will check all existing selection strings and prevent any overlapping text from being selectable
 SDL_FRect drawSelectableTextAlignedSized(resource_data *restrict rdat, text_selection_state *restrict tss, const float xPos, const float yPos, const SDL_Color textColor, const uint8_t fontSizeInd, const Uint8 alpha, const char *txt, const uint8_t alignment, const Uint16 maxWidth){
   
   SDL_FRect rect = drawTextAlignedSized(rdat,xPos,yPos,textColor,fontSizeInd,alpha,txt,alignment,maxWidth);
@@ -461,6 +466,7 @@ SDL_FRect drawSelectableTextAlignedSized(resource_data *restrict rdat, text_sele
   return rect;
 
 }
+
 void drawTextAligned(resource_data *restrict rdat, const float xPos, const float yPos, const SDL_Color textColor, const uint8_t fontSizeInd, const char *txt, const uint8_t alignment){
   drawTextAlignedSized(rdat,xPos,yPos,textColor,fontSizeInd,255,txt,alignment,16384);
 }

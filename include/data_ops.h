@@ -122,6 +122,8 @@ SDL_FRect getRxnMenuButtonRect(const app_state *restrict state, const uint8_t nu
 void updateSingleUIElemPosition(const app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat, const uint8_t uiElemInd);
 void updateUIElemPositions(const app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat);
 
+void removeSelectableStringsInRect(text_selection_state *restrict tss, const SDL_FRect rect);
+
 float getUIthemeScale(const float uiScale);
 void updateUIScale(app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat);
 void updateWindowRes(app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat);

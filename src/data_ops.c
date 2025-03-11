@@ -4316,6 +4316,28 @@ void updateUIElemPositions(const app_data *restrict dat, app_state *restrict sta
 	clearSelectionStrs(&state->tss,1); //update selection strings if needed
 }
 
+//removes all selectable string data where the strings intersect with the provided rect
+void removeSelectableStringsInRect(text_selection_state *restrict tss, const SDL_FRect rect){
+  if(tss->selStrsModifiable){
+		//SDL_Log("Removing selection strings in rect: [ %.2f %.2f %.2f %.2f ]\n",(double)rect.x,(double)rect.y,(double)rect.w,(double)rect.h);
+    for(uint16_t i=0; i<tss->numSelStrs; i++){
+      if(SDL_HasRectIntersectionFloat(&rect,&tss->selectableStrRect[i])){
+        //delet the overlapping selection string data
+				//SDL_Log("Removing selection string %u.\n",i);
+        for(uint16_t j=(i+1); j<tss->numSelStrs; j++){
+          memcpy(&tss->selectableStrRect[j-1],&tss->selectableStrRect[j],sizeof(SDL_FRect));
+          memcpy(&tss->selectableStrFontSize[j-1],&tss->selectableStrFontSize[j],sizeof(uint8_t));
+          memcpy(&tss->selectableStrTxt[j-1],&tss->selectableStrTxt[j],sizeof(char)*MAX_SELECTABLE_STR_LEN);
+        }
+        tss->numSelStrs--;
+				i--;
+      }
+    }
+		tss->selectedStr = 65535; //de-select any selected string
+  }
+}
+
+
 float getUIthemeScale(const float uiScale){
 	//return roundf(2.0f*uiScale); //super-samples the UI texture, but results in odd spacing of text on panels
 	return roundf(uiScale); //seems to work, don't question it

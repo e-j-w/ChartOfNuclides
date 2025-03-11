@@ -846,7 +846,8 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
     }else{
       state->ds.textDragInProgress = 0;
     }
-    if((state->ds.textDragInProgress == 0)||(doubleClick)){
+    if(((state->ds.textDragInProgress == 0)&&(state->ds.chartDragInProgress == 0))||(doubleClick)){
+      //check for the mouse position with respect to any selectable strings
       for(uint16_t i=0; i<state->tss.numSelStrs; i++){
         if((state->mouseXPx >= state->tss.selectableStrRect[i].x)&&(state->mouseXPx < (state->tss.selectableStrRect[i].x + state->tss.selectableStrRect[i].w))){
           if((state->mouseYPx >= state->tss.selectableStrRect[i].y)&&(state->mouseYPx < (state->tss.selectableStrRect[i].y + state->tss.selectableStrRect[i].h))){
@@ -957,12 +958,13 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
       uiElemMouseoverAction(state,rdat); //handle cursor changes with mouse position
 
       //handle click and drag on the chart of nuclides
-      if((chartDraggable)&&(state->mouseholdElement == UIELEM_ENUM_LENGTH)&&(state->mouseHoldStartPosXPx >= 0.0f)){
+      if((chartDraggable)&&(state->mouseoverElement == UIELEM_ENUM_LENGTH)&&(state->mouseHoldStartPosXPx >= 0.0f)&&(state->ds.textDragInProgress == 0)){
         state->ds.chartDragStartX = state->ds.chartPosX;
         state->ds.chartDragStartY = state->ds.chartPosY;
         state->ds.chartDragStartMouseX = state->mouseXPx;
         state->ds.chartDragStartMouseY = state->mouseYPx;
         state->ds.chartDragInProgress = 1;
+        state->tss.selectedStr = 65535; //de-select any text
         //SDL_Log("start drag\n");
       }
       
