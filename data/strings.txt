@@ -63,6 +63,9 @@ chartview_spin|GS spin
 chartview_parity|GS parity
 chartview_num_levels|Known Levels
 chartview_unknown_energy|Unknown Levels
+context_copy|Copy
+context_copy_nuclname|Copy Nuclide Name
+context_copy_nuclinfo|Copy Nuclide Info
 search_placeholder|Type to search (eg. '32Si')
 search_result_nuclide|Nuclide / Isotope
 search_result_egamma|Transition

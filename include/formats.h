@@ -124,7 +124,7 @@ typedef struct
   uint16_t format; //bit 0: whether or not spin is variable
   //bits 1-4: value type (from value_type_enum)
   //bits 5-9: variable index if bit 0 is set
-  //bits 10-12: whether value is tentative (values from tentative_sp_enum)
+  //bits 10-13: whether value is tentative (values from tentative_sp_enum)
 }spinparval; //spin parity value
 
 typedef struct
@@ -242,6 +242,7 @@ typedef struct
   uint16_t nuclFullInfoMaxScrollY; //maximum scroll position, in lines
   uint8_t rxnMenuColumns; //how many columns to use in the reaction menu
   uint8_t mouseOverRxn, mouseHoldRxn, selectedRxn; //which item in the reaction menu is moused-over/selected, =255 if none
+  uint8_t numContextMenuItems; //number of items to show in the context menu
   uint64_t shownElements; //bit pattern describing which UI elements are being shown, values from ui_element_enum
   uint32_t uiAnimPlaying; //bit pattern describing which UI animations are playing
   float timeLeftInUIAnimation[UIANIM_ENUM_LENGTH]; //time left in each UI animation
@@ -291,7 +292,7 @@ typedef struct
 {
   SDL_FRect selectableStrRect[MAX_SELECTABLE_STRS]; //position and size of selectable text
   char selectableStrTxt[MAX_SELECTABLE_STRS][MAX_SELECTABLE_STR_LEN]; //the actual strings that are selectable
-  uint8_t selectableStrFontSize[MAX_SELECTABLE_STRS]; //font sioze of each selectable string
+  uint8_t selectableStrFontSize[MAX_SELECTABLE_STRS]; //font size of each selectable string
   uint16_t numSelStrs;
   uint16_t selectedStr; //65535 if nothing selected
   uint8_t selStartPos, selEndPos; //which character indices correspond to the start and end of the selected text

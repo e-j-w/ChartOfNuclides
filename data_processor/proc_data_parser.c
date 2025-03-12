@@ -304,6 +304,9 @@ static int parseAppRules(app_data *restrict dat, asset_mapping *restrict stringI
 	dat->locStringIDs[LOCSTR_CHARTVIEW_BEA] = (uint16_t)nameToAssetID("chartview_beA",stringIDmap);
 	dat->locStringIDs[LOCSTR_CHARTVIEW_NUMLVLS] = (uint16_t)nameToAssetID("chartview_num_levels",stringIDmap);
 	dat->locStringIDs[LOCSTR_CHARTVIEW_UNKNOWN_ENERGY] = (uint16_t)nameToAssetID("chartview_unknown_energy",stringIDmap);
+	dat->locStringIDs[LOCSTR_CONTEXT_COPY] = (uint16_t)nameToAssetID("context_copy",stringIDmap);
+	dat->locStringIDs[LOCSTR_CONTEXT_COPY_NUCLNAME] = (uint16_t)nameToAssetID("context_copy_nuclname",stringIDmap);
+	dat->locStringIDs[LOCSTR_CONTEXT_COPY_NUCLINFO] = (uint16_t)nameToAssetID("context_copy_nuclinfo",stringIDmap);
 	dat->locStringIDs[LOCSTR_SEARCH_PLACEHOLDER] = (uint16_t)nameToAssetID("search_placeholder",stringIDmap);
 	dat->locStringIDs[LOCSTR_SEARCHRES_NUCLIDE] = (uint16_t)nameToAssetID("search_result_nuclide",stringIDmap);
 	dat->locStringIDs[LOCSTR_SEARCHRES_EGAMMA] = (uint16_t)nameToAssetID("search_result_egamma",stringIDmap);
@@ -987,8 +990,6 @@ void parseSpinPar(level * lev, sp_var_data * varDat, char * spstring){
 	}
 	numTok++;
 
-	
-
 	/*SDL_Log("string: %s, number of tokens: %i\n",spstring,numTok);
 	for(i=0;i<numTok;i++){
 		SDL_Log("| %s ",val[i]);
@@ -1004,13 +1005,13 @@ void parseSpinPar(level * lev, sp_var_data * varDat, char * spstring){
 	}else if((strcmp(val[0],"+")==0)&&(numTok==1)){
 		lev->spval[lev->numSpinParVals].parVal = 1;
 		lev->spval[lev->numSpinParVals].spinVal = 255;
-		lev->spval[lev->numSpinParVals].format |= ((TENTATIVESP_NOSPIN & 7U) << 10U);
+		lev->spval[lev->numSpinParVals].format |= ((TENTATIVESP_NOSPIN & 15U) << 10U);
 		lev->numSpinParVals=1;
 		return;
 	}else if((strcmp(val[0],"-")==0)&&(numTok==1)){
 		lev->spval[lev->numSpinParVals].parVal = -1;
 		lev->spval[lev->numSpinParVals].spinVal = 255;
-		lev->spval[lev->numSpinParVals].format |= ((TENTATIVESP_NOSPIN & 7U) << 10U);
+		lev->spval[lev->numSpinParVals].format |= ((TENTATIVESP_NOSPIN & 15U) << 10U);
 		lev->numSpinParVals=1;
 		return;
 	}else{
@@ -1027,7 +1028,7 @@ void parseSpinPar(level * lev, sp_var_data * varDat, char * spstring){
 				if(strcmp(val[i],"TO")==0){
 					//specifies a range between the prior and next spin values
 					//eg. '3/2 TO 7/2'
-					lev->spval[lev->numSpinParVals].format |= ((TENTATIVESP_RANGE & 7U) << 10U);
+					lev->spval[lev->numSpinParVals].format |= ((TENTATIVESP_RANGE & 15U) << 10U);
 					lev->spval[lev->numSpinParVals].spinVal = 255;
 					lev->numSpinParVals++;
 					continue;
@@ -1036,6 +1037,18 @@ void parseSpinPar(level * lev, sp_var_data * varDat, char * spstring){
 					continue;
 				}else if(strcmp(val[i],"AND")==0){
 					//equivalent to a comma 
+					continue;
+				}else if((i<(numTok-1))&&(strcmp(val[i],"HIGH")==0)&&(strcmp(val[i+1],"J")==0)){
+					lev->spval[lev->numSpinParVals].format |= ((TENTATIVESP_HIGHJ & 15U) << 10U);
+					lev->spval[lev->numSpinParVals].spinVal = 255;
+					lev->numSpinParVals++;
+					i++;
+					continue;
+				}else if((i<(numTok-1))&&(strcmp(val[i],"LOW")==0)&&(strcmp(val[i+1],"J")==0)){
+					lev->spval[lev->numSpinParVals].format |= ((TENTATIVESP_LOWJ & 15U) << 10U);
+					lev->spval[lev->numSpinParVals].spinVal = 255;
+					lev->numSpinParVals++;
+					i++;
 					continue;
 				}
 
@@ -1337,10 +1350,10 @@ void parseSpinPar(level * lev, sp_var_data * varDat, char * spstring){
 						if(tok!=NULL){
 							if(strcmp(tok,"(+)")==0){
 								lev->spval[lev->numSpinParVals].parVal = 1;
-								lev->spval[lev->numSpinParVals].format |= ((TENTATIVESP_PARITYONLY & 7U) << 10U); //only parity is tentative
+								lev->spval[lev->numSpinParVals].format |= ((TENTATIVESP_PARITYONLY & 15U) << 10U); //only parity is tentative
 							}else if(strcmp(tok,"(-)")==0){
 								lev->spval[lev->numSpinParVals].parVal = -1;
-								lev->spval[lev->numSpinParVals].format |= ((TENTATIVESP_PARITYONLY & 7U) << 10U); //only parity is tentative
+								lev->spval[lev->numSpinParVals].format |= ((TENTATIVESP_PARITYONLY & 15U) << 10U); //only parity is tentative
 							}else{
 								SDL_strlcpy(tmpstr,val[i],256);
 								tok=SDL_strtok_r(tmpstr,"/([0123456789GELTAP, ",&saveptr);
@@ -1357,7 +1370,7 @@ void parseSpinPar(level * lev, sp_var_data * varDat, char * spstring){
 											uint8_t prevTentative = (uint8_t)((uint16_t)(lev->spval[j].format >> 10U) & 7U);
 											if(prevTentative != TENTATIVESP_RANGE){
 												lev->spval[j].format = (uint16_t)(lev->spval[j].format & ~(7U << 10U)); //unset tentative type for previous spin-parity values
-												lev->spval[j].format |= ((TENTATIVESP_SPINONLY & 7U) << 10U); //only spin is tentative
+												lev->spval[j].format |= ((TENTATIVESP_SPINONLY & 15U) << 10U); //only spin is tentative
 											}
 										}
 										lev->spval[lev->numSpinParVals].parVal = -1;
@@ -1370,7 +1383,7 @@ void parseSpinPar(level * lev, sp_var_data * varDat, char * spstring){
 											uint8_t prevTentative = (uint8_t)((uint16_t)(lev->spval[j].format >> 10U) & 7U);
 											if(prevTentative != TENTATIVESP_RANGE){
 												lev->spval[j].format = (uint16_t)(lev->spval[j].format & ~(7U << 10U)); //unset tentative type for previous spin-parity values
-												lev->spval[j].format |= ((TENTATIVESP_SPINONLY & 7U) << 10U); //only spin is tentative
+												lev->spval[j].format |= ((TENTATIVESP_SPINONLY & 15U) << 10U); //only spin is tentative
 											}
 										}
 										lev->spval[lev->numSpinParVals].parVal = 1;
@@ -1382,7 +1395,7 @@ void parseSpinPar(level * lev, sp_var_data * varDat, char * spstring){
 											uint8_t prevTentative = (uint8_t)((uint16_t)(lev->spval[j].format >> 10U) & 7U);
 											if(prevTentative != TENTATIVESP_RANGE){
 												lev->spval[j].format = (uint16_t)(lev->spval[j].format & ~(7U << 10U)); //unset tentative type for previous spin-parity values
-												lev->spval[j].format |= ((TENTATIVESP_ASSUMEDSPINONLY & 7U) << 10U); //only spin is tentative
+												lev->spval[j].format |= ((TENTATIVESP_ASSUMEDSPINONLY & 15U) << 10U); //only spin is tentative
 											}
 										}
 										lev->spval[lev->numSpinParVals].parVal = -1;
@@ -1395,7 +1408,7 @@ void parseSpinPar(level * lev, sp_var_data * varDat, char * spstring){
 											uint8_t prevTentative = (uint8_t)((uint16_t)(lev->spval[j].format >> 10U) & 7U);
 											if(prevTentative != TENTATIVESP_RANGE){
 												lev->spval[j].format = (uint16_t)(lev->spval[j].format & ~(7U << 10U)); //unset tentative type for previous spin-parity values
-												lev->spval[j].format |= ((TENTATIVESP_ASSUMEDSPINONLY & 7U) << 10U); //only spin is tentative
+												lev->spval[j].format |= ((TENTATIVESP_ASSUMEDSPINONLY & 15U) << 10U); //only spin is tentative
 											}
 										}
 										lev->spval[lev->numSpinParVals].parVal = 1;
@@ -1431,7 +1444,7 @@ void parseSpinPar(level * lev, sp_var_data * varDat, char * spstring){
 					}
 				}
 
-				lev->spval[lev->numSpinParVals].format |= (uint16_t)((tentative & 7U) << 10U);
+				lev->spval[lev->numSpinParVals].format |= (uint16_t)((tentative & 15U) << 10U);
 				lev->numSpinParVals++;
 
 				//SDL_Log("final assigned variable index: %u\n",((lev->spval[lev->numSpinParVals].format >> 5U) & 15U));
@@ -3512,8 +3525,8 @@ int parseAppData(app_data *restrict dat, const char *appBasePath){
   }else if(MAX_SPIN_VARS > /* DISABLES CODE */ (32)){
     SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"MAX_SPIN_VARS is too large, can't store as 5 bits in a bit pattern (eg. spinparval->format).\n");
     return -1;
-  }else if(TENTATIVESP_ENUM_LENGTH > /* DISABLES CODE */ (8)){
-    SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"TENTATIVESP_ENUM_LENGTH is too large, can't store as 3 bits in a bit pattern (eg. spinparval->format).\n");
+  }else if(TENTATIVESP_ENUM_LENGTH > /* DISABLES CODE */ (16)){
+    SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"TENTATIVESP_ENUM_LENGTH is too large, can't store as 4 bits in a bit pattern (eg. spinparval->format).\n");
     return -1;
   }else if(TENTATIVEMULT_ENUM_LENGTH > /* DISABLES CODE */ (4)){
     SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"TENTATIVEMULT_ENUM_LENGTH is too large, can't store as 2 bits in a bit pattern (eg. transition->multipole).\n");

@@ -79,6 +79,7 @@ void initializeTempState(const app_data *restrict dat, app_state *restrict state
 	state->ds.mouseOverRxn = 255;
 	state->ds.mouseHoldRxn = 255;
 	state->ds.selectedRxn = 0;
+	state->ds.numContextMenuItems = 0;
 	state->ds.totalPanTime = CHART_KEY_PAN_TIME;
 	state->ds.zoomFinished = 0;
 	state->ds.zoomInProgress = 0;
@@ -2128,18 +2129,22 @@ void getSpinParStr(char strOut[32], const ndata *restrict nd, const uint32_t lvl
 		
 		//SDL_Log("Spin: %i, parity: %i, tentative: %u\n\n",nd->levels[lvlInd].spval[i].spinVal,nd->levels[lvlInd].spval[i].parVal,tentative);
 		
-		const uint8_t tentative = (uint8_t)((uint16_t)(nd->levels[lvlInd].spval[i].format >> 10U) & 7U);
+		const uint8_t tentative = (uint8_t)((uint16_t)(nd->levels[lvlInd].spval[i].format >> 10U) & 15U);
 		uint8_t prevTentative = 0;
 		if(i>0){
-			prevTentative = (uint8_t)((uint16_t)(nd->levels[lvlInd].spval[i-1].format >> 10U) & 7U);
+			prevTentative = (uint8_t)((uint16_t)(nd->levels[lvlInd].spval[i-1].format >> 10U) & 15U);
 		}
 		uint8_t nextTentative = 0;
 		if(i<nd->levels[lvlInd].numSpinParVals-1){
-			nextTentative = (uint8_t)((uint16_t)(nd->levels[lvlInd].spval[i+1].format >> 10U) & 7U);
+			nextTentative = (uint8_t)((uint16_t)(nd->levels[lvlInd].spval[i+1].format >> 10U) & 15U);
 		}
 
 		if(tentative == TENTATIVESP_RANGE){
 			SDL_strlcat(strOut,"to",32);
+		}else if(tentative == TENTATIVESP_HIGHJ){
+			SDL_strlcat(strOut,"High J",32);
+		}else if(tentative == TENTATIVESP_LOWJ){
+			SDL_strlcat(strOut,"Low J",32);
 		}else{
 
 			const uint8_t spinIsVar = (uint8_t)(nd->levels[lvlInd].spval[i].format & 1U);
