@@ -126,16 +126,17 @@ void fcScrollAction(app_state *restrict state, const float deltaVal){
 void processInputFlags(app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat){
 
   /* Handle directional input */
-  uint32_t up,down,left,right,altup,altdown,altleft,altright,doubleClick;
-  up = (state->inputFlags & (1U << INPUT_UP));
-  down = (state->inputFlags & (1U << INPUT_DOWN));
-  left = (state->inputFlags & (1U << INPUT_LEFT));
-  right = (state->inputFlags & (1U << INPUT_RIGHT));
-  altup = (state->inputFlags & (1U << INPUT_ALTUP));
-  altdown = (state->inputFlags & (1U << INPUT_ALTDOWN));
-  altleft = (state->inputFlags & (1U << INPUT_ALTLEFT));
-  altright = (state->inputFlags & (1U << INPUT_ALTRIGHT));
-  doubleClick = (state->inputFlags & (1U << INPUT_DOUBLECLICK));
+  uint8_t up,down,left,right,altup,altdown,altleft,altright,doubleClick,rightClick;
+  up = (uint8_t)((state->inputFlags & (1U << INPUT_UP)) != 0);
+  down = (uint8_t)((state->inputFlags & (1U << INPUT_DOWN)) != 0);
+  left = (uint8_t)((state->inputFlags & (1U << INPUT_LEFT)) != 0);
+  right = (uint8_t)((state->inputFlags & (1U << INPUT_RIGHT)) != 0);
+  altup = (uint8_t)((state->inputFlags & (1U << INPUT_ALTUP)) != 0);
+  altdown = (uint8_t)((state->inputFlags & (1U << INPUT_ALTDOWN)) != 0);
+  altleft = (uint8_t)((state->inputFlags & (1U << INPUT_ALTLEFT)) != 0);
+  altright = (uint8_t)((state->inputFlags & (1U << INPUT_ALTRIGHT)) != 0);
+  doubleClick = (uint8_t)((state->inputFlags & (1U << INPUT_DOUBLECLICK)) != 0);
+  rightClick = (uint8_t)((state->inputFlags & (1U << INPUT_RIGHTCLICK)) != 0);
   
   const uint8_t chartDraggable = ((state->uiState == UISTATE_CHARTONLY)||(state->uiState == UISTATE_CHARTWITHMENU)||(state->uiState == UISTATE_INFOBOX));
   const uint8_t chartPannable =  ((state->uiState == UISTATE_CHARTONLY)||(state->uiState == UISTATE_INFOBOX));
@@ -886,11 +887,23 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
       }
     }
 
+    if(rightClick){
+      SDL_FRect selRect = getTextSelRect(&state->tss,rdat);
+      if((state->mouseRightClickPosXPx >= selRect.x)&&(state->mouseRightClickPosXPx < (selRect.x + selRect.w))){
+        if((state->mouseRightClickPosYPx >= selRect.y)&&(state->mouseRightClickPosYPx < (selRect.y + selRect.h))){
+          //right clicked on selected text
+          SDL_Log("Right click on selected text.\n");
+          setupCopyContextMenu(dat,state,rdat);
+        }
+      }
+    }
+
     uint8_t mouseReleaseElement = UIELEM_ENUM_LENGTH;
     if((state->mouseHoldStartPosXPx < 0.0f)&&(state->mouseholdElement < UIELEM_ENUM_LENGTH)){
       //just released the mouse button this frame, while hovering over a UI element
       mouseReleaseElement = state->mouseholdElement;
     }
+
     //reset values
     state->mouseoverElement = UIELEM_ENUM_LENGTH; //by default, no element is moused over
     state->mouseholdElement = UIELEM_ENUM_LENGTH;
@@ -904,7 +917,7 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
         if(state->ds.timeLeftInUIAnimation[UIANIM_RXN_MENU_HIDE]==0.0f){
           //SDL_Log("Mouse-over reaction: %u, selected reaction: %u.\n",state->ds.mouseOverRxn,state->ds.selectedRxn);
           for(uint8_t i=0;i<(dat->ndat.nuclData[state->chartSelectedNucl].numRxns+1);i++){
-            buttonRect = getRxnMenuButtonRect(state,numRxnPerCol,i);
+            buttonRect = getRxnMenuButtonRect(&state->ds,numRxnPerCol,i);
             if((state->mouseHoldStartPosXPx >= buttonRect.x)&&(state->mouseHoldStartPosXPx < (buttonRect.x + buttonRect.w))){
               if((state->mouseHoldStartPosYPx >= buttonRect.y)&&(state->mouseHoldStartPosYPx < (buttonRect.y + buttonRect.h))){
                 state->ds.mouseHoldRxn = i;
@@ -1247,6 +1260,10 @@ void processSingleEvent(app_data *restrict dat, app_state *restrict state, resou
           break;
         case SDL_BUTTON_RIGHT:
           //SDL_Log("Right mouse button up.\n");
+          SDL_GetMouseState(&state->mouseXPx,&state->mouseYPx); //update mouse position
+          state->mouseRightClickPosXPx = state->mouseXPx;
+          state->mouseRightClickPosYPx = state->mouseYPx;
+          state->inputFlags |= (1U << INPUT_RIGHTCLICK);
           break;
         default:
           break;
@@ -1709,6 +1726,7 @@ void processFrameEvents(app_data *restrict dat, app_state *restrict state, resou
     if(state->inputFlags & (1U << INPUT_DOUBLECLICK)){
       state->inputFlags &= ~(1U << INPUT_DOUBLECLICK);
     }
+    state->inputFlags &= ~(1U << INPUT_RIGHTCLICK);
 
     if((state->ds.uiAnimPlaying != 0)||(state->ds.zoomInProgress)||(state->ds.chartDragInProgress)||(state->ds.panInProgress)||(state->ds.fcScrollInProgress)||(state->ds.fcNuclChangeInProgress)){
       //a UI animation is playing, don't block the main thread

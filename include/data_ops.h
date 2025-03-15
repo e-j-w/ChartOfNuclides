@@ -35,6 +35,8 @@ void updateUIAnimationTimes(const app_data *restrict dat, app_state *restrict st
 
 void updateDrawingState(const app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat, const float deltaTime);
 
+void setupCopyContextMenu(const app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat);
+
 const char* getSpecialLvlStr(const app_data *restrict dat, const uint8_t specialLvlInd);
 const char* getFullElemStr(const uint8_t Z, const uint8_t N);
 const char* getElemStr(const uint8_t Z);
@@ -117,7 +119,9 @@ void uiElemClickAction(app_data *restrict dat, app_state *restrict state, resour
 uint16_t getNumTextCharsUnderWidth(resource_data *restrict rdat, const uint16_t widthPx, const char *text, const uint16_t txtStartChar, const uint8_t fontSizeInd);
 
 uint8_t getRxnMenuNumRxnsPerColumn(const app_data *restrict dat, const app_state *restrict state);
-SDL_FRect getRxnMenuButtonRect(const app_state *restrict state, const uint8_t numRxnPerCol, const uint8_t menuItem);
+SDL_FRect getRxnMenuButtonRect(const drawing_state *restrict ds, const uint8_t numRxnPerCol, const uint8_t menuItem);
+SDL_FRect getContextMenuButtonRect(const drawing_state *restrict ds, const uint8_t menuItem);
+SDL_FRect getTextSelRect(const text_selection_state *restrict tss, resource_data *restrict rdat);
 
 void updateSingleUIElemPosition(const app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat, const uint8_t uiElemInd);
 void updateUIElemPositions(const app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat);

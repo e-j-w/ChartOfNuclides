@@ -47,6 +47,9 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #define MAX_SELECTABLE_STRS      1024 //maximum number of onscreen text strings that can be selectable at once
 #define MAX_SELECTABLE_STR_LEN   128 //maximum length of selectable text strings
 
+//context menu parameters
+#define MAX_CONTEXT_MENU_ITEMS   4 //maximum number of items in the context menu
+
 //increasing these numbers will increase the size of 
 //the nuclear database stored in memory (and on disk)
 #define ENSDFSTRBUFSIZE          262144 //2^18
@@ -242,7 +245,7 @@ typedef struct
   uint16_t nuclFullInfoMaxScrollY; //maximum scroll position, in lines
   uint8_t rxnMenuColumns; //how many columns to use in the reaction menu
   uint8_t mouseOverRxn, mouseHoldRxn, selectedRxn; //which item in the reaction menu is moused-over/selected, =255 if none
-  uint8_t numContextMenuItems; //number of items to show in the context menu
+  
   uint64_t shownElements; //bit pattern describing which UI elements are being shown, values from ui_element_enum
   uint32_t uiAnimPlaying; //bit pattern describing which UI animations are playing
   float timeLeftInUIAnimation[UIANIM_ENUM_LENGTH]; //time left in each UI animation
@@ -300,17 +303,29 @@ typedef struct
   char *clipboardData; //pointer to any text that has been copied to the clipboard
 }text_selection_state; //struct containing search data
 
+
+
+typedef struct
+{
+  uint8_t numContextMenuItems; //number of items to show in the context menu
+  uint8_t contextMenuItems[MAX_CONTEXT_MENU_ITEMS]; //values from context_menu_item_enum
+  uint8_t mouseOverContextItem; //255 if none moused over
+  uint8_t clickedContextItem; //255 if none clicked on
+}context_menu_state; //struct containing search data
+
 typedef struct
 {
   drawing_state ds;          //the state information for drawing
   search_state ss;           //the state information for search queries
   text_selection_state tss;  //the state information for text selection
+  context_menu_state cms;    //the state information for right-click context menus
   char msgBoxHeaderTxt[32]; //text to show at the top of the message box
   char msgBoxTxt[256];      //main text to show in the message box
   int searchCursorPos, searchSelectionLen; //for search query text editing
   float mouseXPx, mouseYPx; //current position of the mouse, in pixels
   float mouseHoldStartPosXPx, mouseHoldStartPosYPx; //mouse position at the start of the last mouse button down event, in pixels
   float mouseClickPosXPx, mouseClickPosYPx; //mouse position at the start of a mouse (left) button up event, in pixels
+  float mouseRightClickPosXPx, mouseRightClickPosYPx;
   float mouseScrollbarClickPosYPx;
   float zoomDeltaVal; //amount to zoom by, equivalent to mouse wheel or touchpad scroll delta, can be very small for subtle touchpad events
   uint32_t inputFlags;

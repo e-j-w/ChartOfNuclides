@@ -2066,36 +2066,6 @@ void drawNuclInfoBox(const app_data *restrict dat, app_state *restrict state, re
   //SDL_Log("%.3f %.3f alpha %u\n",(double)state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_SHOW],(double)state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_HIDE],alpha);
 }
 
-void drawMessageBox(const app_data *restrict dat, const app_state *restrict state, resource_data *restrict rdat){
-  
-  float alpha = 1.0f;
-  int16_t yOffset = 0;
-  if(state->ds.uiAnimPlaying & (1U << UIANIM_MODAL_BOX_HIDE)){
-    alpha = (float)(DIMMER_OPACITY*juice_smoothStart2(state->ds.timeLeftInUIAnimation[UIANIM_MODAL_BOX_HIDE]/UI_ANIM_LENGTH));
-    drawScreenDimmer(&state->ds,rdat,alpha);
-    alpha = (float)(1.0f*juice_smoothStart2(state->ds.timeLeftInUIAnimation[UIANIM_MODAL_BOX_HIDE]/(UI_ANIM_LENGTH)));
-  }else if(state->ds.uiAnimPlaying & (1U << UIANIM_MODAL_BOX_SHOW)){
-    alpha = (float)(DIMMER_OPACITY*juice_smoothStop2(1.0f - state->ds.timeLeftInUIAnimation[UIANIM_MODAL_BOX_SHOW]/UI_ANIM_LENGTH));
-    drawScreenDimmer(&state->ds,rdat,alpha);
-    alpha = (float)(1.0f*juice_smoothStop2(1.0f - state->ds.timeLeftInUIAnimation[UIANIM_MODAL_BOX_SHOW]/UI_ANIM_LENGTH));
-    yOffset = (int16_t)(100.0f*juice_smoothStart2(state->ds.timeLeftInUIAnimation[UIANIM_MODAL_BOX_SHOW]/(UI_ANIM_LENGTH)));
-  }else{
-    drawScreenDimmer(&state->ds,rdat,DIMMER_OPACITY);
-  }
-  
-  SDL_FRect msgBoxPanelRect;
-  msgBoxPanelRect.x = state->ds.uiElemPosX[UIELEM_MSG_BOX];
-  msgBoxPanelRect.y = state->ds.uiElemPosY[UIELEM_MSG_BOX] + yOffset;
-  msgBoxPanelRect.w = state->ds.uiElemWidth[UIELEM_MSG_BOX];
-  msgBoxPanelRect.h = state->ds.uiElemHeight[UIELEM_MSG_BOX];
-  drawPanelBG(&dat->rules.themeRules,rdat,msgBoxPanelRect,alpha);
-
-  drawTextAlignedSized(rdat,msgBoxPanelRect.x+(msgBoxPanelRect.w/2),msgBoxPanelRect.y+MESSAGE_BOX_HEADERTXT_Y,dat->rules.themeRules.textColNormal,FONTSIZE_LARGE,(uint8_t)SDL_floorf(alpha*255.0f),state->msgBoxHeaderTxt,ALIGN_CENTER,(Uint16)(msgBoxPanelRect.w - 2*UI_PADDING_SIZE));
-  drawTextAlignedSized(rdat,msgBoxPanelRect.x+(msgBoxPanelRect.w/2),msgBoxPanelRect.y+(msgBoxPanelRect.h/2),dat->rules.themeRules.textColNormal,FONTSIZE_NORMAL,(uint8_t)SDL_floorf(alpha*255.0f),state->msgBoxTxt,ALIGN_CENTER,(Uint16)(msgBoxPanelRect.w - 2*UI_PADDING_SIZE));
-  drawTextButton(&dat->rules.themeRules,rdat,state->ds.uiElemPosX[UIELEM_MSG_BOX_OK_BUTTON],state->ds.uiElemPosY[UIELEM_MSG_BOX_OK_BUTTON]+yOffset,state->ds.uiElemWidth[UIELEM_MSG_BOX_OK_BUTTON],getHighlightState(state,UIELEM_MSG_BOX_OK_BUTTON),(uint8_t)SDL_floorf(alpha*255.0f),dat->strings[dat->locStringIDs[LOCSTR_OK]]);
-  //SDL_Log("%.3f %.3f alpha %u\n",(double)state->ds.timeLeftInUIAnimation[UIANIM_MODAL_BOX_SHOW],(double)state->ds.timeLeftInUIAnimation[UIANIM_MODAL_BOX_HIDE],alpha);
-}
-
 void drawAboutBox(const app_data *restrict dat, const app_state *restrict state, resource_data *restrict rdat){
   
   float alpha = 1.0f;
@@ -2276,7 +2246,7 @@ void drawRxnMenu(const app_data *restrict dat, const app_state *restrict state, 
   for(uint8_t i=0;i<(dat->ndat.nuclData[state->chartSelectedNucl].numRxns+1);i++){
     if(state->lastInputType == INPUT_TYPE_MOUSE){
       if((state->ds.selectedRxn == i)||(state->ds.mouseHoldRxn == i)){
-        drawRect = getRxnMenuButtonRect(state,numRxnPerCol,i);
+        drawRect = getRxnMenuButtonRect(&state->ds,numRxnPerCol,i);
         drawRect.y += yOffset;
         if(state->ds.mouseOverRxn == i){
           highlightCol = dat->rules.themeRules.modSelectedAndMouseOverCol;
@@ -2286,7 +2256,7 @@ void drawRxnMenu(const app_data *restrict dat, const app_state *restrict state, 
         highlightCol.a = alpha;
         drawFlatRect(rdat,drawRect,highlightCol);
       }else if(state->ds.mouseOverRxn == i){
-        drawRect = getRxnMenuButtonRect(state,numRxnPerCol,i);
+        drawRect = getRxnMenuButtonRect(&state->ds,numRxnPerCol,i);
         drawRect.y += yOffset;
         highlightCol = dat->rules.themeRules.modMouseOverCol;
         highlightCol.a = alpha;
@@ -2294,13 +2264,13 @@ void drawRxnMenu(const app_data *restrict dat, const app_state *restrict state, 
       }
     }else{
       if(state->ds.mouseHoldRxn == i){
-        drawRect = getRxnMenuButtonRect(state,numRxnPerCol,i);
+        drawRect = getRxnMenuButtonRect(&state->ds,numRxnPerCol,i);
         drawRect.y += yOffset;
         highlightCol = dat->rules.themeRules.modSelectedCol;
         highlightCol.a = alpha;
         drawFlatRect(rdat,drawRect,highlightCol);
       }else if(state->ds.mouseOverRxn == i){
-        drawRect = getRxnMenuButtonRect(state,numRxnPerCol,i);
+        drawRect = getRxnMenuButtonRect(&state->ds,numRxnPerCol,i);
         drawRect.y += yOffset;
         highlightCol = dat->rules.themeRules.modMouseOverCol;
         highlightCol.a = alpha;
@@ -2575,34 +2545,59 @@ void drawTextSelHighlight(const app_state *restrict state, resource_data *restri
     //no string selected
     return;
   }
+
+  SDL_FRect rawSelRect = getTextSelRect(&state->tss,rdat);
+  drawFlatRect(rdat,rawSelRect,txtSelCol);
+
+}
+
+void drawContextMenu(const app_data *restrict dat, const app_state *restrict state, resource_data *restrict rdat){
   
-  uint8_t charIndStart = state->tss.selStartPos;
-  uint8_t charIndEnd = state->tss.selEndPos;
-  if(charIndStart == charIndEnd){
-    return; //width of selection is 0
-  }else if(charIndStart > charIndEnd){
-    //swap start and end for the purposes of drawing
-    uint8_t tmp = charIndEnd;
-    charIndEnd = charIndStart;
-    charIndStart = tmp;
+  float alpha = 1.0f;
+  if(state->ds.uiAnimPlaying & (1U << UIANIM_CONTEXT_MENU_HIDE)){
+    alpha = (float)(1.0f*juice_smoothStart2(state->ds.timeLeftInUIAnimation[UIANIM_CONTEXT_MENU_HIDE]/(UI_ANIM_LENGTH)));
+  }else if(state->ds.uiAnimPlaying & (1U << UIANIM_CONTEXT_MENU_SHOW)){
+    alpha = (float)(1.0f*juice_smoothStop2(1.0f - state->ds.timeLeftInUIAnimation[UIANIM_CONTEXT_MENU_SHOW]/UI_ANIM_LENGTH));
   }
-  uint8_t selLen = (uint8_t)(charIndEnd - charIndStart);
-  if(selLen < MAX_SELECTABLE_STR_LEN){
-    char selSubStr[MAX_SELECTABLE_STR_LEN], selPreStr[MAX_SELECTABLE_STR_LEN];
-    SDL_strlcpy(selSubStr,&state->tss.selectableStrTxt[state->tss.selectedStr][charIndStart],selLen+1);
-    //deal with '%%' sequences in some snprintf'd strings where the '% character needs to be displayed
-    if((charIndStart > 0)&&(selSubStr[0] == '%')&&(selSubStr[1] != '%')){
-      SDL_strlcpy(selSubStr,&state->tss.selectableStrTxt[state->tss.selectedStr][charIndStart-1],selLen+2);
+  //SDL_Log("alpha: %f\n",(double)alpha);
+  
+  //draw menu background
+  SDL_FRect drawRect;
+  drawRect.x = state->ds.uiElemPosX[UIELEM_CONTEXT_MENU];
+  drawRect.y = state->ds.uiElemPosY[UIELEM_CONTEXT_MENU];
+  drawRect.w = state->ds.uiElemWidth[UIELEM_CONTEXT_MENU];
+  drawRect.h = state->ds.uiElemHeight[UIELEM_CONTEXT_MENU];
+  drawPanelBG(&dat->rules.themeRules,rdat,drawRect,alpha);
+  
+  //draw menu item highlight
+  SDL_FColor highlightCol;
+  for(uint8_t i=0;i<state->cms.numContextMenuItems;i++){
+    drawRect = getContextMenuButtonRect(&state->ds,i);
+    if(i==state->cms.mouseOverContextItem){
+      highlightCol = dat->rules.themeRules.modSelectedCol;
+      highlightCol.a = alpha;
+      drawFlatRect(rdat,drawRect,highlightCol);
+    }else if(i==state->cms.clickedContextItem){
+      highlightCol = dat->rules.themeRules.modMouseOverCol;
+      highlightCol.a = alpha;
+      drawFlatRect(rdat,drawRect,highlightCol);
     }
-    SDL_strlcpy(selPreStr,state->tss.selectableStrTxt[state->tss.selectedStr],charIndStart+1);
-    
-    SDL_FRect rawSelRect = state->tss.selectableStrRect[state->tss.selectedStr];
-    //SDL_Log("Selected text: %s, prior text: %s, selected chars %u to %u\n",selSubStr,selPreStr,charIndStart,charIndEnd);
-    //SDL_Log("Original text rect: %0.2f %0.2f %0.2f %0.2f\n",(double)rawSelRect.x,(double)rawSelRect.y,(double)rawSelRect.w,(double)rawSelRect.h);
-    rawSelRect.x = rawSelRect.x + getTextWidth(rdat,state->tss.selectableStrFontSize[state->tss.selectedStr],selPreStr)/rdat->uiDPIScale;
-    rawSelRect.w = getTextWidth(rdat,state->tss.selectableStrFontSize[state->tss.selectedStr],selSubStr)/rdat->uiDPIScale;
-    //SDL_Log("Highlight rect: %0.2f %0.2f %0.2f %0.2f\n",(double)rawSelRect.x,(double)rawSelRect.y,(double)rawSelRect.w,(double)rawSelRect.h);
-    drawFlatRect(rdat,rawSelRect,txtSelCol);
+  }
+
+  //draw menu item text
+  drawRect.x = state->ds.uiElemPosX[UIELEM_CONTEXT_MENU] + (PANEL_EDGE_SIZE + 3*UI_PADDING_SIZE)*state->ds.uiUserScale;
+  drawRect.y = ((float)state->ds.uiElemPosY[UIELEM_CONTEXT_MENU] + PANEL_EDGE_SIZE*state->ds.uiUserScale);
+  drawRect.w = state->ds.uiElemWidth[UIELEM_CONTEXT_MENU];
+  drawRect.h = state->ds.uiElemHeight[UIELEM_CONTEXT_MENU];
+  Uint8 txtAlpha = (Uint8)(alpha*255.0f);
+  for(uint8_t i=0;i<state->cms.numContextMenuItems;i++){
+    switch(state->cms.contextMenuItems[i]){
+      case CONTEXTITEM_COPY:
+      drawTextAlignedSized(rdat,drawRect.x,drawRect.y + (0.4f + (float)i)*CONTEXT_MENU_ITEM_SPACING*state->ds.uiUserScale,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,dat->strings[dat->locStringIDs[LOCSTR_CONTEXT_COPY]],ALIGN_LEFT,(Uint16)(drawRect.w - (PANEL_EDGE_SIZE + 6*UI_PADDING_SIZE)*state->ds.uiUserScale));
+        break;
+      default:
+        break;
+    }
   }
 
 }
@@ -2701,9 +2696,7 @@ void drawUI(const app_data *restrict dat, app_state *restrict state, resource_da
   }
 
   //draw modal dialogs
-  if(state->ds.shownElements & (1UL << UIELEM_MSG_BOX)){
-    drawMessageBox(dat,state,rdat);
-  }else if(state->ds.shownElements & (1UL << UIELEM_ABOUT_BOX)){
+  if(state->ds.shownElements & (1UL << UIELEM_ABOUT_BOX)){
     drawAboutBox(dat,state,rdat);
   }else if(state->ds.shownElements & (1UL << UIELEM_PREFS_DIALOG)){
     drawPrefsDialog(dat,state,rdat);
@@ -2714,6 +2707,10 @@ void drawUI(const app_data *restrict dat, app_state *restrict state, resource_da
 
   //draw highlight over selected text
   drawTextSelHighlight(state,rdat);
+
+  if(state->cms.numContextMenuItems > 0){
+    drawContextMenu(dat,state,rdat);
+  }
 
   if(state->ds.uiAnimPlaying & (1U << UIANIM_CHART_FADEIN)){
     

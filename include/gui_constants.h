@@ -119,13 +119,6 @@ static const float uiScales[UISCALE_ENUM_LENGTH] = {1.0f,1.20f,1.60f,1.85f};
 
 #define DIMMER_OPACITY               0.20f
 
-//message box (for errors/warnings)
-#define MESSAGE_BOX_WIDTH            360 //in unscaled pixels
-#define MESSAGE_BOX_HEIGHT           240 //in unscaled pixels
-#define MESSAGE_BOX_HEADERTXT_Y      (6*UI_PADDING_SIZE)
-#define MESSAGE_BOX_OK_BUTTON_WIDTH  120
-#define MESSAGE_BOX_OK_BUTTON_YB     (3*UI_PADDING_SIZE)
-
 //about box (credits etc.)
 #define ABOUT_BOX_WIDTH            420 //in unscaled pixels
 #define ABOUT_BOX_HEIGHT           366 //in unscaled pixels

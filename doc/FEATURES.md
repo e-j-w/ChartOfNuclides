@@ -1,13 +1,20 @@
 # Feature list
 
-The overall goal of this project is to make a simple, performant, and multiplatform tool that will be useful in both professional (nuclear structure research) and educational contexts. Currently implemented features include:
+Currently implemented features include:
 
 - Display the chart of nuclides with various color schemes: half-life / lifetime, decay mode, E(2+) ...
 - Select individual nuclides to browse ground and excited state data, including:
   - Level energies, half-lives/lifetimes, decay modes, spin-parities ...
   - Gamma energies, branching fractions, multipolarities ...
   - Atomic masses.
-- Fast, multithreaded search interface for nuclide, level, gamma, and gamma cascade data.
+- Search interface for nuclide, level, gamma, and gamma cascade data.
 - Runs locally, with no network connection needed.
 - Mouse, keyboard, and gamepad (!) support.
-- Written in portable [C99](https://en.wikipedia.org/wiki/C99) using [SDL](https://github.com/libsdl-org/SDL) (so you can browse nuclear half-lives using some of the same code that powers [Half-Life](https://www.pcgamingwiki.com/wiki/Half-Life#Middleware)). Fast hardware accelerated rendering using `SDL_Renderer`, native HI-DPI scaling support.
+
+# Technical info and other musings
+
+The overall goal of this project is to make a simple, performant, and multiplatform tool that will be useful in both professional (nuclear structure research) and educational contexts. The reason I'm making this is because there's basically no way to browse isotope data that's both usable offline and suitable for a normal person to use.
+
+The program is written in portable [C99](https://en.wikipedia.org/wiki/C99) using [SDL](https://github.com/libsdl-org/SDL) (so you can browse nuclear half-lives using some of the same code that powers [Half-Life](https://www.pcgamingwiki.com/wiki/Half-Life#Middleware)). It uses several of SDL's built-in features including fast hardware accelerated rendering and native HI-DPI scaling support.
+
+The nuclear structure data comes from [ENSDF](https://www.nndc.bnl.gov/ensdfarchivals/). The program uses an [overcomplicated parser](../data_processor/proc_data_parser.c) (~3500 SLOC and counting) to pack the original ENSDF data (and some data from other sources) into a single-file database (~50 MB). This database is fully loaded into memory when running the program, which allows for extremely fast retrieval/search of data. The search interface is multithreaded, allowing for multiple searches of the database to be performed simultaneously.

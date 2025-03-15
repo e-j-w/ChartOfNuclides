@@ -79,7 +79,6 @@ void initializeTempState(const app_data *restrict dat, app_state *restrict state
 	state->ds.mouseOverRxn = 255;
 	state->ds.mouseHoldRxn = 255;
 	state->ds.selectedRxn = 0;
-	state->ds.numContextMenuItems = 0;
 	state->ds.totalPanTime = CHART_KEY_PAN_TIME;
 	state->ds.zoomFinished = 0;
 	state->ds.zoomInProgress = 0;
@@ -93,6 +92,7 @@ void initializeTempState(const app_data *restrict dat, app_state *restrict state
 	state->ds.searchEntryDispStartChar = 0;
 	state->ds.searchEntryDispNumChars = 65535U; //default value specifying no text has been input yet
 	state->ds.interfaceSizeInd = UISCALE_NORMAL;
+	state->cms.numContextMenuItems = 0;
 	state->ss.numResults = 0;
 	state->ss.canUpdateResults = SDL_CreateSemaphore(1);
 	clearSelectionStrs(&state->tss,0);
@@ -235,7 +235,6 @@ void stopUIAnimation(const app_data *restrict dat, app_state *restrict state, co
 			}
 			break;
     case UIANIM_MODAL_BOX_HIDE:
-      state->ds.shownElements &= (uint64_t)(~(1UL << UIELEM_MSG_BOX)); //close the message box
 			state->ds.shownElements &= (uint64_t)(~(1UL << UIELEM_ABOUT_BOX)); //close the about box
 			state->ds.shownElements &= (uint64_t)(~(1UL << UIELEM_PREFS_DIALOG)); //close the preferences dialog
 			if(state->ds.shownElements & (1UL << UIELEM_NUCL_FULLINFOBOX)){
@@ -426,13 +425,15 @@ void updateDrawingState(const app_data *restrict dat, app_state *restrict state,
 
 }
 
-//sets everything needed to show a message box
-void setupMessageBox(const app_data *restrict dat, app_state *restrict state, const char *headerTxt, const char *msgTxt){
-  SDL_strlcpy(state->msgBoxHeaderTxt,headerTxt,31);
-  SDL_strlcpy(state->msgBoxTxt,msgTxt,255);
-  state->ds.shownElements |= (uint64_t)(1UL << UIELEM_MSG_BOX);
-  startUIAnimation(dat,state,UIANIM_MODAL_BOX_SHOW);
-  changeUIState(dat,state,UISTATE_MSG_BOX);
+void setupCopyContextMenu(const app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat){
+  state->cms.numContextMenuItems = 1;
+	state->cms.contextMenuItems[0] = CONTEXTITEM_COPY;
+	state->cms.mouseOverContextItem = 255;
+	state->cms.clickedContextItem = 255;
+	updateSingleUIElemPosition(dat,state,rdat,UIELEM_CONTEXT_MENU);
+	//const SDL_FRect conMenuRect = {(float)state->ds.uiElemPosX[UIELEM_CONTEXT_MENU], (float)state->ds.uiElemPosY[UIELEM_CONTEXT_MENU], (float)state->ds.uiElemWidth[UIELEM_CONTEXT_MENU], (float)state->ds.uiElemHeight[UIELEM_CONTEXT_MENU]};
+	//removeSelectableStringsInRect(&state->tss, conMenuRect);
+	startUIAnimation(dat,state,UIANIM_CONTEXT_MENU_SHOW);
 }
 
 //gets strings that denote 'special' levels in certain nuclides
@@ -2755,9 +2756,6 @@ void changeUIState(const app_data *restrict dat, app_state *restrict state, cons
 	}
   
   switch(state->uiState){
-    case UISTATE_MSG_BOX:
-      state->interactableElement |= (uint64_t)(1UL << UIELEM_MSG_BOX_OK_BUTTON);
-      break;
 		case UISTATE_ABOUT_BOX:
 			state->interactableElement |= (uint64_t)(1UL << UIELEM_ABOUT_BOX_CLOSEBUTTON);
 			break;
@@ -3493,10 +3491,6 @@ void uiElemClickAction(app_data *restrict dat, app_state *restrict state, resour
 				state->clickedUIElem = UIELEM_PREFS_DIALOG_UISCALE_DROPDOWN;
       }
 			break;
-    case UIELEM_MSG_BOX_OK_BUTTON:
-      changeUIState(dat,state,state->lastUIState); //restore previous interactable elements
-      startUIAnimation(dat,state,UIANIM_MODAL_BOX_HIDE); //message box will be closed after animation finishes
-      break;
 		case UIELEM_ABOUT_BOX_CLOSEBUTTON:
       changeUIState(dat,state,state->lastUIState); //restore previous interactable elements
       startUIAnimation(dat,state,UIANIM_MODAL_BOX_HIDE); //about box will be closed after animation finishes
@@ -3845,6 +3839,7 @@ void uiElemClickAction(app_data *restrict dat, app_state *restrict state, resour
 					}
 				}
       }
+			state->cms.numContextMenuItems = 0; //remove any opened context menus
       break;
   }
 }
@@ -3917,12 +3912,53 @@ uint8_t getRxnMenuNumRxnsPerColumn(const app_data *restrict dat, const app_state
 	return (uint8_t)(SDL_ceilf((dat->ndat.nuclData[state->chartSelectedNucl].numRxns+1.0f)/(state->ds.rxnMenuColumns*1.0f)));
 }
 
-SDL_FRect getRxnMenuButtonRect(const app_state *restrict state, const uint8_t numRxnPerCol, const uint8_t menuItem){
+SDL_FRect getRxnMenuButtonRect(const drawing_state *restrict ds, const uint8_t numRxnPerCol, const uint8_t menuItem){
 	SDL_FRect rect;
-	rect.x = state->ds.uiElemPosX[UIELEM_RXN_MENU] + (float)(2*PANEL_EDGE_SIZE + RXN_MENU_COLUMN_WIDTH*((menuItem)/numRxnPerCol))*state->ds.uiUserScale;
-	rect.y = (float)state->ds.uiElemPosY[UIELEM_RXN_MENU] + (PANEL_EDGE_SIZE + 0.5f*UI_PADDING_SIZE + ((float)((menuItem)%numRxnPerCol) + 0.1f)*RXN_MENU_ITEM_SPACING)*state->ds.uiUserScale;
-	rect.w = RXN_MENU_COLUMN_WIDTH*state->ds.uiUserScale;
-	rect.h = RXN_MENU_ITEM_SPACING*state->ds.uiUserScale;
+	rect.x = (float)ds->uiElemPosX[UIELEM_RXN_MENU] + (float)(2.0f*PANEL_EDGE_SIZE + RXN_MENU_COLUMN_WIDTH*((menuItem)/numRxnPerCol))*ds->uiUserScale;
+	rect.y = (float)ds->uiElemPosY[UIELEM_RXN_MENU] + (PANEL_EDGE_SIZE + 0.5f*UI_PADDING_SIZE + ((float)((menuItem)%numRxnPerCol) + 0.1f)*RXN_MENU_ITEM_SPACING)*ds->uiUserScale;
+	rect.w = RXN_MENU_COLUMN_WIDTH*ds->uiUserScale;
+	rect.h = RXN_MENU_ITEM_SPACING*ds->uiUserScale;
+	return rect;
+}
+
+SDL_FRect getContextMenuButtonRect(const drawing_state *restrict ds, const uint8_t menuItem){
+	SDL_FRect rect;
+	rect.x = (float)ds->uiElemPosX[UIELEM_CONTEXT_MENU] + (2.0f*PANEL_EDGE_SIZE*ds->uiUserScale);
+	rect.y = (float)ds->uiElemPosY[UIELEM_CONTEXT_MENU] + (PANEL_EDGE_SIZE + 0.5f*UI_PADDING_SIZE + menuItem*CONTEXT_MENU_ITEM_SPACING)*ds->uiUserScale;
+	rect.w = (CONTEXT_MENU_WIDTH - (2.0f*PANEL_EDGE_SIZE + UI_PADDING_SIZE))*ds->uiUserScale;
+	rect.h = CONTEXT_MENU_ITEM_SPACING*ds->uiUserScale;
+	return rect;
+}
+
+SDL_FRect getTextSelRect(const text_selection_state *restrict tss, resource_data *restrict rdat){
+	SDL_FRect rect = {-10.0f, -10.0f, 0.0f, 0.0f};
+	if(tss->selectedStr < tss->numSelStrs){
+
+		uint8_t charIndStart = tss->selStartPos;
+		uint8_t charIndEnd = tss->selEndPos;
+		if(charIndStart == charIndEnd){
+			return rect; //width of selection is 0
+		}else if(charIndStart > charIndEnd){
+			//swap start and end for the purposes of drawing
+			uint8_t tmp = charIndEnd;
+			charIndEnd = charIndStart;
+			charIndStart = tmp;
+		}
+		uint8_t selLen = (uint8_t)(charIndEnd - charIndStart);
+		if(selLen < MAX_SELECTABLE_STR_LEN){
+			char selSubStr[MAX_SELECTABLE_STR_LEN], selPreStr[MAX_SELECTABLE_STR_LEN];
+			SDL_strlcpy(selSubStr,&tss->selectableStrTxt[tss->selectedStr][charIndStart],selLen+1);
+			//deal with '%%' sequences in some snprintf'd strings where the '% character needs to be displayed
+			if((charIndStart > 0)&&(selSubStr[0] == '%')&&(selSubStr[1] != '%')){
+				SDL_strlcpy(selSubStr,&tss->selectableStrTxt[tss->selectedStr][charIndStart-1],selLen+2);
+			}
+			SDL_strlcpy(selPreStr,tss->selectableStrTxt[tss->selectedStr],charIndStart+1);
+
+			rect = tss->selectableStrRect[tss->selectedStr];
+			rect.x = rect.x + getTextWidth(rdat,tss->selectableStrFontSize[tss->selectedStr],selPreStr)/rdat->uiDPIScale;
+			rect.w = getTextWidth(rdat,tss->selectableStrFontSize[tss->selectedStr],selSubStr)/rdat->uiDPIScale;
+		}
+	}
 	return rect;
 }
 
@@ -3956,6 +3992,18 @@ void updateSingleUIElemPosition(const app_data *restrict dat, app_state *restric
 			state->ds.uiElemExtPlusX[uiElemInd] = (uint16_t)((SEARCH_BUTTON_POS_XR+1.0f)*state->ds.uiUserScale); //prevent clicking chart 'in between' buttons
 			state->ds.uiElemExtMinusY[uiElemInd] = (uint16_t)((SEARCH_BUTTON_POS_Y+1.0f)*state->ds.uiUserScale); //prevent clicking chart 'in between' buttons
 			//SDL_Log("res: [%u %u]\nx: %u, y: %u, w: %u, h: %u\n",state->ds.windowXRes,state->ds.windowYRes,state->ds.uiElemPosX[uiElemInd],state->ds.uiElemPosY[uiElemInd],state->ds.uiElemWidth[uiElemInd],state->ds.uiElemHeight[uiElemInd]);
+			break;
+		case UIELEM_CONTEXT_MENU:
+			state->ds.uiElemPosX[uiElemInd] = (int16_t)(state->mouseRightClickPosXPx);
+			state->ds.uiElemPosY[uiElemInd] = (int16_t)(state->mouseRightClickPosYPx);
+			state->ds.uiElemWidth[uiElemInd] = (int16_t)(CONTEXT_MENU_WIDTH*state->ds.uiUserScale);
+			if((state->ds.uiElemPosX[uiElemInd] + state->ds.uiElemWidth[uiElemInd]) > state->ds.windowXRes){
+				state->ds.uiElemPosX[uiElemInd] = (int16_t)(state->ds.uiElemPosX[uiElemInd] - state->ds.uiElemWidth[uiElemInd]);
+			}
+			state->ds.uiElemHeight[uiElemInd] = (int16_t)((state->cms.numContextMenuItems*CONTEXT_MENU_ITEM_SPACING + 2.0f*PANEL_EDGE_SIZE + 3.0f*UI_PADDING_SIZE)*state->ds.uiUserScale);
+			if((state->ds.uiElemPosY[uiElemInd] + state->ds.uiElemHeight[uiElemInd]) > state->ds.windowYRes){
+				state->ds.uiElemPosY[uiElemInd] = (int16_t)(state->ds.uiElemPosY[uiElemInd] - state->ds.uiElemHeight[uiElemInd]);
+			}
 			break;
 		case UIELEM_PRIMARY_MENU:
 			state->ds.uiElemPosX[uiElemInd] = (int16_t)(state->ds.windowXRes-((PRIMARY_MENU_WIDTH+PRIMARY_MENU_POS_XR)*state->ds.uiUserScale));
@@ -4080,18 +4128,6 @@ void updateSingleUIElemPosition(const app_data *restrict dat, app_state *restric
 			state->ds.uiElemPosY[uiElemInd] = (int16_t)((SEARCH_MENU_POS_Y+SEARCH_MENU_ENTRYBOX_POS_Y+UI_TILE_SIZE+UI_PADDING_SIZE+3*SEARCH_MENU_RESULT_HEIGHT)*state->ds.uiUserScale);
 			state->ds.uiElemWidth[uiElemInd] = (int16_t)(SEARCH_MENU_ENTRYBOX_WIDTH*state->ds.uiUserScale);
 			state->ds.uiElemHeight[uiElemInd] = (int16_t)((SEARCH_MENU_RESULT_HEIGHT-UI_PADDING_SIZE)*state->ds.uiUserScale);
-			break;	
-		case UIELEM_MSG_BOX:
-			state->ds.uiElemPosX[uiElemInd] = (int16_t)((state->ds.windowXRes - MESSAGE_BOX_WIDTH*state->ds.uiUserScale)/2);
-			state->ds.uiElemPosY[uiElemInd] = (int16_t)((state->ds.windowYRes - MESSAGE_BOX_HEIGHT*state->ds.uiUserScale)/2);
-			state->ds.uiElemWidth[uiElemInd] = (int16_t)(MESSAGE_BOX_WIDTH*state->ds.uiUserScale);
-			state->ds.uiElemHeight[uiElemInd] = (int16_t)(MESSAGE_BOX_HEIGHT*state->ds.uiUserScale);
-			break;
-		case UIELEM_MSG_BOX_OK_BUTTON:
-			state->ds.uiElemPosX[uiElemInd] = (int16_t)((state->ds.windowXRes - MESSAGE_BOX_OK_BUTTON_WIDTH*state->ds.uiUserScale)/2);
-			state->ds.uiElemPosY[uiElemInd] = (int16_t)((state->ds.windowYRes + MESSAGE_BOX_HEIGHT*state->ds.uiUserScale)/2 - ((MESSAGE_BOX_OK_BUTTON_YB + UI_TILE_SIZE)*state->ds.uiUserScale));
-			state->ds.uiElemWidth[uiElemInd] = (int16_t)(MESSAGE_BOX_OK_BUTTON_WIDTH*state->ds.uiUserScale);
-			state->ds.uiElemHeight[uiElemInd] = (int16_t)(UI_TILE_SIZE*state->ds.uiUserScale);
 			break;
 		case UIELEM_ABOUT_BOX:
 			state->ds.uiElemPosX[uiElemInd] = (int16_t)((state->ds.windowXRes - ABOUT_BOX_WIDTH*state->ds.uiUserScale)/2);
