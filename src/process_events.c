@@ -53,50 +53,6 @@ void setSelTxtPrimarySelection(const text_selection_state *restrict tss){
   }
 }
 
-//callback for SDL_SetClipboardData
-//normally would just use SDL_SetClipboardText, but as of SDL 3.2.4 this is buggy on Wayland
-const void* setSelTxtClipboardData(void *data, const char *mime_type, size_t *size){
-  
-  (void)mime_type;
-  
-  text_selection_state *tss = ((text_selection_state*)(intptr_t)(data)); //get the text selection state (double cast to avoid warning)
-  tss->clipboardData = (char*)SDL_calloc(MAX_SELECTABLE_STR_LEN,sizeof(char)); //allocate output str
-  size_t selLen = 0;
-
-  uint8_t charIndStart = tss->selStartPos;
-  uint8_t charIndEnd = tss->selEndPos;
-  if(charIndStart != charIndEnd){
-    if(charIndStart > charIndEnd){
-      //swap start and end for the purposes of drawing
-      uint8_t tmp = charIndEnd;
-      charIndEnd = charIndStart;
-      charIndStart = tmp;
-    }
-    selLen = (size_t)(charIndEnd - charIndStart);
-    if(selLen < MAX_SELECTABLE_STR_LEN){
-      SDL_strlcpy(tss->clipboardData,&tss->selectableStrTxt[tss->selectedStr][charIndStart],selLen+1);
-      char *selSubStrCpy = findReplaceAllUTF8("%%","%",tss->clipboardData);
-      SDL_strlcpy(tss->clipboardData,selSubStrCpy,selLen+1);
-      free(selSubStrCpy);
-    }
-  }
-
-  *size = SDL_strlen(tss->clipboardData); //output str size
-
-  return (void *)(intptr_t)(tss->clipboardData);
-}
-
-//callback for SDL_SetClipboardData
-//normally would just use SDL_SetClipboardText, but as of SDL 3.2.4 this is buggy on Wayland
-void cleanupSelTxtClipboardData(void *data){
-  
-  text_selection_state *tss = ((text_selection_state*)(intptr_t)(data)); //get the text selection state (double cast to avoid warning)
-  if(tss->clipboardData != NULL){
-    SDL_free(tss->clipboardData);
-  }
-
-}
-
 void fcScrollAction(app_state *restrict state, const float deltaVal){
   //SDL_Log("scroll delta: %f\n",(double)deltaVal);
   const float screenNumLines = (float)(getNumScreenLvlDispLines(&state->ds));
@@ -849,39 +805,42 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
     }
     if(((state->ds.textDragInProgress == 0)&&(state->ds.chartDragInProgress == 0))||(doubleClick)){
       //check for the mouse position with respect to any selectable strings
-      for(uint16_t i=0; i<state->tss.numSelStrs; i++){
-        if((state->mouseXPx >= state->tss.selectableStrRect[i].x)&&(state->mouseXPx < (state->tss.selectableStrRect[i].x + state->tss.selectableStrRect[i].w))){
-          if((state->mouseYPx >= state->tss.selectableStrRect[i].y)&&(state->mouseYPx < (state->tss.selectableStrRect[i].y + state->tss.selectableStrRect[i].h))){
-            //if(state->mouseMovedDuringClick == 0){
-              //mouse is over selectable text
-              //SDL_Log("Mouse over selectable string %u.\n",i);
-              state->ds.textDragInProgress = 2;
-              if((state->mouseHoldStartPosXPx >= 0.0f)||(doubleClick)){
-                float cursorRelPos = (state->mouseHoldStartPosXPx - state->tss.selectableStrRect[i].x)/state->ds.uiUserScale; //position of the cursor relative to the start of the selectable text
-                if(cursorRelPos < 0.0f){
-                  cursorRelPos = 0.0f;
-                }
-                //SDL_Log("rel pos: %0.3f\n",(double)cursorRelPos);
-                if(cursorRelPos >= 0){
-                  state->tss.selectedStr = i;
-                  if(doubleClick){
-                    //select entire string
-                    //SDL_Log("Selecting entire string.\n");
-                    state->ds.textDragInProgress = 0;
-                    state->tss.selStartPos = 0;
-                    state->tss.selEndPos = (uint8_t)SDL_strlen(state->tss.selectableStrTxt[i]);
-                  }else{
-                    //start drag over text
-                    state->ds.textDragStartMouseX = state->mouseXPx;
-                    state->ds.textDragInProgress = 1;
-                    state->tss.selStartPos = (uint8_t)(getNumTextCharsUnderWidth(rdat,(uint16_t)(cursorRelPos),state->tss.selectableStrTxt[i],0,state->tss.selectableStrFontSize[i]));
-                    state->tss.selEndPos = state->tss.selStartPos;
+      if(state->cms.numContextMenuItems == 0){
+        //cannot select text when context menu is open
+        for(uint16_t i=0; i<state->tss.numSelStrs; i++){
+          if((state->mouseXPx >= state->tss.selectableStrRect[i].x)&&(state->mouseXPx < (state->tss.selectableStrRect[i].x + state->tss.selectableStrRect[i].w))){
+            if((state->mouseYPx >= state->tss.selectableStrRect[i].y)&&(state->mouseYPx < (state->tss.selectableStrRect[i].y + state->tss.selectableStrRect[i].h))){
+              //if(state->mouseMovedDuringClick == 0){
+                //mouse is over selectable text
+                //SDL_Log("Mouse over selectable string %u.\n",i);
+                state->ds.textDragInProgress = 2;
+                if((state->mouseHoldStartPosXPx >= 0.0f)||(doubleClick)){
+                  float cursorRelPos = (state->mouseHoldStartPosXPx - state->tss.selectableStrRect[i].x)/state->ds.uiUserScale; //position of the cursor relative to the start of the selectable text
+                  if(cursorRelPos < 0.0f){
+                    cursorRelPos = 0.0f;
                   }
-                  //SDL_Log("start drag on selectable text at character %u\n",state->tss.selStartPos);
+                  //SDL_Log("rel pos: %0.3f\n",(double)cursorRelPos);
+                  if(cursorRelPos >= 0){
+                    state->tss.selectedStr = i;
+                    if(doubleClick){
+                      //select entire string
+                      //SDL_Log("Selecting entire string.\n");
+                      state->ds.textDragInProgress = 0;
+                      state->tss.selStartPos = 0;
+                      state->tss.selEndPos = (uint8_t)SDL_strlen(state->tss.selectableStrTxt[i]);
+                    }else{
+                      //start drag over text
+                      state->ds.textDragStartMouseX = state->mouseXPx;
+                      state->ds.textDragInProgress = 1;
+                      state->tss.selStartPos = (uint8_t)(getNumTextCharsUnderWidth(rdat,(uint16_t)(cursorRelPos),state->tss.selectableStrTxt[i],0,state->tss.selectableStrFontSize[i]));
+                      state->tss.selEndPos = state->tss.selStartPos;
+                    }
+                    //SDL_Log("start drag on selectable text at character %u\n",state->tss.selStartPos);
+                  }
                 }
-              }
-              break;
-            //}
+                break;
+              //}
+            }
           }
         }
       }
@@ -892,7 +851,7 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
       if((state->mouseRightClickPosXPx >= selRect.x)&&(state->mouseRightClickPosXPx < (selRect.x + selRect.w))){
         if((state->mouseRightClickPosYPx >= selRect.y)&&(state->mouseRightClickPosYPx < (selRect.y + selRect.h))){
           //right clicked on selected text
-          SDL_Log("Right click on selected text.\n");
+          //SDL_Log("Right click on selected text.\n");
           setupCopyContextMenu(dat,state,rdat);
         }
       }
@@ -909,7 +868,36 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
     state->mouseholdElement = UIELEM_ENUM_LENGTH;
 
     if(state->ds.chartDragInProgress == 0){
-      //first, handle dynamic menu (menus without a fixed number of entries) selections
+
+      //handle context menu
+      if(state->cms.numContextMenuItems > 0){
+        //context menu visible
+        state->cms.mouseOverContextItem = 255U;
+        if(state->ds.timeLeftInUIAnimation[UIANIM_CONTEXT_MENU_HIDE]==0.0f){
+          for(uint8_t i=0;i<state->cms.numContextMenuItems;i++){
+            SDL_FRect buttonRect = getContextMenuButtonRect(&state->ds,i);
+            if((state->mouseXPx >= buttonRect.x)&&(state->mouseXPx < (buttonRect.x + buttonRect.w))){
+              if((state->mouseYPx >= buttonRect.y)&&(state->mouseYPx < (buttonRect.y + buttonRect.h))){
+                state->cms.mouseOverContextItem = i;
+                //SDL_Log("Mouse pos: %0.3f %0.3f, Mouse click pos: %0.3f %0.3f\n",(double)state->mouseXPx,(double)state->mouseYPx,(double)state->mouseClickPosXPx,(double)state->mouseClickPosYPx);
+                if((state->mouseClickPosXPx >= buttonRect.x)&&(state->mouseClickPosXPx < (buttonRect.x + buttonRect.w))){
+                  if((state->mouseClickPosYPx >= buttonRect.y)&&(state->mouseClickPosYPx < (buttonRect.y + buttonRect.h))){
+                    if((state->mouseMovedDuringClick == 0)||(chartDraggable)){
+                      state->cms.clickedContextItem = i;
+                      //SDL_Log("Clicked context menu item %u.\n",state->cms.clickedContextItem);
+                      contextMenuClickAction(dat,state,i);
+                      break;
+                    }
+                  }
+                }
+                break;
+              }
+            }
+          }
+        }
+      }
+
+      //handle dynamic menu (menus without a fixed number of entries) selections
       uint8_t dynamicMenuItemInteracted = 0;
       if(state->ds.shownElements & (1UL << UIELEM_RXN_MENU)){
         uint8_t numRxnPerCol = getRxnMenuNumRxnsPerColumn(dat,state);
@@ -1008,7 +996,9 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
     //check for mouse click, outside of buttons
     if(state->mouseHoldStartPosXPx >= 0.0f){
       if(state->ds.textDragInProgress == 0){
-        state->tss.selectedStr = 65535; //de-select text
+        if(state->cms.numContextMenuItems == 0){
+          state->tss.selectedStr = 65535; //de-select text
+        }
       }
     }
     

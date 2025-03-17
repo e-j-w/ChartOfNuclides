@@ -27,6 +27,9 @@ using game data/state */
 //function prototypes
 void initializeTempState(const app_data *restrict dat, app_state *restrict state, thread_manager_state *restrict tms);
 
+const void* setSelTxtClipboardData(void *data, const char *mime_type, size_t *size);
+void cleanupSelTxtClipboardData(void *data);
+
 void clearSelectionStrs(text_selection_state *restrict tss, const uint8_t modifiableAfter);
 
 void startUIAnimation(const app_data *restrict dat, app_state *restrict state, const uint8_t uiAnim);
@@ -112,6 +115,7 @@ void setSelectedNuclOnLevelList(const app_data *restrict dat, app_state *restric
 void setSelectedNuclOnChart(const app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat, const uint16_t N, const uint16_t Z, const uint8_t forcePan);
 void setSelectedNuclOnChartDirect(const app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat, const uint16_t selNucl, const uint8_t forcePan);
 void updateSearchUIState(const app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat);
+void contextMenuClickAction(app_data *restrict dat, app_state *restrict state, const uint8_t menuItemInd);
 void uiElemHoldAction(const app_data *restrict dat, app_state *restrict state, const uint8_t uiElemID);
 void uiElemMouseoverAction(const app_state *restrict state, resource_data *restrict rdat);
 void uiElemClickAction(app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat, const uint8_t doubleClick, const uint8_t uiElemID);

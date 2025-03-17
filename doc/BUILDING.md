@@ -1,6 +1,9 @@
-# Building from source
+- [Linux](#linux)
+- [Windows (WIP)](#windows)
 
-The current code has been tested under Arch Linux and Debian 12 as of March 2025, though most recent Linux distros should work as well. The plan is to eventually support other platforms (Windows especially) once a stable SDL3 release is available.
+# Linux
+
+The current code has been tested under Arch Linux and Debian 12 as of March 2025, though most recent Linux distros should work as well.
 
 ## Using Flatpak
 
@@ -93,7 +96,7 @@ make all -j
 make all -j CC=clang
 ```
 
-Two executables will be built: `proc_data` (which generates the data package containing the nuclear structure database used by the main application), and `con` (the main application).  [Build the data files](#build-data-files) if necessary, then run the application:
+Two executables will be built: `proc_data` (which generates the data package containing the nuclear structure database used by the main application), and `con` (the main application).  [Build the data files](#build-data-file) if necessary, then run the application:
 
 ```
 ./con
@@ -111,7 +114,7 @@ To uninstall:
 sudo make uninstall-linux
 ```
 
-### Build data files
+### Build data file
 
 In order for the application to run, it requires a data file (`con.dat`) containing the nuclear structure database and graphics/font resources.  The application will look for the data file in any of the following locations (in order of preference):
 
@@ -140,3 +143,30 @@ Once the data files are properly set up, run:
 ```
 
 This will build the data package file `con.dat` in the same directory (you can then get rid of the original data files if you don't want them anymore).
+
+# Windows
+
+The plan is to eventually support other platforms (Windows especially) once a stable SDL3 release is available. The following guide is work in progress and may not work yet.
+
+There are various guides online for building SDL2 programs in Windows.  With Windows 10, the following has worked for me:
+
+* Install mingw-w64 and SDL2 via [MSYS2](https://www.msys2.org/).  Follow the [installation instructions](https://www.msys2.org/#installation), and then install mingw-w64 and the SDL2 libraries from the MSYS2 terminal:
+
+```
+pacman -S --needed base-devel mingw-w64-x86_64-toolchain mingw-w64-x86_64-sdl3 mingw-w64-x86_64-sdl3-ttf mingw-w64-x86_64-sdl3-image
+```
+
+Then run mingw-w64 (`MSYS2 MinGW x64` in the Start Menu).  Go to the source directory, and compile:
+
+```
+cd /c/path/to/ChartOfNuclides
+make all -j
+```
+
+Build the data file (using the same [procedure](#build-data-file) as on Linux) if necessary, then run the application:
+
+```
+./con.exe
+```
+
+If run from the file manager, the application may compain about missing DLL files, as it is not being run from the MSYS2 environment.  These can be copied over (and placed in the same directory as `con.exe`) from the `C:\msys64\mingw64\bin` directory.  To figure out which DLLs the application depends on, run `ldd con.exe`.

@@ -121,6 +121,50 @@ void initializeTempState(const app_data *restrict dat, app_state *restrict state
 
 }
 
+//callback for SDL_SetClipboardData
+//normally would just use SDL_SetClipboardText, but as of SDL 3.2.4 this is buggy on Wayland (fixed in later versions)
+const void* setSelTxtClipboardData(void *data, const char *mime_type, size_t *size){
+  
+  (void)mime_type;
+  
+  text_selection_state *tss = ((text_selection_state*)(intptr_t)(data)); //get the text selection state (double cast to avoid warning)
+  tss->clipboardData = (char*)SDL_calloc(MAX_SELECTABLE_STR_LEN,sizeof(char)); //allocate output str
+  size_t selLen = 0;
+
+  uint8_t charIndStart = tss->selStartPos;
+  uint8_t charIndEnd = tss->selEndPos;
+  if(charIndStart != charIndEnd){
+    if(charIndStart > charIndEnd){
+      //swap start and end for the purposes of drawing
+      uint8_t tmp = charIndEnd;
+      charIndEnd = charIndStart;
+      charIndStart = tmp;
+    }
+    selLen = (size_t)(charIndEnd - charIndStart);
+    if(selLen < MAX_SELECTABLE_STR_LEN){
+      SDL_strlcpy(tss->clipboardData,&tss->selectableStrTxt[tss->selectedStr][charIndStart],selLen+1);
+      char *selSubStrCpy = findReplaceAllUTF8("%%","%",tss->clipboardData);
+      SDL_strlcpy(tss->clipboardData,selSubStrCpy,selLen+1);
+      free(selSubStrCpy);
+    }
+  }
+
+  *size = SDL_strlen(tss->clipboardData); //output str size
+
+  return (void *)(intptr_t)(tss->clipboardData);
+}
+
+//callback for SDL_SetClipboardData
+//normally would just use SDL_SetClipboardText, but as of SDL 3.2.4 this is buggy on Wayland
+void cleanupSelTxtClipboardData(void *data){
+  
+  text_selection_state *tss = ((text_selection_state*)(intptr_t)(data)); //get the text selection state (double cast to avoid warning)
+  if(tss->clipboardData != NULL){
+    SDL_free(tss->clipboardData);
+  }
+
+}
+
 //resets the text selection state, should be called on frames where selectable text changes position
 void clearSelectionStrs(text_selection_state *restrict tss, const uint8_t modifiableAfter){
 	tss->selStartPos = 0;
@@ -273,6 +317,9 @@ void stopUIAnimation(const app_data *restrict dat, app_state *restrict state, co
 			startUIAnimation(dat,state,UIANIM_NUCLINFOBOX_CONTRACT);
 			changeUIState(dat,state,UISTATE_INFOBOX); //update UI state now that the regular info box is visible
 			clearSelectionStrs(&state->tss,0); //strings on full level list are no longer selectable
+			break;
+		case UIANIM_CONTEXT_MENU_HIDE:
+			state->cms.numContextMenuItems = 0; //prevent further interactions with the context menu
 			break;
     default:
       break;
@@ -3320,6 +3367,33 @@ void updateSearchUIState(const app_data *restrict dat, app_state *restrict state
   }
 }
 
+void contextMenuClickAction(app_data *restrict dat, app_state *restrict state, const uint8_t menuItemInd){
+	
+	if(menuItemInd >= state->cms.numContextMenuItems){
+		SDL_Log("WARNING: conextMenuClickAction - attempt to click on invalid menu item (%u).\n",menuItemInd);
+		return;
+	}
+
+	startUIAnimation(dat,state,UIANIM_CONTEXT_MENU_HIDE); //menu will be closed after animation finishes
+	
+	switch(state->cms.contextMenuItems[menuItemInd]){
+		case CONTEXTITEM_COPY:
+			//copy text
+			if(state->tss.selectedStr < 65535){
+				//copy selected text to clipboard
+				const char *mimeType = "text/plain";
+				if(SDL_SetClipboardData(setSelTxtClipboardData,cleanupSelTxtClipboardData,(void *)(intptr_t)(&state->tss),&mimeType,1) == false){
+					SDL_Log("WARNING: processSingleEvent - couldn't copy text to clipboard. Error: %s\n",SDL_GetError());
+				}
+				//SDL_Log("Copied text to clipboard: %s\n",SDL_GetClipboardText());
+			}
+			break;
+		case CONTEXTITEM_ENUM_LENGTH:
+		default:
+			break;
+	}
+}
+
 void searchResultClickAction(app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat, const uint8_t resultInd){
 	
 	if(resultInd >= MAX_DISP_SEARCH_RESULTS){
@@ -3373,6 +3447,9 @@ void uiElemClickAction(app_data *restrict dat, app_state *restrict state, resour
   state->clickedUIElem = uiElemID;
 
 	//handle extraneous opened menus
+	if(state->cms.numContextMenuItems > 0){
+		startUIAnimation(dat,state,UIANIM_CONTEXT_MENU_HIDE); //remove any opened context menus
+	}
 	if((uiElemID != UIELEM_MENU_BUTTON)&&(uiElemID != UIELEM_PRIMARY_MENU)&&(uiElemID != UIELEM_PM_PREFS_BUTTON)&&(uiElemID != UIELEM_PM_ABOUT_BUTTON)){
 		if((state->ds.shownElements & (1UL << UIELEM_PRIMARY_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_PRIMARY_MENU_HIDE]==0.0f)){
 			startUIAnimation(dat,state,UIANIM_PRIMARY_MENU_HIDE); //menu will be closed after animation finishes
@@ -3839,7 +3916,6 @@ void uiElemClickAction(app_data *restrict dat, app_state *restrict state, resour
 					}
 				}
       }
-			state->cms.numContextMenuItems = 0; //remove any opened context menus
       break;
   }
 }
@@ -3924,8 +4000,8 @@ SDL_FRect getRxnMenuButtonRect(const drawing_state *restrict ds, const uint8_t n
 SDL_FRect getContextMenuButtonRect(const drawing_state *restrict ds, const uint8_t menuItem){
 	SDL_FRect rect;
 	rect.x = (float)ds->uiElemPosX[UIELEM_CONTEXT_MENU] + (2.0f*PANEL_EDGE_SIZE*ds->uiUserScale);
-	rect.y = (float)ds->uiElemPosY[UIELEM_CONTEXT_MENU] + (PANEL_EDGE_SIZE + 0.5f*UI_PADDING_SIZE + menuItem*CONTEXT_MENU_ITEM_SPACING)*ds->uiUserScale;
-	rect.w = (CONTEXT_MENU_WIDTH - (2.0f*PANEL_EDGE_SIZE + UI_PADDING_SIZE))*ds->uiUserScale;
+	rect.y = (float)ds->uiElemPosY[UIELEM_CONTEXT_MENU] + (2.0f*PANEL_EDGE_SIZE + menuItem*CONTEXT_MENU_ITEM_SPACING)*ds->uiUserScale;
+	rect.w = (CONTEXT_MENU_WIDTH - (4.0f*PANEL_EDGE_SIZE))*ds->uiUserScale;
 	rect.h = CONTEXT_MENU_ITEM_SPACING*ds->uiUserScale;
 	return rect;
 }

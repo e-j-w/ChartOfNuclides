@@ -1883,27 +1883,27 @@ void drawNuclFullInfoBox(const app_data *restrict dat, app_state *restrict state
   //draw column title strings
   drawXPos = origDrawXPos;
   drawYPos = (NUCL_FULLINFOBOX_LEVELLIST_HEADER_POS_Y - 2.0f)*state->ds.uiUserScale + txtYOffset;
-  drawTextAlignedSized(rdat,drawXPos - 2*UI_PADDING_SIZE*state->ds.uiUserScale,drawYPos,blackCol8Bit,FONTSIZE_NORMAL_BOLD,txtAlpha,dat->strings[dat->locStringIDs[LOCSTR_LEVELINFO_HEADER]],ALIGN_LEFT,16384);
+  drawSelectableTextAlignedSized(rdat,&state->tss,drawXPos - 2*UI_PADDING_SIZE*state->ds.uiUserScale,drawYPos,blackCol8Bit,FONTSIZE_NORMAL_BOLD,txtAlpha,dat->strings[dat->locStringIDs[LOCSTR_LEVELINFO_HEADER]],ALIGN_LEFT,16384);
   drawYPos += (NUCL_INFOBOX_SMALLLINE_HEIGHT + UI_PADDING_SIZE)*state->ds.uiUserScale;
-  drawTextAlignedSized(rdat,drawXPos,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,dat->strings[dat->locStringIDs[LOCSTR_ENERGY_KEV]],ALIGN_LEFT,16384);
+  drawSelectableTextAlignedSized(rdat,&state->tss,drawXPos,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,dat->strings[dat->locStringIDs[LOCSTR_ENERGY_KEV]],ALIGN_LEFT,16384);
   drawXPos += state->ds.fullInfoElevelColWidth*state->ds.uiUserScale;
-  drawTextAlignedSized(rdat,drawXPos,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,dat->strings[dat->locStringIDs[LOCSTR_JPI]],ALIGN_LEFT,16384);
+  drawSelectableTextAlignedSized(rdat,&state->tss,drawXPos,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,dat->strings[dat->locStringIDs[LOCSTR_JPI]],ALIGN_LEFT,16384);
   drawXPos += state->ds.fullInfoJpiColWidth*state->ds.uiUserScale;
   if(state->ds.useLifetimes){
-    drawTextAlignedSized(rdat,drawXPos,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,dat->strings[dat->locStringIDs[LOCSTR_LIFETIME]],ALIGN_LEFT,16384);
+    drawSelectableTextAlignedSized(rdat,&state->tss,drawXPos,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,dat->strings[dat->locStringIDs[LOCSTR_LIFETIME]],ALIGN_LEFT,16384);
   }else{
-    drawTextAlignedSized(rdat,drawXPos,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,dat->strings[dat->locStringIDs[LOCSTR_HALFLIFE]],ALIGN_LEFT,16384);
+    drawSelectableTextAlignedSized(rdat,&state->tss,drawXPos,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,dat->strings[dat->locStringIDs[LOCSTR_HALFLIFE]],ALIGN_LEFT,16384);
   }
   drawXPos += state->ds.fullInfoHlColWidth*state->ds.uiUserScale;
-  drawTextAlignedSized(rdat,drawXPos,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,dat->strings[dat->locStringIDs[LOCSTR_ENERGY_GAMMA]],ALIGN_LEFT,16384);
+  drawSelectableTextAlignedSized(rdat,&state->tss,drawXPos,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,dat->strings[dat->locStringIDs[LOCSTR_ENERGY_GAMMA]],ALIGN_LEFT,16384);
   drawXPos += state->ds.fullInfoEgammaColWidth*state->ds.uiUserScale;
-  drawTextAlignedSized(rdat,drawXPos,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,dat->strings[dat->locStringIDs[LOCSTR_INTENSITY_GAMMA]],ALIGN_LEFT,16384);
+  drawSelectableTextAlignedSized(rdat,&state->tss,drawXPos,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,dat->strings[dat->locStringIDs[LOCSTR_INTENSITY_GAMMA]],ALIGN_LEFT,16384);
   drawXPos += state->ds.fullInfoIgammaColWidth*state->ds.uiUserScale;
   if(drawMode == 0){
-    drawTextAlignedSized(rdat,drawXPos,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,dat->strings[dat->locStringIDs[LOCSTR_MULTIPOLARITY_GAMMA]],ALIGN_LEFT,16384);
+    drawSelectableTextAlignedSized(rdat,&state->tss,drawXPos,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,dat->strings[dat->locStringIDs[LOCSTR_MULTIPOLARITY_GAMMA]],ALIGN_LEFT,16384);
     drawXPos += state->ds.fullInfoMgammaColWidth*state->ds.uiUserScale;
   }
-  drawTextAlignedSized(rdat,drawXPos,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,dat->strings[dat->locStringIDs[LOCSTR_FINALLEVEL]],ALIGN_LEFT,16384);
+  drawSelectableTextAlignedSized(rdat,&state->tss,drawXPos,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,dat->strings[dat->locStringIDs[LOCSTR_FINALLEVEL]],ALIGN_LEFT,16384);
 
   //back button
   drawIconAndTextButton(&dat->rules.themeRules,rdat,state->ds.uiElemPosX[UIELEM_NUCL_FULLINFOBOX_BACKBUTTON],state->ds.uiElemPosY[UIELEM_NUCL_FULLINFOBOX_BACKBUTTON],state->ds.uiElemWidth[UIELEM_NUCL_FULLINFOBOX_BACKBUTTON],getHighlightState(state,UIELEM_NUCL_FULLINFOBOX_BACKBUTTON),255,UIICON_DOWNARROWS,dat->strings[dat->locStringIDs[LOCSTR_BACKTOSUMMARY]]);
@@ -1973,16 +1973,16 @@ void drawNuclInfoBox(const app_data *restrict dat, app_state *restrict state, re
 	}else{
     drawYPos += 6.0f*state->ds.uiUserScale;
   }
-  drawTextAlignedSized(rdat,drawXPos,drawYPos + 2.0f*state->ds.uiUserScale,blackCol8Bit,FONTSIZE_NORMAL_BOLD,alpha,dat->strings[dat->locStringIDs[LOCSTR_GM_STATE]],ALIGN_LEFT,(Uint16)(state->ds.uiElemWidth[UIELEM_NUCL_INFOBOX]));
+  drawSelectableTextAlignedSized(rdat,&state->tss,drawXPos,drawYPos + 2.0f*state->ds.uiUserScale,blackCol8Bit,FONTSIZE_NORMAL_BOLD,alpha,dat->strings[dat->locStringIDs[LOCSTR_GM_STATE]],ALIGN_LEFT,(Uint16)(state->ds.uiElemWidth[UIELEM_NUCL_INFOBOX]));
   drawYPos += NUCL_INFOBOX_BIGLINE_HEIGHT*state->ds.uiUserScale;
-  drawTextAlignedSized(rdat,drawXPos,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,alpha,dat->strings[dat->locStringIDs[LOCSTR_ENERGY_KEV]],ALIGN_LEFT,(Uint16)(state->ds.uiElemWidth[UIELEM_NUCL_INFOBOX]));
-  drawTextAlignedSized(rdat,drawXPos+state->ds.infoBoxJpiColOffset*state->ds.uiUserScale,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,alpha,dat->strings[dat->locStringIDs[LOCSTR_JPI]],ALIGN_LEFT,(Uint16)(state->ds.uiElemWidth[UIELEM_NUCL_INFOBOX]));
+  drawSelectableTextAlignedSized(rdat,&state->tss,drawXPos,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,alpha,dat->strings[dat->locStringIDs[LOCSTR_ENERGY_KEV]],ALIGN_LEFT,(Uint16)(state->ds.uiElemWidth[UIELEM_NUCL_INFOBOX]));
+  drawSelectableTextAlignedSized(rdat,&state->tss,drawXPos+state->ds.infoBoxJpiColOffset*state->ds.uiUserScale,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,alpha,dat->strings[dat->locStringIDs[LOCSTR_JPI]],ALIGN_LEFT,(Uint16)(state->ds.uiElemWidth[UIELEM_NUCL_INFOBOX]));
   if(state->ds.useLifetimes){
-    drawTextAlignedSized(rdat,drawXPos+state->ds.infoBoxHlColOffset*state->ds.uiUserScale,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,alpha,dat->strings[dat->locStringIDs[LOCSTR_LIFETIME]],ALIGN_LEFT,(Uint16)(state->ds.uiElemWidth[UIELEM_NUCL_INFOBOX]));
+    drawSelectableTextAlignedSized(rdat,&state->tss,drawXPos+state->ds.infoBoxHlColOffset*state->ds.uiUserScale,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,alpha,dat->strings[dat->locStringIDs[LOCSTR_LIFETIME]],ALIGN_LEFT,(Uint16)(state->ds.uiElemWidth[UIELEM_NUCL_INFOBOX]));
   }else{
-    drawTextAlignedSized(rdat,drawXPos+state->ds.infoBoxHlColOffset*state->ds.uiUserScale,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,alpha,dat->strings[dat->locStringIDs[LOCSTR_HALFLIFE]],ALIGN_LEFT,(Uint16)(state->ds.uiElemWidth[UIELEM_NUCL_INFOBOX]));
+    drawSelectableTextAlignedSized(rdat,&state->tss,drawXPos+state->ds.infoBoxHlColOffset*state->ds.uiUserScale,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,alpha,dat->strings[dat->locStringIDs[LOCSTR_HALFLIFE]],ALIGN_LEFT,(Uint16)(state->ds.uiElemWidth[UIELEM_NUCL_INFOBOX]));
   }
-  drawTextAlignedSized(rdat,drawXPos+state->ds.infoBoxDcyModeColOffset*state->ds.uiUserScale,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,alpha,dat->strings[dat->locStringIDs[LOCSTR_DECAYMODE]],ALIGN_LEFT,(Uint16)(state->ds.uiElemWidth[UIELEM_NUCL_INFOBOX]));
+  drawSelectableTextAlignedSized(rdat,&state->tss,drawXPos+state->ds.infoBoxDcyModeColOffset*state->ds.uiUserScale,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,alpha,dat->strings[dat->locStringIDs[LOCSTR_DECAYMODE]],ALIGN_LEFT,(Uint16)(state->ds.uiElemWidth[UIELEM_NUCL_INFOBOX]));
 
   //draw divider line
   drawYPos += 0.9f*NUCL_INFOBOX_BIGLINE_HEIGHT*state->ds.uiUserScale;
