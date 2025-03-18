@@ -853,6 +853,7 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
           //right clicked on selected text
           //SDL_Log("Right click on selected text.\n");
           setupCopyContextMenu(dat,state,rdat);
+          rightClick = 0; //unset
         }
       }
     }
@@ -875,7 +876,7 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
         state->cms.mouseOverContextItem = 255U;
         if(state->ds.timeLeftInUIAnimation[UIANIM_CONTEXT_MENU_HIDE]==0.0f){
           for(uint8_t i=0;i<state->cms.numContextMenuItems;i++){
-            SDL_FRect buttonRect = getContextMenuButtonRect(&state->ds,i);
+            SDL_FRect buttonRect = getContextMenuButtonRect(state,i);
             if((state->mouseXPx >= buttonRect.x)&&(state->mouseXPx < (buttonRect.x + buttonRect.w))){
               if((state->mouseYPx >= buttonRect.y)&&(state->mouseYPx < (buttonRect.y + buttonRect.h))){
                 state->cms.mouseOverContextItem = i;
@@ -1007,10 +1008,13 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
     //check if a click was made outside of any button
     //SDL_Log("click pos x: %f, drag start: [%f %f]\n",(double)state->mouseClickPosXPx,(double)state->ds.chartDragStartMouseX,(double)state->ds.chartDragStartMouseY);
     if(chartDraggable){
-      if((state->mouseClickPosXPx >= 0.0f) && (fabsf(state->ds.chartDragStartMouseX - state->mouseXPx) < 5.0f) && (fabsf(state->ds.chartDragStartMouseY - state->mouseYPx) < 5.0f) ){
+      if(((state->mouseClickPosXPx >= 0.0f) && (fabsf(state->ds.chartDragStartMouseX - state->mouseXPx) < 5.0f) && (fabsf(state->ds.chartDragStartMouseY - state->mouseYPx) < 5.0f) )||(rightClick &&(state->mouseoverElement == UIELEM_ENUM_LENGTH))){
         //unclick (or click on chart view)
         if(doubleClick){
           uiElemClickAction(dat,state,rdat,1,UIELEM_ENUM_LENGTH);
+        }else if(rightClick){
+          //SDL_Log("Right-clicked on chart.\n");
+          uiElemClickAction(dat,state,rdat,2,UIELEM_ENUM_LENGTH);
         }else{
           uiElemClickAction(dat,state,rdat,0,UIELEM_ENUM_LENGTH);
         }

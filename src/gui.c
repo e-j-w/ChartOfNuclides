@@ -2559,6 +2559,7 @@ void drawContextMenu(const app_data *restrict dat, const app_state *restrict sta
   }else if(state->ds.uiAnimPlaying & (1U << UIANIM_CONTEXT_MENU_SHOW)){
     alpha = (float)(1.0f*juice_smoothStop2(1.0f - state->ds.timeLeftInUIAnimation[UIANIM_CONTEXT_MENU_SHOW]/UI_ANIM_LENGTH));
   }
+  Uint8 txtAlpha = (Uint8)(alpha*255.0f);
   //SDL_Log("alpha: %f\n",(double)alpha);
   
   //draw menu background
@@ -2568,32 +2569,99 @@ void drawContextMenu(const app_data *restrict dat, const app_state *restrict sta
   drawRect.w = state->ds.uiElemWidth[UIELEM_CONTEXT_MENU];
   drawRect.h = state->ds.uiElemHeight[UIELEM_CONTEXT_MENU];
   drawPanelBG(&dat->rules.themeRules,rdat,drawRect,alpha);
+
+  //draw header text
+  if(state->cms.useHeaderText){
+    drawRect.x = state->ds.uiElemPosX[UIELEM_CONTEXT_MENU] + (PANEL_EDGE_SIZE + 3*UI_PADDING_SIZE)*state->ds.uiUserScale;
+    drawRect.y = ((float)state->ds.uiElemPosY[UIELEM_CONTEXT_MENU] + (2*PANEL_EDGE_SIZE + 3*UI_PADDING_SIZE)*state->ds.uiUserScale);
+    drawTextAlignedSized(rdat,drawRect.x,drawRect.y,blackCol8Bit,FONTSIZE_LARGE,txtAlpha,state->cms.headerText,ALIGN_LEFT,16384);
+  }
   
   //draw menu item highlight
   SDL_FColor highlightCol;
   for(uint8_t i=0;i<state->cms.numContextMenuItems;i++){
-    drawRect = getContextMenuButtonRect(&state->ds,i);
+    drawRect = getContextMenuButtonRect(state,i);
     if(i==state->cms.mouseOverContextItem){
-      highlightCol = dat->rules.themeRules.modSelectedCol;
+      highlightCol = dat->rules.themeRules.modMouseOverCol;
       highlightCol.a = alpha;
       drawFlatRect(rdat,drawRect,highlightCol);
     }else if(i==state->cms.clickedContextItem){
-      highlightCol = dat->rules.themeRules.modMouseOverCol;
+      highlightCol = dat->rules.themeRules.modSelectedCol;
       highlightCol.a = alpha;
       drawFlatRect(rdat,drawRect,highlightCol);
     }
   }
 
   //draw menu item text
+  char tmpStr[32];
   drawRect.x = state->ds.uiElemPosX[UIELEM_CONTEXT_MENU] + (PANEL_EDGE_SIZE + 3*UI_PADDING_SIZE)*state->ds.uiUserScale;
   drawRect.y = ((float)state->ds.uiElemPosY[UIELEM_CONTEXT_MENU] + PANEL_EDGE_SIZE*state->ds.uiUserScale);
+  if(state->cms.useHeaderText){
+    drawRect.y += (float)(CONTEXT_MENU_HEADER_HEIGHT*state->ds.uiUserScale);
+  }
   drawRect.w = state->ds.uiElemWidth[UIELEM_CONTEXT_MENU];
   drawRect.h = state->ds.uiElemHeight[UIELEM_CONTEXT_MENU];
-  Uint8 txtAlpha = (Uint8)(alpha*255.0f);
   for(uint8_t i=0;i<state->cms.numContextMenuItems;i++){
     switch(state->cms.contextMenuItems[i]){
       case CONTEXTITEM_COPY:
-      drawTextAlignedSized(rdat,drawRect.x,drawRect.y + (0.4f + (float)i)*CONTEXT_MENU_ITEM_SPACING*state->ds.uiUserScale,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,dat->strings[dat->locStringIDs[LOCSTR_CONTEXT_COPY]],ALIGN_LEFT,(Uint16)(drawRect.w - (PANEL_EDGE_SIZE + 6*UI_PADDING_SIZE)*state->ds.uiUserScale));
+        drawTextAlignedSized(rdat,drawRect.x,drawRect.y + (0.4f + (float)i)*CONTEXT_MENU_ITEM_SPACING*state->ds.uiUserScale,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,dat->strings[dat->locStringIDs[LOCSTR_CONTEXT_COPY]],ALIGN_LEFT,(Uint16)(drawRect.w - (PANEL_EDGE_SIZE + 6*UI_PADDING_SIZE)*state->ds.uiUserScale));
+        break;
+      case CONTEXTITEM_NUCLNAME:
+        drawTextAlignedSized(rdat,drawRect.x,drawRect.y + (0.4f + (float)i)*CONTEXT_MENU_ITEM_SPACING*state->ds.uiUserScale,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,dat->strings[dat->locStringIDs[LOCSTR_CONTEXT_COPY_NUCLNAME]],ALIGN_LEFT,(Uint16)(drawRect.w - (PANEL_EDGE_SIZE + 6*UI_PADDING_SIZE)*state->ds.uiUserScale));
+        break;
+      case CONTEXTITEM_NUCLINFO:
+        drawTextAlignedSized(rdat,drawRect.x,drawRect.y + (0.4f + (float)i)*CONTEXT_MENU_ITEM_SPACING*state->ds.uiUserScale,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,dat->strings[dat->locStringIDs[LOCSTR_CONTEXT_COPY_NUCLINFO]],ALIGN_LEFT,(Uint16)(drawRect.w - (PANEL_EDGE_SIZE + 6*UI_PADDING_SIZE)*state->ds.uiUserScale));
+        break;
+      case CONTEXTITEM_CHART_PROPERTY:
+        switch(state->chartView){
+          case CHARTVIEW_HALFLIFE:
+            if(state->ds.useLifetimes){
+              SDL_snprintf(tmpStr,32,"%s %s",dat->strings[dat->locStringIDs[LOCSTR_CONTEXT_COPY]],dat->strings[dat->locStringIDs[LOCSTR_CHARTVIEW_LIFETIME]]);
+              drawTextAlignedSized(rdat,drawRect.x,drawRect.y + (0.4f + (float)i)*CONTEXT_MENU_ITEM_SPACING*state->ds.uiUserScale,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_LEFT,(Uint16)(drawRect.w - (PANEL_EDGE_SIZE + 6*UI_PADDING_SIZE)*state->ds.uiUserScale));
+            }else{
+              SDL_snprintf(tmpStr,32,"%s %s",dat->strings[dat->locStringIDs[LOCSTR_CONTEXT_COPY]],dat->strings[dat->locStringIDs[LOCSTR_CHARTVIEW_HALFLIFE]]);
+              drawTextAlignedSized(rdat,drawRect.x,drawRect.y + (0.4f + (float)i)*CONTEXT_MENU_ITEM_SPACING*state->ds.uiUserScale,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_LEFT,(Uint16)(drawRect.w - (PANEL_EDGE_SIZE + 6*UI_PADDING_SIZE)*state->ds.uiUserScale));
+            }
+            break;
+          case CHARTVIEW_DECAYMODE:
+            SDL_snprintf(tmpStr,32,"%s %s",dat->strings[dat->locStringIDs[LOCSTR_CONTEXT_COPY]],dat->strings[dat->locStringIDs[LOCSTR_CHARTVIEW_DECAYMODE]]);
+            drawTextAlignedSized(rdat,drawRect.x,drawRect.y + (0.4f + (float)i)*CONTEXT_MENU_ITEM_SPACING*state->ds.uiUserScale,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_LEFT,(Uint16)(drawRect.w - (PANEL_EDGE_SIZE + 6*UI_PADDING_SIZE)*state->ds.uiUserScale));
+            break;
+          case CHARTVIEW_2PLUS:
+            SDL_snprintf(tmpStr,32,"%s %s",dat->strings[dat->locStringIDs[LOCSTR_CONTEXT_COPY]],dat->strings[dat->locStringIDs[LOCSTR_CHARTVIEW_2PLUS]]);
+            drawTextAlignedSized(rdat,drawRect.x,drawRect.y + (0.4f + (float)i)*CONTEXT_MENU_ITEM_SPACING*state->ds.uiUserScale,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_LEFT,(Uint16)(drawRect.w - (PANEL_EDGE_SIZE + 6*UI_PADDING_SIZE)*state->ds.uiUserScale));
+            break;
+          case CHARTVIEW_R42:
+            SDL_snprintf(tmpStr,32,"%s R₄₂",dat->strings[dat->locStringIDs[LOCSTR_CONTEXT_COPY]]);
+            drawTextAlignedSized(rdat,drawRect.x,drawRect.y + (0.4f + (float)i)*CONTEXT_MENU_ITEM_SPACING*state->ds.uiUserScale,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_LEFT,(Uint16)(drawRect.w - (PANEL_EDGE_SIZE + 6*UI_PADDING_SIZE)*state->ds.uiUserScale));
+            break;
+          case CHARTVIEW_BETA2:
+            SDL_snprintf(tmpStr,32,"%s %s",dat->strings[dat->locStringIDs[LOCSTR_CONTEXT_COPY]],dat->strings[dat->locStringIDs[LOCSTR_CHARTVIEW_BETA2]]);
+            drawTextAlignedSized(rdat,drawRect.x,drawRect.y + (0.4f + (float)i)*CONTEXT_MENU_ITEM_SPACING*state->ds.uiUserScale,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_LEFT,(Uint16)(drawRect.w - (PANEL_EDGE_SIZE + 6*UI_PADDING_SIZE)*state->ds.uiUserScale));
+            break;
+          case CHARTVIEW_SPIN:
+            SDL_snprintf(tmpStr,32,"%s %s",dat->strings[dat->locStringIDs[LOCSTR_CONTEXT_COPY]],dat->strings[dat->locStringIDs[LOCSTR_CHARTVIEW_SPIN]]);
+            drawTextAlignedSized(rdat,drawRect.x,drawRect.y + (0.4f + (float)i)*CONTEXT_MENU_ITEM_SPACING*state->ds.uiUserScale,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_LEFT,(Uint16)(drawRect.w - (PANEL_EDGE_SIZE + 6*UI_PADDING_SIZE)*state->ds.uiUserScale));
+            break;
+          case CHARTVIEW_PARITY:
+            SDL_snprintf(tmpStr,32,"%s %s",dat->strings[dat->locStringIDs[LOCSTR_CONTEXT_COPY]],dat->strings[dat->locStringIDs[LOCSTR_CHARTVIEW_PARITY]]);
+            drawTextAlignedSized(rdat,drawRect.x,drawRect.y + (0.4f + (float)i)*CONTEXT_MENU_ITEM_SPACING*state->ds.uiUserScale,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_LEFT,(Uint16)(drawRect.w - (PANEL_EDGE_SIZE + 6*UI_PADDING_SIZE)*state->ds.uiUserScale));
+            break;
+          case LOCSTR_CHARTVIEW_BEA:
+            SDL_snprintf(tmpStr,32,"%s %s",dat->strings[dat->locStringIDs[LOCSTR_CONTEXT_COPY]],dat->strings[dat->locStringIDs[LOCSTR_CHARTVIEW_BEA]]);
+            drawTextAlignedSized(rdat,drawRect.x,drawRect.y + (0.4f + (float)i)*CONTEXT_MENU_ITEM_SPACING*state->ds.uiUserScale,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_LEFT,(Uint16)(drawRect.w - (PANEL_EDGE_SIZE + 6*UI_PADDING_SIZE)*state->ds.uiUserScale));
+            break;
+          case CHARTVIEW_NUMLVLS:
+            SDL_snprintf(tmpStr,32,"%s %s",dat->strings[dat->locStringIDs[LOCSTR_CONTEXT_COPY]],dat->strings[dat->locStringIDs[LOCSTR_CHARTVIEW_NUMLVLS]]);
+            drawTextAlignedSized(rdat,drawRect.x,drawRect.y + (0.4f + (float)i)*CONTEXT_MENU_ITEM_SPACING*state->ds.uiUserScale,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_LEFT,(Uint16)(drawRect.w - (PANEL_EDGE_SIZE + 6*UI_PADDING_SIZE)*state->ds.uiUserScale));
+            break;
+          case CHARTVIEW_UNKNOWN_ENERGY:
+            SDL_snprintf(tmpStr,32,"%s %s",dat->strings[dat->locStringIDs[LOCSTR_CONTEXT_COPY]],dat->strings[dat->locStringIDs[LOCSTR_CHARTVIEW_UNKNOWN_ENERGY]]);
+            drawTextAlignedSized(rdat,drawRect.x,drawRect.y + (0.4f + (float)i)*CONTEXT_MENU_ITEM_SPACING*state->ds.uiUserScale,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_LEFT,(Uint16)(drawRect.w - (PANEL_EDGE_SIZE + 6*UI_PADDING_SIZE)*state->ds.uiUserScale));
+            break;
+          default:
+            break;
+        }
         break;
       default:
         break;

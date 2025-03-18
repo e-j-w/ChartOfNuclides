@@ -472,8 +472,26 @@ void updateDrawingState(const app_data *restrict dat, app_state *restrict state,
 
 }
 
+void setupNuclideContextMenu(const app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat, const uint16_t nuclInd){
+  char nuclStr[32];
+  getNuclNameStr(nuclStr,&dat->ndat.nuclData[nuclInd],255);
+	SDL_strlcpy(state->cms.headerText,nuclStr,32);
+	state->cms.useHeaderText = 1;
+	state->cms.numContextMenuItems = 3;
+	state->cms.contextMenuItems[0] = CONTEXTITEM_NUCLNAME;
+	state->cms.contextMenuItems[1] = CONTEXTITEM_NUCLINFO;
+	state->cms.contextMenuItems[2] = CONTEXTITEM_CHART_PROPERTY;
+	state->cms.mouseOverContextItem = 255;
+	state->cms.clickedContextItem = 255;
+	updateSingleUIElemPosition(dat,state,rdat,UIELEM_CONTEXT_MENU);
+	//const SDL_FRect conMenuRect = {(float)state->ds.uiElemPosX[UIELEM_CONTEXT_MENU], (float)state->ds.uiElemPosY[UIELEM_CONTEXT_MENU], (float)state->ds.uiElemWidth[UIELEM_CONTEXT_MENU], (float)state->ds.uiElemHeight[UIELEM_CONTEXT_MENU]};
+	//removeSelectableStringsInRect(&state->tss, conMenuRect);
+	startUIAnimation(dat,state,UIANIM_CONTEXT_MENU_SHOW);
+}
+
 void setupCopyContextMenu(const app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat){
-  state->cms.numContextMenuItems = 1;
+  state->cms.useHeaderText = 0;
+	state->cms.numContextMenuItems = 1;
 	state->cms.contextMenuItems[0] = CONTEXTITEM_COPY;
 	state->cms.mouseOverContextItem = 255;
 	state->cms.clickedContextItem = 255;
@@ -3441,6 +3459,7 @@ void searchResultClickAction(app_data *restrict dat, app_state *restrict state, 
 }
 
 //take action after clicking a button or other UI element
+//doubleClick: 0=left click only, 1=double click (left), 2=right click
 void uiElemClickAction(app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat, const uint8_t doubleClick, const uint8_t uiElemID){
 
 	//SDL_Log("Clicked UI element %u\n",uiElemID);
@@ -3890,8 +3909,14 @@ void uiElemClickAction(app_data *restrict dat, app_state *restrict state, resour
 					}
 					uint16_t mouseX = (uint16_t)mouseXPxToN(&state->ds,state->mouseXPx);
     			uint16_t mouseY = (uint16_t)SDL_ceilf(mouseYPxToZ(&state->ds,state->mouseYPx));
-					//select nucleus
-					setSelectedNuclOnChart(dat,state,rdat,mouseX,mouseY,doubleClick? 1 : 0);
+					if(doubleClick <= 1){
+						//select nucleus
+						setSelectedNuclOnChart(dat,state,rdat,mouseX,mouseY,(doubleClick == 1)? 1 : 0);
+					}else if(doubleClick == 2){
+						//right click on chart
+						uint16_t rightClickNucl = getNuclInd(&dat->ndat,(int16_t)mouseX,(int16_t)mouseY);
+						setupNuclideContextMenu(dat,state,rdat,rightClickNucl);
+					}
 				}else{
 					//clicked out of a menu
 					//handle individual menu closing animations
@@ -3997,12 +4022,15 @@ SDL_FRect getRxnMenuButtonRect(const drawing_state *restrict ds, const uint8_t n
 	return rect;
 }
 
-SDL_FRect getContextMenuButtonRect(const drawing_state *restrict ds, const uint8_t menuItem){
+SDL_FRect getContextMenuButtonRect(const app_state *restrict state, const uint8_t menuItem){
 	SDL_FRect rect;
-	rect.x = (float)ds->uiElemPosX[UIELEM_CONTEXT_MENU] + (2.0f*PANEL_EDGE_SIZE*ds->uiUserScale);
-	rect.y = (float)ds->uiElemPosY[UIELEM_CONTEXT_MENU] + (2.0f*PANEL_EDGE_SIZE + menuItem*CONTEXT_MENU_ITEM_SPACING)*ds->uiUserScale;
-	rect.w = (CONTEXT_MENU_WIDTH - (4.0f*PANEL_EDGE_SIZE))*ds->uiUserScale;
-	rect.h = CONTEXT_MENU_ITEM_SPACING*ds->uiUserScale;
+	rect.x = (float)state->ds.uiElemPosX[UIELEM_CONTEXT_MENU] + (2.0f*PANEL_EDGE_SIZE*state->ds.uiUserScale);
+	rect.y = (float)state->ds.uiElemPosY[UIELEM_CONTEXT_MENU] + (2.0f*PANEL_EDGE_SIZE + menuItem*CONTEXT_MENU_ITEM_SPACING)*state->ds.uiUserScale;
+	rect.w = (CONTEXT_MENU_WIDTH - (4.0f*PANEL_EDGE_SIZE))*state->ds.uiUserScale;
+	rect.h = CONTEXT_MENU_ITEM_SPACING*state->ds.uiUserScale;
+	if(state->cms.useHeaderText){
+		rect.y += (float)(CONTEXT_MENU_HEADER_HEIGHT*state->ds.uiUserScale);
+	}
 	return rect;
 }
 
@@ -4079,6 +4107,9 @@ void updateSingleUIElemPosition(const app_data *restrict dat, app_state *restric
 			state->ds.uiElemHeight[uiElemInd] = (int16_t)((state->cms.numContextMenuItems*CONTEXT_MENU_ITEM_SPACING + 2.0f*PANEL_EDGE_SIZE + 3.0f*UI_PADDING_SIZE)*state->ds.uiUserScale);
 			if((state->ds.uiElemPosY[uiElemInd] + state->ds.uiElemHeight[uiElemInd]) > state->ds.windowYRes){
 				state->ds.uiElemPosY[uiElemInd] = (int16_t)(state->ds.uiElemPosY[uiElemInd] - state->ds.uiElemHeight[uiElemInd]);
+			}
+			if(state->cms.useHeaderText){
+				state->ds.uiElemHeight[uiElemInd] += (int16_t)(CONTEXT_MENU_HEADER_HEIGHT*state->ds.uiUserScale);
 			}
 			break;
 		case UIELEM_PRIMARY_MENU:

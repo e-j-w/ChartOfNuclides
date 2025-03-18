@@ -303,10 +303,10 @@ typedef struct
   char *clipboardData; //pointer to any text that has been copied to the clipboard
 }text_selection_state; //struct containing search data
 
-
-
 typedef struct
 {
+  char headerText[32];
+  uint8_t useHeaderText;
   uint8_t numContextMenuItems; //number of items to show in the context menu
   uint8_t contextMenuItems[MAX_CONTEXT_MENU_ITEMS]; //values from context_menu_item_enum
   uint8_t mouseOverContextItem; //255 if none moused over
