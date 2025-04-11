@@ -856,6 +856,11 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
           rightClick = 0; //unset
         }
       }
+      if(rightClick){
+        if(state->cms.numContextMenuItems > 0){
+          startUIAnimation(dat,state,UIANIM_CONTEXT_MENU_HIDE); //menu will be closed after animation finishes
+        }
+      }
     }
 
     uint8_t mouseReleaseElement = UIELEM_ENUM_LENGTH;
@@ -894,6 +899,13 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
                 }
                 break;
               }
+            }
+          }
+          //check for clicks on the context menu, but not on any button
+          if((state->mouseClickPosXPx >= (state->ds.uiElemPosX[UIELEM_CONTEXT_MENU]-state->ds.uiElemExtMinusX[UIELEM_CONTEXT_MENU]))&&(state->mouseClickPosXPx < (state->ds.uiElemPosX[UIELEM_CONTEXT_MENU]+state->ds.uiElemWidth[UIELEM_CONTEXT_MENU]+state->ds.uiElemExtPlusX[UIELEM_CONTEXT_MENU]))&&(state->mouseClickPosYPx >= (state->ds.uiElemPosY[UIELEM_CONTEXT_MENU]-state->ds.uiElemExtMinusY[UIELEM_CONTEXT_MENU]))&&(state->mouseClickPosYPx < (state->ds.uiElemPosY[UIELEM_CONTEXT_MENU]+state->ds.uiElemHeight[UIELEM_CONTEXT_MENU]+state->ds.uiElemExtPlusY[UIELEM_CONTEXT_MENU]))){
+            if((state->mouseMovedDuringClick == 0)||(UIELEM_CONTEXT_MENU == mouseReleaseElement)){
+              uiElemClickAction(dat,state,rdat,0,UIELEM_CONTEXT_MENU); //data_ops.c
+              return;
             }
           }
         }
