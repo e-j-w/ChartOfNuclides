@@ -1203,7 +1203,7 @@ void drawNuclBoxLabelDetails(const app_data *restrict dat, app_state *restrict s
       }
     }
   }else if(state->chartView == CHARTVIEW_UNKNOWN_ENERGY){
-    uint16_t numUnknowns = getNumUnknownLvls(&dat->ndat,nuclInd);
+    const uint16_t numUnknowns = getNumUnknownLvls(&dat->ndat,nuclInd);
     SDL_snprintf(tmpStr,32,"%u",numUnknowns);
     if(numUnknowns == 1){
       SDL_strlcat(tmpStr," level",32);
@@ -2647,7 +2647,7 @@ void drawContextMenu(const app_data *restrict dat, const app_state *restrict sta
             SDL_snprintf(tmpStr,32,"%s %s",dat->strings[dat->locStringIDs[LOCSTR_CONTEXT_COPY]],dat->strings[dat->locStringIDs[LOCSTR_CHARTVIEW_PARITY]]);
             drawTextAlignedSized(rdat,drawRect.x,drawRect.y + (0.4f + (float)i)*CONTEXT_MENU_ITEM_SPACING*state->ds.uiUserScale,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_LEFT,(Uint16)(drawRect.w - (PANEL_EDGE_SIZE + 6*UI_PADDING_SIZE)*state->ds.uiUserScale));
             break;
-          case LOCSTR_CHARTVIEW_BEA:
+          case CHARTVIEW_BEA:
             SDL_snprintf(tmpStr,32,"%s %s",dat->strings[dat->locStringIDs[LOCSTR_CONTEXT_COPY]],dat->strings[dat->locStringIDs[LOCSTR_CHARTVIEW_BEA]]);
             drawTextAlignedSized(rdat,drawRect.x,drawRect.y + (0.4f + (float)i)*CONTEXT_MENU_ITEM_SPACING*state->ds.uiUserScale,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_LEFT,(Uint16)(drawRect.w - (PANEL_EDGE_SIZE + 6*UI_PADDING_SIZE)*state->ds.uiUserScale));
             break;

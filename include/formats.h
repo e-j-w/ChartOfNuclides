@@ -45,7 +45,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 //text selection parameters
 #define MAX_SELECTABLE_STRS      1024 //maximum number of onscreen text strings that can be selectable at once
-#define MAX_SELECTABLE_STR_LEN   128 //maximum length of selectable text strings
+#define MAX_SELECTABLE_STR_LEN   256 //maximum length of selectable text strings (should be larger than 32, which is the size used by some string composition functions in data_ops.c)
 
 //context menu parameters
 #define MAX_CONTEXT_MENU_ITEMS   4 //maximum number of items in the context menu
@@ -300,7 +300,6 @@ typedef struct
   uint16_t selectedStr; //65535 if nothing selected
   uint8_t selStartPos, selEndPos; //which character indices correspond to the start and end of the selected text
   uint8_t selStrsModifiable; //flag which is set whenever the selection strings can be updated, and is cleared at the end of each frame
-  char *clipboardData; //pointer to any text that has been copied to the clipboard
 }text_selection_state; //struct containing search data
 
 typedef struct
@@ -311,6 +310,7 @@ typedef struct
   uint8_t contextMenuItems[MAX_CONTEXT_MENU_ITEMS]; //values from context_menu_item_enum
   uint8_t mouseOverContextItem; //255 if none moused over
   uint8_t clickedContextItem; //255 if none clicked on
+  uint16_t selectionInd; //index of nuclide or other item corresponding to this context menu
 }context_menu_state; //struct containing search data
 
 typedef struct
@@ -319,8 +319,7 @@ typedef struct
   search_state ss;           //the state information for search queries
   text_selection_state tss;  //the state information for text selection
   context_menu_state cms;    //the state information for right-click context menus
-  char msgBoxHeaderTxt[32]; //text to show at the top of the message box
-  char msgBoxTxt[256];      //main text to show in the message box
+  char copiedTxt[MAX_SELECTABLE_STR_LEN];  //buffer for copying text to clipboard
   int searchCursorPos, searchSelectionLen; //for search query text editing
   float mouseXPx, mouseYPx; //current position of the mouse, in pixels
   float mouseHoldStartPosXPx, mouseHoldStartPosYPx; //mouse position at the start of the last mouse button down event, in pixels

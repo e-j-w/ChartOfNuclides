@@ -66,9 +66,9 @@ static int writeAsset(SDL_IOStream *out, const char *assetPath, const char *base
 }
 
 
-SDL_AppResult SDL_AppInit(void **appstate, int argc, char **argv){
+int main(int argc, char *argv[]){
 
-  (void)appstate; (void)argc; (void)argv; //required main function parameters are unused
+  (void)argc; (void)argv; //required main function parameters are unused
   
   setlocale(LC_ALL, "en_ca.UTF-8");
 
@@ -122,17 +122,6 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char **argv){
 
   SDL_Log("Bundled app data written to file: %s\n",fileName);
   SDL_free(dat);
-  return SDL_APP_SUCCESS;
-}
-
-SDL_AppResult SDL_AppIterate(void *appstate){
-  (void)appstate;
-  return SDL_APP_SUCCESS;
-}
-SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event){
-  (void)appstate; (void)event;
-  return SDL_APP_SUCCESS;
-}
-void SDL_AppQuit(void *appstate, SDL_AppResult result){
-  (void)appstate; (void)result;
+  
+  return 0;
 }

@@ -38,16 +38,14 @@ void setSelTxtPrimarySelection(const text_selection_state *restrict tss){
         charIndStart = tmp;
       }
       uint8_t selLen = (uint8_t)(charIndEnd - charIndStart);
-      if(selLen < MAX_SELECTABLE_STR_LEN){
-        char selSubStr[MAX_SELECTABLE_STR_LEN];
-        SDL_strlcpy(selSubStr,&tss->selectableStrTxt[tss->selectedStr][charIndStart],selLen+1);
-        //filter the string to copy
-        char *selSubStrCpy = findReplaceAllUTF8("%%","%",selSubStr);
-        SDL_strlcpy(selSubStr,selSubStrCpy,selLen+1);
-        free(selSubStrCpy);
-        if(SDL_SetPrimarySelectionText(selSubStr)==false){
-          SDL_Log("WARNING: setSelTxtPrimarySelection - couln't set primary selection text. Error: %s\n",SDL_GetError());
-        }
+      char selSubStr[MAX_SELECTABLE_STR_LEN];
+      SDL_strlcpy(selSubStr,&tss->selectableStrTxt[tss->selectedStr][charIndStart],selLen+1);
+      //filter the string to copy
+      char *selSubStrCpy = findReplaceAllUTF8("%%","%",selSubStr);
+      SDL_strlcpy(selSubStr,selSubStrCpy,selLen+1);
+      free(selSubStrCpy);
+      if(SDL_SetPrimarySelectionText(selSubStr)==false){
+        SDL_Log("WARNING: setSelTxtPrimarySelection - couln't set primary selection text. Error: %s\n",SDL_GetError());
       }
     }
   }
@@ -94,8 +92,8 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
   doubleClick = (uint8_t)((state->inputFlags & (1U << INPUT_DOUBLECLICK)) != 0);
   rightClick = (uint8_t)((state->inputFlags & (1U << INPUT_RIGHTCLICK)) != 0);
   
-  const uint8_t chartDraggable = ((state->uiState == UISTATE_CHARTONLY)||(state->uiState == UISTATE_CHARTWITHMENU)||(state->uiState == UISTATE_INFOBOX));
-  const uint8_t chartPannable =  ((state->uiState == UISTATE_CHARTONLY)||(state->uiState == UISTATE_INFOBOX));
+  const uint8_t chartDraggable = (((state->uiState == UISTATE_CHARTONLY)||(state->uiState == UISTATE_CHARTWITHMENU)||(state->uiState == UISTATE_INFOBOX)) && (state->cms.numContextMenuItems == 0));
+  const uint8_t chartPannable =  (((state->uiState == UISTATE_CHARTONLY)||(state->uiState == UISTATE_INFOBOX)) && (state->cms.numContextMenuItems == 0));
 
   if((SDL_TextInputActive(rdat->window))&&(strlen(state->ss.searchString) > 0)){
     //scroll between search results
@@ -735,6 +733,8 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
     }else if((state->uiState == UISTATE_FULLLEVELINFO)&&(state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_EXPAND]==0.0f)&&(state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_CONTRACT]==0.0f)){
       uiElemClickAction(dat,state,rdat,0,UIELEM_NUCL_FULLINFOBOX_BACKBUTTON); //go back to the main chart
       state->mouseholdElement = UIELEM_ENUM_LENGTH;
+    }else if(state->cms.numContextMenuItems > 0){
+      startUIAnimation(dat,state,UIANIM_CONTEXT_MENU_HIDE); //menu will be closed after animation finishes
     }else if(state->ds.windowFullscreenMode){
       //exit fullscreen
       state->ds.windowFullscreenMode = 0;
@@ -875,6 +875,7 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
         //context menu visible
         state->cms.mouseOverContextItem = 255U;
         if(state->ds.timeLeftInUIAnimation[UIANIM_CONTEXT_MENU_HIDE]==0.0f){
+          //SDL_Log("Checking context menu buttons.\n");
           for(uint8_t i=0;i<state->cms.numContextMenuItems;i++){
             SDL_FRect buttonRect = getContextMenuButtonRect(state,i);
             if((state->mouseXPx >= buttonRect.x)&&(state->mouseXPx < (buttonRect.x + buttonRect.w))){
@@ -898,77 +899,81 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
         }
       }
 
-      //handle dynamic menu (menus without a fixed number of entries) selections
-      uint8_t dynamicMenuItemInteracted = 0;
-      if(state->ds.shownElements & (1UL << UIELEM_RXN_MENU)){
-        uint8_t numRxnPerCol = getRxnMenuNumRxnsPerColumn(dat,state);
-        SDL_FRect buttonRect;
-        if(state->ds.timeLeftInUIAnimation[UIANIM_RXN_MENU_HIDE]==0.0f){
-          //SDL_Log("Mouse-over reaction: %u, selected reaction: %u.\n",state->ds.mouseOverRxn,state->ds.selectedRxn);
-          for(uint8_t i=0;i<(dat->ndat.nuclData[state->chartSelectedNucl].numRxns+1);i++){
-            buttonRect = getRxnMenuButtonRect(&state->ds,numRxnPerCol,i);
-            if((state->mouseHoldStartPosXPx >= buttonRect.x)&&(state->mouseHoldStartPosXPx < (buttonRect.x + buttonRect.w))){
-              if((state->mouseHoldStartPosYPx >= buttonRect.y)&&(state->mouseHoldStartPosYPx < (buttonRect.y + buttonRect.h))){
-                state->ds.mouseHoldRxn = i;
+      if(state->cms.numContextMenuItems == 0){
+
+        //handle dynamic menu (menus without a fixed number of entries) selections
+        uint8_t dynamicMenuItemInteracted = 0;
+        if(state->ds.shownElements & (1UL << UIELEM_RXN_MENU)){
+          uint8_t numRxnPerCol = getRxnMenuNumRxnsPerColumn(dat,state);
+          SDL_FRect buttonRect;
+          if(state->ds.timeLeftInUIAnimation[UIANIM_RXN_MENU_HIDE]==0.0f){
+            //SDL_Log("Mouse-over reaction: %u, selected reaction: %u.\n",state->ds.mouseOverRxn,state->ds.selectedRxn);
+            for(uint8_t i=0;i<(dat->ndat.nuclData[state->chartSelectedNucl].numRxns+1);i++){
+              buttonRect = getRxnMenuButtonRect(&state->ds,numRxnPerCol,i);
+              if((state->mouseHoldStartPosXPx >= buttonRect.x)&&(state->mouseHoldStartPosXPx < (buttonRect.x + buttonRect.w))){
+                if((state->mouseHoldStartPosYPx >= buttonRect.y)&&(state->mouseHoldStartPosYPx < (buttonRect.y + buttonRect.h))){
+                  state->ds.mouseHoldRxn = i;
+                }
               }
-            }
-            if((state->mouseXPx >= buttonRect.x)&&(state->mouseXPx < (buttonRect.x + buttonRect.w))){
-              if((state->mouseYPx >= buttonRect.y)&&(state->mouseYPx < (buttonRect.y + buttonRect.h))){
-                state->ds.mouseOverRxn = i;
-                if((state->mouseClickPosXPx >= buttonRect.x)&&(state->mouseClickPosXPx < (buttonRect.x + buttonRect.w))){
-                  if((state->mouseClickPosYPx >= buttonRect.y)&&(state->mouseClickPosYPx < (buttonRect.y + buttonRect.h))){
-                    if((state->mouseMovedDuringClick == 0)||(i == state->ds.mouseHoldRxn)){
-                      state->ds.selectedRxn = i;
-                      //SDL_Log("Clicked reaction menu item %u.\n",state->ds.selectedRxn);
-                      setSelectedNuclOnLevelList(dat,state,rdat,(uint16_t)(dat->ndat.nuclData[state->chartSelectedNucl].N),(uint16_t)(dat->ndat.nuclData[state->chartSelectedNucl].Z),1);
-                      break;
+              if((state->mouseXPx >= buttonRect.x)&&(state->mouseXPx < (buttonRect.x + buttonRect.w))){
+                if((state->mouseYPx >= buttonRect.y)&&(state->mouseYPx < (buttonRect.y + buttonRect.h))){
+                  state->ds.mouseOverRxn = i;
+                  if((state->mouseClickPosXPx >= buttonRect.x)&&(state->mouseClickPosXPx < (buttonRect.x + buttonRect.w))){
+                    if((state->mouseClickPosYPx >= buttonRect.y)&&(state->mouseClickPosYPx < (buttonRect.y + buttonRect.h))){
+                      if((state->mouseMovedDuringClick == 0)||(i == state->ds.mouseHoldRxn)){
+                        state->ds.selectedRxn = i;
+                        //SDL_Log("Clicked reaction menu item %u.\n",state->ds.selectedRxn);
+                        setSelectedNuclOnLevelList(dat,state,rdat,(uint16_t)(dat->ndat.nuclData[state->chartSelectedNucl].N),(uint16_t)(dat->ndat.nuclData[state->chartSelectedNucl].Z),1);
+                        break;
+                      }
                     }
                   }
+                  dynamicMenuItemInteracted = 1;
+                  break;
                 }
-                dynamicMenuItemInteracted = 1;
+              }
+            }
+          }
+        }
+        if(dynamicMenuItemInteracted == 0){
+          for(uint8_t i=0; i<UIELEM_ENUM_LENGTH; i++){ //ordering in ui_element_enum defines order in which UI elements receive input
+            if(state->interactableElement & (uint64_t)(1LU << i)){
+              if((state->mouseHoldStartPosXPx >= (state->ds.uiElemPosX[i]-state->ds.uiElemExtMinusX[i]))&&(state->mouseHoldStartPosXPx < (state->ds.uiElemPosX[i]+state->ds.uiElemWidth[i]+state->ds.uiElemExtPlusX[i]))&&(state->mouseHoldStartPosYPx >= (state->ds.uiElemPosY[i]-state->ds.uiElemExtMinusY[i]))&&(state->mouseHoldStartPosYPx < (state->ds.uiElemPosY[i]+state->ds.uiElemHeight[i]+state->ds.uiElemExtPlusY[i]))){
+                state->mouseholdElement = i;
+                //SDL_Log("Holding element %u\n",i);
+                uiElemHoldAction(dat,state,state->mouseholdElement);
+              }
+              if((state->mouseXPx >= (state->ds.uiElemPosX[i]-state->ds.uiElemExtMinusX[i]))&&(state->mouseXPx < (state->ds.uiElemPosX[i]+state->ds.uiElemWidth[i]+state->ds.uiElemExtPlusX[i]))&&(state->mouseYPx >= (state->ds.uiElemPosY[i]-state->ds.uiElemExtMinusY[i]))&&(state->mouseYPx < (state->ds.uiElemPosY[i]+state->ds.uiElemHeight[i]+state->ds.uiElemExtPlusY[i]))){
+                state->mouseoverElement = i;
+                //SDL_Log("mouseover element: %u\n",i);
+                if((state->mouseClickPosXPx >= (state->ds.uiElemPosX[i]-state->ds.uiElemExtMinusX[i]))&&(state->mouseClickPosXPx < (state->ds.uiElemPosX[i]+state->ds.uiElemWidth[i]+state->ds.uiElemExtPlusX[i]))&&(state->mouseClickPosYPx >= (state->ds.uiElemPosY[i]-state->ds.uiElemExtMinusY[i]))&&(state->mouseClickPosYPx < (state->ds.uiElemPosY[i]+state->ds.uiElemHeight[i]+state->ds.uiElemExtPlusY[i]))){
+                  if((state->mouseMovedDuringClick == 0)||(i == mouseReleaseElement)){
+                    //take action
+                    uiElemClickAction(dat,state,rdat,0,i); //data_ops.c
+                    //SDL_Log("Clicked element %u\n",i);
+                    return;
+                  }
+                }
                 break;
               }
             }
           }
         }
-      }
-      if(dynamicMenuItemInteracted == 0){
-        for(uint8_t i=0; i<UIELEM_ENUM_LENGTH; i++){ //ordering in ui_element_enum defines order in which UI elements receive input
-          if(state->interactableElement & (uint64_t)(1LU << i)){
-            if((state->mouseHoldStartPosXPx >= (state->ds.uiElemPosX[i]-state->ds.uiElemExtMinusX[i]))&&(state->mouseHoldStartPosXPx < (state->ds.uiElemPosX[i]+state->ds.uiElemWidth[i]+state->ds.uiElemExtPlusX[i]))&&(state->mouseHoldStartPosYPx >= (state->ds.uiElemPosY[i]-state->ds.uiElemExtMinusY[i]))&&(state->mouseHoldStartPosYPx < (state->ds.uiElemPosY[i]+state->ds.uiElemHeight[i]+state->ds.uiElemExtPlusY[i]))){
-              state->mouseholdElement = i;
-              //SDL_Log("Holding element %u\n",i);
-              uiElemHoldAction(dat,state,state->mouseholdElement);
-            }
-            if((state->mouseXPx >= (state->ds.uiElemPosX[i]-state->ds.uiElemExtMinusX[i]))&&(state->mouseXPx < (state->ds.uiElemPosX[i]+state->ds.uiElemWidth[i]+state->ds.uiElemExtPlusX[i]))&&(state->mouseYPx >= (state->ds.uiElemPosY[i]-state->ds.uiElemExtMinusY[i]))&&(state->mouseYPx < (state->ds.uiElemPosY[i]+state->ds.uiElemHeight[i]+state->ds.uiElemExtPlusY[i]))){
-              state->mouseoverElement = i;
-              //SDL_Log("mouseover element: %u\n",i);
-              if((state->mouseClickPosXPx >= (state->ds.uiElemPosX[i]-state->ds.uiElemExtMinusX[i]))&&(state->mouseClickPosXPx < (state->ds.uiElemPosX[i]+state->ds.uiElemWidth[i]+state->ds.uiElemExtPlusX[i]))&&(state->mouseClickPosYPx >= (state->ds.uiElemPosY[i]-state->ds.uiElemExtMinusY[i]))&&(state->mouseClickPosYPx < (state->ds.uiElemPosY[i]+state->ds.uiElemHeight[i]+state->ds.uiElemExtPlusY[i]))){
-                if((state->mouseMovedDuringClick == 0)||(i == mouseReleaseElement)){
-                  //take action
-                  uiElemClickAction(dat,state,rdat,0,i); //data_ops.c
-                  //SDL_Log("Clicked element %u\n",i);
-                  return;
-                }
-              }
-              break;
-            }
-          }
+
+        //handle click and drag on the chart of nuclides
+        if((chartDraggable)&&(state->mouseoverElement == UIELEM_ENUM_LENGTH)&&(state->mouseHoldStartPosXPx >= 0.0f)&&(state->ds.textDragInProgress == 0)&&(state->cms.numContextMenuItems == 0)){
+          state->ds.chartDragStartX = state->ds.chartPosX;
+          state->ds.chartDragStartY = state->ds.chartPosY;
+          state->ds.chartDragStartMouseX = state->mouseXPx;
+          state->ds.chartDragStartMouseY = state->mouseYPx;
+          state->ds.chartDragInProgress = 1;
+          state->tss.selectedStr = 65535; //de-select any text
+          //SDL_Log("start drag\n");
         }
+
       }
 
       uiElemMouseoverAction(state,rdat); //handle cursor changes with mouse position
-
-      //handle click and drag on the chart of nuclides
-      if((chartDraggable)&&(state->mouseoverElement == UIELEM_ENUM_LENGTH)&&(state->mouseHoldStartPosXPx >= 0.0f)&&(state->ds.textDragInProgress == 0)){
-        state->ds.chartDragStartX = state->ds.chartPosX;
-        state->ds.chartDragStartY = state->ds.chartPosY;
-        state->ds.chartDragStartMouseX = state->mouseXPx;
-        state->ds.chartDragStartMouseY = state->mouseYPx;
-        state->ds.chartDragInProgress = 1;
-        state->tss.selectedStr = 65535; //de-select any text
-        //SDL_Log("start drag\n");
-      }
       
     }
 
@@ -1030,6 +1035,10 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
           //close the UI scale menu
           uiElemClickAction(dat,state,rdat,0,UIELEM_PREFS_DIALOG_UISCALE_DROPDOWN);
         }
+      }
+    }else if(state->cms.numContextMenuItems > 0){
+      if(state->mouseClickPosXPx >= 0.0f){
+        startUIAnimation(dat,state,UIANIM_CONTEXT_MENU_HIDE); //menu will be closed after animation finishes
       }
     }
   }else{
@@ -1404,11 +1413,24 @@ void processSingleEvent(app_data *restrict dat, app_state *restrict state, resou
           break;
         case SDL_SCANCODE_C:
           if(state->kbdModVal == KBD_MOD_CTRL){
+            //copy text
             if(state->tss.selectedStr < 65535){
               //copy selected text to clipboard
-              const char *mimeType = "text/plain";
-              if(SDL_SetClipboardData(setSelTxtClipboardData,cleanupSelTxtClipboardData,(void *)(intptr_t)(&state->tss),&mimeType,1) == false){
-                SDL_Log("WARNING: processSingleEvent - couldn't copy text to clipboard. Error: %s\n",SDL_GetError());
+              if(state->tss.selStartPos != state->tss.selEndPos){
+                if(state->tss.selStartPos > state->tss.selEndPos){
+                  //swap start and end for the purposes of drawing
+                  uint8_t tmp = state->tss.selEndPos;
+                  state->tss.selEndPos = state->tss.selStartPos;
+                  state->tss.selStartPos = tmp;
+                }
+                size_t selLen = (size_t)(state->tss.selEndPos - state->tss.selStartPos);
+                if(selLen < MAX_SELECTABLE_STR_LEN){
+                  SDL_strlcpy(state->copiedTxt,&state->tss.selectableStrTxt[state->tss.selectedStr][state->tss.selStartPos],selLen+1);
+                  char *selSubStrCpy = findReplaceAllUTF8("%%","%",state->copiedTxt);
+                  SDL_strlcpy(state->copiedTxt,selSubStrCpy,selLen+1);
+                  free(selSubStrCpy);
+                }
+                SDL_SetClipboardText(state->copiedTxt);
               }
               //SDL_Log("Copied text to clipboard: %s\n",SDL_GetClipboardText());
             }

@@ -4,6 +4,8 @@
 
 The main chart view can be panned by clicking and dragging with a mouse/touchpad, and zoomed in/out using the mouse wheel or scrolling on the touchpad. The controls are basically identical to something like Google Maps.
 
+Right clicking on selected text or on the chart of nuclides will open a menu allowing you to copy information to the clipboard.
+
 ### Keyboard/gamepad controls
 
 The program is also designed to be fully navigable with a keyboard and/or gamepad.
@@ -22,7 +24,6 @@ The program is also designed to be fully navigable with a keyboard and/or gamepa
 | F11                | Home button                 | Toggle fullscreen mode |
 | P                  | N/A                         | Toggle debug overlay (shows FPS and other stats) |
 | Ctrl+Q             | N/A                         | Quit application |
-
 
 ## Searching
 

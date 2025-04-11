@@ -121,50 +121,6 @@ void initializeTempState(const app_data *restrict dat, app_state *restrict state
 
 }
 
-//callback for SDL_SetClipboardData
-//normally would just use SDL_SetClipboardText, but as of SDL 3.2.4 this is buggy on Wayland (fixed in later versions)
-const void* setSelTxtClipboardData(void *data, const char *mime_type, size_t *size){
-  
-  (void)mime_type;
-  
-  text_selection_state *tss = ((text_selection_state*)(intptr_t)(data)); //get the text selection state (double cast to avoid warning)
-  tss->clipboardData = (char*)SDL_calloc(MAX_SELECTABLE_STR_LEN,sizeof(char)); //allocate output str
-  size_t selLen = 0;
-
-  uint8_t charIndStart = tss->selStartPos;
-  uint8_t charIndEnd = tss->selEndPos;
-  if(charIndStart != charIndEnd){
-    if(charIndStart > charIndEnd){
-      //swap start and end for the purposes of drawing
-      uint8_t tmp = charIndEnd;
-      charIndEnd = charIndStart;
-      charIndStart = tmp;
-    }
-    selLen = (size_t)(charIndEnd - charIndStart);
-    if(selLen < MAX_SELECTABLE_STR_LEN){
-      SDL_strlcpy(tss->clipboardData,&tss->selectableStrTxt[tss->selectedStr][charIndStart],selLen+1);
-      char *selSubStrCpy = findReplaceAllUTF8("%%","%",tss->clipboardData);
-      SDL_strlcpy(tss->clipboardData,selSubStrCpy,selLen+1);
-      free(selSubStrCpy);
-    }
-  }
-
-  *size = SDL_strlen(tss->clipboardData); //output str size
-
-  return (void *)(intptr_t)(tss->clipboardData);
-}
-
-//callback for SDL_SetClipboardData
-//normally would just use SDL_SetClipboardText, but as of SDL 3.2.4 this is buggy on Wayland
-void cleanupSelTxtClipboardData(void *data){
-  
-  text_selection_state *tss = ((text_selection_state*)(intptr_t)(data)); //get the text selection state (double cast to avoid warning)
-  if(tss->clipboardData != NULL){
-    SDL_free(tss->clipboardData);
-  }
-
-}
-
 //resets the text selection state, should be called on frames where selectable text changes position
 void clearSelectionStrs(text_selection_state *restrict tss, const uint8_t modifiableAfter){
 	tss->selStartPos = 0;
@@ -320,6 +276,10 @@ void stopUIAnimation(const app_data *restrict dat, app_state *restrict state, co
 			break;
 		case UIANIM_CONTEXT_MENU_HIDE:
 			state->cms.numContextMenuItems = 0; //prevent further interactions with the context menu
+			state->ds.uiElemPosX[UIELEM_CONTEXT_MENU] = -1;
+			state->ds.uiElemPosY[UIELEM_CONTEXT_MENU] = -1;
+			state->ds.uiElemWidth[UIELEM_CONTEXT_MENU] = 0;
+			state->ds.uiElemWidth[UIELEM_CONTEXT_MENU] = 0;
 			break;
     default:
       break;
@@ -476,6 +436,7 @@ void setupNuclideContextMenu(const app_data *restrict dat, app_state *restrict s
   char nuclStr[32];
   getNuclNameStr(nuclStr,&dat->ndat.nuclData[nuclInd],255);
 	SDL_strlcpy(state->cms.headerText,nuclStr,32);
+	state->cms.selectionInd = nuclInd;
 	state->cms.useHeaderText = 1;
 	state->cms.numContextMenuItems = 3;
 	state->cms.contextMenuItems[0] = CONTEXTITEM_NUCLNAME;
@@ -2820,6 +2781,7 @@ void changeUIState(const app_data *restrict dat, app_state *restrict state, cons
   	state->uiState = newState;
 	}
   
+	state->interactableElement |= (uint64_t)(1UL << UIELEM_CONTEXT_MENU);
   switch(state->uiState){
 		case UISTATE_ABOUT_BOX:
 			state->interactableElement |= (uint64_t)(1UL << UIELEM_ABOUT_BOX_CLOSEBUTTON);
@@ -3395,13 +3357,159 @@ void contextMenuClickAction(app_data *restrict dat, app_state *restrict state, c
 	startUIAnimation(dat,state,UIANIM_CONTEXT_MENU_HIDE); //menu will be closed after animation finishes
 	
 	switch(state->cms.contextMenuItems[menuItemInd]){
+		case CONTEXTITEM_NUCLNAME:
+			; //suppress warning
+			getNuclNameStr(state->copiedTxt,&dat->ndat.nuclData[state->cms.selectionInd],255);
+			SDL_SetClipboardText(state->copiedTxt);
+			//SDL_Log("Copied text to clipboard: %s\n",SDL_GetClipboardText());
+			break;
+		case CONTEXTITEM_NUCLINFO:
+			; //suppress warning
+			char tmpStr[32];
+			getNuclNameStr(tmpStr,&dat->ndat.nuclData[state->cms.selectionInd],255);
+			SDL_snprintf(state->copiedTxt,MAX_SELECTABLE_STR_LEN,"%s, %s: %i, %s: %i, %s: ",tmpStr, dat->strings[dat->locStringIDs[LOCSTR_PROTONSDESC]],dat->ndat.nuclData[state->cms.selectionInd].Z,dat->strings[dat->locStringIDs[LOCSTR_NEUTRONSDESC]],dat->ndat.nuclData[state->cms.selectionInd].N,dat->strings[dat->locStringIDs[LOCSTR_JPI]]);
+			getSpinParStr(tmpStr,&dat->ndat,dat->ndat.nuclData[state->cms.selectionInd].firstLevel + dat->ndat.nuclData[state->cms.selectionInd].gsLevel);
+			if(SDL_strlen(tmpStr) > 0){
+				SDL_strlcat(state->copiedTxt,tmpStr,MAX_SELECTABLE_STR_LEN);
+			}else{
+				SDL_strlcat(state->copiedTxt,dat->strings[dat->locStringIDs[LOCSTR_UNKNOWN]],MAX_SELECTABLE_STR_LEN);
+			}
+			SDL_SetClipboardText(state->copiedTxt);
+			//SDL_Log("Copied text to clipboard: %s\n",SDL_GetClipboardText());
+			break;
+		case CONTEXTITEM_CHART_PROPERTY:
+			; //suppress warning
+			const uint32_t gsLevInd = (uint32_t)(dat->ndat.nuclData[state->cms.selectionInd].firstLevel + dat->ndat.nuclData[state->cms.selectionInd].gsLevel);
+			switch(state->chartView){
+				case CHARTVIEW_HALFLIFE:
+					; //suppress warning
+					char tmpHlStr[32];
+					getGSHalfLifeStr(tmpHlStr,dat,state->cms.selectionInd,state->ds.useLifetimes);
+					if(state->ds.useLifetimes){
+						SDL_snprintf(state->copiedTxt,MAX_SELECTABLE_STR_LEN,"%s: %s",dat->strings[dat->locStringIDs[LOCSTR_LIFETIME]],tmpHlStr);
+					}else{
+						SDL_snprintf(state->copiedTxt,MAX_SELECTABLE_STR_LEN,"%s: %s",dat->strings[dat->locStringIDs[LOCSTR_HALFLIFE]],tmpHlStr);
+					}
+					SDL_SetClipboardText(state->copiedTxt);
+					//SDL_Log("Copied text to clipboard: %s\n",SDL_GetClipboardText());
+					break;
+				case CHARTVIEW_DECAYMODE:
+					if(dat->ndat.levels[gsLevInd].halfLife.unit == VALUE_UNIT_STABLE){
+						//if the nuclide is stable, show the 'STABLE' label
+						getGSHalfLifeStr(state->copiedTxt,dat,state->cms.selectionInd,state->ds.useLifetimes);
+					}else{
+						char tmpDecStr[32];
+						state->copiedTxt[0] = '\0'; //empty string to be copied
+						for(int8_t i=0; i<dat->ndat.levels[gsLevInd].numDecModes; i++){
+							getDecayModeStr(tmpDecStr,&dat->ndat,dat->ndat.levels[gsLevInd].firstDecMode + (uint32_t)i);
+							SDL_strlcat(state->copiedTxt,tmpDecStr,MAX_SELECTABLE_STR_LEN);
+							if(i<(dat->ndat.levels[gsLevInd].numDecModes - 1)){
+								SDL_strlcat(state->copiedTxt,", ",MAX_SELECTABLE_STR_LEN);
+							}
+						}
+					}
+					char *cpyStrCpy = findReplaceAllUTF8("%%","%",state->copiedTxt); //you copii?
+					SDL_strlcpy(state->copiedTxt,cpyStrCpy,MAX_SELECTABLE_STR_LEN);
+					free(cpyStrCpy);
+					SDL_SetClipboardText(state->copiedTxt);
+					//SDL_Log("Copied text to clipboard: %s\n",SDL_GetClipboardText());
+					break;
+				case CHARTVIEW_2PLUS:
+					; //suppress warning
+					uint32_t plus2Lvl = get2PlusLvlInd(&dat->ndat,state->cms.selectionInd);
+					if(plus2Lvl != MAXNUMLVLS){
+						char tmpEnStr[32];
+						getLvlEnergyStr(tmpEnStr,&dat->ndat,plus2Lvl,1);
+						SDL_strlcat(tmpEnStr," keV",32);
+						SDL_snprintf(state->copiedTxt,MAX_SELECTABLE_STR_LEN,"%s: %s",dat->strings[dat->locStringIDs[LOCSTR_CHARTVIEW_2PLUS]],tmpEnStr);
+					}else{
+						SDL_snprintf(state->copiedTxt,MAX_SELECTABLE_STR_LEN,"%s: %s",dat->strings[dat->locStringIDs[LOCSTR_CHARTVIEW_2PLUS]],dat->strings[dat->locStringIDs[LOCSTR_UNKNOWN]]);
+					}
+					SDL_SetClipboardText(state->copiedTxt);
+					//SDL_Log("Copied text to clipboard: %s\n",SDL_GetClipboardText());
+					break;
+				case CHARTVIEW_R42:
+					; //suppress warning
+					double r42 = getR42(&dat->ndat,state->cms.selectionInd);
+					if(r42 > 0.0){
+						SDL_snprintf(state->copiedTxt,MAX_SELECTABLE_STR_LEN,"R₄₂: %0.2f",r42);
+					}else{
+						SDL_snprintf(state->copiedTxt,MAX_SELECTABLE_STR_LEN,"R₄₂: %s",dat->strings[dat->locStringIDs[LOCSTR_UNKNOWN]]);
+					}
+					SDL_SetClipboardText(state->copiedTxt);
+					//SDL_Log("Copied text to clipboard: %s\n",SDL_GetClipboardText());
+					break;
+				case CHARTVIEW_BETA2:
+					; //suppress warning
+					double beta2 = getBeta2(&dat->ndat,state->cms.selectionInd);
+					if(beta2 > 0.0){
+						SDL_snprintf(state->copiedTxt,MAX_SELECTABLE_STR_LEN,"%s: %0.2f",dat->strings[dat->locStringIDs[LOCSTR_CHARTVIEW_BETA2]], beta2);
+					}else{
+						SDL_snprintf(state->copiedTxt,MAX_SELECTABLE_STR_LEN,"%s: %s",dat->strings[dat->locStringIDs[LOCSTR_CHARTVIEW_BETA2]], dat->strings[dat->locStringIDs[LOCSTR_UNKNOWN]]);
+					}
+					SDL_SetClipboardText(state->copiedTxt);
+					//SDL_Log("Copied text to clipboard: %s\n",SDL_GetClipboardText());
+					break;
+				case CHARTVIEW_SPIN:
+				case CHARTVIEW_PARITY:
+					if(getMostProbableSpin(&dat->ndat,gsLevInd) >= 255.0){
+						SDL_snprintf(state->copiedTxt,MAX_SELECTABLE_STR_LEN,"%s: %s",dat->strings[dat->locStringIDs[LOCSTR_JPI]],dat->strings[dat->locStringIDs[LOCSTR_UNKNOWN]]);
+					}else{
+						char tmpJPiStr[32];
+						getSpinParStr(tmpJPiStr,&dat->ndat,gsLevInd);
+						SDL_snprintf(state->copiedTxt,MAX_SELECTABLE_STR_LEN,"%s: %s",dat->strings[dat->locStringIDs[LOCSTR_JPI]],tmpJPiStr);
+					}
+					SDL_SetClipboardText(state->copiedTxt);
+					//SDL_Log("Copied text to clipboard: %s\n",SDL_GetClipboardText());
+					break;
+				case CHARTVIEW_BEA:
+					; //suppress warning
+					double beA = getBEA(&dat->ndat,state->cms.selectionInd);
+					if(beA > 0.0){
+						char tmpBEAStr[32];
+						getMassValStr(tmpBEAStr,dat->ndat.nuclData[state->cms.selectionInd].beA,1);
+						SDL_snprintf(state->copiedTxt,MAX_SELECTABLE_STR_LEN,"%s: %s keV",dat->strings[dat->locStringIDs[LOCSTR_CHARTVIEW_BEA]],tmpBEAStr);
+					}else{
+						SDL_snprintf(state->copiedTxt,MAX_SELECTABLE_STR_LEN,"%s: %s",dat->strings[dat->locStringIDs[LOCSTR_CHARTVIEW_BEA]],dat->strings[dat->locStringIDs[LOCSTR_UNKNOWN]]);
+					}
+					SDL_SetClipboardText(state->copiedTxt);
+					//SDL_Log("Copied text to clipboard: %s\n",SDL_GetClipboardText());
+					break;
+				case CHARTVIEW_NUMLVLS:
+					SDL_snprintf(state->copiedTxt,MAX_SELECTABLE_STR_LEN,"%s: %u",dat->strings[dat->locStringIDs[LOCSTR_CHARTVIEW_NUMLVLS]],dat->ndat.nuclData[state->cms.selectionInd].numLevels);
+					SDL_SetClipboardText(state->copiedTxt);
+					//SDL_Log("Copied text to clipboard: %s\n",SDL_GetClipboardText());
+					break;
+				case CHARTVIEW_UNKNOWN_ENERGY:
+					; //suppress warning
+					const uint16_t numUnknowns = getNumUnknownLvls(&dat->ndat,state->cms.selectionInd);
+					SDL_snprintf(state->copiedTxt,MAX_SELECTABLE_STR_LEN,"%s: %u",dat->strings[dat->locStringIDs[LOCSTR_CHARTVIEW_UNKNOWN_ENERGY]],numUnknowns);
+					SDL_SetClipboardText(state->copiedTxt);
+					//SDL_Log("Copied text to clipboard: %s\n",SDL_GetClipboardText());
+					break;
+				default:
+					break;
+			}
+			break;
 		case CONTEXTITEM_COPY:
 			//copy text
 			if(state->tss.selectedStr < 65535){
 				//copy selected text to clipboard
-				const char *mimeType = "text/plain";
-				if(SDL_SetClipboardData(setSelTxtClipboardData,cleanupSelTxtClipboardData,(void *)(intptr_t)(&state->tss),&mimeType,1) == false){
-					SDL_Log("WARNING: processSingleEvent - couldn't copy text to clipboard. Error: %s\n",SDL_GetError());
+				if(state->tss.selStartPos != state->tss.selEndPos){
+					if(state->tss.selStartPos > state->tss.selEndPos){
+						//swap start and end for the purposes of drawing
+						uint8_t tmp = state->tss.selEndPos;
+						state->tss.selEndPos = state->tss.selStartPos;
+						state->tss.selStartPos = tmp;
+					}
+					size_t selLen = (size_t)(state->tss.selEndPos - state->tss.selStartPos);
+					if(selLen < MAX_SELECTABLE_STR_LEN){
+						SDL_strlcpy(state->copiedTxt,&state->tss.selectableStrTxt[state->tss.selectedStr][state->tss.selStartPos],selLen+1);
+						char *selSubStrCpy = findReplaceAllUTF8("%%","%",state->copiedTxt);
+						SDL_strlcpy(state->copiedTxt,selSubStrCpy,selLen+1);
+						free(selSubStrCpy);
+					}
+					SDL_SetClipboardText(state->copiedTxt);
 				}
 				//SDL_Log("Copied text to clipboard: %s\n",SDL_GetClipboardText());
 			}
@@ -3466,7 +3574,7 @@ void uiElemClickAction(app_data *restrict dat, app_state *restrict state, resour
   state->clickedUIElem = uiElemID;
 
 	//handle extraneous opened menus
-	if(state->cms.numContextMenuItems > 0){
+	if((uiElemID != UIELEM_CONTEXT_MENU) && (state->cms.numContextMenuItems > 0)){
 		startUIAnimation(dat,state,UIANIM_CONTEXT_MENU_HIDE); //remove any opened context menus
 	}
 	if((uiElemID != UIELEM_MENU_BUTTON)&&(uiElemID != UIELEM_PRIMARY_MENU)&&(uiElemID != UIELEM_PM_PREFS_BUTTON)&&(uiElemID != UIELEM_PM_ABOUT_BUTTON)){
@@ -3890,6 +3998,8 @@ void uiElemClickAction(app_data *restrict dat, app_state *restrict state, resour
 			state->ds.zoomFinished = 0;
 			state->clickedUIElem = UIELEM_ENUM_LENGTH; //'unclick' the zoom button
 			break;
+		case UIELEM_CONTEXT_MENU:
+			break; //do nothing
 		case UIELEM_ENUM_LENGTH:
     default:
 			//clicked outside of a button or UI element
@@ -4049,19 +4159,17 @@ SDL_FRect getTextSelRect(const text_selection_state *restrict tss, resource_data
 			charIndStart = tmp;
 		}
 		uint8_t selLen = (uint8_t)(charIndEnd - charIndStart);
-		if(selLen < MAX_SELECTABLE_STR_LEN){
-			char selSubStr[MAX_SELECTABLE_STR_LEN], selPreStr[MAX_SELECTABLE_STR_LEN];
-			SDL_strlcpy(selSubStr,&tss->selectableStrTxt[tss->selectedStr][charIndStart],selLen+1);
-			//deal with '%%' sequences in some snprintf'd strings where the '% character needs to be displayed
-			if((charIndStart > 0)&&(selSubStr[0] == '%')&&(selSubStr[1] != '%')){
-				SDL_strlcpy(selSubStr,&tss->selectableStrTxt[tss->selectedStr][charIndStart-1],selLen+2);
-			}
-			SDL_strlcpy(selPreStr,tss->selectableStrTxt[tss->selectedStr],charIndStart+1);
-
-			rect = tss->selectableStrRect[tss->selectedStr];
-			rect.x = rect.x + getTextWidth(rdat,tss->selectableStrFontSize[tss->selectedStr],selPreStr)/rdat->uiDPIScale;
-			rect.w = getTextWidth(rdat,tss->selectableStrFontSize[tss->selectedStr],selSubStr)/rdat->uiDPIScale;
+		char selSubStr[MAX_SELECTABLE_STR_LEN], selPreStr[MAX_SELECTABLE_STR_LEN];
+		SDL_strlcpy(selSubStr,&tss->selectableStrTxt[tss->selectedStr][charIndStart],selLen+1);
+		//deal with '%%' sequences in some snprintf'd strings where the '% character needs to be displayed
+		if((charIndStart > 0)&&(selSubStr[0] == '%')&&(selSubStr[1] != '%')){
+			SDL_strlcpy(selSubStr,&tss->selectableStrTxt[tss->selectedStr][charIndStart-1],selLen+2);
 		}
+		SDL_strlcpy(selPreStr,tss->selectableStrTxt[tss->selectedStr],charIndStart+1);
+
+		rect = tss->selectableStrRect[tss->selectedStr];
+		rect.x = rect.x + getTextWidth(rdat,tss->selectableStrFontSize[tss->selectedStr],selPreStr)/rdat->uiDPIScale;
+		rect.w = getTextWidth(rdat,tss->selectableStrFontSize[tss->selectedStr],selSubStr)/rdat->uiDPIScale;
 	}
 	return rect;
 }
