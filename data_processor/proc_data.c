@@ -28,7 +28,7 @@ static int writeAsset(SDL_IOStream *out, const char *assetPath, const char *base
     int64_t fileSize = SDL_GetIOSize(asset);
     SDL_CloseIO(asset);
     if(fileSize>0){
-      if(SDL_WriteIO(out,&fileSize,sizeof(int64_t))!=sizeof(int64_t)){
+      if(SDL_WriteIO(out,&fileSize,sizeof(fileSize))!=sizeof(fileSize)){
         SDL_Log("ERROR: writeAsset - couldn't write filesize of file %s to output file - %s.\n",filePath,SDL_GetError());
         return -1;
       }
@@ -96,12 +96,12 @@ int main(int argc, char *argv[]){
   
   if(out!=NULL){
     SDL_WriteIO(out,&headerStr[0],sizeof(headerStr)); //write header
-    SDL_WriteIO(out,&version,sizeof(uint8_t));
+    SDL_WriteIO(out,&version,sizeof(version));
     if(writeAsset(out,"data/io.github.e_j_w.ChartOfNuclides.svg",appBasePath)==-1){return SDL_APP_FAILURE;}
-    int64_t dataSize = (int64_t)sizeof(app_data);
+    size_t dataSize = sizeof(app_data);
     //SDL_Log("Data size: %li\n",dataSize);
-    SDL_WriteIO(out,&dataSize,sizeof(int64_t));
-    if(SDL_WriteIO(out,dat,sizeof(app_data))!=sizeof(app_data)){
+    SDL_WriteIO(out,&dataSize,sizeof(dataSize));
+    if(SDL_WriteIO(out,dat,dataSize)!=dataSize){
       SDL_Log("ERROR: data write error - %s.\n",SDL_GetError());
       return SDL_APP_FAILURE;
     }

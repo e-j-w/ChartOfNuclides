@@ -6,7 +6,7 @@ An offline viewer of isotope and nuclear structure data in the [Chart of Nuclide
 
 ## Quick installation (Linux)
 
-Get the latest [release](https://github.com/e-j-w/ChartOfNuclides/releases) and follow the installation instructions there. Support for other platforms is planned for the future.
+Get the latest [release](https://github.com/e-j-w/ChartOfNuclides/releases) and follow the installation instructions there. Support for other platforms is planned in the future.
 
 ## Using the program
 
