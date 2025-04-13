@@ -34,6 +34,6 @@ Example search queries include:
 | Search type        | Description                                         | Example search(es)           |
 | :----------------- | :-------------------------------------------------- |:---------------------------- |
 | Nuclide / isotope  | Search for a nuclide / isotope on the main chart    | `32Si`, `cobalt-60` (shows 60Co), `eu152` (shows 152Eu) |
-| Level energy       | Energy (in keV) of an excited state in a nuclide. Can be combined with the nuclide name.  | `7654.07` (shows Holye state of 12C), `32Si 5502` (shows isomer of 32Si) |
+| Level energy       | Energy (in keV) of an excited state in a nuclide. Can be combined with the nuclide name.  | `7654.07` (shows Holye state of 12C), `32Si 5505` (shows isomer of 32Si) |
 | Gamma energy       | Energy (in keV) of a gamma-ray transition in a nuclide. Can be combined with the nuclide name.  | `2548 28Mg` (shows 4+ to 2+ transition in 28Mg) |
 | Gamma-ray cascade  | Energies (in keV) of a sequence of gamma-ray transitions in a nuclide. Can be combined with the nuclide name.  | `263 685 1477` (shows isomeric cascades in 93Mo), `1274 2083` (shows 4+ to 2+ to 0+ cascade in 22Ne) |

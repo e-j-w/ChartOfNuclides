@@ -4,9 +4,9 @@
 
 An offline viewer of isotope and nuclear structure data in the [Chart of Nuclides / Segrè chart](https://en.wikipedia.org/wiki/Table_of_nuclides) format. Uses nuclear structure data from [ENSDF](https://www.nndc.bnl.gov/ensdf/about.jsp), masses from [AME2020](https://amdc.impcas.ac.cn/web/masseval.html), and isotopic abundance data from [NIST](https://www.nist.gov/pml/atomic-weights-and-isotopic-compositions-relative-atomic-masses). A full list of features is [here](doc/FEATURES.md).
 
-## Quick installation
+## Quick installation (Linux)
 
-Only Linux is supported for now. Get the latest [release](https://github.com/e-j-w/ChartOfNuclides/releases) and follow the installation instructions there.
+Get the latest [release](https://github.com/e-j-w/ChartOfNuclides/releases) and follow the installation instructions there. Support for other platforms is planned for the future.
 
 ## Using the program
 
@@ -24,6 +24,6 @@ The author(s) cannot guarantee the accuracy or completeness of the information p
 
 Developed and maintained by [Jonathan Williams](https://e-j-w.github.io/).
 
-A slightly modified version of the [SDL_FontCache](https://github.com/grimfang4/SDL_FontCache) library by Jonathan Dearborn is used for fast text rendering.
+A modified version of the [SDL_FontCache](https://github.com/grimfang4/SDL_FontCache) library by Jonathan Dearborn is used for fast text rendering.
 
 The font used in this program (`data/font.ttf`) is a modified version of [Oxygen](https://github.com/KDE/oxygen-fonts) with some additional unicode glyphs from [Noto Sans](https://fonts.google.com/noto/specimen/Noto+Sans).  Both fonts are made available under the [Open Font License](https://openfontlicense.org/) (as described [here](https://fonts.google.com/specimen/Oxygen/about) and [here](https://fonts.google.com/noto/specimen/Noto+Sans/about)).

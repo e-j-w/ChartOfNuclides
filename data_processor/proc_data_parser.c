@@ -1929,8 +1929,8 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 								for(uint32_t j=nd->nuclData[nd->numNucl].firstLevel; j<nd->nuclData[nd->numNucl].firstLevel+nd->nuclData[nd->numNucl].numLevels; j++){
 									uint64_t bit1 = (uint64_t)((nd->levels[j].populatingRxns >> i) & 1UL);
 									uint64_t bit2 = (uint64_t)((nd->levels[j].populatingRxns >> reorderedRxns) & 1UL);
-									nd->levels[j].populatingRxns &= ~(1UL << i); //unset
-									nd->levels[j].populatingRxns &= ~(1UL << reorderedRxns); //unset
+									nd->levels[j].populatingRxns &= ~(1ULL << i); //unset
+									nd->levels[j].populatingRxns &= ~(1ULL << reorderedRxns); //unset
 									nd->levels[j].populatingRxns |= (bit1 << reorderedRxns);
 									nd->levels[j].populatingRxns |= (bit2 << i);
 								}
@@ -1949,8 +1949,8 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 								for(uint32_t j=nd->nuclData[nd->numNucl].firstLevel; j<nd->nuclData[nd->numNucl].firstLevel+nd->nuclData[nd->numNucl].numLevels; j++){
 									uint64_t bit1 = (uint64_t)((nd->levels[j].populatingRxns >> i) & 1UL);
 									uint64_t bit2 = (uint64_t)((nd->levels[j].populatingRxns >> reorderedRxns) & 1UL);
-									nd->levels[j].populatingRxns &= ~(1UL << i); //unset
-									nd->levels[j].populatingRxns &= ~(1UL << reorderedRxns); //unset
+									nd->levels[j].populatingRxns &= ~(1ULL << i); //unset
+									nd->levels[j].populatingRxns &= ~(1ULL << reorderedRxns); //unset
 									nd->levels[j].populatingRxns |= (bit1 << reorderedRxns);
 									nd->levels[j].populatingRxns |= (bit2 << i);
 								}
@@ -2120,7 +2120,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 									//level appears in all reactions/datasets
 									for(uint8_t j=0; j<nd->nuclData[nd->numNucl].numRxns; j++){
 										if(j<MAXRXNSPERNUCL){
-											nd->levels[nd->numLvls-1].populatingRxns |= (1UL << j);
+											nd->levels[nd->numLvls-1].populatingRxns |= (1ULL << j);
 											rxnMap.rxnPopulatedLvls[j]++;
 										}
 									}
@@ -2128,7 +2128,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 									//level appears in all reactions/datasets except the ones specified in parantheses
 									for(uint8_t j=0; j<nd->nuclData[nd->numNucl].numRxns; j++){
 										if(j<MAXRXNSPERNUCL){
-											nd->levels[nd->numLvls-1].populatingRxns |= (1UL << j);
+											nd->levels[nd->numLvls-1].populatingRxns |= (1ULL << j);
 											rxnMap.rxnPopulatedLvls[j]++;
 										}
 									}
@@ -2141,7 +2141,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 											if(j<MAXRXNSPERNUCL){
 												for(uint8_t k=0; k<rxnMap.numRxnChars[j]; k++){
 													if(rxnMap.rxnChar[j][k] == lvlRxnChar){
-														nd->levels[nd->numLvls-1].populatingRxns &= ~(1UL << j); //unset reaction
+														nd->levels[nd->numLvls-1].populatingRxns &= ~(1ULL << j); //unset reaction
 														rxnMap.rxnPopulatedLvls[j]--;
 														break;
 													}
@@ -2165,7 +2165,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 												if(j<MAXRXNSPERNUCL){
 													for(uint8_t k=0; k<rxnMap.numRxnChars[j]; k++){
 														if(rxnMap.rxnChar[j][k] == lvlRxnChar){
-															nd->levels[nd->numLvls-1].populatingRxns |= (1UL << j);
+															nd->levels[nd->numLvls-1].populatingRxns |= (1ULL << j);
 															rxnMap.rxnPopulatedLvls[j]++;
 															break;
 														}
