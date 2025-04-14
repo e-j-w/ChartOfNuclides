@@ -94,7 +94,7 @@ static const float uiScales[UISCALE_ENUM_LENGTH] = {1.0f,1.20f,1.60f,1.85f};
 #define SEARCH_BUTTON_POS_Y          UI_PADDING_SIZE //in unscaled pixels
 #define SEARCH_BUTTON_WIDTH          40 //in unscaled pixels
 
-#define SEARCH_MENU_POS_XR           60 //in unscaled pixels
+#define SEARCH_MENU_POS_XR           80 //in unscaled pixels
 #define SEARCH_MENU_POS_Y            (UI_TILE_SIZE+UI_PADDING_SIZE) //in unscaled pixels
 #define SEARCH_MENU_WIDTH            300 //in unscaled pixels
 #define SEARCH_MENU_HEADER_HEIGHT    (UI_TILE_SIZE+4*UI_PADDING_SIZE+2*PANEL_EDGE_SIZE) //in unscaled pixels
@@ -155,7 +155,7 @@ static const float uiScales[UISCALE_ENUM_LENGTH] = {1.0f,1.20f,1.60f,1.85f};
 #define PAN_SPRINT_MULTIPLIER              0.33f
 #define CHART_DOUBLECLICK_PAN_TIME         0.3f //time (in seconds) for the pan animation to finish (double click)
 #define CHART_PAN_DIST                     10.0f //in tiles (scaled by zoom factor)
-#define CHART_AXIS_DEPTH                   40.0f //in scaled pixels
+#define CHART_AXIS_DEPTH                   30.0f //in scaled pixels
 #define CHART_SHELLCLOSURELINE_THICKNESS   3.0f
 
 //info box
