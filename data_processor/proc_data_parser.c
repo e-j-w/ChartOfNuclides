@@ -3518,44 +3518,45 @@ int buildDatabase(const char *appBasePath, ndata *nd){
 //parse all app data
 int parseAppData(app_data *restrict dat, const char *appBasePath){
 
-  //check validity of data format
-  if(VALUETYPE_ENUM_LENGTH > /* DISABLES CODE */ (16)){
-    SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"VALUETYPE_ENUM_LENGTH is too long, can't store as 4 bits in a bit pattern (eg. level->halfLife.format).\n");
-    return -1;
-  }else if(MAX_SPIN_VARS > /* DISABLES CODE */ (32)){
-    SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"MAX_SPIN_VARS is too large, can't store as 5 bits in a bit pattern (eg. spinparval->format).\n");
-    return -1;
-  }else if(TENTATIVESP_ENUM_LENGTH > /* DISABLES CODE */ (16)){
-    SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"TENTATIVESP_ENUM_LENGTH is too large, can't store as 4 bits in a bit pattern (eg. spinparval->format).\n");
-    return -1;
-  }else if(TENTATIVEMULT_ENUM_LENGTH > /* DISABLES CODE */ (4)){
-    SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"TENTATIVEMULT_ENUM_LENGTH is too large, can't store as 2 bits in a bit pattern (eg. transition->multipole).\n");
-    return -1;
-  }else if(MAX_RXN_STRLEN >= /* DISABLES CODE */ (255)){
-    SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"MAX_RXN_STRLEN is too large, can't use 255 as a special return value in parseRxn().\n");
-    return -1;
-  }else if(MAXRXNSPERNUCL > /* DISABLES CODE */ (64)){
-    SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"MAXRXNSPERNUCL is too large, can't index reactions in a 64-bit bit-pattern (level->populatingRxns).\n");
-    return -1;
-  }
+	//check validity of data format
+	if(VALUETYPE_ENUM_LENGTH > /* DISABLES CODE */ (16)){
+		SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"VALUETYPE_ENUM_LENGTH is too long, can't store as 4 bits in a bit pattern (eg. level->halfLife.format).\n");
+		return -1;
+	}else if(MAX_SPIN_VARS > /* DISABLES CODE */ (32)){
+		SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"MAX_SPIN_VARS is too large, can't store as 5 bits in a bit pattern (eg. spinparval->format).\n");
+		return -1;
+	}else if(TENTATIVESP_ENUM_LENGTH > /* DISABLES CODE */ (16)){
+		SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"TENTATIVESP_ENUM_LENGTH is too large, can't store as 4 bits in a bit pattern (eg. spinparval->format).\n");
+		return -1;
+	}else if(TENTATIVEMULT_ENUM_LENGTH > /* DISABLES CODE */ (4)){
+		SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"TENTATIVEMULT_ENUM_LENGTH is too large, can't store as 2 bits in a bit pattern (eg. transition->multipole).\n");
+		return -1;
+	}else if(MAX_RXN_STRLEN >= /* DISABLES CODE */ (255)){
+		SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"MAX_RXN_STRLEN is too large, can't use 255 as a special return value in parseRxn().\n");
+		return -1;
+	}else if(MAXRXNSPERNUCL > /* DISABLES CODE */ (64)){
+		SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"MAXRXNSPERNUCL is too large, can't index reactions in a 64-bit bit-pattern (level->populatingRxns).\n");
+		return -1;
+	}
 
-  asset_mapping *restrict stringIDmap=(asset_mapping*)SDL_calloc(1,sizeof(asset_mapping)); //allocated on heap to not overflow the stack
+	asset_mapping *restrict stringIDmap=(asset_mapping*)SDL_calloc(1,sizeof(asset_mapping)); //allocated on heap to not overflow the stack
 
-  //set default values
-  dat->numStrings=0;
-  memset(dat->locStringIDs,0,sizeof(dat->locStringIDs));
+	//set default values
+	dat->numStrings=0;
+	memset(dat->locStringIDs,0,sizeof(dat->locStringIDs));
 
-  //start parsing data
-  if(parseStrings(dat,stringIDmap,appBasePath)==-1) return -1;
-  if(parseAppRules(dat,stringIDmap,appBasePath)==-1) return -1;
+	//start parsing data
+	if(parseStrings(dat,stringIDmap,appBasePath)==-1) return -1;
+	if(parseAppRules(dat,stringIDmap,appBasePath)==-1) return -1;
+	SDL_free(stringIDmap);
 
-  if(buildDatabase(appBasePath,&dat->ndat)==-1) return -1;
+	if(buildDatabase(appBasePath,&dat->ndat)==-1) return -1;
 
-  //summarize
-  SDL_Log("Data parsing complete.\n");
-  SDL_Log("  Number of localization strings parsed:    %7i (%7i max)\n",dat->numStrings,MAX_NUM_STRINGS);
+	//summarize
+	SDL_Log("Data parsing complete.\n");
+	SDL_Log("  Number of localization strings parsed:    %7i (%7i max)\n",dat->numStrings,MAX_NUM_STRINGS);
 	SDL_Log("  ENSDF string buffer size:                 %7i (%7i max)\n",dat->ndat.ensdfStrBufLen,ENSDFSTRBUFSIZE);
 
-  return 0; //success
+	return 0; //success
   
 }

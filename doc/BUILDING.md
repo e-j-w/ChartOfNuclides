@@ -150,13 +150,13 @@ The plan is to eventually support other platforms (Windows especially) once a st
 
 There are various guides online for building SDL3 programs in Windows.  With Windows 10, the following has worked for me:
 
-* Install mingw-w64 and SDL3 via [MSYS2](https://www.msys2.org/).  Follow the [installation instructions](https://www.msys2.org/#installation), and then install mingw-w64 and the SDL3 libraries from the MSYS2 terminal:
+* Install mingw-w64 and SDL3 via [MSYS2](https://www.msys2.org/).  Follow the [installation instructions](https://www.msys2.org/#installation), and then run mingw-w64 (`MSYS2 MinGW UCRT x64` in the Start Menu). Install mingw-w64 and the SDL3 libraries from the MSYS2 terminal:
 
 ```
-pacman -S --needed base-devel mingw-w64-ucrt-x86_64-gcc mingw-w64-ucrt-x86_64-sdl3 mingw-w64-ucrt-x86_64-sdl3-ttf mingw-w64-ucrt-x86_64-sdl3-image
+pacman -S --needed base-devel pkgconf mingw-w64-ucrt-x86_64-gcc mingw-w64-ucrt-x86_64-sdl3 mingw-w64-ucrt-x86_64-sdl3-ttf mingw-w64-ucrt-x86_64-sdl3-image
 ```
 
-Then run mingw-w64 (`MSYS2 MinGW UCRT x64` in the Start Menu).  Go to the source directory, and compile:
+Go to the source directory, and compile:
 
 ```
 cd /c/path/to/ChartOfNuclides

@@ -8,18 +8,18 @@ INC =  -I./include -I./src -I./lib/fontcache -I./lib/juicer -I./lib/strops
 CC = gcc
 #CC = clang
 
-run: con
-	./con
+run: chart
+	./chart
 
-install-linux: con
-	@echo "Will install executable to /usr/bin and data to /usr/share/con."
+install-linux: chart
+	@echo "Will install executable to /usr/bin and data to /usr/share/chart."
 	@echo "Run 'make uninstall-linux' to undo installation."
 	@if ! [ "$(shell id -u)" = 0 ]; then \
 		echo "This must be run with administrator privileges (eg. with 'sudo')." ; \
 	else \
-		cp con /usr/bin ; \
-		mkdir /usr/share/con ; \
-		cp con.dat /usr/share/con ; \
+		cp chart /usr/bin ; \
+		mkdir /usr/share/chart ; \
+		cp chart.dat /usr/share/chart ; \
 		cp data/io.github.e_j_w.ChartOfNuclides.svg /usr/share/icons/hicolor/scalable/apps ; \
 		cp data/io.github.e_j_w.ChartOfNuclides.desktop /usr/share/applications ; \
 		update-desktop-database /usr/share/applications ; \
@@ -32,22 +32,22 @@ uninstall-linux:
 	@if ! [ "$(shell id -u)" = 0 ]; then \
 		echo "This must be run with administrator privileges (eg. with 'sudo')." ; \
 	else \
-		rm /usr/bin/con ; \
-		rm /usr/share/con/con.dat ; \
-		rmdir /usr/share/con ; \
+		rm /usr/bin/chart ; \
+		rm /usr/share/chart/chart.dat ; \
+		rmdir /usr/share/chart ; \
 		rm /usr/share/icons/hicolor/scalable/apps/io.github.e_j_w.ChartOfNuclides.svg ; \
 		rm /usr/share/applications/io.github.e_j_w.ChartOfNuclides.desktop ; \
 		update-desktop-database /usr/share/applications ; \
 		echo "Done!" ; \
 	fi
 
-all: $(OBJ) proc_data con
+all: $(OBJ) proc_data chart
 
-con: src/*.c include/*.h $(OBJ) con.dat
-	$(CC) src/app.c $(INC) $(OBJ) $(SDL) $(CFLAGS) -lm -o con
+chart: src/*.c include/*.h $(OBJ) chart.dat
+	$(CC) src/app.c $(INC) $(OBJ) $(SDL) $(CFLAGS) -lm -o chart
 
-con.dat: proc_data
-	@if [ ! -f con.dat ]; then \
+chart.dat: proc_data
+	@if [ ! -f chart.dat ]; then \
 		./proc_data ; \
 	fi
 
@@ -91,4 +91,4 @@ proc_data_parser.o: data_processor/proc_data_parser.c data_processor/proc_data_p
 	$(CC) data_processor/proc_data_parser.c $(INC) $(CFLAGS) -c -o proc_data_parser.o
 
 clean:
-	rm -rf *~ *# */*.o *.o con proc_data con.dat
+	rm -rf *~ *# */*.o *.o chart proc_data chart.dat

@@ -79,7 +79,7 @@ int main(int argc, char *argv[]){
   
   const char *appBasePath = SDL_GetBasePath();
   char fileName[512];
-  SDL_snprintf(fileName,512,"%scon.dat",appBasePath);
+  SDL_snprintf(fileName,512,"%schart.dat",appBasePath);
   const char headerStr[6] = "<>|<>";
   const uint8_t version = 0; //revision of data format
 

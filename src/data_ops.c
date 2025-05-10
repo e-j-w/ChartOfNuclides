@@ -2903,7 +2903,7 @@ void changeUIState(const app_data *restrict dat, app_state *restrict state, cons
 	//SDL_Log("Mouseover element: %u\n",state->mouseoverElement);
 }
 
-void panChartToPos(const app_data *restrict dat, drawing_state *restrict ds, const uint16_t posN, const uint16_t posZ, float panTime){
+void panChartToPos(const app_data *restrict dat, drawing_state *restrict ds, const uint16_t posN, const uint16_t posZ, const float panTime){
 	ds->chartPanStartX = ds->chartPosX;
 	ds->chartPanStartY = ds->chartPosY;
 	ds->chartPanToX = posN*1.0f + 0.5f;

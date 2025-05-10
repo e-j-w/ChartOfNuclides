@@ -27,30 +27,30 @@ int findAndLoadAppDataFile(SDL_IOStream **inp, resource_data *restrict rdat, con
   if(!useCached){
     //no file path has been cached yet
     //try the user's local pref path first
-    SDL_snprintf(rdat->appDataFilepath,270,"%scon.dat",rdat->appPrefPath);
+    SDL_snprintf(rdat->appDataFilepath,270,"%schart.dat",rdat->appPrefPath);
   }
   *inp = SDL_IOFromFile(rdat->appDataFilepath, "rb");
   if(*inp==NULL){
     //try base path (path where the execuatable is)
-    SDL_snprintf(rdat->appDataFilepath,270,"%scon.dat",SDL_GetBasePath());
+    SDL_snprintf(rdat->appDataFilepath,270,"%schart.dat",SDL_GetBasePath());
     *inp = SDL_IOFromFile(rdat->appDataFilepath, "rb");
     if(*inp==NULL){
       //try platform specific paths
       const char *platformStr = SDL_GetPlatform();
       if(strcmp(platformStr,"Linux")==0){
-        SDL_snprintf(rdat->appDataFilepath,270,"/usr/share/con/con.dat");
+        SDL_snprintf(rdat->appDataFilepath,270,"/usr/share/chart/chart.dat");
       }else{
-        SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,"Error","Could not find platform-specific location for app data file (con.dat).",rdat->window);
+        SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,"Error","Could not find platform-specific location for app data file (chart.dat).",rdat->window);
         SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"importAppData - couldn't determine platform specific data file location.\n");
         return -1;
       }
       *inp = SDL_IOFromFile(rdat->appDataFilepath, "rb");
       if(*inp==NULL){
         //check Flatpak data location
-        SDL_snprintf(rdat->appDataFilepath,270,"/app/share/con.dat");
+        SDL_snprintf(rdat->appDataFilepath,270,"/app/share/chart.dat");
         *inp = SDL_IOFromFile(rdat->appDataFilepath, "rb");
         if(*inp==NULL){
-          SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,"Error","App data file (con.dat) doesn't exist or is unreadable.",rdat->window);
+          SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,"Error","App data file (chart.dat) doesn't exist or is unreadable.",rdat->window);
           SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"importAppData - couldn't read data package file %s.\n",rdat->appDataFilepath);
           return -1;
         }

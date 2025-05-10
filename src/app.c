@@ -98,7 +98,7 @@ int main(int argc, char *argv[]){
   }
 
   //load preferences (needed prior to window created)
-  gdat->rdat.appPrefPath = SDL_GetPrefPath(NULL,"con"); //setup path
+  gdat->rdat.appPrefPath = SDL_GetPrefPath(NULL,"chart"); //setup path
   initializeTempState(&gdat->dat,&gdat->state,&gdat->tms);
   updatePrefsFromConfigFile(gdat->rdat.appPrefPath,&gdat->dat.rules,&gdat->state); //read settings from .ini file
 
@@ -153,7 +153,7 @@ int main(int argc, char *argv[]){
   }
   SDL_SetWindowIcon(gdat->rdat.window,gdat->rdat.iconSurface);
   SDL_SetWindowTitle(gdat->rdat.window,gdat->dat.rules.appName);
-  if(SDL_SetAppMetadata(gdat->dat.rules.appName,"0.3","io.github.e_j_w.ChartOfNuclides")==false){
+  if(SDL_SetAppMetadata(gdat->dat.rules.appName,"1.0","io.github.e_j_w.ChartOfNuclides")==false){
     SDL_Log("WARNING: couldn't set app metadata.\n");
   }
   updateUIElemPositions(&gdat->dat,&gdat->state,&gdat->rdat); //some UI element positions depend on info only available after importAppData(), like font sizes

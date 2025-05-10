@@ -300,7 +300,7 @@ typedef struct
   uint16_t selectedStr; //65535 if nothing selected
   uint8_t selStartPos, selEndPos; //which character indices correspond to the start and end of the selected text
   uint8_t selStrsModifiable; //flag which is set whenever the selection strings can be updated, and is cleared at the end of each frame
-}text_selection_state; //struct containing search data
+}text_selection_state; //struct containing text selection data
 
 typedef struct
 {
@@ -311,7 +311,7 @@ typedef struct
   uint8_t mouseOverContextItem; //255 if none moused over
   uint8_t clickedContextItem; //255 if none clicked on
   uint16_t selectionInd; //index of nuclide or other item corresponding to this context menu
-}context_menu_state; //struct containing search data
+}context_menu_state; //struct containing context menu data
 
 typedef struct
 {
