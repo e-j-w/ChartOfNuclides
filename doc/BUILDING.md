@@ -96,10 +96,10 @@ make all -j
 make all -j CC=clang
 ```
 
-Two executables will be built: `proc_data` (which generates the data package containing the nuclear structure database used by the main application), and `con` (the main application).  [Build the data files](#build-data-file) if necessary, then run the application:
+Two executables will be built: `proc_data` (which generates the data package containing the nuclear structure database used by the main application), and `chart` (the main application).  [Build the data files](#build-data-file) if necessary, then run the application:
 
 ```
-./con
+./chart
 ```
 
 To install the application for all users, on a Linux system:
@@ -116,16 +116,16 @@ sudo make uninstall-linux
 
 ### Build data file
 
-In order for the application to run, it requires a data file (`con.dat`) containing the nuclear structure database and graphics/font resources.  The application will look for the data file in any of the following locations (in order of preference):
+In order for the application to run, it requires a data file (`chart.dat`) containing the nuclear structure database and graphics/font resources.  The application will look for the data file in any of the following locations (in order of preference):
 
 | Location Name            | Path |
 | :----------------------- | :----- |
-| User-specific data path  | `~/.local/share/con/` (Linux) |
+| User-specific data path  | `~/.local/share/chart/` (Linux) |
 | Executable directory     | The same directory that the executable was run from.  |
-| System-wide data path    | `/usr/share/con/` (Linux) |
+| System-wide data path    | `/usr/share/chart/` (Linux) |
 
 
-If you don't have the `con.dat` data file, it can be built from the original data files using the `proc_data` program (built during the [previous step](#build-the-application)).  First you must obtain the required data files:
+If you don't have the `chart.dat` data file, it can be built from the original data files using the `proc_data` program (built during the [previous step](#build-the-application)).  First you must obtain the required data files:
 
 #### Acquire data files
 
@@ -142,7 +142,7 @@ Once the data files are properly set up, run:
 ./proc_data
 ```
 
-This will build the data package file `con.dat` in the same directory (you can then get rid of the original data files if you don't want them anymore).
+This will build the data package file `chart.dat` in the same directory (you can then get rid of the original data files if you don't want them anymore).
 
 # Windows
 
@@ -163,10 +163,6 @@ cd /c/path/to/ChartOfNuclides
 make all -j
 ```
 
-Build the data file (using the same [procedure](#build-data-file) as on Linux) if necessary, then run the application:
+If necessary, build the data file (using the same [procedure](#build-data-file) as on Linux).
 
-```
-./con.exe
-```
-
-If run from the file manager, the application may compain about missing DLL files, as it is not being run from the MSYS2 environment.  These can be copied over (and placed in the same directory as `con.exe`) from the `C:\msys64\mingw64\bin` directory.  To figure out which DLLs the application depends on, run `ldd con.exe`.
+Check which DLLs are needed to run the application by running `ldd chart.exe`. Copy all of the listed DLLs from the MSYS2 distribution to the same directory as `chart.exe`. Then, it should be possible to run `chart.exe` from the file manager.
