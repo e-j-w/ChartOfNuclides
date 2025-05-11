@@ -4,9 +4,9 @@
 
 An offline viewer of isotope and nuclear structure data in the [Chart of Nuclides / Segrè chart](https://en.wikipedia.org/wiki/Table_of_nuclides) format. Uses nuclear structure data from [ENSDF](https://www.nndc.bnl.gov/ensdf/about.jsp), masses from [AME2020](https://amdc.impcas.ac.cn/web/masseval.html), and isotopic abundance data from [NIST](https://www.nist.gov/pml/atomic-weights-and-isotopic-compositions-relative-atomic-masses). A full list of features is [here](doc/FEATURES.md).
 
-## Quick installation (Linux)
+## Quick installation
 
-Get the latest [release](https://github.com/e-j-w/ChartOfNuclides/releases) and follow the installation instructions there. Support for other platforms is planned in the future.
+Prebuilt releases are available for desktop Linux (via Flatpak) and Windows 10+ (experimental). Go to the [releases](https://github.com/e-j-w/ChartOfNuclides/releases) page and follow the installation instructions there.
 
 ## Using the program
 

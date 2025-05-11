@@ -3,7 +3,7 @@
 
 # Linux
 
-The current code has been tested under Arch Linux and Debian 12 as of April 2025, though most recent Linux distros should work as well.
+The current code has been tested under Arch Linux and Debian 12 as of May 2025, though most recent Linux distros should work as well.
 
 ## Using Flatpak
 
@@ -146,9 +146,7 @@ This will build the data package file `chart.dat` in the same directory (you can
 
 # Windows
 
-The plan is to eventually support other platforms (Windows especially) once a stable SDL3 release is available. The following guide is work in progress and may not work yet.
-
-There are various guides online for building SDL3 programs in Windows.  With Windows 10, the following has worked for me:
+There are various guides online for building SDL3 programs in Windows.  In a Windows 10 VM, the following has worked for me:
 
 * Install mingw-w64 and SDL3 via [MSYS2](https://www.msys2.org/).  Follow the [installation instructions](https://www.msys2.org/#installation), and then run mingw-w64 (`MSYS2 MinGW UCRT x64` in the Start Menu). Install mingw-w64 and the SDL3 libraries from the MSYS2 terminal:
 
