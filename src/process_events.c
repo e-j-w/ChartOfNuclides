@@ -949,7 +949,7 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
         }
         if(dynamicMenuItemInteracted == 0){
           for(uint8_t i=0; i<UIELEM_ENUM_LENGTH; i++){ //ordering in ui_element_enum defines order in which UI elements receive input
-            if(state->interactableElement & (uint64_t)(1LU << i)){
+            if(state->interactableElement & ((uint64_t)(1) << i)){
               if((state->mouseHoldStartPosXPx >= (state->ds.uiElemPosX[i]-state->ds.uiElemExtMinusX[i]))&&(state->mouseHoldStartPosXPx < (state->ds.uiElemPosX[i]+state->ds.uiElemWidth[i]+state->ds.uiElemExtPlusX[i]))&&(state->mouseHoldStartPosYPx >= (state->ds.uiElemPosY[i]-state->ds.uiElemExtMinusY[i]))&&(state->mouseHoldStartPosYPx < (state->ds.uiElemPosY[i]+state->ds.uiElemHeight[i]+state->ds.uiElemExtPlusY[i]))){
                 state->mouseholdElement = i;
                 //SDL_Log("Holding element %u\n",i);

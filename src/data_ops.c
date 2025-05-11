@@ -30,41 +30,41 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 void initializeTempState(const app_data *restrict dat, app_state *restrict state, thread_manager_state *restrict tms){
   
 	//input
-  state->mouseXPx = -1;
-  state->mouseYPx = -1;
-  state->mouseHoldStartPosXPx = -1;
-  state->mouseHoldStartPosYPx = -1;
-  state->lastAxisValLX = 0;
-  state->lastAxisValLY = 0;
+	state->mouseXPx = -1;
+	state->mouseYPx = -1;
+	state->mouseHoldStartPosXPx = -1;
+	state->mouseHoldStartPosYPx = -1;
+	state->lastAxisValLX = 0;
+	state->lastAxisValLY = 0;
 	state->lastAxisValRX = 0;
-  state->lastAxisValRY = 0;
-  state->activeAxisX = 255;
+	state->lastAxisValRY = 0;
+	state->activeAxisX = 255;
 	state->activeAxisY = 255;
-  state->lastInputType = INPUT_TYPE_KEYBOARD; //default input type
+	state->lastInputType = INPUT_TYPE_KEYBOARD; //default input type
 	state->kbdModVal = KBD_MOD_NONE;
 	state->mouseoverElement = UIELEM_ENUM_LENGTH;
 	state->inputFlags = 0;
 	state->interactableElement = 0;
-  //app state
+	//app state
 	state->chartSelectedNucl = MAXNUMNUCL;
 	state->chartView = CHARTVIEW_HALFLIFE;
-  state->quitAppFlag = 0;
+	state->quitAppFlag = 0;
 	state->gamepadDeadzone = 16000;
 	state->gamepadTriggerDeadzone = 4000;
-  state->ds.windowXRes = 880;
-  state->ds.windowYRes = 580;
-  state->ds.drawPerformanceStats = 0;
+	state->ds.windowXRes = 880;
+	state->ds.windowYRes = 580;
+	state->ds.drawPerformanceStats = 0;
 	memset(state->ss.searchString,0,sizeof(state->ss.searchString));
 	state->searchStrUpdated = 0;
-  //ui state
+	//ui state
 	state->lastUIState = UISTATE_CHARTONLY;
-  changeUIState(dat,state,UISTATE_CHARTONLY);
-  state->clickedUIElem = UIELEM_ENUM_LENGTH; //no selected UI element
+	changeUIState(dat,state,UISTATE_CHARTONLY);
+	state->clickedUIElem = UIELEM_ENUM_LENGTH; //no selected UI element
 	state->lastOpenedMenu = UIELEM_ENUM_LENGTH; //no previously selected menu
-  state->ds.shownElements = 0; //no UI elements being shown
+	state->ds.shownElements = 0; //no UI elements being shown
 	state->ds.shownElements |= ((uint64_t)(1) << UIELEM_CHARTOFNUCLIDES);
-  state->ds.uiAnimPlaying = 0; //no UI animations playing
-  state->ds.useUIAnimations = 1;
+	state->ds.uiAnimPlaying = 0; //no UI animations playing
+	state->ds.useUIAnimations = 1;
 	state->ds.useLifetimes = 0;
 	state->ds.drawShellClosures = 1;
 	state->ds.chartPosX = 86.0f;
@@ -103,21 +103,21 @@ void initializeTempState(const app_data *restrict dat, app_state *restrict state
 	memset(state->ds.uiElemExtMinusY,0,sizeof(state->ds.uiElemExtMinusY));
 	//threads
 	for(uint8_t i=0;i<MAX_NUM_THREADS;i++){
-    tms->threadData[i].threadState = THREADSTATE_DEAD;
+		tms->threadData[i].threadState = THREADSTATE_DEAD;
 	}
 
-  //check that constants are valid
-  if(UIELEM_ENUM_LENGTH > /* DISABLES CODE */ (64)){
-    SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"ui_element_enum is too long, cannot be indexed by a uint64_t bit pattern (ds->shownElements, state->interactableElement)!\n");
-    exit(-1);
-  }
-  if(UIANIM_ENUM_LENGTH > /* DISABLES CODE */ (32)){
-    SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"ui_animation_enum is too long, cannot be indexed by a uint32_t bit pattern (ds->uiAnimPlaying)!\n");
-    exit(-1);
-  }
+	//check that constants are valid
+	if(UIELEM_ENUM_LENGTH > /* DISABLES CODE */ (64)){
+		SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"ui_element_enum is too long, cannot be indexed by a uint64_t bit pattern (ds->shownElements, state->interactableElement)!\n");
+		exit(-1);
+	}
+	if(UIANIM_ENUM_LENGTH > /* DISABLES CODE */ (32)){
+		SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"ui_animation_enum is too long, cannot be indexed by a uint32_t bit pattern (ds->uiAnimPlaying)!\n");
+		exit(-1);
+	}
 	if(SEARCHAGENT_ENUM_LENGTH > /* DISABLES CODE */ (32)){
 		SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"search_agent_enum is too long, cannot be indexed by a uint32_t bit pattern (ss->finishedSearchAgents)!\n");
-    exit(-1);
+		exit(-1);
 	}
 
 }
@@ -4026,7 +4026,9 @@ void uiElemClickAction(app_data *restrict dat, app_state *restrict state, resour
 					}else if(doubleClick == 2){
 						//right click on chart
 						uint16_t rightClickNucl = getNuclInd(&dat->ndat,(int16_t)mouseX,(int16_t)mouseY);
-						setupNuclideContextMenu(dat,state,rdat,rightClickNucl);
+						if(rightClickNucl < MAXNUMNUCL){
+							setupNuclideContextMenu(dat,state,rdat,rightClickNucl);
+						}
 					}
 				}else{
 					//clicked out of a menu
