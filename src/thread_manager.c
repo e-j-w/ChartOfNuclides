@@ -126,7 +126,7 @@ int startSearchThreads(app_data *restrict dat, app_state *restrict state, thread
   uint8_t i=0;
   uint16_t loopCtr = 0;
   while(numThreadsStarted < tms->numThreads){
-    if((!(tms->aliveThreads & (uint64_t)(1ULL << i)))&&(tms->threadData[i].threadState == THREADSTATE_DEAD)){
+    if((!(tms->aliveThreads & ((uint64_t)(1) << i)))&&(tms->threadData[i].threadState == THREADSTATE_DEAD)){
       //start a new thread at this slot
       char threadName[16];
       SDL_snprintf(threadName,16,"tp_%u",i);
@@ -142,13 +142,13 @@ int startSearchThreads(app_data *restrict dat, app_state *restrict state, thread
         printf("ERROR: startSearchThreads - couldn't create thread %u - %s\n",i,SDL_GetError());
         return -1;
       }
-      tms->aliveThreads |= (uint64_t)(1ULL << i);
+      tms->aliveThreads |= ((uint64_t)(1) << i);
       numThreadsStarted++;
     }else{
       //active thread, kill it so that this slot can be used again later
       if(tms->threadData[i].threadState != THREADSTATE_KILL){ //check to make sure this thread hasn't already been flagged by killIdleThreads
         tms->threadData[i].threadState = THREADSTATE_KILL;
-        tms->aliveThreads = (uint64_t)(tms->aliveThreads & ~(1ULL << i)); //unset
+        tms->aliveThreads = (uint64_t)(tms->aliveThreads & ~((uint64_t)(1) << i)); //unset
       }
     }
     i++;
@@ -174,10 +174,10 @@ void updateThreads(const app_data *restrict dat, app_state *restrict state, reso
   
   //kill any idle threads
   for(uint8_t i=0;i<MAX_NUM_THREADS;i++){
-    if(tms->aliveThreads & (uint64_t)(1ULL << i)){
+    if(tms->aliveThreads & ((uint64_t)(1) << i)){
       if(tms->threadData[i].threadState == THREADSTATE_IDLE){
         tms->threadData[i].threadState = THREADSTATE_KILL;
-        tms->aliveThreads = (uint64_t)(tms->aliveThreads & ~(1ULL << i)); //unset
+        tms->aliveThreads = (uint64_t)(tms->aliveThreads & ~((uint64_t)(1) << i)); //unset
         if(tms->numThreads > 0){
           tms->numThreads--;
         }

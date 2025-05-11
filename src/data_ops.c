@@ -44,6 +44,7 @@ void initializeTempState(const app_data *restrict dat, app_state *restrict state
 	state->kbdModVal = KBD_MOD_NONE;
 	state->mouseoverElement = UIELEM_ENUM_LENGTH;
 	state->inputFlags = 0;
+	state->interactableElement = 0;
   //app state
 	state->chartSelectedNucl = MAXNUMNUCL;
 	state->chartView = CHARTVIEW_HALFLIFE;
@@ -61,7 +62,7 @@ void initializeTempState(const app_data *restrict dat, app_state *restrict state
   state->clickedUIElem = UIELEM_ENUM_LENGTH; //no selected UI element
 	state->lastOpenedMenu = UIELEM_ENUM_LENGTH; //no previously selected menu
   state->ds.shownElements = 0; //no UI elements being shown
-	state->ds.shownElements |= (1ULL << UIELEM_CHARTOFNUCLIDES);
+	state->ds.shownElements |= ((uint64_t)(1) << UIELEM_CHARTOFNUCLIDES);
   state->ds.uiAnimPlaying = 0; //no UI animations playing
   state->ds.useUIAnimations = 1;
 	state->ds.useLifetimes = 0;
@@ -171,17 +172,17 @@ void stopUIAnimation(const app_data *restrict dat, app_state *restrict state, co
   //take action at the end of the animation
   switch(uiAnim){
 		case UIANIM_PRIMARY_MENU_HIDE:
-			state->ds.shownElements &= (uint64_t)(~(1ULL << UIELEM_PRIMARY_MENU)); //close the menu
-			if(!(state->ds.shownElements & (1ULL << UIELEM_PREFS_DIALOG))){
-				if(!(state->ds.shownElements & (1ULL << UIELEM_ABOUT_BOX))){
-					if(!(state->ds.shownElements & (1ULL << UIELEM_CHARTVIEW_MENU))){
-						if(!(state->ds.shownElements & (1ULL << UIELEM_SEARCH_MENU))){
-							if(!(state->ds.shownElements & (1ULL << UIELEM_RXN_MENU))){
-								if(state->ds.shownElements & (1ULL << UIELEM_NUCL_FULLINFOBOX)){
+			state->ds.shownElements &= (~((uint64_t)(1) << UIELEM_PRIMARY_MENU)); //close the menu
+			if(!(state->ds.shownElements & ((uint64_t)(1) << UIELEM_PREFS_DIALOG))){
+				if(!(state->ds.shownElements & ((uint64_t)(1) << UIELEM_ABOUT_BOX))){
+					if(!(state->ds.shownElements & ((uint64_t)(1) << UIELEM_CHARTVIEW_MENU))){
+						if(!(state->ds.shownElements & ((uint64_t)(1) << UIELEM_SEARCH_MENU))){
+							if(!(state->ds.shownElements & ((uint64_t)(1) << UIELEM_RXN_MENU))){
+								if(state->ds.shownElements & ((uint64_t)(1) << UIELEM_NUCL_FULLINFOBOX)){
 									if((state->mouseoverElement != UIELEM_NUCL_FULLINFOBOX_BACKBUTTON)||(state->lastOpenedMenu != UIELEM_NUCL_FULLINFOBOX_BACKBUTTON)||(state->lastInputType != INPUT_TYPE_KEYBOARD)){
 										changeUIState(dat,state,UISTATE_FULLLEVELINFO);
 									}
-								}else if(state->ds.shownElements & (1ULL << UIELEM_NUCL_INFOBOX)){
+								}else if(state->ds.shownElements & ((uint64_t)(1) << UIELEM_NUCL_INFOBOX)){
 									changeUIState(dat,state,UISTATE_INFOBOX);
 								}else{
 									changeUIState(dat,state,UISTATE_CHARTONLY);
@@ -193,12 +194,12 @@ void stopUIAnimation(const app_data *restrict dat, app_state *restrict state, co
 			}
 			break;
 		case UIANIM_CHARTVIEW_MENU_HIDE:
-			state->ds.shownElements &= (uint64_t)(~(1ULL << UIELEM_CHARTVIEW_MENU)); //close the menu
-			if(!(state->ds.shownElements & (1ULL << UIELEM_PRIMARY_MENU))){
-				if(!(state->ds.shownElements & (1ULL << UIELEM_SEARCH_MENU))){
-					if(state->ds.shownElements & (1ULL << UIELEM_NUCL_INFOBOX)){
+			state->ds.shownElements &= (~((uint64_t)(1) << UIELEM_CHARTVIEW_MENU)); //close the menu
+			if(!(state->ds.shownElements & ((uint64_t)(1) << UIELEM_PRIMARY_MENU))){
+				if(!(state->ds.shownElements & ((uint64_t)(1) << UIELEM_SEARCH_MENU))){
+					if(state->ds.shownElements & ((uint64_t)(1) << UIELEM_NUCL_INFOBOX)){
 						changeUIState(dat,state,UISTATE_INFOBOX);
-					}else if(state->ds.shownElements & (1ULL << UIELEM_NUCL_FULLINFOBOX)){
+					}else if(state->ds.shownElements & ((uint64_t)(1) << UIELEM_NUCL_FULLINFOBOX)){
 						changeUIState(dat,state,UISTATE_FULLLEVELINFO);
 					}else{
 						changeUIState(dat,state,UISTATE_CHARTONLY);
@@ -207,12 +208,12 @@ void stopUIAnimation(const app_data *restrict dat, app_state *restrict state, co
 			}
 			break;
 		case UIANIM_SEARCH_MENU_HIDE:
-			state->ds.shownElements &= (uint64_t)(~(1ULL << UIELEM_SEARCH_MENU)); //close the menu
-			if(!(state->ds.shownElements & (1ULL << UIELEM_PRIMARY_MENU))){
-				if(!(state->ds.shownElements & (1ULL << UIELEM_CHARTVIEW_MENU))){
-					if(state->ds.shownElements & (1ULL << UIELEM_NUCL_INFOBOX)){
+			state->ds.shownElements &= (~((uint64_t)(1) << UIELEM_SEARCH_MENU)); //close the menu
+			if(!(state->ds.shownElements & ((uint64_t)(1) << UIELEM_PRIMARY_MENU))){
+				if(!(state->ds.shownElements & ((uint64_t)(1) << UIELEM_CHARTVIEW_MENU))){
+					if(state->ds.shownElements & ((uint64_t)(1) << UIELEM_NUCL_INFOBOX)){
 						changeUIState(dat,state,UISTATE_INFOBOX);
-					}else if(state->ds.shownElements & (1ULL << UIELEM_NUCL_FULLINFOBOX)){
+					}else if(state->ds.shownElements & ((uint64_t)(1) << UIELEM_NUCL_FULLINFOBOX)){
 						changeUIState(dat,state,UISTATE_FULLLEVELINFO);
 					}else{
 						changeUIState(dat,state,UISTATE_CHARTONLY);
@@ -221,13 +222,13 @@ void stopUIAnimation(const app_data *restrict dat, app_state *restrict state, co
 			}
 			break;
 		case UIANIM_UISCALE_MENU_HIDE:
-			state->ds.shownElements &= (uint64_t)(~(1ULL << UIELEM_PREFS_UISCALE_MENU)); //close the menu
+			state->ds.shownElements &= (~((uint64_t)(1) << UIELEM_PREFS_UISCALE_MENU)); //close the menu
 			changeUIState(dat,state,UISTATE_PREFS_DIALOG);
 			break;
 		case UIANIM_RXN_MENU_HIDE:
-			state->ds.shownElements &= (uint64_t)(~(1ULL << UIELEM_RXN_MENU)); //close the menu
-			if(!(state->ds.shownElements & (1ULL << UIELEM_PRIMARY_MENU))){
-				if(!(state->ds.shownElements & (1ULL << UIELEM_CHARTOFNUCLIDES))){ //in case the menu was hidden by going back to the main chart
+			state->ds.shownElements &= (~((uint64_t)(1) << UIELEM_RXN_MENU)); //close the menu
+			if(!(state->ds.shownElements & ((uint64_t)(1) << UIELEM_PRIMARY_MENU))){
+				if(!(state->ds.shownElements & ((uint64_t)(1) << UIELEM_CHARTOFNUCLIDES))){ //in case the menu was hidden by going back to the main chart
 					if((state->mouseoverElement != UIELEM_NUCL_FULLINFOBOX_BACKBUTTON)||(state->lastOpenedMenu != UIELEM_NUCL_FULLINFOBOX_BACKBUTTON)||(state->lastInputType != INPUT_TYPE_KEYBOARD)){
 						changeUIState(dat,state,UISTATE_FULLLEVELINFO);
 					}
@@ -235,11 +236,11 @@ void stopUIAnimation(const app_data *restrict dat, app_state *restrict state, co
 			}
 			break;
     case UIANIM_MODAL_BOX_HIDE:
-			state->ds.shownElements &= (uint64_t)(~(1ULL << UIELEM_ABOUT_BOX)); //close the about box
-			state->ds.shownElements &= (uint64_t)(~(1ULL << UIELEM_PREFS_DIALOG)); //close the preferences dialog
-			if(state->ds.shownElements & (1ULL << UIELEM_NUCL_FULLINFOBOX)){
+			state->ds.shownElements &= (~((uint64_t)(1) << UIELEM_ABOUT_BOX)); //close the about box
+			state->ds.shownElements &= (~((uint64_t)(1) << UIELEM_PREFS_DIALOG)); //close the preferences dialog
+			if(state->ds.shownElements & ((uint64_t)(1) << UIELEM_NUCL_FULLINFOBOX)){
 				changeUIState(dat,state,UISTATE_FULLLEVELINFO);
-			}else if(state->ds.shownElements & (1ULL << UIELEM_NUCL_INFOBOX)){
+			}else if(state->ds.shownElements & ((uint64_t)(1) << UIELEM_NUCL_INFOBOX)){
 				changeUIState(dat,state,UISTATE_INFOBOX);
 			}else{
 				changeUIState(dat,state,UISTATE_CHARTONLY);
@@ -250,13 +251,13 @@ void stopUIAnimation(const app_data *restrict dat, app_state *restrict state, co
 			clearSelectionStrs(&state->tss,1); //allow strings on the info box to be selectable
 			break;
 		case UIANIM_NUCLINFOBOX_HIDE:
-			state->ds.shownElements &= (uint64_t)(~(1ULL << UIELEM_NUCL_INFOBOX)); //close the info box
+			state->ds.shownElements &= (~((uint64_t)(1) << UIELEM_NUCL_INFOBOX)); //close the info box
 			state->chartSelectedNucl = MAXNUMNUCL;
 			break;
 		case UIANIM_NUCLINFOBOX_EXPAND:
-			state->ds.shownElements &= (uint64_t)(~(1ULL << UIELEM_NUCL_INFOBOX)); //close the info box
-			state->ds.shownElements &= (uint64_t)(~(1ULL << UIELEM_CHARTOFNUCLIDES)); //don't show the chart
-			state->ds.shownElements |= (1ULL << UIELEM_NUCL_FULLINFOBOX); //show the full info box
+			state->ds.shownElements &= (~((uint64_t)(1) << UIELEM_NUCL_INFOBOX)); //close the info box
+			state->ds.shownElements &= (~((uint64_t)(1) << UIELEM_CHARTOFNUCLIDES)); //don't show the chart
+			state->ds.shownElements |= ((uint64_t)(1) << UIELEM_NUCL_FULLINFOBOX); //show the full info box
 			startUIAnimation(dat,state,UIANIM_NUCLINFOBOX_TXTFADEIN);
 			changeUIState(dat,state,UISTATE_FULLLEVELINFO); //update UI state now that the full info box is visible
 			break;
@@ -267,9 +268,9 @@ void stopUIAnimation(const app_data *restrict dat, app_state *restrict state, co
 			clearSelectionStrs(&state->tss,1); //allow strings on the full info box to be selectable
 			break;
 		case UIANIM_NUCLINFOBOX_TXTFADEOUT:
-			state->ds.shownElements &= (uint64_t)(~(1ULL << UIELEM_NUCL_FULLINFOBOX)); //close the full info box
-			state->ds.shownElements |= (1ULL << UIELEM_NUCL_INFOBOX); //show the info box
-			state->ds.shownElements |= (1ULL << UIELEM_CHARTOFNUCLIDES); //show the chart
+			state->ds.shownElements &= (~((uint64_t)(1) << UIELEM_NUCL_FULLINFOBOX)); //close the full info box
+			state->ds.shownElements |= ((uint64_t)(1) << UIELEM_NUCL_INFOBOX); //show the info box
+			state->ds.shownElements |= ((uint64_t)(1) << UIELEM_CHARTOFNUCLIDES); //show the chart
 			startUIAnimation(dat,state,UIANIM_NUCLINFOBOX_CONTRACT);
 			changeUIState(dat,state,UISTATE_INFOBOX); //update UI state now that the regular info box is visible
 			clearSelectionStrs(&state->tss,0); //strings on full level list are no longer selectable
@@ -413,7 +414,7 @@ void updateDrawingState(const app_data *restrict dat, app_state *restrict state,
 
 	//dismiss info box if it selected nuclide is offscreen
 	if(state->chartSelectedNucl != MAXNUMNUCL){
-		if(state->ds.shownElements & (1ULL << UIELEM_NUCL_INFOBOX)){
+		if(state->ds.shownElements & ((uint64_t)(1) << UIELEM_NUCL_INFOBOX)){
 			if(state->ds.panInProgress == 0){ //don't hide while panning (eg. when panning to a search result)
 				if((state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_HIDE]==0.0f)&&(state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_SHOW]==0.0f)){
 					if(((dat->ndat.nuclData[state->chartSelectedNucl].N+1) < getMinChartN(&state->ds))||(dat->ndat.nuclData[state->chartSelectedNucl].N > getMaxChartN(&state->ds))){
@@ -2686,7 +2687,7 @@ uint16_t getNumTotalLvlDispLines(const ndata *restrict nd, const app_state *rest
 	for(uint32_t lvlInd = nd->nuclData[state->chartSelectedNucl].firstLevel; lvlInd<(nd->nuclData[state->chartSelectedNucl].firstLevel + nd->nuclData[state->chartSelectedNucl].numLevels); lvlInd++){
 		if(state->ds.selectedRxn == 0){
 			numLines += getNumDispLinesForLvl(nd,lvlInd);
-		}else if(nd->levels[lvlInd].populatingRxns & (uint64_t)(1ULL << (state->ds.selectedRxn-1))){
+		}else if(nd->levels[lvlInd].populatingRxns & ((uint64_t)(1) << (state->ds.selectedRxn-1))){
 			numLines += getNumDispLinesForLvl(nd,lvlInd);
 		}
 	}
@@ -2781,23 +2782,23 @@ void changeUIState(const app_data *restrict dat, app_state *restrict state, cons
   	state->uiState = newState;
 	}
   
-	state->interactableElement |= (uint64_t)(1ULL << UIELEM_CONTEXT_MENU);
+	state->interactableElement |= ((uint64_t)(1) << UIELEM_CONTEXT_MENU);
   switch(state->uiState){
 		case UISTATE_ABOUT_BOX:
-			state->interactableElement |= (uint64_t)(1ULL << UIELEM_ABOUT_BOX_CLOSEBUTTON);
+			state->interactableElement |= ((uint64_t)(1) << UIELEM_ABOUT_BOX_CLOSEBUTTON);
 			break;
 		case UISTATE_PREFS_DIALOG:
-			state->interactableElement |= (uint64_t)(1ULL << UIELEM_PREFS_DIALOG_CLOSEBUTTON);
-			state->interactableElement |= (uint64_t)(1ULL << UIELEM_PREFS_DIALOG_SHELLCLOSURE_CHECKBOX);
-			state->interactableElement |= (uint64_t)(1ULL << UIELEM_PREFS_DIALOG_LIFETIME_CHECKBOX);
-			state->interactableElement |= (uint64_t)(1ULL << UIELEM_PREFS_DIALOG_UIANIM_CHECKBOX);
-			state->interactableElement |= (uint64_t)(1ULL << UIELEM_PREFS_DIALOG_UISCALE_DROPDOWN);
-			if((state->ds.shownElements & (1ULL << UIELEM_PREFS_UISCALE_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_UISCALE_MENU_HIDE]==0.0f)){
-				state->interactableElement |= (uint64_t)(1ULL << UIELEM_UISM_SMALL_BUTTON);
-				state->interactableElement |= (uint64_t)(1ULL << UIELEM_UISM_DEFAULT_BUTTON);
-				state->interactableElement |= (uint64_t)(1ULL << UIELEM_UISM_LARGE_BUTTON);
-				state->interactableElement |= (uint64_t)(1ULL << UIELEM_UISM_HUGE_BUTTON);
-				state->interactableElement |= (uint64_t)(1ULL << UIELEM_PREFS_UISCALE_MENU);
+			state->interactableElement |= ((uint64_t)(1) << UIELEM_PREFS_DIALOG_CLOSEBUTTON);
+			state->interactableElement |= ((uint64_t)(1) << UIELEM_PREFS_DIALOG_SHELLCLOSURE_CHECKBOX);
+			state->interactableElement |= ((uint64_t)(1) << UIELEM_PREFS_DIALOG_LIFETIME_CHECKBOX);
+			state->interactableElement |= ((uint64_t)(1) << UIELEM_PREFS_DIALOG_UIANIM_CHECKBOX);
+			state->interactableElement |= ((uint64_t)(1) << UIELEM_PREFS_DIALOG_UISCALE_DROPDOWN);
+			if((state->ds.shownElements & ((uint64_t)(1) << UIELEM_PREFS_UISCALE_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_UISCALE_MENU_HIDE]==0.0f)){
+				state->interactableElement |= ((uint64_t)(1) << UIELEM_UISM_SMALL_BUTTON);
+				state->interactableElement |= ((uint64_t)(1) << UIELEM_UISM_DEFAULT_BUTTON);
+				state->interactableElement |= ((uint64_t)(1) << UIELEM_UISM_LARGE_BUTTON);
+				state->interactableElement |= ((uint64_t)(1) << UIELEM_UISM_HUGE_BUTTON);
+				state->interactableElement |= ((uint64_t)(1) << UIELEM_PREFS_UISCALE_MENU);
 				if(state->lastInputType != INPUT_TYPE_MOUSE){
 					//keyboard/gamepad navigation of the menu
 					state->mouseoverElement = (uint8_t)((int16_t)UIELEM_PREFS_UISCALE_MENU - (int16_t)UISCALE_ENUM_LENGTH); //select the first menu item
@@ -2817,15 +2818,15 @@ void changeUIState(const app_data *restrict dat, app_state *restrict state, cons
 		case UISTATE_FULLLEVELINFO:
 		case UISTATE_FULLLEVELINFOWITHMENU:
 			state->ds.nuclFullInfoMaxScrollY = getMaxNumLvlDispLines(&dat->ndat,state); //find total number of lines displayable
-			state->interactableElement |= (uint64_t)(1ULL << UIELEM_MENU_BUTTON);
-			state->interactableElement |= (uint64_t)(1ULL << UIELEM_NUCL_FULLINFOBOX);
-			state->interactableElement |= (uint64_t)(1ULL << UIELEM_NUCL_FULLINFOBOX_BACKBUTTON);
-			state->interactableElement |= (uint64_t)(1ULL << UIELEM_NUCL_FULLINFOBOX_RXNBUTTON);
-			state->interactableElement |= (uint64_t)(1ULL << UIELEM_NUCL_FULLINFOBOX_SCROLLBAR);
-			if((state->ds.shownElements & (1ULL << UIELEM_PRIMARY_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_PRIMARY_MENU_HIDE]==0.0f)){
-				state->interactableElement |= (uint64_t)(1ULL << UIELEM_PM_PREFS_BUTTON);
-				state->interactableElement |= (uint64_t)(1ULL << UIELEM_PM_ABOUT_BUTTON);
-				state->interactableElement |= (uint64_t)(1ULL << UIELEM_PRIMARY_MENU);
+			state->interactableElement |= ((uint64_t)(1) << UIELEM_MENU_BUTTON);
+			state->interactableElement |= ((uint64_t)(1) << UIELEM_NUCL_FULLINFOBOX);
+			state->interactableElement |= ((uint64_t)(1) << UIELEM_NUCL_FULLINFOBOX_BACKBUTTON);
+			state->interactableElement |= ((uint64_t)(1) << UIELEM_NUCL_FULLINFOBOX_RXNBUTTON);
+			state->interactableElement |= ((uint64_t)(1) << UIELEM_NUCL_FULLINFOBOX_SCROLLBAR);
+			if((state->ds.shownElements & ((uint64_t)(1) << UIELEM_PRIMARY_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_PRIMARY_MENU_HIDE]==0.0f)){
+				state->interactableElement |= ((uint64_t)(1) << UIELEM_PM_PREFS_BUTTON);
+				state->interactableElement |= ((uint64_t)(1) << UIELEM_PM_ABOUT_BUTTON);
+				state->interactableElement |= ((uint64_t)(1) << UIELEM_PRIMARY_MENU);
 				if(state->lastInputType != INPUT_TYPE_MOUSE){
 					//keyboard/gamepad navigation of the menu
 					state->mouseoverElement = (uint8_t)(UIELEM_PRIMARY_MENU - PRIMARY_MENU_NUM_UIELEMENTS); //select the first menu item
@@ -2838,64 +2839,64 @@ void changeUIState(const app_data *restrict dat, app_state *restrict state, cons
 			}
 			break;
 		case UISTATE_INFOBOX:
-			state->interactableElement |= (uint64_t)(1ULL << UIELEM_MENU_BUTTON);
-			state->interactableElement |= (uint64_t)(1ULL << UIELEM_CHARTVIEW_BUTTON);
-			state->interactableElement |= (uint64_t)(1ULL << UIELEM_SEARCH_BUTTON);
-			state->interactableElement |= (uint64_t)(1ULL << UIELEM_NUCL_INFOBOX);
-			state->interactableElement |= (uint64_t)(1ULL << UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON);
-			state->interactableElement |= (uint64_t)(1ULL << UIELEM_NUCL_INFOBOX_CLOSEBUTTON);
+			state->interactableElement |= ((uint64_t)(1) << UIELEM_MENU_BUTTON);
+			state->interactableElement |= ((uint64_t)(1) << UIELEM_CHARTVIEW_BUTTON);
+			state->interactableElement |= ((uint64_t)(1) << UIELEM_SEARCH_BUTTON);
+			state->interactableElement |= ((uint64_t)(1) << UIELEM_NUCL_INFOBOX);
+			state->interactableElement |= ((uint64_t)(1) << UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON);
+			state->interactableElement |= ((uint64_t)(1) << UIELEM_NUCL_INFOBOX_CLOSEBUTTON);
 			if(state->ds.chartZoomToScale > MIN_CHART_ZOOM_SCALE){
-				state->interactableElement |= (uint64_t)(1ULL << UIELEM_ZOOMOUT_BUTTON);
+				state->interactableElement |= ((uint64_t)(1) << UIELEM_ZOOMOUT_BUTTON);
 			}
 			if(state->ds.chartZoomToScale < MAX_CHART_ZOOM_SCALE){
-				state->interactableElement |= (uint64_t)(1ULL << UIELEM_ZOOMIN_BUTTON);
+				state->interactableElement |= ((uint64_t)(1) << UIELEM_ZOOMIN_BUTTON);
 			}
 			break;
 		case UISTATE_CHARTWITHMENU:
-			state->interactableElement |= (uint64_t)(1ULL << UIELEM_MENU_BUTTON);
-			state->interactableElement |= (uint64_t)(1ULL << UIELEM_CHARTVIEW_BUTTON);
-			state->interactableElement |= (uint64_t)(1ULL << UIELEM_SEARCH_BUTTON);
-			if((state->ds.shownElements & (1ULL << UIELEM_PRIMARY_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_PRIMARY_MENU_HIDE]==0.0f)){
-				state->interactableElement |= (uint64_t)(1ULL << UIELEM_PM_PREFS_BUTTON);
-				state->interactableElement |= (uint64_t)(1ULL << UIELEM_PM_ABOUT_BUTTON);
-				state->interactableElement |= (uint64_t)(1ULL << UIELEM_PRIMARY_MENU);
+			state->interactableElement |= ((uint64_t)(1) << UIELEM_MENU_BUTTON);
+			state->interactableElement |= ((uint64_t)(1) << UIELEM_CHARTVIEW_BUTTON);
+			state->interactableElement |= ((uint64_t)(1) << UIELEM_SEARCH_BUTTON);
+			if((state->ds.shownElements & ((uint64_t)(1) << UIELEM_PRIMARY_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_PRIMARY_MENU_HIDE]==0.0f)){
+				state->interactableElement |= ((uint64_t)(1) << UIELEM_PM_PREFS_BUTTON);
+				state->interactableElement |= ((uint64_t)(1) << UIELEM_PM_ABOUT_BUTTON);
+				state->interactableElement |= ((uint64_t)(1) << UIELEM_PRIMARY_MENU);
 				if(state->lastInputType != INPUT_TYPE_MOUSE){
 					//keyboard/gamepad navigation of the menu
 					state->mouseoverElement = (uint8_t)(UIELEM_PRIMARY_MENU - PRIMARY_MENU_NUM_UIELEMENTS); //select the first menu item
 				}
 			}
-			if((state->ds.shownElements & (1ULL << UIELEM_CHARTVIEW_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_CHARTVIEW_MENU_HIDE]==0.0f)){
-				state->interactableElement |= (uint64_t)(1ULL << UIELEM_CVM_HALFLIFE_BUTTON);
-				state->interactableElement |= (uint64_t)(1ULL << UIELEM_CVM_DECAYMODE_BUTTON);
-				state->interactableElement |= (uint64_t)(1ULL << UIELEM_CVM_2PLUS_BUTTON);
-				state->interactableElement |= (uint64_t)(1ULL << UIELEM_CVM_R42_BUTTON);
-				state->interactableElement |= (uint64_t)(1ULL << UIELEM_CVM_BETA2_BUTTON);
-				state->interactableElement |= (uint64_t)(1ULL << UIELEM_CVM_SPIN_BUTTON);
-				state->interactableElement |= (uint64_t)(1ULL << UIELEM_CVM_PARITY_BUTTON);
-				state->interactableElement |= (uint64_t)(1ULL << UIELEM_CVM_BEA_BUTTON);
-				state->interactableElement |= (uint64_t)(1ULL << UIELEM_CVM_NUMLVLS);
-				state->interactableElement |= (uint64_t)(1ULL << UIELEM_CVM_UNKNOWN_ENERGY_BUTTON);
-				state->interactableElement |= (uint64_t)(1ULL << UIELEM_CHARTVIEW_MENU);
+			if((state->ds.shownElements & ((uint64_t)(1) << UIELEM_CHARTVIEW_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_CHARTVIEW_MENU_HIDE]==0.0f)){
+				state->interactableElement |= ((uint64_t)(1) << UIELEM_CVM_HALFLIFE_BUTTON);
+				state->interactableElement |= ((uint64_t)(1) << UIELEM_CVM_DECAYMODE_BUTTON);
+				state->interactableElement |= ((uint64_t)(1) << UIELEM_CVM_2PLUS_BUTTON);
+				state->interactableElement |= ((uint64_t)(1) << UIELEM_CVM_R42_BUTTON);
+				state->interactableElement |= ((uint64_t)(1) << UIELEM_CVM_BETA2_BUTTON);
+				state->interactableElement |= ((uint64_t)(1) << UIELEM_CVM_SPIN_BUTTON);
+				state->interactableElement |= ((uint64_t)(1) << UIELEM_CVM_PARITY_BUTTON);
+				state->interactableElement |= ((uint64_t)(1) << UIELEM_CVM_BEA_BUTTON);
+				state->interactableElement |= ((uint64_t)(1) << UIELEM_CVM_NUMLVLS);
+				state->interactableElement |= ((uint64_t)(1) << UIELEM_CVM_UNKNOWN_ENERGY_BUTTON);
+				state->interactableElement |= ((uint64_t)(1) << UIELEM_CHARTVIEW_MENU);
 				if(state->lastInputType != INPUT_TYPE_MOUSE){
 					//keyboard/gamepad navigation of the menu
 					state->mouseoverElement = (uint8_t)((int16_t)UIELEM_CHARTVIEW_MENU - (int16_t)CHARTVIEW_ENUM_LENGTH); //select the first menu item
 				}
 			}
-			if((state->ds.shownElements & (1ULL << UIELEM_SEARCH_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_SEARCH_MENU_HIDE]==0.0f)){
-				state->interactableElement |= (uint64_t)(1ULL << UIELEM_SEARCH_ENTRYBOX);
-				state->interactableElement |= (uint64_t)(1ULL << UIELEM_SEARCH_MENU);
+			if((state->ds.shownElements & ((uint64_t)(1) << UIELEM_SEARCH_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_SEARCH_MENU_HIDE]==0.0f)){
+				state->interactableElement |= ((uint64_t)(1) << UIELEM_SEARCH_ENTRYBOX);
+				state->interactableElement |= ((uint64_t)(1) << UIELEM_SEARCH_MENU);
 			}
 			break;
     case UISTATE_CHARTONLY:
     default:
-      state->interactableElement |= (uint64_t)(1ULL << UIELEM_MENU_BUTTON);
-			state->interactableElement |= (uint64_t)(1ULL << UIELEM_CHARTVIEW_BUTTON);
-			state->interactableElement |= (uint64_t)(1ULL << UIELEM_SEARCH_BUTTON);
+      state->interactableElement |= ((uint64_t)(1) << UIELEM_MENU_BUTTON);
+			state->interactableElement |= ((uint64_t)(1) << UIELEM_CHARTVIEW_BUTTON);
+			state->interactableElement |= ((uint64_t)(1) << UIELEM_SEARCH_BUTTON);
 			if(state->ds.chartZoomToScale > MIN_CHART_ZOOM_SCALE){
-				state->interactableElement |= (uint64_t)(1ULL << UIELEM_ZOOMOUT_BUTTON);
+				state->interactableElement |= ((uint64_t)(1) << UIELEM_ZOOMOUT_BUTTON);
 			}
 			if(state->ds.chartZoomToScale < MAX_CHART_ZOOM_SCALE){
-				state->interactableElement |= (uint64_t)(1ULL << UIELEM_ZOOMIN_BUTTON);
+				state->interactableElement |= ((uint64_t)(1) << UIELEM_ZOOMIN_BUTTON);
 			}
 			clearSelectionStrs(&state->tss,0); //strings on the info box are no longer selectable
       break;
@@ -3233,8 +3234,8 @@ void setSelectedNuclOnChart(const app_data *restrict dat, app_state *restrict st
 		state->chartSelectedNucl = selNucl;
 		setInfoBoxDimensions(dat,state,rdat,selNucl);
 		clearSelectionStrs(&state->tss,1); //allow strings on the info box to be selectable
-		if(!(state->ds.shownElements & (1ULL << UIELEM_NUCL_INFOBOX))){
-			state->ds.shownElements |= (1ULL << UIELEM_NUCL_INFOBOX);
+		if(!(state->ds.shownElements & ((uint64_t)(1) << UIELEM_NUCL_INFOBOX))){
+			state->ds.shownElements |= ((uint64_t)(1) << UIELEM_NUCL_INFOBOX);
 			changeUIState(dat,state,UISTATE_INFOBOX); //make info box interactable
 			startUIAnimation(dat,state,UIANIM_NUCLINFOBOX_SHOW);
 		}
@@ -3281,7 +3282,7 @@ void setSelectedNuclOnChart(const app_data *restrict dat, app_state *restrict st
 			//SDL_Log("starting pan to: %f %f\n",(double)mouseX,(double)mouseY);
 			panChartToPos(dat,&state->ds,N,Z,CHART_DOUBLECLICK_PAN_TIME);
 		}else if(forcePan == 0){
-			if((state->ds.shownElements & (1ULL << UIELEM_NUCL_INFOBOX))&&(state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_HIDE]==0.0f)){
+			if((state->ds.shownElements & ((uint64_t)(1) << UIELEM_NUCL_INFOBOX))&&(state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_HIDE]==0.0f)){
 				startUIAnimation(dat,state,UIANIM_NUCLINFOBOX_HIDE); //hide the info box, see stopUIAnimation() for info box hiding action
 				startUIAnimation(dat,state,UIANIM_NUCLHIGHLIGHT_HIDE);
 			}else{
@@ -3337,12 +3338,12 @@ void updateSearchUIState(const app_data *restrict dat, app_state *restrict state
   updateSingleUIElemPosition(dat,state,rdat,UIELEM_SEARCH_MENU);
   for(uint8_t i=0; i<state->ss.numResults; i++){
     if(i<MAX_DISP_SEARCH_RESULTS){
-      state->interactableElement |= (uint64_t)(1ULL << (UIELEM_SEARCH_RESULT+i));
+      state->interactableElement |= ((uint64_t)(1) << (UIELEM_SEARCH_RESULT+i));
 			//SDL_Log("interactable: %u\n",i);
     }
   }
   for(uint8_t i=state->ss.numResults; i<MAX_DISP_SEARCH_RESULTS; i++){
-    state->interactableElement = (uint64_t)(state->interactableElement & ~(1ULL << (UIELEM_SEARCH_RESULT+i))); //unset
+    state->interactableElement = (uint64_t)(state->interactableElement & ~((uint64_t)(1) << (UIELEM_SEARCH_RESULT+i))); //unset
 		//SDL_Log("uninteractable: %u\n",i);
   }
 }
@@ -3578,19 +3579,19 @@ void uiElemClickAction(app_data *restrict dat, app_state *restrict state, resour
 		startUIAnimation(dat,state,UIANIM_CONTEXT_MENU_HIDE); //remove any opened context menus
 	}
 	if((uiElemID != UIELEM_MENU_BUTTON)&&(uiElemID != UIELEM_PRIMARY_MENU)&&(uiElemID != UIELEM_PM_PREFS_BUTTON)&&(uiElemID != UIELEM_PM_ABOUT_BUTTON)){
-		if((state->ds.shownElements & (1ULL << UIELEM_PRIMARY_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_PRIMARY_MENU_HIDE]==0.0f)){
+		if((state->ds.shownElements & ((uint64_t)(1) << UIELEM_PRIMARY_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_PRIMARY_MENU_HIDE]==0.0f)){
 			startUIAnimation(dat,state,UIANIM_PRIMARY_MENU_HIDE); //menu will be closed after animation finishes
 			state->clickedUIElem = UIELEM_ENUM_LENGTH; //'unclick' the menu button
 		}
 	}
 	if((uiElemID != UIELEM_CHARTVIEW_BUTTON)&&(uiElemID != UIELEM_CHARTVIEW_MENU)&&(uiElemID != UIELEM_CVM_HALFLIFE_BUTTON)&&(uiElemID != UIELEM_CVM_DECAYMODE_BUTTON)&&(uiElemID != UIELEM_CVM_2PLUS_BUTTON)&&(uiElemID != UIELEM_CVM_R42_BUTTON)&&(uiElemID != UIELEM_CVM_BETA2_BUTTON)&&(uiElemID != UIELEM_CVM_SPIN_BUTTON)&&(uiElemID != UIELEM_CVM_PARITY_BUTTON)&&(uiElemID != UIELEM_CVM_BEA_BUTTON)&&(uiElemID != UIELEM_CVM_NUMLVLS)&&(uiElemID != UIELEM_CVM_UNKNOWN_ENERGY_BUTTON)){
-		if((state->ds.shownElements & (1ULL << UIELEM_CHARTVIEW_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_CHARTVIEW_MENU_HIDE]==0.0f)){
+		if((state->ds.shownElements & ((uint64_t)(1) << UIELEM_CHARTVIEW_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_CHARTVIEW_MENU_HIDE]==0.0f)){
 			startUIAnimation(dat,state,UIANIM_CHARTVIEW_MENU_HIDE); //menu will be closed after animation finishes
 			state->clickedUIElem = UIELEM_ENUM_LENGTH; //'unclick' the menu button
 		}
 	}
 	if((uiElemID != UIELEM_SEARCH_BUTTON)&&(uiElemID != UIELEM_SEARCH_MENU)&&(uiElemID != UIELEM_SEARCH_ENTRYBOX)){
-		if((state->ds.shownElements & (1ULL << UIELEM_SEARCH_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_SEARCH_MENU_HIDE]==0.0f)){
+		if((state->ds.shownElements & ((uint64_t)(1) << UIELEM_SEARCH_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_SEARCH_MENU_HIDE]==0.0f)){
 			startUIAnimation(dat,state,UIANIM_SEARCH_MENU_HIDE); //menu will be closed after animation finishes
 			state->clickedUIElem = UIELEM_ENUM_LENGTH; //'unclick' the menu button
 			//stop search input
@@ -3605,13 +3606,13 @@ void uiElemClickAction(app_data *restrict dat, app_state *restrict state, resour
 		}
 	}
 	if((uiElemID != UIELEM_PREFS_DIALOG_UISCALE_DROPDOWN)&&(uiElemID != UIELEM_PREFS_UISCALE_MENU)&&(uiElemID != UIELEM_UISM_SMALL_BUTTON)&&(uiElemID != UIELEM_UISM_DEFAULT_BUTTON)&&(uiElemID != UIELEM_UISM_LARGE_BUTTON)&&(uiElemID != UIELEM_UISM_HUGE_BUTTON)){
-		if((state->ds.shownElements & (1ULL << UIELEM_PREFS_UISCALE_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_UISCALE_MENU_HIDE]==0.0f)){
+		if((state->ds.shownElements & ((uint64_t)(1) << UIELEM_PREFS_UISCALE_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_UISCALE_MENU_HIDE]==0.0f)){
 			startUIAnimation(dat,state,UIANIM_UISCALE_MENU_HIDE); //menu will be closed after animation finishes
 			state->clickedUIElem = UIELEM_ENUM_LENGTH; //'unclick' the menu button
 		}
 	}
 	if((uiElemID != UIELEM_NUCL_FULLINFOBOX_RXNBUTTON)&&(uiElemID != UIELEM_RXN_MENU)){
-		if((state->ds.shownElements & (1ULL << UIELEM_RXN_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_RXN_MENU_HIDE]==0.0f)){
+		if((state->ds.shownElements & ((uint64_t)(1) << UIELEM_RXN_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_RXN_MENU_HIDE]==0.0f)){
 			startUIAnimation(dat,state,UIANIM_RXN_MENU_HIDE); //menu will be closed after animation finishes
 			state->clickedUIElem = UIELEM_ENUM_LENGTH; //'unclick' the menu button
 		}
@@ -3627,14 +3628,14 @@ void uiElemClickAction(app_data *restrict dat, app_state *restrict state, resour
 	//take action from click
   switch(uiElemID){
     case UIELEM_MENU_BUTTON:
-      if((state->ds.shownElements & (1ULL << UIELEM_PRIMARY_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_PRIMARY_MENU_HIDE]==0.0f)){
+      if((state->ds.shownElements & ((uint64_t)(1) << UIELEM_PRIMARY_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_PRIMARY_MENU_HIDE]==0.0f)){
 				startUIAnimation(dat,state,UIANIM_PRIMARY_MENU_HIDE); //menu will be closed after animation finishes
         state->clickedUIElem = UIELEM_ENUM_LENGTH; //'unclick' the menu button
       }else if(state->ds.timeLeftInUIAnimation[UIANIM_PRIMARY_MENU_SHOW]==0.0f){
-				state->ds.shownElements |= (1ULL << UIELEM_PRIMARY_MENU);
+				state->ds.shownElements |= ((uint64_t)(1) << UIELEM_PRIMARY_MENU);
 				state->lastOpenedMenu = UIELEM_PRIMARY_MENU;
 				startUIAnimation(dat,state,UIANIM_PRIMARY_MENU_SHOW);
-				if(state->ds.shownElements & (1ULL << UIELEM_NUCL_FULLINFOBOX)){
+				if(state->ds.shownElements & ((uint64_t)(1) << UIELEM_NUCL_FULLINFOBOX)){
 					changeUIState(dat,state,UISTATE_FULLLEVELINFOWITHMENU);
 				}else{
 					changeUIState(dat,state,UISTATE_CHARTWITHMENU);
@@ -3643,11 +3644,11 @@ void uiElemClickAction(app_data *restrict dat, app_state *restrict state, resour
       }
       break;
 		case UIELEM_CHARTVIEW_BUTTON:
-			if((state->ds.shownElements & (1ULL << UIELEM_CHARTVIEW_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_CHARTVIEW_MENU_HIDE]==0.0f)){
+			if((state->ds.shownElements & ((uint64_t)(1) << UIELEM_CHARTVIEW_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_CHARTVIEW_MENU_HIDE]==0.0f)){
 				startUIAnimation(dat,state,UIANIM_CHARTVIEW_MENU_HIDE); //menu will be closed after animation finishes
         state->clickedUIElem = UIELEM_ENUM_LENGTH; //'unclick' the menu button
       }else if(state->ds.timeLeftInUIAnimation[UIANIM_CHARTVIEW_MENU_SHOW]==0.0f){
-				state->ds.shownElements |= (1ULL << UIELEM_CHARTVIEW_MENU);
+				state->ds.shownElements |= ((uint64_t)(1) << UIELEM_CHARTVIEW_MENU);
 				state->lastOpenedMenu = UIELEM_CHARTVIEW_MENU;
 				startUIAnimation(dat,state,UIANIM_CHARTVIEW_MENU_SHOW);
 				changeUIState(dat,state,UISTATE_CHARTWITHMENU);
@@ -3655,7 +3656,7 @@ void uiElemClickAction(app_data *restrict dat, app_state *restrict state, resour
       }
 			break;
 		case UIELEM_SEARCH_BUTTON:
-			if((state->ds.shownElements & (1ULL << UIELEM_SEARCH_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_SEARCH_MENU_HIDE]==0.0f)){
+			if((state->ds.shownElements & ((uint64_t)(1) << UIELEM_SEARCH_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_SEARCH_MENU_HIDE]==0.0f)){
 				startUIAnimation(dat,state,UIANIM_SEARCH_MENU_HIDE); //menu will be closed after animation finishes
         state->clickedUIElem = UIELEM_ENUM_LENGTH; //'unclick' the menu button
 				//stop search input
@@ -3668,7 +3669,7 @@ void uiElemClickAction(app_data *restrict dat, app_state *restrict state, resour
 					SDL_StopTextInput(rdat->window);
 				}
       }else if(state->ds.timeLeftInUIAnimation[UIANIM_SEARCH_MENU_SHOW]==0.0f){
-				state->ds.shownElements |= (1ULL << UIELEM_SEARCH_MENU);
+				state->ds.shownElements |= ((uint64_t)(1) << UIELEM_SEARCH_MENU);
 				state->lastOpenedMenu = UIELEM_SEARCH_MENU;
 				startUIAnimation(dat,state,UIANIM_SEARCH_MENU_SHOW);
 				changeUIState(dat,state,UISTATE_CHARTWITHMENU);
@@ -3685,11 +3686,11 @@ void uiElemClickAction(app_data *restrict dat, app_state *restrict state, resour
       }
 			break;
 		case UIELEM_PREFS_DIALOG_UISCALE_DROPDOWN:
-			if((state->ds.shownElements & (1ULL << UIELEM_PREFS_UISCALE_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_UISCALE_MENU_HIDE]==0.0f)){
+			if((state->ds.shownElements & ((uint64_t)(1) << UIELEM_PREFS_UISCALE_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_UISCALE_MENU_HIDE]==0.0f)){
 				startUIAnimation(dat,state,UIANIM_UISCALE_MENU_HIDE); //menu will be closed after animation finishes
         state->clickedUIElem = UIELEM_ENUM_LENGTH; //'unclick' the menu button
       }else if(state->ds.timeLeftInUIAnimation[UIANIM_UISCALE_MENU_SHOW]==0.0f){
-				state->ds.shownElements |= (1ULL << UIELEM_PREFS_UISCALE_MENU);
+				state->ds.shownElements |= ((uint64_t)(1) << UIELEM_PREFS_UISCALE_MENU);
 				startUIAnimation(dat,state,UIANIM_UISCALE_MENU_SHOW);
 				changeUIState(dat,state,state->uiState);
 				state->clickedUIElem = UIELEM_PREFS_DIALOG_UISCALE_DROPDOWN;
@@ -3722,7 +3723,7 @@ void uiElemClickAction(app_data *restrict dat, app_state *restrict state, resour
 			break;
 		case UIELEM_NUCL_INFOBOX_CLOSEBUTTON:
 			//close the info box
-			if((state->ds.shownElements & (1ULL << UIELEM_NUCL_INFOBOX))&&(state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_HIDE]==0.0f)){
+			if((state->ds.shownElements & ((uint64_t)(1) << UIELEM_NUCL_INFOBOX))&&(state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_HIDE]==0.0f)){
 				startUIAnimation(dat,state,UIANIM_NUCLINFOBOX_HIDE); //hide the info box, see stopUIAnimation() for info box hiding action
 				startUIAnimation(dat,state,UIANIM_NUCLHIGHLIGHT_HIDE);
 			}
@@ -3744,11 +3745,11 @@ void uiElemClickAction(app_data *restrict dat, app_state *restrict state, resour
 			state->clickedUIElem = UIELEM_ENUM_LENGTH; //'unclick' the scrollbar when the mouse is released
 			break;
 		case UIELEM_NUCL_FULLINFOBOX_RXNBUTTON:
-			if((state->ds.shownElements & (1ULL << UIELEM_RXN_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_RXN_MENU_HIDE]==0.0f)){
+			if((state->ds.shownElements & ((uint64_t)(1) << UIELEM_RXN_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_RXN_MENU_HIDE]==0.0f)){
 				startUIAnimation(dat,state,UIANIM_RXN_MENU_HIDE); //menu will be closed after animation finishes
         state->clickedUIElem = UIELEM_ENUM_LENGTH; //'unclick' the menu button
       }else if(state->ds.timeLeftInUIAnimation[UIANIM_RXN_MENU_SHOW]==0.0f){
-				state->ds.shownElements |= (1ULL << UIELEM_RXN_MENU);
+				state->ds.shownElements |= ((uint64_t)(1) << UIELEM_RXN_MENU);
 				state->lastOpenedMenu = UIELEM_RXN_MENU;
 				state->ds.mouseOverRxn = 255;
 				state->ds.mouseHoldRxn = 255;
@@ -3761,7 +3762,7 @@ void uiElemClickAction(app_data *restrict dat, app_state *restrict state, resour
 			//SDL_Log("Clicked prefs button.\n");
 			startUIAnimation(dat,state,UIANIM_PRIMARY_MENU_HIDE); //menu will be closed after animation finishes
       state->clickedUIElem = UIELEM_ENUM_LENGTH; //'unclick' the menu button
-			state->ds.shownElements |= (uint64_t)(1ULL << UIELEM_PREFS_DIALOG);
+			state->ds.shownElements |= ((uint64_t)(1) << UIELEM_PREFS_DIALOG);
 			startUIAnimation(dat,state,UIANIM_MODAL_BOX_SHOW);
 			changeUIState(dat,state,UISTATE_PREFS_DIALOG);
 			break;
@@ -3769,7 +3770,7 @@ void uiElemClickAction(app_data *restrict dat, app_state *restrict state, resour
 			//SDL_Log("Clicked about button.\n");
 			startUIAnimation(dat,state,UIANIM_PRIMARY_MENU_HIDE); //menu will be closed after animation finishes
       state->clickedUIElem = UIELEM_ENUM_LENGTH; //'unclick' the menu button
-			state->ds.shownElements |= (uint64_t)(1ULL << UIELEM_ABOUT_BOX);
+			state->ds.shownElements |= ((uint64_t)(1) << UIELEM_ABOUT_BOX);
 			startUIAnimation(dat,state,UIANIM_MODAL_BOX_SHOW);
 			changeUIState(dat,state,UISTATE_ABOUT_BOX);
 			break;
@@ -4004,7 +4005,7 @@ void uiElemClickAction(app_data *restrict dat, app_state *restrict state, resour
     default:
 			//clicked outside of a button or UI element
       if((state->uiState == UISTATE_CHARTONLY)||(state->uiState == UISTATE_CHARTWITHMENU)||(state->uiState == UISTATE_INFOBOX)||(state->uiState == UISTATE_FULLLEVELINFOWITHMENU)){
-				if(((state->ds.shownElements) == (uint64_t)(1ULL << UIELEM_CHARTOFNUCLIDES))||((state->ds.shownElements >> (UIELEM_CHARTOFNUCLIDES+1UL)) == (1ULL << (UIELEM_NUCL_INFOBOX-1)))){
+				if(((state->ds.shownElements) == ((uint64_t)(1) << UIELEM_CHARTOFNUCLIDES))||((state->ds.shownElements >> (UIELEM_CHARTOFNUCLIDES+1)) == ((uint64_t)(1) << (UIELEM_NUCL_INFOBOX-1)))){
 					//only the chart of nuclides and/or info box are open
 					//clicked on the chart view
 					if((state->mouseXPx > state->ds.uiElemPosX[UIELEM_ZOOMOUT_BUTTON])&&(state->mouseYPx > state->ds.uiElemPosY[UIELEM_ZOOMOUT_BUTTON])){
@@ -4030,24 +4031,24 @@ void uiElemClickAction(app_data *restrict dat, app_state *restrict state, resour
 				}else{
 					//clicked out of a menu
 					//handle individual menu closing animations
-					if((state->ds.shownElements & (1ULL << UIELEM_PRIMARY_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_PRIMARY_MENU_HIDE]==0.0f)){
+					if((state->ds.shownElements & ((uint64_t)(1) << UIELEM_PRIMARY_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_PRIMARY_MENU_HIDE]==0.0f)){
 						startUIAnimation(dat,state,UIANIM_PRIMARY_MENU_HIDE); //menu will be closed after animation finishes
 						state->clickedUIElem = UIELEM_ENUM_LENGTH; //'unclick' the menu button
 					}
-					if((state->ds.shownElements & (1ULL << UIELEM_CHARTVIEW_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_CHARTVIEW_MENU_HIDE]==0.0f)){
+					if((state->ds.shownElements & ((uint64_t)(1) << UIELEM_CHARTVIEW_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_CHARTVIEW_MENU_HIDE]==0.0f)){
 						startUIAnimation(dat,state,UIANIM_CHARTVIEW_MENU_HIDE); //menu will be closed after animation finishes
 						state->clickedUIElem = UIELEM_ENUM_LENGTH; //'unclick' the menu button
 					}
-					if((state->ds.shownElements & (1ULL << UIELEM_PREFS_UISCALE_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_UISCALE_MENU_HIDE]==0.0f)){
+					if((state->ds.shownElements & ((uint64_t)(1) << UIELEM_PREFS_UISCALE_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_UISCALE_MENU_HIDE]==0.0f)){
 						startUIAnimation(dat,state,UIANIM_UISCALE_MENU_HIDE); //menu will be closed after animation finishes
 						state->clickedUIElem = UIELEM_ENUM_LENGTH; //'unclick' the menu button
 					}
-					if((state->ds.shownElements & (1ULL << UIELEM_NUCL_INFOBOX))&&(state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_HIDE]==0.0f)){
+					if((state->ds.shownElements & ((uint64_t)(1) << UIELEM_NUCL_INFOBOX))&&(state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_HIDE]==0.0f)){
 						startUIAnimation(dat,state,UIANIM_NUCLINFOBOX_HIDE); //hide the info box, see stopUIAnimation() for info box hiding action
 						startUIAnimation(dat,state,UIANIM_NUCLHIGHLIGHT_HIDE);
 					}
 					if((state->uiState == UISTATE_CHARTONLY)||(state->uiState == UISTATE_CHARTWITHMENU)||(state->uiState == UISTATE_INFOBOX)){
-						state->ds.shownElements |= (1ULL << UIELEM_CHARTOFNUCLIDES);
+						state->ds.shownElements |= ((uint64_t)(1) << UIELEM_CHARTOFNUCLIDES);
 					}
 				}
       }

@@ -1695,7 +1695,7 @@ void drawNuclFullInfoBox(const app_data *restrict dat, app_state *restrict state
     
     //skip all levels which are not part of the selected reaction
     if(state->ds.selectedRxn > 0){
-      if(!(dat->ndat.levels[lvlInd].populatingRxns & (uint64_t)(1ULL << (state->ds.selectedRxn-1)))){
+      if(!(dat->ndat.levels[lvlInd].populatingRxns & ((uint64_t)(1) << (state->ds.selectedRxn-1)))){
         continue;
       }
     }
@@ -2706,7 +2706,7 @@ void drawUI(const app_data *restrict dat, app_state *restrict state, resource_da
   drawFlatBG(&state->ds,rdat,dat->rules.themeRules.bgCol);
 
   //draw chart of nuclides below everything else
-  if(state->ds.shownElements & (1ULL << UIELEM_CHARTOFNUCLIDES)){
+  if(state->ds.shownElements & ((uint64_t)(1) << UIELEM_CHARTOFNUCLIDES)){
     drawChartOfNuclides(dat,state,rdat);
     if(state->chartView == CHARTVIEW_HALFLIFE){
       if(state->ds.useLifetimes){
@@ -2739,11 +2739,11 @@ void drawUI(const app_data *restrict dat, app_state *restrict state, resource_da
   }
   
   //draw info boxes
-  if(state->ds.shownElements & (1ULL << UIELEM_NUCL_INFOBOX)){
+  if(state->ds.shownElements & ((uint64_t)(1) << UIELEM_NUCL_INFOBOX)){
     drawNuclInfoBox(dat,state,rdat,state->chartSelectedNucl);
-  }else if(state->ds.shownElements & (1ULL << UIELEM_NUCL_FULLINFOBOX)){
+  }else if(state->ds.shownElements & ((uint64_t)(1) << UIELEM_NUCL_FULLINFOBOX)){
     drawNuclFullInfoBox(dat,state,rdat,state->chartSelectedNucl);
-    if(state->ds.shownElements & (1ULL << UIELEM_RXN_MENU)){
+    if(state->ds.shownElements & ((uint64_t)(1) << UIELEM_RXN_MENU)){
       drawRxnMenu(dat,state,rdat);
     }
   }
@@ -2752,23 +2752,23 @@ void drawUI(const app_data *restrict dat, app_state *restrict state, resource_da
   drawIconButton(&dat->rules.themeRules,rdat,state->ds.uiElemPosX[UIELEM_MENU_BUTTON],state->ds.uiElemPosY[UIELEM_MENU_BUTTON],state->ds.uiElemWidth[UIELEM_MENU_BUTTON],getHighlightState(state,UIELEM_MENU_BUTTON),1.0f,UIICON_MENU);
 
   //draw menus/panels etc.
-  if(state->ds.shownElements & (1ULL << UIELEM_PRIMARY_MENU)){
+  if(state->ds.shownElements & ((uint64_t)(1) << UIELEM_PRIMARY_MENU)){
     drawPrimaryMenu(dat,state,rdat);
   }
-  if(state->ds.shownElements & (1ULL << UIELEM_CHARTVIEW_MENU)){
+  if(state->ds.shownElements & ((uint64_t)(1) << UIELEM_CHARTVIEW_MENU)){
     drawChartViewMenu(dat,state,rdat);
   }
-  if(state->ds.shownElements & (1ULL << UIELEM_SEARCH_MENU)){
+  if(state->ds.shownElements & ((uint64_t)(1) << UIELEM_SEARCH_MENU)){
     updateSearchUIState(dat,state,rdat);
     drawSearchMenu(dat,state,rdat);
   }
 
   //draw modal dialogs
-  if(state->ds.shownElements & (1ULL << UIELEM_ABOUT_BOX)){
+  if(state->ds.shownElements & ((uint64_t)(1) << UIELEM_ABOUT_BOX)){
     drawAboutBox(dat,state,rdat);
-  }else if(state->ds.shownElements & (1ULL << UIELEM_PREFS_DIALOG)){
+  }else if(state->ds.shownElements & ((uint64_t)(1) << UIELEM_PREFS_DIALOG)){
     drawPrefsDialog(dat,state,rdat);
-    if(state->ds.shownElements & (1ULL << UIELEM_PREFS_UISCALE_MENU)){
+    if(state->ds.shownElements & ((uint64_t)(1) << UIELEM_PREFS_UISCALE_MENU)){
       drawUIScaleMenu(dat,state,rdat);
     }
   }
