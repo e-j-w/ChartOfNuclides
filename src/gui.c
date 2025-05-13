@@ -2029,9 +2029,15 @@ void drawNuclInfoBox(const app_data *restrict dat, app_state *restrict state, re
     if(dat->ndat.levels[lvlInd].halfLife.unit == VALUE_UNIT_STABLE){
       drawSelectableTextAlignedSized(rdat,&state->tss,drawXPos+state->ds.infoBoxDcyModeColOffset*state->ds.uiUserScale,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,alpha,"N/A",ALIGN_LEFT,(Uint16)(state->ds.uiElemWidth[UIELEM_NUCL_INFOBOX])); //draw no decay mode label
     }else{
-      for(int8_t i=0; i<dat->ndat.levels[lvlInd].numDecModes; i++){
-        getDecayModeStr(tmpStr,&dat->ndat,dat->ndat.levels[lvlInd].firstDecMode + (uint32_t)i);
-        //SDL_Log("%s\n",tmpStr);
+      if(dat->ndat.levels[lvlInd].numDecModes > 0){
+        for(int8_t i=0; i<dat->ndat.levels[lvlInd].numDecModes; i++){
+          getDecayModeStr(tmpStr,&dat->ndat,dat->ndat.levels[lvlInd].firstDecMode + (uint32_t)i);
+          //SDL_Log("%s\n",tmpStr);
+          drawSelectableTextAlignedSized(rdat,&state->tss,drawXPos+state->ds.infoBoxDcyModeColOffset*state->ds.uiUserScale,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,alpha,tmpStr,ALIGN_LEFT,(Uint16)(state->ds.uiElemWidth[UIELEM_NUCL_INFOBOX])); //draw decay mode label
+          drawYPos += NUCL_INFOBOX_SMALLLINE_HEIGHT*state->ds.uiUserScale;
+        }
+      }else if(dat->ndat.levels[lvlInd].numTran >0){
+        SDL_snprintf(tmpStr,32,"IT > 0%%%%");
         drawSelectableTextAlignedSized(rdat,&state->tss,drawXPos+state->ds.infoBoxDcyModeColOffset*state->ds.uiUserScale,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,alpha,tmpStr,ALIGN_LEFT,(Uint16)(state->ds.uiElemWidth[UIELEM_NUCL_INFOBOX])); //draw decay mode label
         drawYPos += NUCL_INFOBOX_SMALLLINE_HEIGHT*state->ds.uiUserScale;
       }
