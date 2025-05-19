@@ -20,6 +20,7 @@ list
 # temporary files from text editors
 *.save
 *~
+*.png
 .vscode
 *.code-workspace
 sample_parameters

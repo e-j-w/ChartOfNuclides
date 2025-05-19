@@ -43,6 +43,10 @@ int main(int argc, char *argv[]){
 
   setlocale(LC_ALL, "en_ca.UTF-8");
 
+  #ifdef __MINGW32__
+  setbuf(stdout,NULL); //needed to show printf output on Windows
+  #endif
+
   //parse command line arguments
   uint8_t cliArgs = 0;
   for(int i=1; i<argc; i++){
@@ -202,6 +206,9 @@ int main(int argc, char *argv[]){
 
     drawUI(&gdat->dat,&gdat->state,&gdat->rdat); //gui.c
 
+    if(gdat->rdat.ssdat.takingScreenshot == 1){
+      takeScreenshot(&gdat->rdat); //data_ops.c
+    }
     if(gdat->state.ds.drawPerformanceStats == 1){
       drawPerformanceStats(&gdat->dat.rules.themeRules,&gdat->state,&gdat->tms,&gdat->rdat,deltaTime);
     }

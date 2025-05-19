@@ -280,6 +280,7 @@ static int parseAppRules(app_data *restrict dat, asset_mapping *restrict stringI
 	dat->locStringIDs[LOCSTR_BACKTOSUMMARY] = (uint16_t)nameToAssetID("back_to_summary",stringIDmap);
 	dat->locStringIDs[LOCSTR_ALLREACTIONS] = (uint16_t)nameToAssetID("all_reactions",stringIDmap);
 	dat->locStringIDs[LOCSTR_MENUITEM_PREFS] = (uint16_t)nameToAssetID("menuitem_preferences",stringIDmap);
+	dat->locStringIDs[LOCSTR_MENUITEM_SCREENSHOT] = (uint16_t)nameToAssetID("menuitem_screenshot",stringIDmap);
 	dat->locStringIDs[LOCSTR_MENUITEM_ABOUT] = (uint16_t)nameToAssetID("menuitem_about",stringIDmap);
 	dat->locStringIDs[LOCSTR_ABOUTSTR_VERSION] = (uint16_t)nameToAssetID("about_string_version",stringIDmap);
 	dat->locStringIDs[LOCSTR_ABOUTSTR_1] = (uint16_t)nameToAssetID("about_string_1",stringIDmap);

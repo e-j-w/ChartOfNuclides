@@ -27,8 +27,7 @@ using game data/state */
 //function prototypes
 void initializeTempState(const app_data *restrict dat, app_state *restrict state, thread_manager_state *restrict tms);
 
-const void* setSelTxtClipboardData(void *data, const char *mime_type, size_t *size);
-void cleanupSelTxtClipboardData(void *data);
+void takeScreenshot(resource_data *restrict rdat);
 
 void clearSelectionStrs(text_selection_state *restrict tss, const uint8_t modifiableAfter);
 

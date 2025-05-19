@@ -73,12 +73,12 @@ static const float uiScales[UISCALE_ENUM_LENGTH] = {1.0f,1.20f,1.60f,1.85f};
 #define MENU_BUTTON_POS_Y            UI_PADDING_SIZE //in unscaled pixels
 #define MENU_BUTTON_WIDTH            40 //in unscaled pixels
 
-#define PRIMARY_MENU_NUM_UIELEMENTS  2 //number of buttons in the menu
+#define PRIMARY_MENU_NUM_UIELEMENTS  3 //number of buttons in the menu
 #define PRIMARY_MENU_ITEM_SPACING    36 //in unscaled pixels
 #define PRIMARY_MENU_POS_XR          (MENU_BUTTON_POS_XR) //in unscaled pixels
 #define PRIMARY_MENU_POS_Y           (UI_TILE_SIZE+UI_PADDING_SIZE)  //in unscaled pixels
 #define PRIMARY_MENU_WIDTH           200 //in unscaled pixels
-#define PRIMARY_MENU_HEIGHT          (2*PRIMARY_MENU_ITEM_SPACING + 2*PANEL_EDGE_SIZE + 3*UI_PADDING_SIZE) //in unscaled pixels
+#define PRIMARY_MENU_HEIGHT          (3*PRIMARY_MENU_ITEM_SPACING + 2*PANEL_EDGE_SIZE + 3*UI_PADDING_SIZE) //in unscaled pixels
 
 #define CHARTVIEW_BUTTON_POS_XR      (UI_PADDING_SIZE) //in unscaled pixels, relative to menu button position
 #define CHARTVIEW_BUTTON_POS_Y       UI_PADDING_SIZE //in unscaled pixels

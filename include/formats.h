@@ -346,11 +346,19 @@ typedef struct
   unsigned int kbdModVal : 2; //values from kbd_mod_enum
   unsigned int lastInputType : 2; //0=keyboard, 1=apppad, 2=mouse
   unsigned int gamepadDisabled : 1; //1=gamepad/apppad disabled
+  
   unsigned int quitAppFlag : 1; //0=take no action, 1=quit app
 }app_state; //structure containing all app state data (persistent AND temporary)
 
 typedef struct
 {
+  SDL_Surface *screenshot; //surface for any screenshots
+  unsigned int takingScreenshot : 2; //0=not taking a screenshot, 1=taking a screenshot at the end of the current frame, 2=saving screenshot
+}screenshot_data; //structure containing data relating to resources such as textures and fonts
+
+typedef struct
+{
+  screenshot_data ssdat;
   size_t themeOffset; //data file offset for the embedded theme
   float uiDPIScale; //scaling factor for UI, for HI-DPI only
   float uiScale; //overall scaling factor for UI

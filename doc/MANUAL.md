@@ -23,6 +23,7 @@ The program is also designed to be fully navigable with a keyboard and/or gamepa
 | Ctrl+F             | N/A                         | Search |
 | F11                | Home button                 | Toggle fullscreen mode |
 | P                  | N/A                         | Toggle debug overlay (shows FPS and other stats) |
+| Ctrl+S             | N/A                         | Take a screenshot. UI elements will be omitted from the image. |
 | Ctrl+Q             | N/A                         | Quit application |
 
 ## Searching

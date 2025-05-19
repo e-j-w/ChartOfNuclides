@@ -6,7 +6,7 @@ An offline viewer of isotope and nuclear structure data in the [Chart of Nuclide
 
 ## Quick installation
 
-Prebuilt releases are available for desktop Linux (via Flatpak) and Windows 10+ (experimental). Go to the [releases](https://github.com/e-j-w/ChartOfNuclides/releases) page and follow the installation instructions there.
+Prebuilt binaries are available for desktop Linux (via Flatpak) and Windows 10+ (experimental). Go to the [releases](https://github.com/e-j-w/ChartOfNuclides/releases) page and follow the installation instructions there.
 
 ## Using the program
 

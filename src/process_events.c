@@ -1346,7 +1346,12 @@ void processSingleEvent(app_data *restrict dat, app_state *restrict state, resou
           break;
         case SDL_SCANCODE_S:
           if(!(SDL_TextInputActive(rdat->window))){
-            state->inputFlags |= (1U << INPUT_ALTDOWN);
+            if(state->kbdModVal == KBD_MOD_CTRL){
+              rdat->ssdat.takingScreenshot = 1; //queue a screenshot to be taken
+            }else{
+              state->kbdModVal = KBD_MOD_OTHER; //block key combo if entered in reverse order
+              state->inputFlags |= (1U << INPUT_ALTDOWN);
+            }
           }
           break;
         case SDL_SCANCODE_PAGEUP:
@@ -1489,11 +1494,15 @@ void processSingleEvent(app_data *restrict dat, app_state *restrict state, resou
         case SDL_SCANCODE_Q:
           if(state->kbdModVal == KBD_MOD_CTRL){
             state->quitAppFlag = 1; //quit the app
+          }else{
+            state->kbdModVal = KBD_MOD_OTHER; //block key combo if entered in reverse order
           }
           break;
         case SDL_SCANCODE_LCTRL:
         case SDL_SCANCODE_RCTRL:
-          state->kbdModVal = KBD_MOD_CTRL;
+          if(state->kbdModVal == KBD_MOD_NONE){
+            state->kbdModVal = KBD_MOD_CTRL;
+          }
           break;
         default:
           break;
@@ -1519,6 +1528,9 @@ void processSingleEvent(app_data *restrict dat, app_state *restrict state, resou
       }
       break;
     case SDL_EVENT_KEY_UP: //released key
+      if(state->kbdModVal == KBD_MOD_OTHER){
+        state->kbdModVal = KBD_MOD_NONE;
+      }
       switch(evt.key.scancode){
         case SDL_SCANCODE_LEFT:
           state->inputFlags &= ~(1U << INPUT_LEFT);
@@ -1782,6 +1794,9 @@ void processFrameEvents(app_data *restrict dat, app_state *restrict state, resou
     }
 
     //process the results of input state
+    if(rdat->ssdat.takingScreenshot != 0){
+      return; //don't allow input when a screenshot is in progress
+    }
     processInputFlags(dat,state,rdat);
 
 }

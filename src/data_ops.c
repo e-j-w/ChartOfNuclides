@@ -122,6 +122,51 @@ void initializeTempState(const app_data *restrict dat, app_state *restrict state
 
 }
 
+//callback for saving screenshots
+//userdata points to the application resource_data
+void saveScreenshotCallback(void *userdata, const char * const *filelist, int filter){
+	(void)filter; //unused for now
+
+	resource_data *rdat = ((resource_data*)(intptr_t)userdata);
+	
+	if(rdat->ssdat.screenshot){
+		if(filelist){
+			//loop through all files
+			while(*filelist){
+				const char *fileName;
+				//handle string format returned by file dialog
+				if(strncmp(*filelist,"file://",7)==0){
+					fileName = (*filelist)+7;
+				}else{
+					fileName = (*filelist);
+				}
+				if(IMG_SavePNG(rdat->ssdat.screenshot,fileName) == false){
+					SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,"saveScreenshotCallback - error saving PNG file: %s",SDL_GetError());
+					break;
+				}
+				break; //only one filename can be provided
+			}
+		}else{
+			SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,"saveScreenshotCallback - file selection error: %s",SDL_GetError());
+		}
+		SDL_DestroySurface(rdat->ssdat.screenshot);
+	}
+
+	rdat->ssdat.takingScreenshot = 0; //no longer taking a screenshot
+  //successfully saved file
+  //changeUIState(((app_state*)userdata),UISTATE_DRAWAREAONLY); //make buttons interactable again
+}
+
+void takeScreenshot(resource_data *restrict rdat){
+	rdat->ssdat.takingScreenshot = 2; //currently taking a screenshot
+	rdat->ssdat.screenshot = SDL_RenderReadPixels(rdat->renderer,NULL);
+	const SDL_DialogFileFilter filters[2] = {
+		{"Image files (.png)","png"},
+		{NULL,NULL}
+	};
+	SDL_ShowSaveFileDialog(saveScreenshotCallback,(void *)(intptr_t)(rdat),rdat->window,filters,1,NULL);
+}
+
 //resets the text selection state, should be called on frames where selectable text changes position
 void clearSelectionStrs(text_selection_state *restrict tss, const uint8_t modifiableAfter){
 	tss->selStartPos = 0;
@@ -2825,6 +2870,7 @@ void changeUIState(const app_data *restrict dat, app_state *restrict state, cons
 			state->interactableElement |= ((uint64_t)(1) << UIELEM_NUCL_FULLINFOBOX_SCROLLBAR);
 			if((state->ds.shownElements & ((uint64_t)(1) << UIELEM_PRIMARY_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_PRIMARY_MENU_HIDE]==0.0f)){
 				state->interactableElement |= ((uint64_t)(1) << UIELEM_PM_PREFS_BUTTON);
+				state->interactableElement |= ((uint64_t)(1) << UIELEM_PM_SCREENSHOT_BUTTON);
 				state->interactableElement |= ((uint64_t)(1) << UIELEM_PM_ABOUT_BUTTON);
 				state->interactableElement |= ((uint64_t)(1) << UIELEM_PRIMARY_MENU);
 				if(state->lastInputType != INPUT_TYPE_MOUSE){
@@ -2858,6 +2904,7 @@ void changeUIState(const app_data *restrict dat, app_state *restrict state, cons
 			state->interactableElement |= ((uint64_t)(1) << UIELEM_SEARCH_BUTTON);
 			if((state->ds.shownElements & ((uint64_t)(1) << UIELEM_PRIMARY_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_PRIMARY_MENU_HIDE]==0.0f)){
 				state->interactableElement |= ((uint64_t)(1) << UIELEM_PM_PREFS_BUTTON);
+				state->interactableElement |= ((uint64_t)(1) << UIELEM_PM_SCREENSHOT_BUTTON);
 				state->interactableElement |= ((uint64_t)(1) << UIELEM_PM_ABOUT_BUTTON);
 				state->interactableElement |= ((uint64_t)(1) << UIELEM_PRIMARY_MENU);
 				if(state->lastInputType != INPUT_TYPE_MOUSE){
@@ -3578,7 +3625,7 @@ void uiElemClickAction(app_data *restrict dat, app_state *restrict state, resour
 	if((uiElemID != UIELEM_CONTEXT_MENU) && (state->cms.numContextMenuItems > 0)){
 		startUIAnimation(dat,state,UIANIM_CONTEXT_MENU_HIDE); //remove any opened context menus
 	}
-	if((uiElemID != UIELEM_MENU_BUTTON)&&(uiElemID != UIELEM_PRIMARY_MENU)&&(uiElemID != UIELEM_PM_PREFS_BUTTON)&&(uiElemID != UIELEM_PM_ABOUT_BUTTON)){
+	if((uiElemID != UIELEM_MENU_BUTTON)&&(uiElemID != UIELEM_PRIMARY_MENU)&&(uiElemID != UIELEM_PM_PREFS_BUTTON)&&(uiElemID != UIELEM_PM_SCREENSHOT_BUTTON)&&(uiElemID != UIELEM_PM_ABOUT_BUTTON)){
 		if((state->ds.shownElements & ((uint64_t)(1) << UIELEM_PRIMARY_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_PRIMARY_MENU_HIDE]==0.0f)){
 			startUIAnimation(dat,state,UIANIM_PRIMARY_MENU_HIDE); //menu will be closed after animation finishes
 			state->clickedUIElem = UIELEM_ENUM_LENGTH; //'unclick' the menu button
@@ -3765,6 +3812,14 @@ void uiElemClickAction(app_data *restrict dat, app_state *restrict state, resour
 			state->ds.shownElements |= ((uint64_t)(1) << UIELEM_PREFS_DIALOG);
 			startUIAnimation(dat,state,UIANIM_MODAL_BOX_SHOW);
 			changeUIState(dat,state,UISTATE_PREFS_DIALOG);
+			break;
+		case UIELEM_PM_SCREENSHOT_BUTTON:
+			//SDL_Log("Clicked screenshot button.\n");
+			//flag that a screenshot is to be taken at the end of the frame
+			//this will be used by the GUI drawing code to omit UI elements from the screenshot
+			rdat->ssdat.takingScreenshot = 1;
+			startUIAnimation(dat,state,UIANIM_PRIMARY_MENU_HIDE); //menu will be closed after animation finishes
+      state->clickedUIElem = UIELEM_ENUM_LENGTH; //'unclick' the menu button
 			break;
 		case UIELEM_PM_ABOUT_BUTTON:
 			//SDL_Log("Clicked about button.\n");
@@ -4235,9 +4290,15 @@ void updateSingleUIElemPosition(const app_data *restrict dat, app_state *restric
 			state->ds.uiElemWidth[uiElemInd] = (int16_t)((PRIMARY_MENU_WIDTH - 2*PANEL_EDGE_SIZE - 4*UI_PADDING_SIZE)*state->ds.uiUserScale);
 			state->ds.uiElemHeight[uiElemInd] = (int16_t)((PRIMARY_MENU_ITEM_SPACING - UI_PADDING_SIZE)*state->ds.uiUserScale);
 			break;
-		case UIELEM_PM_ABOUT_BUTTON:
+		case UIELEM_PM_SCREENSHOT_BUTTON:
 			state->ds.uiElemPosX[uiElemInd] = (int16_t)(state->ds.windowXRes-((PRIMARY_MENU_WIDTH+PRIMARY_MENU_POS_XR - PANEL_EDGE_SIZE - 2*UI_PADDING_SIZE)*state->ds.uiUserScale));
 			state->ds.uiElemPosY[uiElemInd] = (int16_t)((PRIMARY_MENU_POS_Y + PANEL_EDGE_SIZE + 2*UI_PADDING_SIZE + PRIMARY_MENU_ITEM_SPACING)*state->ds.uiUserScale);
+			state->ds.uiElemWidth[uiElemInd] = (int16_t)((PRIMARY_MENU_WIDTH - 2*PANEL_EDGE_SIZE - 4*UI_PADDING_SIZE)*state->ds.uiUserScale);
+			state->ds.uiElemHeight[uiElemInd] = (int16_t)((PRIMARY_MENU_ITEM_SPACING - UI_PADDING_SIZE)*state->ds.uiUserScale);
+			break;
+		case UIELEM_PM_ABOUT_BUTTON:
+			state->ds.uiElemPosX[uiElemInd] = (int16_t)(state->ds.windowXRes-((PRIMARY_MENU_WIDTH+PRIMARY_MENU_POS_XR - PANEL_EDGE_SIZE - 2*UI_PADDING_SIZE)*state->ds.uiUserScale));
+			state->ds.uiElemPosY[uiElemInd] = (int16_t)((PRIMARY_MENU_POS_Y + PANEL_EDGE_SIZE + 2*UI_PADDING_SIZE + 2*PRIMARY_MENU_ITEM_SPACING)*state->ds.uiUserScale);
 			state->ds.uiElemWidth[uiElemInd] = (int16_t)((PRIMARY_MENU_WIDTH - 2*PANEL_EDGE_SIZE - 4*UI_PADDING_SIZE)*state->ds.uiUserScale);
 			state->ds.uiElemHeight[uiElemInd] = (int16_t)((PRIMARY_MENU_ITEM_SPACING - UI_PADDING_SIZE)*state->ds.uiUserScale);
 			break;
