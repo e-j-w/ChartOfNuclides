@@ -206,14 +206,18 @@ int main(int argc, char *argv[]){
 
     drawUI(&gdat->dat,&gdat->state,&gdat->rdat); //gui.c
 
-    if(gdat->rdat.ssdat.takingScreenshot == 1){
-      takeScreenshot(&gdat->rdat); //data_ops.c
-    }
-    if(gdat->state.ds.drawPerformanceStats == 1){
+    if((gdat->state.ds.drawPerformanceStats == 1)&&(gdat->rdat.ssdat.takingScreenshot != 1)){
       drawPerformanceStats(&gdat->dat.rules.themeRules,&gdat->state,&gdat->tms,&gdat->rdat,deltaTime);
     }
 
-    SDL_RenderPresent(gdat->rdat.renderer); //tell the renderer to actually show the image
+    if(gdat->rdat.ssdat.takingScreenshot == 1){
+      takeScreenshot(&gdat->rdat); //data_ops.c
+      //we don't render the frame to screen when taking a screenshot, since that
+      //would cause a 'flicker' due the the UI elements not included in 
+      //screenshots being missing from the frame 
+    }else{
+      SDL_RenderPresent(gdat->rdat.renderer); //tell the renderer to actually show the image
+    }
 
   }
   
