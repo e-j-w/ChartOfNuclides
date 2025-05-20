@@ -1426,6 +1426,8 @@ void processSingleEvent(app_data *restrict dat, app_state *restrict state, resou
             if(state->ds.shownElements & ((uint64_t)(1) << UIELEM_CHARTOFNUCLIDES)){
               uiElemClickAction(dat,state,rdat,0,UIELEM_SEARCH_BUTTON); //open search, also activates text input
             }
+          }else{
+            state->kbdModVal = KBD_MOD_OTHER; //block key combo if entered in reverse order
           }
           break;
         case SDL_SCANCODE_C:
@@ -1451,6 +1453,8 @@ void processSingleEvent(app_data *restrict dat, app_state *restrict state, resou
               }
               //SDL_Log("Copied text to clipboard: %s\n",SDL_GetClipboardText());
             }
+          }else{
+            state->kbdModVal = KBD_MOD_OTHER; //block key combo if entered in reverse order
           }
           break;
         /*case SDL_SCANCODE_F7:
