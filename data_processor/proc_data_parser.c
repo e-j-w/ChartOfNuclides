@@ -451,13 +451,13 @@ uint8_t parseRxn(reaction *rxn, const char *rxnstring, char *ensdfStrBuf, const 
 	}else if(SDL_strcmp(rxnstring,"COULOMB EXCITATION")==0){
 		SDL_snprintf(modRxnStr,MAX_RXN_STRLEN,"Coulomb Excitation");
 		rxn->type = REACTIONTYPE_COULEX;
-	}else if(strncmp(rxnstring,"INELASTIC SCATTERING",20)==0){
+	}else if(SDL_strncmp(rxnstring,"INELASTIC SCATTERING",20)==0){
 		SDL_snprintf(modRxnStr,MAX_RXN_STRLEN,"Inelastic Scattering");
 		rxn->type = REACTIONTYPE_INELASTICSCATTERING;
-	}else if(strncmp(rxnstring,"NEUTRON RESONANCES",18)==0){
+	}else if(SDL_strncmp(rxnstring,"NEUTRON RESONANCES",18)==0){
 		SDL_snprintf(modRxnStr,MAX_RXN_STRLEN,"Neutron Resonances");
 		rxn->type = REACTIONTYPE_NEUTRONRESONANCES;
-	}else if(strncmp(rxnstring,"MUONIC ATOM",11)==0){
+	}else if(SDL_strncmp(rxnstring,"MUONIC ATOM",11)==0){
 		SDL_snprintf(modRxnStr,MAX_RXN_STRLEN,"Muonic Atom");
 		rxn->type = REACTIONTYPE_NEUTRONRESONANCES;
 	}else{
@@ -2234,9 +2234,13 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 									double hl = getLevelHalfLifeSeconds(nd,nd->numLvls-1);
 									if(hl >= 10.0E-9){
 										//SDL_Log("E: %f, hl: %f\n",en,hl);
-										if(hl >= 1E-3){
+										if(hl >= ISOMER_MVAL_HL_THRESHOLD){
 											isomerMValInNucl++; //m-values are somewhat informal but are generally only assigned for longer-lived isomers
 											nd->nuclData[nd->numNucl].numIsomerMVals++;
+											if(isomerMValInNucl < 8){
+												//flag level with its isomer m-value
+												nd->levels[nd->numLvls-1].format |= (uint8_t)(isomerMValInNucl << 5U);
+											}
 										}
 										if(hl > longestIsomerHl){
 											//SDL_Log("Longest lived isomer found with m-val %u\n",isomerMValInNucl);
@@ -2245,12 +2249,16 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 											nd->nuclData[nd->numNucl].longestIsomerMVal = isomerMValInNucl;
 											
 										}
-									}else if((en < 0.02)&&(eValueType != VALUETYPE_PLUSX)&&(eValueType != VALUETYPE_X)){
+									}else if((en < ISOMER_MVAL_E_THRESHOLD)&&(eValueType != VALUETYPE_PLUSX)&&(eValueType != VALUETYPE_X)){
 										//low energy levels are generally isomers (even if their half-life is unknown)
 										//229Th is a famous case
 										//only include these if no other long-lived isomers are found
 										isomerMValInNucl++;
 										nd->nuclData[nd->numNucl].numIsomerMVals++;
+										if(isomerMValInNucl < 8){
+											//flag level with its isomer m-value
+											nd->levels[nd->numLvls-1].format |= (uint8_t)(isomerMValInNucl << 5U);
+										}
 										if(!(longestIsomerHl > 0.0)&&(hl <= longestIsomerHl)){
 											longestIsomerHl = hl;
 											nd->nuclData[nd->numNucl].longestIsomerLevel = nd->numLvls-1;

@@ -73,7 +73,7 @@ void fcScrollAction(app_state *restrict state, const float deltaVal){
   state->ds.timeSinceFCScollStart = 0.0f;
   state->ds.fcScrollInProgress = 1;
   state->ds.fcScrollFinished = 0;
-  clearSelectionStrs(&state->tss,0); //selection string positions are changed on scroll
+  clearSelectionStrs(&state->ds,&state->tss,0); //selection string positions are changed on scroll
   //SDL_Log("scroll pos: %f, scroll to: %f\n",(double)state->ds.nuclFullInfoScrollY,(double)state->ds.nuclFullInfoScrollToY);
 }
 
@@ -994,7 +994,7 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
       if(state->ds.chartDragInProgress){
         //SDL_Log("Mouse released.\n");
         state->ds.chartDragFinished = 1;
-        clearSelectionStrs(&state->tss,1); //allow strings on the chart to be selectable
+        clearSelectionStrs(&state->ds,&state->tss,1); //allow strings on the chart to be selectable
       }
       if(state->ds.textDragInProgress == 1){
         if(state->mouseXPx >= 0.0f){ //only update the selection position if the mouse is still in the window

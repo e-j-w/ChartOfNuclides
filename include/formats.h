@@ -70,6 +70,9 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #define MAX_SPIN_VARS            32 //maximum spin variables (ie. J1, J2, J3...) per nuclide
 
+#define ISOMER_MVAL_HL_THRESHOLD    1.0E-3 //half-life (in seconds) lower threshold for an m-value to be assigned to an isomer
+#define ISOMER_MVAL_E_THRESHOLD     0.02   //energy (keV) upper threshold for an m-value to be assigned to an isomer
+
 #define NUMSHELLCLOSURES 7
 static const uint16_t shellClosureValues[NUMSHELLCLOSURES] = {2,8,20,28,50,82,126};
 
@@ -153,7 +156,8 @@ typedef struct
   uint16_t firstDecMode;
   float decayProb[DECAYMODE_ENUM_LENGTH]; //% probability of each decay mode for this level
   uint8_t format; //bit 0: whether spin-parity values are half integer (if set, then spinVal is multiplied by 0.5)
-  //bits 1-7: labels for special levels (see special_level_enum)
+  //bits 1-4: labels for special levels (see special_level_enum)
+  //bits 5-7: m-value for isomer levels
 }level; //an individual excited level
 
 typedef struct

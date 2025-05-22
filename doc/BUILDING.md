@@ -1,5 +1,5 @@
 - [Linux](#linux)
-- [Windows (WIP)](#windows)
+- [Windows](#windows)
 
 # Linux
 
