@@ -1739,14 +1739,7 @@ void drawNuclFullInfoBox(const app_data *restrict dat, app_state *restrict state
       //handle special level info
       uint8_t slInd = (uint8_t)((dat->ndat.levels[lvlInd].format >> 1U) & 15U);
       uint8_t mValInd = (uint8_t)((dat->ndat.levels[lvlInd].format >> 5U) & 7U);
-      if(slInd > 0){
-        drawYPos += (NUCL_INFOBOX_SMALLLINE_HEIGHT*state->ds.uiUserScale + txtYOffset);
-        char slStr[64];
-        SDL_snprintf(slStr,64,"(%s)",getSpecialLvlStr(dat,slInd));
-        //SDL_Log("%s\n",tmpStr);
-        drawSelectableTextAlignedSized(rdat,&state->tss,drawXPos,drawYPos,(hl > 1.0E3) ? whiteCol8Bit : blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,slStr,ALIGN_LEFT,16384);
-        drawYPos = levelStartDrawPos;
-      }else if(mValInd > 0){
+      if(mValInd > 0){
         //handle isomer m-value labels
         drawYPos += (NUCL_INFOBOX_SMALLLINE_HEIGHT*state->ds.uiUserScale + txtYOffset);
         char mValStr[32];
@@ -1756,8 +1749,15 @@ void drawNuclFullInfoBox(const app_data *restrict dat, app_state *restrict state
           getNuclNameStr(mValStr,&dat->ndat.nuclData[nuclInd],0);
         }
         drawSelectableTextAlignedSized(rdat,&state->tss,drawXPos,drawYPos,(hl > 1.0E3) ? whiteCol8Bit : blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,mValStr,ALIGN_LEFT,16384);
-        drawYPos = levelStartDrawPos;
       }
+      if(slInd > 0){
+        drawYPos += (NUCL_INFOBOX_SMALLLINE_HEIGHT*state->ds.uiUserScale + txtYOffset);
+        char slStr[64];
+        SDL_snprintf(slStr,64,"%s",getSpecialLvlStr(dat,slInd));
+        //SDL_Log("%s\n",tmpStr);
+        drawSelectableTextAlignedSized(rdat,&state->tss,drawXPos,drawYPos,(hl > 1.0E3) ? whiteCol8Bit : blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,slStr,ALIGN_LEFT,16384);
+      }
+      drawYPos = levelStartDrawPos;
       drawXPos += state->ds.fullInfoElevelColWidth*state->ds.uiUserScale;
       getSpinParStr(tmpStr,&dat->ndat,lvlInd);
       drawSelectableTextAlignedSized(rdat,&state->tss,drawXPos,drawYPos,(hl > 1.0E3) ? whiteCol8Bit : blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_LEFT,16384);

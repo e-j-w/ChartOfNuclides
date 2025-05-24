@@ -49,6 +49,9 @@ about_string_4|This program is free software: you can redistribute it and/or mod
 sl_hoyle|Hoyle state
 sl_naturallyoccuringisomer|Naturally occuring isomer
 sl_clockisomer|Nuclear clock isomer
+sl_spectmedical|SPECT medical isotope
+sl_e6isomer|E6-decaying isomer
+sl_pdecayisomer|Proton-decaying isomer
 pref_shellclosure|Show shell closures on chart
 pref_lifetime|Show lifetimes instead of half-lives
 pref_ui_animations|Show UI animations

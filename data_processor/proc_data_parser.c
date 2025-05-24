@@ -290,6 +290,9 @@ static int parseAppRules(app_data *restrict dat, asset_mapping *restrict stringI
 	dat->locStringIDs[LOCSTR_SL_HOYLE] = (uint16_t)nameToAssetID("sl_hoyle",stringIDmap);
 	dat->locStringIDs[LOCSTR_SL_NATURALLYOCCURINGISOMER] = (uint16_t)nameToAssetID("sl_naturallyoccuringisomer",stringIDmap);
 	dat->locStringIDs[LOCSTR_SL_CLOCKISOMER] = (uint16_t)nameToAssetID("sl_clockisomer",stringIDmap);
+	dat->locStringIDs[LOCSTR_SL_SPECTMEDICAL] = (uint16_t)nameToAssetID("sl_spectmedical",stringIDmap);
+	dat->locStringIDs[LOCSTR_SL_E6ISOMER] = (uint16_t)nameToAssetID("sl_e6isomer",stringIDmap);
+	dat->locStringIDs[LOCSTR_SL_PDECAYISOMER] = (uint16_t)nameToAssetID("sl_pdecayisomer",stringIDmap);
 	dat->locStringIDs[LOCSTR_PREF_SHELLCLOSURE] = (uint16_t)nameToAssetID("pref_shellclosure",stringIDmap);
 	dat->locStringIDs[LOCSTR_PREF_LIFETIME] = (uint16_t)nameToAssetID("pref_lifetime",stringIDmap);
 	dat->locStringIDs[LOCSTR_PREF_UIANIM] = (uint16_t)nameToAssetID("pref_ui_animations",stringIDmap);
@@ -2287,6 +2290,24 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 								if((en > 0.000005)&&(en < 1.0)){
 									//Nuclear clock isomer in 229Th
 									nd->levels[nd->numLvls-1].format |= (uint8_t)(SPECIALLEVEL_CLOCKISOMER << 1U);
+								}
+							}else if((nd->nuclData[nd->numNucl].Z == 43)&&(nd->nuclData[nd->numNucl].N == 56)){
+								//99Tc
+								if((en > 142.6)&&(en < 142.8)){
+									//99mTc, SPECT medical isotope
+									nd->levels[nd->numLvls-1].format |= (uint8_t)(SPECIALLEVEL_SPECTMEDICAL << 1U);
+								}
+							}else if((nd->nuclData[nd->numNucl].Z == 26)&&(nd->nuclData[nd->numNucl].N == 27)){
+								//53Fe
+								if((en > 3040.0)&&(en < 3040.9)){
+									//53mFe, E6 decaying isomer
+									nd->levels[nd->numLvls-1].format |= (uint8_t)(SPECIALLEVEL_E6ISOMER << 1U);
+								}
+							}else if((nd->nuclData[nd->numNucl].Z == 27)&&(nd->nuclData[nd->numNucl].N == 26)){
+								//53Co
+								if((en > 3196.0)&&(en < 3198.0)){
+									//53mCo, proton decaying isomer
+									nd->levels[nd->numLvls-1].format |= (uint8_t)(SPECIALLEVEL_PDECAYISOMER << 1U);
 								}
 							}
 							

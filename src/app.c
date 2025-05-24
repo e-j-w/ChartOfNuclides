@@ -102,7 +102,7 @@ int main(int argc, char *argv[]){
   }
 
   //load preferences (needed prior to window created)
-  gdat->rdat.appPrefPath = SDL_GetPrefPath(NULL,"chart"); //setup path
+  gdat->rdat.appPrefPath = SDL_GetPrefPath("ChartOfNuclides","chart"); //setup path
   initializeTempState(&gdat->dat,&gdat->state,&gdat->tms);
   updatePrefsFromConfigFile(gdat->rdat.appPrefPath,&gdat->dat.rules,&gdat->state); //read settings from .ini file
 
@@ -221,7 +221,6 @@ int main(int argc, char *argv[]){
 
   }
   
-  //SDL_DestroyTexture(targetTex);
   shutdownApp(gdat,0);
 
   return 0;

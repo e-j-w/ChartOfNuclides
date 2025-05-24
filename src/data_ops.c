@@ -530,7 +530,14 @@ const char* getSpecialLvlStr(const app_data *restrict dat, const uint8_t special
 			return dat->strings[dat->locStringIDs[LOCSTR_SL_NATURALLYOCCURINGISOMER]];
 		case SPECIALLEVEL_CLOCKISOMER:
 			return dat->strings[dat->locStringIDs[LOCSTR_SL_CLOCKISOMER]];
+		case SPECIALLEVEL_SPECTMEDICAL:
+			return dat->strings[dat->locStringIDs[LOCSTR_SL_SPECTMEDICAL]];
+		case SPECIALLEVEL_E6ISOMER:
+			return dat->strings[dat->locStringIDs[LOCSTR_SL_E6ISOMER]];
+		case SPECIALLEVEL_PDECAYISOMER:
+			return dat->strings[dat->locStringIDs[LOCSTR_SL_PDECAYISOMER]];
 		default:
+			SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,"getSpecialLvlStr - invalid special level type (%u).\n",specialLvlInd);
 			return " ";
 	}
 }
@@ -2767,15 +2774,17 @@ uint16_t getNumDispLinesForLvl(const ndata *restrict nd, const uint32_t lvlInd){
   if(nd->levels[lvlInd].numTran > levelNumLines){
     levelNumLines = (uint16_t)(nd->levels[lvlInd].numTran);
   }
-	if(levelNumLines < 2){
-		uint8_t slInd = (uint8_t)((nd->levels[lvlInd].format >> 1U) & 127U);
-		uint8_t mValInd = (uint8_t)((nd->levels[lvlInd].format >> 5U) & 7U);
-		if(slInd > 0){
-			levelNumLines++;
-		}else if(mValInd > 0){
-			levelNumLines++;
-		}
-
+	uint8_t additionalLines = 0;
+	uint8_t slInd = (uint8_t)((nd->levels[lvlInd].format >> 1U) & 127U);
+	uint8_t mValInd = (uint8_t)((nd->levels[lvlInd].format >> 5U) & 7U);
+	if(slInd > 0){
+		additionalLines++;
+	}
+	if(mValInd > 0){
+		additionalLines++;
+	}
+	if(levelNumLines < (1+additionalLines)){
+		levelNumLines=1+additionalLines;
 	}
   return levelNumLines;
 }
@@ -3101,7 +3110,7 @@ void setFullLevelInfoDimensions(const app_data *restrict dat, app_state *restric
 		if(tmpWidth > state->ds.fullInfoElevelColWidth){
 			state->ds.fullInfoElevelColWidth = tmpWidth;
 		}
-		uint8_t slInd = (uint8_t)((dat->ndat.levels[lvlInd].format >> 1U) & 127U);
+		uint8_t slInd = (uint8_t)((dat->ndat.levels[lvlInd].format >> 1U) & 15U);
 		if(slInd > 0){
 			tmpWidth = getTextWidthScaleIndependent(rdat,FONTSIZE_NORMAL,getSpecialLvlStr(dat,slInd)) + 6*UI_PADDING_SIZE;
 			if(tmpWidth > state->ds.fullInfoElevelColWidth){
