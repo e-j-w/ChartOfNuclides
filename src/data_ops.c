@@ -119,6 +119,10 @@ void initializeTempState(const app_data *restrict dat, app_state *restrict state
 		SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"search_agent_enum is too long, cannot be indexed by a uint32_t bit pattern (ss->finishedSearchAgents)!\n");
 		exit(-1);
 	}
+	if(FONTSIZE_ENUM_LENGTH > /* DISABLES CODE */ (8)){
+		SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"FONTSIZE_ENUM_LENGTH is too long, fonts cannot be expressed in 3 bits (tss->selectableStrProp)!\n");
+		exit(-1);
+	}
 
 }
 
@@ -4254,8 +4258,8 @@ SDL_FRect getTextSelRect(const text_selection_state *restrict tss, resource_data
 		SDL_strlcpy(selPreStr,tss->selectableStrTxt[tss->selectedStr],charIndStart+1);
 
 		rect = tss->selectableStrRect[tss->selectedStr];
-		rect.x = rect.x + getTextWidth(rdat,tss->selectableStrFontSize[tss->selectedStr],selPreStr)/rdat->uiDPIScale;
-		rect.w = getTextWidth(rdat,tss->selectableStrFontSize[tss->selectedStr],selSubStr)/rdat->uiDPIScale;
+		rect.x = rect.x + getTextWidth(rdat,tss->selectableStrProp[tss->selectedStr] & 7U,selPreStr)/rdat->uiDPIScale;
+		rect.w = getTextWidth(rdat,tss->selectableStrProp[tss->selectedStr] & 7U,selSubStr)/rdat->uiDPIScale;
 	}
 	return rect;
 }
@@ -4674,7 +4678,7 @@ void removeSelectableStringsInRect(text_selection_state *restrict tss, const SDL
 				//SDL_Log("Removing selection string %u.\n",i);
         for(uint16_t j=(i+1); j<tss->numSelStrs; j++){
           memcpy(&tss->selectableStrRect[j-1],&tss->selectableStrRect[j],sizeof(SDL_FRect));
-          memcpy(&tss->selectableStrFontSize[j-1],&tss->selectableStrFontSize[j],sizeof(uint8_t));
+          memcpy(&tss->selectableStrProp[j-1],&tss->selectableStrProp[j],sizeof(uint8_t));
           memcpy(&tss->selectableStrTxt[j-1],&tss->selectableStrTxt[j],sizeof(char)*MAX_SELECTABLE_STR_LEN);
         }
         tss->numSelStrs--;

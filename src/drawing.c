@@ -457,7 +457,7 @@ SDL_FRect drawSelectableTextAlignedSized(resource_data *restrict rdat, text_sele
       //SDL_Log("Adding selection string %u: %s\n",tss->numSelStrs,txt);
       //SDL_Log("  Rect: %0.3f %0.3f %0.3f %0.3f\n",(double)rect.x,(double)rect.y,(double)rect.w,(double)rect.h);
       tss->selectableStrRect[tss->numSelStrs] = rect;
-      tss->selectableStrFontSize[tss->numSelStrs] = fontSizeInd;
+      tss->selectableStrProp[tss->numSelStrs] = (uint8_t)(fontSizeInd & 7U);
       SDL_strlcpy(tss->selectableStrTxt[tss->numSelStrs],txt,MAX_SELECTABLE_STR_LEN);
       tss->numSelStrs++;
     }

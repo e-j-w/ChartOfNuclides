@@ -797,7 +797,7 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
         if(cursorRelPos < 0.0f){
           cursorRelPos = 0.0f;
         }
-        state->tss.selEndPos = (uint8_t)(getNumTextCharsUnderWidth(rdat,(uint16_t)(cursorRelPos),state->tss.selectableStrTxt[state->tss.selectedStr],0,state->tss.selectableStrFontSize[state->tss.selectedStr]));
+        state->tss.selEndPos = (uint8_t)(getNumTextCharsUnderWidth(rdat,(uint16_t)(cursorRelPos),state->tss.selectableStrTxt[state->tss.selectedStr],0,state->tss.selectableStrProp[state->tss.selectedStr] & 7U));
         state->ds.forceRedraw = 1;
       }
     }else{
@@ -832,7 +832,7 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
                       //start drag over text
                       state->ds.textDragStartMouseX = state->mouseXPx;
                       state->ds.textDragInProgress = 1;
-                      state->tss.selStartPos = (uint8_t)(getNumTextCharsUnderWidth(rdat,(uint16_t)(cursorRelPos),state->tss.selectableStrTxt[i],0,state->tss.selectableStrFontSize[i]));
+                      state->tss.selStartPos = (uint8_t)(getNumTextCharsUnderWidth(rdat,(uint16_t)(cursorRelPos),state->tss.selectableStrTxt[i],0,state->tss.selectableStrProp[i] & 7U));
                       state->tss.selEndPos = state->tss.selStartPos;
                     }
                     //SDL_Log("start drag on selectable text at character %u\n",state->tss.selStartPos);
@@ -1002,7 +1002,7 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
           if(cursorRelPos < 0.0f){
             cursorRelPos = 0.0f;
           }
-          state->tss.selEndPos = (uint8_t)(getNumTextCharsUnderWidth(rdat,(uint16_t)(cursorRelPos),state->tss.selectableStrTxt[state->tss.selectedStr],0,state->tss.selectableStrFontSize[state->tss.selectedStr]));
+          state->tss.selEndPos = (uint8_t)(getNumTextCharsUnderWidth(rdat,(uint16_t)(cursorRelPos),state->tss.selectableStrTxt[state->tss.selectedStr],0,state->tss.selectableStrProp[state->tss.selectedStr] & 7U));
         }
         setSelTxtPrimarySelection(&state->tss); //support primary selection on Linux
         state->ds.textDragFinished = 1;
