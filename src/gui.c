@@ -56,10 +56,18 @@ SDL_FColor getHalfLifeCol(const double halflifeSeconds){
     col.r = 0.0f;
     col.g = 0.1f;
     col.b = 0.4f;
+  }else if(halflifeSeconds > 1.0E8){
+    col.r = 0.0f;
+    col.g = 0.1f;
+    col.b = 0.5f;
   }else if(halflifeSeconds > 1.0E7){
     col.r = 0.1f;
     col.g = 0.2f;
     col.b = 0.5f;
+  }else if(halflifeSeconds > 1.0E6){
+    col.r = 0.1f;
+    col.g = 0.2f;
+    col.b = 0.6f;
   }else if(halflifeSeconds > 1.0E5){
     col.r = 0.1f;
     col.g = 0.3f;
@@ -80,7 +88,11 @@ SDL_FColor getHalfLifeCol(const double halflifeSeconds){
     col.r = 0.3f;
     col.g = 0.9f;
     col.b = 0.7f;
-  }else if(halflifeSeconds > 1.0E0){
+  }else if(halflifeSeconds > 4.0E0){
+    col.r = 0.4f;
+    col.g = 1.0f;
+    col.b = 0.7f;
+  }else if(halflifeSeconds > 0.5E0){
     col.r = 0.5f;
     col.g = 1.0f;
     col.b = 0.7f;
@@ -111,6 +123,10 @@ SDL_FColor getHalfLifeCol(const double halflifeSeconds){
   }else if(halflifeSeconds > 1.0E-7){
     col.r = 1.0f;
     col.g = 0.6f;
+    col.b = 0.7f;
+  }else if(halflifeSeconds > 1.0E-8){
+    col.r = 1.0f;
+    col.g = 0.7f;
     col.b = 0.7f;
   }else if(halflifeSeconds > 1.0E-9){
     col.r = 1.0f;
@@ -640,6 +656,10 @@ SDL_FColor getBEACol(const double beA){
     col.b = 0.0f;
   }else if(beA >= 8700.0){
     col.r = 0.0f;
+    col.g = 0.0f;
+    col.b = 0.3f;
+  }else if(beA >= 8650.0){
+    col.r = 0.0f;
     col.g = 0.1f;
     col.b = 0.4f;
   }else if(beA >= 8600.0){
@@ -650,30 +670,58 @@ SDL_FColor getBEACol(const double beA){
     col.r = 0.1f;
     col.g = 0.3f;
     col.b = 0.7f;
+  }else if(beA >= 8400.0){
+    col.r = 0.2f;
+    col.g = 0.3f;
+    col.b = 0.8f;
   }else if(beA >= 8300.0){
     col.r = 0.2f;
     col.g = 0.4f;
     col.b = 0.8f;
-  }else if(beA >= 8100.0){ //box color inversion point
-    col.r = 0.3f;
+  }else if(beA >= 8200.0){
+    col.r = 0.2f;
     col.g = 0.5f;
     col.b = 0.8f;
+  }else if(beA >= 8100.0){
+    col.r = 0.3f;
+    col.g = 0.6f;
+    col.b = 0.8f;
+  }else if(beA >= 8000.0){ //box color inversion point
+    col.r = 0.3f;
+    col.g = 0.6f;
+    col.b = 0.7f;
   }else if(beA >= 7900.0){
     col.r = 0.3f;
     col.g = 0.7f;
+    col.b = 0.7f;
+  }else if(beA >= 7800.0){
+    col.r = 0.3f;
+    col.g = 0.8f;
     col.b = 0.7f;
   }else if(beA >= 7700.0){
     col.r = 0.3f;
     col.g = 0.9f;
     col.b = 0.7f;
+  }else if(beA >= 7600.0){
+    col.r = 0.4f;
+    col.g = 1.0f;
+    col.b = 0.7f;
   }else if(beA >= 7500.0){
     col.r = 0.5f;
     col.g = 1.0f;
     col.b = 0.7f;
+  }else if(beA >= 7400.0){
+    col.r = 0.6f;
+    col.g = 0.9f;
+    col.b = 0.6f;
   }else if(beA >= 7300.0){
     col.r = 0.7f;
     col.g = 0.9f;
     col.b = 0.5f;
+  }else if(beA >= 7200.0){
+    col.r = 0.8f;
+    col.g = 0.9f;
+    col.b = 0.4f;
   }else if(beA >= 7100.0){
     col.r = 0.9f;
     col.g = 0.9f;
@@ -1454,7 +1502,7 @@ void drawChartOfNuclides(const app_data *restrict dat, app_state *restrict state
                     int8_t par = getMostProbableParity(&dat->ndat,dat->ndat.nuclData[i].firstLevel + dat->ndat.nuclData[i].gsLevel);
                     drawNuclBoxLabel(dat,state,rdat,rect.x,rect.y,rect.w,(rect.h-lowBoxHeight-(2.0f*lowBoxPadding)),(par < 0) ? whiteCol8Bit : blackCol8Bit,(uint16_t)i);
                   }else if(state->chartView == CHARTVIEW_BEA){
-                    drawNuclBoxLabel(dat,state,rdat,rect.x,rect.y,rect.w,(rect.h-lowBoxHeight-(2.0f*lowBoxPadding)),(getBEA(&dat->ndat,(uint16_t)i) >= 8100.0) ? whiteCol8Bit : blackCol8Bit,(uint16_t)i);
+                    drawNuclBoxLabel(dat,state,rdat,rect.x,rect.y,rect.w,(rect.h-lowBoxHeight-(2.0f*lowBoxPadding)),(getBEA(&dat->ndat,(uint16_t)i) >= 8000.0) ? whiteCol8Bit : blackCol8Bit,(uint16_t)i);
                   }
                 }else{
                   if(state->chartView == CHARTVIEW_HALFLIFE){
@@ -1474,7 +1522,7 @@ void drawChartOfNuclides(const app_data *restrict dat, app_state *restrict state
                     int8_t par = getMostProbableParity(&dat->ndat,dat->ndat.nuclData[i].firstLevel + dat->ndat.nuclData[i].gsLevel);
                     drawNuclBoxLabel(dat,state,rdat,rect.x,rect.y,rect.w,rect.h,(par < 0) ? whiteCol8Bit : blackCol8Bit,(uint16_t)i);
                   }else if(state->chartView == CHARTVIEW_BEA){
-                    drawNuclBoxLabel(dat,state,rdat,rect.x,rect.y,rect.w,rect.h,(getBEA(&dat->ndat,(uint16_t)i) >= 8100.0) ? whiteCol8Bit : blackCol8Bit,(uint16_t)i);
+                    drawNuclBoxLabel(dat,state,rdat,rect.x,rect.y,rect.w,rect.h,(getBEA(&dat->ndat,(uint16_t)i) >= 8000.0) ? whiteCol8Bit : blackCol8Bit,(uint16_t)i);
                   }else if(state->chartView == CHARTVIEW_NUMLVLS){
                     drawNuclBoxLabel(dat,state,rdat,rect.x,rect.y,rect.w,rect.h,(dat->ndat.nuclData[i].numLevels >= 200) ? whiteCol8Bit : blackCol8Bit,(uint16_t)i);
                   }else if(state->chartView == CHARTVIEW_UNKNOWN_ENERGY){
