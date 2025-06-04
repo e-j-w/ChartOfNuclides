@@ -2779,7 +2779,7 @@ uint16_t getNumDispLinesForLvl(const ndata *restrict nd, const uint32_t lvlInd){
     levelNumLines = (uint16_t)(nd->levels[lvlInd].numTran);
   }
 	uint8_t additionalLines = 0;
-	uint8_t slInd = (uint8_t)((nd->levels[lvlInd].format >> 1U) & 127U);
+	uint8_t slInd = (uint8_t)((nd->levels[lvlInd].format >> 1U) & 15U);
 	uint8_t mValInd = (uint8_t)((nd->levels[lvlInd].format >> 5U) & 7U);
 	if(slInd > 0){
 		additionalLines++;
