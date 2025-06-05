@@ -1750,6 +1750,7 @@ void drawNuclFullInfoBox(const app_data *restrict dat, app_state *restrict state
   for(uint32_t lvlInd = dat->ndat.nuclData[nuclInd].firstLevel; lvlInd<(dat->ndat.nuclData[nuclInd].firstLevel+dat->ndat.nuclData[nuclInd].numLevels); lvlInd++){
     
     //skip all levels which are not part of the selected reaction
+    //SDL_Log("Lvl %u populating rxns: %lu\n",lvlInd,dat->ndat.levels[lvlInd].populatingRxns);
     if(state->ds.selectedRxn > 0){
       if(!(dat->ndat.levels[lvlInd].populatingRxns & ((uint64_t)(1) << (state->ds.selectedRxn-1)))){
         continue;
@@ -2324,6 +2325,7 @@ void drawRxnMenu(const app_data *restrict dat, const app_state *restrict state, 
 
   //draw menu item highlight
   SDL_FColor highlightCol;
+  //SDL_Log("numRxns: %u\n",dat->ndat.nuclData[state->chartSelectedNucl].numRxns);
   //SDL_Log("Mouse-over reaction: %u, selected reaction: %u.\n",state->ds.mouseOverRxn,state->ds.selectedRxn);
   for(uint8_t i=0;i<(dat->ndat.nuclData[state->chartSelectedNucl].numRxns+1);i++){
     if(state->lastInputType == INPUT_TYPE_MOUSE){

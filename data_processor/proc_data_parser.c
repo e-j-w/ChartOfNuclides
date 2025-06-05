@@ -1912,6 +1912,14 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 							//delet it
 							for(uint8_t j=i; j<(nd->nuclData[nd->numNucl].numRxns-1); j++){
 								SDL_memcpy(&nd->rxn[nd->nuclData[nd->numNucl].firstRxn + j],&nd->rxn[nd->nuclData[nd->numNucl].firstRxn + j + 1],sizeof(reaction));
+								rxnMap.rxnPopulatedLvls[j] = rxnMap.rxnPopulatedLvls[j+1];
+								//swap bits in reaction patterns
+								for(uint32_t k=nd->nuclData[nd->numNucl].firstLevel; k<nd->nuclData[nd->numNucl].firstLevel+nd->nuclData[nd->numNucl].numLevels; k++){
+									if(nd->levels[k].populatingRxns & ((uint64_t)(1) << (j+1))){
+										nd->levels[k].populatingRxns &= ~((uint64_t)(1) << (j+1)); //unset old position
+										nd->levels[k].populatingRxns |= ((uint64_t)(1) << j); //set new position
+									}
+								}
 							}
 							nd->nuclData[nd->numNucl].numRxns--;
 							nd->numRxns--;
@@ -2055,6 +2063,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 									break;
 								}
 							}
+							//SDL_Log("rxnBuff: %s\n",rxnBuff);
 							uint8_t rxnStrLen = parseRxn(&nd->rxn[nd->numRxns],rxnBuff,nd->ensdfStrBuf,nd->ensdfStrBufLen);
 							if((rxnStrLen>0)&&(rxnStrLen <= MAX_RXN_STRLEN)){
 								if(nd->numRxns < MAXNUMREACTIONS){
@@ -2096,7 +2105,9 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 								SDL_Log("ERROR: couldn't parse reaction string: %s\n",rxnBuff);
 								return -1;
 							}
-						}
+						}/*else{
+							SDL_Log("WARNING: number of reactions parsed exceeds the maximum per nuclide (%i).\n",MAXRXNSPERNUCL);
+						}*/
 					}else if((strcmp(&typebuff[1]," L")==0)&&(!(SDL_isspace(typebuff[0])))){
 						if(nd->numLvls > 0){
 							char hdbuff[6];
@@ -2113,6 +2124,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 										break;
 									}
 								}
+								//SDL_Log("rxnListBuf: %s\n",rxnListBuf);
 								//check for early end of reaction list ('$' character)
 								for(uint8_t i=0; i<((uint8_t)SDL_strlen(rxnListBuf)); i++){
 									if(rxnListBuf[i] == '$'){
@@ -2169,6 +2181,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 												if(j<MAXRXNSPERNUCL){
 													for(uint8_t k=0; k<rxnMap.numRxnChars[j]; k++){
 														if(rxnMap.rxnChar[j][k] == lvlRxnChar){
+															//SDL_Log("found rxn for char: %c\n",lvlRxnChar); getc(stdin);
 															nd->levels[nd->numLvls-1].populatingRxns |= ((uint64_t)(1) << j);
 															rxnMap.rxnPopulatedLvls[j]++;
 															break;
