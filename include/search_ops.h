@@ -10,9 +10,9 @@
 
 //function prototypes
 void tokenizeSearchStr(search_state *restrict ss);
-void searchELevel(const ndata *restrict ndat, search_state *restrict ss);
-void searchEGamma(const ndata *restrict ndat, search_state *restrict ss);
-void searchGammaCascade(const ndata *restrict ndat, search_state *restrict ss);
+void searchELevel(const ndata *restrict ndat, const drawing_state *restrict ds, search_state *restrict ss);
+void searchEGamma(const ndata *restrict ndat, const drawing_state *restrict ds, search_state *restrict ss);
+void searchGammaCascade(const ndata *restrict ndat, const drawing_state *restrict ds, search_state *restrict ss);
 void searchNuclides(const ndata *restrict ndat, search_state *restrict ss);
 
 #endif

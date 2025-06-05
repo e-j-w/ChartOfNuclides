@@ -60,7 +60,7 @@ int tpFunc(void *data){
               SDL_Delay(THREAD_UPDATE_DELAY); //wait for tokenization to complete
             }
             //SDL_Log("Searching for transitions...\n");
-            searchEGamma(&tdat->dat->ndat,&tdat->state->ss);
+            searchEGamma(&tdat->dat->ndat,&tdat->state->ds,&tdat->state->ss);
             break;
           case SEARCHAGENT_ELEVEL:
             while(!(tdat->state->ss.finishedSearchAgents & (uint32_t)(1U << SEARCHAGENT_NUCLIDE))){
@@ -70,7 +70,7 @@ int tpFunc(void *data){
               SDL_Delay(THREAD_UPDATE_DELAY); //wait for tokenization to complete
             }
             //SDL_Log("Searching for levels...\n");
-            searchELevel(&tdat->dat->ndat,&tdat->state->ss);
+            searchELevel(&tdat->dat->ndat,&tdat->state->ds,&tdat->state->ss);
             break;
           case SEARCHAGENT_GAMMACASCADE:
             while(!(tdat->state->ss.finishedSearchAgents & (uint32_t)(1U << SEARCHAGENT_NUCLIDE))){
@@ -80,7 +80,7 @@ int tpFunc(void *data){
               SDL_Delay(THREAD_UPDATE_DELAY); //wait for tokenization to complete
             }
             //SDL_Log("Searching for gamma cascades...\n");
-            searchGammaCascade(&tdat->dat->ndat,&tdat->state->ss);
+            searchGammaCascade(&tdat->dat->ndat,&tdat->state->ds,&tdat->state->ss);
             break;
           default:
             break;

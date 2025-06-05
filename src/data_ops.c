@@ -3607,6 +3607,8 @@ void searchResultClickAction(app_data *restrict dat, app_state *restrict state, 
 		return;
 	}
 
+	//SDL_Log("Clicking search result %u, with params: %u %u\n",resultInd,state->ss.results[resultInd].resultVal[0],state->ss.results[resultInd].resultVal[1]);
+
 	startUIAnimation(dat,state,UIANIM_SEARCH_MENU_HIDE); //menu will be closed after animation finishes
 	state->clickedUIElem = UIELEM_ENUM_LENGTH; //'unclick' the menu button
 	changeUIState(dat,state,UISTATE_CHARTONLY); //prevents mouseover from still highlighting buttons while the menu closes
@@ -3619,6 +3621,7 @@ void searchResultClickAction(app_data *restrict dat, app_state *restrict state, 
 		case SEARCHAGENT_GAMMACASCADE:
 		case SEARCHAGENT_EGAMMA:
 			setSelectedNuclOnChartDirect(dat,state,rdat,(uint16_t)(state->ss.results[resultInd].resultVal[0]),1);
+			state->chartSelectedNucl = (uint16_t)(state->ss.results[resultInd].resultVal[0]);
 			uiElemClickAction(dat,state,rdat,0,UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON);
 			//get the level corresponding to the transition
 			for(uint16_t i=0; i<dat->ndat.nuclData[state->ss.results[resultInd].resultVal[0]].numLevels; i++){
@@ -3637,6 +3640,7 @@ void searchResultClickAction(app_data *restrict dat, app_state *restrict state, 
 			break;
 		case SEARCHAGENT_ELEVEL:
 			setSelectedNuclOnChartDirect(dat,state,rdat,(uint16_t)(state->ss.results[resultInd].resultVal[0]),1);
+			state->chartSelectedNucl = (uint16_t)(state->ss.results[resultInd].resultVal[0]);
 			uiElemClickAction(dat,state,rdat,0,UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON);
 			nuclLevel = (uint16_t)(state->ss.results[resultInd].resultVal[1] - dat->ndat.nuclData[state->ss.results[resultInd].resultVal[0]].firstLevel);
 			state->ds.nuclFullInfoScrollY = getNumDispLinesUpToLvl(&dat->ndat,state,nuclLevel); //scroll to the level of interest

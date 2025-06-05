@@ -126,7 +126,7 @@ void tokenizeSearchStr(search_state *restrict ss){
 
 }
 
-void searchELevel(const ndata *restrict ndat, search_state *restrict ss){
+void searchELevel(const ndata *restrict ndat, const drawing_state *restrict ds, search_state *restrict ss){
 	for(uint8_t i=0; i<ss->numSearchTok; i++){
 
 		//first, filter out any tokens with characters
@@ -145,6 +145,8 @@ void searchELevel(const ndata *restrict ndat, search_state *restrict ss){
 		if(eSearch > 0.0){
 			//valid energy
 			for(int16_t j=0; j<ndat->numNucl; j++){
+				float proximityFactor = fabsf((float)ndat->nuclData[j].Z - ds->chartPosY - (16.0f/ds->chartZoomScale)) + fabsf((float)ndat->nuclData[j].N - ds->chartPosX) + 0.1f;
+				proximityFactor = ds->chartZoomScale/proximityFactor;
 				for(uint32_t k=ndat->nuclData[j].firstLevel; k<(ndat->nuclData[j].firstLevel + (uint32_t)ndat->nuclData[j].numLevels); k++){
 					if((((ndat->levels[k].energy.format >> 5U) & 15U)) != VALUETYPE_X){ //ignore variable energy
 						double rawEVal = getRawValFromDB(&ndat->levels[k].energy);
@@ -158,6 +160,7 @@ void searchELevel(const ndata *restrict ndat, search_state *restrict ss){
 								//energy matches query
 								search_result res;
 								res.relevance = 0.6f; //base value
+								res.relevance += proximityFactor;
 								res.relevance -= (float)(rawErrVal/rawEVal); //weight by size of error bars
 								res.relevance /= (1.0f + (float)fabs(0.1*(eSearch - rawEVal))); //weight by distance from value
 								res.resultType = SEARCHAGENT_ELEVEL;
@@ -175,7 +178,7 @@ void searchELevel(const ndata *restrict ndat, search_state *restrict ss){
 	}
 }
 
-void searchEGamma(const ndata *restrict ndat, search_state *restrict ss){
+void searchEGamma(const ndata *restrict ndat, const drawing_state *restrict ds, search_state *restrict ss){
 	for(uint8_t i=0; i<ss->numSearchTok; i++){
 
 		//first, filter out any tokens with characters
@@ -194,6 +197,8 @@ void searchEGamma(const ndata *restrict ndat, search_state *restrict ss){
 		if(eSearch > 0.0){
 			//valid energy
 			for(int16_t j=0; j<ndat->numNucl; j++){
+				float proximityFactor = fabsf((float)ndat->nuclData[j].Z - ds->chartPosY - (16.0f/ds->chartZoomScale)) + fabsf((float)ndat->nuclData[j].N - ds->chartPosX) + 0.1f;
+				proximityFactor = ds->chartZoomScale/proximityFactor;
 				for(uint32_t k=ndat->nuclData[j].firstLevel; k<(ndat->nuclData[j].firstLevel + (uint32_t)ndat->nuclData[j].numLevels); k++){
 					for(uint32_t l=ndat->levels[k].firstTran; l<(ndat->levels[k].firstTran + (uint32_t)ndat->levels[k].numTran); l++){
 						if((((ndat->tran[l].energy.format >> 5U) & 15U)) != VALUETYPE_X){ //ignore variable energy
@@ -208,6 +213,7 @@ void searchEGamma(const ndata *restrict ndat, search_state *restrict ss){
 									//energy matches query
 									search_result res;
 									res.relevance = 0.5f; //base value
+									res.relevance += proximityFactor;
 									res.relevance -= (float)(rawErrVal/rawEVal); //weight by size of error bars
 									res.relevance /= (1.0f + (float)fabs(0.1*(eSearch - rawEVal))); //weight by distance from value
 									res.resultType = SEARCHAGENT_EGAMMA;
@@ -226,7 +232,7 @@ void searchEGamma(const ndata *restrict ndat, search_state *restrict ss){
 	}
 }
 
-void searchGammaCascade(const ndata *restrict ndat, search_state *restrict ss){
+void searchGammaCascade(const ndata *restrict ndat, const drawing_state *restrict ds, search_state *restrict ss){
 	
 	uint8_t numCascadeGammas = 0;
 	double cascadeGammas[MAX_CASCADE_GAMMAS];
@@ -258,9 +264,11 @@ void searchGammaCascade(const ndata *restrict ndat, search_state *restrict ss){
 	}
 
 	if(numCascadeGammas > 1){
-		//search for nuclides containing all of the cascade's gammas in coincidence
+		//search for nuclides containing all of the cascade's gammas in coincidenc
 		for(int16_t i=0; i<ndat->numNucl; i++){
 			if(ndat->nuclData[i].numLevels > 1){
+				float proximityFactor = fabsf((float)ndat->nuclData[i].Z - ds->chartPosY - (16.0f/ds->chartZoomScale)) + fabsf((float)ndat->nuclData[i].N - ds->chartPosX) + 0.1f;
+				proximityFactor = 4.0f*ds->chartZoomScale/proximityFactor;
 				for(uint32_t j=(ndat->nuclData[i].firstLevel + (uint32_t)(ndat->nuclData[i].numLevels - 1)); j>=ndat->nuclData[i].firstLevel; j--){
 					if(j==0){
 						break; //safety valve
@@ -331,6 +339,7 @@ void searchGammaCascade(const ndata *restrict ndat, search_state *restrict ss){
 											res.relevance = 1.0f; //base value
 											res.relevance += (float)intensityFactor/100.0f; //weight by intensity of gammas (and implicitly by multiplicity of cascade)
 											res.relevance /= (float)(energyFactor); //weight by distance of energies from search values
+											res.relevance += proximityFactor;
 											res.resultType = SEARCHAGENT_GAMMACASCADE;
 											res.resultVal[0] = (uint32_t)i; //nuclide index
 											for(uint8_t ind=1; ind<=numGammasMatched; ind++){

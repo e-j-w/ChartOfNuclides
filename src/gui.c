@@ -2761,7 +2761,7 @@ void drawPerformanceStats(const ui_theme_rules *restrict uirules, const app_stat
   //draw background
   SDL_FRect perfOvRect;
   perfOvRect.w = (628.0f*rdat->uiScale);
-  perfOvRect.h = (140.0f*rdat->uiScale);
+  perfOvRect.h = (156.0f*rdat->uiScale);
   perfOvRect.x = (CHART_AXIS_DEPTH*rdat->uiScale);
   perfOvRect.y = 0.0f;
   
@@ -2776,12 +2776,14 @@ void drawPerformanceStats(const ui_theme_rules *restrict uirules, const app_stat
   drawDefaultText(uirules,rdat,PERF_OVERLAY_BUTTON_X_ANCHOR,PERF_OVERLAY_BUTTON_Y_ANCHOR+PERF_OVERLAY_Y_SPACING*state->ds.uiUserScale,txtStr);
   SDL_snprintf(txtStr,256,"Zoom scale: %4.1f, UI status: %u",(double)state->ds.chartZoomScale,state->uiState);
   drawDefaultText(uirules,rdat,PERF_OVERLAY_BUTTON_X_ANCHOR,PERF_OVERLAY_BUTTON_Y_ANCHOR+2*PERF_OVERLAY_Y_SPACING*state->ds.uiUserScale,txtStr);
-  SDL_snprintf(txtStr,256,"Active threads: %2u, Selectable strings: %3u",tms->numThreads,state->tss.numSelStrs);
+  SDL_snprintf(txtStr,256,"Chart position: [%3.2f %3.2f], Selected nuclide: %4u",(double)state->ds.chartPosX,(double)state->ds.chartPosY,state->chartSelectedNucl);
   drawDefaultText(uirules,rdat,PERF_OVERLAY_BUTTON_X_ANCHOR,PERF_OVERLAY_BUTTON_Y_ANCHOR+3*PERF_OVERLAY_Y_SPACING*state->ds.uiUserScale,txtStr);
-  SDL_snprintf(txtStr,256,"FPS: %4.1f",1.0/((double)deltaTime));
+  SDL_snprintf(txtStr,256,"Active threads: %2u, Selectable strings: %3u",tms->numThreads,state->tss.numSelStrs);
   drawDefaultText(uirules,rdat,PERF_OVERLAY_BUTTON_X_ANCHOR,PERF_OVERLAY_BUTTON_Y_ANCHOR+4*PERF_OVERLAY_Y_SPACING*state->ds.uiUserScale,txtStr);
-  SDL_snprintf(txtStr,256,"Frame time (ms): %4.3f",(double)(deltaTime*1000.0f));
+  SDL_snprintf(txtStr,256,"FPS: %4.1f",1.0/((double)deltaTime));
   drawDefaultText(uirules,rdat,PERF_OVERLAY_BUTTON_X_ANCHOR,PERF_OVERLAY_BUTTON_Y_ANCHOR+5*PERF_OVERLAY_Y_SPACING*state->ds.uiUserScale,txtStr);
+  SDL_snprintf(txtStr,256,"Frame time (ms): %4.3f",(double)(deltaTime*1000.0f));
+  drawDefaultText(uirules,rdat,PERF_OVERLAY_BUTTON_X_ANCHOR,PERF_OVERLAY_BUTTON_Y_ANCHOR+6*PERF_OVERLAY_Y_SPACING*state->ds.uiUserScale,txtStr);
 }
 
 //meta-function which draws any UI menus, if applicable
