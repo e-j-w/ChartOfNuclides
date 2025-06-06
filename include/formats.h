@@ -86,7 +86,7 @@ static const uint16_t shellClosureValues[NUMSHELLCLOSURES] = {2,8,20,28,50,82,12
 typedef struct
 {
   double val;
-  uint8_t unit; //unit, (from halflife_unit_enum for half-lives)
+  uint8_t unit; //bits 0 to 6: unit (from value_unit_enum), bit 7: whether value is amibiguous (displayed with '?')
   uint8_t err; //uncertainty value (on trailing sig figs)
   int8_t exponent; //value after exponent (eg. -5 for 4.2E-5), if value is in exponent form
   uint16_t format; //bits 0-3: number of sig figs after the decimal place
@@ -99,7 +99,7 @@ typedef struct
 typedef struct
 {
   float val;
-  uint8_t unit; //unit, (from halflife_unit_enum for half-lives)
+  uint8_t unit; //bits 0 to 6: unit (from value_unit_enum), bit 7: whether value is amibiguous (displayed with '?')
   uint8_t err; //uncertainty value (on trailing sig figs)
   int8_t exponent; //value after exponent (eg. -5 for 4.2E-5), if value is in exponent form
   uint16_t format; //bits 0-3: number of sig figs after the decimal place

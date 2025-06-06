@@ -2210,8 +2210,17 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 							memcpy(eeBuff, &line[19], 2);
 							eeBuff[2] = '\0';
 
+							//check for ambiguity
+							uint8_t ambiguous = 0;
+							if(line[79] == '?'){
+								ambiguous = 1;
+							}
+
 							//parse the level energy
 							parseLevelE(&nd->levels[nd->numLvls].energy,&nd->nuclData[nd->numNucl],ebuff,eeBuff);
+							if(ambiguous){
+								nd->levels[nd->numLvls].energy.unit |= (uint8_t)(1U << 7);
+							}
 							nd->nuclData[nd->numNucl].numLevels++;
 							nd->numLvls++;
 							if(nd->nuclData[nd->numNucl].numLevels == 1){
@@ -2492,9 +2501,12 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 								memcpy(eeBuff, &line[19], 2);
 								eeBuff[2] = '\0';
 								
-								uint8_t tentativeE  = 0;
+								uint8_t tentativeE = 0;
+								uint8_t ambiguous = 0;
 								if(line[79]=='S'){
 									tentativeE = 1;
+								}else if(line[79]=='?'){
+									ambiguous = 1;
 								}
 								
 								uint32_t tranInd = nd->levels[nd->numLvls-1].firstTran + (uint32_t)(nd->levels[nd->numLvls-1].numTran);
@@ -2640,6 +2652,10 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 									nd->tran[tranInd].energy.unit=VALUE_UNIT_KEV;
 								}
 
+								if(ambiguous){
+									nd->tran[tranInd].energy.unit |= (uint8_t)(1U << 7);
+								}
+
 								//check for final level of transition
 								double minEDiff = 1000.0;
 								nd->tran[tranInd].finalLvlOffset = 0;
@@ -2698,7 +2714,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 										}
 										
 									
-										double fudgeFactor = SDL_sqrt(pow(getRawErrFromDB(&nd->tran[tranInd].energy),2.0) + pow(getRawErrFromDB(&nd->levels[lvlInd].energy),2.0) + pow(getRawErrFromDB(&nd->levels[nd->numLvls-1].energy),2.0));
+										double fudgeFactor = 3.0*SDL_sqrt(pow(getRawErrFromDB(&nd->tran[tranInd].energy),2.0) + pow(getRawErrFromDB(&nd->levels[lvlInd].energy),2.0) + pow(getRawErrFromDB(&nd->levels[nd->numLvls-1].energy),2.0));
 										fudgeFactor += pow(getRawValFromDB(&nd->tran[tranInd].energy),2.0)/(2.0E6*(nd->nuclData[nd->numNucl].Z + nd->nuclData[nd->numNucl].N)); //nuclear recoil energy approximation
 										if(fudgeFactor < 0.01){
 											fudgeFactor = 1.0; //default assumed energy resolution, when no error is reported 
@@ -2724,7 +2740,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 									if(nd->tran[tranInd].finalLvlOffset == 0){
 										//no final level was found yet
 										if((lvlValType == VALUETYPE_NUMBER)&&(gammaValType == VALUETYPE_NUMBER)){
-											minEDiff = 1.5;
+											minEDiff = 5.0;
 											for(uint32_t lvlInd = (nd->numLvls-2); lvlInd >= nd->nuclData[nd->numNucl].firstLevel; lvlInd--){
 												double eDiff = fabs(getRawValFromDB(&nd->levels[lvlInd].energy) - (getRawValFromDB(&nd->levels[nd->numLvls-1].energy) - getRawValFromDB(&nd->tran[tranInd].energy)));
 												if(eDiff < minEDiff){
@@ -3573,6 +3589,9 @@ int parseAppData(app_data *restrict dat, const char *appBasePath){
 		return -1;
 	}else if(TENTATIVEMULT_ENUM_LENGTH > /* DISABLES CODE */ (4)){
 		SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"TENTATIVEMULT_ENUM_LENGTH is too large, can't store as 2 bits in a bit pattern (eg. transition->multipole).\n");
+		return -1;
+	}else if(VALUE_UNIT_ENUM_LENGTH > /* DISABLES CODE */ (128)){
+		SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"VALUE_UNIT_ENUM_LENGTH is too large, can't store as 7 bits (eg. valWithErr->unit).\n");
 		return -1;
 	}else if(MAX_RXN_STRLEN >= /* DISABLES CODE */ (255)){
 		SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"MAX_RXN_STRLEN is too large, can't use 255 as a special return value in parseRxn().\n");

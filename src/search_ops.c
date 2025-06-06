@@ -145,10 +145,10 @@ void searchELevel(const ndata *restrict ndat, const drawing_state *restrict ds, 
 		if(eSearch > 0.0){
 			//valid energy
 			for(int16_t j=0; j<ndat->numNucl; j++){
-				float proximityFactor = fabsf((float)ndat->nuclData[j].Z - ds->chartPosY - (16.0f/ds->chartZoomScale)) + fabsf((float)ndat->nuclData[j].N - ds->chartPosX) + 0.1f;
-				proximityFactor = ds->chartZoomScale/proximityFactor;
+				float proximityFactor = sqrtf(fabsf((float)ndat->nuclData[j].Z - ds->chartPosY - (16.0f/ds->chartZoomScale)) + fabsf((float)ndat->nuclData[j].N - ds->chartPosX) + 0.1f);
+				proximityFactor = 0.6f*ds->chartZoomScale/proximityFactor;
 				for(uint32_t k=ndat->nuclData[j].firstLevel; k<(ndat->nuclData[j].firstLevel + (uint32_t)ndat->nuclData[j].numLevels); k++){
-					if((((ndat->levels[k].energy.format >> 5U) & 15U)) != VALUETYPE_X){ //ignore variable energy
+					if((((ndat->levels[k].energy.format >> 5U) & 15U)) == VALUETYPE_NUMBER){ //ignore variable energy
 						double rawEVal = getRawValFromDB(&ndat->levels[k].energy);
 						double rawErrVal = getRawErrFromDB(&ndat->levels[k].energy);
 						if(rawEVal > 0.0){
@@ -197,8 +197,8 @@ void searchEGamma(const ndata *restrict ndat, const drawing_state *restrict ds, 
 		if(eSearch > 0.0){
 			//valid energy
 			for(int16_t j=0; j<ndat->numNucl; j++){
-				float proximityFactor = fabsf((float)ndat->nuclData[j].Z - ds->chartPosY - (16.0f/ds->chartZoomScale)) + fabsf((float)ndat->nuclData[j].N - ds->chartPosX) + 0.1f;
-				proximityFactor = ds->chartZoomScale/proximityFactor;
+				float proximityFactor = sqrtf(fabsf((float)ndat->nuclData[j].Z - ds->chartPosY - (16.0f/ds->chartZoomScale)) + fabsf((float)ndat->nuclData[j].N - ds->chartPosX) + 0.1f);
+				proximityFactor = 0.5f*ds->chartZoomScale/proximityFactor;
 				for(uint32_t k=ndat->nuclData[j].firstLevel; k<(ndat->nuclData[j].firstLevel + (uint32_t)ndat->nuclData[j].numLevels); k++){
 					for(uint32_t l=ndat->levels[k].firstTran; l<(ndat->levels[k].firstTran + (uint32_t)ndat->levels[k].numTran); l++){
 						if((((ndat->tran[l].energy.format >> 5U) & 15U)) != VALUETYPE_X){ //ignore variable energy
@@ -216,6 +216,23 @@ void searchEGamma(const ndata *restrict ndat, const drawing_state *restrict ds, 
 									res.relevance += proximityFactor;
 									res.relevance -= (float)(rawErrVal/rawEVal); //weight by size of error bars
 									res.relevance /= (1.0f + (float)fabs(0.1*(eSearch - rawEVal))); //weight by distance from value
+									uint8_t intensityType = (uint8_t)((ndat->tran[l].energy.format >> 5U) & 15U);
+									switch(intensityType){
+										case VALUETYPE_NUMBER:
+										case VALUETYPE_GREATERTHAN:
+										case VALUETYPE_GREATEROREQUALTHAN:
+										case VALUETYPE_APPROX:
+											; //get around gcc warning
+											float intensityFactor = (float)getRawValFromDB(&ndat->tran[l].intensity)/100.0f;
+											if(intensityFactor > 1.0f){
+												intensityFactor = 1.0f;
+											}
+											res.relevance *= intensityFactor;
+											break;
+										default:
+											res.relevance *= 0.01f;
+											break;
+									}
 									res.resultType = SEARCHAGENT_EGAMMA;
 									res.resultVal[0] = (uint32_t)j; //nuclide index
 									res.resultVal[1] = (uint32_t)l; //transition index
@@ -267,8 +284,8 @@ void searchGammaCascade(const ndata *restrict ndat, const drawing_state *restric
 		//search for nuclides containing all of the cascade's gammas in coincidenc
 		for(int16_t i=0; i<ndat->numNucl; i++){
 			if(ndat->nuclData[i].numLevels > 1){
-				float proximityFactor = fabsf((float)ndat->nuclData[i].Z - ds->chartPosY - (16.0f/ds->chartZoomScale)) + fabsf((float)ndat->nuclData[i].N - ds->chartPosX) + 0.1f;
-				proximityFactor = 4.0f*ds->chartZoomScale/proximityFactor;
+				float proximityFactor = sqrtf(fabsf((float)ndat->nuclData[i].Z - ds->chartPosY - (16.0f/ds->chartZoomScale)) + fabsf((float)ndat->nuclData[i].N - ds->chartPosX) + 0.1f);
+				proximityFactor = 1.0f*ds->chartZoomScale/proximityFactor;
 				for(uint32_t j=(ndat->nuclData[i].firstLevel + (uint32_t)(ndat->nuclData[i].numLevels - 1)); j>=ndat->nuclData[i].firstLevel; j--){
 					if(j==0){
 						break; //safety valve
@@ -474,30 +491,34 @@ void searchNuclides(const ndata *restrict ndat, search_state *restrict ss){
 			if(nuclZ >= 0){
 				if(ndat->nuclData[j].Z == nuclZ){
 					if(((ndat->nuclData[j].N + ndat->nuclData[j].Z)) == nuclA){
-						//identified nuclide (exact match)
-						search_result res;
-						res.relevance = 1.0f; //exact match
-						res.resultType = SEARCHAGENT_NUCLIDE;
-						res.resultVal[0] = (uint32_t)j;
-						res.resultVal[1] = 0;
-						res.corrRes = 0;
-						//SDL_Log("Found nuclide %u\n",res.resultVal[0]);
-						sortAndAppendResult(ss,&res);
+						if((ndat->nuclData[j].flags & 3U) == OBSFLAG_OBSERVED){
+							//identified nuclide (exact match)
+							search_result res;
+							res.relevance = 1.0f; //exact match
+							res.resultType = SEARCHAGENT_NUCLIDE;
+							res.resultVal[0] = (uint32_t)j;
+							res.resultVal[1] = 0;
+							res.corrRes = 0;
+							//SDL_Log("Found nuclide %u\n",res.resultVal[0]);
+							sortAndAppendResult(ss,&res);
+						}
 					}
 				}
 			}
 			if(nuclZu >= 0){
 				if((nuclZu != nuclZ)&&(ndat->nuclData[j].Z == nuclZu)){
 					if(((ndat->nuclData[j].N + ndat->nuclData[j].Z)) == nuclA){
-						//identified nuclide (uppercase match)
-						search_result res;
-						res.relevance = 0.8f; //uppercase match
-						res.resultType = SEARCHAGENT_NUCLIDE;
-						res.resultVal[0] = (uint32_t)j;
-						res.resultVal[1] = 0;
-						res.corrRes = 0;
-						//SDL_Log("Found nuclide %u\n",res.resultVal[0]);
-						sortAndAppendResult(ss,&res);
+						if((ndat->nuclData[j].flags & 3U) == OBSFLAG_OBSERVED){
+							//identified nuclide (uppercase match)
+							search_result res;
+							res.relevance = 0.8f; //uppercase match
+							res.resultType = SEARCHAGENT_NUCLIDE;
+							res.resultVal[0] = (uint32_t)j;
+							res.resultVal[1] = 0;
+							res.corrRes = 0;
+							//SDL_Log("Found nuclide %u\n",res.resultVal[0]);
+							sortAndAppendResult(ss,&res);
+						}
 					}
 				}
 			}

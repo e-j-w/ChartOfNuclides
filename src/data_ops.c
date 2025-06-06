@@ -1867,6 +1867,7 @@ void getGammaEnergyStr(char strOut[32], const ndata *restrict nd, const uint32_t
 	uint8_t ePrecision = (uint8_t)(nd->tran[tranInd].energy.format & 15U);
 	uint8_t eExponent = (uint8_t)((nd->tran[tranInd].energy.format >> 4U) & 1U);
 	uint8_t eValueType = (uint8_t)((nd->tran[tranInd].energy.format >> 5U) & 15U);
+	uint8_t ambiguous = (uint8_t)((nd->tran[tranInd].energy.unit >> 7U) & 1U);
 	if(eValueType == VALUETYPE_X){
 		uint8_t variable = (uint8_t)((nd->tran[tranInd].energy.format >> 9U) & 127U);
 		SDL_snprintf(strOut,32,"%c",variable);
@@ -1924,6 +1925,9 @@ void getGammaEnergyStr(char strOut[32], const ndata *restrict nd, const uint32_t
 				}
 			}
 		}
+	}
+	if(ambiguous){
+		SDL_strlcat(strOut," ?",32);
 	}
 	
 }
@@ -2025,6 +2029,7 @@ void getLvlEnergyStr(char strOut[32], const ndata *restrict nd, const uint32_t l
 	uint8_t ePrecision = (uint8_t)(nd->levels[lvlInd].energy.format & 15U);
 	uint8_t eExponent = (uint8_t)((nd->levels[lvlInd].energy.format >> 4U) & 1U);
 	uint8_t eValueType = (uint8_t)((nd->levels[lvlInd].energy.format >> 5U) & 15U);
+	uint8_t ambiguous = (uint8_t)((nd->levels[lvlInd].energy.unit >> 7U) & 1U);
 	if(eValueType == VALUETYPE_X){
 		uint8_t variable = (uint8_t)((nd->levels[lvlInd].energy.format >> 9U) & 127U);
 		SDL_snprintf(strOut,32,"%c",variable);
@@ -2048,14 +2053,17 @@ void getLvlEnergyStr(char strOut[32], const ndata *restrict nd, const uint32_t l
 			SDL_snprintf(strOut,32,"%.*f(%u)E%i",ePrecision,(double)(nd->levels[lvlInd].energy.val),nd->levels[lvlInd].energy.err,nd->levels[lvlInd].energy.exponent);
 		}
 	}
+	if(ambiguous){
+		SDL_strlcat(strOut," ?",32);
+	}
 	
 }
 
 void getHalfLifeStr(char strOut[32], const app_data *restrict dat, const uint32_t lvlInd, const uint8_t showErr, const uint8_t showUnknown, const uint8_t useLifetime){
 	if(lvlInd < dat->ndat.numLvls){
-		if(dat->ndat.levels[lvlInd].halfLife.unit == VALUE_UNIT_STABLE){
+		if((dat->ndat.levels[lvlInd].halfLife.unit & 127U) == VALUE_UNIT_STABLE){
 			SDL_snprintf(strOut,32,"Stable");
-		}else if(dat->ndat.levels[lvlInd].halfLife.unit == VALUE_UNIT_NOVAL){
+		}else if((dat->ndat.levels[lvlInd].halfLife.unit & 127U) == VALUE_UNIT_NOVAL){
 			if(showUnknown){
 				SDL_snprintf(strOut,32,"%s",dat->strings[dat->locStringIDs[LOCSTR_UNKNOWN]]);
 			}else{
@@ -2079,22 +2087,22 @@ void getHalfLifeStr(char strOut[32], const app_data *restrict dat, const uint32_
 					negErr = (uint8_t)(SDL_ceil((double)negErr * 1.4427)); //convert half-life error to lifetime error
 				}
 				if(hlExponent == 0){
-					SDL_snprintf(strOut,32,"%.*f(+%u-%u) %s",hlPrecision,hlVal,hlErr,negErr,getValueUnitShortStr(dat->ndat.levels[lvlInd].halfLife.unit));
+					SDL_snprintf(strOut,32,"%.*f(+%u-%u) %s",hlPrecision,hlVal,hlErr,negErr,getValueUnitShortStr((uint8_t)(dat->ndat.levels[lvlInd].halfLife.unit & 127U)));
 				}else{
-					SDL_snprintf(strOut,32,"%.*f(+%u-%u)E%i %s",hlPrecision,hlVal,hlErr,negErr,dat->ndat.levels[lvlInd].halfLife.exponent,getValueUnitShortStr(dat->ndat.levels[lvlInd].halfLife.unit));
+					SDL_snprintf(strOut,32,"%.*f(+%u-%u)E%i %s",hlPrecision,hlVal,hlErr,negErr,dat->ndat.levels[lvlInd].halfLife.exponent,getValueUnitShortStr((uint8_t)(dat->ndat.levels[lvlInd].halfLife.unit & 127U)));
 				}
 			}else{
 				if((showErr == 0)||(hlErr == 0)){
 					if(hlExponent == 0){
-						SDL_snprintf(strOut,32,"%s%.*f %s",getValueTypeShortStr(hlValueType),hlPrecision,hlVal,getValueUnitShortStr(dat->ndat.levels[lvlInd].halfLife.unit));
+						SDL_snprintf(strOut,32,"%s%.*f %s",getValueTypeShortStr(hlValueType),hlPrecision,hlVal,getValueUnitShortStr((uint8_t)(dat->ndat.levels[lvlInd].halfLife.unit & 127U)));
 					}else{
-						SDL_snprintf(strOut,32,"%s%.*fE%i %s",getValueTypeShortStr(hlValueType),hlPrecision,hlVal,dat->ndat.levels[lvlInd].halfLife.exponent,getValueUnitShortStr(dat->ndat.levels[lvlInd].halfLife.unit));
+						SDL_snprintf(strOut,32,"%s%.*fE%i %s",getValueTypeShortStr(hlValueType),hlPrecision,hlVal,dat->ndat.levels[lvlInd].halfLife.exponent,getValueUnitShortStr((uint8_t)(dat->ndat.levels[lvlInd].halfLife.unit & 127U)));
 					}
 				}else{
 					if(hlExponent == 0){
-						SDL_snprintf(strOut,32,"%s%.*f(%u) %s",getValueTypeShortStr(hlValueType),hlPrecision,hlVal,hlErr,getValueUnitShortStr(dat->ndat.levels[lvlInd].halfLife.unit));
+						SDL_snprintf(strOut,32,"%s%.*f(%u) %s",getValueTypeShortStr(hlValueType),hlPrecision,hlVal,hlErr,getValueUnitShortStr((uint8_t)(dat->ndat.levels[lvlInd].halfLife.unit & 127U)));
 					}else{
-						SDL_snprintf(strOut,32,"%s%.*f(%u)E%i %s",getValueTypeShortStr(hlValueType),hlPrecision,hlVal,hlErr,dat->ndat.levels[lvlInd].halfLife.exponent,getValueUnitShortStr(dat->ndat.levels[lvlInd].halfLife.unit));
+						SDL_snprintf(strOut,32,"%s%.*f(%u)E%i %s",getValueTypeShortStr(hlValueType),hlPrecision,hlVal,hlErr,dat->ndat.levels[lvlInd].halfLife.exponent,getValueUnitShortStr((uint8_t)(dat->ndat.levels[lvlInd].halfLife.unit & 127U)));
 					}
 				}
 			}
@@ -2119,7 +2127,7 @@ void getGSHalfLifeStr(char strOut[32], const app_data *restrict dat, const uint1
 
 void getDecayModeStr(char strOut[32], const ndata *restrict nd, const uint32_t dcyModeInd){
 	if(dcyModeInd < nd->numDecModes){
-		uint8_t decUnitType = nd->dcyMode[dcyModeInd].prob.unit;
+		uint8_t decUnitType = (uint8_t)(nd->dcyMode[dcyModeInd].prob.unit & 127U);
 		uint8_t decType = nd->dcyMode[dcyModeInd].type;
 		uint8_t decPrecision = (uint8_t)(nd->dcyMode[dcyModeInd].prob.format & 15U);
 		uint8_t decValueType = (uint8_t)((nd->dcyMode[dcyModeInd].prob.format >> 5U) & 15U);
@@ -2165,7 +2173,7 @@ void getMostProbableDecayModeStr(char strOut[32], const ndata *restrict nd, cons
 
 	uint32_t probDcyModeInd = MAXNUMDECAYMODES;
 
-	uint8_t hlUnit = nd->levels[lvlInd].halfLife.unit;
+	uint8_t hlUnit = (uint8_t)(nd->levels[lvlInd].halfLife.unit & 127U);
 	if(hlUnit == VALUE_UNIT_STABLE){
 		SDL_snprintf(strOut,32," "); //stable
 		return;
@@ -2178,7 +2186,7 @@ void getMostProbableDecayModeStr(char strOut[32], const ndata *restrict nd, cons
 	int8_t maxProbInd = -1;
 	for(int8_t i=0; i<nd->levels[lvlInd].numDecModes; i++){
 		uint32_t dcyModeInd = nd->levels[lvlInd].firstDecMode + (uint32_t)i;
-		uint8_t decUnitType = nd->dcyMode[dcyModeInd].prob.unit;
+		uint8_t decUnitType = (uint8_t)(nd->dcyMode[dcyModeInd].prob.unit & 127U);
 		if(decUnitType < VALUETYPE_ENUM_LENGTH){
 			double prob = getRawValFromDB(&nd->dcyMode[dcyModeInd].prob);
 			if(prob > maxProb){
@@ -2205,7 +2213,7 @@ void getRxnStr(char strOut[32], const ndata *restrict nd, const uint32_t rxnInd)
 
 void getAbundanceStr(char strOut[32], const ndata *restrict nd, const uint16_t nuclInd){
 	if(nuclInd < nd->numNucl){
-		if(nd->nuclData[nuclInd].abundance.unit == VALUE_UNIT_PERCENT){
+		if((nd->nuclData[nuclInd].abundance.unit & 127U) == VALUE_UNIT_PERCENT){
 			uint8_t abPrecision = (uint8_t)(nd->nuclData[nuclInd].abundance.format & 15U);
 			SDL_snprintf(strOut,32,"%.*f%%%%",abPrecision,(double)nd->nuclData[nuclInd].abundance.val); //%%%% will be parsed to "%%" in tmpStr, which will then be parsed as a format string by SDL_FontCacahe, leaving "%"
 		}else{
@@ -2424,7 +2432,7 @@ double getLevelEnergykeV(const ndata *restrict nd, const uint32_t levelInd){
 			//unknown level energy
 			return -2.0;
 		}
-		uint8_t eUnit = nd->levels[levelInd].energy.unit;
+		uint8_t eUnit = (uint8_t)(nd->levels[levelInd].energy.unit & 127U);
 		switch(eUnit){
 			case VALUE_UNIT_EV:
 				return levelE/1000.0;
@@ -2614,7 +2622,7 @@ double getLevelHalfLifeSeconds(const ndata *restrict nd, const uint32_t levelInd
 			//unknown half-life
 			return -2.0;
 		}
-		uint8_t hlUnit = nd->levels[levelInd].halfLife.unit;
+		uint8_t hlUnit = (uint8_t)(nd->levels[levelInd].halfLife.unit & 127U);
 		switch(hlUnit){
 			case VALUE_UNIT_STABLE:
 				return 1.0E30; //stable
@@ -2663,7 +2671,7 @@ double getNuclGSHalfLifeSeconds(const ndata *restrict nd, const uint16_t nuclInd
 
 uint8_t getLevelMostProbableDcyMode(const ndata *restrict nd, const uint32_t lvlInd){
 	
-	uint8_t hlUnit = nd->levels[lvlInd].halfLife.unit;
+	uint8_t hlUnit = (uint8_t)(nd->levels[lvlInd].halfLife.unit & 127U);
 	if(hlUnit == VALUE_UNIT_STABLE){
 		return (DECAYMODE_ENUM_LENGTH+1); //stable
 	}else if((nd->levels[lvlInd].numDecModes == 0)&&(getLevelHalfLifeSeconds(nd,lvlInd)>1.0E15)){
@@ -2674,7 +2682,7 @@ uint8_t getLevelMostProbableDcyMode(const ndata *restrict nd, const uint32_t lvl
 	int8_t maxProbInd = -1;
 	for(int8_t i=0; i<nd->levels[lvlInd].numDecModes; i++){
 		uint32_t dcyModeInd = nd->levels[lvlInd].firstDecMode + (uint32_t)i;
-		uint8_t decUnitType = nd->dcyMode[dcyModeInd].prob.unit;
+		uint8_t decUnitType = (uint8_t)(nd->dcyMode[dcyModeInd].prob.unit & 127U);
 		if(decUnitType < VALUETYPE_ENUM_LENGTH){
 			double prob = getRawValFromDB(&nd->dcyMode[dcyModeInd].prob);
 			if(prob > maxProb){
@@ -3474,7 +3482,7 @@ void contextMenuClickAction(app_data *restrict dat, app_state *restrict state, c
 					//SDL_Log("Copied text to clipboard: %s\n",SDL_GetClipboardText());
 					break;
 				case CHARTVIEW_DECAYMODE:
-					if(dat->ndat.levels[gsLevInd].halfLife.unit == VALUE_UNIT_STABLE){
+					if((dat->ndat.levels[gsLevInd].halfLife.unit & 127U) == VALUE_UNIT_STABLE){
 						//if the nuclide is stable, show the 'STABLE' label
 						getGSHalfLifeStr(state->copiedTxt,dat,state->cms.selectionInd,state->ds.useLifetimes);
 					}else{
@@ -3621,7 +3629,6 @@ void searchResultClickAction(app_data *restrict dat, app_state *restrict state, 
 		case SEARCHAGENT_GAMMACASCADE:
 		case SEARCHAGENT_EGAMMA:
 			setSelectedNuclOnChartDirect(dat,state,rdat,(uint16_t)(state->ss.results[resultInd].resultVal[0]),1);
-			state->chartSelectedNucl = (uint16_t)(state->ss.results[resultInd].resultVal[0]);
 			uiElemClickAction(dat,state,rdat,0,UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON);
 			//get the level corresponding to the transition
 			for(uint16_t i=0; i<dat->ndat.nuclData[state->ss.results[resultInd].resultVal[0]].numLevels; i++){
@@ -3640,7 +3647,6 @@ void searchResultClickAction(app_data *restrict dat, app_state *restrict state, 
 			break;
 		case SEARCHAGENT_ELEVEL:
 			setSelectedNuclOnChartDirect(dat,state,rdat,(uint16_t)(state->ss.results[resultInd].resultVal[0]),1);
-			state->chartSelectedNucl = (uint16_t)(state->ss.results[resultInd].resultVal[0]);
 			uiElemClickAction(dat,state,rdat,0,UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON);
 			nuclLevel = (uint16_t)(state->ss.results[resultInd].resultVal[1] - dat->ndat.nuclData[state->ss.results[resultInd].resultVal[0]].firstLevel);
 			state->ds.nuclFullInfoScrollY = getNumDispLinesUpToLvl(&dat->ndat,state,nuclLevel); //scroll to the level of interest
