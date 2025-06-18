@@ -916,8 +916,8 @@ uint8_t getNuclBoxLabelNumLines(const app_data *restrict dat, const uint16_t nuc
 void drawIsomerSpinBoxLabel(const app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat, const float xPos, const float yPos, const float boxWidth, const float boxHeight, SDL_Color col, const uint16_t nuclInd, const uint32_t isomerLvl, const uint8_t isomerMVal){
   char tmpStr[32];
   float drawXPos, drawYPos;
-  float labelMargin = NUCLBOX_LABEL_SMALLMARGIN*state->ds.chartZoomScale*state->ds.uiUserScale;
-  uint16_t Z = (uint16_t)dat->ndat.nuclData[nuclInd].Z;
+  const float labelMargin = NUCLBOX_LABEL_SMALLMARGIN*state->ds.chartZoomScale*state->ds.uiUserScale;
+  const uint16_t Z = (uint16_t)dat->ndat.nuclData[nuclInd].Z;
   if(boxHeight > 38.0f){
     drawXPos = xPos + labelMargin;
     float totalLblHeight = getTextHeight(rdat,FONTSIZE_LARGE,getElemStr((uint8_t)Z))/rdat->uiDPIScale;
@@ -942,8 +942,8 @@ void drawIsomerSpinBoxLabel(const app_data *restrict dat, app_state *restrict st
 void drawIsomerDecayModeBoxLabel(const app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat, const float xPos, const float yPos, const float boxWidth, const float boxHeight, SDL_Color col, const uint16_t nuclInd, const uint32_t isomerLvl, const uint8_t isomerMVal, const uint8_t dcyMode){
   char tmpStr[32];
   float drawXPos, drawYPos;
-  float labelMargin = NUCLBOX_LABEL_SMALLMARGIN*state->ds.chartZoomScale*state->ds.uiUserScale;
-  uint16_t Z = (uint16_t)dat->ndat.nuclData[nuclInd].Z;
+  const float labelMargin = NUCLBOX_LABEL_SMALLMARGIN*state->ds.chartZoomScale*state->ds.uiUserScale;
+  const uint16_t Z = (uint16_t)dat->ndat.nuclData[nuclInd].Z;
   if(boxHeight > 38.0f){
     drawXPos = xPos + labelMargin;
     float totalLblHeight = getTextHeight(rdat,FONTSIZE_LARGE,getElemStr((uint8_t)Z))/rdat->uiDPIScale;
@@ -988,8 +988,8 @@ void drawIsomerDecayModeBoxLabel(const app_data *restrict dat, app_state *restri
 void drawisomerBoxLabel(const app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat, const float xPos, const float yPos, const float boxWidth, const float boxHeight, SDL_Color col, const uint16_t nuclInd, const uint32_t isomerLvl, const uint8_t isomerMVal){
   char tmpStr[32];
   float drawXPos, drawYPos;
-  float labelMargin = NUCLBOX_LABEL_SMALLMARGIN*state->ds.chartZoomScale*state->ds.uiUserScale;
-  uint16_t Z = (uint16_t)dat->ndat.nuclData[nuclInd].Z;
+  const float labelMargin = NUCLBOX_LABEL_SMALLMARGIN*state->ds.chartZoomScale*state->ds.uiUserScale;
+  const uint16_t Z = (uint16_t)dat->ndat.nuclData[nuclInd].Z;
   if(boxHeight > 38.0f){
     drawXPos = xPos + labelMargin;
     float totalLblHeight = getTextHeight(rdat,FONTSIZE_LARGE,getElemStr((uint8_t)Z))/rdat->uiDPIScale;
@@ -1786,8 +1786,8 @@ void drawNuclFullInfoBox(const app_data *restrict dat, app_state *restrict state
       }
       drawSelectableTextAlignedSized(rdat,&state->tss,drawXPos,drawYPos,(hl > 1.0E3) ? whiteCol8Bit : blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_LEFT,16384);
       //handle special level info
-      uint8_t slInd = (uint8_t)((dat->ndat.levels[lvlInd].format >> 1U) & 15U);
-      uint8_t mValInd = (uint8_t)((dat->ndat.levels[lvlInd].format >> 5U) & 7U);
+      const uint8_t slInd = (uint8_t)((dat->ndat.levels[lvlInd].format >> 1U) & 15U);
+      const uint8_t mValInd = (uint8_t)((dat->ndat.levels[lvlInd].format >> 5U) & 7U);
       if(mValInd > 0){
         //handle isomer m-value labels
         drawYPos += (NUCL_INFOBOX_SMALLLINE_HEIGHT*state->ds.uiUserScale + txtYOffset);
@@ -1872,7 +1872,8 @@ void drawNuclFullInfoBox(const app_data *restrict dat, app_state *restrict state
       rect.w = (float)(state->ds.uiElemWidth[UIELEM_NUCL_FULLINFOBOX_SCROLLBAR]);
       rect.h = (float)(state->ds.uiElemHeight[UIELEM_NUCL_FULLINFOBOX_SCROLLBAR]);
       const float sbPos = state->ds.nuclFullInfoScrollY/state->ds.nuclFullInfoMaxScrollY;
-      const float sbViewSize = (float)(getNumScreenLvlDispLines(&state->ds))/(float)(getNumTotalLvlDispLines(&dat->ndat,state));
+      float sbViewSize = (float)(getNumScreenLvlDispLines(&state->ds))/(float)(getNumTotalLvlDispLines(&dat->ndat,state));
+      if(sbViewSize < 0.05f){sbViewSize = 0.05f;} //enforce minimum scrollbar size
       const float sbAlpha = (float)(txtAlpha/255.0f);
       //SDL_Log("x: %f, y: %f, w: %f. h: %f\n",(double)rect.x,(double)rect.y,(double)rect.w,(double)rect.h);
       //SDL_Log("pos: %f, view size: %f, alpha: %f\n",(double)sbPos,(double)sbViewSize,(double)sbAlpha);
@@ -2165,7 +2166,7 @@ void drawAboutBox(const app_data *restrict dat, const app_state *restrict state,
   }else{
     drawScreenDimmer(&state->ds,rdat,DIMMER_OPACITY);
   }
-  uint8_t alpha8 = (uint8_t)SDL_floorf(alpha*255.0f);
+  const uint8_t alpha8 = (uint8_t)SDL_floorf(alpha*255.0f);
   
   SDL_FRect aboutBoxPanelRect;
   aboutBoxPanelRect.x = state->ds.uiElemPosX[UIELEM_ABOUT_BOX];
@@ -2262,7 +2263,7 @@ void drawUIScaleMenu(const app_data *restrict dat, const app_state *restrict sta
   drawRect.y = ((float)state->ds.uiElemPosY[UIELEM_PREFS_UISCALE_MENU] + yOffset);
   drawRect.w = state->ds.uiElemWidth[UIELEM_PREFS_UISCALE_MENU];
   drawRect.h = state->ds.uiElemHeight[UIELEM_PREFS_UISCALE_MENU];
-  int16_t arrowX = (int16_t)(state->ds.uiElemPosX[UIELEM_PREFS_DIALOG_UISCALE_DROPDOWN] + 0.39f*state->ds.uiElemWidth[UIELEM_PREFS_DIALOG_UISCALE_DROPDOWN]);
+  const int16_t arrowX = (int16_t)(state->ds.uiElemPosX[UIELEM_PREFS_DIALOG_UISCALE_DROPDOWN] + 0.39f*state->ds.uiElemWidth[UIELEM_PREFS_DIALOG_UISCALE_DROPDOWN]);
   drawMenuBGWithArrow(&dat->rules.themeRules,rdat,drawRect,arrowX,alpha);
   
   //draw menu item highlight
@@ -2291,7 +2292,7 @@ void drawUIScaleMenu(const app_data *restrict dat, const app_state *restrict sta
   drawRect.y = ((float)state->ds.uiElemPosY[UIELEM_PREFS_UISCALE_MENU] + PANEL_EDGE_SIZE*state->ds.uiUserScale + yOffset);
   drawRect.w = state->ds.uiElemWidth[UIELEM_PREFS_UISCALE_MENU];
   drawRect.h = state->ds.uiElemHeight[UIELEM_PREFS_UISCALE_MENU];
-  Uint8 txtAlpha = (Uint8)(alpha*255.0f);
+  const Uint8 txtAlpha = (Uint8)(alpha*255.0f);
   drawTextAlignedSized(rdat,drawRect.x,drawRect.y + 0.4f*PREFS_DIALOG_UISCALE_MENU_ITEM_SPACING*state->ds.uiUserScale + yOffset,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,dat->strings[dat->locStringIDs[LOCSTR_SMALL]],ALIGN_LEFT,(Uint16)(drawRect.w - (PANEL_EDGE_SIZE + 6*UI_PADDING_SIZE)*state->ds.uiUserScale));
   drawTextAlignedSized(rdat,drawRect.x,drawRect.y + 1.4f*PREFS_DIALOG_UISCALE_MENU_ITEM_SPACING*state->ds.uiUserScale + yOffset,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,dat->strings[dat->locStringIDs[LOCSTR_DEFAULT]],ALIGN_LEFT,(Uint16)(drawRect.w - (PANEL_EDGE_SIZE + 6*UI_PADDING_SIZE)*state->ds.uiUserScale));
   drawTextAlignedSized(rdat,drawRect.x,drawRect.y + 2.4f*PREFS_DIALOG_UISCALE_MENU_ITEM_SPACING*state->ds.uiUserScale + yOffset,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,dat->strings[dat->locStringIDs[LOCSTR_LARGE]],ALIGN_LEFT,(Uint16)(drawRect.w - (PANEL_EDGE_SIZE + 6*UI_PADDING_SIZE)*state->ds.uiUserScale));
@@ -2309,7 +2310,7 @@ void drawRxnMenu(const app_data *restrict dat, const app_state *restrict state, 
     alpha = (float)(1.0f*juice_smoothStop2(1.0f - state->ds.timeLeftInUIAnimation[UIANIM_RXN_MENU_SHOW]/UI_ANIM_LENGTH));
     yOffset = (-30.0f*state->ds.uiUserScale*juice_smoothStart2(state->ds.timeLeftInUIAnimation[UIANIM_RXN_MENU_SHOW]/(UI_ANIM_LENGTH)));
   }
-  uint8_t alpha8 = (uint8_t)SDL_floorf(alpha*255.0f);
+  const uint8_t alpha8 = (uint8_t)SDL_floorf(alpha*255.0f);
   //SDL_Log("alpha: %f\n",(double)alpha);
   
   //draw menu background
@@ -2318,10 +2319,10 @@ void drawRxnMenu(const app_data *restrict dat, const app_state *restrict state, 
   drawRect.y = ((float)state->ds.uiElemPosY[UIELEM_RXN_MENU] + yOffset);
   drawRect.w = state->ds.uiElemWidth[UIELEM_RXN_MENU];
   drawRect.h = state->ds.uiElemHeight[UIELEM_RXN_MENU];
-  int16_t arrowX = (int16_t)(state->ds.uiElemPosX[UIELEM_NUCL_FULLINFOBOX_RXNBUTTON] + 0.42f*state->ds.uiElemWidth[UIELEM_NUCL_FULLINFOBOX_RXNBUTTON]);
+  const int16_t arrowX = (int16_t)(state->ds.uiElemPosX[UIELEM_NUCL_FULLINFOBOX_RXNBUTTON] + 0.42f*state->ds.uiElemWidth[UIELEM_NUCL_FULLINFOBOX_RXNBUTTON]);
   drawMenuBGWithArrow(&dat->rules.themeRules,rdat,drawRect,arrowX,alpha);
 
-  uint8_t numRxnPerCol = getRxnMenuNumRxnsPerColumn(dat,state);
+  const uint8_t numRxnPerCol = getRxnMenuNumRxnsPerColumn(dat,state);
 
   //draw menu item highlight
   SDL_FColor highlightCol;
@@ -2407,7 +2408,7 @@ void drawSearchMenu(const app_data *restrict dat, const app_state *restrict stat
     alpha = (float)(1.0f*juice_smoothStop2(1.0f - state->ds.timeLeftInUIAnimation[UIANIM_SEARCH_MENU_SHOW]/UI_ANIM_LENGTH));
     yOffset = (-30.0f*state->ds.uiUserScale*juice_smoothStart2(state->ds.timeLeftInUIAnimation[UIANIM_SEARCH_MENU_SHOW]/(UI_ANIM_LENGTH)));
   }
-  uint8_t alpha8 = (uint8_t)SDL_floorf(alpha*255.0f);
+  const uint8_t alpha8 = (uint8_t)SDL_floorf(alpha*255.0f);
   //SDL_Log("alpha: %f\n",(double)alpha);
   
   //draw menu background
@@ -2416,7 +2417,7 @@ void drawSearchMenu(const app_data *restrict dat, const app_state *restrict stat
   drawRect.y = ((float)state->ds.uiElemPosY[UIELEM_SEARCH_MENU] + yOffset);
   drawRect.w = state->ds.uiElemWidth[UIELEM_SEARCH_MENU];
   drawRect.h = state->ds.uiElemHeight[UIELEM_SEARCH_MENU];
-  int16_t arrowX = (int16_t)(drawRect.x + 0.44f*drawRect.w);
+  const int16_t arrowX = (int16_t)(drawRect.x + 0.44f*drawRect.w);
   drawMenuBGWithArrow(&dat->rules.themeRules,rdat,drawRect,arrowX,alpha);
 
   //draw entry box
@@ -2517,7 +2518,7 @@ void drawChartViewMenu(const app_data *restrict dat, const app_state *restrict s
   drawRect.y = ((float)state->ds.uiElemPosY[UIELEM_CHARTVIEW_MENU] + yOffset);
   drawRect.w = state->ds.uiElemWidth[UIELEM_CHARTVIEW_MENU];
   drawRect.h = state->ds.uiElemHeight[UIELEM_CHARTVIEW_MENU];
-  int16_t arrowX = (int16_t)(drawRect.x + 0.42f*drawRect.w);
+  const int16_t arrowX = (int16_t)(drawRect.x + 0.42f*drawRect.w);
   drawMenuBGWithArrow(&dat->rules.themeRules,rdat,drawRect,arrowX,alpha);
   
   //draw menu item highlight
@@ -2551,7 +2552,7 @@ void drawChartViewMenu(const app_data *restrict dat, const app_state *restrict s
   drawRect.y = ((float)state->ds.uiElemPosY[UIELEM_CHARTVIEW_MENU] + PANEL_EDGE_SIZE*state->ds.uiUserScale + yOffset);
   drawRect.w = state->ds.uiElemWidth[UIELEM_CHARTVIEW_MENU];
   drawRect.h = state->ds.uiElemHeight[UIELEM_CHARTVIEW_MENU];
-  Uint8 txtAlpha = (Uint8)(alpha*255.0f);
+  const Uint8 txtAlpha = (Uint8)(alpha*255.0f);
   drawTextAlignedSized(rdat,state->ds.uiElemPosX[UIELEM_CHARTVIEW_MENU] + (PANEL_EDGE_SIZE + 3*UI_PADDING_SIZE)*state->ds.uiUserScale,drawRect.y + 0.4f*CHARTVIEW_MENU_ITEM_SPACING*state->ds.uiUserScale + yOffset,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,dat->strings[dat->locStringIDs[LOCSTR_CHARTVIEW_MENUTITLE]],ALIGN_LEFT,(Uint16)(drawRect.w - 8*UI_PADDING_SIZE*state->ds.uiUserScale));
   for(uint8_t i=0;i<CHARTVIEW_ENUM_LENGTH;i++){
     if(state->chartView == i){
@@ -2585,7 +2586,7 @@ void drawPrimaryMenu(const app_data *restrict dat, const app_state *restrict sta
   drawRect.y = ((float)state->ds.uiElemPosY[UIELEM_PRIMARY_MENU] + yOffset);
   drawRect.w = state->ds.uiElemWidth[UIELEM_PRIMARY_MENU];
   drawRect.h = state->ds.uiElemHeight[UIELEM_PRIMARY_MENU];
-  int16_t arrowX = (int16_t)(drawRect.x + 0.82f*drawRect.w);
+  const int16_t arrowX = (int16_t)(drawRect.x + 0.82f*drawRect.w);
   drawMenuBGWithArrow(&dat->rules.themeRules,rdat,drawRect,arrowX,alpha);
   
   //draw menu item highlight
@@ -2617,7 +2618,7 @@ void drawPrimaryMenu(const app_data *restrict dat, const app_state *restrict sta
   drawRect.y = ((float)state->ds.uiElemPosY[UIELEM_PRIMARY_MENU] + PANEL_EDGE_SIZE*state->ds.uiUserScale + yOffset);
   drawRect.w = state->ds.uiElemWidth[UIELEM_PRIMARY_MENU];
   drawRect.h = state->ds.uiElemHeight[UIELEM_PRIMARY_MENU];
-  Uint8 txtAlpha = (Uint8)(alpha*255.0f);
+  const Uint8 txtAlpha = (Uint8)(alpha*255.0f);
   drawTextAlignedSized(rdat,drawRect.x,drawRect.y + 0.4f*PRIMARY_MENU_ITEM_SPACING*state->ds.uiUserScale + yOffset,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,dat->strings[dat->locStringIDs[LOCSTR_MENUITEM_PREFS]],ALIGN_LEFT,(Uint16)(drawRect.w - (PANEL_EDGE_SIZE + 6*UI_PADDING_SIZE)*state->ds.uiUserScale));
   drawTextAlignedSized(rdat,drawRect.x,drawRect.y + 1.4f*PRIMARY_MENU_ITEM_SPACING*state->ds.uiUserScale + yOffset,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,dat->strings[dat->locStringIDs[LOCSTR_MENUITEM_SCREENSHOT]],ALIGN_LEFT,(Uint16)(drawRect.w - (PANEL_EDGE_SIZE + 6*UI_PADDING_SIZE)*state->ds.uiUserScale));
   drawTextAlignedSized(rdat,drawRect.x,drawRect.y + 2.4f*PRIMARY_MENU_ITEM_SPACING*state->ds.uiUserScale + yOffset,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,dat->strings[dat->locStringIDs[LOCSTR_MENUITEM_ABOUT]],ALIGN_LEFT,(Uint16)(drawRect.w - (PANEL_EDGE_SIZE + 6*UI_PADDING_SIZE)*state->ds.uiUserScale));
