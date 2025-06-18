@@ -17,11 +17,11 @@ install-linux: chart
 	@if ! [ "$(shell id -u)" = 0 ]; then \
 		echo "This must be run with administrator privileges (eg. with 'sudo')." ; \
 	else \
-		cp chart /usr/bin ; \
 		mkdir /usr/share/chart ; \
-		cp chart.dat /usr/share/chart ; \
-		cp data/io.github.e_j_w.ChartOfNuclides.svg /usr/share/icons/hicolor/scalable/apps ; \
-		cp data/io.github.e_j_w.ChartOfNuclides.desktop /usr/share/applications ; \
+		install -Dm755 chart -t /usr/bin ; \
+		install -Dm644 chart.dat -t /usr/share/chart ; \
+		install -Dm644 data/io.github.e_j_w.ChartOfNuclides.svg -t /usr/share/icons/hicolor/scalable/apps ; \
+		install -Dm644 data/io.github.e_j_w.ChartOfNuclides.desktop -t /usr/share/applications ; \
 		update-desktop-database /usr/share/applications ; \
 		gtk-update-icon-cache -f -t /usr/share/icons/hicolor ; \
 		echo "Done!" ; \
