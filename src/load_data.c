@@ -195,6 +195,8 @@ int importAppData(app_data *restrict dat, resource_data *restrict rdat){
       SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"importAppData - couldn't read font resource %u - %s.\n",i,SDL_GetError());
       return -1;
     }
+    TTF_SetFontStyle(rdat->font[i],fontStyles[i]);
+    TTF_SetFontHinting(rdat->font[i],TTF_HINTING_LIGHT);
   }
 
   //read footer
@@ -230,6 +232,9 @@ int regenerateThemeAndFontCache(app_data *restrict dat, resource_data *restrict 
     SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,"regenerateFontCache - attempting to regenerate cache when app data was not previously imported. Doing that now...\n");
     return importAppData(dat,rdat);
   }
+
+  TTF_DestroyRendererTextEngine(rdat->te);
+  rdat->te = TTF_CreateRendererTextEngine(rdat->renderer);
 
   SDL_IOStream *inp = NULL;
   if(findAndLoadAppDataFile(&inp,rdat,1)==-1){
@@ -308,6 +313,9 @@ int regenerateThemeAndFontCache(app_data *restrict dat, resource_data *restrict 
       SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"importAppData - couldn't read font resource %u - %s.\n",i,SDL_GetError());
       return -1;
     }
+    TTF_SetFontStyle(rdat->font[i],fontStyles[i]);
+    TTF_SetFontHinting(rdat->font[i],TTF_HINTING_LIGHT);
+    
   }
 
   if(SDL_CloseIO(inp)==0){
