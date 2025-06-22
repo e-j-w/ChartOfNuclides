@@ -27,8 +27,6 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include <SDL3_image/SDL_image.h>
 #include <SDL3_ttf/SDL_ttf.h>
 
-#include "SDL_FontCache.h"
-
 #include "enums.h"
 
 //app data parameters (should all be powers of 2)
@@ -370,7 +368,8 @@ typedef struct
   SDL_Texture *uiThemeTex; //the main texture atlas
   SDL_Texture *tempTex; //used to store temporary texture data during draw operations
   //using different fonts (rather than resizing a single font) decreases CPU usage at the expense of memory
-  FC_Font *font[FONTSIZE_ENUM_LENGTH]; //the default font
+  TTF_TextEngine *te;
+  TTF_Font *font[FONTSIZE_ENUM_LENGTH]; //the default font
   void *fontData; //memory address of the font data (must stay alive as long as fonts are used)
   SDL_Cursor *defaultCursor, *dragCursor, *textEntryCursor;
   SDL_Gamepad *gamepad;

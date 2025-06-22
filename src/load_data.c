@@ -70,6 +70,7 @@ int importAppData(app_data *restrict dat, resource_data *restrict rdat){
   int64_t fileSize;
   size_t totalAlloc = 0;
   rdat->themeOffset = 0;
+  rdat->te = TTF_CreateRendererTextEngine(rdat->renderer);
   
   if(findAndLoadAppDataFile(&inp,rdat,0)==-1){
     return -1;
@@ -188,8 +189,7 @@ int importAppData(app_data *restrict dat, resource_data *restrict rdat){
   }
 
   for(uint8_t i=0; i<FONTSIZE_ENUM_LENGTH; i++){
-    rdat->font[i] = FC_CreateFont();
-    FC_LoadFont_RW(rdat->font[i], rdat->renderer,SDL_IOFromConstMem(rdat->fontData,(size_t)fontFilesize),1,(Uint32)(fontSizes[i]*rdat->uiScale),whiteCol8Bit,fontStyles[i]);
+    rdat->font[i] = TTF_OpenFontIO(SDL_IOFromConstMem(rdat->fontData,(size_t)fontFilesize),false,(float)(fontSizes[i]*rdat->uiScale));
     if(rdat->font[i]==NULL){
       SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,"Error","App data file read error - unable to load resource.",rdat->window);
       SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"importAppData - couldn't read font resource %u - %s.\n",i,SDL_GetError());
@@ -247,7 +247,7 @@ int regenerateThemeAndFontCache(app_data *restrict dat, resource_data *restrict 
   }
   for(uint8_t i=0; i<FONTSIZE_ENUM_LENGTH; i++){
     if(rdat->font[i]){
-      FC_FreeFont(rdat->font[i]);
+      TTF_CloseFont(rdat->font[i]);
     }
   }
 
@@ -302,8 +302,7 @@ int regenerateThemeAndFontCache(app_data *restrict dat, resource_data *restrict 
   }
 
   for(uint8_t i=0; i<FONTSIZE_ENUM_LENGTH; i++){
-    rdat->font[i] = FC_CreateFont();
-    FC_LoadFont_RW(rdat->font[i], rdat->renderer,SDL_IOFromConstMem(rdat->fontData,(size_t)fontFilesize),1,(Uint32)(fontSizes[i]*rdat->uiScale),whiteCol8Bit,fontStyles[i]);
+    rdat->font[i] = TTF_OpenFontIO(SDL_IOFromConstMem(rdat->fontData,(size_t)fontFilesize),false,(float)(fontSizes[i]*rdat->uiScale));
     if(rdat->font[i]==NULL){
       SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,"Error","App data file read error - unable to load resource.",rdat->window);
       SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"importAppData - couldn't read font resource %u - %s.\n",i,SDL_GetError());

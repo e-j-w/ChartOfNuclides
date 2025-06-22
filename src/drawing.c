@@ -390,10 +390,20 @@ void drawScreenDimmer(const drawing_state *restrict ds, resource_data *restrict 
 }
 
 float getTextHeight(resource_data *restrict rdat, const uint8_t fontSizeInd, const char *str){
-  return FC_GetHeight(rdat->font[fontSizeInd],str);
+  int textW = 0;
+  int textH = 0;
+  TTF_Text *ttxt = TTF_CreateText(rdat->te,rdat->font[fontSizeInd],str,0);
+  TTF_GetTextSize(ttxt,&textW,&textH);
+  TTF_DestroyText(ttxt);
+  return (float)textH;
 }
 float getTextWidth(resource_data *restrict rdat, const uint8_t fontSizeInd, const char *str){
-  return FC_GetWidth(rdat->font[fontSizeInd],str);
+  int textW = 0;
+  int textH = 0;
+  TTF_Text *ttxt = TTF_CreateText(rdat->te,rdat->font[fontSizeInd],str,0);
+  TTF_GetTextSize(ttxt,&textW,&textH);
+  TTF_DestroyText(ttxt);
+  return (float)textW;
 }
 float getTextHeightScaleIndependent(resource_data *restrict rdat, const uint8_t fontSizeInd, const char *str){
   return getTextHeight(rdat,fontSizeInd,str)/rdat->uiScale;
@@ -412,23 +422,32 @@ SDL_FRect drawTextAlignedSized(resource_data *restrict rdat, const float xPos, c
     drawW = maxWidth*rdat->uiDPIScale;
   }
   //SDL_Log("Width: %f\n", (double)drawW);
-  FC_AlignEnum alignFC = FC_ALIGN_LEFT;
   if(alignment == ALIGN_RIGHT){
     drawX = drawX - (maxWidth*rdat->uiDPIScale);
-    alignFC = FC_ALIGN_RIGHT;
+    TTF_SetFontWrapAlignment(rdat->font[fontSizeInd],TTF_HORIZONTAL_ALIGN_RIGHT);
   }else if(alignment == ALIGN_CENTER){
     const float drawH = getTextHeight(rdat,fontSizeInd,txt);
     drawX = drawX - (maxWidth*rdat->uiDPIScale)/2.0f;
     drawY = drawY - drawH/2.0f;
-    alignFC = FC_ALIGN_CENTER;
+    TTF_SetFontWrapAlignment(rdat->font[fontSizeInd],TTF_HORIZONTAL_ALIGN_CENTER);
+  }else{
+    TTF_SetFontWrapAlignment(rdat->font[fontSizeInd],TTF_HORIZONTAL_ALIGN_LEFT);
   }
+  TTF_Text *ttxt = TTF_CreateText(rdat->te,rdat->font[fontSizeInd],txt,0);
+  TTF_SetTextWrapWidth(ttxt,(int)(maxWidth*rdat->uiDPIScale));
   SDL_FRect drawRect;
+  drawRect.x = drawX;
+  drawRect.y = drawY;
+  drawRect.w = getTextWidth(rdat,fontSizeInd,txt);
+  drawRect.h = getTextHeight(rdat,fontSizeInd,txt);
   if(alpha != textColor.a){
     SDL_Color drawCol = textColor;
     drawCol.a = alpha;
-    drawRect = FC_DrawColumnColorAlign(rdat->font[fontSizeInd],rdat->renderer,drawX,drawY,(Uint16)(maxWidth*rdat->uiDPIScale),drawCol,alignFC,txt);
+    TTF_SetTextColor(ttxt,drawCol.r,drawCol.g,drawCol.b,drawCol.a);
+    TTF_DrawRendererText(ttxt,drawX,drawY);
   }else{
-    drawRect = FC_DrawColumnColorAlign(rdat->font[fontSizeInd],rdat->renderer,drawX,drawY,(Uint16)(maxWidth*rdat->uiDPIScale),textColor,alignFC,txt);
+    TTF_SetTextColor(ttxt,textColor.r,textColor.g,textColor.b,textColor.a);
+    TTF_DrawRendererText(ttxt,drawX,drawY);
   }
   if(alignment == ALIGN_RIGHT){
     drawRect.x = xPos - (drawRect.w/rdat->uiDPIScale);
@@ -442,6 +461,7 @@ SDL_FRect drawTextAlignedSized(resource_data *restrict rdat, const float xPos, c
   }
   drawRect.w /= rdat->uiDPIScale;
   drawRect.h /= rdat->uiDPIScale;
+  TTF_DestroyText(ttxt);
   return drawRect;
 }
 

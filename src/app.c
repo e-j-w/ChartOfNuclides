@@ -23,7 +23,7 @@ void shutdownApp(const global_data *gdat, const uint8_t skipDealloc){
   if(!skipDealloc){
     for(uint8_t i=0; i<FONTSIZE_ENUM_LENGTH; i++){
       if(gdat->rdat.font[i]){
-        FC_FreeFont(gdat->rdat.font[i]);
+        TTF_CloseFont(gdat->rdat.font[i]);
       }
     }
     if(gdat->rdat.fontData!=NULL){

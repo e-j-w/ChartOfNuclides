@@ -2136,22 +2136,22 @@ void getDecayModeStr(char strOut[32], const ndata *restrict nd, const uint32_t d
 			if(decValueType == VALUETYPE_ASYMERROR){
 				uint8_t negErr = (uint8_t)((nd->dcyMode[dcyModeInd].prob.format >> 9U) & 127U);
 				if(decExponent == 0){
-					SDL_snprintf(strOut,32,"%s = %.*f(+%u-%u)%%%%",getDecayTypeShortStr(decType),decPrecision,(double)(nd->dcyMode[dcyModeInd].prob.val),nd->dcyMode[dcyModeInd].prob.err,negErr);
+					SDL_snprintf(strOut,32,"%s = %.*f(+%u-%u)%%",getDecayTypeShortStr(decType),decPrecision,(double)(nd->dcyMode[dcyModeInd].prob.val),nd->dcyMode[dcyModeInd].prob.err,negErr);
 				}else{
-					SDL_snprintf(strOut,32,"%s = %.*f(+%u-%u)E%i%%%%",getDecayTypeShortStr(decType),decPrecision,(double)(nd->dcyMode[dcyModeInd].prob.val),nd->dcyMode[dcyModeInd].prob.err,negErr,nd->dcyMode[dcyModeInd].prob.exponent);
+					SDL_snprintf(strOut,32,"%s = %.*f(+%u-%u)E%i%%",getDecayTypeShortStr(decType),decPrecision,(double)(nd->dcyMode[dcyModeInd].prob.val),nd->dcyMode[dcyModeInd].prob.err,negErr,nd->dcyMode[dcyModeInd].prob.exponent);
 				}
 			}else{
 				if(nd->dcyMode[dcyModeInd].prob.err > 0){
 					if(decExponent == 0){
-						SDL_snprintf(strOut,32,"%s = %.*f(%u)%%%%",getDecayTypeShortStr(decType),decPrecision,(double)nd->dcyMode[dcyModeInd].prob.val,nd->dcyMode[dcyModeInd].prob.err); //%%%% will be parsed to "%%" in tmpStr, which will then be parsed as a format string by SDL_FontCacahe, leaving "%"
+						SDL_snprintf(strOut,32,"%s = %.*f(%u)%%",getDecayTypeShortStr(decType),decPrecision,(double)nd->dcyMode[dcyModeInd].prob.val,nd->dcyMode[dcyModeInd].prob.err);
 					}else{
-						SDL_snprintf(strOut,32,"%s = %.*f(%u)E%i%%%%",getDecayTypeShortStr(decType),decPrecision,(double)nd->dcyMode[dcyModeInd].prob.val,nd->dcyMode[dcyModeInd].prob.err,nd->dcyMode[dcyModeInd].prob.exponent); //%%%% will be parsed to "%%" in tmpStr, which will then be parsed as a format string by SDL_FontCacahe, leaving "%"
+						SDL_snprintf(strOut,32,"%s = %.*f(%u)E%i%%",getDecayTypeShortStr(decType),decPrecision,(double)nd->dcyMode[dcyModeInd].prob.val,nd->dcyMode[dcyModeInd].prob.err,nd->dcyMode[dcyModeInd].prob.exponent);
 					}
 				}else{
 					if(decExponent == 0){
-						SDL_snprintf(strOut,32,"%s = %.*f%%%%",getDecayTypeShortStr(decType),decPrecision,(double)nd->dcyMode[dcyModeInd].prob.val); //%%%% will be parsed to "%%" in tmpStr, which will then be parsed as a format string by SDL_FontCacahe, leaving "%"
+						SDL_snprintf(strOut,32,"%s = %.*f%%",getDecayTypeShortStr(decType),decPrecision,(double)nd->dcyMode[dcyModeInd].prob.val);
 					}else{
-						SDL_snprintf(strOut,32,"%s = %.*fE%i%%%%",getDecayTypeShortStr(decType),decPrecision,(double)nd->dcyMode[dcyModeInd].prob.val,nd->dcyMode[dcyModeInd].prob.exponent); //%%%% will be parsed to "%%" in tmpStr, which will then be parsed as a format string by SDL_FontCacahe, leaving "%"
+						SDL_snprintf(strOut,32,"%s = %.*fE%i%%",getDecayTypeShortStr(decType),decPrecision,(double)nd->dcyMode[dcyModeInd].prob.val,nd->dcyMode[dcyModeInd].prob.exponent);
 					}
 				}
 			}
@@ -2159,9 +2159,9 @@ void getDecayModeStr(char strOut[32], const ndata *restrict nd, const uint32_t d
 			SDL_snprintf(strOut,32,"%s%s",getDecayTypeShortStr(decType),getValueTypeShortStr(decUnitType));
 		}else{
 			if(decExponent == 0){
-				SDL_snprintf(strOut,32,"%s %s%.*f%%%%",getDecayTypeShortStr(decType),getValueTypeShortStr(decUnitType),decPrecision,(double)nd->dcyMode[dcyModeInd].prob.val); //%%%% will be parsed to "%%" in tmpStr, which will then be parsed as a format string by SDL_FontCacahe, leaving "%"
+				SDL_snprintf(strOut,32,"%s %s%.*f%%",getDecayTypeShortStr(decType),getValueTypeShortStr(decUnitType),decPrecision,(double)nd->dcyMode[dcyModeInd].prob.val);
 			}else{
-				SDL_snprintf(strOut,32,"%s %s%.*fE%i%%%%",getDecayTypeShortStr(decType),getValueTypeShortStr(decUnitType),decPrecision,(double)nd->dcyMode[dcyModeInd].prob.val,nd->dcyMode[dcyModeInd].prob.exponent); //%%%% will be parsed to "%%" in tmpStr, which will then be parsed as a format string by SDL_FontCacahe, leaving "%"
+				SDL_snprintf(strOut,32,"%s %s%.*fE%i%%",getDecayTypeShortStr(decType),getValueTypeShortStr(decUnitType),decPrecision,(double)nd->dcyMode[dcyModeInd].prob.val,nd->dcyMode[dcyModeInd].prob.exponent);
 			}
 		}
 	}else{
@@ -2200,7 +2200,7 @@ void getMostProbableDecayModeStr(char strOut[32], const ndata *restrict nd, cons
 		probDcyModeInd = nd->levels[lvlInd].firstDecMode + (uint32_t)maxProbInd;
 		getDecayModeStr(strOut,nd,probDcyModeInd);
 	}else if(nd->levels[lvlInd].numTran >0){
-		SDL_snprintf(strOut,32,"IT > 0%%%%");
+		SDL_snprintf(strOut,32,"IT > 0%%");
 	}else{
 		SDL_snprintf(strOut,32," "); //couldn't find probable decay mode
 		return;
@@ -2215,7 +2215,7 @@ void getAbundanceStr(char strOut[32], const ndata *restrict nd, const uint16_t n
 	if(nuclInd < nd->numNucl){
 		if((nd->nuclData[nuclInd].abundance.unit & 127U) == VALUE_UNIT_PERCENT){
 			uint8_t abPrecision = (uint8_t)(nd->nuclData[nuclInd].abundance.format & 15U);
-			SDL_snprintf(strOut,32,"%.*f%%%%",abPrecision,(double)nd->nuclData[nuclInd].abundance.val); //%%%% will be parsed to "%%" in tmpStr, which will then be parsed as a format string by SDL_FontCacahe, leaving "%"
+			SDL_snprintf(strOut,32,"%.*f%%",abPrecision,(double)nd->nuclData[nuclInd].abundance.val);
 		}else{
 			SDL_snprintf(strOut,32," ");
 		}
