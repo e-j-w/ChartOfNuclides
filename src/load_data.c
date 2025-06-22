@@ -196,7 +196,7 @@ int importAppData(app_data *restrict dat, resource_data *restrict rdat){
       return -1;
     }
     TTF_SetFontStyle(rdat->font[i],fontStyles[i]);
-    TTF_SetFontHinting(rdat->font[i],TTF_HINTING_LIGHT);
+    TTF_SetFontHinting(rdat->font[i],TTF_HINTING_LIGHT_SUBPIXEL);
   }
 
   //read footer
@@ -314,7 +314,7 @@ int regenerateThemeAndFontCache(app_data *restrict dat, resource_data *restrict 
       return -1;
     }
     TTF_SetFontStyle(rdat->font[i],fontStyles[i]);
-    TTF_SetFontHinting(rdat->font[i],TTF_HINTING_LIGHT);
+    TTF_SetFontHinting(rdat->font[i],TTF_HINTING_LIGHT_SUBPIXEL);
     
   }
 

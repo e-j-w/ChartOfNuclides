@@ -59,7 +59,7 @@ static const uint8_t UITHEME_ICON_TILE_X[UIICON_ENUM_LENGTH] = {0,0, 0, 1, 2, 2,
 static const uint8_t UITHEME_ICON_TILE_Y[UIICON_ENUM_LENGTH] = {1,9,10,10,11,10,9,9,8,8,11,11,3,3};
 
 //font sizes (assuming UI scale of 1)
-static const uint16_t fontSizes[FONTSIZE_ENUM_LENGTH] = {13,15,15,19};
+static const float fontSizes[FONTSIZE_ENUM_LENGTH] = {13.0f,15.0f,15.0f,19.0f};
 static const uint16_t fontStyles[FONTSIZE_ENUM_LENGTH] = {TTF_STYLE_NORMAL,TTF_STYLE_NORMAL,TTF_STYLE_BOLD,TTF_STYLE_NORMAL};
 
 //user UI scaling factors
@@ -125,10 +125,10 @@ static const float uiScales[UISCALE_ENUM_LENGTH] = {1.0f,1.20f,1.60f,1.85f};
 #define ABOUT_BOX_HEIGHT           366 //in unscaled pixels
 #define ABOUT_BOX_HEADERTXT_Y      (8*UI_PADDING_SIZE)
 #define ABOUT_BOX_VERSION_Y        (14*UI_PADDING_SIZE)
-#define ABOUT_BOX_STR1_Y           108 //in unscaled pixels
-#define ABOUT_BOX_STR2_Y           154 //in unscaled pixels
-#define ABOUT_BOX_STR3_Y           210 //in unscaled pixels
-#define ABOUT_BOX_STR4_Y           282 //in unscaled pixels
+#define ABOUT_BOX_STR1_Y           108.0f //in unscaled pixels
+#define ABOUT_BOX_STR2_Y           154.0f //in unscaled pixels
+#define ABOUT_BOX_STR3_Y           212.0f //in unscaled pixels
+#define ABOUT_BOX_STR4_Y           284.0f //in unscaled pixels
 
 //preferences dialog
 #define PREFS_DIALOG_NUM_UIELEMENTS             5
@@ -136,9 +136,9 @@ static const float uiScales[UISCALE_ENUM_LENGTH] = {1.0f,1.20f,1.60f,1.85f};
 #define PREFS_DIALOG_HEIGHT                     260 //in unscaled pixels
 #define PREFS_DIALOG_HEADERTXT_X                (6*UI_PADDING_SIZE)
 #define PREFS_DIALOG_HEADERTXT_Y                (6*UI_PADDING_SIZE)
-#define PREFS_DIALOG_PREF_Y_SPACING             36 //in unscaled pixels
+#define PREFS_DIALOG_PREF_Y_SPACING             36.0f //in unscaled pixels
 #define PREFS_DIALOG_PREFCOL1_X                 (6*UI_PADDING_SIZE)
-#define PREFS_DIALOG_PREFCOL1_Y                 80 //in unscaled pixels
+#define PREFS_DIALOG_PREFCOL1_Y                 82.0f //in unscaled pixels
 #define PREFS_DIALOG_UISCALE_BUTTON_WIDTH       120 //in unscaled pixels
 #define PREFS_DIALOG_UISCALE_MENU_WIDTH         140 //in unscaled pixels
 #define PREFS_DIALOG_UISCALE_MENU_ITEM_SPACING  36 //in unscaled pixels
