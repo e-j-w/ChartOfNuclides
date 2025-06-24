@@ -363,28 +363,41 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
           state->mouseoverElement = (uint8_t)((int16_t)UIELEM_CHARTVIEW_MENU-(int16_t)CHARTVIEW_ENUM_LENGTH);
         }else{
           uint8_t selMenuElem = (uint8_t)(CHARTVIEW_ENUM_LENGTH - (UIELEM_CHARTVIEW_MENU - state->mouseoverElement));
+          uint8_t numViewsPerCol = (uint8_t)SDL_ceilf((CHARTVIEW_ENUM_LENGTH)/(1.0f*CHARTVIEW_MENU_COLUMNS));
           if(selMenuElem >= CHARTVIEW_ENUM_LENGTH){
             state->mouseoverElement = (uint8_t)((int16_t)UIELEM_CHARTVIEW_MENU-(int16_t)CHARTVIEW_ENUM_LENGTH);
           }
           if(up && !down){
-            if(selMenuElem > 0){
+            if((selMenuElem%numViewsPerCol)==0){
+              state->mouseoverElement += (uint8_t)(numViewsPerCol-1);
+            }else if(selMenuElem > 0){
               state->mouseoverElement--;
             }else{
               state->mouseoverElement = (uint8_t)(UIELEM_CHARTVIEW_MENU-1);
             }
           }else if(down && !up){
-            if(selMenuElem < (CHARTVIEW_ENUM_LENGTH-1)){
+            if(((selMenuElem+1)%numViewsPerCol)==0){
+              state->mouseoverElement -= (uint8_t)(numViewsPerCol-1);
+            }else if(selMenuElem < (CHARTVIEW_ENUM_LENGTH-1)){
               state->mouseoverElement++;
             }else{
               state->mouseoverElement = (uint8_t)((int16_t)UIELEM_CHARTVIEW_MENU-(int16_t)CHARTVIEW_ENUM_LENGTH);
             }
           }else if(right && !left){
-            if((state->ds.shownElements & ((uint64_t)(1) << UIELEM_CHARTVIEW_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_CHARTVIEW_MENU_SHOW]==0.0f)){
-              uiElemClickAction(dat,state,rdat,0,UIELEM_MENU_BUTTON); //open the primary menu
+            if(selMenuElem >= (CHARTVIEW_ENUM_LENGTH - numViewsPerCol)){
+              if((state->ds.shownElements & ((uint64_t)(1) << UIELEM_CHARTVIEW_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_CHARTVIEW_MENU_SHOW]==0.0f)){
+                uiElemClickAction(dat,state,rdat,0,UIELEM_MENU_BUTTON); //open the primary menu
+              }
+            }else{
+              state->mouseoverElement+=numViewsPerCol;
             }
           }else if(left && !right){
-            if((state->ds.shownElements & ((uint64_t)(1) << UIELEM_CHARTVIEW_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_CHARTVIEW_MENU_SHOW]==0.0f)){
-              uiElemClickAction(dat,state,rdat,0,UIELEM_SEARCH_BUTTON); //open the search menu
+            if(selMenuElem < numViewsPerCol){
+              if((state->ds.shownElements & ((uint64_t)(1) << UIELEM_CHARTVIEW_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_CHARTVIEW_MENU_SHOW]==0.0f)){
+                uiElemClickAction(dat,state,rdat,0,UIELEM_SEARCH_BUTTON); //open the search menu
+              }
+            }else{
+              state->mouseoverElement-=numViewsPerCol;
             }
           }
         }
