@@ -306,6 +306,10 @@ static int parseAppRules(app_data *restrict dat, asset_mapping *restrict stringI
 	dat->locStringIDs[LOCSTR_CHARTVIEW_SPIN] = (uint16_t)nameToAssetID("chartview_spin",stringIDmap);
 	dat->locStringIDs[LOCSTR_CHARTVIEW_PARITY] = (uint16_t)nameToAssetID("chartview_parity",stringIDmap);
 	dat->locStringIDs[LOCSTR_CHARTVIEW_BEA] = (uint16_t)nameToAssetID("chartview_beA",stringIDmap);
+	dat->locStringIDs[LOCSTR_CHARTVIEW_SN] = (uint16_t)nameToAssetID("chartview_sn",stringIDmap);
+	dat->locStringIDs[LOCSTR_CHARTVIEW_SP] = (uint16_t)nameToAssetID("chartview_sp",stringIDmap);
+	dat->locStringIDs[LOCSTR_CHARTVIEW_QALPHA] = (uint16_t)nameToAssetID("chartview_qalpha",stringIDmap);
+	dat->locStringIDs[LOCSTR_CHARTVIEW_QBETA] = (uint16_t)nameToAssetID("chartview_qbeta",stringIDmap);
 	dat->locStringIDs[LOCSTR_CHARTVIEW_NUMLVLS] = (uint16_t)nameToAssetID("chartview_num_levels",stringIDmap);
 	dat->locStringIDs[LOCSTR_CHARTVIEW_UNKNOWN_ENERGY] = (uint16_t)nameToAssetID("chartview_unknown_energy",stringIDmap);
 	dat->locStringIDs[LOCSTR_CONTEXT_COPY] = (uint16_t)nameToAssetID("context_copy",stringIDmap);
@@ -2970,10 +2974,20 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 							nd->nuclData[nd->numNucl].qbeta.val = (float)atof(qbBuff);
 							if(strcmp(qbErrBuff,"SY")==0){
 								nd->nuclData[nd->numNucl].qbeta.err = 255; //systematic
+							}else if(strcmp(qbErrBuff,"CA")==0){
+								nd->nuclData[nd->numNucl].qbeta.err = 254; //calculated
 							}else{
 								nd->nuclData[nd->numNucl].qbeta.err = (uint8_t)atoi(qbErrBuff);
 							}
 							nd->nuclData[nd->numNucl].qbeta.unit = VALUE_UNIT_KEV;
+
+							//correct improperly formatted values in ENSDF
+							if(((nd->nuclData[nd->numNucl].N == 121)&&(nd->nuclData[nd->numNucl].Z == 89)) || ((nd->nuclData[nd->numNucl].N == 122)&&(nd->nuclData[nd->numNucl].Z == 92)) || ((nd->nuclData[nd->numNucl].N == 12)&&(nd->nuclData[nd->numNucl].Z == 19)) || ((nd->nuclData[nd->numNucl].N == 78)&&(nd->nuclData[nd->numNucl].Z == 71))){
+								if(nd->nuclData[nd->numNucl].qbeta.val > 4000.0f){
+									//210Ac, 214U, 31K, 149Lu values are improperly signed (as of June 2025 ENSDF)		
+									nd->nuclData[nd->numNucl].qbeta.val *= -1.0f;
+								}
+							}
 
 							//handle expoenents
 							tok = SDL_strtok_r(qbBuff,".",&saveptr);
@@ -3026,10 +3040,25 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 							nd->nuclData[nd->numNucl].sn.val = (float)atof(nsBuff);
 							if(strcmp(nsErrBuff,"SY")==0){
 								nd->nuclData[nd->numNucl].sn.err = 255; //systematic
+							}else if(strcmp(nsErrBuff,"CA")==0){
+								nd->nuclData[nd->numNucl].sn.err = 254; //calculated
 							}else{
 								nd->nuclData[nd->numNucl].sn.err = (uint8_t)atoi(nsErrBuff);
 							}
 							nd->nuclData[nd->numNucl].sn.unit = VALUE_UNIT_KEV;
+
+							//correct improperly formatted values in ENSDF
+							if((nd->nuclData[nd->numNucl].N + nd->nuclData[nd->numNucl].Z)==105){
+								if(nd->nuclData[nd->numNucl].sn.val < 0.0f){
+									//improper sign on A=105 evaluation (as of June 2025 ENSDF)
+									nd->nuclData[nd->numNucl].sn.val = SDL_fabsf(nd->nuclData[nd->numNucl].sn.val);
+								}
+							}
+							uint8_t badExpFlag = 0;
+							if(nd->nuclData[nd->numNucl].sn.val > 1000000.0f){
+								//186Tl has an improperly specified exponent (as of June 2025 ENSDF)
+								badExpFlag = 1;
+							}
 
 							//handle expoenents
 							tok = SDL_strtok_r(nsBuff,".",&saveptr);
@@ -3059,9 +3088,20 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 											nd->nuclData[nd->numNucl].sn.exponent = (int8_t)atoi(tok);
 											//SDL_Log("%s, parsed to %i\n",tok,nd->nuclData[nd->numNucl].sn.exponent);
 											nd->nuclData[nd->numNucl].sn.val = nd->nuclData[nd->numNucl].sn.val / powf(10.0f,(float)(nd->nuclData[nd->numNucl].sn.exponent));
-											nd->nuclData[nd->numNucl].sn.format |= (uint16_t)(1U << 4); //exponent flag
+											if(badExpFlag == 0){
+												nd->nuclData[nd->numNucl].sn.format |= (uint16_t)(1U << 4); //exponent flag
+											}
 										}
 									}
+								}
+							}
+							//correct improperly formatted values in ENSDF
+							if((nd->nuclData[nd->numNucl].N == 96)&&(nd->nuclData[nd->numNucl].Z == 77)){
+								if(nd->nuclData[nd->numNucl].sn.val < 3.0f){
+									//173Ir value is improperly formatted (as of June 2025 ENSDF)		
+									nd->nuclData[nd->numNucl].sn.exponent = 4;
+									nd->nuclData[nd->numNucl].sn.format = 4;
+									nd->nuclData[nd->numNucl].sn.format |= (uint16_t)(1U << 4); //exponent flag
 								}
 							}
 
@@ -3082,10 +3122,27 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 							nd->nuclData[nd->numNucl].sp.val = (float)atof(psBuff);
 							if(strcmp(psErrBuff,"SY")==0){
 								nd->nuclData[nd->numNucl].sp.err = 255; //systematic
+							}else if(strcmp(psErrBuff,"CA")==0){
+								nd->nuclData[nd->numNucl].sp.err = 254; //calculated
 							}else{
 								nd->nuclData[nd->numNucl].sp.err = (uint8_t)atoi(psErrBuff);
 							}
 							nd->nuclData[nd->numNucl].sp.unit = VALUE_UNIT_KEV;
+
+							//correct improperly formatted values in ENSDF
+							if((nd->nuclData[nd->numNucl].N + nd->nuclData[nd->numNucl].Z)==105){
+								if(nd->nuclData[nd->numNucl].sp.val < 0.0f){
+									//improper sign on A=105 evaluation (as of June 2025 ENSDF)
+									nd->nuclData[nd->numNucl].sp.val = SDL_fabsf(nd->nuclData[nd->numNucl].sp.val);
+								}
+							}
+							if((nd->nuclData[nd->numNucl].N + nd->nuclData[nd->numNucl].Z)>40){
+								if(nd->nuclData[nd->numNucl].Z > nd->nuclData[nd->numNucl].N){
+									if(nd->nuclData[nd->numNucl].sp.val > 10000.0f){
+										nd->nuclData[nd->numNucl].sp.val /= 10.0f; //incorrect decimal placement in ENSDF (eg. 99Sn)
+									}
+								}
+							}
 
 							//handle expoenents
 							tok = SDL_strtok_r(psBuff,".",&saveptr);
@@ -3138,10 +3195,38 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 							nd->nuclData[nd->numNucl].qalpha.val = (float)atof(qaBuff);
 							if(strcmp(qaErrBuff,"SY")==0){
 								nd->nuclData[nd->numNucl].qalpha.err = 255; //systematic
+							}else if(strcmp(qaErrBuff,"CA")==0){
+								nd->nuclData[nd->numNucl].qalpha.err = 254; //calculated
 							}else{
 								nd->nuclData[nd->numNucl].qalpha.err = (uint8_t)atoi(qaErrBuff);
 							}
 							nd->nuclData[nd->numNucl].qalpha.unit = VALUE_UNIT_KEV;
+
+							//correct improperly formatted values in ENSDF
+							if(((nd->nuclData[nd->numNucl].N == 53)&&(nd->nuclData[nd->numNucl].Z == 45))
+							 || ((nd->nuclData[nd->numNucl].N == 32)&&(nd->nuclData[nd->numNucl].Z == 18))
+							 || ((nd->nuclData[nd->numNucl].N == 67)&&(nd->nuclData[nd->numNucl].Z == 41))
+							 || ((nd->nuclData[nd->numNucl].N == 66)&&(nd->nuclData[nd->numNucl].Z == 37))){
+								if(nd->nuclData[nd->numNucl].qalpha.val > 0.0f){
+									//wrong sign in ENSDF (eg. 50Ar, 98Rh, 103Rb, 108Nb)
+									nd->nuclData[nd->numNucl].qalpha.val *= -1.0f;
+								}
+							}
+							if(nd->nuclData[nd->numNucl].qalpha.val < -50000.0f){
+								nd->nuclData[nd->numNucl].qalpha.val /= 10.0f;
+							}
+							if(((nd->nuclData[nd->numNucl].N == 7)&&(nd->nuclData[nd->numNucl].Z == 11)) || ((nd->nuclData[nd->numNucl].N == 105)&&(nd->nuclData[nd->numNucl].Z == 81))){
+								if(SDL_fabsf(nd->nuclData[nd->numNucl].qalpha.val < 3000.0f)){
+									//18Na, 186Tl values are improperly formatted (as of June 2025 ENSDF)		
+									nd->nuclData[nd->numNucl].qalpha.val *= 1000.0f;
+								}
+							}
+							if((nd->nuclData[nd->numNucl].N == 98)&&(nd->nuclData[nd->numNucl].Z == 79)){
+								if(nd->nuclData[nd->numNucl].qalpha.val > 50000.0f){
+									//177Au value is improperly formatted (as of June 2025 ENSDF)		
+									nd->nuclData[nd->numNucl].qalpha.val -= 50000.0f;
+								}
+							}
 
 							//handle expoenents
 							tok = SDL_strtok_r(qaBuff,".",&saveptr);

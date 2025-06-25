@@ -756,8 +756,291 @@ SDL_FColor getBEACol(const double beA){
     col.b = 0.9f;
   }else if(beA > 0.0){
     col.r = 1.0f;
+    col.g = 0.9f;
+    col.b = 0.9f;
+  }
+  return col;
+}
+
+SDL_FColor getSnpCol(const double snpKeV, const double halflifeSeconds){
+  SDL_FColor col;
+  col.a = 1.0f;
+  if(snpKeV == 0.0){
+    col.r = 1.0f;
+    col.g = 1.0f;
+    col.b = 1.0f;
+  }else if(snpKeV >= 25000.0){
+    col.r = 0.0f;
+    col.g = 0.1f;
+    col.b = 0.4f;
+  }else if(snpKeV >= 20000.0){
+    col.r = 0.1f;
+    col.g = 0.2f;
+    col.b = 0.5f;
+  }else if(snpKeV >= 15000.0){
+    col.r = 0.1f;
+    col.g = 0.3f;
+    col.b = 0.7f;
+  }else if(snpKeV >= 10000.0){
+    col.r = 0.2f;
+    col.g = 0.4f;
+    col.b = 0.8f;
+  }else if(snpKeV >= 8000.0){
+    col.r = 0.3f;
+    col.g = 0.5f;
+    col.b = 0.8f;
+  }else if(snpKeV >= 6000.0){
+    col.r = 0.3f;
+    col.g = 0.7f;
+    col.b = 0.7f;
+  }else if(snpKeV >= 5000.0){
+    col.r = 0.3f;
+    col.g = 0.9f;
+    col.b = 0.7f;
+  }else if(snpKeV >= 4000.0){
+    col.r = 0.5f;
+    col.g = 1.0f;
+    col.b = 0.7f;
+  }else if(snpKeV >= 3000.0){
+    col.r = 0.7f;
+    col.g = 0.9f;
+    col.b = 0.5f;
+  }else if(snpKeV >= 2000.0){
+    col.r = 0.9f;
+    col.g = 0.9f;
+    col.b = 0.4f;
+  }else if(snpKeV >= 1000.0){
+    col.r = 1.0f;
+    col.g = 1.0f;
+    col.b = 0.3f;
+  }else if(snpKeV >= 500.0){
+    col.r = 1.0f;
+    col.g = 0.8f;
+    col.b = 0.4f;
+  }else if(snpKeV >= 300.0){
+    col.r = 1.0f;
+    col.g = 0.7f;
+    col.b = 0.5f;
+  }else if(snpKeV >= 200.0){
+    col.r = 1.0f;
+    col.g = 0.6f;
+    col.b = 0.6f;
+  }else if(snpKeV >= 100.0){
+    col.r = 1.0f;
+    col.g = 0.6f;
+    col.b = 0.7f;
+  }else if(snpKeV >= 50.0){
+    col.r = 1.0f;
+    col.g = 0.7f;
+    col.b = 0.8f;
+  }else if(snpKeV >= 0.0){
+    col.r = 1.0f;
     col.g = 0.8f;
     col.b = 0.9f;
+  }else if(snpKeV >= -100.0){
+    col.r = 1.0f;
+    col.g = 0.9f;
+    col.b = 0.9f;
+  }else{
+    col.r = 1.0f;
+    col.g = 0.7f;
+    col.b = 1.0f;
+  }
+  //slightly darken stable nuclides
+  if(halflifeSeconds > 1.0E15){
+    col.r -= 0.1f;
+    col.g -= 0.1f;
+    col.b -= 0.1f;
+  }
+  return col;
+}
+
+SDL_FColor getQaCol(const double qaKeV, const double halflifeSeconds){
+  SDL_FColor col;
+  col.a = 1.0f;
+  if(qaKeV == 0.0){
+    col.r = 1.0f;
+    col.g = 1.0f;
+    col.b = 1.0f;
+  }else if(qaKeV >= 10000.0){
+    col.r = 1.0f;
+    col.g = 0.9f;
+    col.b = 0.9f;
+  }else if(qaKeV >= 8000.0){
+    col.r = 1.0f;
+    col.g = 0.8f;
+    col.b = 0.9f;
+  }else if(qaKeV >= 6000.0){
+    col.r = 1.0f;
+    col.g = 0.7f;
+    col.b = 0.8f;
+  }else if(qaKeV >= 4000.0){
+    col.r = 1.0f;
+    col.g = 0.6f;
+    col.b = 0.8f;
+  }else if(qaKeV >= 3000.0){
+    col.r = 1.0f;
+    col.g = 0.6f;
+    col.b = 0.7f;
+  }else if(qaKeV >= 2000.0){
+    col.r = 1.0f;
+    col.g = 0.6f;
+    col.b = 0.6f;
+  }else if(qaKeV >= 1000.0){
+    col.r = 1.0f;
+    col.g = 0.7f;
+    col.b = 0.5f;
+  }else if(qaKeV >= 500.0){
+    col.r = 1.0f;
+    col.g = 0.9f;
+    col.b = 0.3f;
+  }else if(qaKeV >= 0.0){
+    col.r = 1.0f;
+    col.g = 1.0f;
+    col.b = 0.2f;
+  }else if(qaKeV >= -1000.0){
+    col.r = 0.9f;
+    col.g = 0.9f;
+    col.b = 0.4f;
+  }else if(qaKeV >= -2000.0){
+    col.r = 0.7f;
+    col.g = 0.9f;
+    col.b = 0.5f;
+  }else if(qaKeV >= -4000.0){
+    col.r = 0.5f;
+    col.g = 1.0f;
+    col.b = 0.7f;
+  }else if(qaKeV >= -6000.0){
+    col.r = 0.3f;
+    col.g = 0.9f;
+    col.b = 0.7f;
+  }else if(qaKeV >= -8000.0){
+    col.r = 0.3f;
+    col.g = 0.7f;
+    col.b = 0.7f;
+  }else if(qaKeV >= -10000.0){
+    col.r = 0.3f;
+    col.g = 0.5f;
+    col.b = 0.8f;
+  }else if(qaKeV >= -12000.0){
+    col.r = 0.2f;
+    col.g = 0.4f;
+    col.b = 0.8f;
+  }else if(qaKeV >= -14000.0){
+    col.r = 0.1f;
+    col.g = 0.3f;
+    col.b = 0.7f;
+  }else if(qaKeV >= -17000.0){
+    col.r = 0.1f;
+    col.g = 0.2f;
+    col.b = 0.5f;
+  }else if(qaKeV >= -20000.0){
+    col.r = 0.0f;
+    col.g = 0.1f;
+    col.b = 0.4f;
+  }else{
+    col.r = 0.0f;
+    col.g = 0.0f;
+    col.b = 0.0f;
+  }
+  //slightly darken stable nuclides
+  if(halflifeSeconds > 1.0E15){
+    col.r -= 0.1f;
+    col.g -= 0.1f;
+    col.b -= 0.1f;
+  }
+  return col;
+}
+
+SDL_FColor getQbCol(const double qbKeV, const double halflifeSeconds){
+  SDL_FColor col;
+  col.a = 1.0f;
+  if(qbKeV == 0.0){
+    col.r = 1.0f;
+    col.g = 1.0f;
+    col.b = 1.0f;
+  }else if(qbKeV >= 18000.0){
+    col.r = 1.0f;
+    col.g = 0.9f;
+    col.b = 0.9f;
+  }else if(qbKeV >= 15000.0){
+    col.r = 1.0f;
+    col.g = 0.8f;
+    col.b = 0.9f;
+  }else if(qbKeV >= 12000.0){
+    col.r = 1.0f;
+    col.g = 0.7f;
+    col.b = 0.8f;
+  }else if(qbKeV >= 10000.0){
+    col.r = 1.0f;
+    col.g = 0.6f;
+    col.b = 0.7f;
+  }else if(qbKeV >= 8000.0){
+    col.r = 1.0f;
+    col.g = 0.6f;
+    col.b = 0.6f;
+  }else if(qbKeV >= 6000.0){
+    col.r = 1.0f;
+    col.g = 0.7f;
+    col.b = 0.5f;
+  }else if(qbKeV >= 4000.0){
+    col.r = 1.0f;
+    col.g = 0.8f;
+    col.b = 0.4f;
+  }else if(qbKeV >= 2000.0){
+    col.r = 1.0f;
+    col.g = 1.0f;
+    col.b = 0.3f;
+  }else if(qbKeV >= 1000.0){
+    col.r = 0.9f;
+    col.g = 0.9f;
+    col.b = 0.4f;
+  }else if(qbKeV >= 0.0){
+    col.r = 0.7f;
+    col.g = 0.9f;
+    col.b = 0.5f;
+  }else if(qbKeV >= -1000.0){
+    col.r = 0.5f;
+    col.g = 1.0f;
+    col.b = 0.7f;
+  }else if(qbKeV >= -2000.0){
+    col.r = 0.3f;
+    col.g = 0.9f;
+    col.b = 0.7f;
+  }else if(qbKeV >= -4000.0){
+    col.r = 0.3f;
+    col.g = 0.7f;
+    col.b = 0.7f;
+  }else if(qbKeV >= -6000.0){
+    col.r = 0.3f;
+    col.g = 0.5f;
+    col.b = 0.8f;
+  }else if(qbKeV >= -8000.0){
+    col.r = 0.2f;
+    col.g = 0.4f;
+    col.b = 0.8f;
+  }else if(qbKeV >= -10000.0){
+    col.r = 0.1f;
+    col.g = 0.3f;
+    col.b = 0.7f;
+  }else if(qbKeV >= -12000.0){
+    col.r = 0.1f;
+    col.g = 0.2f;
+    col.b = 0.5f;
+  }else if(qbKeV >= -15000.0){
+    col.r = 0.0f;
+    col.g = 0.1f;
+    col.b = 0.4f;
+  }else{
+    col.r = 0.0f;
+    col.g = 0.0f;
+    col.b = 0.0f;
+  }
+  //slightly darken stable nuclides
+  if(halflifeSeconds > 1.0E15){
+    col.r -= 0.1f;
+    col.g -= 0.1f;
+    col.b -= 0.1f;
   }
   return col;
 }
@@ -1228,6 +1511,38 @@ void drawNuclBoxLabelDetails(const app_data *restrict dat, app_state *restrict s
       SDL_strlcat(tmpStr," keV",32);
       drawTextAlignedSized(rdat,drawXPos,drawYPos+((yOffsets*19.0f + 40.0f)*state->ds.uiUserScale),col,FONTSIZE_NORMAL,255,tmpStr,ALIGN_CENTER,maxLblWidth); //draw BE/A label
     }
+  }else if(state->chartView == CHARTVIEW_SN){
+    if(dat->ndat.nuclData[nuclInd].sn.val != 0.0f){
+      getQValStr(tmpStr,dat->ndat.nuclData[nuclInd].sn,1);
+      SDL_strlcat(tmpStr," keV",32);
+      drawTextAlignedSized(rdat,drawXPos,drawYPos+((yOffsets*19.0f + 40.0f)*state->ds.uiUserScale),col,FONTSIZE_NORMAL,255,tmpStr,ALIGN_CENTER,maxLblWidth); //draw Sn label
+    }else{
+      drawTextAlignedSized(rdat,drawXPos,drawYPos+((yOffsets*19.0f + 40.0f)*state->ds.uiUserScale),col,FONTSIZE_NORMAL,255,dat->strings[dat->locStringIDs[LOCSTR_UNKNOWN]],ALIGN_CENTER,maxLblWidth); //draw Sn label
+    }
+  }else if(state->chartView == CHARTVIEW_SP){
+    if(dat->ndat.nuclData[nuclInd].sp.val != 0.0f){
+      getQValStr(tmpStr,dat->ndat.nuclData[nuclInd].sp,1);
+      SDL_strlcat(tmpStr," keV",32);
+      drawTextAlignedSized(rdat,drawXPos,drawYPos+((yOffsets*19.0f + 40.0f)*state->ds.uiUserScale),col,FONTSIZE_NORMAL,255,tmpStr,ALIGN_CENTER,maxLblWidth); //draw Sp label
+    }else{
+      drawTextAlignedSized(rdat,drawXPos,drawYPos+((yOffsets*19.0f + 40.0f)*state->ds.uiUserScale),col,FONTSIZE_NORMAL,255,dat->strings[dat->locStringIDs[LOCSTR_UNKNOWN]],ALIGN_CENTER,maxLblWidth); //draw Sp label
+    }
+  }else if(state->chartView == CHARTVIEW_QALPHA){
+    if(dat->ndat.nuclData[nuclInd].qalpha.val != 0.0f){
+      getQValStr(tmpStr,dat->ndat.nuclData[nuclInd].qalpha,1);
+      SDL_strlcat(tmpStr," keV",32);
+      drawTextAlignedSized(rdat,drawXPos,drawYPos+((yOffsets*19.0f + 40.0f)*state->ds.uiUserScale),col,FONTSIZE_NORMAL,255,tmpStr,ALIGN_CENTER,maxLblWidth); //draw Qalpha label
+    }else{
+      drawTextAlignedSized(rdat,drawXPos,drawYPos+((yOffsets*19.0f + 40.0f)*state->ds.uiUserScale),col,FONTSIZE_NORMAL,255,dat->strings[dat->locStringIDs[LOCSTR_UNKNOWN]],ALIGN_CENTER,maxLblWidth); //draw Qalpha label
+    }
+  }else if(state->chartView == CHARTVIEW_QBETAMINUS){
+    if(dat->ndat.nuclData[nuclInd].qbeta.val != 0.0f){
+      getQValStr(tmpStr,dat->ndat.nuclData[nuclInd].qbeta,1);
+      SDL_strlcat(tmpStr," keV",32);
+      drawTextAlignedSized(rdat,drawXPos,drawYPos+((yOffsets*19.0f + 40.0f)*state->ds.uiUserScale),col,FONTSIZE_NORMAL,255,tmpStr,ALIGN_CENTER,maxLblWidth); //draw Qbeta label
+    }else{
+      drawTextAlignedSized(rdat,drawXPos,drawYPos+((yOffsets*19.0f + 40.0f)*state->ds.uiUserScale),col,FONTSIZE_NORMAL,255,dat->strings[dat->locStringIDs[LOCSTR_UNKNOWN]],ALIGN_CENTER,maxLblWidth); //draw Qbeta label
+    }
   }else if(state->chartView == CHARTVIEW_NUMLVLS){
     SDL_snprintf(tmpStr,32,"%u",dat->ndat.nuclData[nuclInd].numLevels);
     if(dat->ndat.nuclData[nuclInd].numLevels == 1){
@@ -1366,6 +1681,14 @@ void drawChartOfNuclides(const app_data *restrict dat, app_state *restrict state
                 boxCol = getParCol(getMostProbableParity(&dat->ndat,dat->ndat.nuclData[i].firstLevel + dat->ndat.nuclData[i].gsLevel));
               }else if(state->chartView == CHARTVIEW_BEA){
                 boxCol = getBEACol(getBEA(&dat->ndat,(uint16_t)i));
+              }else if(state->chartView == CHARTVIEW_SN){
+                boxCol = getSnpCol(getRawValFromDB(&dat->ndat.nuclData[i].sn),getNuclGSHalfLifeSeconds(&dat->ndat,(uint16_t)i));
+              }else if(state->chartView == CHARTVIEW_SP){
+                boxCol = getSnpCol(getRawValFromDB(&dat->ndat.nuclData[i].sp),getNuclGSHalfLifeSeconds(&dat->ndat,(uint16_t)i));
+              }else if(state->chartView == CHARTVIEW_QALPHA){
+                boxCol = getQaCol(getRawValFromDB(&dat->ndat.nuclData[i].qalpha),getNuclGSHalfLifeSeconds(&dat->ndat,(uint16_t)i));
+              }else if(state->chartView == CHARTVIEW_QBETAMINUS){
+                boxCol = getQbCol(getRawValFromDB(&dat->ndat.nuclData[i].qbeta),getNuclGSHalfLifeSeconds(&dat->ndat,(uint16_t)i));
               }else if(state->chartView == CHARTVIEW_NUMLVLS){
                 boxCol = getNumLvlsCol(dat->ndat.nuclData[i].numLevels,getNuclGSHalfLifeSeconds(&dat->ndat,(uint16_t)i));
               }else if(state->chartView == CHARTVIEW_UNKNOWN_ENERGY){
@@ -1523,6 +1846,14 @@ void drawChartOfNuclides(const app_data *restrict dat, app_state *restrict state
                     drawNuclBoxLabel(dat,state,rdat,rect.x,rect.y,rect.w,rect.h,(par < 0) ? whiteCol8Bit : blackCol8Bit,(uint16_t)i);
                   }else if(state->chartView == CHARTVIEW_BEA){
                     drawNuclBoxLabel(dat,state,rdat,rect.x,rect.y,rect.w,rect.h,(getBEA(&dat->ndat,(uint16_t)i) >= 8000.0) ? whiteCol8Bit : blackCol8Bit,(uint16_t)i);
+                  }else if(state->chartView == CHARTVIEW_SN){
+                    drawNuclBoxLabel(dat,state,rdat,rect.x,rect.y,rect.w,rect.h,(getRawValFromDB(&dat->ndat.nuclData[i].sn) >= 8000.0) ? whiteCol8Bit : blackCol8Bit,(uint16_t)i);
+                  }else if(state->chartView == CHARTVIEW_SP){
+                    drawNuclBoxLabel(dat,state,rdat,rect.x,rect.y,rect.w,rect.h,(getRawValFromDB(&dat->ndat.nuclData[i].sp) >= 8000.0) ? whiteCol8Bit : blackCol8Bit,(uint16_t)i);
+                  }else if(state->chartView == CHARTVIEW_QALPHA){
+                    drawNuclBoxLabel(dat,state,rdat,rect.x,rect.y,rect.w,rect.h,(getRawValFromDB(&dat->ndat.nuclData[i].qalpha) <= -10000.0) ? whiteCol8Bit : blackCol8Bit,(uint16_t)i);
+                  }else if(state->chartView == CHARTVIEW_QBETAMINUS){
+                    drawNuclBoxLabel(dat,state,rdat,rect.x,rect.y,rect.w,rect.h,(getRawValFromDB(&dat->ndat.nuclData[i].qbeta) <= -3000.0) ? whiteCol8Bit : blackCol8Bit,(uint16_t)i);
                   }else if(state->chartView == CHARTVIEW_NUMLVLS){
                     drawNuclBoxLabel(dat,state,rdat,rect.x,rect.y,rect.w,rect.h,(dat->ndat.nuclData[i].numLevels >= 200) ? whiteCol8Bit : blackCol8Bit,(uint16_t)i);
                   }else if(state->chartView == CHARTVIEW_UNKNOWN_ENERGY){
@@ -2738,6 +3069,22 @@ void drawContextMenu(const app_data *restrict dat, const app_state *restrict sta
             SDL_snprintf(tmpStr,32,"%s %s",dat->strings[dat->locStringIDs[LOCSTR_CONTEXT_COPY]],dat->strings[dat->locStringIDs[LOCSTR_CHARTVIEW_BEA]]);
             drawTextAlignedSized(rdat,drawRect.x,drawRect.y + (0.4f + (float)i)*CONTEXT_MENU_ITEM_SPACING*state->ds.uiUserScale,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_LEFT,(Uint16)(drawRect.w - (PANEL_EDGE_SIZE + 6*UI_PADDING_SIZE)*state->ds.uiUserScale));
             break;
+          case CHARTVIEW_SN:
+            SDL_snprintf(tmpStr,32,"%s %s",dat->strings[dat->locStringIDs[LOCSTR_CONTEXT_COPY]],dat->strings[dat->locStringIDs[LOCSTR_SN]]);
+            drawTextAlignedSized(rdat,drawRect.x,drawRect.y + (0.4f + (float)i)*CONTEXT_MENU_ITEM_SPACING*state->ds.uiUserScale,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_LEFT,(Uint16)(drawRect.w - (PANEL_EDGE_SIZE + 6*UI_PADDING_SIZE)*state->ds.uiUserScale));
+            break;
+          case CHARTVIEW_SP:
+            SDL_snprintf(tmpStr,32,"%s %s",dat->strings[dat->locStringIDs[LOCSTR_CONTEXT_COPY]],dat->strings[dat->locStringIDs[LOCSTR_SP]]);
+            drawTextAlignedSized(rdat,drawRect.x,drawRect.y + (0.4f + (float)i)*CONTEXT_MENU_ITEM_SPACING*state->ds.uiUserScale,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_LEFT,(Uint16)(drawRect.w - (PANEL_EDGE_SIZE + 6*UI_PADDING_SIZE)*state->ds.uiUserScale));
+            break;
+          case CHARTVIEW_QALPHA:
+            SDL_snprintf(tmpStr,32,"%s %s",dat->strings[dat->locStringIDs[LOCSTR_CONTEXT_COPY]],dat->strings[dat->locStringIDs[LOCSTR_QALPHA]]);
+            drawTextAlignedSized(rdat,drawRect.x,drawRect.y + (0.4f + (float)i)*CONTEXT_MENU_ITEM_SPACING*state->ds.uiUserScale,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_LEFT,(Uint16)(drawRect.w - (PANEL_EDGE_SIZE + 6*UI_PADDING_SIZE)*state->ds.uiUserScale));
+            break;
+          case CHARTVIEW_QBETAMINUS:
+            SDL_snprintf(tmpStr,32,"%s %s",dat->strings[dat->locStringIDs[LOCSTR_CONTEXT_COPY]],dat->strings[dat->locStringIDs[LOCSTR_QBETAMNUS]]);
+            drawTextAlignedSized(rdat,drawRect.x,drawRect.y + (0.4f + (float)i)*CONTEXT_MENU_ITEM_SPACING*state->ds.uiUserScale,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_LEFT,(Uint16)(drawRect.w - (PANEL_EDGE_SIZE + 6*UI_PADDING_SIZE)*state->ds.uiUserScale));
+            break;
           case CHARTVIEW_NUMLVLS:
             SDL_snprintf(tmpStr,32,"%s %s",dat->strings[dat->locStringIDs[LOCSTR_CONTEXT_COPY]],dat->strings[dat->locStringIDs[LOCSTR_CHARTVIEW_NUMLVLS]]);
             drawTextAlignedSized(rdat,drawRect.x,drawRect.y + (0.4f + (float)i)*CONTEXT_MENU_ITEM_SPACING*state->ds.uiUserScale,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_LEFT,(Uint16)(drawRect.w - (PANEL_EDGE_SIZE + 6*UI_PADDING_SIZE)*state->ds.uiUserScale));
@@ -2823,6 +3170,14 @@ void drawUI(const app_data *restrict dat, app_state *restrict state, resource_da
         drawIconAndTextButton(&dat->rules.themeRules,rdat,state->ds.uiElemPosX[UIELEM_CHARTVIEW_BUTTON],(int16_t)(state->ds.uiElemPosY[UIELEM_CHARTVIEW_BUTTON] + yOffset),state->ds.uiElemWidth[UIELEM_CHARTVIEW_BUTTON],getHighlightState(state,UIELEM_CHARTVIEW_BUTTON),255,UIICON_CHARTVIEW,dat->strings[dat->locStringIDs[LOCSTR_CHARTVIEW_PARITY]]);
       }else if(state->chartView == CHARTVIEW_BEA){
         drawIconAndTextButton(&dat->rules.themeRules,rdat,state->ds.uiElemPosX[UIELEM_CHARTVIEW_BUTTON],(int16_t)(state->ds.uiElemPosY[UIELEM_CHARTVIEW_BUTTON] + yOffset),state->ds.uiElemWidth[UIELEM_CHARTVIEW_BUTTON],getHighlightState(state,UIELEM_CHARTVIEW_BUTTON),255,UIICON_CHARTVIEW,dat->strings[dat->locStringIDs[LOCSTR_CHARTVIEW_BEA]]);
+      }else if(state->chartView == CHARTVIEW_SN){
+        drawIconAndTextButton(&dat->rules.themeRules,rdat,state->ds.uiElemPosX[UIELEM_CHARTVIEW_BUTTON],(int16_t)(state->ds.uiElemPosY[UIELEM_CHARTVIEW_BUTTON] + yOffset),state->ds.uiElemWidth[UIELEM_CHARTVIEW_BUTTON],getHighlightState(state,UIELEM_CHARTVIEW_BUTTON),255,UIICON_CHARTVIEW,dat->strings[dat->locStringIDs[LOCSTR_SN]]);
+      }else if(state->chartView == CHARTVIEW_SP){
+        drawIconAndTextButton(&dat->rules.themeRules,rdat,state->ds.uiElemPosX[UIELEM_CHARTVIEW_BUTTON],(int16_t)(state->ds.uiElemPosY[UIELEM_CHARTVIEW_BUTTON] + yOffset),state->ds.uiElemWidth[UIELEM_CHARTVIEW_BUTTON],getHighlightState(state,UIELEM_CHARTVIEW_BUTTON),255,UIICON_CHARTVIEW,dat->strings[dat->locStringIDs[LOCSTR_SP]]);
+      }else if(state->chartView == CHARTVIEW_QALPHA){
+        drawIconAndTextButton(&dat->rules.themeRules,rdat,state->ds.uiElemPosX[UIELEM_CHARTVIEW_BUTTON],(int16_t)(state->ds.uiElemPosY[UIELEM_CHARTVIEW_BUTTON] + yOffset),state->ds.uiElemWidth[UIELEM_CHARTVIEW_BUTTON],getHighlightState(state,UIELEM_CHARTVIEW_BUTTON),255,UIICON_CHARTVIEW,dat->strings[dat->locStringIDs[LOCSTR_QALPHA]]);
+      }else if(state->chartView == CHARTVIEW_QBETAMINUS){
+        drawIconAndTextButton(&dat->rules.themeRules,rdat,state->ds.uiElemPosX[UIELEM_CHARTVIEW_BUTTON],(int16_t)(state->ds.uiElemPosY[UIELEM_CHARTVIEW_BUTTON] + yOffset),state->ds.uiElemWidth[UIELEM_CHARTVIEW_BUTTON],getHighlightState(state,UIELEM_CHARTVIEW_BUTTON),255,UIICON_CHARTVIEW,dat->strings[dat->locStringIDs[LOCSTR_QBETAMNUS]]);
       }else if(state->chartView == CHARTVIEW_NUMLVLS){
         drawIconAndTextButton(&dat->rules.themeRules,rdat,state->ds.uiElemPosX[UIELEM_CHARTVIEW_BUTTON],(int16_t)(state->ds.uiElemPosY[UIELEM_CHARTVIEW_BUTTON] + yOffset),state->ds.uiElemWidth[UIELEM_CHARTVIEW_BUTTON],getHighlightState(state,UIELEM_CHARTVIEW_BUTTON),255,UIICON_CHARTVIEW,dat->strings[dat->locStringIDs[LOCSTR_CHARTVIEW_NUMLVLS]]);
       }else if(state->chartView == CHARTVIEW_UNKNOWN_ENERGY){

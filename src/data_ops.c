@@ -1849,12 +1849,17 @@ void getQValStr(char strOut[32], const valWithErr qVal, const uint8_t showErr){
 			if(qVal.err == 255){
 				//systematic
 				SDL_snprintf(strOut,32,"%.*f(sys.)",qPrecision,(double)(qVal.val));
+			}else if(qVal.err == 254){
+				//calculated
+				SDL_snprintf(strOut,32,"%.*f(calc.)",qPrecision,(double)(qVal.val));
 			}else{
 				SDL_snprintf(strOut,32,"%.*f(%u)",qPrecision,(double)(qVal.val),qVal.err);
 			}
 		}else{
 			if(qVal.err == 255){
 				SDL_snprintf(strOut,32,"%.*f(sys.)E%i",qPrecision,(double)(qVal.val),qVal.exponent);
+			}else if(qVal.err == 254){
+				SDL_snprintf(strOut,32,"%.*f(calc.)E%i",qPrecision,(double)(qVal.val),qVal.exponent);
 			}else{
 				SDL_snprintf(strOut,32,"%.*f(%u)E%i",qPrecision,(double)(qVal.val),qVal.err,qVal.exponent);
 			}
@@ -2960,6 +2965,10 @@ void changeUIState(const app_data *restrict dat, app_state *restrict state, cons
 				state->interactableElement |= ((uint64_t)(1) << UIELEM_CVM_SPIN_BUTTON);
 				state->interactableElement |= ((uint64_t)(1) << UIELEM_CVM_PARITY_BUTTON);
 				state->interactableElement |= ((uint64_t)(1) << UIELEM_CVM_BEA_BUTTON);
+				state->interactableElement |= ((uint64_t)(1) << UIELEM_CVM_SN_BUTTON);
+				state->interactableElement |= ((uint64_t)(1) << UIELEM_CVM_SP_BUTTON);
+				state->interactableElement |= ((uint64_t)(1) << UIELEM_CVM_QALPHA_BUTTON);
+				state->interactableElement |= ((uint64_t)(1) << UIELEM_CVM_QBETAMINUS_BUTTON);
 				state->interactableElement |= ((uint64_t)(1) << UIELEM_CVM_NUMLVLS);
 				state->interactableElement |= ((uint64_t)(1) << UIELEM_CVM_UNKNOWN_ENERGY_BUTTON);
 				state->interactableElement |= ((uint64_t)(1) << UIELEM_CHARTVIEW_MENU);
@@ -3563,6 +3572,38 @@ void contextMenuClickAction(app_data *restrict dat, app_state *restrict state, c
 					SDL_SetClipboardText(state->copiedTxt);
 					//SDL_Log("Copied text to clipboard: %s\n",SDL_GetClipboardText());
 					break;
+				case CHARTVIEW_SN:
+					; //suppress warning
+					char tmpSnStr[32];
+					getQValStr(tmpSnStr,dat->ndat.nuclData[state->cms.selectionInd].sn,1);
+					SDL_snprintf(state->copiedTxt,MAX_SELECTABLE_STR_LEN,"%s: %s %s",dat->strings[dat->locStringIDs[LOCSTR_SN]],tmpSnStr,getValueUnitShortStr(dat->ndat.nuclData[state->cms.selectionInd].sn.unit));
+					SDL_SetClipboardText(state->copiedTxt);
+					//SDL_Log("Copied text to clipboard: %s\n",SDL_GetClipboardText());
+					break;
+				case CHARTVIEW_SP:
+					; //suppress warning
+					char tmpSpStr[32];
+					getQValStr(tmpSpStr,dat->ndat.nuclData[state->cms.selectionInd].sp,1);
+					SDL_snprintf(state->copiedTxt,MAX_SELECTABLE_STR_LEN,"%s: %s %s",dat->strings[dat->locStringIDs[LOCSTR_SP]],tmpSpStr,getValueUnitShortStr(dat->ndat.nuclData[state->cms.selectionInd].sp.unit));
+					SDL_SetClipboardText(state->copiedTxt);
+					//SDL_Log("Copied text to clipboard: %s\n",SDL_GetClipboardText());
+					break;
+				case CHARTVIEW_QALPHA:
+					; //suppress warning
+					char tmpQaStr[32];
+					getQValStr(tmpQaStr,dat->ndat.nuclData[state->cms.selectionInd].qalpha,1);
+					SDL_snprintf(state->copiedTxt,MAX_SELECTABLE_STR_LEN,"%s: %s %s",dat->strings[dat->locStringIDs[LOCSTR_QALPHA]],tmpQaStr,getValueUnitShortStr(dat->ndat.nuclData[state->cms.selectionInd].qalpha.unit));
+					SDL_SetClipboardText(state->copiedTxt);
+					//SDL_Log("Copied text to clipboard: %s\n",SDL_GetClipboardText());
+					break;
+				case CHARTVIEW_QBETAMINUS:
+					; //suppress warning
+					char tmpQbStr[32];
+					getQValStr(tmpQbStr,dat->ndat.nuclData[state->cms.selectionInd].qbeta,1);
+					SDL_snprintf(state->copiedTxt,MAX_SELECTABLE_STR_LEN,"%s: %s %s",dat->strings[dat->locStringIDs[LOCSTR_QBETAMNUS]],tmpQbStr,getValueUnitShortStr(dat->ndat.nuclData[state->cms.selectionInd].qbeta.unit));
+					SDL_SetClipboardText(state->copiedTxt);
+					//SDL_Log("Copied text to clipboard: %s\n",SDL_GetClipboardText());
+					break;
 				case CHARTVIEW_NUMLVLS:
 					SDL_snprintf(state->copiedTxt,MAX_SELECTABLE_STR_LEN,"%s: %u",dat->strings[dat->locStringIDs[LOCSTR_CHARTVIEW_NUMLVLS]],dat->ndat.nuclData[state->cms.selectionInd].numLevels);
 					SDL_SetClipboardText(state->copiedTxt);
@@ -3673,7 +3714,12 @@ void uiElemClickAction(app_data *restrict dat, app_state *restrict state, resour
 			state->clickedUIElem = UIELEM_ENUM_LENGTH; //'unclick' the menu button
 		}
 	}
-	if((uiElemID != UIELEM_CHARTVIEW_BUTTON)&&(uiElemID != UIELEM_CHARTVIEW_MENU)&&(uiElemID != UIELEM_CVM_HALFLIFE_BUTTON)&&(uiElemID != UIELEM_CVM_DECAYMODE_BUTTON)&&(uiElemID != UIELEM_CVM_2PLUS_BUTTON)&&(uiElemID != UIELEM_CVM_R42_BUTTON)&&(uiElemID != UIELEM_CVM_BETA2_BUTTON)&&(uiElemID != UIELEM_CVM_SPIN_BUTTON)&&(uiElemID != UIELEM_CVM_PARITY_BUTTON)&&(uiElemID != UIELEM_CVM_BEA_BUTTON)&&(uiElemID != UIELEM_CVM_NUMLVLS)&&(uiElemID != UIELEM_CVM_UNKNOWN_ENERGY_BUTTON)){
+	if((uiElemID != UIELEM_CHARTVIEW_BUTTON)&&(uiElemID != UIELEM_CHARTVIEW_MENU)&&(uiElemID != UIELEM_CVM_HALFLIFE_BUTTON)&&
+	(uiElemID != UIELEM_CVM_DECAYMODE_BUTTON)&&(uiElemID != UIELEM_CVM_2PLUS_BUTTON)&&(uiElemID != UIELEM_CVM_R42_BUTTON)&&
+	(uiElemID != UIELEM_CVM_BETA2_BUTTON)&&(uiElemID != UIELEM_CVM_SPIN_BUTTON)&&(uiElemID != UIELEM_CVM_PARITY_BUTTON)&&
+	(uiElemID != UIELEM_CVM_BEA_BUTTON)&&(uiElemID != UIELEM_CVM_SN_BUTTON)&&(uiElemID != UIELEM_CVM_SP_BUTTON)&&
+	(uiElemID != UIELEM_CVM_QALPHA_BUTTON)&&(uiElemID != UIELEM_CVM_QBETAMINUS_BUTTON)&&(uiElemID != UIELEM_CVM_NUMLVLS)&&
+	(uiElemID != UIELEM_CVM_UNKNOWN_ENERGY_BUTTON)){
 		if((state->ds.shownElements & ((uint64_t)(1) << UIELEM_CHARTVIEW_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_CHARTVIEW_MENU_HIDE]==0.0f)){
 			startUIAnimation(dat,state,UIANIM_CHARTVIEW_MENU_HIDE); //menu will be closed after animation finishes
 			state->clickedUIElem = UIELEM_ENUM_LENGTH; //'unclick' the menu button
@@ -3917,6 +3963,30 @@ void uiElemClickAction(app_data *restrict dat, app_state *restrict state, resour
 			startUIAnimation(dat,state,UIANIM_CHARTVIEW_MENU_HIDE); //menu will be closed after animation finishes
 			state->clickedUIElem = UIELEM_ENUM_LENGTH; //'unclick' the menu button
 			state->chartView = CHARTVIEW_BEA;
+			changeUIState(dat,state,UISTATE_CHARTONLY); //prevents mouseover from still highlighting buttons while the menu closes
+			break;
+		case UIELEM_CVM_SN_BUTTON:
+			startUIAnimation(dat,state,UIANIM_CHARTVIEW_MENU_HIDE); //menu will be closed after animation finishes
+			state->clickedUIElem = UIELEM_ENUM_LENGTH; //'unclick' the menu button
+			state->chartView = CHARTVIEW_SN;
+			changeUIState(dat,state,UISTATE_CHARTONLY); //prevents mouseover from still highlighting buttons while the menu closes
+			break;
+		case UIELEM_CVM_SP_BUTTON:
+			startUIAnimation(dat,state,UIANIM_CHARTVIEW_MENU_HIDE); //menu will be closed after animation finishes
+			state->clickedUIElem = UIELEM_ENUM_LENGTH; //'unclick' the menu button
+			state->chartView = CHARTVIEW_SP;
+			changeUIState(dat,state,UISTATE_CHARTONLY); //prevents mouseover from still highlighting buttons while the menu closes
+			break;
+		case UIELEM_CVM_QALPHA_BUTTON:
+			startUIAnimation(dat,state,UIANIM_CHARTVIEW_MENU_HIDE); //menu will be closed after animation finishes
+			state->clickedUIElem = UIELEM_ENUM_LENGTH; //'unclick' the menu button
+			state->chartView = CHARTVIEW_QALPHA;
+			changeUIState(dat,state,UISTATE_CHARTONLY); //prevents mouseover from still highlighting buttons while the menu closes
+			break;
+		case UIELEM_CVM_QBETAMINUS_BUTTON:
+			startUIAnimation(dat,state,UIANIM_CHARTVIEW_MENU_HIDE); //menu will be closed after animation finishes
+			state->clickedUIElem = UIELEM_ENUM_LENGTH; //'unclick' the menu button
+			state->chartView = CHARTVIEW_QBETAMINUS;
 			changeUIState(dat,state,UISTATE_CHARTONLY); //prevents mouseover from still highlighting buttons while the menu closes
 			break;
 		case UIELEM_CVM_NUMLVLS:
