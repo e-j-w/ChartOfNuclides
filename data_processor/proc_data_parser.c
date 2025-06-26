@@ -387,20 +387,20 @@ void getENSDFNuclStrNZ(int16_t *N, int16_t *Z, const char *nuclStr){
 	*N = -1;
 
 	//check special cases
-	if((strcmp(nuclStr,"N")==0)||(strcmp(nuclStr,"n")==0)){
+	if((SDL_strcmp(nuclStr,"N")==0)||(SDL_strcmp(nuclStr,"n")==0)){
 		*Z=0;
 		*N=1;
 		return;
-	}else if(strcmp(nuclStr,"P")==0){
+	}else if(SDL_strcmp(nuclStr,"P")==0){
 		*Z=1;
 		*N=0;
-	}else if(strcmp(nuclStr,"D")==0){
+	}else if(SDL_strcmp(nuclStr,"D")==0){
 		*Z=1;
 		*N=1;
-	}else if(strcmp(nuclStr,"T")==0){
+	}else if(SDL_strcmp(nuclStr,"T")==0){
 		*Z=1;
 		*N=2;
-	}else if(strcmp(nuclStr,"A")==0){
+	}else if(SDL_strcmp(nuclStr,"A")==0){
 		*Z=2;
 		*N=2;
 	}
@@ -416,7 +416,7 @@ void getENSDFNuclStrNZ(int16_t *N, int16_t *Z, const char *nuclStr){
 	SDL_strlcpy(str,nuclStr,255); //copy the nucleus name
 	tok=SDL_strtok_r(str,"0123456789",&saveptr);
 	if(tok!=NULL){
-		if(strcmp(tok,"NN")==0){
+		if(SDL_strcmp(tok,"NN")==0){
 			*Z=0;
 			*N=A;
 		}else{
@@ -451,9 +451,9 @@ uint8_t parseRxn(reaction *rxn, const char *rxnstring, char *ensdfStrBuf, const 
 	SDL_snprintf(modRxnStr,MAX_RXN_STRLEN,"%s",rxnstring); //by default, just use the reaction string as provided by ENSDF
 
 	//modify string and reaction info as neccessary
-	if(strcmp(rxnstring,"COMMENTS")==0){
+	if(SDL_strcmp(rxnstring,"COMMENTS")==0){
 		return 255; //unsuccessful, but don't warn
-	}else if(strcmp(rxnstring,"REFERENCES")==0){
+	}else if(SDL_strcmp(rxnstring,"REFERENCES")==0){
 		return 255; //unsuccessful, but don't warn
 	}else if(SDL_strcmp(rxnstring,"COULOMB EXCITATION")==0){
 		SDL_snprintf(modRxnStr,MAX_RXN_STRLEN,"Coulomb Excitation");
@@ -826,12 +826,12 @@ void parseHalfLife(level * lev, const char * hlstring){
   //SDL_Log("%s\n",hlstring);
   //SDL_Log("hlVal = %s, hlUnitVal = %s, hlErrVal = %s\n",hlVal,hlUnitVal,hlErrVal);
 
-	if(strcmp(hlVal,"")==0){
+	if(SDL_strcmp(hlVal,"")==0){
     //SDL_Log("Couldn't parse half-life info from string: %s\n",hlstring);
     return;
-  }else if(strcmp(hlVal,"?")==0){
+  }else if(SDL_strcmp(hlVal,"?")==0){
 		return; //no measured value
-	}else if(strcmp(hlVal,"STABLE")==0){
+	}else if(SDL_strcmp(hlVal,"STABLE")==0){
 		lev->halfLife.val = 1.0E20f;
 		lev->halfLife.unit = VALUE_UNIT_STABLE;
 	}else{
@@ -872,33 +872,33 @@ void parseHalfLife(level * lev, const char * hlstring){
 
     if(lev->halfLife.val<=0.0f){
       lev->halfLife.unit = VALUE_UNIT_STABLE;
-    }else if(strcmp(hlUnitVal,"Y")==0){
+    }else if(SDL_strcmp(hlUnitVal,"Y")==0){
       lev->halfLife.unit = VALUE_UNIT_YEARS;
-    }else if(strcmp(hlUnitVal,"D")==0){
+    }else if(SDL_strcmp(hlUnitVal,"D")==0){
       lev->halfLife.unit = VALUE_UNIT_DAYS;
-    }else if(strcmp(hlUnitVal,"H")==0){
+    }else if(SDL_strcmp(hlUnitVal,"H")==0){
       lev->halfLife.unit = VALUE_UNIT_HOURS;
-    }else if(strcmp(hlUnitVal,"M")==0){
+    }else if(SDL_strcmp(hlUnitVal,"M")==0){
       lev->halfLife.unit = VALUE_UNIT_MINUTES;
-    }else if(strcmp(hlUnitVal,"S")==0){
+    }else if(SDL_strcmp(hlUnitVal,"S")==0){
       lev->halfLife.unit = VALUE_UNIT_SECONDS;
-    }else if(strcmp(hlUnitVal,"MS")==0){
+    }else if(SDL_strcmp(hlUnitVal,"MS")==0){
       lev->halfLife.unit = VALUE_UNIT_MILLISECONDS;
-    }else if(strcmp(hlUnitVal,"US")==0){
+    }else if(SDL_strcmp(hlUnitVal,"US")==0){
       lev->halfLife.unit = VALUE_UNIT_MICROSECONDS;
-    }else if(strcmp(hlUnitVal,"NS")==0){
+    }else if(SDL_strcmp(hlUnitVal,"NS")==0){
       lev->halfLife.unit = VALUE_UNIT_NANOSECONDS;
-    }else if(strcmp(hlUnitVal,"PS")==0){
+    }else if(SDL_strcmp(hlUnitVal,"PS")==0){
       lev->halfLife.unit = VALUE_UNIT_PICOSECONDS;
-    }else if(strcmp(hlUnitVal,"FS")==0){
+    }else if(SDL_strcmp(hlUnitVal,"FS")==0){
       lev->halfLife.unit = VALUE_UNIT_FEMTOSECONDS;
-    }else if(strcmp(hlUnitVal,"AS")==0){
+    }else if(SDL_strcmp(hlUnitVal,"AS")==0){
       lev->halfLife.unit = VALUE_UNIT_ATTOSECONDS;
-    }else if(strcmp(hlUnitVal,"EV")==0){
+    }else if(SDL_strcmp(hlUnitVal,"EV")==0){
       lev->halfLife.unit = VALUE_UNIT_EV;
-    }else if(strcmp(hlUnitVal,"KEV")==0){
+    }else if(SDL_strcmp(hlUnitVal,"KEV")==0){
       lev->halfLife.unit = VALUE_UNIT_KEV;
-    }else if(strcmp(hlUnitVal,"MEV")==0){
+    }else if(SDL_strcmp(hlUnitVal,"MEV")==0){
       lev->halfLife.unit = VALUE_UNIT_MEV;
     }else{
 			//assume keV if no unit given (this occurs once in the Nov 2024 ENSDF data)
@@ -924,19 +924,19 @@ void parseHalfLife(level * lev, const char * hlstring){
 			//check for special value type
 			tok = SDL_strtok_r(hlErrVal, " ",&saveptr);
 			if(tok!=NULL){
-				if(strcmp(tok,"GT")==0){
+				if(SDL_strcmp(tok,"GT")==0){
 					lev->halfLife.format |= (uint16_t)(VALUETYPE_GREATERTHAN << 5);
-				}else if(strcmp(tok,"GT")==0){
+				}else if(SDL_strcmp(tok,"GT")==0){
 					lev->halfLife.format |= (uint16_t)(VALUETYPE_GREATERTHAN << 5);
-				}else if(strcmp(tok,"GE")==0){
+				}else if(SDL_strcmp(tok,"GE")==0){
 					lev->halfLife.format |= (uint16_t)(VALUETYPE_GREATEROREQUALTHAN << 5);
-				}else if(strcmp(tok,"LT")==0){
+				}else if(SDL_strcmp(tok,"LT")==0){
 					lev->halfLife.format |= (uint16_t)(VALUETYPE_LESSTHAN << 5);
-				}else if(strcmp(tok,"LE")==0){
+				}else if(SDL_strcmp(tok,"LE")==0){
 					lev->halfLife.format |= (uint16_t)(VALUETYPE_LESSOREQUALTHAN << 5);
-				}else if(strcmp(tok,"AP")==0){
+				}else if(SDL_strcmp(tok,"AP")==0){
 					lev->halfLife.format |= (uint16_t)(VALUETYPE_APPROX << 5);
-				}else if(strcmp(tok,"?")==0){
+				}else if(SDL_strcmp(tok,"?")==0){
 					lev->halfLife.format |= (uint16_t)(VALUETYPE_UNKNOWN << 5);
 				}
 			}
@@ -974,7 +974,7 @@ void parseSpinPar(level * lev, sp_var_data * varDat, char * spstring){
 	}
 	/*SDL_strlcpy(str,spstring,256);
 	tok = strtok (str, ".");
-	if((tok == NULL)||(strcmp(tok,spstring)!=0)){
+	if((tok == NULL)||(SDL_strcmp(tok,spstring)!=0)){
 		//SDL_Log("%s\n",tok);
 		//SDL_Log("Not a valid spin-parity value.\n");
 		//getc(stdin);
@@ -1010,13 +1010,13 @@ void parseSpinPar(level * lev, sp_var_data * varDat, char * spstring){
 
 	if(numTok<=0){
 		return;
-	}else if((strcmp(val[0],"+")==0)&&(numTok==1)){
+	}else if((SDL_strcmp(val[0],"+")==0)&&(numTok==1)){
 		lev->spval[lev->numSpinParVals].parVal = 1;
 		lev->spval[lev->numSpinParVals].spinVal = 255;
 		lev->spval[lev->numSpinParVals].format |= ((TENTATIVESP_NOSPIN & 15U) << 10U);
 		lev->numSpinParVals=1;
 		return;
-	}else if((strcmp(val[0],"-")==0)&&(numTok==1)){
+	}else if((SDL_strcmp(val[0],"-")==0)&&(numTok==1)){
 		lev->spval[lev->numSpinParVals].parVal = -1;
 		lev->spval[lev->numSpinParVals].spinVal = 255;
 		lev->spval[lev->numSpinParVals].format |= ((TENTATIVESP_NOSPIN & 15U) << 10U);
@@ -1033,26 +1033,26 @@ void parseSpinPar(level * lev, sp_var_data * varDat, char * spstring){
 				uint8_t spVarNum = 255; //temp var for spin variable assignment
 
 				//special cases
-				if(strcmp(val[i],"TO")==0){
+				if(SDL_strcmp(val[i],"TO")==0){
 					//specifies a range between the prior and next spin values
 					//eg. '3/2 TO 7/2'
 					lev->spval[lev->numSpinParVals].format |= ((TENTATIVESP_RANGE & 15U) << 10U);
 					lev->spval[lev->numSpinParVals].spinVal = 255;
 					lev->numSpinParVals++;
 					continue;
-				}else if(strcmp(val[i],"&")==0){
+				}else if(SDL_strcmp(val[i],"&")==0){
 					//equivalent to a comma 
 					continue;
-				}else if(strcmp(val[i],"AND")==0){
+				}else if(SDL_strcmp(val[i],"AND")==0){
 					//equivalent to a comma 
 					continue;
-				}else if((i<(numTok-1))&&(strcmp(val[i],"HIGH")==0)&&(strcmp(val[i+1],"J")==0)){
+				}else if((i<(numTok-1))&&(SDL_strcmp(val[i],"HIGH")==0)&&(SDL_strcmp(val[i+1],"J")==0)){
 					lev->spval[lev->numSpinParVals].format |= ((TENTATIVESP_HIGHJ & 15U) << 10U);
 					lev->spval[lev->numSpinParVals].spinVal = 255;
 					lev->numSpinParVals++;
 					i++;
 					continue;
-				}else if((i<(numTok-1))&&(strcmp(val[i],"LOW")==0)&&(strcmp(val[i+1],"J")==0)){
+				}else if((i<(numTok-1))&&(SDL_strcmp(val[i],"LOW")==0)&&(SDL_strcmp(val[i+1],"J")==0)){
 					lev->spval[lev->numSpinParVals].format |= ((TENTATIVESP_LOWJ & 15U) << 10U);
 					lev->spval[lev->numSpinParVals].spinVal = 255;
 					lev->numSpinParVals++;
@@ -1101,7 +1101,7 @@ void parseSpinPar(level * lev, sp_var_data * varDat, char * spstring){
 							//check variable name
 							for(int16_t j=0;j<(varDat->numSpVars);j++){
 								//SDL_Log("%i %s %s\n",j,tmpstr2,varDat->spVars[j]);
-								if(strcmp(tmpstr2,varDat->spVars[j])==0){
+								if(SDL_strcmp(tmpstr2,varDat->spVars[j])==0){
 									spVarNum = (uint8_t)((uint8_t)(j) & 31U);
 									lev->spval[lev->numSpinParVals].format |= (VALUETYPE_NUMBER << 1U);
 									lev->spval[lev->numSpinParVals].format |= (uint16_t)(spVarNum << 5U); //set variable index
@@ -1131,23 +1131,23 @@ void parseSpinPar(level * lev, sp_var_data * varDat, char * spstring){
 							for(int j=2;j<=((int)SDL_strlen(tmpstr2));j++){
 								memcpy(varValType, &tmpstr2[j-2], 2);
 								tmpstr2[2] = '\0';
-								if(strcmp(varValType,"GT")==0){
+								if(SDL_strcmp(varValType,"GT")==0){
 									lev->spval[lev->numSpinParVals].format |= (VALUETYPE_GREATERTHAN << 1U);
 									varValTypePos = (uint8_t)(j-2);
 									break;
-								}else if(strcmp(varValType,"GE")==0){
+								}else if(SDL_strcmp(varValType,"GE")==0){
 									lev->spval[lev->numSpinParVals].format |= (VALUETYPE_GREATEROREQUALTHAN << 1U);
 									varValTypePos = (uint8_t)(j-2);
 									break;
-								}else if(strcmp(varValType,"LT")==0){
+								}else if(SDL_strcmp(varValType,"LT")==0){
 									lev->spval[lev->numSpinParVals].format |= (VALUETYPE_LESSTHAN << 1U);
 									varValTypePos = (uint8_t)(j-2);
 									break;
-								}else if(strcmp(varValType,"LE")==0){
+								}else if(SDL_strcmp(varValType,"LE")==0){
 									lev->spval[lev->numSpinParVals].format |= (VALUETYPE_LESSOREQUALTHAN << 1U);
 									varValTypePos = (uint8_t)(j-2);
 									break;
-								}else if(strcmp(varValType,"AP")==0){
+								}else if(SDL_strcmp(varValType,"AP")==0){
 									lev->spval[lev->numSpinParVals].format |= (VALUETYPE_APPROX << 1U);
 									varValTypePos = (uint8_t)(j-2);
 									break;
@@ -1159,7 +1159,7 @@ void parseSpinPar(level * lev, sp_var_data * varDat, char * spstring){
 								//SDL_Log("variable name (no offset, default value type): %s\n",tmpstr2);
 								lev->spval[lev->numSpinParVals].format |= (VALUETYPE_NUMBER << 1U);
 								for(int j=0;j<(varDat->numSpVars);j++){
-									if(strcmp(tmpstr2,varDat->spVars[j])==0){
+									if(SDL_strcmp(tmpstr2,varDat->spVars[j])==0){
 										spVarNum = (uint8_t)j;
 										lev->spval[lev->numSpinParVals].format |= (uint16_t)(spVarNum << 5U); //set variable index
 										//SDL_Log("variable index %u\n",spVarNum);
@@ -1186,7 +1186,7 @@ void parseSpinPar(level * lev, sp_var_data * varDat, char * spstring){
 									//SDL_Log("variable name (no offset, special value type): %s\n",varName);
 									//check variable name
 									for(int j=0;j<(varDat->numSpVars);j++){
-										if(strcmp(varName,varDat->spVars[j])==0){
+										if(SDL_strcmp(varName,varDat->spVars[j])==0){
 											spVarNum = (uint8_t)j;
 											lev->spval[lev->numSpinParVals].format |= (uint16_t)(spVarNum << 5U); //set variable index
 										}
@@ -1225,44 +1225,44 @@ void parseSpinPar(level * lev, sp_var_data * varDat, char * spstring){
 				}
 
 				//check for cases where the spin-parity value is separated by a space
-				if(strcmp(val[i],"(LE")==0){
+				if(SDL_strcmp(val[i],"(LE")==0){
 					lev->spval[lev->numSpinParVals].format |= (VALUETYPE_LESSOREQUALTHAN << 1U);
 					lsBrak = 1;
 					lsBrakStart = (uint16_t)lev->numSpinParVals;
 					continue;
-				}else if(strcmp(val[i],"LE")==0){
+				}else if(SDL_strcmp(val[i],"LE")==0){
 					lev->spval[lev->numSpinParVals].format |= (VALUETYPE_LESSOREQUALTHAN << 1U);
 					continue;
-				}else if(strcmp(val[i],"(LT")==0){
+				}else if(SDL_strcmp(val[i],"(LT")==0){
 					lev->spval[lev->numSpinParVals].format |= (VALUETYPE_LESSTHAN << 1U);
 					lsBrak = 1;
 					lsBrakStart = (uint16_t)lev->numSpinParVals;
 					continue;
-				}else if(strcmp(val[i],"LT")==0){
+				}else if(SDL_strcmp(val[i],"LT")==0){
 					lev->spval[lev->numSpinParVals].format |= (VALUETYPE_LESSTHAN << 1U);
 					continue;
-				}else if(strcmp(val[i],"(GE")==0){
+				}else if(SDL_strcmp(val[i],"(GE")==0){
 					lev->spval[lev->numSpinParVals].format |= (VALUETYPE_GREATEROREQUALTHAN << 1U);
 					lsBrak = 1;
 					lsBrakStart = (uint16_t)lev->numSpinParVals;
 					continue;
-				}else if(strcmp(val[i],"GE")==0){
+				}else if(SDL_strcmp(val[i],"GE")==0){
 					lev->spval[lev->numSpinParVals].format |= (VALUETYPE_GREATEROREQUALTHAN << 1U);
 					continue;
-				}else if(strcmp(val[i],"(GT")==0){
+				}else if(SDL_strcmp(val[i],"(GT")==0){
 					lev->spval[lev->numSpinParVals].format |= (VALUETYPE_GREATERTHAN << 1U);
 					lsBrak = 1;
 					lsBrakStart = (uint16_t)lev->numSpinParVals;
 					continue;
-				}else if(strcmp(val[i],"GT")==0){
+				}else if(SDL_strcmp(val[i],"GT")==0){
 					lev->spval[lev->numSpinParVals].format |= (VALUETYPE_GREATERTHAN << 1U);
 					continue;
-				}else if(strcmp(val[i],"(AP")==0){
+				}else if(SDL_strcmp(val[i],"(AP")==0){
 					lev->spval[lev->numSpinParVals].format |= (VALUETYPE_APPROX << 1U);
 					lsBrak = 1;
 					lsBrakStart = (uint16_t)lev->numSpinParVals;
 					continue;
-				}else if(strcmp(val[i],"AP")==0){
+				}else if(SDL_strcmp(val[i],"AP")==0){
 					lev->spval[lev->numSpinParVals].format |= (VALUETYPE_APPROX << 1U);
 					continue;
 				}
@@ -1278,7 +1278,7 @@ void parseSpinPar(level * lev, sp_var_data * varDat, char * spstring){
 				SDL_strlcpy(tmpstr,val[i],256);
 				tok=SDL_strtok_r(tmpstr,"(",&saveptr);
 				if(tok!=NULL){
-					if(strcmp(tok,val[i])!=0){
+					if(SDL_strcmp(tok,val[i])!=0){
 						//bracket exists on left side
 						lsBrak = 1;
 						lsBrakStart = (uint16_t)lev->numSpinParVals;
@@ -1287,7 +1287,7 @@ void parseSpinPar(level * lev, sp_var_data * varDat, char * spstring){
 				SDL_strlcpy(tmpstr,val[i],256);
 				tok=SDL_strtok_r(tmpstr,")",&saveptr);
 				if(tok!=NULL){
-					if(strcmp(tok,val[i])!=0){
+					if(SDL_strcmp(tok,val[i])!=0){
 						//bracket exists on right side
 						rsBrak = 1;
 					}
@@ -1314,7 +1314,7 @@ void parseSpinPar(level * lev, sp_var_data * varDat, char * spstring){
 				SDL_strlcpy(tmpstr,val[i],256);
 				tok=SDL_strtok_r(tmpstr,"[",&saveptr);
 				if(tok!=NULL){
-					if(strcmp(tok,val[i])!=0){
+					if(SDL_strcmp(tok,val[i])!=0){
 						//bracket exists on left side
 						lsSqBrak = 1;
 						lsSqBrakStart = (uint16_t)lev->numSpinParVals;
@@ -1323,7 +1323,7 @@ void parseSpinPar(level * lev, sp_var_data * varDat, char * spstring){
 				SDL_strlcpy(tmpstr,val[i],256);
 				tok=SDL_strtok_r(tmpstr,"]",&saveptr);
 				if(tok!=NULL){
-					if(strcmp(tok,val[i])!=0){
+					if(SDL_strcmp(tok,val[i])!=0){
 						//bracket exists on right side
 						rsSqBrak = 1;
 					}
@@ -1350,16 +1350,16 @@ void parseSpinPar(level * lev, sp_var_data * varDat, char * spstring){
 				SDL_strlcpy(tmpstr,val[i],256);
 				tok=SDL_strtok_r(tmpstr,"+-",&saveptr);
 				if(tok!=NULL){
-					if(strcmp(tok,val[i])!=0){
+					if(SDL_strcmp(tok,val[i])!=0){
 						//SDL_Log("setting parity marker, tok: %s, val: %s\n",tok,val[i]);
 						//contains parity info
 						SDL_strlcpy(tmpstr,val[i],256);
 						tok=SDL_strtok_r(tmpstr,"/0123456789GELTAP, ",&saveptr);
 						if(tok!=NULL){
-							if(strcmp(tok,"(+)")==0){
+							if(SDL_strcmp(tok,"(+)")==0){
 								lev->spval[lev->numSpinParVals].parVal = 1;
 								lev->spval[lev->numSpinParVals].format |= ((TENTATIVESP_PARITYONLY & 15U) << 10U); //only parity is tentative
-							}else if(strcmp(tok,"(-)")==0){
+							}else if(SDL_strcmp(tok,"(-)")==0){
 								lev->spval[lev->numSpinParVals].parVal = -1;
 								lev->spval[lev->numSpinParVals].format |= ((TENTATIVESP_PARITYONLY & 15U) << 10U); //only parity is tentative
 							}else{
@@ -1367,11 +1367,11 @@ void parseSpinPar(level * lev, sp_var_data * varDat, char * spstring){
 								tok=SDL_strtok_r(tmpstr,"/([0123456789GELTAP, ",&saveptr);
 								if(tok!=NULL){
 									//SDL_Log("tok: %s\n",tok);
-									if((strcmp(tok,"+")==0)||(strcmp(tok,"+)")==0)||(strcmp(tok,"+]")==0)){
+									if((SDL_strcmp(tok,"+")==0)||(SDL_strcmp(tok,"+)")==0)||(SDL_strcmp(tok,"+]")==0)){
 										lev->spval[lev->numSpinParVals].parVal = 1;
-									}else if((strcmp(tok,"-")==0)||(strcmp(tok,"-)")==0)||(strcmp(tok,"-]")==0)){
+									}else if((SDL_strcmp(tok,"-")==0)||(SDL_strcmp(tok,"-)")==0)||(SDL_strcmp(tok,"-]")==0)){
 										lev->spval[lev->numSpinParVals].parVal = -1;
-									}else if(strcmp(tok,")-")==0){
+									}else if(SDL_strcmp(tok,")-")==0){
 										//all spin values negative parity
 										for(int j=lsBrakStart;j<lev->numSpinParVals;j++){
 											lev->spval[j].parVal = -1;
@@ -1383,7 +1383,7 @@ void parseSpinPar(level * lev, sp_var_data * varDat, char * spstring){
 										}
 										lev->spval[lev->numSpinParVals].parVal = -1;
 										tentative = TENTATIVESP_SPINONLY; //only spin is tentative
-									}else if(strcmp(tok,")+")==0){
+									}else if(SDL_strcmp(tok,")+")==0){
 										//all spin values positive parity
 										//SDL_Log("Setting all spin values to +ve parity.\n");
 										for(int j=lsBrakStart;j<lev->numSpinParVals;j++){
@@ -1396,7 +1396,7 @@ void parseSpinPar(level * lev, sp_var_data * varDat, char * spstring){
 										}
 										lev->spval[lev->numSpinParVals].parVal = 1;
 										tentative = TENTATIVESP_SPINONLY; //only spin is tentative
-									}else if(strcmp(tok,"]-")==0){
+									}else if(SDL_strcmp(tok,"]-")==0){
 										//all spin values negative parity
 										for(int j=lsSqBrakStart;j<lev->numSpinParVals;j++){
 											lev->spval[j].parVal = -1;
@@ -1408,7 +1408,7 @@ void parseSpinPar(level * lev, sp_var_data * varDat, char * spstring){
 										}
 										lev->spval[lev->numSpinParVals].parVal = -1;
 										tentative = TENTATIVESP_ASSUMEDSPINONLY; //only spin is tentative
-									}else if(strcmp(tok,"]+")==0){
+									}else if(SDL_strcmp(tok,"]+")==0){
 										//all spin values positive parity
 										//SDL_Log("Setting all spin values to +ve parity.\n");
 										for(int j=lsSqBrakStart;j<lev->numSpinParVals;j++){
@@ -1436,7 +1436,7 @@ void parseSpinPar(level * lev, sp_var_data * varDat, char * spstring){
 				if(tok!=NULL){
 					SDL_strlcpy(tmpstr2,tok,256);
 					tok=SDL_strtok_r(tok,"/",&saveptr);
-					if(strcmp(tok,tmpstr2)!=0){
+					if(SDL_strcmp(tok,tmpstr2)!=0){
 						//SDL_Log("Detected half-integer spin.\n");
 						if(atoi(tok) >= 255){
 							SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,"high spin value: %i/2\n",atoi(tok));
@@ -1480,85 +1480,85 @@ void getNuclNZ(nucl *nuc, const char *nucName){
 }
 
 uint8_t getDcyModeFromENSDFSubstr(const char *substr){
-	if(strcmp(substr,"%IT")==0){
+	if(SDL_strcmp(substr,"%IT")==0){
 		return DECAYMODE_IT;
-	}else if(strcmp(substr,"%B-")==0){
+	}else if(SDL_strcmp(substr,"%B-")==0){
 		return DECAYMODE_BETAMINUS;
-	}else if(strcmp(substr,"%B+")==0){
+	}else if(SDL_strcmp(substr,"%B+")==0){
 		return DECAYMODE_BETAPLUS;
-	}else if(strcmp(substr,"%EC")==0){
+	}else if(SDL_strcmp(substr,"%EC")==0){
 		return DECAYMODE_EC;
-	}else if(strcmp(substr,"%EC+%B+")==0){
+	}else if(SDL_strcmp(substr,"%EC+%B+")==0){
 		return DECAYMODE_ECANDBETAPLUS;
-	}else if(strcmp(substr,"%B-N")==0){
+	}else if(SDL_strcmp(substr,"%B-N")==0){
 		return DECAYMODE_BETAMINUS_NEUTRON;
-	}else if(strcmp(substr,"%B-2N")==0){
+	}else if(SDL_strcmp(substr,"%B-2N")==0){
 		return DECAYMODE_BETAMINUS_TWONEUTRON;
-	}else if(strcmp(substr,"%B-P")==0){
+	}else if(SDL_strcmp(substr,"%B-P")==0){
 		return DECAYMODE_BETAMINUS_PROTON;
-	}else if(strcmp(substr,"%B+P")==0){
+	}else if(SDL_strcmp(substr,"%B+P")==0){
 		return DECAYMODE_BETAPLUS_PROTON;
-	}else if(strcmp(substr,"%B+2P")==0){
+	}else if(SDL_strcmp(substr,"%B+2P")==0){
 		return DECAYMODE_BETAPLUS_TWOPROTON;
-	}else if(strcmp(substr,"%B+3P")==0){
+	}else if(SDL_strcmp(substr,"%B+3P")==0){
 		return DECAYMODE_BETAPLUS_THREEPROTON;
-	}else if(strcmp(substr,"%B+A")==0){
+	}else if(SDL_strcmp(substr,"%B+A")==0){
 		return DECAYMODE_BETAPLUS_ALPHA;
-	}else if(strcmp(substr,"%ECP")==0){
+	}else if(SDL_strcmp(substr,"%ECP")==0){
 		return DECAYMODE_EC_PROTON;
-	}else if(strcmp(substr,"%EC2P")==0){
+	}else if(SDL_strcmp(substr,"%EC2P")==0){
 		return DECAYMODE_EC_TWOPROTON;
-	}else if(strcmp(substr,"%EC3P")==0){
+	}else if(SDL_strcmp(substr,"%EC3P")==0){
 		return DECAYMODE_EC_THREEPROTON;
-	}else if(strcmp(substr,"%ECA")==0){
+	}else if(SDL_strcmp(substr,"%ECA")==0){
 		return DECAYMODE_EC_ALPHA;
-	}else if(strcmp(substr,"%P")==0){
+	}else if(SDL_strcmp(substr,"%P")==0){
 		return DECAYMODE_PROTON;
-	}else if(strcmp(substr,"%2P")==0){
+	}else if(SDL_strcmp(substr,"%2P")==0){
 		return DECAYMODE_TWOPROTON;
-	}else if(strcmp(substr,"%N")==0){
+	}else if(SDL_strcmp(substr,"%N")==0){
 		return DECAYMODE_NEUTRON;
-	}else if(strcmp(substr,"%2N")==0){
+	}else if(SDL_strcmp(substr,"%2N")==0){
 		return DECAYMODE_TWONEUTRON;
-	}else if(strcmp(substr,"%D")==0){
+	}else if(SDL_strcmp(substr,"%D")==0){
 		return DECAYMODE_DEUTERON;
-	}else if(strcmp(substr,"%3HE")==0){
+	}else if(SDL_strcmp(substr,"%3HE")==0){
 		return DECAYMODE_3HE;
-	}else if(strcmp(substr,"%A")==0){
+	}else if(SDL_strcmp(substr,"%A")==0){
 		return DECAYMODE_ALPHA;
-	}else if(strcmp(substr,"%B-A")==0){
+	}else if(SDL_strcmp(substr,"%B-A")==0){
 		return DECAYMODE_BETAMINUS_ALPHA;
-	}else if(strcmp(substr,"%SF")==0){
+	}else if(SDL_strcmp(substr,"%SF")==0){
 		return DECAYMODE_SPONTANEOUSFISSION;
-	}else if(strcmp(substr,"%B-SF")==0){
+	}else if(SDL_strcmp(substr,"%B-SF")==0){
 		return DECAYMODE_BETAMINUS_SPONTANEOUSFISSION;
-	}else if(strcmp(substr,"%2B-")==0){
+	}else if(SDL_strcmp(substr,"%2B-")==0){
 		return DECAYMODE_2BETAMINUS;
-	}else if(strcmp(substr,"%2B+")==0){
+	}else if(SDL_strcmp(substr,"%2B+")==0){
 		return DECAYMODE_2BETAPLUS;
-	}else if(strcmp(substr,"%2EC")==0){
+	}else if(SDL_strcmp(substr,"%2EC")==0){
 		return DECAYMODE_2EC;
-	}else if(strcmp(substr,"%14C")==0){
+	}else if(SDL_strcmp(substr,"%14C")==0){
 		return DECAYMODE_14C;
-	}else if(strcmp(substr,"%{+20}Ne")==0){
+	}else if(SDL_strcmp(substr,"%{+20}Ne")==0){
 		return DECAYMODE_20NE;
-	}else if(strcmp(substr,"%{+25}Ne")==0){
+	}else if(SDL_strcmp(substr,"%{+25}Ne")==0){
 		return DECAYMODE_25NE;
-	}else if(strcmp(substr,"%{+28}Mg")==0){
+	}else if(SDL_strcmp(substr,"%{+28}Mg")==0){
 		return DECAYMODE_28MG;
-	}else if(strcmp(substr,"%34SI")==0){
+	}else if(SDL_strcmp(substr,"%34SI")==0){
 		return DECAYMODE_34SI;
-	}else if(strcmp(substr,"%|b{+-}")==0){
+	}else if(SDL_strcmp(substr,"%|b{+-}")==0){
 		return DECAYMODE_BETAMINUS;
-	}else if(strcmp(substr,"%|b{++}")==0){
+	}else if(SDL_strcmp(substr,"%|b{++}")==0){
 		return DECAYMODE_BETAPLUS;
-	}else if(strcmp(substr,"%|b{++}")==0){
+	}else if(SDL_strcmp(substr,"%|b{++}")==0){
 		return DECAYMODE_BETAPLUS;
-	}else if(strcmp(substr,"%|e+%|b{++}")==0){
+	}else if(SDL_strcmp(substr,"%|e+%|b{++}")==0){
 		return DECAYMODE_ECANDBETAPLUS;
-	}else if(strcmp(substr,"%|e")==0){
+	}else if(SDL_strcmp(substr,"%|e")==0){
 		return DECAYMODE_EC;
-	}else if(strcmp(substr,"%|a")==0){
+	}else if(SDL_strcmp(substr,"%|a")==0){
 		return DECAYMODE_ALPHA;
 	}else{
 		return DECAYMODE_ENUM_LENGTH;
@@ -1615,22 +1615,22 @@ uint8_t parseDcyModeSubstr(ndata *nd, const uint16_t dcyModeInd, const char *sub
 			tok2 = SDL_strtok_r(valBuff," ",&saveptr);
 			if(tok2 != NULL){
 				//SDL_Log("tok2: %s\n",tok2);
-				if(strcmp(tok2,"GT")==0){
+				if(SDL_strcmp(tok2,"GT")==0){
 					nd->dcyMode[dcyModeInd].prob.unit = VALUETYPE_GREATERTHAN;
 					tok2 = SDL_strtok_r(NULL," ",&saveptr);
-				}else if(strcmp(tok2,"GE")==0){
+				}else if(SDL_strcmp(tok2,"GE")==0){
 					nd->dcyMode[dcyModeInd].prob.unit = VALUETYPE_GREATEROREQUALTHAN;
 					tok2 = SDL_strtok_r(NULL," ",&saveptr);
-				}else if(strcmp(tok2,"LT")==0){
+				}else if(SDL_strcmp(tok2,"LT")==0){
 					nd->dcyMode[dcyModeInd].prob.unit = VALUETYPE_LESSTHAN;
 					tok2 = SDL_strtok_r(NULL," ",&saveptr);
-				}else if(strcmp(tok2,"LE")==0){
+				}else if(SDL_strcmp(tok2,"LE")==0){
 					nd->dcyMode[dcyModeInd].prob.unit = VALUETYPE_LESSOREQUALTHAN;
 					tok2 = SDL_strtok_r(NULL," ",&saveptr);
-				}else if(strcmp(tok2,"AP")==0){
+				}else if(SDL_strcmp(tok2,"AP")==0){
 					nd->dcyMode[dcyModeInd].prob.unit = VALUETYPE_APPROX;
 					tok2 = SDL_strtok_r(NULL," ",&saveptr);
-				}else if(strcmp(tok2,"?")==0){
+				}else if(SDL_strcmp(tok2,"?")==0){
 					nd->dcyMode[dcyModeInd].prob.unit = VALUETYPE_UNKNOWN;
 					tok2 = SDL_strtok_r(NULL," ",&saveptr);
 				}
@@ -1888,7 +1888,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 			char hbuff[15];
 			memcpy(hbuff, &line[9], 14);
 			hbuff[14] = '\0';
-			if(strcmp(hbuff,"ADOPTED LEVELS")==0){
+			if(SDL_strcmp(hbuff,"ADOPTED LEVELS")==0){
 				//new nuclide
 
 				//first handle any business arising from the previous nuclide
@@ -2002,13 +2002,13 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 					char obsbuff[8];
 					memcpy(obsbuff, &line[23], 7);
 					obsbuff[7] = '\0';
-					if(strcmp(obsbuff,":NOT OB")==0){
+					if(SDL_strcmp(obsbuff,":NOT OB")==0){
 						nd->nuclData[nd->numNucl].flags = OBSFLAG_UNOBSERVED;
-					}else if(strcmp(obsbuff,":UNOBSE")==0){
+					}else if(SDL_strcmp(obsbuff,":UNOBSE")==0){
 						nd->nuclData[nd->numNucl].flags = OBSFLAG_UNOBSERVED;
-					}else if(strcmp(obsbuff,":INFERR")==0){
+					}else if(SDL_strcmp(obsbuff,":INFERR")==0){
 						nd->nuclData[nd->numNucl].flags = OBSFLAG_INFERRED;
-					}else if(strcmp(obsbuff,":TENTAT")==0){
+					}else if(SDL_strcmp(obsbuff,":TENTAT")==0){
 						nd->nuclData[nd->numNucl].flags = OBSFLAG_TENTATIVE;
 					}else{
 						nd->nuclData[nd->numNucl].flags = OBSFLAG_OBSERVED;
@@ -2054,7 +2054,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 				if(subSec==0){ //adopted levels subsection
 
 					//add reactions
-					if(strcmp(typebuff,"  X")==0){
+					if(SDL_strcmp(typebuff,"  X")==0){
 						if(nd->nuclData[nd->numNucl].numRxns < MAXRXNSPERNUCL){
 							rxnMap.rxnChar[nd->nuclData[nd->numNucl].numRxns][0] = line[8];
 							rxnMap.numRxnChars[nd->nuclData[nd->numNucl].numRxns] = 1;
@@ -2112,12 +2112,12 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 						}/*else{
 							SDL_Log("WARNING: number of reactions parsed exceeds the maximum per nuclide (%i).\n",MAXRXNSPERNUCL);
 						}*/
-					}else if((strcmp(&typebuff[1]," L")==0)&&(!(SDL_isspace(typebuff[0])))){
+					}else if((SDL_strcmp(&typebuff[1]," L")==0)&&(!(SDL_isspace(typebuff[0])))){
 						if(nd->numLvls > 0){
 							char hdbuff[6];
 							memcpy(hdbuff, &line[9], 5);
 							hdbuff[5] = '\0';
-							if(strcmp(hdbuff,"XREF=")==0){
+							if(SDL_strcmp(hdbuff,"XREF=")==0){
 								//reaction list for the last parsed level
 								//SDL_Log("Found reaction list for level %u.\n",nd->numLvls);
 								char rxnListBuf[128];
@@ -2202,7 +2202,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 
 					//add levels
 					if(nd->numLvls<MAXNUMLVLS){
-						if(strcmp(typebuff,"  L")==0){
+						if(SDL_strcmp(typebuff,"  L")==0){
 
 							//parse the energy
 							char ebuff[11];
@@ -2349,7 +2349,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 						//they are usually listed per-measurement in 'cL' lines (so they can 
 						//repeat if there are multiple measurements), with the best values
 						//being at the top
-						if((strcmp(typebuff+1," L")==0)||((strcmp(typebuff+1,"cL")==0)&&(decModeLineParsed == 0))){
+						if((SDL_strcmp(typebuff+1," L")==0)||((SDL_strcmp(typebuff+1,"cL")==0)&&(decModeLineParsed == 0))){
 							//parse decay mode info
 							//search for first decay string
 							//SDL_Log("%s\n",line);
@@ -2429,7 +2429,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 					}
 
 					//SDL_Log("line: %s\n",line);
-					if(strcmp(typebuff+1,"cQ")==0){
+					if(SDL_strcmp(typebuff+1,"cQ")==0){
 						//some GS decays are only specified as Q-values
 						//before any of the other level info
 						//if there are no other decay modes specified,
@@ -2444,7 +2444,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 							tok = SDL_strtok_r(dmBuff," =",&saveptr);
 							if(tok!=NULL){
 								//SDL_Log("tok: %s\n",tok);
-								if(strcmp(tok,"$Q(2|b{+-})")==0){
+								if(SDL_strcmp(tok,"$Q(2|b{+-})")==0){
 									tok = SDL_strtok_r(NULL," ;",&saveptr);
 									if(tok!=NULL){
 										if(atof(tok) > 0.0){
@@ -2453,7 +2453,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 											qValDecModeType = DECAYMODE_2BETAMINUS;
 										}
 									}
-								}else if(strcmp(tok,"$Q(2|b{++})")==0){
+								}else if(SDL_strcmp(tok,"$Q(2|b{++})")==0){
 									tok = SDL_strtok_r(NULL," ;",&saveptr);
 									if(tok!=NULL){
 										if(atof(tok) > 0.0){
@@ -2470,7 +2470,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 					//add gamma rays
 					if(nd->nuclData[nd->numNucl].numLevels>0){ //check that indices are valid
 						if(nd->levels[nd->numLvls-1].numTran<MAXGAMMASPERLEVEL){
-							if(strcmp(typebuff,"  G")==0){
+							if(SDL_strcmp(typebuff,"  G")==0){
 								//SDL_Log("%s\n",line);
 								if(nd->levels[nd->numLvls-1].numTran == 0){
 									nd->levels[nd->numLvls-1].firstTran = nd->numTran;
@@ -2635,19 +2635,19 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 								}
 								
 								nd->tran[tranInd].energy.val=gammaE;
-								if(strcmp(eeBuff,"GT")==0){
+								if(SDL_strcmp(eeBuff,"GT")==0){
 									nd->tran[tranInd].energy.format |= (uint16_t)(VALUETYPE_GREATERTHAN << 5U);
-								}else if(strcmp(eeBuff,"GT")==0){
+								}else if(SDL_strcmp(eeBuff,"GT")==0){
 									nd->tran[tranInd].energy.format |= (uint16_t)(VALUETYPE_GREATERTHAN << 5U);
-								}else if(strcmp(eeBuff,"GE")==0){
+								}else if(SDL_strcmp(eeBuff,"GE")==0){
 									nd->tran[tranInd].energy.format |= (uint16_t)(VALUETYPE_GREATEROREQUALTHAN << 5U);
-								}else if(strcmp(eeBuff,"LT")==0){
+								}else if(SDL_strcmp(eeBuff,"LT")==0){
 									nd->tran[tranInd].energy.format |= (uint16_t)(VALUETYPE_LESSTHAN << 5U);
-								}else if(strcmp(eeBuff,"LE")==0){
+								}else if(SDL_strcmp(eeBuff,"LE")==0){
 									nd->tran[tranInd].energy.format |= (uint16_t)(VALUETYPE_LESSOREQUALTHAN << 5U);
-								}else if(strcmp(eeBuff,"AP")==0){
+								}else if(SDL_strcmp(eeBuff,"AP")==0){
 									nd->tran[tranInd].energy.format |= (uint16_t)(VALUETYPE_APPROX << 5U);
-								}else if(strcmp(eeBuff,"?")==0){
+								}else if(SDL_strcmp(eeBuff,"?")==0){
 									nd->tran[tranInd].energy.format |= (uint16_t)(VALUETYPE_UNKNOWN << 5U);
 								}else{
 									nd->tran[tranInd].energy.err=(uint8_t)atoi(eeBuff);
@@ -2798,19 +2798,19 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 								nd->tran[tranInd].intensity.err=0;
 								tok = SDL_strtok_r(ieBuff, " ",&saveptr);
 								if(tok!=NULL){
-									if(strcmp(tok,"GT")==0){
+									if(SDL_strcmp(tok,"GT")==0){
 										nd->tran[tranInd].intensity.format |= (uint16_t)(VALUETYPE_GREATERTHAN << 5);
-									}else if(strcmp(tok,"GT")==0){
+									}else if(SDL_strcmp(tok,"GT")==0){
 										nd->tran[tranInd].intensity.format |= (uint16_t)(VALUETYPE_GREATERTHAN << 5);
-									}else if(strcmp(tok,"GE")==0){
+									}else if(SDL_strcmp(tok,"GE")==0){
 										nd->tran[tranInd].intensity.format |= (uint16_t)(VALUETYPE_GREATEROREQUALTHAN << 5);
-									}else if(strcmp(tok,"LT")==0){
+									}else if(SDL_strcmp(tok,"LT")==0){
 										nd->tran[tranInd].intensity.format |= (uint16_t)(VALUETYPE_LESSTHAN << 5);
-									}else if(strcmp(tok,"LE")==0){
+									}else if(SDL_strcmp(tok,"LE")==0){
 										nd->tran[tranInd].intensity.format |= (uint16_t)(VALUETYPE_LESSOREQUALTHAN << 5);
-									}else if(strcmp(tok,"AP")==0){
+									}else if(SDL_strcmp(tok,"AP")==0){
 										nd->tran[tranInd].intensity.format |= (uint16_t)(VALUETYPE_APPROX << 5);
-									}else if(strcmp(tok,"?")==0){
+									}else if(SDL_strcmp(tok,"?")==0){
 										nd->tran[tranInd].intensity.format |= (uint16_t)(VALUETYPE_UNKNOWN << 5);
 									}else{
 										nd->tran[tranInd].intensity.err=(uint8_t)atoi(ieBuff);
@@ -2855,19 +2855,19 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 								nd->tran[tranInd].icc.err=0;
 								tok = SDL_strtok_r(icceBuff, " ",&saveptr);
 								if(tok!=NULL){
-									if(strcmp(tok,"GT")==0){
+									if(SDL_strcmp(tok,"GT")==0){
 										nd->tran[tranInd].icc.format |= (uint16_t)(VALUETYPE_GREATERTHAN << 5);
-									}else if(strcmp(tok,"GT")==0){
+									}else if(SDL_strcmp(tok,"GT")==0){
 										nd->tran[tranInd].icc.format |= (uint16_t)(VALUETYPE_GREATERTHAN << 5);
-									}else if(strcmp(tok,"GE")==0){
+									}else if(SDL_strcmp(tok,"GE")==0){
 										nd->tran[tranInd].icc.format |= (uint16_t)(VALUETYPE_GREATEROREQUALTHAN << 5);
-									}else if(strcmp(tok,"LT")==0){
+									}else if(SDL_strcmp(tok,"LT")==0){
 										nd->tran[tranInd].icc.format |= (uint16_t)(VALUETYPE_LESSTHAN << 5);
-									}else if(strcmp(tok,"LE")==0){
+									}else if(SDL_strcmp(tok,"LE")==0){
 										nd->tran[tranInd].icc.format |= (uint16_t)(VALUETYPE_LESSOREQUALTHAN << 5);
-									}else if(strcmp(tok,"AP")==0){
+									}else if(SDL_strcmp(tok,"AP")==0){
 										nd->tran[tranInd].icc.format |= (uint16_t)(VALUETYPE_APPROX << 5);
-									}else if(strcmp(tok,"?")==0){
+									}else if(SDL_strcmp(tok,"?")==0){
 										nd->tran[tranInd].icc.format |= (uint16_t)(VALUETYPE_UNKNOWN << 5);
 									}else{
 										nd->tran[tranInd].icc.err=(uint8_t)atoi(icceBuff);
@@ -2955,7 +2955,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 					//SDL_Log("Done parsing gamma line.\n");
 
 					//add Q-values and separation energies
-					if(strcmp(typebuff,"  Q")==0){
+					if(SDL_strcmp(typebuff,"  Q")==0){
 						if(firstQLine==1){
 							//parse the beta Q-value
 							char qbBuff[11];
@@ -2972,9 +2972,9 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 							qbErrBuff[2] = '\0';
 
 							nd->nuclData[nd->numNucl].qbeta.val = (float)atof(qbBuff);
-							if(strcmp(qbErrBuff,"SY")==0){
+							if(SDL_strcmp(qbErrBuff,"SY")==0){
 								nd->nuclData[nd->numNucl].qbeta.err = 255; //systematic
-							}else if(strcmp(qbErrBuff,"CA")==0){
+							}else if(SDL_strcmp(qbErrBuff,"CA")==0){
 								nd->nuclData[nd->numNucl].qbeta.err = 254; //calculated
 							}else{
 								nd->nuclData[nd->numNucl].qbeta.err = (uint8_t)atoi(qbErrBuff);
@@ -3038,9 +3038,9 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 							nsErrBuff[2] = '\0';
 
 							nd->nuclData[nd->numNucl].sn.val = (float)atof(nsBuff);
-							if(strcmp(nsErrBuff,"SY")==0){
+							if(SDL_strcmp(nsErrBuff,"SY")==0){
 								nd->nuclData[nd->numNucl].sn.err = 255; //systematic
-							}else if(strcmp(nsErrBuff,"CA")==0){
+							}else if(SDL_strcmp(nsErrBuff,"CA")==0){
 								nd->nuclData[nd->numNucl].sn.err = 254; //calculated
 							}else{
 								nd->nuclData[nd->numNucl].sn.err = (uint8_t)atoi(nsErrBuff);
@@ -3120,9 +3120,9 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 							psErrBuff[2] = '\0';
 
 							nd->nuclData[nd->numNucl].sp.val = (float)atof(psBuff);
-							if(strcmp(psErrBuff,"SY")==0){
+							if(SDL_strcmp(psErrBuff,"SY")==0){
 								nd->nuclData[nd->numNucl].sp.err = 255; //systematic
-							}else if(strcmp(psErrBuff,"CA")==0){
+							}else if(SDL_strcmp(psErrBuff,"CA")==0){
 								nd->nuclData[nd->numNucl].sp.err = 254; //calculated
 							}else{
 								nd->nuclData[nd->numNucl].sp.err = (uint8_t)atoi(psErrBuff);
@@ -3193,9 +3193,9 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 							qaErrBuff[2] = '\0';
 							
 							nd->nuclData[nd->numNucl].qalpha.val = (float)atof(qaBuff);
-							if(strcmp(qaErrBuff,"SY")==0){
+							if(SDL_strcmp(qaErrBuff,"SY")==0){
 								nd->nuclData[nd->numNucl].qalpha.err = 255; //systematic
-							}else if(strcmp(qaErrBuff,"CA")==0){
+							}else if(SDL_strcmp(qaErrBuff,"CA")==0){
 								nd->nuclData[nd->numNucl].qalpha.err = 254; //calculated
 							}else{
 								nd->nuclData[nd->numNucl].qalpha.err = (uint8_t)atoi(qaErrBuff);
@@ -3264,6 +3264,131 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 
 						}
 						firstQLine = 0;
+					}else if(SDL_strcmp(typebuff+2,"Q")==0){
+						//try reading separation energies and Q-values that weren't specified in the main record
+						//these could be from second lines ('2 Q') or comment lines (' cQ')
+						char cBuff[80],tval[80];
+						SDL_strlcpy(cBuff,line,80);
+						tok=SDL_strtok_r(cBuff," $={},",&saveptr);
+						while(tok != NULL){
+							SDL_strlcpy(tval,tok,80);
+							if((SDL_strcmp(tval,"S(n)")==0)||(SDL_strcmp(tval,"SN")==0)){
+								if(nd->nuclData[nd->numNucl].sn.val == 0.0f){
+									tok = SDL_strtok_r(NULL," $={},",&saveptr);
+									if(tok!=NULL){
+										SDL_strlcpy(tval,tok,80);
+										//SDL_Log("tval: %s\n",tval);
+										nd->nuclData[nd->numNucl].sn.val = (float)atof(tval);
+										char *saveptr2 = NULL;
+										char *tok2 = SDL_strtok_r(tval,".",&saveptr2);
+										if(tok2!=NULL){
+											tok2 = SDL_strtok_r(NULL," ",&saveptr2);
+											if(tok2!=NULL){
+												//SDL_Log("tok2: %s\n",tok2);
+												nd->nuclData[nd->numNucl].sn.format = (uint16_t)SDL_strlen(tok2);
+											}
+										}
+										tok = SDL_strtok_r(NULL," $={},",&saveptr);
+										if(tok!=NULL){
+											SDL_strlcpy(tval,tok,80);
+											//SDL_Log("tok: %s\n",tok);
+											if((tval[0]=='I')&&(SDL_strlen(tval) > 1)){
+												nd->nuclData[nd->numNucl].sn.err = (uint8_t)atoi(&tval[1]);
+											}else if(SDL_isdigit(tval[0])){
+												nd->nuclData[nd->numNucl].sn.err = (uint8_t)atoi(tval);
+											}
+										}
+									}
+								}
+							}else if((SDL_strcmp(tval,"S(p)")==0)||(SDL_strcmp(tval,"SP")==0)){
+								if(nd->nuclData[nd->numNucl].sp.val == 0.0f){
+									tok = SDL_strtok_r(NULL," $={},",&saveptr);
+									if(tok!=NULL){
+										SDL_strlcpy(tval,tok,80);
+										//SDL_Log("tval: %s\n",tval);
+										nd->nuclData[nd->numNucl].sp.val = (float)atof(tval);
+										char *saveptr2 = NULL;
+										char *tok2 = SDL_strtok_r(tval,".",&saveptr2);
+										if(tok2!=NULL){
+											tok2 = SDL_strtok_r(NULL," ",&saveptr2);
+											if(tok2!=NULL){
+												//SDL_Log("tok2: %s\n",tok2);
+												nd->nuclData[nd->numNucl].sp.format = (uint16_t)SDL_strlen(tok2);
+											}
+										}
+										tok = SDL_strtok_r(NULL," $={},",&saveptr);
+										if(tok!=NULL){
+											SDL_strlcpy(tval,tok,80);
+											//SDL_Log("tok: %s\n",tok);
+											if((tval[0]=='I')&&(SDL_strlen(tval) > 1)){
+												nd->nuclData[nd->numNucl].sp.err = (uint8_t)atoi(&tval[1]);
+											}else if(SDL_isdigit(tval[0])){
+												nd->nuclData[nd->numNucl].sp.err = (uint8_t)atoi(tval);
+											}
+										}
+									}
+								}
+							}else if(SDL_strcmp(tval,"QBM")==0){
+								if(nd->nuclData[nd->numNucl].qbeta.val == 0.0f){
+									tok = SDL_strtok_r(NULL," $={},",&saveptr);
+									if(tok!=NULL){
+										SDL_strlcpy(tval,tok,80);
+										//SDL_Log("tval: %s\n",tval);
+										nd->nuclData[nd->numNucl].qbeta.val = (float)atof(tval);
+										char *saveptr2 = NULL;
+										char *tok2 = SDL_strtok_r(tval,".",&saveptr2);
+										if(tok2!=NULL){
+											tok2 = SDL_strtok_r(NULL," ",&saveptr2);
+											if(tok2!=NULL){
+												//SDL_Log("tok2: %s\n",tok2);
+												nd->nuclData[nd->numNucl].qbeta.format = (uint16_t)SDL_strlen(tok2);
+											}
+										}
+										tok = SDL_strtok_r(NULL," $={},",&saveptr);
+										if(tok!=NULL){
+											SDL_strlcpy(tval,tok,80);
+											//SDL_Log("tok: %s\n",tok);
+											if((tval[0]=='I')&&(SDL_strlen(tval) > 1)){
+												nd->nuclData[nd->numNucl].qbeta.err = (uint8_t)atoi(&tval[1]);
+											}else if(SDL_isdigit(tval[0])){
+												nd->nuclData[nd->numNucl].qbeta.err = (uint8_t)atoi(tval);
+											}
+										}
+									}
+								}
+							}else if((SDL_strcmp(tval,"Q(|a)")==0)||(SDL_strcmp(tval,"QA")==0)){
+								if(nd->nuclData[nd->numNucl].qalpha.val == 0.0f){
+									tok = SDL_strtok_r(NULL," $={},",&saveptr);
+									if(tok!=NULL){
+										SDL_strlcpy(tval,tok,80);
+										//SDL_Log("tval: %s\n",tval);
+										nd->nuclData[nd->numNucl].qalpha.val = (float)atof(tval);
+										char *saveptr2 = NULL;
+										char *tok2 = SDL_strtok_r(tval,".",&saveptr2);
+										if(tok2!=NULL){
+											tok2 = SDL_strtok_r(NULL," ",&saveptr2);
+											if(tok2!=NULL){
+												//SDL_Log("tok2: %s\n",tok2);
+												nd->nuclData[nd->numNucl].qalpha.format = (uint16_t)SDL_strlen(tok2);
+											}
+										}
+										tok = SDL_strtok_r(NULL," $={},",&saveptr);
+										if(tok!=NULL){
+											SDL_strlcpy(tval,tok,80);
+											//SDL_Log("tok: %s\n",tok);
+											if((tval[0]=='I')&&(SDL_strlen(tval) > 1)){
+												nd->nuclData[nd->numNucl].qalpha.err = (uint8_t)atoi(&tval[1]);
+											}else if(SDL_isdigit(tval[0])){
+												nd->nuclData[nd->numNucl].qalpha.err = (uint8_t)atoi(tval);
+											}
+										}
+									}
+								}
+							}
+							if(tok!=NULL){
+								tok = SDL_strtok_r(NULL," $={},",&saveptr);
+							}
+						}
 					}
 				}
 			}
@@ -3334,12 +3459,12 @@ int parseAbundanceData(const char * filePath, ndata * nd){
 			}
 
 			if(tokPos == 1){
-				if(strcmp(val[0],"Atomic Number ")==0){
+				if(SDL_strcmp(val[0],"Atomic Number ")==0){
 					Z = (int16_t)atoi(val[1]);
-				}else if(strcmp(val[0],"Mass Number ")==0){
+				}else if(SDL_strcmp(val[0],"Mass Number ")==0){
 					A = (int16_t)atoi(val[1]);
 					N = (int16_t)(A - Z);
-				}else if(strcmp(val[0],"Isotopic Composition ")==0){
+				}else if(SDL_strcmp(val[0],"Isotopic Composition ")==0){
 					uint16_t nuclInd = getNuclInd(nd,N,Z);
 					if(nuclInd < nd->numNucl){
 						SDL_strlcpy(tmpVal,val[1],256);
