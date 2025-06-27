@@ -65,6 +65,7 @@ void getSpinParStr(char strOut[32], const ndata *restrict nd, const uint32_t lvl
 
 double getRawDblValFromDB(const dblValWithErr *restrict valStruct);
 double getRawValFromDB(const valWithErr *restrict valStruct);
+double getRawDblErrFromDB(const dblValWithErr *restrict valStruct);
 double getRawErrFromDB(const valWithErr *restrict valStruct);
 
 double getLevelEnergykeV(const ndata *restrict nd, const uint32_t levelInd);

@@ -3699,6 +3699,175 @@ int parseMassData(const char * filePath, ndata * nd){
 		}
 	}
 	fclose(mfile);
+
+	//use mass excesses to re-examine Q-values and separation energies
+	//and replace them if there is significant disagreement with the ENSDF values
+	SDL_Log("Evaluating separation energies and Q-values using AME2020 data...\n");
+	uint16_t nnuclInd = getNuclInd(nd,1,0);
+	uint16_t pnuclInd = getNuclInd(nd,0,1);
+	uint16_t anuclInd = getNuclInd(nd,2,2);
+	if((nnuclInd < nd->numNucl)&&(pnuclInd < nd->numNucl)&&(anuclInd < nd->numNucl)){
+		for(uint16_t i=0; i<nd->numNucl; i++){
+			if(nd->nuclData[i].massExcess.val != 0.0){
+				if(((nd->nuclData[i].massExcess.format >> 5U) & 15U) == 0){ //exclude systematic values
+					//S(n)
+					uint16_t nuclInd2 = getNuclInd(nd,nd->nuclData[i].N - 1,nd->nuclData[i].Z);
+					if(nuclInd2 < nd->numNucl){
+						if(nd->nuclData[nuclInd2].massExcess.val != 0.0){
+							if(((nd->nuclData[nuclInd2].massExcess.format >> 5U) & 15U) == 0){ //exclude systematic values
+								double snCalcVal = getRawDblValFromDB(&nd->nuclData[nuclInd2].massExcess) + getRawDblValFromDB(&nd->nuclData[nnuclInd].massExcess) - getRawDblValFromDB(&nd->nuclData[i].massExcess);
+								if(SDL_fabs(snCalcVal - getRawValFromDB(&nd->nuclData[i].sn)) > SDL_fabs(0.3*getRawValFromDB(&nd->nuclData[i].sn))){
+									//replace value
+									SDL_Log("  Replacing S(n) for nuclide with  N = %3u, Z = %3u.\n",nd->nuclData[i].N,nd->nuclData[i].Z);
+									double snCalcErr = SDL_sqrt(SDL_pow(getRawDblErrFromDB(&nd->nuclData[nuclInd2].massExcess),2.0) + SDL_pow(getRawDblErrFromDB(&nd->nuclData[nnuclInd].massExcess),2.0) + SDL_pow(getRawDblErrFromDB(&nd->nuclData[i].massExcess),2.0));
+									uint8_t numSigFigs = 0;
+									int8_t exponent = 0;
+									if(snCalcErr > 0.0){
+										if(snCalcErr < 100.0){
+											while(snCalcErr < 10.0){
+												snCalcErr *= 10.0;
+												numSigFigs++;
+											}
+										}else{
+											while(snCalcErr >= 100.0){
+												snCalcErr /= 10.0;
+												snCalcVal /= 10.0;
+												exponent++;
+											}
+										}
+									}
+									nd->nuclData[i].sn.val = (float)snCalcVal;
+									nd->nuclData[i].sn.err = (uint8_t)SDL_round(snCalcErr);
+									nd->nuclData[i].sn.unit = VALUE_UNIT_KEV;
+									nd->nuclData[i].sn.format = (uint16_t)(numSigFigs & 15U);
+									if(exponent != 0){
+										nd->nuclData[i].sn.format |= (uint16_t)(1U << 4); //exponent flag
+										nd->nuclData[i].sn.exponent = exponent;
+									}
+								}
+							}
+						}
+					}
+					//S(p)
+					nuclInd2 = getNuclInd(nd,nd->nuclData[i].N,nd->nuclData[i].Z - 1);
+					if(nuclInd2 < nd->numNucl){
+						if(nd->nuclData[nuclInd2].massExcess.val != 0.0){
+							if(((nd->nuclData[nuclInd2].massExcess.format >> 5U) & 15U) == 0){ //exclude systematic values
+								double spCalcVal = getRawDblValFromDB(&nd->nuclData[nuclInd2].massExcess) + getRawDblValFromDB(&nd->nuclData[pnuclInd].massExcess) - getRawDblValFromDB(&nd->nuclData[i].massExcess);
+								if(SDL_fabs(spCalcVal - getRawValFromDB(&nd->nuclData[i].sp)) > SDL_fabs(0.3*getRawValFromDB(&nd->nuclData[i].sp))){
+									//replace value
+									SDL_Log("  Replacing S(p) for nuclide with  N = %3u, Z = %3u.\n",nd->nuclData[i].N,nd->nuclData[i].Z);
+									double spCalcErr = SDL_sqrt(SDL_pow(getRawDblErrFromDB(&nd->nuclData[nuclInd2].massExcess),2.0) + SDL_pow(getRawDblErrFromDB(&nd->nuclData[pnuclInd].massExcess),2.0) + SDL_pow(getRawDblErrFromDB(&nd->nuclData[i].massExcess),2.0));
+									uint8_t numSigFigs = 0;
+									int8_t exponent = 0;
+									if(spCalcErr > 0.0){
+										if(spCalcErr < 100.0){
+											while(spCalcErr < 10.0){
+												spCalcErr *= 10.0;
+												numSigFigs++;
+											}
+										}else{
+											while(spCalcErr >= 100.0){
+												spCalcErr /= 10.0;
+												spCalcVal /= 10.0;
+												exponent++;
+											}
+										}
+									}
+									nd->nuclData[i].sp.val = (float)spCalcVal;
+									nd->nuclData[i].sp.err = (uint8_t)SDL_round(spCalcErr);
+									nd->nuclData[i].sp.unit = VALUE_UNIT_KEV;
+									nd->nuclData[i].sp.format = (uint16_t)(numSigFigs & 15U);
+									if(exponent != 0){
+										nd->nuclData[i].sp.format |= (uint16_t)(1U << 4); //exponent flag
+										nd->nuclData[i].sp.exponent = exponent;
+									}
+								}
+							}
+						}
+					}
+					//Q(α)
+					nuclInd2 = getNuclInd(nd,nd->nuclData[i].N - 2,nd->nuclData[i].Z - 2);
+					if(nuclInd2 < nd->numNucl){
+						if(nd->nuclData[nuclInd2].massExcess.val != 0.0){
+							if(((nd->nuclData[nuclInd2].massExcess.format >> 5U) & 15U) == 0){ //exclude systematic values
+								double qaCalcVal = getRawDblValFromDB(&nd->nuclData[i].massExcess) - getRawDblValFromDB(&nd->nuclData[nuclInd2].massExcess) - getRawDblValFromDB(&nd->nuclData[anuclInd].massExcess);
+								if(SDL_fabs(qaCalcVal - getRawValFromDB(&nd->nuclData[i].qalpha)) > SDL_fabs(0.3*getRawValFromDB(&nd->nuclData[i].qalpha))){
+									//replace value
+									SDL_Log("  Replacing Q(α) for nuclide with  N = %3u, Z = %3u.\n",nd->nuclData[i].N,nd->nuclData[i].Z);
+									double qaCalcErr = SDL_sqrt(SDL_pow(getRawDblErrFromDB(&nd->nuclData[nuclInd2].massExcess),2.0) + SDL_pow(getRawDblErrFromDB(&nd->nuclData[anuclInd].massExcess),2.0) + SDL_pow(getRawDblErrFromDB(&nd->nuclData[i].massExcess),2.0));
+									uint8_t numSigFigs = 0;
+									int8_t exponent = 0;
+									if(qaCalcErr > 0.0){
+										if(qaCalcErr < 100.0){
+											while(qaCalcErr < 10.0){
+												qaCalcErr *= 10.0;
+												numSigFigs++;
+											}
+										}else{
+											while(qaCalcErr >= 100.0){
+												qaCalcErr /= 10.0;
+												qaCalcVal /= 10.0;
+												exponent++;
+											}
+										}
+									}
+									nd->nuclData[i].qalpha.val = (float)qaCalcVal;
+									nd->nuclData[i].qalpha.err = (uint8_t)SDL_round(qaCalcErr);
+									nd->nuclData[i].qalpha.unit = VALUE_UNIT_KEV;
+									nd->nuclData[i].qalpha.format = (uint16_t)(numSigFigs & 15U);
+									if(exponent != 0){
+										nd->nuclData[i].qalpha.format |= (uint16_t)(1U << 4); //exponent flag
+										nd->nuclData[i].qalpha.exponent = exponent;
+									}
+								}
+							}
+						}
+					}
+					//Q(β-)
+					nuclInd2 = getNuclInd(nd,nd->nuclData[i].N - 1,nd->nuclData[i].Z + 1);
+					if(nuclInd2 < nd->numNucl){
+						if(nd->nuclData[nuclInd2].massExcess.val != 0.0){
+							if(((nd->nuclData[nuclInd2].massExcess.format >> 5U) & 15U) == 0){ //exclude systematic values
+								double qbCalcVal = getRawDblValFromDB(&nd->nuclData[i].massExcess) - getRawDblValFromDB(&nd->nuclData[nuclInd2].massExcess);
+								if(SDL_fabs(qbCalcVal - getRawValFromDB(&nd->nuclData[i].qbeta)) > SDL_fabs(0.3*getRawValFromDB(&nd->nuclData[i].qbeta))){
+									//replace value
+									SDL_Log("  Replacing Q(β-) for nuclide with N = %3u, Z = %3u.\n",nd->nuclData[i].N,nd->nuclData[i].Z);
+									//SDL_Log("    Old value: %f, new value: %f\n",getRawValFromDB(&nd->nuclData[i].qbeta),qbCalcVal);
+									double qbCalcErr = SDL_sqrt(SDL_pow(getRawDblErrFromDB(&nd->nuclData[nuclInd2].massExcess),2.0) + SDL_pow(getRawDblErrFromDB(&nd->nuclData[i].massExcess),2.0));
+									uint8_t numSigFigs = 0;
+									int8_t exponent = 0;
+									if(qbCalcErr > 0.0){
+										if(qbCalcErr < 100.0){
+											while(qbCalcErr < 10.0){
+												qbCalcErr *= 10.0;
+												numSigFigs++;
+											}
+										}else{
+											while(qbCalcErr >= 100.0){
+												qbCalcErr /= 10.0;
+												qbCalcVal /= 10.0;
+												exponent++;
+											}
+										}
+									}
+									nd->nuclData[i].qbeta.val = (float)qbCalcVal;
+									nd->nuclData[i].qbeta.err = (uint8_t)SDL_round(qbCalcErr);
+									nd->nuclData[i].qbeta.unit = VALUE_UNIT_KEV;
+									nd->nuclData[i].qbeta.format = (uint16_t)(numSigFigs & 15U);
+									if(exponent != 0){
+										nd->nuclData[i].qbeta.format |= (uint16_t)(1U << 4); //exponent flag
+										nd->nuclData[i].qbeta.exponent = exponent;
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	
 	
 	SDL_Log("Finished reading mass data file: %s\n",filePath);
   return 0;
@@ -3766,7 +3935,20 @@ int buildDatabase(const char *appBasePath, ndata *nd){
 					}
 					break;
 				}
-      }
+      }else if(nd->levels[nd->nuclData[i].firstLevel + (uint32_t)j].energy.val == 0.0f){
+				uint8_t eValueType = (uint8_t)((nd->levels[nd->nuclData[i].firstLevel + (uint32_t)j].energy.format >> 5U) & 15U);
+				uint8_t isVariableE = ((eValueType == VALUETYPE_X)||(eValueType == VALUETYPE_PLUSX));
+				if(!isVariableE){
+					//if(j!=0) SDL_Log("GS ind for nucleus %u: %u\n",i,j);
+					if(j>=255){
+						SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,"GS level index for nuclide %u is too high (%u).\n",i,j);
+						nd->nuclData[i].gsLevel = 0;
+					}else{
+						nd->nuclData[i].gsLevel = (uint8_t)j;
+					}
+					break;
+				}
+			}
     }
 		if((nd->nuclData[i].gsLevel == 0)&&(firstLvlWithHl != 255)){
 			//could have searched through all the levels but didn't find a ground state

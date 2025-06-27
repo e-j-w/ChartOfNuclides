@@ -2401,7 +2401,7 @@ double getRawDblValFromDB(const dblValWithErr *restrict valStruct){
 	double val = valStruct->val;
 	if(((valStruct->format >> 4U) & 1U) != 0){
 		//value in exponent form
-		val = val * pow(10.0,(double)(valStruct->exponent));
+		val = val * SDL_pow(10.0,(double)(valStruct->exponent));
 	}
 	return val;
 }
@@ -2409,9 +2409,25 @@ double getRawValFromDB(const valWithErr *restrict valStruct){
 	double val = (double)(valStruct->val);
 	if(((valStruct->format >> 4U) & 1U) != 0){
 		//value in exponent form
-		val = val * pow(10.0,(double)(valStruct->exponent));
+		val = val * SDL_pow(10.0,(double)(valStruct->exponent));
 	}
 	return val;
+}
+
+double getRawDblErrFromDB(const dblValWithErr *restrict valStruct){
+	if(valStruct->err == 0){
+		return 0.0;
+	}
+	uint8_t numSigFigs = (uint8_t)(valStruct->format & 15U);
+	double err = valStruct->err;
+	if(numSigFigs > 0){
+		err = err/(SDL_pow(10.0,numSigFigs));
+	}
+	if(((valStruct->format >> 4U) & 1U) != 0){
+		//value in exponent form
+		err = err * SDL_pow(10.0,(double)(valStruct->exponent));
+	}
+	return err;
 }
 
 double getRawErrFromDB(const valWithErr *restrict valStruct){
@@ -2421,11 +2437,11 @@ double getRawErrFromDB(const valWithErr *restrict valStruct){
 	uint8_t numSigFigs = (uint8_t)(valStruct->format & 15U);
 	double err = (double)(valStruct->err);
 	if(numSigFigs > 0){
-		err = err/(pow(10.0,numSigFigs));
+		err = err/(SDL_pow(10.0,numSigFigs));
 	}
 	if(((valStruct->format >> 4U) & 1U) != 0){
 		//value in exponent form
-		err = err * pow(10.0,(double)(valStruct->exponent));
+		err = err * SDL_pow(10.0,(double)(valStruct->exponent));
 	}
 	return err;
 }
@@ -2671,7 +2687,17 @@ double getNuclLevelHalfLifeSeconds(const ndata *restrict nd, const uint16_t nucl
 }
 
 double getNuclGSHalfLifeSeconds(const ndata *restrict nd, const uint16_t nuclInd){
-	return getNuclLevelHalfLifeSeconds(nd,nuclInd,nd->nuclData[nuclInd].gsLevel);
+	double gsHl = getNuclLevelHalfLifeSeconds(nd,nuclInd,nd->nuclData[nuclInd].gsLevel);
+	if(gsHl < 0.0){
+		//find the first level with a half-life, and use that
+		for(uint16_t i=0; i<nd->nuclData[nuclInd].numLevels; i++){
+			gsHl = getNuclLevelHalfLifeSeconds(nd,nuclInd,i);
+			if(gsHl > 0.0){
+				break;
+			}
+		}
+	}
+	return gsHl;
 }
 
 uint8_t getLevelMostProbableDcyMode(const ndata *restrict nd, const uint32_t lvlInd){

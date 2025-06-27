@@ -60,77 +60,133 @@ SDL_FColor getHalfLifeCol(const double halflifeSeconds){
     col.r = 0.0f;
     col.g = 0.1f;
     col.b = 0.5f;
+  }else if(halflifeSeconds > 5.0E7){
+    col.r = 0.1f;
+    col.g = 0.15f;
+    col.b = 0.5f;
   }else if(halflifeSeconds > 1.0E7){
     col.r = 0.1f;
     col.g = 0.2f;
     col.b = 0.5f;
+  }else if(halflifeSeconds > 5.0E6){
+    col.r = 0.1f;
+    col.g = 0.2f;
+    col.b = 0.55f;
   }else if(halflifeSeconds > 1.0E6){
     col.r = 0.1f;
     col.g = 0.2f;
     col.b = 0.6f;
+  }else if(halflifeSeconds > 5.0E5){
+    col.r = 0.1f;
+    col.g = 0.25f;
+    col.b = 0.65f;
   }else if(halflifeSeconds > 1.0E5){
     col.r = 0.1f;
     col.g = 0.3f;
     col.b = 0.7f;
+  }else if(halflifeSeconds > 5.0E4){
+    col.r = 0.15f;
+    col.g = 0.35f;
+    col.b = 0.75f;
   }else if(halflifeSeconds > 1.0E4){
     col.r = 0.2f;
     col.g = 0.4f;
+    col.b = 0.8f;
+  }else if(halflifeSeconds > 5.0E3){
+    col.r = 0.25f;
+    col.g = 0.45f;
     col.b = 0.8f;
   }else if(halflifeSeconds > 1.0E3){
     col.r = 0.3f;
     col.g = 0.5f;
     col.b = 0.8f;
+  }else if(halflifeSeconds > 5.0E2){
+    col.r = 0.3f;
+    col.g = 0.6f;
+    col.b = 0.75f;
   }else if(halflifeSeconds > 1.0E2){
     col.r = 0.3f;
     col.g = 0.7f;
+    col.b = 0.7f;
+  }else if(halflifeSeconds > 5.0E1){
+    col.r = 0.3f;
+    col.g = 0.8f;
     col.b = 0.7f;
   }else if(halflifeSeconds > 1.0E1){
     col.r = 0.3f;
     col.g = 0.9f;
     col.b = 0.7f;
-  }else if(halflifeSeconds > 4.0E0){
+  }else if(halflifeSeconds > 5.0){
     col.r = 0.4f;
-    col.g = 1.0f;
+    col.g = 0.95f;
     col.b = 0.7f;
-  }else if(halflifeSeconds > 0.5E0){
+  }else if(halflifeSeconds > 1.0){
     col.r = 0.5f;
     col.g = 1.0f;
     col.b = 0.7f;
+  }else if(halflifeSeconds > 5.0E-1){
+    col.r = 0.6f;
+    col.g = 0.95f;
+    col.b = 0.6f;
   }else if(halflifeSeconds > 1.0E-1){
     col.r = 0.7f;
     col.g = 0.9f;
     col.b = 0.5f;
+  }else if(halflifeSeconds > 5.0E-2){
+    col.r = 0.8f;
+    col.g = 0.9f;
+    col.b = 0.45f;
   }else if(halflifeSeconds > 1.0E-2){
     col.r = 0.9f;
     col.g = 0.9f;
     col.b = 0.4f;
+  }else if(halflifeSeconds > 5.0E-3){
+    col.r = 0.95f;
+    col.g = 0.95f;
+    col.b = 0.35f;
   }else if(halflifeSeconds > 1.0E-3){
     col.r = 1.0f;
     col.g = 1.0f;
     col.b = 0.3f;
+  }else if(halflifeSeconds > 5.0E-4){
+    col.r = 1.0f;
+    col.g = 0.9f;
+    col.b = 0.35f;
   }else if(halflifeSeconds > 1.0E-4){
     col.r = 1.0f;
     col.g = 0.8f;
     col.b = 0.4f;
+  }else if(halflifeSeconds > 5.0E-5){
+    col.r = 1.0f;
+    col.g = 0.75f;
+    col.b = 0.5f;
   }else if(halflifeSeconds > 1.0E-5){
     col.r = 1.0f;
     col.g = 0.7f;
-    col.b = 0.5f;
+    col.b = 0.6f;
+  }else if(halflifeSeconds > 5.0E-6){
+    col.r = 1.0f;
+    col.g = 0.65f;
+    col.b = 0.65f;
   }else if(halflifeSeconds > 1.0E-6){
     col.r = 1.0f;
     col.g = 0.6f;
-    col.b = 0.6f;
+    col.b = 0.7f;
+  }else if(halflifeSeconds > 5.0E-7){
+    col.r = 1.0f;
+    col.g = 0.65f;
+    col.b = 0.7f;
   }else if(halflifeSeconds > 1.0E-7){
     col.r = 1.0f;
-    col.g = 0.6f;
+    col.g = 0.7f;
     col.b = 0.7f;
   }else if(halflifeSeconds > 1.0E-8){
     col.r = 1.0f;
     col.g = 0.7f;
-    col.b = 0.7f;
+    col.b = 0.8f;
   }else if(halflifeSeconds > 1.0E-9){
     col.r = 1.0f;
-    col.g = 0.7f;
+    col.g = 0.8f;
     col.b = 0.8f;
   }else if(halflifeSeconds > 1.0E-12){
     col.r = 1.0f;
@@ -534,78 +590,82 @@ SDL_FColor getSpinCol(const double spin){
     col.g = 0.1f;
     col.b = 0.4f;
   }else if(spin <= 0.5){
-    col.r = 0.1f;
+    col.r = 0.05f;
     col.g = 0.2f;
     col.b = 0.5f;
   }else if(spin <= 1.0){
     col.r = 0.1f;
     col.g = 0.3f;
-    col.b = 0.7f;
+    col.b = 0.6f;
   }else if(spin <= 1.5){
-    col.r = 0.2f;
+    col.r = 0.25f;
     col.g = 0.4f;
-    col.b = 0.8f;
+    col.b = 0.7f;
   }else if(spin <= 2.0){ //box color inversion point
     col.r = 0.3f;
     col.g = 0.5f;
     col.b = 0.8f;
   }else if(spin <= 2.5){
     col.r = 0.3f;
+    col.g = 0.6f;
+    col.b = 0.75f;
+  }else if(spin <= 3.0){
+    col.r = 0.35f;
     col.g = 0.7f;
     col.b = 0.7f;
-  }else if(spin <= 3.0){
-    col.r = 0.3f;
-    col.g = 0.9f;
-    col.b = 0.7f;
   }else if(spin <= 3.5){
-    col.r = 0.5f;
-    col.g = 1.0f;
+    col.r = 0.4f;
+    col.g = 0.8f;
     col.b = 0.7f;
   }else if(spin <= 4.0){
-    col.r = 0.7f;
+    col.r = 0.5f;
+    col.g = 0.9f;
+    col.b = 0.6f;
+  }else if(spin <= 4.5){
+    col.r = 0.6f;
     col.g = 0.9f;
     col.b = 0.5f;
   }else if(spin <= 5.0){
-    col.r = 0.9f;
-    col.g = 0.9f;
-    col.b = 0.4f;
-  }else if(spin <= 6.0){
-    col.r = 0.95f;
+    col.r = 0.7f;
     col.g = 0.95f;
+    col.b = 0.4f;
+  }else if(spin <= 5.5){
+    col.r = 0.8f;
+    col.g = 1.0f;
+    col.b = 0.3f;
+  }else if(spin <= 6.0){
+    col.r = 0.9f;
+    col.g = 0.95f;
+    col.b = 0.3f;
+  }else if(spin <= 6.5){
+    col.r = 1.0f;
+    col.g = 0.9f;
     col.b = 0.35f;
   }else if(spin <= 7.0){
     col.r = 1.0f;
-    col.g = 1.0f;
-    col.b = 0.3f;
-  }else if(spin <= 8.0){
-    col.r = 1.0f;
-    col.g = 0.9f;
-    col.b = 0.35f;
-  }else if(spin <= 9.0){
-    col.r = 1.0f;
     col.g = 0.8f;
     col.b = 0.4f;
-  }else if(spin <= 11.0){
+  }else if(spin <= 8.0){
     col.r = 1.0f;
     col.g = 0.75f;
     col.b = 0.45f;
-  }else if(spin <= 13.0){
+  }else if(spin <= 9.0){
     col.r = 1.0f;
     col.g = 0.7f;
     col.b = 0.5f;
-  }else if(spin <= 15.0){
+  }else if(spin <= 11.0){
     col.r = 1.0f;
     col.g = 0.65f;
     col.b = 0.55f;
-  }else if(spin <= 17.0){
+  }else if(spin <= 13.0){
     col.r = 1.0f;
     col.g = 0.6f;
     col.b = 0.6f;
-  }else if(spin <= 20.0){
+  }else if(spin <= 15.0){
     col.r = 1.0f;
     col.g = 0.6f;
     col.b = 0.7f;
-  }else if(spin <= 25.0){
+  }else if(spin <= 17.0){
     col.r = 1.0f;
     col.g = 0.7f;
     col.b = 0.8f;
@@ -615,8 +675,8 @@ SDL_FColor getSpinCol(const double spin){
     col.b = 0.9f;
   }else{
     //unknown spin
-    col.r = 1.0f;
-    col.g = 0.8f;
+    col.r = 0.9f;
+    col.g = 0.9f;
     col.b = 0.9f;
   }
   return col;
@@ -637,8 +697,9 @@ SDL_FColor getParCol(const int8_t par){
     col.g = 0.8f;
     col.b = 0.8f;
   }else{
-    col.r = 1.0f;
-    col.g = 0.8f;
+    //unknown parity
+    col.r = 0.9f;
+    col.g = 0.9f;
     col.b = 0.9f;
   }
   return col;
@@ -666,50 +727,98 @@ SDL_FColor getBEACol(const double beA){
     col.r = 0.1f;
     col.g = 0.2f;
     col.b = 0.5f;
+  }else if(beA >= 8550.0){
+    col.r = 0.1f;
+    col.g = 0.25f;
+    col.b = 0.6f;
   }else if(beA >= 8500.0){
     col.r = 0.1f;
     col.g = 0.3f;
     col.b = 0.7f;
+  }else if(beA >= 8450.0){
+    col.r = 0.15f;
+    col.g = 0.3f;
+    col.b = 0.75f;
   }else if(beA >= 8400.0){
     col.r = 0.2f;
     col.g = 0.3f;
+    col.b = 0.8f;
+  }else if(beA >= 8350.0){
+    col.r = 0.2f;
+    col.g = 0.35f;
     col.b = 0.8f;
   }else if(beA >= 8300.0){
     col.r = 0.2f;
     col.g = 0.4f;
     col.b = 0.8f;
+  }else if(beA >= 8250.0){
+    col.r = 0.2f;
+    col.g = 0.45f;
+    col.b = 0.8f;
   }else if(beA >= 8200.0){
     col.r = 0.2f;
     col.g = 0.5f;
+    col.b = 0.8f;
+  }else if(beA >= 8150.0){
+    col.r = 0.25f;
+    col.g = 0.55f;
     col.b = 0.8f;
   }else if(beA >= 8100.0){
     col.r = 0.3f;
     col.g = 0.6f;
     col.b = 0.8f;
+  }else if(beA >= 8050.0){
+    col.r = 0.3f;
+    col.g = 0.6f;
+    col.b = 0.75f;
   }else if(beA >= 8000.0){ //box color inversion point
     col.r = 0.3f;
     col.g = 0.6f;
+    col.b = 0.7f;
+  }else if(beA >= 7950.0){
+    col.r = 0.3f;
+    col.g = 0.65f;
     col.b = 0.7f;
   }else if(beA >= 7900.0){
     col.r = 0.3f;
     col.g = 0.7f;
     col.b = 0.7f;
+  }else if(beA >= 7850.0){
+    col.r = 0.3f;
+    col.g = 0.75f;
+    col.b = 0.7f;
   }else if(beA >= 7800.0){
     col.r = 0.3f;
     col.g = 0.8f;
+    col.b = 0.7f;
+  }else if(beA >= 7750.0){
+    col.r = 0.3f;
+    col.g = 0.85f;
     col.b = 0.7f;
   }else if(beA >= 7700.0){
     col.r = 0.3f;
     col.g = 0.9f;
     col.b = 0.7f;
+  }else if(beA >= 7650.0){
+    col.r = 0.35f;
+    col.g = 0.95f;
+    col.b = 0.7f;
   }else if(beA >= 7600.0){
     col.r = 0.4f;
     col.g = 1.0f;
     col.b = 0.7f;
+  }else if(beA >= 7550.0){
+    col.r = 0.4f;
+    col.g = 0.95f;
+    col.b = 0.7f;
   }else if(beA >= 7500.0){
     col.r = 0.5f;
-    col.g = 1.0f;
+    col.g = 0.95f;
     col.b = 0.7f;
+  }else if(beA >= 7450.0){
+    col.r = 0.5f;
+    col.g = 0.9f;
+    col.b = 0.6f;
   }else if(beA >= 7400.0){
     col.r = 0.6f;
     col.g = 0.9f;
@@ -762,7 +871,7 @@ SDL_FColor getBEACol(const double beA){
   return col;
 }
 
-SDL_FColor getSnpCol(const double snpKeV, const double halflifeSeconds){
+SDL_FColor getSnpCol(const double snpKeV){
   SDL_FColor col;
   col.a = 1.0f;
   if(snpKeV == 0.0){
@@ -847,15 +956,15 @@ SDL_FColor getSnpCol(const double snpKeV, const double halflifeSeconds){
     col.b = 1.0f;
   }
   //slightly darken stable nuclides
-  if(halflifeSeconds > 1.0E15){
+  /*if(halflifeSeconds > 1.0E15){
     col.r -= 0.1f;
     col.g -= 0.1f;
     col.b -= 0.1f;
-  }
+  }*/
   return col;
 }
 
-SDL_FColor getQaCol(const double qaKeV, const double halflifeSeconds){
+SDL_FColor getQaCol(const double qaKeV){
   SDL_FColor col;
   col.a = 1.0f;
   if(qaKeV == 0.0){
@@ -866,13 +975,25 @@ SDL_FColor getQaCol(const double qaKeV, const double halflifeSeconds){
     col.r = 1.0f;
     col.g = 0.9f;
     col.b = 0.9f;
+  }else if(qaKeV >= 9000.0){
+    col.r = 1.0f;
+    col.g = 0.85f;
+    col.b = 0.9f;
   }else if(qaKeV >= 8000.0){
     col.r = 1.0f;
     col.g = 0.8f;
     col.b = 0.9f;
+  }else if(qaKeV >= 7000.0){
+    col.r = 1.0f;
+    col.g = 0.75f;
+    col.b = 0.85f;
   }else if(qaKeV >= 6000.0){
     col.r = 1.0f;
     col.g = 0.7f;
+    col.b = 0.8f;
+  }else if(qaKeV >= 5000.0){
+    col.r = 1.0f;
+    col.g = 0.65f;
     col.b = 0.8f;
   }else if(qaKeV >= 4000.0){
     col.r = 1.0f;
@@ -894,33 +1015,77 @@ SDL_FColor getQaCol(const double qaKeV, const double halflifeSeconds){
     col.r = 1.0f;
     col.g = 0.9f;
     col.b = 0.3f;
+  }else if(qaKeV >= 250.0){
+    col.r = 1.0f;
+    col.g = 0.95f;
+    col.b = 0.2f;
   }else if(qaKeV >= 0.0){
     col.r = 1.0f;
     col.g = 1.0f;
+    col.b = 0.1f;
+  }else if(qaKeV >= -250.0){
+    col.r = 0.95f;
+    col.g = 0.95f;
     col.b = 0.2f;
+  }else if(qaKeV >= -500.0){
+    col.r = 0.9f;
+    col.g = 0.9f;
+    col.b = 0.3f;
   }else if(qaKeV >= -1000.0){
     col.r = 0.9f;
     col.g = 0.9f;
     col.b = 0.4f;
+  }else if(qaKeV >= -1500.0){
+    col.r = 0.8f;
+    col.g = 0.9f;
+    col.b = 0.45f;
   }else if(qaKeV >= -2000.0){
     col.r = 0.7f;
     col.g = 0.9f;
     col.b = 0.5f;
+  }else if(qaKeV >= -2500.0){
+    col.r = 0.65f;
+    col.g = 0.95f;
+    col.b = 0.55f;
+  }else if(qaKeV >= -3000.0){
+    col.r = 0.6f;
+    col.g = 0.95f;
+    col.b = 0.6f;
+  }else if(qaKeV >= -3500.0){
+    col.r = 0.55f;
+    col.g = 1.0f;
+    col.b = 0.65f;
   }else if(qaKeV >= -4000.0){
     col.r = 0.5f;
     col.g = 1.0f;
+    col.b = 0.7f;
+  }else if(qaKeV >= -5000.0){
+    col.r = 0.4f;
+    col.g = 0.95f;
     col.b = 0.7f;
   }else if(qaKeV >= -6000.0){
     col.r = 0.3f;
     col.g = 0.9f;
     col.b = 0.7f;
+  }else if(qaKeV >= -7000.0){
+    col.r = 0.3f;
+    col.g = 0.8f;
+    col.b = 0.7f;
   }else if(qaKeV >= -8000.0){
     col.r = 0.3f;
     col.g = 0.7f;
     col.b = 0.7f;
+  }else if(qaKeV >= -9000.0){
+    col.r = 0.3f;
+    col.g = 0.6f;
+    col.b = 0.8f;
   }else if(qaKeV >= -10000.0){
     col.r = 0.3f;
     col.g = 0.5f;
+    col.b = 0.8f;
+  }else if(qaKeV >= -11000.0){
+    col.r = 0.25f;
+    col.g = 0.45f;
     col.b = 0.8f;
   }else if(qaKeV >= -12000.0){
     col.r = 0.2f;
@@ -944,15 +1109,15 @@ SDL_FColor getQaCol(const double qaKeV, const double halflifeSeconds){
     col.b = 0.0f;
   }
   //slightly darken stable nuclides
-  if(halflifeSeconds > 1.0E15){
+  /*if(halflifeSeconds > 1.0E15){
     col.r -= 0.1f;
     col.g -= 0.1f;
     col.b -= 0.1f;
-  }
+  }*/
   return col;
 }
 
-SDL_FColor getQbCol(const double qbKeV, const double halflifeSeconds){
+SDL_FColor getQbCol(const double qbKeV){
   SDL_FColor col;
   col.a = 1.0f;
   if(qbKeV == 0.0){
@@ -1037,11 +1202,11 @@ SDL_FColor getQbCol(const double qbKeV, const double halflifeSeconds){
     col.b = 0.0f;
   }
   //slightly darken stable nuclides
-  if(halflifeSeconds > 1.0E15){
+  /*if(halflifeSeconds > 1.0E15){
     col.r -= 0.1f;
     col.g -= 0.1f;
     col.b -= 0.1f;
-  }
+  }*/
   return col;
 }
 
@@ -1055,46 +1220,90 @@ SDL_FColor getNumLvlsCol(const uint16_t numLvls, const double halflifeSeconds){
     col.r = 0.0f;
     col.g = 0.0f;
     col.b = 0.0f;
+  }else if(numLvls >= 450){
+    col.r = 0.0f;
+    col.g = 0.05f;
+    col.b = 0.2f;
   }else if(numLvls >= 400){
     col.r = 0.0f;
     col.g = 0.1f;
     col.b = 0.4f;
+  }else if(numLvls >= 350){
+    col.r = 0.05f;
+    col.g = 0.15f;
+    col.b = 0.45f;
   }else if(numLvls >= 300){
     col.r = 0.1f;
     col.g = 0.2f;
     col.b = 0.5f;
+  }else if(numLvls >= 275){
+    col.r = 0.1f;
+    col.g = 0.25f;
+    col.b = 0.6f;
   }else if(numLvls >= 250){
     col.r = 0.1f;
     col.g = 0.3f;
     col.b = 0.7f;
+  }else if(numLvls >= 225){
+    col.r = 0.15f;
+    col.g = 0.35f;
+    col.b = 0.75f;
   }else if(numLvls >= 200){
     col.r = 0.2f;
     col.g = 0.4f;
+    col.b = 0.8f;
+  }else if(numLvls >= 175){
+    col.r = 0.25f;
+    col.g = 0.45f;
     col.b = 0.8f;
   }else if(numLvls >= 150){ //box color inversion point
     col.r = 0.3f;
     col.g = 0.5f;
     col.b = 0.8f;
-  }else if(numLvls >= 120){
+  }else if(numLvls >= 125){
+    col.r = 0.3f;
+    col.g = 0.6f;
+    col.b = 0.75f;
+  }else if(numLvls >= 100){
     col.r = 0.3f;
     col.g = 0.7f;
     col.b = 0.7f;
   }else if(numLvls >= 90){
     col.r = 0.3f;
+    col.g = 0.8f;
+    col.b = 0.7f;
+  }else if(numLvls >= 80){
+    col.r = 0.3f;
     col.g = 0.9f;
+    col.b = 0.7f;
+  }else if(numLvls >= 70){
+    col.r = 0.4f;
+    col.g = 0.95f;
     col.b = 0.7f;
   }else if(numLvls >= 60){
     col.r = 0.5f;
     col.g = 1.0f;
     col.b = 0.7f;
+  }else if(numLvls >= 50){
+    col.r = 0.6f;
+    col.g = 0.95f;
+    col.b = 0.6f;
   }else if(numLvls >= 40){
     col.r = 0.7f;
     col.g = 0.9f;
     col.b = 0.5f;
+  }else if(numLvls >= 35){
+    col.r = 0.8f;
+    col.g = 0.9f;
+    col.b = 0.45f;
   }else if(numLvls >= 30){
     col.r = 0.9f;
     col.g = 0.9f;
     col.b = 0.4f;
+  }else if(numLvls >= 25){
+    col.r = 0.95f;
+    col.g = 0.95f;
+    col.b = 0.35f;
   }else if(numLvls >= 20){
     col.r = 1.0f;
     col.g = 1.0f;
@@ -1107,13 +1316,17 @@ SDL_FColor getNumLvlsCol(const uint16_t numLvls, const double halflifeSeconds){
     col.r = 1.0f;
     col.g = 0.7f;
     col.b = 0.5f;
+  }else if(numLvls >= 7){
+    col.r = 1.0f;
+    col.g = 0.65f;
+    col.b = 0.55f;
   }else if(numLvls >= 5){
     col.r = 1.0f;
     col.g = 0.6f;
     col.b = 0.6f;
   }else if(numLvls >= 4){
     col.r = 1.0f;
-    col.g = 0.6f;
+    col.g = 0.65f;
     col.b = 0.7f;
   }else if(numLvls >= 3){
     col.r = 1.0f;
@@ -1682,13 +1895,13 @@ void drawChartOfNuclides(const app_data *restrict dat, app_state *restrict state
               }else if(state->chartView == CHARTVIEW_BEA){
                 boxCol = getBEACol(getBEA(&dat->ndat,(uint16_t)i));
               }else if(state->chartView == CHARTVIEW_SN){
-                boxCol = getSnpCol(getRawValFromDB(&dat->ndat.nuclData[i].sn),getNuclGSHalfLifeSeconds(&dat->ndat,(uint16_t)i));
+                boxCol = getSnpCol(getRawValFromDB(&dat->ndat.nuclData[i].sn));
               }else if(state->chartView == CHARTVIEW_SP){
-                boxCol = getSnpCol(getRawValFromDB(&dat->ndat.nuclData[i].sp),getNuclGSHalfLifeSeconds(&dat->ndat,(uint16_t)i));
+                boxCol = getSnpCol(getRawValFromDB(&dat->ndat.nuclData[i].sp));
               }else if(state->chartView == CHARTVIEW_QALPHA){
-                boxCol = getQaCol(getRawValFromDB(&dat->ndat.nuclData[i].qalpha),getNuclGSHalfLifeSeconds(&dat->ndat,(uint16_t)i));
+                boxCol = getQaCol(getRawValFromDB(&dat->ndat.nuclData[i].qalpha));
               }else if(state->chartView == CHARTVIEW_QBETAMINUS){
-                boxCol = getQbCol(getRawValFromDB(&dat->ndat.nuclData[i].qbeta),getNuclGSHalfLifeSeconds(&dat->ndat,(uint16_t)i));
+                boxCol = getQbCol(getRawValFromDB(&dat->ndat.nuclData[i].qbeta));
               }else if(state->chartView == CHARTVIEW_NUMLVLS){
                 boxCol = getNumLvlsCol(dat->ndat.nuclData[i].numLevels,getNuclGSHalfLifeSeconds(&dat->ndat,(uint16_t)i));
               }else if(state->chartView == CHARTVIEW_UNKNOWN_ENERGY){
