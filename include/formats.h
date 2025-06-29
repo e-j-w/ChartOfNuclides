@@ -240,6 +240,7 @@ typedef struct
   float timeSinceZoomStart, timeSincePanStart, totalPanTime, timeSinceFCScollStart, timeSinceFCNuclChangeStart;
   float infoBoxTableHeight; //the height in unscaled pixels needed to show the info box ground and isomeric state info
   float infoBoxWidth, infoBoxEColOffset, infoBoxJpiColOffset, infoBoxHlColOffset, infoBoxDcyModeColOffset;
+  float infoBoxCurrentX, infoBoxCurrentY, infoBoxCurrentDispWidth, infoBoxCurrentDispHeight, infoBoxPrevX, infoBoxPrevY, infoBoxPrevDispWidth, infoBoxPrevDispHeight;
   float fullInfoElevelColWidth, fullInfoJpiColWidth, fullInfoHlColWidth, fullInfoEgammaColWidth, fullInfoIgammaColWidth;
   float fullInfoMgammaColWidth, fullInfoFinalElevelColWidth, fullInfoFinalJpiColWidth;
   float fullInfoAllColWidth, fullInfoAllColWidthExclM, fullInfoAllColWidthExcluMFinalJpi;

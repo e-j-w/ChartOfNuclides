@@ -93,6 +93,7 @@ void initializeTempState(const app_data *restrict dat, app_state *restrict state
 	state->ds.searchEntryDispStartChar = 0;
 	state->ds.searchEntryDispNumChars = 65535U; //default value specifying no text has been input yet
 	state->ds.interfaceSizeInd = UISCALE_NORMAL;
+	state->ds.infoBoxPrevX = -1.0f;
 	state->cms.numContextMenuItems = 0;
 	state->ss.numResults = 0;
 	state->ss.canUpdateResults = SDL_CreateSemaphore(1);
@@ -201,6 +202,7 @@ void startUIAnimation(const app_data *restrict dat, app_state *restrict state, c
 	switch(uiAnim){
 		case UIANIM_NUCLINFOBOX_TXTFADEOUT:
 		case UIANIM_NUCLINFOBOX_EXPAND:
+		case UIANIM_NUCLINFOBOX_MORPH:
 			//short animation
 			state->ds.timeLeftInUIAnimation[uiAnim] = SHORT_UI_ANIM_LENGTH;
 			break;
@@ -314,6 +316,7 @@ void stopUIAnimation(const app_data *restrict dat, app_state *restrict state, co
 			break;
 		case UIANIM_NUCLINFOBOX_HIDE:
 			state->ds.shownElements &= (~((uint64_t)(1) << UIELEM_NUCL_INFOBOX)); //close the info box
+			state->ds.infoBoxPrevX = -1.0f; //flag the morph animation to not be used when re-opening the box
 			state->chartSelectedNucl = MAXNUMNUCL;
 			break;
 		case UIANIM_NUCLINFOBOX_EXPAND:
@@ -324,6 +327,9 @@ void stopUIAnimation(const app_data *restrict dat, app_state *restrict state, co
 			changeUIState(dat,state,UISTATE_FULLLEVELINFO); //update UI state now that the full info box is visible
 			break;
 		case UIANIM_NUCLINFOBOX_CONTRACT:
+			clearSelectionStrs(&state->ds,&state->tss,1); //allow strings on the info box to be selectable
+			break;
+		case UIANIM_NUCLINFOBOX_MORPH:
 			clearSelectionStrs(&state->ds,&state->tss,1); //allow strings on the info box to be selectable
 			break;
 		case UIANIM_NUCLINFOBOX_TXTFADEIN:
@@ -3309,6 +3315,17 @@ void setInfoBoxDimensions(const app_data *restrict dat, app_state *restrict stat
 		state->ds.infoBoxWidth = NUCL_INFOBOX_MIN_WIDTH;
 	}
 
+	if(state->ds.infoBoxPrevX >= 0.0f){ //initialized to -1 on program start
+		//only do the morphing animation if switching from one info box size to another
+		state->ds.infoBoxPrevX = state->ds.uiElemPosX[UIELEM_NUCL_INFOBOX];
+		state->ds.infoBoxPrevY = state->ds.uiElemPosY[UIELEM_NUCL_INFOBOX];
+		state->ds.infoBoxPrevDispWidth = state->ds.uiElemWidth[UIELEM_NUCL_INFOBOX];
+		state->ds.infoBoxPrevDispHeight = state->ds.uiElemHeight[UIELEM_NUCL_INFOBOX];
+		startUIAnimation(dat,state,UIANIM_NUCLINFOBOX_MORPH);
+		//SDL_Log("Started info box morph.\n");
+	}else{
+		state->ds.infoBoxPrevX = 0.0f;
+	}
 	updateSingleUIElemPosition(dat,state,rdat,UIELEM_NUCL_INFOBOX);
 	updateSingleUIElemPosition(dat,state,rdat,UIELEM_NUCL_INFOBOX_CLOSEBUTTON);
 	updateSingleUIElemPosition(dat,state,rdat,UIELEM_NUCL_FULLINFOBOX_RXNBUTTON);
@@ -4370,6 +4387,41 @@ SDL_FRect getTextSelRect(const text_selection_state *restrict tss, resource_data
 	return rect;
 }
 
+SDL_FRect getInfoBoxAllLvlButtonPos(const app_state *restrict state, const float infoBoxX, const float infoBoxY, const float infoBoxWidth){
+	SDL_FRect pos;
+	pos.w = (float)(NUCL_INFOBOX_ALLLEVELS_BUTTON_WIDTH*state->ds.uiUserScale);
+	pos.h = (float)(UI_TILE_SIZE*state->ds.uiUserScale);
+	if(state->ds.uiAnimPlaying & (1U << UIANIM_NUCLINFOBOX_EXPAND)){
+		float animFrac = juice_smoothStop3(1.0f - state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_EXPAND]/SHORT_UI_ANIM_LENGTH);
+		int16_t defaultPosX = (int16_t)(infoBoxX + infoBoxWidth - (UI_TILE_SIZE*state->ds.uiUserScale) - pos.w - (int32_t)(7*UI_PADDING_SIZE*state->ds.uiUserScale));
+		int16_t defaultPosY = (int16_t)infoBoxY + (int16_t)(4*UI_PADDING_SIZE*state->ds.uiUserScale);
+		int16_t fullPosX = (int16_t)(state->ds.windowXRes-(NUCL_FULLINFOBOX_BACKBUTTON_WIDTH+NUCL_FULLINFOBOX_BACKBUTTON_POS_XR)*state->ds.uiUserScale);
+		int16_t fullPosY = (int16_t)(NUCL_FULLINFOBOX_BACKBUTTON_POS_Y*state->ds.uiUserScale);
+		pos.x = (float)(defaultPosX + animFrac*(fullPosX - defaultPosX));
+		pos.y = (float)(defaultPosY + animFrac*(fullPosY - defaultPosY));
+	}else if(state->ds.uiAnimPlaying & (1U << UIANIM_NUCLINFOBOX_CONTRACT)){
+		float animFrac = juice_smoothStop3(1.0f - state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_CONTRACT]/UI_ANIM_LENGTH);
+		int16_t defaultPosX = (int16_t)(infoBoxX + infoBoxWidth - (UI_TILE_SIZE*state->ds.uiUserScale) - pos.w - (int32_t)(7*UI_PADDING_SIZE*state->ds.uiUserScale));
+		int16_t defaultPosY = (int16_t)infoBoxY + (int16_t)(4*UI_PADDING_SIZE*state->ds.uiUserScale);
+		int16_t fullPosX = (int16_t)(state->ds.windowXRes-(NUCL_FULLINFOBOX_BACKBUTTON_WIDTH+NUCL_FULLINFOBOX_BACKBUTTON_POS_XR)*state->ds.uiUserScale);
+		int16_t fullPosY = (int16_t)(NUCL_FULLINFOBOX_BACKBUTTON_POS_Y*state->ds.uiUserScale);
+		pos.x = (float)(fullPosX + animFrac*(defaultPosX - fullPosX));
+		pos.y = (float)(fullPosY + animFrac*(defaultPosY - fullPosY));
+	}else{
+		pos.x = (float)(infoBoxX + infoBoxWidth - (UI_TILE_SIZE*state->ds.uiUserScale) - pos.w - (int32_t)(7*UI_PADDING_SIZE*state->ds.uiUserScale));
+		pos.y = infoBoxY + (float)(4*UI_PADDING_SIZE*state->ds.uiUserScale);
+	}
+	return pos;
+}
+
+SDL_FRect getInfoBoxCloseButtonPos(const app_state *restrict state, const float infoBoxX, const float infoBoxY, const float infoBoxWidth){
+	SDL_FRect pos;
+	pos.w = (float)(UI_TILE_SIZE*state->ds.uiUserScale);
+	pos.h = pos.w;
+	pos.x = (float)(infoBoxX + infoBoxWidth - pos.w - (int32_t)(4*UI_PADDING_SIZE*state->ds.uiUserScale));
+	pos.y = infoBoxY + (int16_t)(4*UI_PADDING_SIZE*state->ds.uiUserScale);
+	return pos;
+}
 
 //updates UI element (buttons etc.) positions, based on the screen resolution and other factors
 //positioning constants are defined in gui_constants.h
@@ -4604,34 +4656,20 @@ void updateSingleUIElemPosition(const app_data *restrict dat, app_state *restric
 			updateSingleUIElemPosition(dat,state,rdat,UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON);
 			break;
 		case UIELEM_NUCL_INFOBOX_CLOSEBUTTON:
-			state->ds.uiElemWidth[UIELEM_NUCL_INFOBOX_CLOSEBUTTON] = (int16_t)(UI_TILE_SIZE*state->ds.uiUserScale);
-			state->ds.uiElemHeight[UIELEM_NUCL_INFOBOX_CLOSEBUTTON] = state->ds.uiElemWidth[UIELEM_NUCL_INFOBOX_CLOSEBUTTON];
-			state->ds.uiElemPosX[UIELEM_NUCL_INFOBOX_CLOSEBUTTON] = (int16_t)(state->ds.uiElemPosX[UIELEM_NUCL_INFOBOX] + state->ds.uiElemWidth[UIELEM_NUCL_INFOBOX] - state->ds.uiElemWidth[UIELEM_NUCL_INFOBOX_CLOSEBUTTON] - (int32_t)(4*UI_PADDING_SIZE*state->ds.uiUserScale));
-			state->ds.uiElemPosY[UIELEM_NUCL_INFOBOX_CLOSEBUTTON] = state->ds.uiElemPosY[UIELEM_NUCL_INFOBOX] + (int16_t)(4*UI_PADDING_SIZE*state->ds.uiUserScale);
+			; //suppress warning
+			SDL_FRect closeButtonPos = getInfoBoxCloseButtonPos(state,(float)state->ds.uiElemPosX[UIELEM_NUCL_INFOBOX],(float)state->ds.uiElemPosY[UIELEM_NUCL_INFOBOX],(float)state->ds.uiElemWidth[UIELEM_NUCL_INFOBOX]);
+			state->ds.uiElemWidth[UIELEM_NUCL_INFOBOX_CLOSEBUTTON] = (int16_t)(closeButtonPos.w);
+			state->ds.uiElemHeight[UIELEM_NUCL_INFOBOX_CLOSEBUTTON] = (int16_t)(closeButtonPos.h);
+			state->ds.uiElemPosX[UIELEM_NUCL_INFOBOX_CLOSEBUTTON] = (int16_t)(closeButtonPos.x);
+			state->ds.uiElemPosY[UIELEM_NUCL_INFOBOX_CLOSEBUTTON] = (int16_t)(closeButtonPos.y);
 			break;
 		case UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON:
-			state->ds.uiElemWidth[UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON] = (int16_t)(NUCL_INFOBOX_ALLLEVELS_BUTTON_WIDTH*state->ds.uiUserScale);
-			state->ds.uiElemHeight[UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON] = (int16_t)(UI_TILE_SIZE*state->ds.uiUserScale);
-			if(state->ds.uiAnimPlaying & (1U << UIANIM_NUCLINFOBOX_EXPAND)){
-				float animFrac = juice_smoothStop3(1.0f - state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_EXPAND]/SHORT_UI_ANIM_LENGTH);
-				int16_t defaultPosX = (int16_t)(state->ds.uiElemPosX[UIELEM_NUCL_INFOBOX] + state->ds.uiElemWidth[UIELEM_NUCL_INFOBOX] - state->ds.uiElemWidth[UIELEM_NUCL_INFOBOX_CLOSEBUTTON] - state->ds.uiElemWidth[UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON] - (int32_t)(7*UI_PADDING_SIZE*state->ds.uiUserScale));
-				int16_t defaultPosY = state->ds.uiElemPosY[UIELEM_NUCL_INFOBOX] + (int16_t)(4*UI_PADDING_SIZE*state->ds.uiUserScale);
-				int16_t fullPosX = (int16_t)(state->ds.windowXRes-(NUCL_FULLINFOBOX_BACKBUTTON_WIDTH+NUCL_FULLINFOBOX_BACKBUTTON_POS_XR)*state->ds.uiUserScale);
-				int16_t fullPosY = (int16_t)(NUCL_FULLINFOBOX_BACKBUTTON_POS_Y*state->ds.uiUserScale);
-				state->ds.uiElemPosX[UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON] = (int16_t)(defaultPosX + animFrac*(fullPosX - defaultPosX));
-				state->ds.uiElemPosY[UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON] = (int16_t)(defaultPosY + animFrac*(fullPosY - defaultPosY));
-			}else if(state->ds.uiAnimPlaying & (1U << UIANIM_NUCLINFOBOX_CONTRACT)){
-				float animFrac = juice_smoothStop3(1.0f - state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_CONTRACT]/UI_ANIM_LENGTH);
-				int16_t defaultPosX = (int16_t)(state->ds.uiElemPosX[UIELEM_NUCL_INFOBOX] + state->ds.uiElemWidth[UIELEM_NUCL_INFOBOX] - state->ds.uiElemWidth[UIELEM_NUCL_INFOBOX_CLOSEBUTTON] - state->ds.uiElemWidth[UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON] - (int32_t)(7*UI_PADDING_SIZE*state->ds.uiUserScale));
-				int16_t defaultPosY = state->ds.uiElemPosY[UIELEM_NUCL_INFOBOX] + (int16_t)(4*UI_PADDING_SIZE*state->ds.uiUserScale);
-				int16_t fullPosX = (int16_t)(state->ds.windowXRes-(NUCL_FULLINFOBOX_BACKBUTTON_WIDTH+NUCL_FULLINFOBOX_BACKBUTTON_POS_XR)*state->ds.uiUserScale);
-				int16_t fullPosY = (int16_t)(NUCL_FULLINFOBOX_BACKBUTTON_POS_Y*state->ds.uiUserScale);
-				state->ds.uiElemPosX[UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON] = (int16_t)(fullPosX + animFrac*(defaultPosX - fullPosX));
-				state->ds.uiElemPosY[UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON] = (int16_t)(fullPosY + animFrac*(defaultPosY - fullPosY));
-			}else{
-				state->ds.uiElemPosX[UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON] = (int16_t)(state->ds.uiElemPosX[UIELEM_NUCL_INFOBOX] + state->ds.uiElemWidth[UIELEM_NUCL_INFOBOX] - state->ds.uiElemWidth[UIELEM_NUCL_INFOBOX_CLOSEBUTTON] - state->ds.uiElemWidth[UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON] - (int32_t)(7*UI_PADDING_SIZE*state->ds.uiUserScale));
-				state->ds.uiElemPosY[UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON] = state->ds.uiElemPosY[UIELEM_NUCL_INFOBOX] + (int16_t)(4*UI_PADDING_SIZE*state->ds.uiUserScale);
-			}
+			; //suppress warning
+			SDL_FRect allLvlButtonPos = getInfoBoxAllLvlButtonPos(state,(float)state->ds.uiElemPosX[UIELEM_NUCL_INFOBOX],(float)state->ds.uiElemPosY[UIELEM_NUCL_INFOBOX],(float)state->ds.uiElemWidth[UIELEM_NUCL_INFOBOX]);
+			state->ds.uiElemWidth[UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON] = (int16_t)(allLvlButtonPos.w);
+			state->ds.uiElemHeight[UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON] = (int16_t)(allLvlButtonPos.h);
+			state->ds.uiElemPosX[UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON] = (int16_t)(allLvlButtonPos.x);
+			state->ds.uiElemPosY[UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON] = (int16_t)(allLvlButtonPos.y);
 			//SDL_Log("x: %u, y: %u, w: %u, h: %u\n",state->ds.uiElemPosX[UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON],state->ds.uiElemPosY[UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON],state->ds.uiElemWidth[UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON],state->ds.uiElemHeight[UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON]);
 			break;
 		case UIELEM_NUCL_FULLINFOBOX_BACKBUTTON:

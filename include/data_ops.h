@@ -128,6 +128,9 @@ SDL_FRect getRxnMenuButtonRect(const drawing_state *restrict ds, const uint8_t n
 SDL_FRect getContextMenuButtonRect(const app_state *restrict state, const uint8_t menuItem);
 SDL_FRect getTextSelRect(const text_selection_state *restrict tss, resource_data *restrict rdat);
 
+SDL_FRect getInfoBoxAllLvlButtonPos(const app_state *restrict state, const float infoBoxX, const float infoBoxY, const float infoBoxWidth);
+SDL_FRect getInfoBoxCloseButtonPos(const app_state *restrict state, const float infoBoxX, const float infoBoxY, const float infoBoxWidth);
+
 void updateSingleUIElemPosition(const app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat, const uint8_t uiElemInd);
 void updateUIElemPositions(const app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat);
 
