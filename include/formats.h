@@ -136,6 +136,7 @@ typedef struct
   valWithErr energy; //transition energy, in keV
   valWithErr intensity; //relative intensity
   valWithErr icc; //internal conversion coefficient
+  valWithErr delta; //mixing ratio
   uint8_t numMultipoles; //only uses the first couple bits
   uint8_t multipole[MAXMULTPERLEVEL]; //bit 0: E (unset) or M (set), bits 1-4: multipole order, bits 5-6: values from tentative_mult_enum, bit 7: if set, bit 0 corresponds to quadrupole/dipole
   uint8_t finalLvlOffset; //offset of the index of the final level from the initial level
@@ -178,6 +179,7 @@ typedef struct
   valWithErr abundance;
   uint8_t flags; //bits 0 to 1: observation flag (observed/unobserved/inferred/tentative), 
                  //bit 2: set if any internal conversion coefficients are measured in this nuclide
+                 //bit 3: set if any gamma mixing ratios are measured in this nuclide
 }nucl; //gamma data for a given nuclide
 
 typedef struct
