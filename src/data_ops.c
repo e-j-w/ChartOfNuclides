@@ -1943,6 +1943,29 @@ void getGammaEnergyStr(char strOut[32], const ndata *restrict nd, const uint32_t
 	
 }
 
+void getGammaICCStr(char strOut[32], const ndata *restrict nd, const uint32_t tranInd, const uint8_t showErr){
+
+	uint8_t iPrecision = (uint8_t)(nd->tran[tranInd].icc.format & 15U);
+	uint8_t iExponent = (uint8_t)((nd->tran[tranInd].icc.format >> 4U) & 1U);
+	uint8_t iValueType = (uint8_t)((nd->tran[tranInd].icc.format >> 5U) & 15U);
+	if(nd->tran[tranInd].icc.val <= 0.0f){
+		strOut[0] = '\0'; //empty string
+	}else if((showErr == 0)||(nd->tran[tranInd].icc.err == 0)){
+		if(iExponent == 0){
+			SDL_snprintf(strOut,32,"%s%.*f",getValueTypeShortStr(iValueType),iPrecision,(double)(nd->tran[tranInd].icc.val));
+		}else{
+			SDL_snprintf(strOut,32,"%s%.*fE%i",getValueTypeShortStr(iValueType),iPrecision,(double)(nd->tran[tranInd].icc.val),nd->tran[tranInd].icc.exponent);
+		}
+	}else{
+		if(iExponent == 0){
+			SDL_snprintf(strOut,32,"%s%.*f(%u)",getValueTypeShortStr(iValueType),iPrecision,(double)(nd->tran[tranInd].icc.val),nd->tran[tranInd].icc.err);
+		}else{
+			SDL_snprintf(strOut,32,"%s%.*f(%u)E%i",getValueTypeShortStr(iValueType),iPrecision,(double)(nd->tran[tranInd].icc.val),nd->tran[tranInd].icc.err,nd->tran[tranInd].icc.exponent);
+		}
+	}
+	
+}
+
 void getGammaIntensityStr(char strOut[32], const ndata *restrict nd, const uint32_t tranInd, const uint8_t showErr){
 
 	uint8_t iPrecision = (uint8_t)(nd->tran[tranInd].intensity.format & 15U);
@@ -1988,13 +2011,13 @@ void getGammaMultipolarityStr(char strOut[32], const ndata *restrict nd, const u
 				SDL_strlcat(strOut,"[",32);
 			}
 		}else if(mTentative == TENTATIVESP_NONE){
-			if(tentative == 1){
-				tentative = 0;
-				SDL_strlcat(strOut,")",32);
-			}
 			if(derived == 1){
 				derived = 0;
 				SDL_strlcat(strOut,"]",32);
+			}
+			if(tentative == 1){
+				tentative = 0;
+				SDL_strlcat(strOut,")",32);
 			}
 		}
 		if(i>0){
@@ -2025,11 +2048,11 @@ void getGammaMultipolarityStr(char strOut[32], const ndata *restrict nd, const u
 		}
 
 		if(i==(nd->tran[tranInd].numMultipoles-1)){
-			if(derived == 1){
-				SDL_strlcat(strOut,"]",32);
-			}
 			if(tentative == 1){
 				SDL_strlcat(strOut,")",32);
+			}
+			if(derived == 1){
+				SDL_strlcat(strOut,"]",32);
 			}
 		}
 	}
@@ -2211,7 +2234,7 @@ void getMostProbableDecayModeStr(char strOut[32], const ndata *restrict nd, cons
 		probDcyModeInd = nd->levels[lvlInd].firstDecMode + (uint32_t)maxProbInd;
 		getDecayModeStr(strOut,nd,probDcyModeInd);
 	}else if(nd->levels[lvlInd].numTran >0){
-		SDL_snprintf(strOut,32,"IT > 0%%");
+		SDL_strlcpy(strOut,"IT > 0%",32);
 	}else{
 		SDL_snprintf(strOut,32," "); //couldn't find probable decay mode
 		return;
@@ -3154,6 +3177,7 @@ void setFullLevelInfoDimensions(const app_data *restrict dat, app_state *restric
 	state->ds.fullInfoEgammaColWidth = NUCL_FULLINFOBOX_EGAMMA_COL_MIN_WIDTH;
 	state->ds.fullInfoIgammaColWidth = NUCL_FULLINFOBOX_IGAMMA_COL_MIN_WIDTH;
 	state->ds.fullInfoMgammaColWidth = NUCL_FULLINFOBOX_MGAMMA_COL_MIN_WIDTH;
+	state->ds.fullInfoICCColWidth = NUCL_FULLINFOBOX_ICC_COL_MIN_WIDTH;
 	state->ds.fullInfoFinalElevelColWidth = NUCL_FULLINFOBOX_FINALLEVEL_E_COL_MIN_WIDTH;
 	state->ds.fullInfoFinalJpiColWidth = NUCL_FULLINFOBOX_FINALLEVEL_JPI_COL_MIN_WIDTH;
 
@@ -3205,6 +3229,11 @@ void setFullLevelInfoDimensions(const app_data *restrict dat, app_state *restric
 			if(tmpWidth > state->ds.fullInfoMgammaColWidth){
 				state->ds.fullInfoMgammaColWidth = tmpWidth;
 			}
+			getGammaICCStr(tmpStr,&dat->ndat,(uint32_t)(dat->ndat.levels[lvlInd].firstTran + i),1);
+			tmpWidth = getTextWidthScaleIndependent(rdat,FONTSIZE_NORMAL,tmpStr) + 2*UI_PADDING_SIZE;
+			if(tmpWidth > state->ds.fullInfoICCColWidth){
+				state->ds.fullInfoICCColWidth = tmpWidth;
+			}
 			uint32_t finalLvlInd = getFinalLvlInd(&dat->ndat,lvlInd,(uint32_t)(dat->ndat.levels[lvlInd].firstTran + i));
       getLvlEnergyStr(tmpStr,&dat->ndat,finalLvlInd,0);
 			tmpWidth = getTextWidthScaleIndependent(rdat,FONTSIZE_NORMAL,tmpStr) + 2*UI_PADDING_SIZE;
@@ -3219,9 +3248,10 @@ void setFullLevelInfoDimensions(const app_data *restrict dat, app_state *restric
 		}
 	}
 	
-	state->ds.fullInfoAllColWidth = state->ds.fullInfoElevelColWidth + state->ds.fullInfoJpiColWidth + state->ds.fullInfoHlColWidth + state->ds.fullInfoEgammaColWidth + state->ds.fullInfoIgammaColWidth + state->ds.fullInfoMgammaColWidth + state->ds.fullInfoFinalElevelColWidth + state->ds.fullInfoFinalJpiColWidth;
-	state->ds.fullInfoAllColWidthExclM = state->ds.fullInfoElevelColWidth + state->ds.fullInfoJpiColWidth + state->ds.fullInfoHlColWidth + state->ds.fullInfoEgammaColWidth + state->ds.fullInfoIgammaColWidth + state->ds.fullInfoFinalElevelColWidth + state->ds.fullInfoFinalJpiColWidth;
-	state->ds.fullInfoAllColWidthExcluMFinalJpi = state->ds.fullInfoElevelColWidth + state->ds.fullInfoJpiColWidth + state->ds.fullInfoHlColWidth + state->ds.fullInfoEgammaColWidth + state->ds.fullInfoIgammaColWidth + state->ds.fullInfoFinalElevelColWidth;
+	state->ds.fullInfoAllColWidth = state->ds.fullInfoElevelColWidth + state->ds.fullInfoJpiColWidth + state->ds.fullInfoHlColWidth + state->ds.fullInfoEgammaColWidth + state->ds.fullInfoIgammaColWidth + state->ds.fullInfoMgammaColWidth + state->ds.fullInfoICCColWidth + state->ds.fullInfoFinalElevelColWidth + state->ds.fullInfoFinalJpiColWidth;
+	state->ds.fullInfoAllColWidthExclICC = state->ds.fullInfoElevelColWidth + state->ds.fullInfoJpiColWidth + state->ds.fullInfoHlColWidth + state->ds.fullInfoEgammaColWidth + state->ds.fullInfoIgammaColWidth + state->ds.fullInfoMgammaColWidth + state->ds.fullInfoFinalElevelColWidth + state->ds.fullInfoFinalJpiColWidth;
+	state->ds.fullInfoAllColWidthExclICCM = state->ds.fullInfoElevelColWidth + state->ds.fullInfoJpiColWidth + state->ds.fullInfoHlColWidth + state->ds.fullInfoEgammaColWidth + state->ds.fullInfoIgammaColWidth + state->ds.fullInfoFinalElevelColWidth + state->ds.fullInfoFinalJpiColWidth;
+	state->ds.fullInfoAllColWidthExcluICCMFinalJpi = state->ds.fullInfoElevelColWidth + state->ds.fullInfoJpiColWidth + state->ds.fullInfoHlColWidth + state->ds.fullInfoEgammaColWidth + state->ds.fullInfoIgammaColWidth + state->ds.fullInfoFinalElevelColWidth;
 
 }
 

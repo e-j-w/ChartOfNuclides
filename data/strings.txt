@@ -30,6 +30,7 @@ lifetime|τ
 decay_mode|Decay Mode
 energy_gamma|E(γ) (keV)
 intensity_gamma|I(γ)
+icc_gamma|α(γ)
 multipolarity_gamma|M(γ)
 final_level|Final Level
 neutrons_desc|Neutrons (N)

@@ -271,6 +271,7 @@ static int parseAppRules(app_data *restrict dat, asset_mapping *restrict stringI
 	dat->locStringIDs[LOCSTR_DECAYMODE] = (uint16_t)nameToAssetID("decay_mode",stringIDmap);
 	dat->locStringIDs[LOCSTR_ENERGY_GAMMA] = (uint16_t)nameToAssetID("energy_gamma",stringIDmap);
 	dat->locStringIDs[LOCSTR_INTENSITY_GAMMA] = (uint16_t)nameToAssetID("intensity_gamma",stringIDmap);
+	dat->locStringIDs[LOCSTR_ICC_GAMMA] = (uint16_t)nameToAssetID("icc_gamma",stringIDmap);
 	dat->locStringIDs[LOCSTR_MULTIPOLARITY_GAMMA] = (uint16_t)nameToAssetID("multipolarity_gamma",stringIDmap);
 	dat->locStringIDs[LOCSTR_FINALLEVEL] = (uint16_t)nameToAssetID("final_level",stringIDmap);
 	dat->locStringIDs[LOCSTR_PROTONSDESC] = (uint16_t)nameToAssetID("protons_desc",stringIDmap);
@@ -2822,12 +2823,20 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 								//get the number of sig figs
 								nd->tran[tranInd].icc.format = 0; //default
 								//SDL_Log("iccBuff: %s\n",iccBuff);
+								//check for presence of exponent
+								uint8_t hasExp = 0;
+								for(uint8_t i=0; i<SDL_strlen(iccBuff);i++){
+									if(iccBuff[i]=='E'){
+										hasExp = 1;
+										break;
+									}
+								}
 								tok = SDL_strtok_r(iccBuff,".",&saveptr);
 								if(tok!=NULL){
-									//SDL_Log("%s\n",tok);
+									//SDL_Log("tok_1: %s\n",tok);
 									tok = SDL_strtok_r(NULL,"E",&saveptr); //some values are specified with exponents
 									if(tok!=NULL){
-										//SDL_Log("%s\n",tok);
+										//SDL_Log("tok_2: %s\n",tok);
 										nd->tran[tranInd].icc.format = (uint16_t)SDL_strlen(tok);
 										//check for trailing empty spaces
 										for(uint8_t i=0;i<nd->tran[tranInd].icc.format;i++){
@@ -2836,17 +2845,34 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 												break;
 											}
 										}
-										if(nd->tran[tranInd].icc.format > 15U){
-											nd->tran[tranInd].icc.format = 15U; //only 4 bits available for precision
-										}
 										//SDL_Log("format: %u\n",nd->tran[tranInd].icc.format);
 										tok = SDL_strtok_r(NULL,"",&saveptr); //get the remaining part of the string (only get past here if the value was expressed in exponent form)
 										if(tok!=NULL){
-											//SDL_Log("ICC in exponent form: %s\n",ebuff);
 											//value was in exponent format
 											nd->tran[tranInd].icc.exponent = (int8_t)atoi(tok);
 											gammaICC = gammaICC / powf(10.0f,(float)(nd->tran[tranInd].icc.exponent));
+											if(nd->tran[tranInd].icc.format > 15U){
+												nd->tran[tranInd].icc.format = 15U; //only 4 bits available for precision
+											}
 											nd->tran[tranInd].icc.format |= (uint16_t)(1U << 4); //exponent flag
+											//SDL_Log("ICC in exponent form: %s, exponent: %u\n",line,nd->tran[tranInd].icc.exponent);
+										}else if(hasExp){
+											//we missed parsing the exponent...
+											//assume value was something like '3.E9', in which case the exponent was
+											//earlier parsed as the format instead
+											memcpy(iccBuff, &line[55], 7); //remake iccBuff
+											iccBuff[7] = '\0';
+											tok = SDL_strtok_r(iccBuff,".",&saveptr);
+											if(tok!=NULL){
+												tok = SDL_strtok_r(NULL,"E",&saveptr);
+												if(tok!=NULL){
+													nd->tran[tranInd].icc.exponent = (int8_t)SDL_atoi(tok);
+													gammaICC = gammaICC / powf(10.0f,(float)(nd->tran[tranInd].icc.exponent));
+													nd->tran[tranInd].icc.format = 1;
+													nd->tran[tranInd].icc.format |= (uint16_t)(1U << 4); //exponent flag
+													//SDL_Log("ICC in exponent form: %s, exponent: %u\n",line,nd->tran[tranInd].icc.exponent);
+												}
+											}
 										}
 									}
 								}
@@ -2946,9 +2972,101 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 
 								nd->tran[tranInd].intensity.val=gammaI;
 								nd->tran[tranInd].icc.val=gammaICC;
+								if(gammaICC > 0.0f){
+									//flag that the nuclide has ICC data
+									nd->nuclData[nd->numNucl].flags |= (1U << 2);
+								}
 								nd->levels[nd->numLvls-1].numTran++;
 								nd->numTran++;
 									
+							}else if(SDL_strcmp(typebuff+1," G")==0){
+								//check for other properties not specified in the main record
+								uint32_t tranInd = nd->levels[nd->numLvls-1].firstTran + (uint32_t)(nd->levels[nd->numLvls-1].numTran - 1);
+								char gBuff[80],tval[80];
+								SDL_strlcpy(gBuff,line,80);
+								tok=SDL_strtok_r(gBuff," $={},",&saveptr);
+								while(tok != NULL){
+									SDL_strlcpy(tval,tok,80);
+									if(SDL_strcmp(tval,"CC")==0){
+										//SDL_Log("Found conversion coefficient in line: %s\n",line);
+										if(nd->tran[tranInd].icc.val == 0.0f){
+											tok = SDL_strtok_r(NULL," $={},",&saveptr);
+											if(tok!=NULL){
+												SDL_strlcpy(tval,tok,80);
+												//SDL_Log("tval: %s\n",tval);
+												nd->tran[tranInd].icc.val = (float)atof(tval);
+												//flag that the nuclide has ICC data
+												nd->nuclData[nd->numNucl].flags |= (1U << 2);
+												//check for presence of exponent
+												uint8_t hasExp = 0;
+												for(uint8_t i=0; i<SDL_strlen(tval);i++){
+													if(tval[i]=='E'){
+														hasExp = 1;
+														break;
+													}
+												}
+												char *saveptr2 = NULL;
+												char *tok2 = SDL_strtok_r(tval,".",&saveptr2);
+												if(tok2!=NULL){
+													//SDL_Log("tok2_1: %s\n",tok);
+													tok2 = SDL_strtok_r(NULL,"E",&saveptr2); //some values are specified with exponents
+													if(tok2!=NULL){
+														//SDL_Log("tok2_2: %s\n",tok2);
+														nd->tran[tranInd].icc.format = (uint16_t)SDL_strlen(tok2);
+														//check for trailing empty spaces
+														for(uint8_t i=0;i<nd->tran[tranInd].icc.format;i++){
+															if(SDL_isspace(tok2[i])){
+																nd->tran[tranInd].icc.format = i;
+																break;
+															}
+														}
+														if(nd->tran[tranInd].icc.format > 15U){
+															nd->tran[tranInd].icc.format = 15U; //only 4 bits available for precision
+														}
+														//SDL_Log("format: %u\n",nd->tran[tranInd].icc.format);
+														tok2 = SDL_strtok_r(NULL,"",&saveptr2); //get the remaining part of the string (only get past here if the value was expressed in exponent form)
+														if(tok2!=NULL){
+															//SDL_Log("ICC in exponent form: %s\n",line);
+															//value was in exponent format
+															nd->tran[tranInd].icc.exponent = (int8_t)atoi(tok2);
+															nd->tran[tranInd].icc.val = nd->tran[tranInd].icc.val / powf(10.0f,(float)(nd->tran[tranInd].icc.exponent));
+															nd->tran[tranInd].icc.format |= (uint16_t)(1U << 4); //exponent flag
+														}else if(hasExp){
+															//we missed parsing the exponent...
+															//assume value was something like '3.E9', in which case the exponent was
+															//earlier parsed as the format instead
+															SDL_strlcpy(tval,tok,80); //remake tval
+															tok2 = SDL_strtok_r(tval,".",&saveptr2);
+															if(tok2!=NULL){
+																tok2 = SDL_strtok_r(NULL,"E",&saveptr2);
+																if(tok2!=NULL){
+																	nd->tran[tranInd].icc.exponent = (int8_t)SDL_atoi(tok2);
+																	nd->tran[tranInd].icc.val = nd->tran[tranInd].icc.val / powf(10.0f,(float)(nd->tran[tranInd].icc.exponent));
+																	nd->tran[tranInd].icc.format = 1;
+																	nd->tran[tranInd].icc.format |= (uint16_t)(1U << 4); //exponent flag
+																	//SDL_Log("ICC in exponent form: %s, exponent: %u\n",line,nd->tran[tranInd].icc.exponent);
+																}
+															}
+														}
+													}
+												}
+												tok = SDL_strtok_r(NULL," $={},",&saveptr);
+												if(tok!=NULL){
+													SDL_strlcpy(tval,tok,80);
+													//SDL_Log("tok: %s\n",tok);
+													if((tval[0]=='I')&&(SDL_strlen(tval) > 1)){
+														nd->tran[tranInd].icc.err = (uint8_t)atoi(&tval[1]);
+													}else if(SDL_isdigit(tval[0])){
+														nd->tran[tranInd].icc.err = (uint8_t)atoi(tval);
+													}
+												}
+											}
+										}
+									}
+									if(tok!=NULL){
+										tok = SDL_strtok_r(NULL," $={},",&saveptr);
+									}
+								}
 							}
 						}
 					}
@@ -3916,15 +4034,28 @@ int buildDatabase(const char *appBasePath, ndata *nd){
   //find ground state level
   for(uint16_t i=0;i<nd->numNucl;i++){
 		uint8_t firstLvlWithHl = 255;
+		uint8_t zeroEnLvl = 255;
 		nd->nuclData[i].gsLevel = 0;
+		for(uint16_t j=0; j<nd->nuclData[i].numLevels; j++){
+			uint8_t eValueType = (uint8_t)((nd->levels[nd->nuclData[i].firstLevel + (uint32_t)j].energy.format >> 5U) & 15U);
+			uint8_t isVariableE = ((eValueType == VALUETYPE_X)||(eValueType == VALUETYPE_PLUSX));
+			if(!isVariableE){
+				if(nd->levels[nd->nuclData[i].firstLevel + (uint32_t)j].energy.val == 0.0f){
+					if(j<255){
+						zeroEnLvl = (uint8_t)j;
+					}
+					break;
+				}
+			}
+		}
     for(uint16_t j=0; j<nd->nuclData[i].numLevels; j++){
       double hl = getNuclLevelHalfLifeSeconds(nd,i,j);
+			uint8_t eValueType = (uint8_t)((nd->levels[nd->nuclData[i].firstLevel + (uint32_t)j].energy.format >> 5U) & 15U);
+			uint8_t isVariableE = ((eValueType == VALUETYPE_X)||(eValueType == VALUETYPE_PLUSX));
       if(hl >= -1.0){
 				if((firstLvlWithHl==255)&&(j<255)){
 					firstLvlWithHl=(uint8_t)j;
 				}
-				uint8_t eValueType = (uint8_t)((nd->levels[nd->nuclData[i].firstLevel + (uint32_t)j].energy.format >> 5U) & 15U);
-				uint8_t isVariableE = ((eValueType == VALUETYPE_X)||(eValueType == VALUETYPE_PLUSX));
 				if(!isVariableE){
 					//if(j!=0) SDL_Log("GS ind for nucleus %u: %u\n",i,j);
 					if(j>=255){
@@ -3936,9 +4067,8 @@ int buildDatabase(const char *appBasePath, ndata *nd){
 					break;
 				}
       }else if(nd->levels[nd->nuclData[i].firstLevel + (uint32_t)j].energy.val == 0.0f){
-				uint8_t eValueType = (uint8_t)((nd->levels[nd->nuclData[i].firstLevel + (uint32_t)j].energy.format >> 5U) & 15U);
-				uint8_t isVariableE = ((eValueType == VALUETYPE_X)||(eValueType == VALUETYPE_PLUSX));
-				if(!isVariableE){
+				//ground state is the level with 0 energy (or 0+X energy, if no level has 0 energy)
+				if((!isVariableE) || (zeroEnLvl==255)){
 					//if(j!=0) SDL_Log("GS ind for nucleus %u: %u\n",i,j);
 					if(j>=255){
 						SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,"GS level index for nuclide %u is too high (%u).\n",i,j);

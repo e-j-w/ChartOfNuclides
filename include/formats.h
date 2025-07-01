@@ -176,7 +176,8 @@ typedef struct
   uint16_t firstRxn; //index of first reaction populating this nuclide
   uint8_t numRxns;
   valWithErr abundance;
-  uint8_t flags; //bits 0 to 1: observation flag (observed/unobserved/inferred/tentative)
+  uint8_t flags; //bits 0 to 1: observation flag (observed/unobserved/inferred/tentative), 
+                 //bit 2: set if any internal conversion coefficients are measured in this nuclide
 }nucl; //gamma data for a given nuclide
 
 typedef struct
@@ -242,8 +243,8 @@ typedef struct
   float infoBoxWidth, infoBoxEColOffset, infoBoxJpiColOffset, infoBoxHlColOffset, infoBoxDcyModeColOffset;
   float infoBoxCurrentX, infoBoxCurrentY, infoBoxCurrentDispWidth, infoBoxCurrentDispHeight, infoBoxPrevX, infoBoxPrevY, infoBoxPrevDispWidth, infoBoxPrevDispHeight;
   float fullInfoElevelColWidth, fullInfoJpiColWidth, fullInfoHlColWidth, fullInfoEgammaColWidth, fullInfoIgammaColWidth;
-  float fullInfoMgammaColWidth, fullInfoFinalElevelColWidth, fullInfoFinalJpiColWidth;
-  float fullInfoAllColWidth, fullInfoAllColWidthExclM, fullInfoAllColWidthExcluMFinalJpi;
+  float fullInfoMgammaColWidth, fullInfoICCColWidth, fullInfoFinalElevelColWidth, fullInfoFinalJpiColWidth;
+  float fullInfoAllColWidth, fullInfoAllColWidthExclICC, fullInfoAllColWidthExclICCM, fullInfoAllColWidthExcluICCMFinalJpi;
   float nuclFullInfoScrollStartY, nuclFullInfoScrollToY, nuclFullInfoScrollY; //full level info view: number of lines scrolled in the y-direction
   uint16_t nuclFullInfoMaxScrollY; //maximum scroll position, in lines
   uint8_t rxnMenuColumns; //how many columns to use in the reaction menu

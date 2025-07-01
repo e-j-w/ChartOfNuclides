@@ -52,6 +52,7 @@ const char* getElementFamilyStr(const app_data *restrict dat, const int16_t Z);
 void getMassValStr(char strOut[32], const dblValWithErr mVal, const uint8_t showErr);
 void getQValStr(char strOut[32], const valWithErr qVal, const uint8_t showErr);
 void getGammaEnergyStr(char strOut[32], const ndata *restrict nd, const uint32_t tranInd, const uint8_t showErr);
+void getGammaICCStr(char strOut[32], const ndata *restrict nd, const uint32_t tranInd, const uint8_t showErr);
 void getGammaIntensityStr(char strOut[32], const ndata *restrict nd, const uint32_t tranInd, const uint8_t showErr);
 void getGammaMultipolarityStr(char strOut[32], const ndata *restrict nd, const uint32_t tranInd);
 void getLvlEnergyStr(char strOut[32], const ndata *restrict nd, const uint32_t lvlInd, const uint8_t showErr);
