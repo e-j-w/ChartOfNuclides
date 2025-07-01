@@ -244,11 +244,10 @@ typedef struct
   float infoBoxTableHeight; //the height in unscaled pixels needed to show the info box ground and isomeric state info
   float infoBoxWidth, infoBoxEColOffset, infoBoxJpiColOffset, infoBoxHlColOffset, infoBoxDcyModeColOffset;
   float infoBoxCurrentX, infoBoxCurrentY, infoBoxCurrentDispWidth, infoBoxCurrentDispHeight, infoBoxPrevX, infoBoxPrevY, infoBoxPrevDispWidth, infoBoxPrevDispHeight;
-  float fullInfoElevelColWidth, fullInfoJpiColWidth, fullInfoHlColWidth, fullInfoEgammaColWidth, fullInfoIgammaColWidth;
-  float fullInfoMgammaColWidth, fullInfoICCColWidth, fullInfoFinalElevelColWidth, fullInfoFinalJpiColWidth;
-  float fullInfoAllColWidth, fullInfoAllColWidthExclICC, fullInfoAllColWidthExclICCM, fullInfoAllColWidthExcluICCMFinalJpi;
+  float fullInfoColWidth[LLCOLUMN_ENUM_LENGTH];
   float nuclFullInfoScrollStartY, nuclFullInfoScrollToY, nuclFullInfoScrollY; //full level info view: number of lines scrolled in the y-direction
   uint16_t nuclFullInfoMaxScrollY; //maximum scroll position, in lines
+  uint16_t nuclFullInfoShownColumns; //bit-pattern describing which columns are shown in the full level info view (values from level_list_column_enum)
   uint8_t rxnMenuColumns; //how many columns to use in the reaction menu
   uint8_t mouseOverRxn, mouseHoldRxn, selectedRxn; //which item in the reaction menu is moused-over/selected, =255 if none
   uint64_t shownElements; //bit pattern describing which UI elements are being shown, values from ui_element_enum

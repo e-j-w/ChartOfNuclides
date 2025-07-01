@@ -124,6 +124,10 @@ void initializeTempState(const app_data *restrict dat, app_state *restrict state
 		SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"FONTSIZE_ENUM_LENGTH is too long, fonts cannot be expressed in 3 bits (tss->selectableStrProp)!\n");
 		exit(-1);
 	}
+	if(LLCOLUMN_ENUM_LENGTH > /* DISABLES CODE */ (16)){
+		SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"LLCOLUMN_ENUM_LENGTH is too long, cannot be indexed by a uint16_t bit pattern (ds->nuclFullInfoShownColumns)!\n");
+		exit(-1);
+	}
 
 }
 
@@ -1966,6 +1970,37 @@ void getGammaICCStr(char strOut[32], const ndata *restrict nd, const uint32_t tr
 	
 }
 
+void getGammaDeltaStr(char strOut[32], const ndata *restrict nd, const uint32_t tranInd, const uint8_t showErr){
+
+	uint8_t dPrecision = (uint8_t)(nd->tran[tranInd].delta.format & 15U);
+	uint8_t dExponent = (uint8_t)((nd->tran[tranInd].delta.format >> 4U) & 1U);
+	uint8_t dValueType = (uint8_t)((nd->tran[tranInd].delta.format >> 5U) & 15U);
+	if((nd->tran[tranInd].delta.val == 0.0f)&&(nd->tran[tranInd].delta.err == 0.0f)){
+		strOut[0] = '\0'; //empty string
+	}else if((showErr == 0)||(nd->tran[tranInd].delta.err == 0)){
+		if(dExponent == 0){
+			SDL_snprintf(strOut,32,"%s%.*f",getValueTypeShortStr(dValueType),dPrecision,(double)(nd->tran[tranInd].delta.val));
+		}else{
+			SDL_snprintf(strOut,32,"%s%.*fE%i",getValueTypeShortStr(dValueType),dPrecision,(double)(nd->tran[tranInd].delta.val),nd->tran[tranInd].delta.exponent);
+		}
+	}else{
+		if(dValueType == VALUETYPE_ASYMERROR){
+			uint8_t negErr = (uint8_t)((nd->tran[tranInd].delta.format >> 9U) & 127U);
+			if(dExponent == 0){
+				SDL_snprintf(strOut,32,"%s%.*f(+%u-%u)",getValueTypeShortStr(dValueType),dPrecision,(double)(nd->tran[tranInd].delta.val),nd->tran[tranInd].delta.err,negErr);
+			}else{
+				SDL_snprintf(strOut,32,"%s%.*f(+%u-%u)E%i",getValueTypeShortStr(dValueType),dPrecision,(double)(nd->tran[tranInd].delta.val),nd->tran[tranInd].delta.err,negErr,nd->tran[tranInd].delta.exponent);
+			}
+		}else{
+			if(dExponent == 0){
+				SDL_snprintf(strOut,32,"%s%.*f(%u)",getValueTypeShortStr(dValueType),dPrecision,(double)(nd->tran[tranInd].delta.val),nd->tran[tranInd].delta.err);
+			}else{
+				SDL_snprintf(strOut,32,"%s%.*f(%u)E%i",getValueTypeShortStr(dValueType),dPrecision,(double)(nd->tran[tranInd].delta.val),nd->tran[tranInd].delta.err,nd->tran[tranInd].delta.exponent);
+			}
+		}
+	}
+}
+
 void getGammaIntensityStr(char strOut[32], const ndata *restrict nd, const uint32_t tranInd, const uint8_t showErr){
 
 	uint8_t iPrecision = (uint8_t)(nd->tran[tranInd].intensity.format & 15U);
@@ -3171,88 +3206,89 @@ void setFullLevelInfoDimensions(const app_data *restrict dat, app_state *restric
 
 	char tmpStr[32];
 	float tmpWidth = 0.0f;
-	state->ds.fullInfoElevelColWidth = NUCL_FULLINFOBOX_ENERGY_COL_MIN_WIDTH;
-	state->ds.fullInfoJpiColWidth = NUCL_FULLINFOBOX_JPI_COL_MIN_WIDTH;
-	state->ds.fullInfoHlColWidth = NUCL_FULLINFOBOX_HALFLIFE_COL_MIN_WIDTH;
-	state->ds.fullInfoEgammaColWidth = NUCL_FULLINFOBOX_EGAMMA_COL_MIN_WIDTH;
-	state->ds.fullInfoIgammaColWidth = NUCL_FULLINFOBOX_IGAMMA_COL_MIN_WIDTH;
-	state->ds.fullInfoMgammaColWidth = NUCL_FULLINFOBOX_MGAMMA_COL_MIN_WIDTH;
-	state->ds.fullInfoICCColWidth = NUCL_FULLINFOBOX_ICC_COL_MIN_WIDTH;
-	state->ds.fullInfoFinalElevelColWidth = NUCL_FULLINFOBOX_FINALLEVEL_E_COL_MIN_WIDTH;
-	state->ds.fullInfoFinalJpiColWidth = NUCL_FULLINFOBOX_FINALLEVEL_JPI_COL_MIN_WIDTH;
+	state->ds.fullInfoColWidth[LLCOLUMN_ELEVEL] = NUCL_FULLINFOBOX_ENERGY_COL_MIN_WIDTH;
+	state->ds.fullInfoColWidth[LLCOLUMN_JPI] = NUCL_FULLINFOBOX_JPI_COL_MIN_WIDTH;
+	state->ds.fullInfoColWidth[LLCOLUMN_HALFLIFE] = NUCL_FULLINFOBOX_HALFLIFE_COL_MIN_WIDTH;
+	state->ds.fullInfoColWidth[LLCOLUMN_EGAMMA] = NUCL_FULLINFOBOX_EGAMMA_COL_MIN_WIDTH;
+	state->ds.fullInfoColWidth[LLCOLUMN_IGAMMA] = NUCL_FULLINFOBOX_IGAMMA_COL_MIN_WIDTH;
+	state->ds.fullInfoColWidth[LLCOLUMN_MGAMMA] = NUCL_FULLINFOBOX_MGAMMA_COL_MIN_WIDTH;
+	state->ds.fullInfoColWidth[LLCOLUMN_ICC] = NUCL_FULLINFOBOX_ICC_COL_MIN_WIDTH;
+	state->ds.fullInfoColWidth[LLCOLUMN_DELTA] = NUCL_FULLINFOBOX_DELTA_COL_MIN_WIDTH;
+	state->ds.fullInfoColWidth[LLCOLUMN_FINALLEVEL_E] = NUCL_FULLINFOBOX_FINALLEVEL_E_COL_MIN_WIDTH;
+	state->ds.fullInfoColWidth[LLCOLUMN_FINALLEVEL_JPI] = NUCL_FULLINFOBOX_FINALLEVEL_JPI_COL_MIN_WIDTH;
 
 	for(uint32_t lvlInd = dat->ndat.nuclData[selNucl].firstLevel; lvlInd<(dat->ndat.nuclData[selNucl].firstLevel+dat->ndat.nuclData[selNucl].numLevels); lvlInd++){
 		getLvlEnergyStr(tmpStr,&dat->ndat,lvlInd,1);
 		tmpWidth = getTextWidthScaleIndependent(rdat,FONTSIZE_NORMAL,tmpStr) + 2*UI_PADDING_SIZE;
-		if(tmpWidth > state->ds.fullInfoElevelColWidth){
-			state->ds.fullInfoElevelColWidth = tmpWidth;
+		if(tmpWidth > state->ds.fullInfoColWidth[LLCOLUMN_ELEVEL]){
+			state->ds.fullInfoColWidth[LLCOLUMN_ELEVEL] = tmpWidth;
 		}
 		uint8_t slInd = (uint8_t)((dat->ndat.levels[lvlInd].format >> 1U) & 15U);
 		if(slInd > 0){
-			tmpWidth = getTextWidthScaleIndependent(rdat,FONTSIZE_NORMAL,getSpecialLvlStr(dat,slInd)) + 6*UI_PADDING_SIZE;
-			if(tmpWidth > state->ds.fullInfoElevelColWidth){
-				state->ds.fullInfoElevelColWidth = tmpWidth;
+			tmpWidth = getTextWidthScaleIndependent(rdat,FONTSIZE_NORMAL,getSpecialLvlStr(dat,slInd)) + 3*NUCL_FULLINFOBOX_ONECOL_DISPLAY_PADDING;
+			if(tmpWidth > state->ds.fullInfoColWidth[LLCOLUMN_ELEVEL]){
+				state->ds.fullInfoColWidth[LLCOLUMN_ELEVEL] = tmpWidth;
 			}
 		}
 		getSpinParStr(tmpStr,&dat->ndat,lvlInd);
-		tmpWidth = getTextWidthScaleIndependent(rdat,FONTSIZE_NORMAL,tmpStr) + 2*UI_PADDING_SIZE;
-		if(tmpWidth > state->ds.fullInfoJpiColWidth){
-			state->ds.fullInfoJpiColWidth = tmpWidth;
+		tmpWidth = getTextWidthScaleIndependent(rdat,FONTSIZE_NORMAL,tmpStr) + NUCL_FULLINFOBOX_ONECOL_DISPLAY_PADDING;
+		if(tmpWidth > state->ds.fullInfoColWidth[LLCOLUMN_JPI]){
+			state->ds.fullInfoColWidth[LLCOLUMN_JPI] = tmpWidth;
 		}
 		getHalfLifeStr(tmpStr,dat,lvlInd,1,0,state->ds.useLifetimes);
-		tmpWidth = getTextWidthScaleIndependent(rdat,FONTSIZE_NORMAL,tmpStr) + 2*UI_PADDING_SIZE;
-		if(tmpWidth > state->ds.fullInfoHlColWidth){
-			state->ds.fullInfoHlColWidth = tmpWidth;
+		tmpWidth = getTextWidthScaleIndependent(rdat,FONTSIZE_NORMAL,tmpStr) + NUCL_FULLINFOBOX_ONECOL_DISPLAY_PADDING;
+		if(tmpWidth > state->ds.fullInfoColWidth[LLCOLUMN_HALFLIFE]){
+			state->ds.fullInfoColWidth[LLCOLUMN_HALFLIFE] = tmpWidth;
 		}
 		if(dat->ndat.levels[lvlInd].numDecModes > 0){
 			for(int8_t i=0; i<dat->ndat.levels[lvlInd].numDecModes; i++){
 				getDecayModeStr(tmpStr,&dat->ndat,dat->ndat.levels[lvlInd].firstDecMode + (uint32_t)i);
-				tmpWidth = getTextWidthScaleIndependent(rdat,FONTSIZE_NORMAL,tmpStr) + 5*UI_PADDING_SIZE;
-				if(tmpWidth > state->ds.fullInfoHlColWidth){
-					state->ds.fullInfoHlColWidth = tmpWidth;
+				tmpWidth = getTextWidthScaleIndependent(rdat,FONTSIZE_NORMAL,tmpStr) + 2*NUCL_FULLINFOBOX_ONECOL_DISPLAY_PADDING;
+				if(tmpWidth > state->ds.fullInfoColWidth[LLCOLUMN_HALFLIFE]){
+					state->ds.fullInfoColWidth[LLCOLUMN_HALFLIFE] = tmpWidth;
 				}
 			}
 		}
 		for(uint16_t i=0; i<dat->ndat.levels[lvlInd].numTran; i++){
       getGammaEnergyStr(tmpStr,&dat->ndat,(uint32_t)(dat->ndat.levels[lvlInd].firstTran + i),1);
-			tmpWidth = getTextWidthScaleIndependent(rdat,FONTSIZE_NORMAL,tmpStr) + 2*UI_PADDING_SIZE;
-			if(tmpWidth > state->ds.fullInfoEgammaColWidth){
-				state->ds.fullInfoEgammaColWidth = tmpWidth;
+			tmpWidth = getTextWidthScaleIndependent(rdat,FONTSIZE_NORMAL,tmpStr) + NUCL_FULLINFOBOX_ONECOL_DISPLAY_PADDING;
+			if(tmpWidth > state->ds.fullInfoColWidth[LLCOLUMN_EGAMMA]){
+				state->ds.fullInfoColWidth[LLCOLUMN_EGAMMA] = tmpWidth;
 			}
 			getGammaIntensityStr(tmpStr,&dat->ndat,(uint32_t)(dat->ndat.levels[lvlInd].firstTran + i),1);
-			tmpWidth = getTextWidthScaleIndependent(rdat,FONTSIZE_NORMAL,tmpStr) + 2*UI_PADDING_SIZE;
-			if(tmpWidth > state->ds.fullInfoIgammaColWidth){
-				state->ds.fullInfoIgammaColWidth = tmpWidth;
+			tmpWidth = getTextWidthScaleIndependent(rdat,FONTSIZE_NORMAL,tmpStr) + NUCL_FULLINFOBOX_ONECOL_DISPLAY_PADDING;
+			if(tmpWidth > state->ds.fullInfoColWidth[LLCOLUMN_IGAMMA]){
+				state->ds.fullInfoColWidth[LLCOLUMN_IGAMMA] = tmpWidth;
 			}
 			getGammaMultipolarityStr(tmpStr,&dat->ndat,(uint32_t)(dat->ndat.levels[lvlInd].firstTran + i));
-			tmpWidth = getTextWidthScaleIndependent(rdat,FONTSIZE_NORMAL,tmpStr) + 2*UI_PADDING_SIZE;
-			if(tmpWidth > state->ds.fullInfoMgammaColWidth){
-				state->ds.fullInfoMgammaColWidth = tmpWidth;
+			tmpWidth = getTextWidthScaleIndependent(rdat,FONTSIZE_NORMAL,tmpStr) + NUCL_FULLINFOBOX_ONECOL_DISPLAY_PADDING;
+			if(tmpWidth > state->ds.fullInfoColWidth[LLCOLUMN_MGAMMA]){
+				state->ds.fullInfoColWidth[LLCOLUMN_MGAMMA] = tmpWidth;
 			}
 			getGammaICCStr(tmpStr,&dat->ndat,(uint32_t)(dat->ndat.levels[lvlInd].firstTran + i),1);
-			tmpWidth = getTextWidthScaleIndependent(rdat,FONTSIZE_NORMAL,tmpStr) + 2*UI_PADDING_SIZE;
-			if(tmpWidth > state->ds.fullInfoICCColWidth){
-				state->ds.fullInfoICCColWidth = tmpWidth;
+			tmpWidth = getTextWidthScaleIndependent(rdat,FONTSIZE_NORMAL,tmpStr) + NUCL_FULLINFOBOX_ONECOL_DISPLAY_PADDING;
+			if(tmpWidth > state->ds.fullInfoColWidth[LLCOLUMN_ICC]){
+				state->ds.fullInfoColWidth[LLCOLUMN_ICC] = tmpWidth;
+			}
+			getGammaDeltaStr(tmpStr,&dat->ndat,(uint32_t)(dat->ndat.levels[lvlInd].firstTran + i),1);
+			tmpWidth = getTextWidthScaleIndependent(rdat,FONTSIZE_NORMAL,tmpStr) + NUCL_FULLINFOBOX_ONECOL_DISPLAY_PADDING;
+			if(tmpWidth > state->ds.fullInfoColWidth[LLCOLUMN_DELTA]){
+				state->ds.fullInfoColWidth[LLCOLUMN_DELTA] = tmpWidth;
 			}
 			uint32_t finalLvlInd = getFinalLvlInd(&dat->ndat,lvlInd,(uint32_t)(dat->ndat.levels[lvlInd].firstTran + i));
       getLvlEnergyStr(tmpStr,&dat->ndat,finalLvlInd,0);
-			tmpWidth = getTextWidthScaleIndependent(rdat,FONTSIZE_NORMAL,tmpStr) + 2*UI_PADDING_SIZE;
-			if(tmpWidth > state->ds.fullInfoFinalElevelColWidth){
-				state->ds.fullInfoFinalElevelColWidth = tmpWidth;
+			tmpWidth = getTextWidthScaleIndependent(rdat,FONTSIZE_NORMAL,tmpStr) + NUCL_FULLINFOBOX_ONECOL_DISPLAY_PADDING;
+			if(tmpWidth > state->ds.fullInfoColWidth[LLCOLUMN_FINALLEVEL_E]){
+				state->ds.fullInfoColWidth[LLCOLUMN_FINALLEVEL_E] = tmpWidth;
 			}
 			getSpinParStr(tmpStr,&dat->ndat,finalLvlInd);
-			tmpWidth = getTextWidthScaleIndependent(rdat,FONTSIZE_NORMAL,tmpStr) + 2*UI_PADDING_SIZE;
-			if(tmpWidth > state->ds.fullInfoFinalJpiColWidth){
-				state->ds.fullInfoFinalJpiColWidth = tmpWidth;
+			tmpWidth = getTextWidthScaleIndependent(rdat,FONTSIZE_NORMAL,tmpStr) + NUCL_FULLINFOBOX_ONECOL_DISPLAY_PADDING;
+			if(tmpWidth > state->ds.fullInfoColWidth[LLCOLUMN_FINALLEVEL_JPI]){
+				state->ds.fullInfoColWidth[LLCOLUMN_FINALLEVEL_JPI] = tmpWidth;
 			}
 		}
 	}
 	
-	state->ds.fullInfoAllColWidth = state->ds.fullInfoElevelColWidth + state->ds.fullInfoJpiColWidth + state->ds.fullInfoHlColWidth + state->ds.fullInfoEgammaColWidth + state->ds.fullInfoIgammaColWidth + state->ds.fullInfoMgammaColWidth + state->ds.fullInfoICCColWidth + state->ds.fullInfoFinalElevelColWidth + state->ds.fullInfoFinalJpiColWidth;
-	state->ds.fullInfoAllColWidthExclICC = state->ds.fullInfoElevelColWidth + state->ds.fullInfoJpiColWidth + state->ds.fullInfoHlColWidth + state->ds.fullInfoEgammaColWidth + state->ds.fullInfoIgammaColWidth + state->ds.fullInfoMgammaColWidth + state->ds.fullInfoFinalElevelColWidth + state->ds.fullInfoFinalJpiColWidth;
-	state->ds.fullInfoAllColWidthExclICCM = state->ds.fullInfoElevelColWidth + state->ds.fullInfoJpiColWidth + state->ds.fullInfoHlColWidth + state->ds.fullInfoEgammaColWidth + state->ds.fullInfoIgammaColWidth + state->ds.fullInfoFinalElevelColWidth + state->ds.fullInfoFinalJpiColWidth;
-	state->ds.fullInfoAllColWidthExcluICCMFinalJpi = state->ds.fullInfoElevelColWidth + state->ds.fullInfoJpiColWidth + state->ds.fullInfoHlColWidth + state->ds.fullInfoEgammaColWidth + state->ds.fullInfoIgammaColWidth + state->ds.fullInfoFinalElevelColWidth;
-
 }
 
 void setInfoBoxDimensions(const app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat, const uint16_t selNucl){

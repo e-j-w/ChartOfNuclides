@@ -272,6 +272,7 @@ static int parseAppRules(app_data *restrict dat, asset_mapping *restrict stringI
 	dat->locStringIDs[LOCSTR_ENERGY_GAMMA] = (uint16_t)nameToAssetID("energy_gamma",stringIDmap);
 	dat->locStringIDs[LOCSTR_INTENSITY_GAMMA] = (uint16_t)nameToAssetID("intensity_gamma",stringIDmap);
 	dat->locStringIDs[LOCSTR_ICC_GAMMA] = (uint16_t)nameToAssetID("icc_gamma",stringIDmap);
+	dat->locStringIDs[LOCSTR_MIXING_GAMMA] = (uint16_t)nameToAssetID("mixing_gamma",stringIDmap);
 	dat->locStringIDs[LOCSTR_MULTIPOLARITY_GAMMA] = (uint16_t)nameToAssetID("multipolarity_gamma",stringIDmap);
 	dat->locStringIDs[LOCSTR_FINALLEVEL] = (uint16_t)nameToAssetID("final_level",stringIDmap);
 	dat->locStringIDs[LOCSTR_PROTONSDESC] = (uint16_t)nameToAssetID("protons_desc",stringIDmap);
@@ -3068,6 +3069,20 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 													//SDL_Log("neg err: %u\n",negErr);
 													nd->tran[tranInd].delta.format |= (uint16_t)(VALUETYPE_ASYMERROR << 5);
 													nd->tran[tranInd].delta.format |= (uint16_t)(negErr << 9);
+												}
+											}
+										}else if(deltaeBuff[0]=='-'){
+											//asymmetric errors, negative error first
+											//SDL_Log("aysmmetric err: %s\n",deltaeBuff);
+											tok = SDL_strtok_r(deltaeBuff, "+",&saveptr);
+											if((tok != NULL)&&(SDL_strlen(tok)>1)){
+												uint16_t negErr = ((uint16_t)atoi(tok+1) & 127U); //negative error
+												//SDL_Log("neg err: %u\n",negErr);
+												nd->tran[tranInd].delta.format |= (uint16_t)(VALUETYPE_ASYMERROR << 5);
+												nd->tran[tranInd].delta.format |= (uint16_t)(negErr << 9);
+												tok = SDL_strtok_r(NULL, "",&saveptr); //get rest of the string
+												if(tok!=NULL){
+													nd->tran[tranInd].delta.err = (uint8_t)atoi(tok); //positive error
 												}
 											}
 										}else{

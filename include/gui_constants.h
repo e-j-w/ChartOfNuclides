@@ -191,12 +191,15 @@ static const float uiScales[UISCALE_ENUM_LENGTH] = {1.0f,1.20f,1.60f,1.85f};
 #define NUCL_FULLINFOBOX_IGAMMA_COL_MIN_WIDTH           90.0f //in unscaled pixels
 #define NUCL_FULLINFOBOX_MGAMMA_COL_MIN_WIDTH           80.0f //in unscaled pixels
 #define NUCL_FULLINFOBOX_ICC_COL_MIN_WIDTH              80.0f //in unscaled pixels
+#define NUCL_FULLINFOBOX_DELTA_COL_MIN_WIDTH            80.0f //in unscaled pixels
 #define NUCL_FULLINFOBOX_DIVIDER_LINE_THICKNESS         1.0f //in unscaled pixels
 #define NUCL_FULLINFOBOX_FINALLEVEL_E_COL_MIN_WIDTH     60.0f //in unscaled pixels
 #define NUCL_FULLINFOBOX_FINALLEVEL_JPI_COL_MIN_WIDTH   40.0f //in unscaled pixels
 #define NUCL_FULLINFOBOX_LEVELLIST_HEADER_POS_Y         112.0f //in unscaled pixels
 #define NUCL_FULLINFOBOX_LEVELLIST_POS_Y                (NUCL_FULLINFOBOX_LEVELLIST_HEADER_POS_Y + 46.0f) //in unscaled pixels
 #define NUCL_FULLINFOBOX_SCROLLBAR_POS_XR               (4*UI_PADDING_SIZE)
+#define NUCL_FULLINFOBOX_ONECOL_DISPLAY_PADDING         (2*UI_PADDING_SIZE)
+#define NUCL_FULLINFOBOX_ALLCOL_DISPLAY_PADDING         (UI_TILE_SIZE)
 
 //performance overlay
 #define PERF_OVERLAY_BUTTON_X_ANCHOR  (CHART_AXIS_DEPTH+16)
