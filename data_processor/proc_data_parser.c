@@ -2883,6 +2883,22 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 												}
 											}
 										}
+									}else if(hasExp){
+										//we missed parsing the exponent...
+										//assume value was something like '3E9'
+										memcpy(iccBuff, &line[55], 7); //remake iccBuff
+										iccBuff[7] = '\0';
+										tok = SDL_strtok_r(iccBuff,"E",&saveptr);
+										if(tok!=NULL){
+											tok = SDL_strtok_r(NULL,"",&saveptr); //get the remaining part of the string (only get past here if the value was expressed in exponent form)
+											if(tok!=NULL){
+												nd->tran[tranInd].icc.exponent = (int8_t)SDL_atoi(tok);
+												gammaICC = gammaICC / powf(10.0f,(float)(nd->tran[tranInd].icc.exponent));
+												nd->tran[tranInd].icc.format = 1;
+												nd->tran[tranInd].icc.format |= (uint16_t)(1U << 4); //exponent flag
+												//SDL_Log("ICC in exponent form: %s, exponent: %i\n",line,nd->tran[tranInd].icc.exponent);
+											}
+										}
 									}
 								}
 
@@ -3172,6 +3188,21 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 																	nd->tran[tranInd].icc.format |= (uint16_t)(1U << 4); //exponent flag
 																	//SDL_Log("ICC in exponent form: %s, exponent: %u\n",line,nd->tran[tranInd].icc.exponent);
 																}
+															}
+														}
+													}else if(hasExp){
+														//we missed parsing the exponent...
+														//assume value was something like '3E9'
+														SDL_strlcpy(tval,tok,80); //remake tval
+														tok2 = SDL_strtok_r(tval,"E",&saveptr2);
+														if(tok2!=NULL){
+															tok2 = SDL_strtok_r(NULL,"",&saveptr2); //get the remaining part of the string (only get past here if the value was expressed in exponent form)
+															if(tok2!=NULL){
+																nd->tran[tranInd].icc.exponent = (int8_t)SDL_atoi(tok2);
+																nd->tran[tranInd].icc.val = nd->tran[tranInd].icc.val / powf(10.0f,(float)(nd->tran[tranInd].icc.exponent));
+																nd->tran[tranInd].icc.format = 1;
+																nd->tran[tranInd].icc.format |= (uint16_t)(1U << 4); //exponent flag
+																//SDL_Log("ICC in exponent form: %s, exponent: %i\n",line,nd->tran[tranInd].icc.exponent);
 															}
 														}
 													}
