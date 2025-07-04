@@ -272,6 +272,7 @@ static int parseAppRules(app_data *restrict dat, asset_mapping *restrict stringI
 	dat->locStringIDs[LOCSTR_ENERGY_GAMMA] = (uint16_t)nameToAssetID("energy_gamma",stringIDmap);
 	dat->locStringIDs[LOCSTR_INTENSITY_GAMMA] = (uint16_t)nameToAssetID("intensity_gamma",stringIDmap);
 	dat->locStringIDs[LOCSTR_ICC_GAMMA] = (uint16_t)nameToAssetID("icc_gamma",stringIDmap);
+	dat->locStringIDs[LOCSTR_MIXING_GAMMA] = (uint16_t)nameToAssetID("mixing_gamma",stringIDmap);
 	dat->locStringIDs[LOCSTR_MULTIPOLARITY_GAMMA] = (uint16_t)nameToAssetID("multipolarity_gamma",stringIDmap);
 	dat->locStringIDs[LOCSTR_FINALLEVEL] = (uint16_t)nameToAssetID("final_level",stringIDmap);
 	dat->locStringIDs[LOCSTR_PROTONSDESC] = (uint16_t)nameToAssetID("protons_desc",stringIDmap);
@@ -2499,6 +2500,14 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 								char icceBuff[3];
 								memcpy(icceBuff, &line[62], 2);
 								icceBuff[2] = '\0';
+								//parse the mixing ratio
+								char deltaBuff[9];
+								memcpy(deltaBuff, &line[41], 8);
+								deltaBuff[8] = '\0';
+								//parse the internal mixing ratio error
+								char deltaeBuff[7];
+								memcpy(deltaeBuff, &line[49], 6);
+								deltaeBuff[6] = '\0';
 								//parse the energy
 								char ebuff[11];
 								memcpy(ebuff, &line[9], 10);
@@ -2857,7 +2866,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 												nd->tran[tranInd].icc.format = 15U; //only 4 bits available for precision
 											}
 											nd->tran[tranInd].icc.format |= (uint16_t)(1U << 4); //exponent flag
-											//SDL_Log("ICC in exponent form: %s, exponent: %u\n",line,nd->tran[tranInd].icc.exponent);
+											//SDL_Log("ICC in exponent form: %s, exponent: %i\n",line,nd->tran[tranInd].icc.exponent);
 										}else if(hasExp){
 											//we missed parsing the exponent...
 											//assume value was something like '3.E9', in which case the exponent was
@@ -2872,8 +2881,24 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 													gammaICC = gammaICC / powf(10.0f,(float)(nd->tran[tranInd].icc.exponent));
 													nd->tran[tranInd].icc.format = 1;
 													nd->tran[tranInd].icc.format |= (uint16_t)(1U << 4); //exponent flag
-													//SDL_Log("ICC in exponent form: %s, exponent: %u\n",line,nd->tran[tranInd].icc.exponent);
+													//SDL_Log("ICC in exponent form: %s, exponent: %i\n",line,nd->tran[tranInd].icc.exponent);
 												}
+											}
+										}
+									}else if(hasExp){
+										//we missed parsing the exponent...
+										//assume value was something like '3E9'
+										memcpy(iccBuff, &line[55], 7); //remake iccBuff
+										iccBuff[7] = '\0';
+										tok = SDL_strtok_r(iccBuff,"E",&saveptr);
+										if(tok!=NULL){
+											tok = SDL_strtok_r(NULL,"",&saveptr); //get the remaining part of the string (only get past here if the value was expressed in exponent form)
+											if(tok!=NULL){
+												nd->tran[tranInd].icc.exponent = (int8_t)SDL_atoi(tok);
+												gammaICC = gammaICC / powf(10.0f,(float)(nd->tran[tranInd].icc.exponent));
+												nd->tran[tranInd].icc.format = 1;
+												nd->tran[tranInd].icc.format |= (uint16_t)(1U << 4); //exponent flag
+												//SDL_Log("ICC in exponent form: %s, exponent: %i\n",line,nd->tran[tranInd].icc.exponent);
 											}
 										}
 									}
@@ -2972,11 +2997,128 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 									}
 								}
 
+								//gamma mixing ratio
+								float gammaDelta = (float)atof(deltaBuff);
+								//get the number of sig figs
+								nd->tran[tranInd].delta.format = 0; //default
+								//SDL_Log("deltaBuff: %s\n",deltaBuff);
+								//check for presence of exponent
+								hasExp = 0;
+								for(uint8_t i=0; i<SDL_strlen(deltaBuff);i++){
+									if(deltaBuff[i]=='E'){
+										hasExp = 1;
+										break;
+									}
+								}
+								tok = SDL_strtok_r(deltaBuff,".",&saveptr);
+								if(tok!=NULL){
+									//SDL_Log("tok_1: %s\n",tok);
+									tok = SDL_strtok_r(NULL,"E",&saveptr); //some values are specified with exponents
+									if(tok!=NULL){
+										//SDL_Log("tok_2: %s\n",tok);
+										nd->tran[tranInd].delta.format = (uint16_t)SDL_strlen(tok);
+										//check for trailing empty spaces
+										for(uint8_t i=0;i<nd->tran[tranInd].delta.format;i++){
+											if(SDL_isspace(tok[i])){
+												nd->tran[tranInd].delta.format = i;
+												break;
+											}
+										}
+										//SDL_Log("format: %u\n",nd->tran[tranInd].delta.format);
+										tok = SDL_strtok_r(NULL,"",&saveptr); //get the remaining part of the string (only get past here if the value was expressed in exponent form)
+										if(tok!=NULL){
+											//value was in exponent format
+											nd->tran[tranInd].delta.exponent = (int8_t)atoi(tok);
+											gammaDelta = gammaDelta / powf(10.0f,(float)(nd->tran[tranInd].delta.exponent));
+											if(nd->tran[tranInd].delta.format > 15U){
+												nd->tran[tranInd].delta.format = 15U; //only 4 bits available for precision
+											}
+											nd->tran[tranInd].delta.format |= (uint16_t)(1U << 4); //exponent flag
+											//SDL_Log("mixing ratio in exponent form: %s, value: %f, exponent: %i\n",line,(double)gammaDelta,nd->tran[tranInd].delta.exponent);
+										}else if(hasExp){
+											//we missed parsing the exponent...
+											//assume value was something like '3.E9', in which case the exponent was
+											//earlier parsed as the format instead
+											memcpy(deltaBuff, &line[41], 8); //remake deltaBuff
+											deltaBuff[8] = '\0';
+											tok = SDL_strtok_r(deltaBuff,".",&saveptr);
+											if(tok!=NULL){
+												tok = SDL_strtok_r(NULL,"E",&saveptr);
+												if(tok!=NULL){
+													nd->tran[tranInd].delta.exponent = (int8_t)SDL_atoi(tok);
+													gammaDelta = gammaDelta / powf(10.0f,(float)(nd->tran[tranInd].delta.exponent));
+													nd->tran[tranInd].delta.format = 1;
+													nd->tran[tranInd].delta.format |= (uint16_t)(1U << 4); //exponent flag
+													//SDL_Log("mixing ratio in exponent form: %s, exponent: %i\n",line,nd->tran[tranInd].delta.exponent);
+												}
+											}
+										}
+									}
+								}
+
+								//gamma mixing ratio: check for special value type
+								nd->tran[tranInd].delta.err=0;
+								tok = SDL_strtok_r(deltaeBuff, " ",&saveptr);
+								if(tok!=NULL){
+									if(SDL_strcmp(tok,"GT")==0){
+										nd->tran[tranInd].delta.format |= (uint16_t)(VALUETYPE_GREATERTHAN << 5);
+									}else if(SDL_strcmp(tok,"GT")==0){
+										nd->tran[tranInd].delta.format |= (uint16_t)(VALUETYPE_GREATERTHAN << 5);
+									}else if(SDL_strcmp(tok,"GE")==0){
+										nd->tran[tranInd].delta.format |= (uint16_t)(VALUETYPE_GREATEROREQUALTHAN << 5);
+									}else if(SDL_strcmp(tok,"LT")==0){
+										nd->tran[tranInd].delta.format |= (uint16_t)(VALUETYPE_LESSTHAN << 5);
+									}else if(SDL_strcmp(tok,"LE")==0){
+										nd->tran[tranInd].delta.format |= (uint16_t)(VALUETYPE_LESSOREQUALTHAN << 5);
+									}else if(SDL_strcmp(tok,"AP")==0){
+										nd->tran[tranInd].delta.format |= (uint16_t)(VALUETYPE_APPROX << 5);
+									}else if(SDL_strcmp(tok,"?")==0){
+										nd->tran[tranInd].delta.format |= (uint16_t)(VALUETYPE_UNKNOWN << 5);
+									}else{
+										if(deltaeBuff[0]=='+'){
+											//asymmetric errors
+											//SDL_Log("aysmmetric err: %s\n",deltaeBuff);
+											tok = SDL_strtok_r(deltaeBuff, "-",&saveptr);
+											if(tok != NULL){
+												nd->tran[tranInd].delta.err = (uint8_t)atoi(tok); //positive error
+												tok = SDL_strtok_r(NULL, "",&saveptr); //get rest of the string
+												if(tok!=NULL){
+													uint16_t negErr = ((uint16_t)atoi(tok) & 127U); //negative error
+													//SDL_Log("neg err: %u\n",negErr);
+													nd->tran[tranInd].delta.format |= (uint16_t)(VALUETYPE_ASYMERROR << 5);
+													nd->tran[tranInd].delta.format |= (uint16_t)(negErr << 9);
+												}
+											}
+										}else if(deltaeBuff[0]=='-'){
+											//asymmetric errors, negative error first
+											//SDL_Log("aysmmetric err: %s\n",deltaeBuff);
+											tok = SDL_strtok_r(deltaeBuff, "+",&saveptr);
+											if((tok != NULL)&&(SDL_strlen(tok)>1)){
+												uint16_t negErr = ((uint16_t)atoi(tok+1) & 127U); //negative error
+												//SDL_Log("neg err: %u\n",negErr);
+												nd->tran[tranInd].delta.format |= (uint16_t)(VALUETYPE_ASYMERROR << 5);
+												nd->tran[tranInd].delta.format |= (uint16_t)(negErr << 9);
+												tok = SDL_strtok_r(NULL, "",&saveptr); //get rest of the string
+												if(tok!=NULL){
+													nd->tran[tranInd].delta.err = (uint8_t)atoi(tok); //positive error
+												}
+											}
+										}else{
+											nd->tran[tranInd].delta.err=(uint8_t)atoi(deltaeBuff);
+										}
+									}
+								}
+
 								nd->tran[tranInd].intensity.val=gammaI;
 								nd->tran[tranInd].icc.val=gammaICC;
 								if(gammaICC > 0.0f){
 									//flag that the nuclide has ICC data
 									nd->nuclData[nd->numNucl].flags |= (1U << 2);
+								}
+								nd->tran[tranInd].delta.val=gammaDelta;
+								if(gammaDelta != 0.0f){
+									//flag that the nuclide has mixing ratio data
+									nd->nuclData[nd->numNucl].flags |= (1U << 3);
 								}
 								nd->levels[nd->numLvls-1].numTran++;
 								nd->numTran++;
@@ -3048,6 +3190,21 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 																	nd->tran[tranInd].icc.format |= (uint16_t)(1U << 4); //exponent flag
 																	//SDL_Log("ICC in exponent form: %s, exponent: %u\n",line,nd->tran[tranInd].icc.exponent);
 																}
+															}
+														}
+													}else if(hasExp){
+														//we missed parsing the exponent...
+														//assume value was something like '3E9'
+														SDL_strlcpy(tval,tok,80); //remake tval
+														tok2 = SDL_strtok_r(tval,"E",&saveptr2);
+														if(tok2!=NULL){
+															tok2 = SDL_strtok_r(NULL,"",&saveptr2); //get the remaining part of the string (only get past here if the value was expressed in exponent form)
+															if(tok2!=NULL){
+																nd->tran[tranInd].icc.exponent = (int8_t)SDL_atoi(tok2);
+																nd->tran[tranInd].icc.val = nd->tran[tranInd].icc.val / powf(10.0f,(float)(nd->tran[tranInd].icc.exponent));
+																nd->tran[tranInd].icc.format = 1;
+																nd->tran[tranInd].icc.format |= (uint16_t)(1U << 4); //exponent flag
+																//SDL_Log("ICC in exponent form: %s, exponent: %i\n",line,nd->tran[tranInd].icc.exponent);
 															}
 														}
 													}

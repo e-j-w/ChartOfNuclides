@@ -2274,22 +2274,41 @@ void drawNuclFullInfoBox(const app_data *restrict dat, app_state *restrict state
   SDL_FRect rect;
   SDL_FColor dividerLineCol = lightGrayCol;
   dividerLineCol.a = txtAlpha/255.0f;
-  uint8_t drawMode = LLDRAWMODE_ALL;
-  float allColWidth = state->ds.fullInfoAllColWidth*state->ds.uiUserScale;
-  if(allColWidth > (state->ds.windowXRes - 4*UI_PADDING_SIZE*state->ds.uiUserScale)){
-    drawMode = LLDRAWMODE_SKIPICC;
-    allColWidth = state->ds.fullInfoAllColWidthExclICC*state->ds.uiUserScale;
-    if(allColWidth > (state->ds.windowXRes - 4*UI_PADDING_SIZE*state->ds.uiUserScale)){
-      drawMode = LLDRAWMODE_SKIPICC_MULT;
-      allColWidth = state->ds.fullInfoAllColWidthExclICCM*state->ds.uiUserScale;
-      if(allColWidth > (state->ds.windowXRes - 4*UI_PADDING_SIZE*state->ds.uiUserScale)){
-        drawMode = LLDRAWMODE_SKIPICC_MULT_JF;
-        allColWidth = state->ds.fullInfoAllColWidthExcluICCMFinalJpi*state->ds.uiUserScale;
+  state->ds.nuclFullInfoShownColumns = 65535U; //by default, show all columns
+  float allColWidth = 0.0f;
+  for(uint8_t i=0; i<LLCOLUMN_ENUM_LENGTH; i++){
+    allColWidth += state->ds.fullInfoColWidth[i];
+  }
+  allColWidth *= state->ds.uiUserScale;
+  if(!(dat->ndat.nuclData[nuclInd].flags & (1U << 2))){
+    //skip drawing ICC column as no data is available
+    state->ds.nuclFullInfoShownColumns = (uint16_t)(state->ds.nuclFullInfoShownColumns & ~(1U << LLCOLUMN_ICC));
+    allColWidth -= state->ds.fullInfoColWidth[LLCOLUMN_ICC]*state->ds.uiUserScale;
+  }
+  if(!(dat->ndat.nuclData[nuclInd].flags & (1U << 3))){
+    //skip drawing mixing ratio column as no data is available
+    state->ds.nuclFullInfoShownColumns = (uint16_t)(state->ds.nuclFullInfoShownColumns & ~(1U << LLCOLUMN_DELTA));
+    allColWidth -= state->ds.fullInfoColWidth[LLCOLUMN_DELTA]*state->ds.uiUserScale;
+  }
+  if(allColWidth > (state->ds.windowXRes - NUCL_FULLINFOBOX_ALLCOL_DISPLAY_PADDING*state->ds.uiUserScale)){
+    if(state->ds.nuclFullInfoShownColumns & (1U << LLCOLUMN_DELTA)){
+      state->ds.nuclFullInfoShownColumns = (uint16_t)(state->ds.nuclFullInfoShownColumns & ~(1U << LLCOLUMN_DELTA)); //don't draw mixing ratio column
+      allColWidth -= state->ds.fullInfoColWidth[LLCOLUMN_DELTA]*state->ds.uiUserScale;
+    }
+    if(allColWidth > (state->ds.windowXRes - NUCL_FULLINFOBOX_ALLCOL_DISPLAY_PADDING*state->ds.uiUserScale)){
+      if(state->ds.nuclFullInfoShownColumns & (1U << LLCOLUMN_ICC)){
+        state->ds.nuclFullInfoShownColumns = (uint16_t)(state->ds.nuclFullInfoShownColumns & ~(1U << LLCOLUMN_ICC)); //don't draw ICC column
+        allColWidth -= state->ds.fullInfoColWidth[LLCOLUMN_ICC]*state->ds.uiUserScale;
+      }
+      if(allColWidth > (state->ds.windowXRes - NUCL_FULLINFOBOX_ALLCOL_DISPLAY_PADDING*state->ds.uiUserScale)){
+        state->ds.nuclFullInfoShownColumns = (uint16_t)(state->ds.nuclFullInfoShownColumns & ~(1U << LLCOLUMN_MGAMMA)); //don't draw multipolarity column
+        allColWidth -= state->ds.fullInfoColWidth[LLCOLUMN_MGAMMA]*state->ds.uiUserScale;
+        if(allColWidth > (state->ds.windowXRes - NUCL_FULLINFOBOX_ALLCOL_DISPLAY_PADDING*state->ds.uiUserScale)){
+          state->ds.nuclFullInfoShownColumns = (uint16_t)(state->ds.nuclFullInfoShownColumns & ~(1U << LLCOLUMN_FINALLEVEL_JPI)); //don't draw final Jpi column
+          allColWidth -= state->ds.fullInfoColWidth[LLCOLUMN_FINALLEVEL_JPI]*state->ds.uiUserScale;
+        }
       }
     }
-  }else if(!(dat->ndat.nuclData[nuclInd].flags & (1U << 2))){
-    //skip drawing ICC column as no data is available
-    drawMode = LLDRAWMODE_SKIPICC;
   }
   float origDrawXPos = (state->ds.windowXRes - allColWidth)/2.0f;
   float drawXPos = origDrawXPos;
@@ -2358,10 +2377,10 @@ void drawNuclFullInfoBox(const app_data *restrict dat, app_state *restrict state
         drawSelectableTextAlignedSized(rdat,&state->tss,drawXPos,drawYPos,(hl > 1.0E3) ? whiteCol8Bit : blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,slStr,ALIGN_LEFT,16384);
       }
       drawYPos = levelStartDrawPos;
-      drawXPos += state->ds.fullInfoElevelColWidth*state->ds.uiUserScale;
+      drawXPos += state->ds.fullInfoColWidth[LLCOLUMN_ELEVEL]*state->ds.uiUserScale;
       getSpinParStr(tmpStr,&dat->ndat,lvlInd);
       drawSelectableTextAlignedSized(rdat,&state->tss,drawXPos,drawYPos,(hl > 1.0E3) ? whiteCol8Bit : blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_LEFT,16384);
-      drawXPos += state->ds.fullInfoJpiColWidth*state->ds.uiUserScale;
+      drawXPos += state->ds.fullInfoColWidth[LLCOLUMN_JPI]*state->ds.uiUserScale;
       getHalfLifeStr(tmpStr,dat,lvlInd,1,0,state->ds.useLifetimes);
       drawSelectableTextAlignedSized(rdat,&state->tss,drawXPos,drawYPos,(hl > 1.0E3) ? whiteCol8Bit : blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_LEFT,16384);
       if(dat->ndat.levels[lvlInd].numDecModes > 0){
@@ -2372,34 +2391,39 @@ void drawNuclFullInfoBox(const app_data *restrict dat, app_state *restrict state
           drawSelectableTextAlignedSized(rdat,&state->tss,drawXPos+(2*UI_PADDING_SIZE*state->ds.uiUserScale),drawYPos,(hl > 1.0E3) ? whiteCol8Bit : blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_LEFT,16384); //draw decay mode label
         }
       }
-      drawXPos += state->ds.fullInfoHlColWidth*state->ds.uiUserScale;
+      drawXPos += state->ds.fullInfoColWidth[LLCOLUMN_HALFLIFE]*state->ds.uiUserScale;
       if(dat->ndat.levels[lvlInd].numTran > 0){
         drawYPos = levelStartDrawPos;
         for(uint16_t i=0; i<dat->ndat.levels[lvlInd].numTran; i++){
           float drawXPosTran = drawXPos;
           getGammaEnergyStr(tmpStr,&dat->ndat,(uint32_t)(dat->ndat.levels[lvlInd].firstTran + i),1);
           drawSelectableTextAlignedSized(rdat,&state->tss,drawXPosTran,drawYPos,(hl > 1.0E3) ? whiteCol8Bit : blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_LEFT,16384); //draw transition energy label
-          drawXPosTran += state->ds.fullInfoEgammaColWidth*state->ds.uiUserScale;
+          drawXPosTran += state->ds.fullInfoColWidth[LLCOLUMN_EGAMMA]*state->ds.uiUserScale;
           getGammaIntensityStr(tmpStr,&dat->ndat,(uint32_t)(dat->ndat.levels[lvlInd].firstTran + i),1);
           drawSelectableTextAlignedSized(rdat,&state->tss,drawXPosTran,drawYPos,(hl > 1.0E3) ? whiteCol8Bit : blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_LEFT,16384); //draw transition intensity label
-          drawXPosTran += state->ds.fullInfoIgammaColWidth*state->ds.uiUserScale;
-          if(drawMode <= LLDRAWMODE_SKIPICC){
+          drawXPosTran += state->ds.fullInfoColWidth[LLCOLUMN_IGAMMA]*state->ds.uiUserScale;
+          if(state->ds.nuclFullInfoShownColumns & (1U << LLCOLUMN_MGAMMA)){
             getGammaMultipolarityStr(tmpStr,&dat->ndat,(uint32_t)(dat->ndat.levels[lvlInd].firstTran + i));
             drawSelectableTextAlignedSized(rdat,&state->tss,drawXPosTran,drawYPos,(hl > 1.0E3) ? whiteCol8Bit : blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_LEFT,16384); //draw transition multipolarity label
-            drawXPosTran += state->ds.fullInfoMgammaColWidth*state->ds.uiUserScale;
+            drawXPosTran += state->ds.fullInfoColWidth[LLCOLUMN_MGAMMA]*state->ds.uiUserScale;
           }
-          if(drawMode == LLDRAWMODE_ALL){
+          if(state->ds.nuclFullInfoShownColumns & (1U << LLCOLUMN_DELTA)){
+            getGammaDeltaStr(tmpStr,&dat->ndat,(uint32_t)(dat->ndat.levels[lvlInd].firstTran + i),1);
+            drawSelectableTextAlignedSized(rdat,&state->tss,drawXPosTran,drawYPos,(hl > 1.0E3) ? whiteCol8Bit : blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_LEFT,16384); //draw transition mixing ratio label
+            drawXPosTran += state->ds.fullInfoColWidth[LLCOLUMN_DELTA]*state->ds.uiUserScale;
+          }
+          if(state->ds.nuclFullInfoShownColumns & (1U << LLCOLUMN_ICC)){
             getGammaICCStr(tmpStr,&dat->ndat,(uint32_t)(dat->ndat.levels[lvlInd].firstTran + i),1);
             drawSelectableTextAlignedSized(rdat,&state->tss,drawXPosTran,drawYPos,(hl > 1.0E3) ? whiteCol8Bit : blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_LEFT,16384); //draw transition ICC label
-            drawXPosTran += state->ds.fullInfoICCColWidth*state->ds.uiUserScale;
+            drawXPosTran += state->ds.fullInfoColWidth[LLCOLUMN_ICC]*state->ds.uiUserScale;
           }
           if(dat->ndat.tran[(uint32_t)(dat->ndat.levels[lvlInd].firstTran + i)].finalLvlOffset != 0){
             float drawXPosFL = drawXPosTran;
             uint32_t finalLvlInd = getFinalLvlInd(&dat->ndat,lvlInd,(uint32_t)(dat->ndat.levels[lvlInd].firstTran + i));
             getLvlEnergyStr(tmpStr,&dat->ndat,finalLvlInd,0);
             drawSelectableTextAlignedSized(rdat,&state->tss,drawXPosFL,drawYPos,(hl > 1.0E3) ? whiteCol8Bit : blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_LEFT,16384); //draw final level energy label
-            if(drawMode <= LLDRAWMODE_SKIPICC_MULT){
-              drawXPosFL += (state->ds.fullInfoFinalElevelColWidth+state->ds.fullInfoFinalJpiColWidth)*state->ds.uiUserScale;
+            if(state->ds.nuclFullInfoShownColumns & (1U << LLCOLUMN_FINALLEVEL_JPI)){
+              drawXPosFL += (state->ds.fullInfoColWidth[LLCOLUMN_FINALLEVEL_E]+state->ds.fullInfoColWidth[LLCOLUMN_FINALLEVEL_JPI])*state->ds.uiUserScale;
               getSpinParStr(tmpStr,&dat->ndat,finalLvlInd);
               drawSelectableTextAlignedSized(rdat,&state->tss,drawXPosFL,drawYPos,(hl > 1.0E3) ? whiteCol8Bit : blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_RIGHT,16384); //draw final level spin-parity label
             }
@@ -2513,26 +2537,30 @@ void drawNuclFullInfoBox(const app_data *restrict dat, app_state *restrict state
   drawSelectableTextAlignedSized(rdat,&state->tss,drawXPos - 2*UI_PADDING_SIZE*state->ds.uiUserScale,drawYPos,blackCol8Bit,FONTSIZE_NORMAL_BOLD,txtAlpha,dat->strings[dat->locStringIDs[LOCSTR_LEVELINFO_HEADER]],ALIGN_LEFT,16384);
   drawYPos += (NUCL_INFOBOX_SMALLLINE_HEIGHT + UI_PADDING_SIZE)*state->ds.uiUserScale;
   drawSelectableTextAlignedSized(rdat,&state->tss,drawXPos,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,dat->strings[dat->locStringIDs[LOCSTR_ENERGY_KEV]],ALIGN_LEFT,16384);
-  drawXPos += state->ds.fullInfoElevelColWidth*state->ds.uiUserScale;
+  drawXPos += state->ds.fullInfoColWidth[LLCOLUMN_ELEVEL]*state->ds.uiUserScale;
   drawSelectableTextAlignedSized(rdat,&state->tss,drawXPos,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,dat->strings[dat->locStringIDs[LOCSTR_JPI]],ALIGN_LEFT,16384);
-  drawXPos += state->ds.fullInfoJpiColWidth*state->ds.uiUserScale;
+  drawXPos += state->ds.fullInfoColWidth[LLCOLUMN_JPI]*state->ds.uiUserScale;
   if(state->ds.useLifetimes){
     drawSelectableTextAlignedSized(rdat,&state->tss,drawXPos,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,dat->strings[dat->locStringIDs[LOCSTR_LIFETIME]],ALIGN_LEFT,16384);
   }else{
     drawSelectableTextAlignedSized(rdat,&state->tss,drawXPos,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,dat->strings[dat->locStringIDs[LOCSTR_HALFLIFE]],ALIGN_LEFT,16384);
   }
-  drawXPos += state->ds.fullInfoHlColWidth*state->ds.uiUserScale;
+  drawXPos += state->ds.fullInfoColWidth[LLCOLUMN_HALFLIFE]*state->ds.uiUserScale;
   drawSelectableTextAlignedSized(rdat,&state->tss,drawXPos,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,dat->strings[dat->locStringIDs[LOCSTR_ENERGY_GAMMA]],ALIGN_LEFT,16384);
-  drawXPos += state->ds.fullInfoEgammaColWidth*state->ds.uiUserScale;
+  drawXPos += state->ds.fullInfoColWidth[LLCOLUMN_EGAMMA]*state->ds.uiUserScale;
   drawSelectableTextAlignedSized(rdat,&state->tss,drawXPos,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,dat->strings[dat->locStringIDs[LOCSTR_INTENSITY_GAMMA]],ALIGN_LEFT,16384);
-  drawXPos += state->ds.fullInfoIgammaColWidth*state->ds.uiUserScale;
-  if(drawMode <= LLDRAWMODE_SKIPICC){
+  drawXPos += state->ds.fullInfoColWidth[LLCOLUMN_IGAMMA]*state->ds.uiUserScale;
+  if(state->ds.nuclFullInfoShownColumns & (1U << LLCOLUMN_MGAMMA)){
     drawSelectableTextAlignedSized(rdat,&state->tss,drawXPos,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,dat->strings[dat->locStringIDs[LOCSTR_MULTIPOLARITY_GAMMA]],ALIGN_LEFT,16384);
-    drawXPos += state->ds.fullInfoMgammaColWidth*state->ds.uiUserScale;
+    drawXPos += state->ds.fullInfoColWidth[LLCOLUMN_MGAMMA]*state->ds.uiUserScale;
   }
-  if(drawMode == LLDRAWMODE_ALL){
+  if(state->ds.nuclFullInfoShownColumns & (1U << LLCOLUMN_DELTA)){
+    drawSelectableTextAlignedSized(rdat,&state->tss,drawXPos,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,dat->strings[dat->locStringIDs[LOCSTR_MIXING_GAMMA]],ALIGN_LEFT,16384);
+    drawXPos += state->ds.fullInfoColWidth[LLCOLUMN_DELTA]*state->ds.uiUserScale;
+  }
+  if(state->ds.nuclFullInfoShownColumns & (1U << LLCOLUMN_ICC)){
     drawSelectableTextAlignedSized(rdat,&state->tss,drawXPos,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,dat->strings[dat->locStringIDs[LOCSTR_ICC_GAMMA]],ALIGN_LEFT,16384);
-    drawXPos += state->ds.fullInfoICCColWidth*state->ds.uiUserScale;
+    drawXPos += state->ds.fullInfoColWidth[LLCOLUMN_ICC]*state->ds.uiUserScale;
   }
   drawSelectableTextAlignedSized(rdat,&state->tss,drawXPos,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,dat->strings[dat->locStringIDs[LOCSTR_FINALLEVEL]],ALIGN_LEFT,16384);
 
