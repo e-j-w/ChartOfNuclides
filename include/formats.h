@@ -36,7 +36,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //search parameters
 #define SEARCH_STRING_MAX_SIZE   256
 #define MAX_SEARCH_TOKENS        16
-#define MAX_SEARCH_RESULTS       32 //number of results to cache (max 32, indexed by corrRes bitpattern)
+#define MAX_SEARCH_RESULTS       64 //number of results to cache (max 32, indexed by corrRes bitpattern)
 #define MAX_DISP_SEARCH_RESULTS  4  //number of results to display
 #define SEARCH_RESULT_DATASIZE   4
 #define UNUSED_SEARCH_RESULT     4294967295U
@@ -207,7 +207,7 @@ typedef struct
 {
   uint8_t resultType;  //values from search_agent_enum
   uint32_t resultVal[SEARCH_RESULT_DATASIZE];  //defines the result (eg. nuclide index for nuclide search)
-  uint32_t corrRes; //bitpattern specifying other results that this is correlated with
+  uint64_t corrRes; //bitpattern specifying other results that this is correlated with
   float relevance;     //a value which defines how relevant the result is (for sorting)
 }search_result;
 
@@ -291,6 +291,7 @@ typedef struct
   uint8_t numResults; //the number of results returned so far
   uint8_t numSearchTok;
   uint32_t finishedSearchAgents; //bit pattern specifying which search agents have finished
+  uint8_t searchInProgress; //=1 if a search is currently being performed
   SDL_Semaphore *canUpdateResults;
 }search_state; //struct containing search data
 

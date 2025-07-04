@@ -82,6 +82,16 @@ int tpFunc(void *data){
             //SDL_Log("Searching for gamma cascades...\n");
             searchGammaCascade(&tdat->dat->ndat,&tdat->state->ds,&tdat->state->ss);
             break;
+          case SEARCHAGENT_HALFLIFE:
+            while(!(tdat->state->ss.finishedSearchAgents & (uint32_t)(1U << SEARCHAGENT_NUCLIDE))){
+              if(tdat->threadState == THREADSTATE_KILL){
+                break; //kill waiting thread, if requested
+              }
+              SDL_Delay(THREAD_UPDATE_DELAY); //wait for tokenization to complete
+            }
+            //SDL_Log("Searching for half-lives...\n");
+            searchHalfLife(&tdat->dat->ndat,&tdat->state->ds,&tdat->state->ss);
+            break;
           default:
             break;
         }
@@ -112,13 +122,14 @@ int startSearchThreads(app_data *restrict dat, app_state *restrict state, thread
   memset(state->ss.updatedResults,0,sizeof(state->ss.updatedResults));
   state->ss.finishedSearchAgents = 0;
   state->ss.numUpdatedResults = 0;
+  state->ss.searchInProgress = 1;
 
   //determine number of threads
   tms->numThreads = SEARCHAGENT_ENUM_LENGTH;
   tms->masterThreadState = THREADSTATE_SEARCH;
   if(tms->numThreads > MAX_NUM_THREADS){
     SDL_Log("ERROR: startSearchThreads - trying to start invalid number of threads (%u).\n",tms->numThreads);
-    return -1;
+    return -1; //fail
   }
   //printf("Starting %u search thread(s).\n",tms->numThreads);
 
@@ -140,7 +151,7 @@ int startSearchThreads(app_data *restrict dat, app_state *restrict state, thread
       SDL_DetachThread(thread);
       if(thread==NULL){
         printf("ERROR: startSearchThreads - couldn't create thread %u - %s\n",i,SDL_GetError());
-        return -1;
+        return -1; //fail
       }
       tms->aliveThreads |= ((uint64_t)(1) << i);
       numThreadsStarted++;
@@ -159,15 +170,15 @@ int startSearchThreads(app_data *restrict dat, app_state *restrict state, thread
     }
     if(loopCtr >= 2048){
       SDL_Log("ERROR: startSearchThreads - probable infinite loop.\n");
-      return -1;
+      return -1; //fail
     }
   }
   if(numThreadsStarted != tms->numThreads){
     SDL_Log("ERROR: startSearchThreads - started an invalid number of threads (%u, should be %u).\n",numThreadsStarted,tms->numThreads);
-    return -1;
+    return -1; //fail
   }
   
-  return (int)(tms->numThreads);
+  return (int)(tms->numThreads); //win
 }
 
 void updateThreads(const app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat, thread_manager_state *restrict tms){
@@ -207,6 +218,7 @@ void updateThreads(const app_data *restrict dat, app_state *restrict state, reso
       }
       updateSearchUIState(dat,state,rdat);
       tms->masterThreadState = THREADSTATE_KILL;
+      state->ss.searchInProgress = 0; //allow another search to occur
     }
   }
 }

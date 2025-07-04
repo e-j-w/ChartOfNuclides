@@ -321,6 +321,8 @@ static int parseAppRules(app_data *restrict dat, asset_mapping *restrict stringI
 	dat->locStringIDs[LOCSTR_SEARCHRES_EGAMMA] = (uint16_t)nameToAssetID("search_result_egamma",stringIDmap);
 	dat->locStringIDs[LOCSTR_SEARCHRES_ELEVEL] = (uint16_t)nameToAssetID("search_result_elevel",stringIDmap);
 	dat->locStringIDs[LOCSTR_SEARCHRES_GAMMACASCADE] = (uint16_t)nameToAssetID("search_result_gammacascade",stringIDmap);
+	dat->locStringIDs[LOCSTR_SEARCHRES_HALFLIFE] = (uint16_t)nameToAssetID("search_result_halflife",stringIDmap);
+	dat->locStringIDs[LOCSTR_SEARCHRES_LIFETIME] = (uint16_t)nameToAssetID("search_result_lifetime",stringIDmap);
 	dat->locStringIDs[LOCSTR_PREF_UISCALE] = (uint16_t)nameToAssetID("interface_size",stringIDmap);
 	dat->locStringIDs[LOCSTR_SMALL] = (uint16_t)nameToAssetID("small",stringIDmap);
 	dat->locStringIDs[LOCSTR_LARGE] = (uint16_t)nameToAssetID("large",stringIDmap);
@@ -4056,7 +4058,7 @@ int buildDatabase(const char *appBasePath, ndata *nd){
 				if((firstLvlWithHl==255)&&(j<255)){
 					firstLvlWithHl=(uint8_t)j;
 				}
-				if(!isVariableE){
+				if((!isVariableE) || (zeroEnLvl==255)){
 					//if(j!=0) SDL_Log("GS ind for nucleus %u: %u\n",i,j);
 					if(j>=255){
 						SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,"GS level index for nuclide %u is too high (%u).\n",i,j);

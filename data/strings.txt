@@ -42,7 +42,7 @@ all_reactions|All Reactions
 menuitem_preferences|Preferences
 menuitem_screenshot|Take a screenshot...
 menuitem_about|About Chart of Nuclides
-about_string_version|Version 0.6.1 - "Differential Equation"
+about_string_version|Version 0.7.0 - "Differential Equation"
 about_string_1|Developed by Jonathan Williams
 about_string_2|Nuclear structure data is sourced from ENSDF, mass data from AME2020, and isotope abundance data from NIST.
 about_string_3|This is an independently developed program not endorsed by the above entities. The accuracy or completeness of any information provided is not guaranteed.
@@ -80,6 +80,8 @@ search_result_nuclide|Nuclide / Isotope
 search_result_egamma|Transition
 search_result_elevel|Excited State
 search_result_gammacascade|Gamma-ray cascade
+search_result_halflife|Half-life
+search_result_lifetime|Mean lifetime
 interface_size|Interface size
 small|Small
 default|Default

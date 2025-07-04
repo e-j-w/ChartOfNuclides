@@ -38,5 +38,6 @@ Example search queries include:
 | Level energy       | Energy (in keV) of an excited state in a nuclide. Can be combined with the nuclide name.  | `7654.07` (shows Holye state of 12C), `32Si 5505` (shows isomer of 32Si) |
 | Gamma energy       | Energy (in keV) of a gamma-ray transition in a nuclide. Can be combined with the nuclide name.  | `2548 28Mg` (shows 4+ to 2+ transition in 28Mg) |
 | Gamma-ray cascade  | Energies (in keV) of a sequence of gamma-ray transitions in a nuclide. Can be combined with the nuclide name.  | `263 685 1477` (shows isomeric cascades in 93Mo), `1274 2083` (shows 4+ to 2+ to 0+ cascade in 22Ne) |
+| Half-life / Lifetime | Half-life of a nuclide (or the mean lifetime, if enabled in the preferences). Half-lives of excited states can also be searched, but will be shown with lower priority. Can be combined with the nuclide name. | `99Tc 6.0076` (shows isomer of 99Tc) |
 
 To focus the search results on a specific region of the chart, first zoom in to that region on the chart before searching.

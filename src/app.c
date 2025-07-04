@@ -199,8 +199,13 @@ int main(int argc, char *argv[]){
     processFrameEvents(&gdat->dat,&gdat->state,&gdat->rdat); //can block the main thread to save CPU, see process_events.h
     
     if(gdat->state.searchStrUpdated){
-      gdat->state.searchStrUpdated = 0;
-      startSearchThreads(&gdat->dat,&gdat->state,&gdat->tms);
+      if(gdat->state.ss.searchInProgress == 0){
+        gdat->state.searchStrUpdated = 0; //reset flag
+        //start the search
+        if(startSearchThreads(&gdat->dat,&gdat->state,&gdat->tms)<0){
+          gdat->state.ss.searchInProgress = 0; //unable to start search
+        }
+      }
     }
     //SDL_RenderClear(gdat->rdat.renderer); //clear the window, disabled for optimization purposes
 

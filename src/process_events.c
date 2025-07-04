@@ -1362,7 +1362,9 @@ void processSingleEvent(app_data *restrict dat, app_state *restrict state, resou
             if(state->kbdModVal == KBD_MOD_CTRL){
               rdat->ssdat.takingScreenshot = 1; //queue a screenshot to be taken
             }else{
-              state->kbdModVal = KBD_MOD_OTHER; //block key combo if entered in reverse order
+              if(state->kbdModVal != KBD_MOD_SHIFT){
+                state->kbdModVal = KBD_MOD_OTHER; //block Ctrl+S key combo if entered in reverse order
+              }
               state->inputFlags |= (1U << INPUT_ALTDOWN);
             }
           }

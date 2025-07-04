@@ -96,6 +96,7 @@ void initializeTempState(const app_data *restrict dat, app_state *restrict state
 	state->ds.infoBoxPrevX = -1.0f;
 	state->cms.numContextMenuItems = 0;
 	state->ss.numResults = 0;
+	state->ss.searchInProgress = 0;
 	state->ss.canUpdateResults = SDL_CreateSemaphore(1);
 	clearSelectionStrs(&state->ds,&state->tss,0);
 	memset(state->ds.uiElemExtPlusX,0,sizeof(state->ds.uiElemExtPlusX));
@@ -3764,6 +3765,15 @@ void searchResultClickAction(app_data *restrict dat, app_state *restrict state, 
 			uiElemClickAction(dat,state,rdat,0,UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON);
 			nuclLevel = (uint16_t)(state->ss.results[resultInd].resultVal[1] - dat->ndat.nuclData[state->ss.results[resultInd].resultVal[0]].firstLevel);
 			state->ds.nuclFullInfoScrollY = getNumDispLinesUpToLvl(&dat->ndat,state,nuclLevel); //scroll to the level of interest
+			break;
+		case SEARCHAGENT_HALFLIFE:
+			setSelectedNuclOnChartDirect(dat,state,rdat,(uint16_t)(state->ss.results[resultInd].resultVal[0]),1);
+			if(state->ss.results[resultInd].resultVal[1] != (dat->ndat.nuclData[state->ss.results[resultInd].resultVal[0]].firstLevel + dat->ndat.nuclData[state->ss.results[resultInd].resultVal[0]].gsLevel)){
+				//half-life was of an excited state
+				uiElemClickAction(dat,state,rdat,0,UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON);
+				nuclLevel = (uint16_t)(state->ss.results[resultInd].resultVal[1] - dat->ndat.nuclData[state->ss.results[resultInd].resultVal[0]].firstLevel);
+				state->ds.nuclFullInfoScrollY = getNumDispLinesUpToLvl(&dat->ndat,state,nuclLevel); //scroll to the level of interest
+			}
 			break;
 		default:
 			break;
