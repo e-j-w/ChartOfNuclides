@@ -109,7 +109,7 @@ void tokenizeSearchStr(search_state *restrict ss){
 	memcpy(searchStrCpy,ss->searchString,sizeof(ss->searchString));
 	tok = SDL_strtok_r(searchStrCpy," ,",&saveptr);
 	while(tok!=NULL){
-		if(strlen(tok) > 0){
+		if(SDL_strlen(tok) > 0){
 			SDL_strlcpy(ss->searchTok[numTok],tok,15);
 			numTok++;
 		}
@@ -133,7 +133,7 @@ void searchELevel(const ndata *restrict ndat, const drawing_state *restrict ds, 
 
 		//first, filter out any tokens with characters
 		uint8_t isNum = 1;
-		for(uint16_t j=0; j<strlen(ss->searchTok[i]); j++){
+		for(uint16_t j=0; j<SDL_strlen(ss->searchTok[i]); j++){
 			if(isalpha(ss->searchTok[i][j])){
 				isNum = 0;
 				break;
@@ -188,7 +188,7 @@ void searchEGamma(const ndata *restrict ndat, const drawing_state *restrict ds, 
 
 		//first, filter out any tokens with characters
 		uint8_t isNum = 1;
-		for(uint16_t j=0; j<strlen(ss->searchTok[i]); j++){
+		for(uint16_t j=0; j<SDL_strlen(ss->searchTok[i]); j++){
 			if(isalpha(ss->searchTok[i][j])){
 				isNum = 0;
 				break;
@@ -267,7 +267,7 @@ void searchGammaCascade(const ndata *restrict ndat, const drawing_state *restric
 
 		//first, filter out any tokens with characters
 		uint8_t isNum = 1;
-		for(uint16_t j=0; j<strlen(ss->searchTok[i]); j++){
+		for(uint16_t j=0; j<SDL_strlen(ss->searchTok[i]); j++){
 			if(isalpha(ss->searchTok[i][j])){
 				isNum = 0;
 				break;
@@ -403,7 +403,7 @@ void searchHalfLife(const ndata *restrict ndat, const drawing_state *restrict ds
 
 		//first, filter out any tokens with characters
 		uint8_t isNum = 1;
-		for(uint16_t j=0; j<strlen(ss->searchTok[i]); j++){
+		for(uint16_t j=0; j<SDL_strlen(ss->searchTok[i]); j++){
 			if(isalpha(ss->searchTok[i][j])){
 				isNum = 0;
 				break;
@@ -414,11 +414,11 @@ void searchHalfLife(const ndata *restrict ndat, const drawing_state *restrict ds
 		}
 
 		double hlSearch = SDL_atof(ss->searchTok[i]);
-		if(ds->useLifetimes){
-			hlSearch /= 1.4427; //convert lifetime to half-life
-		}
 		if(hlSearch > 0.0){
 			//valid energy
+			if(ds->useLifetimes){
+				hlSearch /= 1.4427; //convert lifetime to half-life
+			}
 			for(int16_t j=0; j<ndat->numNucl; j++){
 				float proximityFactor = sqrtf(fabsf((float)ndat->nuclData[j].Z - ds->chartPosY - (16.0f/ds->chartZoomScale)) + fabsf((float)ndat->nuclData[j].N - ds->chartPosX) + 0.1f);
 				proximityFactor = 0.5f*ds->chartZoomScale/proximityFactor;
@@ -430,8 +430,8 @@ void searchHalfLife(const ndata *restrict ndat, const drawing_state *restrict ds
 					uint8_t hlValueType = (uint8_t)((ndat->levels[k].halfLife.format >> 5U) & 15U);
 					if((hlValueType == VALUETYPE_NUMBER)||(hlValueType == VALUETYPE_ASYMERROR)){
 						double rawHlVal = getRawValFromDB(&ndat->levels[k].halfLife);
-						double rawErrVal = getRawErrFromDB(&ndat->levels[k].halfLife);
 						if(rawHlVal > 0.0){
+							double rawErrVal = getRawErrFromDB(&ndat->levels[k].halfLife);
 							double errBound = 3.0*rawErrVal;
 							if(errBound < 5.0){
 								errBound = 5.0;
@@ -439,16 +439,20 @@ void searchHalfLife(const ndata *restrict ndat, const drawing_state *restrict ds
 							if(((rawHlVal - errBound) <= hlSearch)&&((rawHlVal + errBound) >= hlSearch)){
 								//energy matches query
 								search_result res;
-								res.relevance = 0.7f; //base value
-								res.relevance += proximityFactor;
-								res.relevance -= (float)(rawErrVal/rawHlVal); //weight by size of error bars
-								res.relevance /= (1.0f + (float)fabs(0.1*(hlSearch - rawHlVal))); //weight by distance from value
+								//set base value differently for different types of states
 								if(k != (ndat->nuclData[j].firstLevel + ndat->nuclData[j].gsLevel)){
 									//de-prioritize short lived excited states
 									if(getLevelHalfLifeSeconds(ndat,k)<1.0E-6){
-										res.relevance /= 10.0f; 
+										res.relevance = 0.07f; 
+									}else{
+										res.relevance = 0.7f; 
 									}
+								}else{
+									res.relevance = 0.7f;
 								}
+								res.relevance += proximityFactor;
+								res.relevance -= (float)(rawErrVal/rawHlVal); //weight by size of error bars
+								res.relevance /= (1.0f + (float)fabs(0.1*(hlSearch - rawHlVal))); //weight by distance from value
 								res.resultType = SEARCHAGENT_HALFLIFE;
 								res.resultVal[0] = (uint32_t)j; //nuclide index
 								res.resultVal[1] = (uint32_t)k; //level index
@@ -468,7 +472,7 @@ void searchNuclides(const ndata *restrict ndat, search_state *restrict ss){
 	char nuclAStr[8], nuclElemName[32];
 	for(uint8_t i=0; i<ss->numSearchTok; i++){
 		uint8_t foundNucl = 0;
-		uint8_t len = (uint8_t)strlen(ss->searchTok[i]);
+		uint8_t len = (uint8_t)SDL_strlen(ss->searchTok[i]);
 		if(isdigit(ss->searchTok[i][0])){
 			//look for nuclide names starting with a digit (eg. 32Si)
 			for(uint8_t j=1; j<len; j++){
