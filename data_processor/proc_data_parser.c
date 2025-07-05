@@ -1492,12 +1492,22 @@ uint8_t getDcyModeFromENSDFSubstr(const char *substr){
 		return DECAYMODE_BETAPLUS;
 	}else if(SDL_strcmp(substr,"%EC")==0){
 		return DECAYMODE_EC;
-	}else if(SDL_strcmp(substr,"%EC+%B+")==0){
+	}else if((SDL_strcmp(substr,"%EC+%B+")==0)||(SDL_strcmp(substr,"%EC+B+")==0)){
 		return DECAYMODE_ECANDBETAPLUS;
 	}else if(SDL_strcmp(substr,"%B-N")==0){
 		return DECAYMODE_BETAMINUS_NEUTRON;
 	}else if(SDL_strcmp(substr,"%B-2N")==0){
 		return DECAYMODE_BETAMINUS_TWONEUTRON;
+	}else if(SDL_strcmp(substr,"%B-3N")==0){
+		return DECAYMODE_BETAMINUS_THREENEUTRON;
+	}else if(SDL_strcmp(substr,"%B-4N")==0){
+		return DECAYMODE_BETAMINUS_FOURNEUTRON;
+	}else if(SDL_strcmp(substr,"%B-5N")==0){
+		return DECAYMODE_BETAMINUS_FIVENEUTRON;
+	}else if(SDL_strcmp(substr,"%B-6N")==0){
+		return DECAYMODE_BETAMINUS_SIXNEUTRON;
+	}else if(SDL_strcmp(substr,"%B-7N")==0){
+		return DECAYMODE_BETAMINUS_SEVENNEUTRON;
 	}else if(SDL_strcmp(substr,"%B-P")==0){
 		return DECAYMODE_BETAMINUS_PROTON;
 	}else if(SDL_strcmp(substr,"%B+P")==0){
@@ -1522,10 +1532,12 @@ uint8_t getDcyModeFromENSDFSubstr(const char *substr){
 		return DECAYMODE_TWOPROTON;
 	}else if(SDL_strcmp(substr,"%N")==0){
 		return DECAYMODE_NEUTRON;
-	}else if(SDL_strcmp(substr,"%2N")==0){
+	}else if((SDL_strcmp(substr,"%2N")==0)||(SDL_strcmp(substr,"%2n")==0)){
 		return DECAYMODE_TWONEUTRON;
 	}else if(SDL_strcmp(substr,"%D")==0){
 		return DECAYMODE_DEUTERON;
+	}else if(SDL_strcmp(substr,"%3H")==0){
+		return DECAYMODE_3H;
 	}else if(SDL_strcmp(substr,"%3HE")==0){
 		return DECAYMODE_3HE;
 	}else if(SDL_strcmp(substr,"%A")==0){
@@ -1536,24 +1548,40 @@ uint8_t getDcyModeFromENSDFSubstr(const char *substr){
 		return DECAYMODE_SPONTANEOUSFISSION;
 	}else if(SDL_strcmp(substr,"%B-SF")==0){
 		return DECAYMODE_BETAMINUS_SPONTANEOUSFISSION;
+	}else if(SDL_strcmp(substr,"%ECSF")==0){
+		return DECAYMODE_EC_SPONTANEOUSFISSION;
+	}else if(SDL_strcmp(substr,"%EC+%B+SF")==0){
+		return DECAYMODE_ECANDBETAPLUS_SPONTANEOUSFISSION;
 	}else if(SDL_strcmp(substr,"%2B-")==0){
 		return DECAYMODE_2BETAMINUS;
 	}else if(SDL_strcmp(substr,"%2B+")==0){
 		return DECAYMODE_2BETAPLUS;
 	}else if(SDL_strcmp(substr,"%2EC")==0){
 		return DECAYMODE_2EC;
+	}else if(SDL_strcmp(substr,"%8BE")==0){
+		return DECAYMODE_8BE;
+	}else if(SDL_strcmp(substr,"%12C")==0){
+		return DECAYMODE_12C;
 	}else if(SDL_strcmp(substr,"%14C")==0){
 		return DECAYMODE_14C;
-	}else if(SDL_strcmp(substr,"%{+20}Ne")==0){
+	}else if((SDL_strcmp(substr,"%{+20}Ne")==0)||(SDL_strcmp(substr,"%20NE")==0)){
 		return DECAYMODE_20NE;
-	}else if(SDL_strcmp(substr,"%{+25}Ne")==0){
+	}else if((SDL_strcmp(substr,"%{+24}Ne")==0)||(SDL_strcmp(substr,"%24NE")==0)){
+		return DECAYMODE_24NE;
+	}else if((SDL_strcmp(substr,"%{+25}Ne")==0)||(SDL_strcmp(substr,"%25NE")==0)){
 		return DECAYMODE_25NE;
-	}else if(SDL_strcmp(substr,"%{+28}Mg")==0){
+	}else if((SDL_strcmp(substr,"%{+28}Mg")==0)||(SDL_strcmp(substr,"%28MG")==0)){
 		return DECAYMODE_28MG;
-	}else if(SDL_strcmp(substr,"%34SI")==0){
+	}else if((SDL_strcmp(substr,"%{+34}Si")==0)||(SDL_strcmp(substr,"%34SI")==0)){
 		return DECAYMODE_34SI;
 	}else if(SDL_strcmp(substr,"%|b{+-}")==0){
 		return DECAYMODE_BETAMINUS;
+	}else if(SDL_strcmp(substr,"%|b{+-}n")==0){
+		return DECAYMODE_BETAMINUS_NEUTRON;
+	}else if(SDL_strcmp(substr,"%|b{+-}2n")==0){
+		return DECAYMODE_BETAMINUS_TWONEUTRON;
+	}else if(SDL_strcmp(substr,"%|b{+-}3n")==0){
+		return DECAYMODE_BETAMINUS_THREENEUTRON;
 	}else if(SDL_strcmp(substr,"%|b{++}")==0){
 		return DECAYMODE_BETAPLUS;
 	}else if(SDL_strcmp(substr,"%|b{++}")==0){
@@ -1565,6 +1593,9 @@ uint8_t getDcyModeFromENSDFSubstr(const char *substr){
 	}else if(SDL_strcmp(substr,"%|a")==0){
 		return DECAYMODE_ALPHA;
 	}else{
+		/*if((SDL_strcmp(substr,"XREF")!=0)&&(SDL_strcmp(substr,"ISPIN")!=0)&&(SDL_strcmp(substr,"MOMM1")!=0)&&(SDL_strcmp(substr,"MOME2")!=0)&&(SDL_strcmp(substr,"%")!=0)){
+			SDL_Log("Unknown decay mode string: %s\n",substr);
+		}*/
 		return DECAYMODE_ENUM_LENGTH;
 	}
 }

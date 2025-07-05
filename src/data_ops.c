@@ -1698,6 +1698,16 @@ const char* getDecayTypeShortStr(const uint8_t type){
 			return "β-n";
 		case DECAYMODE_BETAMINUS_TWONEUTRON:
 			return "β-2n";
+		case DECAYMODE_BETAMINUS_THREENEUTRON:
+			return "β-3n";
+		case DECAYMODE_BETAMINUS_FOURNEUTRON:
+			return "β-4n";
+		case DECAYMODE_BETAMINUS_FIVENEUTRON:
+			return "β-5n";
+		case DECAYMODE_BETAMINUS_SIXNEUTRON:
+			return "β-6n";
+		case DECAYMODE_BETAMINUS_SEVENNEUTRON:
+			return "β-7n";
 		case DECAYMODE_BETAMINUS_PROTON:
 			return "β-p";
 		case DECAYMODE_BETAPLUS_PROTON:
@@ -1722,8 +1732,10 @@ const char* getDecayTypeShortStr(const uint8_t type){
 			return "ε/β+";
 		case DECAYMODE_IT:
 			return "IT";
+		case DECAYMODE_3H:
+			return "³H";
 		case DECAYMODE_3HE:
-			return "3He";
+			return "³He";
 		case DECAYMODE_DEUTERON:
 			return "d";
 		case DECAYMODE_NEUTRON:
@@ -1738,22 +1750,32 @@ const char* getDecayTypeShortStr(const uint8_t type){
 			return "SF";
 		case DECAYMODE_BETAMINUS_SPONTANEOUSFISSION:
 			return "β-SF";
+		case DECAYMODE_EC_SPONTANEOUSFISSION:
+			return "εSF";
+		case DECAYMODE_ECANDBETAPLUS_SPONTANEOUSFISSION:
+			return "ε/β+SF";
 		case DECAYMODE_2BETAMINUS:
 			return "2β-";
 		case DECAYMODE_2BETAPLUS:
 			return "2β+";
 		case DECAYMODE_2EC:
 			return "2ε";
+		case DECAYMODE_8BE:
+			return "⁸Be";
+		case DECAYMODE_12C:
+			return "¹²C";
 		case DECAYMODE_14C:
-			return "14C";
+			return "¹⁴C";
 		case DECAYMODE_20NE:
-			return "20Ne";
+			return "²⁰Ne";
+		case DECAYMODE_24NE:
+			return "²⁴Ne";
 		case DECAYMODE_25NE:
-			return "25Ne";
+			return "²⁵Ne";
 		case DECAYMODE_28MG:
-			return "28Mg";
+			return "²⁸Mg";
 		case DECAYMODE_34SI:
-			return "34Si";
+			return "³⁴Si";
 		default:
 			return "";																						
 	}
