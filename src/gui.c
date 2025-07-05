@@ -3045,8 +3045,8 @@ void drawSearchMenu(const app_data *restrict dat, const app_state *restrict stat
       drawRect.h = state->ds.uiElemHeight[UIELEM_SEARCH_RESULT+i];
       drawButtonBG(&dat->rules.themeRules,rdat,drawRect,getHighlightState(state,UIELEM_SEARCH_RESULT+i),alpha);
       //draw relevance value
-      SDL_snprintf(eStr,32,"%0.3f",(double)state->ss.results[i].relevance);
-      drawTextAlignedSized(rdat,drawRect.x+drawRect.w-10.0f*state->ds.uiUserScale,drawRect.y+8.0f*state->ds.uiUserScale,grayCol8Bit,FONTSIZE_SMALL,alpha8,eStr,ALIGN_RIGHT,16384);
+      //SDL_snprintf(eStr,32,"%0.3f",(double)state->ss.results[i].relevance);
+      //drawTextAlignedSized(rdat,drawRect.x+drawRect.w-10.0f*state->ds.uiUserScale,drawRect.y+8.0f*state->ds.uiUserScale,grayCol8Bit,FONTSIZE_SMALL,alpha8,eStr,ALIGN_RIGHT,16384);
       //draw result info
       switch(state->ss.results[i].resultType){
         case SEARCHAGENT_NUCLIDE:
@@ -3054,7 +3054,7 @@ void drawSearchMenu(const app_data *restrict dat, const app_state *restrict stat
           N = (uint16_t)dat->ndat.nuclData[state->ss.results[i].resultVal[0]].N;
           SDL_snprintf(tmpStr,64,"%u",N+Z);
           numWidth = drawTextAlignedSized(rdat,drawRect.x+12.0f*state->ds.uiUserScale,drawRect.y+12.0f*state->ds.uiUserScale,blackCol8Bit,FONTSIZE_SMALL,alpha8,tmpStr,ALIGN_LEFT,16384).w; //draw number label
-          drawTextAlignedSized(rdat,drawRect.x+12.0f*state->ds.uiUserScale+numWidth,drawRect.y+(20.0f*state->ds.uiUserScale),blackCol8Bit,FONTSIZE_LARGE,alpha8,getElemStr((uint8_t)Z),ALIGN_LEFT,16384); //draw element label
+          drawTextAlignedSized(rdat,drawRect.x+12.0f*state->ds.uiUserScale+numWidth,drawRect.y+(22.0f*state->ds.uiUserScale),blackCol8Bit,FONTSIZE_LARGE,alpha8,getElemStr((uint8_t)Z),ALIGN_LEFT,16384); //draw element label
           drawTextAlignedSized(rdat,drawRect.x+12.0f*state->ds.uiUserScale,drawRect.y+(SEARCH_MENU_RESULT_HEIGHT-32.0f)*state->ds.uiUserScale,grayCol8Bit,FONTSIZE_NORMAL,alpha8,dat->strings[dat->locStringIDs[LOCSTR_SEARCHRES_NUCLIDE]],ALIGN_LEFT,16384);
           break;
         case SEARCHAGENT_EGAMMA:
@@ -3064,7 +3064,7 @@ void drawSearchMenu(const app_data *restrict dat, const app_state *restrict stat
           numWidth = drawTextAlignedSized(rdat,drawRect.x+12.0f*state->ds.uiUserScale,drawRect.y+12.0f*state->ds.uiUserScale,blackCol8Bit,FONTSIZE_SMALL,alpha8,tmpStr,ALIGN_LEFT,16384).w; //draw number label
           getGammaEnergyStr(eStr,&dat->ndat,state->ss.results[i].resultVal[1],1);
           SDL_snprintf(tmpStr,64,"%s - %s keV",getElemStr((uint8_t)Z),eStr);
-          drawTextAlignedSized(rdat,drawRect.x+12.0f*state->ds.uiUserScale+numWidth,drawRect.y+(20.0f*state->ds.uiUserScale),blackCol8Bit,FONTSIZE_LARGE,alpha8,tmpStr,ALIGN_LEFT,16384); //draw element and gamma label
+          drawTextAlignedSized(rdat,drawRect.x+12.0f*state->ds.uiUserScale+numWidth,drawRect.y+(22.0f*state->ds.uiUserScale),blackCol8Bit,FONTSIZE_LARGE,alpha8,tmpStr,ALIGN_LEFT,16384); //draw element and gamma label
           drawTextAlignedSized(rdat,drawRect.x+12.0f*state->ds.uiUserScale,drawRect.y+(SEARCH_MENU_RESULT_HEIGHT-32.0f)*state->ds.uiUserScale,grayCol8Bit,FONTSIZE_NORMAL,alpha8,dat->strings[dat->locStringIDs[LOCSTR_SEARCHRES_EGAMMA]],ALIGN_LEFT,16384);
           break;
         case SEARCHAGENT_ELEVEL:
@@ -3074,7 +3074,7 @@ void drawSearchMenu(const app_data *restrict dat, const app_state *restrict stat
           numWidth = drawTextAlignedSized(rdat,drawRect.x+12.0f*state->ds.uiUserScale,drawRect.y+12.0f*state->ds.uiUserScale,blackCol8Bit,FONTSIZE_SMALL,alpha8,tmpStr,ALIGN_LEFT,16384).w; //draw number label
           getLvlEnergyStr(eStr,&dat->ndat,state->ss.results[i].resultVal[1],1);
           SDL_snprintf(tmpStr,64,"%s - %s keV",getElemStr((uint8_t)Z),eStr);
-          drawTextAlignedSized(rdat,drawRect.x+12.0f*state->ds.uiUserScale+numWidth,drawRect.y+(20.0f*state->ds.uiUserScale),blackCol8Bit,FONTSIZE_LARGE,alpha8,tmpStr,ALIGN_LEFT,16384); //draw element and level label
+          drawTextAlignedSized(rdat,drawRect.x+12.0f*state->ds.uiUserScale+numWidth,drawRect.y+(22.0f*state->ds.uiUserScale),blackCol8Bit,FONTSIZE_LARGE,alpha8,tmpStr,ALIGN_LEFT,16384); //draw element and level label
           drawTextAlignedSized(rdat,drawRect.x+12.0f*state->ds.uiUserScale,drawRect.y+(SEARCH_MENU_RESULT_HEIGHT-32.0f)*state->ds.uiUserScale,grayCol8Bit,FONTSIZE_NORMAL,alpha8,dat->strings[dat->locStringIDs[LOCSTR_SEARCHRES_ELEVEL]],ALIGN_LEFT,16384);
           break;
         case SEARCHAGENT_GAMMACASCADE:
@@ -3098,7 +3098,7 @@ void drawSearchMenu(const app_data *restrict dat, const app_state *restrict stat
             length += SDL_snprintf(tmpStr+length,(uint64_t)(64-length),"%0.0f, ",(double)(dat->ndat.tran[state->ss.results[i].resultVal[j]].energy.val));
           }
           length += SDL_snprintf(tmpStr+length,(uint64_t)(64-length),"%0.0f keV",(double)(dat->ndat.tran[state->ss.results[i].resultVal[numCascadeGammas]].energy.val));
-          drawTextAlignedSized(rdat,drawRect.x+12.0f*state->ds.uiUserScale+numWidth,drawRect.y+(20.0f*state->ds.uiUserScale),blackCol8Bit,FONTSIZE_LARGE,alpha8,tmpStr,ALIGN_LEFT,16384); //draw element and cascade label
+          drawTextAlignedSized(rdat,drawRect.x+12.0f*state->ds.uiUserScale+numWidth,drawRect.y+(22.0f*state->ds.uiUserScale),blackCol8Bit,FONTSIZE_LARGE,alpha8,tmpStr,ALIGN_LEFT,16384); //draw element and cascade label
           drawTextAlignedSized(rdat,drawRect.x+12.0f*state->ds.uiUserScale,drawRect.y+(SEARCH_MENU_RESULT_HEIGHT-32.0f)*state->ds.uiUserScale,grayCol8Bit,FONTSIZE_NORMAL,alpha8,dat->strings[dat->locStringIDs[LOCSTR_SEARCHRES_GAMMACASCADE]],ALIGN_LEFT,16384);
           break;
         case SEARCHAGENT_HALFLIFE:
@@ -3112,7 +3112,7 @@ void drawSearchMenu(const app_data *restrict dat, const app_state *restrict stat
           }else{
             SDL_snprintf(tmpStr,64,"%s - %s",getElemStr((uint8_t)Z),eStr);
           }
-          drawTextAlignedSized(rdat,drawRect.x+12.0f*state->ds.uiUserScale+numWidth,drawRect.y+(20.0f*state->ds.uiUserScale),blackCol8Bit,FONTSIZE_LARGE,alpha8,tmpStr,ALIGN_LEFT,16384); //draw element and half-life label
+          drawTextAlignedSized(rdat,drawRect.x+12.0f*state->ds.uiUserScale+numWidth,drawRect.y+(22.0f*state->ds.uiUserScale),blackCol8Bit,FONTSIZE_LARGE,alpha8,tmpStr,ALIGN_LEFT,16384); //draw element and half-life label
           if(state->ds.useLifetimes){
             drawTextAlignedSized(rdat,drawRect.x+12.0f*state->ds.uiUserScale,drawRect.y+(SEARCH_MENU_RESULT_HEIGHT-32.0f)*state->ds.uiUserScale,grayCol8Bit,FONTSIZE_NORMAL,alpha8,dat->strings[dat->locStringIDs[LOCSTR_SEARCHRES_LIFETIME]],ALIGN_LEFT,16384);
           }else{
