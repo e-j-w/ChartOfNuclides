@@ -135,19 +135,24 @@ void searchELevel(const ndata *restrict ndat, const drawing_state *restrict ds, 
 		if(eSearch > 0.0){
 			//valid energy
 			for(int16_t j=0; j<ndat->numNucl; j++){
-				float proximityFactor = SDL_sqrtf(fabsf((float)ndat->nuclData[j].Z - ds->chartPosY - (16.0f/ds->chartZoomScale)) + fabsf((float)ndat->nuclData[j].N - ds->chartPosX) + 0.1f);
-				proximityFactor = 0.6f*ds->chartZoomScale/proximityFactor;
-				if(proximityFactor > 1.0f){
-					proximityFactor = 1.0f;
+
+				float proximityFactor = 0.0f;
+				if(ds->chartZoomScale > 5.0f){
+					proximityFactor = (fabsf((float)ndat->nuclData[j].Z - ds->chartPosY - (16.0f/ds->chartZoomScale)) + fabsf((float)ndat->nuclData[j].N - ds->chartPosX) + 0.1f);
+					proximityFactor = 0.6f*ds->chartZoomScale/proximityFactor;
+					if(proximityFactor > 1.0f){
+						proximityFactor = 1.0f;
+					}
 				}
+
 				for(uint32_t k=ndat->nuclData[j].firstLevel; k<(ndat->nuclData[j].firstLevel + (uint32_t)ndat->nuclData[j].numLevels); k++){
 					if((((ndat->levels[k].energy.format >> 5U) & 15U)) == VALUETYPE_NUMBER){ //ignore variable energy
 						double rawEVal = getRawValFromDB(&ndat->levels[k].energy);
 						double rawErrVal = getRawErrFromDB(&ndat->levels[k].energy);
 						if(rawEVal > 0.0){
 							double errBound = 3.0*rawErrVal;
-							if(errBound < 5.0){
-								errBound = 5.0;
+							if(errBound < rawEVal*0.005){
+								errBound = rawEVal*0.005;
 							}
 							if(((rawEVal - errBound) <= eSearch)&&((rawEVal + errBound) >= eSearch)){
 								//energy matches query
@@ -196,11 +201,15 @@ void searchELevelDiff(const ndata *restrict ndat, const drawing_state *restrict 
 			//valid energy
 			for(uint16_t j=0; j<ndat->numNucl; j++){
 
-				float proximityFactor = SDL_sqrtf(fabsf((float)ndat->nuclData[j].Z - ds->chartPosY - (16.0f/ds->chartZoomScale)) + fabsf((float)ndat->nuclData[j].N - ds->chartPosX) + 0.1f);
-				proximityFactor = 0.6f*ds->chartZoomScale/proximityFactor;
-				if(proximityFactor > 1.0f){
-					proximityFactor = 1.0f;
+				float proximityFactor = 0.0f;
+				if(ds->chartZoomScale > 5.0f){
+					proximityFactor = SDL_sqrtf(fabsf((float)ndat->nuclData[j].Z - ds->chartPosY - (16.0f/ds->chartZoomScale)) + fabsf((float)ndat->nuclData[j].N - ds->chartPosX) + 0.1f);
+					proximityFactor = 0.6f*ds->chartZoomScale/proximityFactor;
+					if(proximityFactor > 1.0f){
+						proximityFactor = 1.0f;
+					}
 				}
+				
 				uint32_t lastLvlInd = (ndat->nuclData[j].firstLevel + (uint32_t)ndat->nuclData[j].numLevels);
 				for(uint32_t k=ndat->nuclData[j].firstLevel; k<lastLvlInd; k++){
 					if((((ndat->levels[k].energy.format >> 5U) & 15U)) == VALUETYPE_NUMBER){ //ignore variable energy
@@ -209,8 +218,8 @@ void searchELevelDiff(const ndata *restrict ndat, const drawing_state *restrict 
 
 								double diffVal = SDL_fabs(getRawValFromDB(&ndat->levels[l].energy) - getRawValFromDB(&ndat->levels[k].energy));
 								double errBound = 3.0*(getRawErrFromDB(&ndat->levels[l].energy) + getRawErrFromDB(&ndat->levels[k].energy));
-								if(errBound < 5.0){
-									errBound = 5.0;
+								if(errBound < diffVal*0.005){
+									errBound = diffVal*0.005;
 								}
 
 								if((diffVal - errBound) > eSearch){
@@ -224,9 +233,10 @@ void searchELevelDiff(const ndata *restrict ndat, const drawing_state *restrict 
 										res.relevance = 1.0f; //base value
 										res.relevance += proximityFactor;
 										res.relevance -= (float)(errBound/diffVal); //weight by size of error bars
-										res.relevance -= (float)(getRawValFromDB(&ndat->levels[l].energy)/30000.0); //weight by level energy (prefer lower levels)
+										res.relevance -= (float)(getRawValFromDB(&ndat->levels[l].energy)/1000000.0); //weight by level energy (prefer lower levels)
 										res.relevance /= (1.0f + (float)fabs(0.1*(eSearch - diffVal))); //weight by distance from value
-										if(res.relevance > 1.0f){
+										//SDL_Log("relevance: %f\n",(double)res.relevance);
+										if(res.relevance > 0.9f){
 											res.resultType = SEARCHAGENT_ELEVELDIFF;
 											res.resultVal[0] = (uint32_t)j; //nuclide index
 											res.resultVal[1] = (uint32_t)k; //level index
@@ -264,11 +274,16 @@ void searchEGamma(const ndata *restrict ndat, const drawing_state *restrict ds, 
 		if(eSearch > 0.0){
 			//valid energy
 			for(int16_t j=0; j<ndat->numNucl; j++){
-				float proximityFactor = SDL_sqrtf(fabsf((float)ndat->nuclData[j].Z - ds->chartPosY - (16.0f/ds->chartZoomScale)) + fabsf((float)ndat->nuclData[j].N - ds->chartPosX) + 0.1f);
-				proximityFactor = 0.5f*ds->chartZoomScale/proximityFactor;
-				if(proximityFactor > 1.0f){
-					proximityFactor = 1.0f;
+
+				float proximityFactor = 0.0f;
+				if(ds->chartZoomScale > 5.0f){
+					proximityFactor = SDL_sqrtf(fabsf((float)ndat->nuclData[j].Z - ds->chartPosY - (16.0f/ds->chartZoomScale)) + fabsf((float)ndat->nuclData[j].N - ds->chartPosX) + 0.1f);
+					proximityFactor = 0.5f*ds->chartZoomScale/proximityFactor;
+					if(proximityFactor > 1.0f){
+						proximityFactor = 1.0f;
+					}
 				}
+				
 				for(uint32_t k=ndat->nuclData[j].firstLevel; k<(ndat->nuclData[j].firstLevel + (uint32_t)ndat->nuclData[j].numLevels); k++){
 					for(uint32_t l=ndat->levels[k].firstTran; l<(ndat->levels[k].firstTran + (uint32_t)ndat->levels[k].numTran); l++){
 						if((((ndat->tran[l].energy.format >> 5U) & 15U)) != VALUETYPE_X){ //ignore variable energy
@@ -276,8 +291,8 @@ void searchEGamma(const ndata *restrict ndat, const drawing_state *restrict ds, 
 							double rawErrVal = getRawErrFromDB(&ndat->tran[l].energy);
 							if(rawEVal > 0.0){
 								double errBound = 3.0*rawErrVal;
-								if(errBound < 5.0){
-									errBound = 5.0;
+								if(errBound < rawEVal*0.005){
+									errBound = rawEVal*0.005;
 								}
 								if(((rawEVal - errBound) <= eSearch)&&((rawEVal + errBound) >= eSearch)){
 									//energy matches query
@@ -353,11 +368,16 @@ void searchGammaCascade(const ndata *restrict ndat, const drawing_state *restric
 		//search for nuclides containing all of the cascade's gammas in coincidenc
 		for(int16_t i=0; i<ndat->numNucl; i++){
 			if(ndat->nuclData[i].numLevels > 1){
-				float proximityFactor = SDL_sqrtf(fabsf((float)ndat->nuclData[i].Z - ds->chartPosY - (16.0f/ds->chartZoomScale)) + fabsf((float)ndat->nuclData[i].N - ds->chartPosX) + 0.1f);
-				proximityFactor = 1.0f*ds->chartZoomScale/proximityFactor;
-				if(proximityFactor > 1.0f){
-					proximityFactor = 1.0f;
+
+				float proximityFactor = 0.0f;
+				if(ds->chartZoomScale > 5.0f){
+					proximityFactor = SDL_sqrtf(fabsf((float)ndat->nuclData[i].Z - ds->chartPosY - (16.0f/ds->chartZoomScale)) + fabsf((float)ndat->nuclData[i].N - ds->chartPosX) + 0.1f);
+					proximityFactor = 1.0f*ds->chartZoomScale/proximityFactor;
+					if(proximityFactor > 1.0f){
+						proximityFactor = 1.0f;
+					}
 				}
+				
 				for(uint32_t j=(ndat->nuclData[i].firstLevel + (uint32_t)(ndat->nuclData[i].numLevels - 1)); j>=ndat->nuclData[i].firstLevel; j--){
 					if(j==0){
 						break; //safety valve
@@ -368,8 +388,8 @@ void searchGammaCascade(const ndata *restrict ndat, const drawing_state *restric
 							double rawErrVal = getRawErrFromDB(&ndat->tran[k].energy);
 							if(rawEVal > 0.0){
 								double errBound = 3.0*rawErrVal;
-								if(errBound < 5.0){
-									errBound = 5.0;
+								if(errBound < rawEVal*0.005){
+									errBound = rawEVal*0.005;
 								}
 								
 								for(uint8_t l=0; l<numCascadeGammas; l++){
@@ -480,11 +500,16 @@ void searchHalfLife(const ndata *restrict ndat, const drawing_state *restrict ds
 				hlSearch /= 1.4427; //convert lifetime to half-life
 			}
 			for(int16_t j=0; j<ndat->numNucl; j++){
-				float proximityFactor = SDL_sqrtf(fabsf((float)ndat->nuclData[j].Z - ds->chartPosY - (16.0f/ds->chartZoomScale)) + fabsf((float)ndat->nuclData[j].N - ds->chartPosX) + 0.1f);
-				proximityFactor = 0.5f*ds->chartZoomScale/proximityFactor;
-				if(proximityFactor > 1.0f){
-					proximityFactor = 1.0f;
+
+				float proximityFactor = 0.0f;
+				if(ds->chartZoomScale > 5.0f){
+					proximityFactor = SDL_sqrtf(fabsf((float)ndat->nuclData[j].Z - ds->chartPosY - (16.0f/ds->chartZoomScale)) + fabsf((float)ndat->nuclData[j].N - ds->chartPosX) + 0.1f);
+					proximityFactor = 0.5f*ds->chartZoomScale/proximityFactor;
+					if(proximityFactor > 1.0f){
+						proximityFactor = 1.0f;
+					}
 				}
+				
 				//SDL_Log("proximityFactor: %f\n",(double)proximityFactor);
 				for(uint32_t k=ndat->nuclData[j].firstLevel; k<(ndat->nuclData[j].firstLevel + (uint32_t)ndat->nuclData[j].numLevels); k++){
 					uint8_t hlValueType = (uint8_t)((ndat->levels[k].halfLife.format >> 5U) & 15U);
@@ -493,8 +518,8 @@ void searchHalfLife(const ndata *restrict ndat, const drawing_state *restrict ds
 						if(rawHlVal > 0.0){
 							double rawErrVal = getRawErrFromDB(&ndat->levels[k].halfLife);
 							double errBound = 3.0*rawErrVal;
-							if(errBound < 5.0){
-								errBound = 5.0;
+							if(errBound < rawHlVal*0.005){
+								errBound = rawHlVal*0.005;
 							}
 							if(((rawHlVal - errBound) <= hlSearch)&&((rawHlVal + errBound) >= hlSearch)){
 								//energy matches query
