@@ -41,15 +41,17 @@ int tpFunc(void *data){
               tdat->state->ss.finishedSearchAgents |= (uint32_t)(1U << SEARCHAGENT_TOKENIZE); //flag search agent as finished
             }
             break;
-          case SEARCHAGENT_NUCLIDE:
+          case SEARCHAGENT_PARSESPECIALSTRS:
             while(!(tdat->state->ss.finishedSearchAgents & (uint32_t)(1U << SEARCHAGENT_TOKENIZE))){
               if(tdat->threadState == THREADSTATE_KILL){
                 break; //kill waiting thread, if requested
               }
               SDL_Delay(THREAD_UPDATE_DELAY); //wait for tokenization to complete
             }
-            //SDL_Log("Searching for nuclides...\n");
+            //SDL_Log("Searching for special strings...\n");
+            searchSpecialStrings(&tdat->state->ss);
             searchNuclides(&tdat->dat->ndat,&tdat->state->ss);
+            tdat->state->ss.finishedSearchAgents |= (uint32_t)(1U << SEARCHAGENT_PARSESPECIALSTRS); //flag search agent as finished
             tdat->state->ss.finishedSearchAgents |= (uint32_t)(1U << SEARCHAGENT_NUCLIDE); //flag search agent as finished
             break;
           case SEARCHAGENT_EGAMMA:
@@ -71,6 +73,18 @@ int tpFunc(void *data){
             }
             //SDL_Log("Searching for levels...\n");
             searchELevel(&tdat->dat->ndat,&tdat->state->ds,&tdat->state->ss);
+            break;
+          case SEARCHAGENT_ELEVELDIFF:
+            while(!(tdat->state->ss.finishedSearchAgents & (uint32_t)(1U << SEARCHAGENT_NUCLIDE))){
+              if(tdat->threadState == THREADSTATE_KILL){
+                break; //kill waiting thread, if requested
+              }
+              SDL_Delay(THREAD_UPDATE_DELAY); //wait for tokenization to complete
+            }
+            if(tdat->state->ss.boostedResultType == SEARCHAGENT_ELEVELDIFF){
+              //use this thread (alongside other threads) to do a search of level energy differences
+              searchELevelDiff(&tdat->dat->ndat,&tdat->state->ds,&tdat->state->ss);
+            }
             break;
           case SEARCHAGENT_GAMMACASCADE:
             while(!(tdat->state->ss.finishedSearchAgents & (uint32_t)(1U << SEARCHAGENT_NUCLIDE))){
@@ -123,6 +137,8 @@ int startSearchThreads(app_data *restrict dat, app_state *restrict state, thread
   state->ss.finishedSearchAgents = 0;
   state->ss.numUpdatedResults = 0;
   state->ss.searchInProgress = 1;
+  state->ss.boostedNucl = MAXNUMNUCL;
+  state->ss.boostedResultType = SEARCHAGENT_TOKENIZE; //default value
 
   //determine number of threads
   tms->numThreads = SEARCHAGENT_ENUM_LENGTH;

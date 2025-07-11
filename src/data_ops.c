@@ -129,6 +129,10 @@ void initializeTempState(const app_data *restrict dat, app_state *restrict state
 		SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"LLCOLUMN_ENUM_LENGTH is too long, cannot be indexed by a uint16_t bit pattern (ds->nuclFullInfoShownColumns)!\n");
 		exit(-1);
 	}
+	if(MAXNUMNUCL > /* DISABLES CODE */ (32768)){
+		SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"MAXNUMNUCL is too long, cannot be indexed by a uint16_t bit variable (ss->boostedNucl)!\n");
+		exit(-1);
+	}
 
 }
 
@@ -3824,6 +3828,12 @@ void searchResultClickAction(app_data *restrict dat, app_state *restrict state, 
 			nuclLevel = (uint16_t)(state->ss.results[resultInd].resultVal[1] - dat->ndat.nuclData[state->ss.results[resultInd].resultVal[0]].firstLevel);
 			state->ds.nuclFullInfoScrollY = getNumDispLinesUpToLvl(&dat->ndat,state,nuclLevel); //scroll to the level of interest
 			break;
+		case SEARCHAGENT_ELEVELDIFF:
+			setSelectedNuclOnChartDirect(dat,state,rdat,(uint16_t)(state->ss.results[resultInd].resultVal[0]),1);
+			uiElemClickAction(dat,state,rdat,0,UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON);
+			nuclLevel = (uint16_t)(state->ss.results[resultInd].resultVal[1] - dat->ndat.nuclData[state->ss.results[resultInd].resultVal[0]].firstLevel);
+			state->ds.nuclFullInfoScrollY = getNumDispLinesUpToLvl(&dat->ndat,state,nuclLevel); //scroll to the level of interest
+			break;
 		case SEARCHAGENT_HALFLIFE:
 			setSelectedNuclOnChartDirect(dat,state,rdat,(uint16_t)(state->ss.results[resultInd].resultVal[0]),1);
 			if(state->ss.results[resultInd].resultVal[1] != (dat->ndat.nuclData[state->ss.results[resultInd].resultVal[0]].firstLevel + dat->ndat.nuclData[state->ss.results[resultInd].resultVal[0]].gsLevel)){
@@ -4491,7 +4501,7 @@ SDL_FRect getInfoBoxAllLvlButtonPos(const app_state *restrict state, const float
 	pos.h = (float)(UI_TILE_SIZE*state->ds.uiUserScale);
 	if(state->ds.uiAnimPlaying & (1U << UIANIM_NUCLINFOBOX_EXPAND)){
 		float animFrac = juice_smoothStop3(1.0f - state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_EXPAND]/SHORT_UI_ANIM_LENGTH);
-		int16_t defaultPosX = (int16_t)(infoBoxX + infoBoxWidth - (UI_TILE_SIZE*state->ds.uiUserScale) - pos.w - (int32_t)(7*UI_PADDING_SIZE*state->ds.uiUserScale));
+		int16_t defaultPosX = (int16_t)(infoBoxX + infoBoxWidth - (UI_TILE_SIZE*state->ds.uiUserScale) - pos.w - (float)(7*UI_PADDING_SIZE*state->ds.uiUserScale));
 		int16_t defaultPosY = (int16_t)infoBoxY + (int16_t)(4*UI_PADDING_SIZE*state->ds.uiUserScale);
 		int16_t fullPosX = (int16_t)(state->ds.windowXRes-(NUCL_FULLINFOBOX_BACKBUTTON_WIDTH+NUCL_FULLINFOBOX_BACKBUTTON_POS_XR)*state->ds.uiUserScale);
 		int16_t fullPosY = (int16_t)(NUCL_FULLINFOBOX_BACKBUTTON_POS_Y*state->ds.uiUserScale);
@@ -4499,14 +4509,14 @@ SDL_FRect getInfoBoxAllLvlButtonPos(const app_state *restrict state, const float
 		pos.y = (float)(defaultPosY + animFrac*(fullPosY - defaultPosY));
 	}else if(state->ds.uiAnimPlaying & (1U << UIANIM_NUCLINFOBOX_CONTRACT)){
 		float animFrac = juice_smoothStop3(1.0f - state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_CONTRACT]/UI_ANIM_LENGTH);
-		int16_t defaultPosX = (int16_t)(infoBoxX + infoBoxWidth - (UI_TILE_SIZE*state->ds.uiUserScale) - pos.w - (int32_t)(7*UI_PADDING_SIZE*state->ds.uiUserScale));
+		int16_t defaultPosX = (int16_t)(infoBoxX + infoBoxWidth - (UI_TILE_SIZE*state->ds.uiUserScale) - pos.w - (float)(7*UI_PADDING_SIZE*state->ds.uiUserScale));
 		int16_t defaultPosY = (int16_t)infoBoxY + (int16_t)(4*UI_PADDING_SIZE*state->ds.uiUserScale);
 		int16_t fullPosX = (int16_t)(state->ds.windowXRes-(NUCL_FULLINFOBOX_BACKBUTTON_WIDTH+NUCL_FULLINFOBOX_BACKBUTTON_POS_XR)*state->ds.uiUserScale);
 		int16_t fullPosY = (int16_t)(NUCL_FULLINFOBOX_BACKBUTTON_POS_Y*state->ds.uiUserScale);
 		pos.x = (float)(fullPosX + animFrac*(defaultPosX - fullPosX));
 		pos.y = (float)(fullPosY + animFrac*(defaultPosY - fullPosY));
 	}else{
-		pos.x = (float)(infoBoxX + infoBoxWidth - (UI_TILE_SIZE*state->ds.uiUserScale) - pos.w - (int32_t)(7*UI_PADDING_SIZE*state->ds.uiUserScale));
+		pos.x = (float)(infoBoxX + infoBoxWidth - (UI_TILE_SIZE*state->ds.uiUserScale) - pos.w - (float)(7*UI_PADDING_SIZE*state->ds.uiUserScale));
 		pos.y = infoBoxY + (float)(4*UI_PADDING_SIZE*state->ds.uiUserScale);
 	}
 	return pos;
@@ -4516,7 +4526,7 @@ SDL_FRect getInfoBoxCloseButtonPos(const app_state *restrict state, const float 
 	SDL_FRect pos;
 	pos.w = (float)(UI_TILE_SIZE*state->ds.uiUserScale);
 	pos.h = pos.w;
-	pos.x = (float)(infoBoxX + infoBoxWidth - pos.w - (int32_t)(4*UI_PADDING_SIZE*state->ds.uiUserScale));
+	pos.x = (float)(infoBoxX + infoBoxWidth - pos.w - (float)(4*UI_PADDING_SIZE*state->ds.uiUserScale));
 	pos.y = infoBoxY + (int16_t)(4*UI_PADDING_SIZE*state->ds.uiUserScale);
 	return pos;
 }
@@ -4592,18 +4602,18 @@ void updateSingleUIElemPosition(const app_data *restrict dat, app_state *restric
 			break;
 		case UIELEM_CHARTVIEW_MENU:
 			state->ds.uiElemWidth[uiElemInd] = (int16_t)((CHARTVIEW_MENU_WIDTH*CHARTVIEW_MENU_COLUMNS - 4*PANEL_EDGE_SIZE)*state->ds.uiUserScale);
-			uint8_t numViewsPerCol = (uint8_t)SDL_ceilf((CHARTVIEW_ENUM_LENGTH)/(1.0f*CHARTVIEW_MENU_COLUMNS));
-			float heightFrac = (1.0f*numViewsPerCol + CHARTVIEW_MENU_COLUMNS)/(1.0f*CHARTVIEW_ENUM_LENGTH + CHARTVIEW_MENU_COLUMNS);
+			uint8_t numViewsPerCol = (uint8_t)SDL_ceilf(((float)CHARTVIEW_ENUM_LENGTH)/(1.0f*((float)CHARTVIEW_MENU_COLUMNS)));
+			float heightFrac = (1.0f*numViewsPerCol + (float)CHARTVIEW_MENU_COLUMNS)/(1.0f*((float)CHARTVIEW_ENUM_LENGTH) + (float)CHARTVIEW_MENU_COLUMNS);
 			state->ds.uiElemHeight[uiElemInd] = (int16_t)(CHARTVIEW_MENU_HEIGHT*heightFrac*state->ds.uiUserScale);
 			state->ds.uiElemPosX[uiElemInd] = (int16_t)(state->ds.windowXRes-(state->ds.uiElemWidth[uiElemInd] + CHARTVIEW_MENU_POS_XR*state->ds.uiUserScale));
 			state->ds.uiElemPosY[uiElemInd] = (int16_t)(CHARTVIEW_MENU_POS_Y*state->ds.uiUserScale);
 			float cvmButtonWidth = (CHARTVIEW_MENU_WIDTH - 2*CHARTVIEW_MENU_COLUMNS*PANEL_EDGE_SIZE - 4*CHARTVIEW_MENU_COLUMNS*UI_PADDING_SIZE);
 			float cvmButtonHeight = (CHARTVIEW_MENU_ITEM_SPACING - UI_PADDING_SIZE);
 			for(uint8_t i=0; i<CHARTVIEW_ENUM_LENGTH; i++){
-				state->ds.uiElemWidth[UIELEM_CHARTVIEW_MENU-CHARTVIEW_ENUM_LENGTH+i] = (int16_t)(cvmButtonWidth*state->ds.uiUserScale);
-				state->ds.uiElemHeight[UIELEM_CHARTVIEW_MENU-CHARTVIEW_ENUM_LENGTH+i] = (int16_t)(cvmButtonHeight*state->ds.uiUserScale);
-				state->ds.uiElemPosX[UIELEM_CHARTVIEW_MENU-CHARTVIEW_ENUM_LENGTH+i] = (int16_t)(state->ds.windowXRes-((CHARTVIEW_MENU_WIDTH+CHARTVIEW_MENU_POS_XR - 4*PANEL_EDGE_SIZE - 4*UI_PADDING_SIZE + (float)(((CHARTVIEW_MENU_COLUMNS-1) - (i/numViewsPerCol))*(cvmButtonWidth + UI_TILE_SIZE - UI_PADDING_SIZE)))*state->ds.uiUserScale) );
-				state->ds.uiElemPosY[UIELEM_CHARTVIEW_MENU-CHARTVIEW_ENUM_LENGTH+i] = (int16_t)((CHARTVIEW_MENU_POS_Y + PANEL_EDGE_SIZE + CHARTVIEW_MENU_ITEM_SPACING + 2*UI_PADDING_SIZE + (float)((i%numViewsPerCol)*CHARTVIEW_MENU_ITEM_SPACING))*state->ds.uiUserScale);
+				state->ds.uiElemWidth[(int32_t)UIELEM_CHARTVIEW_MENU-((int32_t)CHARTVIEW_ENUM_LENGTH)+i] = (int16_t)(cvmButtonWidth*state->ds.uiUserScale);
+				state->ds.uiElemHeight[(int32_t)UIELEM_CHARTVIEW_MENU-((int32_t)CHARTVIEW_ENUM_LENGTH)+i] = (int16_t)(cvmButtonHeight*state->ds.uiUserScale);
+				state->ds.uiElemPosX[(int32_t)UIELEM_CHARTVIEW_MENU-((int32_t)CHARTVIEW_ENUM_LENGTH)+i] = (int16_t)(state->ds.windowXRes-((CHARTVIEW_MENU_WIDTH+CHARTVIEW_MENU_POS_XR - 4*PANEL_EDGE_SIZE - 4*UI_PADDING_SIZE + (float)(((CHARTVIEW_MENU_COLUMNS-1) - (i/numViewsPerCol))*(cvmButtonWidth + UI_TILE_SIZE - UI_PADDING_SIZE)))*state->ds.uiUserScale) );
+				state->ds.uiElemPosY[(int32_t)UIELEM_CHARTVIEW_MENU-((int32_t)CHARTVIEW_ENUM_LENGTH)+i] = (int16_t)((CHARTVIEW_MENU_POS_Y + PANEL_EDGE_SIZE + CHARTVIEW_MENU_ITEM_SPACING + 2*UI_PADDING_SIZE + (float)((i%numViewsPerCol)*CHARTVIEW_MENU_ITEM_SPACING))*state->ds.uiUserScale);
 			}
 			break;
 		case UIELEM_SEARCH_MENU:

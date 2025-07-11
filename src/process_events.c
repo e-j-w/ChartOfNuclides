@@ -363,7 +363,7 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
           state->mouseoverElement = (uint8_t)((int16_t)UIELEM_CHARTVIEW_MENU-(int16_t)CHARTVIEW_ENUM_LENGTH);
         }else{
           uint8_t selMenuElem = (uint8_t)(CHARTVIEW_ENUM_LENGTH - (UIELEM_CHARTVIEW_MENU - state->mouseoverElement));
-          uint8_t numViewsPerCol = (uint8_t)SDL_ceilf((CHARTVIEW_ENUM_LENGTH)/(1.0f*CHARTVIEW_MENU_COLUMNS));
+          uint8_t numViewsPerCol = (uint8_t)SDL_ceilf(((float)CHARTVIEW_ENUM_LENGTH)/(1.0f*((float)CHARTVIEW_MENU_COLUMNS)));
           if(selMenuElem >= CHARTVIEW_ENUM_LENGTH){
             state->mouseoverElement = (uint8_t)((int16_t)UIELEM_CHARTVIEW_MENU-(int16_t)CHARTVIEW_ENUM_LENGTH);
           }

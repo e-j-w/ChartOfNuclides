@@ -29,16 +29,6 @@ int SDLCALL compareRelevance(const void *a, const void *b){
 	float relB = resB->relevance;
 	//printf("A: val %u rel %f\n",resA->resultVal[0],(double)resA->relevance);
 	//printf("B: val %u rel %f\n",resB->resultVal[0],(double)resB->relevance);
-	for(uint8_t i=0; i<64; i++){
-		if(resA->corrRes & (uint64_t)(1U << i)){
-			relA += 1.0f;
-			relA *= 10.0f;
-		}
-		if(resB->corrRes & (uint64_t)(1U << i)){
-			relB += 1.0f;
-			relB *= 10.0f;
-		}
-	}
 	if(relA >= relB){
 		return -1;
 	}else{
@@ -46,7 +36,7 @@ int SDLCALL compareRelevance(const void *a, const void *b){
 	}
 }
 
-void sortAndAppendResult(search_state *restrict ss, const search_result *restrict res){
+void sortAndAppendResult(search_state *restrict ss, search_result *restrict res){
 
 	SDL_WaitSemaphore(ss->canUpdateResults); //wait while any other threads update the results
 	
@@ -61,6 +51,22 @@ void sortAndAppendResult(search_state *restrict ss, const search_result *restric
 			}
 		}
 	}
+
+	//boost result relevance if neccessary
+	if(res->resultType == ss->boostedResultType){
+		res->relevance *= 100.0f;
+	}
+	if((res->resultType == SEARCHAGENT_EGAMMA)||(res->resultType == SEARCHAGENT_ELEVEL)||(res->resultType == SEARCHAGENT_GAMMACASCADE)||(res->resultType == SEARCHAGENT_HALFLIFE)||(res->resultType == SEARCHAGENT_ELEVELDIFF)){
+		if(res->resultVal[0] == ss->boostedNucl){
+			//gamma or half-life matching a nuclide
+			res->relevance *= 100.0f;
+		}
+	}
+
+	/*if(res->relevance < 1.0f){
+		return; //don't process low relevance results
+	}*/
+
 	//SDL_Log("Appending result with type %u, values [%u %u], relevance %0.3f.\n",res->resultType,res->resultVal[0],res->resultVal[1],(double)res->relevance);
 	//add the result to the list, if possible
 	if(ss->numUpdatedResults < MAX_SEARCH_RESULTS){
@@ -71,24 +77,6 @@ void sortAndAppendResult(search_state *restrict ss, const search_result *restric
 		//assuming results are already sorted...
 		//overwrite that lowest ranked result with the new result
 		memcpy(&ss->updatedResults[MAX_SEARCH_RESULTS-1],res,sizeof(search_result));
-	}
-
-	//check for correlations between results
-	for(uint8_t i=0; i<ss->numUpdatedResults; i++){
-		ss->updatedResults[i].corrRes = 0;
-		for(uint8_t j=0; j<ss->numUpdatedResults; j++){
-			if(i != j){
-				if((ss->updatedResults[i].resultType == SEARCHAGENT_EGAMMA)||(ss->updatedResults[i].resultType == SEARCHAGENT_ELEVEL)||(ss->updatedResults[i].resultType == SEARCHAGENT_GAMMACASCADE)||(ss->updatedResults[i].resultType == SEARCHAGENT_HALFLIFE)){
-					if(ss->updatedResults[j].resultType == SEARCHAGENT_NUCLIDE){
-						if(ss->updatedResults[i].resultVal[0] == ss->updatedResults[j].resultVal[0]){
-							//gamma or half-life matching a nuclide
-							//SDL_Log("Correlated result %u with result %u\n",i,j);
-							ss->updatedResults[i].corrRes |= (uint64_t)(1U << j);
-						}
-					}
-				}
-			}
-		}
 	}
 	
 	//sort the results by relevance
@@ -147,7 +135,7 @@ void searchELevel(const ndata *restrict ndat, const drawing_state *restrict ds, 
 		if(eSearch > 0.0){
 			//valid energy
 			for(int16_t j=0; j<ndat->numNucl; j++){
-				float proximityFactor = sqrtf(fabsf((float)ndat->nuclData[j].Z - ds->chartPosY - (16.0f/ds->chartZoomScale)) + fabsf((float)ndat->nuclData[j].N - ds->chartPosX) + 0.1f);
+				float proximityFactor = SDL_sqrtf(fabsf((float)ndat->nuclData[j].Z - ds->chartPosY - (16.0f/ds->chartZoomScale)) + fabsf((float)ndat->nuclData[j].N - ds->chartPosX) + 0.1f);
 				proximityFactor = 0.6f*ds->chartZoomScale/proximityFactor;
 				if(proximityFactor > 1.0f){
 					proximityFactor = 1.0f;
@@ -171,9 +159,83 @@ void searchELevel(const ndata *restrict ndat, const drawing_state *restrict ds, 
 								res.resultType = SEARCHAGENT_ELEVEL;
 								res.resultVal[0] = (uint32_t)j; //nuclide index
 								res.resultVal[1] = (uint32_t)k; //level index
-								res.corrRes = 0;
 								//SDL_Log("Found level %u\n",res.resultVal[1]);
 								sortAndAppendResult(ss,&res);
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+void searchELevelDiff(const ndata *restrict ndat, const drawing_state *restrict ds, search_state *restrict ss){
+
+	//only search this type if asked to
+	if(ss->boostedResultType != SEARCHAGENT_ELEVELDIFF){
+		return;
+	}
+
+	for(uint8_t i=0; i<ss->numSearchTok; i++){
+
+		//first, filter out any tokens with characters
+		uint8_t isNum = 1;
+		for(uint16_t j=0; j<SDL_strlen(ss->searchTok[i]); j++){
+			if(isalpha(ss->searchTok[i][j])){
+				isNum = 0;
+				break;
+			}
+		}
+		if(isNum == 0){
+			continue; //check next search token
+		}
+
+		double eSearch = SDL_atof(ss->searchTok[i]);
+		if(eSearch > 0.0){
+			//valid energy
+			for(uint16_t j=0; j<ndat->numNucl; j++){
+
+				float proximityFactor = SDL_sqrtf(fabsf((float)ndat->nuclData[j].Z - ds->chartPosY - (16.0f/ds->chartZoomScale)) + fabsf((float)ndat->nuclData[j].N - ds->chartPosX) + 0.1f);
+				proximityFactor = 0.6f*ds->chartZoomScale/proximityFactor;
+				if(proximityFactor > 1.0f){
+					proximityFactor = 1.0f;
+				}
+				uint32_t lastLvlInd = (ndat->nuclData[j].firstLevel + (uint32_t)ndat->nuclData[j].numLevels);
+				for(uint32_t k=ndat->nuclData[j].firstLevel; k<lastLvlInd; k++){
+					if((((ndat->levels[k].energy.format >> 5U) & 15U)) == VALUETYPE_NUMBER){ //ignore variable energy
+						for(uint32_t l=k+1; l<lastLvlInd; l++){
+							if((((ndat->levels[l].energy.format >> 5U) & 15U)) == VALUETYPE_NUMBER){ //ignore variable energy
+
+								double diffVal = SDL_fabs(getRawValFromDB(&ndat->levels[l].energy) - getRawValFromDB(&ndat->levels[k].energy));
+								double errBound = 3.0*(getRawErrFromDB(&ndat->levels[l].energy) + getRawErrFromDB(&ndat->levels[k].energy));
+								if(errBound < 5.0){
+									errBound = 5.0;
+								}
+
+								if((diffVal - errBound) > eSearch){
+									//level energy difference is too high
+									//assume levels are ordered by energy
+									break;
+								}else if(diffVal > 0.0){
+									if((diffVal + errBound) >= eSearch){
+										//energy matches query
+										search_result res;
+										res.relevance = 1.0f; //base value
+										res.relevance += proximityFactor;
+										res.relevance -= (float)(errBound/diffVal); //weight by size of error bars
+										res.relevance -= (float)(getRawValFromDB(&ndat->levels[l].energy)/30000.0); //weight by level energy (prefer lower levels)
+										res.relevance /= (1.0f + (float)fabs(0.1*(eSearch - diffVal))); //weight by distance from value
+										if(res.relevance > 1.0f){
+											res.resultType = SEARCHAGENT_ELEVELDIFF;
+											res.resultVal[0] = (uint32_t)j; //nuclide index
+											res.resultVal[1] = (uint32_t)k; //level index
+											res.resultVal[2] = (uint32_t)l; //level index
+											//SDL_Log("Found level %u\n",res.resultVal[1]);
+											sortAndAppendResult(ss,&res);
+										}
+									}
+								}
 							}
 						}
 					}
@@ -202,7 +264,7 @@ void searchEGamma(const ndata *restrict ndat, const drawing_state *restrict ds, 
 		if(eSearch > 0.0){
 			//valid energy
 			for(int16_t j=0; j<ndat->numNucl; j++){
-				float proximityFactor = sqrtf(fabsf((float)ndat->nuclData[j].Z - ds->chartPosY - (16.0f/ds->chartZoomScale)) + fabsf((float)ndat->nuclData[j].N - ds->chartPosX) + 0.1f);
+				float proximityFactor = SDL_sqrtf(fabsf((float)ndat->nuclData[j].Z - ds->chartPosY - (16.0f/ds->chartZoomScale)) + fabsf((float)ndat->nuclData[j].N - ds->chartPosX) + 0.1f);
 				proximityFactor = 0.5f*ds->chartZoomScale/proximityFactor;
 				if(proximityFactor > 1.0f){
 					proximityFactor = 1.0f;
@@ -244,7 +306,6 @@ void searchEGamma(const ndata *restrict ndat, const drawing_state *restrict ds, 
 									res.resultType = SEARCHAGENT_EGAMMA;
 									res.resultVal[0] = (uint32_t)j; //nuclide index
 									res.resultVal[1] = (uint32_t)l; //transition index
-									res.corrRes = 0;
 									//SDL_Log("Found transition %u\n",res.resultVal[1]);
 									sortAndAppendResult(ss,&res);
 								}
@@ -292,7 +353,7 @@ void searchGammaCascade(const ndata *restrict ndat, const drawing_state *restric
 		//search for nuclides containing all of the cascade's gammas in coincidenc
 		for(int16_t i=0; i<ndat->numNucl; i++){
 			if(ndat->nuclData[i].numLevels > 1){
-				float proximityFactor = sqrtf(fabsf((float)ndat->nuclData[i].Z - ds->chartPosY - (16.0f/ds->chartZoomScale)) + fabsf((float)ndat->nuclData[i].N - ds->chartPosX) + 0.1f);
+				float proximityFactor = SDL_sqrtf(fabsf((float)ndat->nuclData[i].Z - ds->chartPosY - (16.0f/ds->chartZoomScale)) + fabsf((float)ndat->nuclData[i].N - ds->chartPosX) + 0.1f);
 				proximityFactor = 1.0f*ds->chartZoomScale/proximityFactor;
 				if(proximityFactor > 1.0f){
 					proximityFactor = 1.0f;
@@ -378,7 +439,6 @@ void searchGammaCascade(const ndata *restrict ndat, const drawing_state *restric
 											if((numGammasMatched+1) < SEARCH_RESULT_DATASIZE){
 												res.resultVal[numGammasMatched+1] = UNUSED_SEARCH_RESULT; //truncate results
 											}
-											res.corrRes = 0;
 											//SDL_Log("Found cascade in nuclide %u starting with transition %u\n",res.resultVal[0],res.resultVal[1]);
 											sortAndAppendResult(ss,&res);
 										}
@@ -420,7 +480,7 @@ void searchHalfLife(const ndata *restrict ndat, const drawing_state *restrict ds
 				hlSearch /= 1.4427; //convert lifetime to half-life
 			}
 			for(int16_t j=0; j<ndat->numNucl; j++){
-				float proximityFactor = sqrtf(fabsf((float)ndat->nuclData[j].Z - ds->chartPosY - (16.0f/ds->chartZoomScale)) + fabsf((float)ndat->nuclData[j].N - ds->chartPosX) + 0.1f);
+				float proximityFactor = SDL_sqrtf(fabsf((float)ndat->nuclData[j].Z - ds->chartPosY - (16.0f/ds->chartZoomScale)) + fabsf((float)ndat->nuclData[j].N - ds->chartPosX) + 0.1f);
 				proximityFactor = 0.5f*ds->chartZoomScale/proximityFactor;
 				if(proximityFactor > 1.0f){
 					proximityFactor = 1.0f;
@@ -456,7 +516,6 @@ void searchHalfLife(const ndata *restrict ndat, const drawing_state *restrict ds
 								res.resultType = SEARCHAGENT_HALFLIFE;
 								res.resultVal[0] = (uint32_t)j; //nuclide index
 								res.resultVal[1] = (uint32_t)k; //level index
-								res.corrRes = 0;
 								//SDL_Log("Found transition %u\n",res.resultVal[1]);
 								sortAndAppendResult(ss,&res);
 							}
@@ -575,13 +634,11 @@ void searchNuclides(const ndata *restrict ndat, search_state *restrict ss){
 						if((ndat->nuclData[j].flags & 3U) == OBSFLAG_OBSERVED){
 							//identified nuclide (exact match)
 							search_result res;
-							res.relevance = 2.0f; //exact match
+							res.relevance = 1.0f; //base value
 							res.resultType = SEARCHAGENT_NUCLIDE;
-							res.resultVal[0] = (uint32_t)j;
-							res.resultVal[1] = 0;
-							res.corrRes = 0;
-							//SDL_Log("Found nuclide %u\n",res.resultVal[0]);
+							res.resultVal[0] = (uint32_t)j; //nuclide index
 							sortAndAppendResult(ss,&res);
+							ss->boostedNucl = (uint16_t)j;
 						}
 					}
 				}
@@ -592,18 +649,51 @@ void searchNuclides(const ndata *restrict ndat, search_state *restrict ss){
 						if((ndat->nuclData[j].flags & 3U) == OBSFLAG_OBSERVED){
 							//identified nuclide (uppercase match)
 							search_result res;
-							res.relevance = 1.8f; //uppercase match
+							res.relevance = 1.0f; //base value
 							res.resultType = SEARCHAGENT_NUCLIDE;
-							res.resultVal[0] = (uint32_t)j;
-							res.resultVal[1] = 0;
-							res.corrRes = 0;
-							//SDL_Log("Found nuclide %u\n",res.resultVal[0]);
+							res.resultVal[0] = (uint32_t)j; //nuclide index
 							sortAndAppendResult(ss,&res);
+							ss->boostedNucl = (uint16_t)j;
 						}
 					}
 				}
 			}
 		}
+	}
+
+	//SDL_Log("Number of search results: %u\n",ss->numUpdatedResults);
+}
+
+//search for special strings (eg. 'level') which can be used to modify the
+//priority of search results
+void searchSpecialStrings(search_state *restrict ss){
+	
+	
+	char tmpStr[64];
+	for(uint8_t i=0; i<ss->numSearchTok; i++){
+		
+		SDL_strlcpy(tmpStr,ss->searchTok[i],64);
+		uint8_t len = (uint8_t)SDL_strlen(tmpStr);
+		for(uint8_t j=0; j<len; j++){
+			tmpStr[j] = (char)SDL_tolower(tmpStr[j]); //convert entire string to lowercase
+		}
+		if((SDL_strcmp(tmpStr,"level")==0)||(SDL_strcmp(tmpStr,"lvl")==0)||(SDL_strcmp(tmpStr,"state")==0)){
+			ss->boostedResultType = SEARCHAGENT_ELEVEL;
+			return;
+		}else if((SDL_strcmp(tmpStr,"gamma")==0)||(SDL_strcmp(tmpStr,"transition")==0)){
+			ss->boostedResultType = SEARCHAGENT_EGAMMA;
+			return;
+		}else if(SDL_strcmp(tmpStr,"cascade")==0){
+			ss->boostedResultType = SEARCHAGENT_GAMMACASCADE;
+			return;
+		}else if((SDL_strcmp(tmpStr,"halflife")==0)||(SDL_strcmp(tmpStr,"half life")==0)||(SDL_strcmp(tmpStr,"lifetime")==0)){
+			ss->boostedResultType = SEARCHAGENT_HALFLIFE;
+			return;
+		}else if(SDL_strncmp(tmpStr,"diff",4)==0){
+			ss->boostedResultType = SEARCHAGENT_ELEVELDIFF;
+			return;
+		}
+		
 	}
 
 	//SDL_Log("Number of search results: %u\n",ss->numUpdatedResults);

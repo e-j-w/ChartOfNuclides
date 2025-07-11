@@ -3022,7 +3022,7 @@ void drawSearchMenu(const app_data *restrict dat, const app_state *restrict stat
   drawRect.y = ((float)state->ds.uiElemPosY[UIELEM_SEARCH_MENU] + yOffset);
   drawRect.w = state->ds.uiElemWidth[UIELEM_SEARCH_MENU];
   drawRect.h = state->ds.uiElemHeight[UIELEM_SEARCH_MENU];
-  const int16_t arrowX = (int16_t)(drawRect.x + 0.44f*drawRect.w);
+  const int16_t arrowX = (int16_t)(drawRect.x + 0.46f*drawRect.w);
   drawMenuBGWithArrow(&dat->rules.themeRules,rdat,drawRect,arrowX,alpha);
 
   //draw entry box
@@ -3078,6 +3078,21 @@ void drawSearchMenu(const app_data *restrict dat, const app_state *restrict stat
           SDL_snprintf(tmpStr,64,"%s - %s keV",eStr,eStr2);
           drawTextAlignedSized(rdat,drawRect.x+12.0f*state->ds.uiUserScale,drawRect.y+(16.0f*state->ds.uiUserScale),blackCol8Bit,FONTSIZE_LARGE,alpha8,tmpStr,ALIGN_LEFT,16384); //draw element and level label
           drawTextAlignedSized(rdat,drawRect.x+12.0f*state->ds.uiUserScale,drawRect.y+(SEARCH_MENU_RESULT_HEIGHT-32.0f)*state->ds.uiUserScale,grayCol8Bit,FONTSIZE_NORMAL,alpha8,dat->strings[dat->locStringIDs[LOCSTR_SEARCHRES_ELEVEL]],ALIGN_LEFT,16384);
+          break;
+        case SEARCHAGENT_ELEVELDIFF:
+          getNuclNameStr(eStr,&dat->ndat.nuclData[state->ss.results[i].resultVal[0]],255);
+          getLvlEnergyStr(eStr2,&dat->ndat,state->ss.results[i].resultVal[2],1);
+          SDL_snprintf(tmpStr,64,"%s - %s to ",eStr,eStr2);
+          getLvlEnergyStr(eStr2,&dat->ndat,state->ss.results[i].resultVal[1],1);
+          SDL_strlcat(tmpStr,eStr2,64);
+          SDL_strlcat(tmpStr," keV",64);
+          if(SDL_strlen(tmpStr) > 38){
+            tmpStr[38]='.'; tmpStr[39]='.'; tmpStr[40]='.';
+            tmpStr[41]='\0'; //terminate
+          }
+          drawTextAlignedSized(rdat,drawRect.x+12.0f*state->ds.uiUserScale,drawRect.y+(16.0f*state->ds.uiUserScale),blackCol8Bit,FONTSIZE_LARGE,alpha8,tmpStr,ALIGN_LEFT,16384); //draw element and level difference label
+          SDL_snprintf(tmpStr,64,"%s (%0.1f keV)",dat->strings[dat->locStringIDs[LOCSTR_SEARCHRES_ELEVELDIFF]],getLevelEnergykeV(&dat->ndat,state->ss.results[i].resultVal[2])-getLevelEnergykeV(&dat->ndat,state->ss.results[i].resultVal[1]));
+          drawTextAlignedSized(rdat,drawRect.x+12.0f*state->ds.uiUserScale,drawRect.y+(SEARCH_MENU_RESULT_HEIGHT-32.0f)*state->ds.uiUserScale,grayCol8Bit,FONTSIZE_NORMAL,alpha8,tmpStr,ALIGN_LEFT,16384);
           break;
         case SEARCHAGENT_GAMMACASCADE:
           getNuclNameStr(eStr,&dat->ndat.nuclData[state->ss.results[i].resultVal[0]],255);
@@ -3152,7 +3167,7 @@ void drawChartViewMenu(const app_data *restrict dat, const app_state *restrict s
   drawRect.y = ((float)state->ds.uiElemPosY[UIELEM_CHARTVIEW_MENU] + yOffset);
   drawRect.w = state->ds.uiElemWidth[UIELEM_CHARTVIEW_MENU];
   drawRect.h = state->ds.uiElemHeight[UIELEM_CHARTVIEW_MENU];
-  const int16_t arrowX = (int16_t)(drawRect.x + 0.62f*drawRect.w);
+  const int16_t arrowX = (int16_t)(drawRect.x + 0.615f*drawRect.w);
   drawMenuBGWithArrow(&dat->rules.themeRules,rdat,drawRect,arrowX,alpha);
   
   //draw menu item highlight
@@ -3182,7 +3197,7 @@ void drawChartViewMenu(const app_data *restrict dat, const app_state *restrict s
   }
 
   //draw menu item text
-  uint8_t numViewsPerCol = (uint8_t)SDL_ceilf((CHARTVIEW_ENUM_LENGTH)/(1.0f*CHARTVIEW_MENU_COLUMNS));
+  uint8_t numViewsPerCol = (uint8_t)SDL_ceilf(((float)CHARTVIEW_ENUM_LENGTH)/(1.0f*((float)CHARTVIEW_MENU_COLUMNS)));
   drawRect.y = ((float)state->ds.uiElemPosY[UIELEM_CHARTVIEW_MENU] + PANEL_EDGE_SIZE*state->ds.uiUserScale + yOffset);
   drawRect.w = state->ds.uiElemWidth[UIELEM_CHARTVIEW_MENU];
   drawRect.h = state->ds.uiElemHeight[UIELEM_CHARTVIEW_MENU];

@@ -80,6 +80,7 @@ search_placeholder|Type to search (eg. '32Si')
 search_result_nuclide|Nuclide / Isotope
 search_result_egamma|Transition
 search_result_elevel|Excited State
+search_result_elevel_diff|Level energy difference
 search_result_gammacascade|Gamma-ray cascade
 search_result_halflife|Half-life
 search_result_lifetime|Mean lifetime

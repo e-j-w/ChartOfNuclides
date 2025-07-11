@@ -321,6 +321,7 @@ static int parseAppRules(app_data *restrict dat, asset_mapping *restrict stringI
 	dat->locStringIDs[LOCSTR_SEARCHRES_NUCLIDE] = (uint16_t)nameToAssetID("search_result_nuclide",stringIDmap);
 	dat->locStringIDs[LOCSTR_SEARCHRES_EGAMMA] = (uint16_t)nameToAssetID("search_result_egamma",stringIDmap);
 	dat->locStringIDs[LOCSTR_SEARCHRES_ELEVEL] = (uint16_t)nameToAssetID("search_result_elevel",stringIDmap);
+	dat->locStringIDs[LOCSTR_SEARCHRES_ELEVELDIFF] = (uint16_t)nameToAssetID("search_result_elevel_diff",stringIDmap);
 	dat->locStringIDs[LOCSTR_SEARCHRES_GAMMACASCADE] = (uint16_t)nameToAssetID("search_result_gammacascade",stringIDmap);
 	dat->locStringIDs[LOCSTR_SEARCHRES_HALFLIFE] = (uint16_t)nameToAssetID("search_result_halflife",stringIDmap);
 	dat->locStringIDs[LOCSTR_SEARCHRES_LIFETIME] = (uint16_t)nameToAssetID("search_result_lifetime",stringIDmap);
@@ -3524,7 +3525,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 								nd->nuclData[nd->numNucl].qalpha.val /= 10.0f;
 							}
 							if(((nd->nuclData[nd->numNucl].N == 7)&&(nd->nuclData[nd->numNucl].Z == 11)) || ((nd->nuclData[nd->numNucl].N == 105)&&(nd->nuclData[nd->numNucl].Z == 81))){
-								if(SDL_fabsf(nd->nuclData[nd->numNucl].qalpha.val < 3000.0f)){
+								if(SDL_fabsf(nd->nuclData[nd->numNucl].qalpha.val) < 3000.0f){
 									//18Na, 186Tl values are improperly formatted (as of June 2025 ENSDF)		
 									nd->nuclData[nd->numNucl].qalpha.val *= 1000.0f;
 								}
