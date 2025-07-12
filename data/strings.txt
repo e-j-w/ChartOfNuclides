@@ -5,6 +5,8 @@ no_db|No ENSDF database loaded.
 gm_state|Ground and isomeric state information:
 qalpha|Q(α)
 q_betaminus|Q(β-)
+q_betaplus|Q(β+)
+q_ec|Q(ε)
 protonsep_energy|S(p)
 neutronsep_energy|S(n)
 atomic_mass|Atomic Mass
@@ -43,7 +45,7 @@ all_reactions|All Reactions
 menuitem_preferences|Preferences
 menuitem_screenshot|Take a screenshot...
 menuitem_about|About Chart of Nuclides
-about_string_version|Version 0.7.0 - "Differential Equation"
+about_string_version|Version 0.7.1 - "Differential Equation"
 about_string_1|Developed by Jonathan Williams
 about_string_2|Nuclear structure data is sourced from ENSDF, mass data from AME2020, and isotope abundance data from NIST.
 about_string_3|This is an independently developed program not endorsed by the above entities. The accuracy or completeness of any information provided is not guaranteed.
@@ -69,6 +71,8 @@ chartview_sn|S(n)
 chartview_sp|S(p)
 chartview_qalpha|Q(α)
 chartview_qbeta|Q(β-)
+chartview_qbetaplus|Q(β+)
+chartview_qec|Q(ε)
 chartview_spin|GS spin
 chartview_parity|GS parity
 chartview_num_levels|Known Levels

@@ -3086,6 +3086,8 @@ void changeUIState(const app_data *restrict dat, app_state *restrict state, cons
 				state->interactableElement |= ((uint64_t)(1) << UIELEM_CVM_SP_BUTTON);
 				state->interactableElement |= ((uint64_t)(1) << UIELEM_CVM_QALPHA_BUTTON);
 				state->interactableElement |= ((uint64_t)(1) << UIELEM_CVM_QBETAMINUS_BUTTON);
+				state->interactableElement |= ((uint64_t)(1) << UIELEM_CVM_QBETAPLUS_BUTTON);
+				state->interactableElement |= ((uint64_t)(1) << UIELEM_CVM_QEC_BUTTON);
 				state->interactableElement |= ((uint64_t)(1) << UIELEM_CVM_NUMLVLS);
 				state->interactableElement |= ((uint64_t)(1) << UIELEM_CVM_UNKNOWN_ENERGY_BUTTON);
 				state->interactableElement |= ((uint64_t)(1) << UIELEM_CHARTVIEW_MENU);
@@ -3736,7 +3738,23 @@ void contextMenuClickAction(app_data *restrict dat, app_state *restrict state, c
 					; //suppress warning
 					char tmpQbStr[32];
 					getQValStr(tmpQbStr,dat->ndat.nuclData[state->cms.selectionInd].qbeta,1);
-					SDL_snprintf(state->copiedTxt,MAX_SELECTABLE_STR_LEN,"%s: %s %s",dat->strings[dat->locStringIDs[LOCSTR_QBETAMNUS]],tmpQbStr,getValueUnitShortStr(dat->ndat.nuclData[state->cms.selectionInd].qbeta.unit));
+					SDL_snprintf(state->copiedTxt,MAX_SELECTABLE_STR_LEN,"%s: %s %s",dat->strings[dat->locStringIDs[LOCSTR_QBETAMINUS]],tmpQbStr,getValueUnitShortStr(dat->ndat.nuclData[state->cms.selectionInd].qbeta.unit));
+					SDL_SetClipboardText(state->copiedTxt);
+					//SDL_Log("Copied text to clipboard: %s\n",SDL_GetClipboardText());
+					break;
+				case CHARTVIEW_QBETAPLUS:
+					; //suppress warning
+					char tmpQbpStr[32];
+					getQValStr(tmpQbpStr,dat->ndat.nuclData[state->cms.selectionInd].qbetaplus,1);
+					SDL_snprintf(state->copiedTxt,MAX_SELECTABLE_STR_LEN,"%s: %s %s",dat->strings[dat->locStringIDs[LOCSTR_QBETAPLUS]],tmpQbpStr,getValueUnitShortStr(dat->ndat.nuclData[state->cms.selectionInd].qbetaplus.unit));
+					SDL_SetClipboardText(state->copiedTxt);
+					//SDL_Log("Copied text to clipboard: %s\n",SDL_GetClipboardText());
+					break;
+				case CHARTVIEW_QEC:
+					; //suppress warning
+					char tmpQecStr[32];
+					getQValStr(tmpQecStr,dat->ndat.nuclData[state->cms.selectionInd].qec,1);
+					SDL_snprintf(state->copiedTxt,MAX_SELECTABLE_STR_LEN,"%s: %s %s",dat->strings[dat->locStringIDs[LOCSTR_QEC]],tmpQecStr,getValueUnitShortStr(dat->ndat.nuclData[state->cms.selectionInd].qec.unit));
 					SDL_SetClipboardText(state->copiedTxt);
 					//SDL_Log("Copied text to clipboard: %s\n",SDL_GetClipboardText());
 					break;
@@ -3869,8 +3887,9 @@ void uiElemClickAction(app_data *restrict dat, app_state *restrict state, resour
 	(uiElemID != UIELEM_CVM_DECAYMODE_BUTTON)&&(uiElemID != UIELEM_CVM_2PLUS_BUTTON)&&(uiElemID != UIELEM_CVM_R42_BUTTON)&&
 	(uiElemID != UIELEM_CVM_BETA2_BUTTON)&&(uiElemID != UIELEM_CVM_SPIN_BUTTON)&&(uiElemID != UIELEM_CVM_PARITY_BUTTON)&&
 	(uiElemID != UIELEM_CVM_BEA_BUTTON)&&(uiElemID != UIELEM_CVM_SN_BUTTON)&&(uiElemID != UIELEM_CVM_SP_BUTTON)&&
-	(uiElemID != UIELEM_CVM_QALPHA_BUTTON)&&(uiElemID != UIELEM_CVM_QBETAMINUS_BUTTON)&&(uiElemID != UIELEM_CVM_NUMLVLS)&&
-	(uiElemID != UIELEM_CVM_UNKNOWN_ENERGY_BUTTON)){
+	(uiElemID != UIELEM_CVM_QALPHA_BUTTON)&&(uiElemID != UIELEM_CVM_QBETAMINUS_BUTTON)&&
+	(uiElemID != UIELEM_CVM_QBETAPLUS_BUTTON)&&(uiElemID != UIELEM_CVM_QEC_BUTTON)&&
+	(uiElemID != UIELEM_CVM_NUMLVLS)&&(uiElemID != UIELEM_CVM_UNKNOWN_ENERGY_BUTTON)){
 		if((state->ds.shownElements & ((uint64_t)(1) << UIELEM_CHARTVIEW_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_CHARTVIEW_MENU_HIDE]==0.0f)){
 			startUIAnimation(dat,state,UIANIM_CHARTVIEW_MENU_HIDE); //menu will be closed after animation finishes
 			state->clickedUIElem = UIELEM_ENUM_LENGTH; //'unclick' the menu button
@@ -4138,6 +4157,18 @@ void uiElemClickAction(app_data *restrict dat, app_state *restrict state, resour
 			startUIAnimation(dat,state,UIANIM_CHARTVIEW_MENU_HIDE); //menu will be closed after animation finishes
 			state->clickedUIElem = UIELEM_ENUM_LENGTH; //'unclick' the menu button
 			state->chartView = CHARTVIEW_QBETAMINUS;
+			changeUIState(dat,state,UISTATE_CHARTONLY); //prevents mouseover from still highlighting buttons while the menu closes
+			break;
+		case UIELEM_CVM_QBETAPLUS_BUTTON:
+			startUIAnimation(dat,state,UIANIM_CHARTVIEW_MENU_HIDE); //menu will be closed after animation finishes
+			state->clickedUIElem = UIELEM_ENUM_LENGTH; //'unclick' the menu button
+			state->chartView = CHARTVIEW_QBETAPLUS;
+			changeUIState(dat,state,UISTATE_CHARTONLY); //prevents mouseover from still highlighting buttons while the menu closes
+			break;
+		case UIELEM_CVM_QEC_BUTTON:
+			startUIAnimation(dat,state,UIANIM_CHARTVIEW_MENU_HIDE); //menu will be closed after animation finishes
+			state->clickedUIElem = UIELEM_ENUM_LENGTH; //'unclick' the menu button
+			state->chartView = CHARTVIEW_QEC;
 			changeUIState(dat,state,UISTATE_CHARTONLY); //prevents mouseover from still highlighting buttons while the menu closes
 			break;
 		case UIELEM_CVM_NUMLVLS:

@@ -62,7 +62,7 @@ int tpFunc(void *data){
               SDL_Delay(THREAD_UPDATE_DELAY); //wait for tokenization to complete
             }
             //SDL_Log("Searching for transitions...\n");
-            searchEGamma(&tdat->dat->ndat,&tdat->state->ds,&tdat->state->ss);
+            searchEGamma(&tdat->dat->ndat,tdat->state,&tdat->state->ss);
             break;
           case SEARCHAGENT_ELEVEL:
             while(!(tdat->state->ss.finishedSearchAgents & (uint32_t)(1U << SEARCHAGENT_NUCLIDE))){
@@ -72,7 +72,7 @@ int tpFunc(void *data){
               SDL_Delay(THREAD_UPDATE_DELAY); //wait for tokenization to complete
             }
             //SDL_Log("Searching for levels...\n");
-            searchELevel(&tdat->dat->ndat,&tdat->state->ds,&tdat->state->ss);
+            searchELevel(&tdat->dat->ndat,tdat->state,&tdat->state->ss);
             break;
           case SEARCHAGENT_ELEVELDIFF:
             while(!(tdat->state->ss.finishedSearchAgents & (uint32_t)(1U << SEARCHAGENT_NUCLIDE))){
@@ -83,7 +83,7 @@ int tpFunc(void *data){
             }
             if(tdat->state->ss.boostedResultType == SEARCHAGENT_ELEVELDIFF){
               //use this thread (alongside other threads) to do a search of level energy differences
-              searchELevelDiff(&tdat->dat->ndat,&tdat->state->ds,&tdat->state->ss);
+              searchELevelDiff(&tdat->dat->ndat,tdat->state,&tdat->state->ss);
             }
             break;
           case SEARCHAGENT_GAMMACASCADE:
@@ -94,7 +94,7 @@ int tpFunc(void *data){
               SDL_Delay(THREAD_UPDATE_DELAY); //wait for tokenization to complete
             }
             //SDL_Log("Searching for gamma cascades...\n");
-            searchGammaCascade(&tdat->dat->ndat,&tdat->state->ds,&tdat->state->ss);
+            searchGammaCascade(&tdat->dat->ndat,tdat->state,&tdat->state->ss);
             break;
           case SEARCHAGENT_HALFLIFE:
             while(!(tdat->state->ss.finishedSearchAgents & (uint32_t)(1U << SEARCHAGENT_NUCLIDE))){
@@ -104,7 +104,7 @@ int tpFunc(void *data){
               SDL_Delay(THREAD_UPDATE_DELAY); //wait for tokenization to complete
             }
             //SDL_Log("Searching for half-lives...\n");
-            searchHalfLife(&tdat->dat->ndat,&tdat->state->ds,&tdat->state->ss);
+            searchHalfLife(&tdat->dat->ndat,tdat->state,&tdat->state->ss);
             break;
           default:
             break;

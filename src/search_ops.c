@@ -116,8 +116,8 @@ void tokenizeSearchStr(search_state *restrict ss){
 
 }
 
-void searchELevel(const ndata *restrict ndat, const drawing_state *restrict ds, search_state *restrict ss){
-	for(uint8_t i=0; i<ss->numSearchTok; i++){
+void searchELevel(const ndata *restrict ndat, const app_state *state, search_state *ss){
+	for(uint8_t i=0; i<state->ss.numSearchTok; i++){
 
 		//first, filter out any tokens with characters
 		uint8_t isNum = 1;
@@ -137,11 +137,19 @@ void searchELevel(const ndata *restrict ndat, const drawing_state *restrict ds, 
 			for(int16_t j=0; j<ndat->numNucl; j++){
 
 				float proximityFactor = 0.0f;
-				if(ds->chartZoomScale > 5.0f){
-					proximityFactor = (fabsf((float)ndat->nuclData[j].Z - ds->chartPosY - (16.0f/ds->chartZoomScale)) + fabsf((float)ndat->nuclData[j].N - ds->chartPosX) + 0.1f);
-					proximityFactor = 0.6f*ds->chartZoomScale/proximityFactor;
-					if(proximityFactor > 1.0f){
-						proximityFactor = 1.0f;
+				if(state->ds.chartZoomScale > 5.0f){
+					if(state->chartSelectedNucl != MAXNUMNUCL){
+						//offset proximity center point based on presence of nuclide info box
+						proximityFactor = SDL_sqrtf(fabsf((float)ndat->nuclData[j].Z - state->ds.chartPosY - (16.0f/state->ds.chartZoomScale)) + fabsf((float)ndat->nuclData[j].N - state->ds.chartPosX) + 0.1f);
+					}else{
+						proximityFactor = SDL_sqrtf(fabsf((float)ndat->nuclData[j].Z - state->ds.chartPosY) + fabsf((float)ndat->nuclData[j].N - state->ds.chartPosX) + 0.1f);
+					}
+					if(proximityFactor < 2.0f){
+						proximityFactor = 2.0f;
+					}
+					proximityFactor = 1.0f*state->ds.chartZoomScale/proximityFactor;
+					if(proximityFactor > 100.0f){
+						proximityFactor = 100.0f;
 					}
 				}
 
@@ -175,7 +183,7 @@ void searchELevel(const ndata *restrict ndat, const drawing_state *restrict ds, 
 	}
 }
 
-void searchELevelDiff(const ndata *restrict ndat, const drawing_state *restrict ds, search_state *restrict ss){
+void searchELevelDiff(const ndata *restrict ndat, const app_state *state, search_state *ss){
 
 	//only search this type if asked to
 	if(ss->boostedResultType != SEARCHAGENT_ELEVELDIFF){
@@ -202,11 +210,19 @@ void searchELevelDiff(const ndata *restrict ndat, const drawing_state *restrict 
 			for(uint16_t j=0; j<ndat->numNucl; j++){
 
 				float proximityFactor = 0.0f;
-				if(ds->chartZoomScale > 5.0f){
-					proximityFactor = SDL_sqrtf(fabsf((float)ndat->nuclData[j].Z - ds->chartPosY - (16.0f/ds->chartZoomScale)) + fabsf((float)ndat->nuclData[j].N - ds->chartPosX) + 0.1f);
-					proximityFactor = 0.6f*ds->chartZoomScale/proximityFactor;
-					if(proximityFactor > 1.0f){
-						proximityFactor = 1.0f;
+				if(state->ds.chartZoomScale > 5.0f){
+					if(state->chartSelectedNucl != MAXNUMNUCL){
+						//offset proximity center point based on presence of nuclide info box
+						proximityFactor = SDL_sqrtf(fabsf((float)ndat->nuclData[j].Z - state->ds.chartPosY - (16.0f/state->ds.chartZoomScale)) + fabsf((float)ndat->nuclData[j].N - state->ds.chartPosX) + 0.1f);
+					}else{
+						proximityFactor = SDL_sqrtf(fabsf((float)ndat->nuclData[j].Z - state->ds.chartPosY) + fabsf((float)ndat->nuclData[j].N - state->ds.chartPosX) + 0.1f);
+					}
+					if(proximityFactor < 2.0f){
+						proximityFactor = 2.0f;
+					}
+					proximityFactor = 1.0f*state->ds.chartZoomScale/proximityFactor;
+					if(proximityFactor > 100.0f){
+						proximityFactor = 100.0f;
 					}
 				}
 				
@@ -255,7 +271,7 @@ void searchELevelDiff(const ndata *restrict ndat, const drawing_state *restrict 
 	}
 }
 
-void searchEGamma(const ndata *restrict ndat, const drawing_state *restrict ds, search_state *restrict ss){
+void searchEGamma(const ndata *restrict ndat, const app_state *state, search_state *ss){
 	for(uint8_t i=0; i<ss->numSearchTok; i++){
 
 		//first, filter out any tokens with characters
@@ -276,11 +292,19 @@ void searchEGamma(const ndata *restrict ndat, const drawing_state *restrict ds, 
 			for(int16_t j=0; j<ndat->numNucl; j++){
 
 				float proximityFactor = 0.0f;
-				if(ds->chartZoomScale > 5.0f){
-					proximityFactor = SDL_sqrtf(fabsf((float)ndat->nuclData[j].Z - ds->chartPosY - (16.0f/ds->chartZoomScale)) + fabsf((float)ndat->nuclData[j].N - ds->chartPosX) + 0.1f);
-					proximityFactor = 0.5f*ds->chartZoomScale/proximityFactor;
-					if(proximityFactor > 1.0f){
-						proximityFactor = 1.0f;
+				if(state->ds.chartZoomScale > 5.0f){
+					if(state->chartSelectedNucl != MAXNUMNUCL){
+						//offset proximity center point based on presence of nuclide info box
+						proximityFactor = SDL_sqrtf(fabsf((float)ndat->nuclData[j].Z - state->ds.chartPosY - (16.0f/state->ds.chartZoomScale)) + fabsf((float)ndat->nuclData[j].N - state->ds.chartPosX) + 0.1f);
+					}else{
+						proximityFactor = SDL_sqrtf(fabsf((float)ndat->nuclData[j].Z - state->ds.chartPosY) + fabsf((float)ndat->nuclData[j].N - state->ds.chartPosX) + 0.1f);
+					}
+					if(proximityFactor < 2.0f){
+						proximityFactor = 2.0f;
+					}
+					proximityFactor = 1.0f*state->ds.chartZoomScale/proximityFactor;
+					if(proximityFactor > 100.0f){
+						proximityFactor = 100.0f;
 					}
 				}
 				
@@ -301,6 +325,7 @@ void searchEGamma(const ndata *restrict ndat, const drawing_state *restrict ds, 
 									res.relevance += proximityFactor;
 									res.relevance -= (float)(rawErrVal/rawEVal); //weight by size of error bars
 									res.relevance /= (1.0f + (float)fabs(0.1*(eSearch - rawEVal))); //weight by distance from value
+									//SDL_Log("proximity factor: %f\n",(double)proximityFactor);
 									uint8_t intensityType = (uint8_t)((ndat->tran[l].energy.format >> 5U) & 15U);
 									switch(intensityType){
 										case VALUETYPE_NUMBER:
@@ -333,7 +358,7 @@ void searchEGamma(const ndata *restrict ndat, const drawing_state *restrict ds, 
 	}
 }
 
-void searchGammaCascade(const ndata *restrict ndat, const drawing_state *restrict ds, search_state *restrict ss){
+void searchGammaCascade(const ndata *restrict ndat, const app_state *state, search_state *ss){
 	
 	uint8_t numCascadeGammas = 0;
 	double cascadeGammas[MAX_CASCADE_GAMMAS];
@@ -370,11 +395,19 @@ void searchGammaCascade(const ndata *restrict ndat, const drawing_state *restric
 			if(ndat->nuclData[i].numLevels > 1){
 
 				float proximityFactor = 0.0f;
-				if(ds->chartZoomScale > 5.0f){
-					proximityFactor = SDL_sqrtf(fabsf((float)ndat->nuclData[i].Z - ds->chartPosY - (16.0f/ds->chartZoomScale)) + fabsf((float)ndat->nuclData[i].N - ds->chartPosX) + 0.1f);
-					proximityFactor = 1.0f*ds->chartZoomScale/proximityFactor;
-					if(proximityFactor > 1.0f){
-						proximityFactor = 1.0f;
+				if(state->ds.chartZoomScale > 5.0f){
+					if(state->chartSelectedNucl != MAXNUMNUCL){
+						//offset proximity center point based on presence of nuclide info box
+						proximityFactor = SDL_sqrtf(fabsf((float)ndat->nuclData[i].Z - state->ds.chartPosY - (16.0f/state->ds.chartZoomScale)) + fabsf((float)ndat->nuclData[i].N - state->ds.chartPosX) + 0.1f);
+					}else{
+						proximityFactor = SDL_sqrtf(fabsf((float)ndat->nuclData[i].Z - state->ds.chartPosY) + fabsf((float)ndat->nuclData[i].N - state->ds.chartPosX) + 0.1f);
+					}
+					if(proximityFactor < 2.0f){
+						proximityFactor = 2.0f;
+					}
+					proximityFactor = 1.0f*state->ds.chartZoomScale/proximityFactor;
+					if(proximityFactor > 100.0f){
+						proximityFactor = 100.0f;
 					}
 				}
 				
@@ -478,7 +511,7 @@ void searchGammaCascade(const ndata *restrict ndat, const drawing_state *restric
 
 }
 
-void searchHalfLife(const ndata *restrict ndat, const drawing_state *restrict ds, search_state *restrict ss){
+void searchHalfLife(const ndata *restrict ndat, const app_state *state, search_state *ss){
 	for(uint8_t i=0; i<ss->numSearchTok; i++){
 
 		//first, filter out any tokens with characters
@@ -496,17 +529,25 @@ void searchHalfLife(const ndata *restrict ndat, const drawing_state *restrict ds
 		double hlSearch = SDL_atof(ss->searchTok[i]);
 		if(hlSearch > 0.0){
 			//valid energy
-			if(ds->useLifetimes){
+			if(state->ds.useLifetimes){
 				hlSearch /= 1.4427; //convert lifetime to half-life
 			}
 			for(int16_t j=0; j<ndat->numNucl; j++){
 
 				float proximityFactor = 0.0f;
-				if(ds->chartZoomScale > 5.0f){
-					proximityFactor = SDL_sqrtf(fabsf((float)ndat->nuclData[j].Z - ds->chartPosY - (16.0f/ds->chartZoomScale)) + fabsf((float)ndat->nuclData[j].N - ds->chartPosX) + 0.1f);
-					proximityFactor = 0.5f*ds->chartZoomScale/proximityFactor;
-					if(proximityFactor > 1.0f){
-						proximityFactor = 1.0f;
+				if(state->ds.chartZoomScale > 5.0f){
+					if(state->chartSelectedNucl != MAXNUMNUCL){
+						//offset proximity center point based on presence of nuclide info box
+						proximityFactor = SDL_sqrtf(fabsf((float)ndat->nuclData[j].Z - state->ds.chartPosY - (16.0f/state->ds.chartZoomScale)) + fabsf((float)ndat->nuclData[j].N - state->ds.chartPosX) + 0.1f);
+					}else{
+						proximityFactor = SDL_sqrtf(fabsf((float)ndat->nuclData[j].Z - state->ds.chartPosY) + fabsf((float)ndat->nuclData[j].N - state->ds.chartPosX) + 0.1f);
+					}
+					if(proximityFactor < 2.0f){
+						proximityFactor = 2.0f;
+					}
+					proximityFactor = 1.0f*state->ds.chartZoomScale/proximityFactor;
+					if(proximityFactor > 100.0f){
+						proximityFactor = 100.0f;
 					}
 				}
 				

@@ -245,7 +245,9 @@ static int parseAppRules(app_data *restrict dat, asset_mapping *restrict stringI
   dat->locStringIDs[LOCSTR_NODB] = (uint16_t)nameToAssetID("no_db",stringIDmap);
 	dat->locStringIDs[LOCSTR_GM_STATE] = (uint16_t)nameToAssetID("gm_state",stringIDmap);
 	dat->locStringIDs[LOCSTR_QALPHA] = (uint16_t)nameToAssetID("qalpha",stringIDmap);
-	dat->locStringIDs[LOCSTR_QBETAMNUS] = (uint16_t)nameToAssetID("q_betaminus",stringIDmap);
+	dat->locStringIDs[LOCSTR_QBETAMINUS] = (uint16_t)nameToAssetID("q_betaminus",stringIDmap);
+	dat->locStringIDs[LOCSTR_QBETAPLUS] = (uint16_t)nameToAssetID("q_betaplus",stringIDmap);
+	dat->locStringIDs[LOCSTR_QEC] = (uint16_t)nameToAssetID("q_ec",stringIDmap);
 	dat->locStringIDs[LOCSTR_SP] = (uint16_t)nameToAssetID("protonsep_energy",stringIDmap);
 	dat->locStringIDs[LOCSTR_SN] = (uint16_t)nameToAssetID("neutronsep_energy",stringIDmap);
 	dat->locStringIDs[LOCSTR_ATOMIC_MASS] = (uint16_t)nameToAssetID("atomic_mass",stringIDmap);
@@ -312,6 +314,8 @@ static int parseAppRules(app_data *restrict dat, asset_mapping *restrict stringI
 	dat->locStringIDs[LOCSTR_CHARTVIEW_SP] = (uint16_t)nameToAssetID("chartview_sp",stringIDmap);
 	dat->locStringIDs[LOCSTR_CHARTVIEW_QALPHA] = (uint16_t)nameToAssetID("chartview_qalpha",stringIDmap);
 	dat->locStringIDs[LOCSTR_CHARTVIEW_QBETA] = (uint16_t)nameToAssetID("chartview_qbeta",stringIDmap);
+	dat->locStringIDs[LOCSTR_CHARTVIEW_QBETAPLUS] = (uint16_t)nameToAssetID("chartview_qbetaplus",stringIDmap);
+	dat->locStringIDs[LOCSTR_CHARTVIEW_QEC] = (uint16_t)nameToAssetID("chartview_qec",stringIDmap);
 	dat->locStringIDs[LOCSTR_CHARTVIEW_NUMLVLS] = (uint16_t)nameToAssetID("chartview_num_levels",stringIDmap);
 	dat->locStringIDs[LOCSTR_CHARTVIEW_UNKNOWN_ENERGY] = (uint16_t)nameToAssetID("chartview_unknown_energy",stringIDmap);
 	dat->locStringIDs[LOCSTR_CONTEXT_COPY] = (uint16_t)nameToAssetID("context_copy",stringIDmap);
@@ -4018,7 +4022,14 @@ int parseMassData(const char * filePath, ndata * nd){
 	if((nnuclInd < nd->numNucl)&&(pnuclInd < nd->numNucl)&&(anuclInd < nd->numNucl)){
 		for(uint16_t i=0; i<nd->numNucl; i++){
 			if(nd->nuclData[i].massExcess.val != 0.0){
-				if(((nd->nuclData[i].massExcess.format >> 5U) & 15U) == 0){ //exclude systematic values
+				
+				uint8_t systematic1 = 0;
+				if(((nd->nuclData[i].massExcess.format >> 5U) & 15U) == VALUETYPE_UNKNOWN){
+					//input mass is systematic
+					systematic1 = 1;
+				}
+
+				if(systematic1 == 0){ //exclude systematic values
 					//S(n)
 					uint16_t nuclInd2 = getNuclInd(nd,nd->nuclData[i].N - 1,nd->nuclData[i].Z);
 					if(nuclInd2 < nd->numNucl){
@@ -4173,6 +4184,57 @@ int parseMassData(const char * filePath, ndata * nd){
 						}
 					}
 				}
+
+				//Q(EC)
+				//(not replacing any existing values since this quantity is not tabulated in ENSDF)
+				uint16_t nuclInd2 = getNuclInd(nd,nd->nuclData[i].N + 1,nd->nuclData[i].Z - 1);
+				if(nuclInd2 < nd->numNucl){
+					if(nd->nuclData[nuclInd2].massExcess.val != 0.0){
+						uint8_t systematic2 = 0;
+						if(((nd->nuclData[nuclInd2].massExcess.format >> 5U) & 15U) == VALUETYPE_UNKNOWN){
+							//input mass is systematic
+							systematic2 = 1;
+						}
+						double qecCalcVal = getRawDblValFromDB(&nd->nuclData[i].massExcess) - getRawDblValFromDB(&nd->nuclData[nuclInd2].massExcess);
+						double qecCalcErr = SDL_sqrt(SDL_pow(getRawDblErrFromDB(&nd->nuclData[nuclInd2].massExcess),2.0) + SDL_pow(getRawDblErrFromDB(&nd->nuclData[i].massExcess),2.0));
+						double qbpCalcVal = qecCalcVal - 1021.9979; //Q(β-) is simply Q(EC) offset by 2x the rest mass of the electron
+						uint8_t numSigFigs = 0;
+						int8_t exponent = 0;
+						if(qecCalcErr > 0.0){
+							if(qecCalcErr < 100.0){
+								while(qecCalcErr < 10.0){
+									qecCalcErr *= 10.0;
+									numSigFigs++;
+								}
+							}else{
+								while(qecCalcErr >= 100.0){
+									qecCalcErr /= 10.0;
+									qecCalcVal /= 10.0;
+									qbpCalcVal /= 10.0;
+									exponent++;
+								}
+							}
+						}
+						nd->nuclData[i].qec.val = (float)qecCalcVal;
+						nd->nuclData[i].qec.err = (uint8_t)SDL_round(qecCalcErr);
+						nd->nuclData[i].qec.unit = VALUE_UNIT_KEV;
+						nd->nuclData[i].qec.format = (uint16_t)(numSigFigs & 15U);
+						if(exponent != 0){
+							nd->nuclData[i].qec.format |= (uint16_t)(1U << 4); //exponent flag
+							nd->nuclData[i].qec.exponent = exponent;
+						}
+						if(systematic1 || systematic2){
+							//input is systematic, so is output
+							nd->nuclData[i].qec.err = 255;
+						}
+						nd->nuclData[i].qbetaplus.val = (float)(qbpCalcVal);
+						nd->nuclData[i].qbetaplus.err = nd->nuclData[i].qec.err;
+						nd->nuclData[i].qbetaplus.unit = VALUE_UNIT_KEV;
+						nd->nuclData[i].qbetaplus.format = nd->nuclData[i].qec.format;
+						nd->nuclData[i].qbetaplus.exponent = nd->nuclData[i].qec.exponent;
+					}
+				}
+
 			}
 		}
 	}

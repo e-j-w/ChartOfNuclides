@@ -1756,6 +1756,22 @@ void drawNuclBoxLabelDetails(const app_data *restrict dat, app_state *restrict s
     }else{
       drawTextAlignedSized(rdat,drawXPos,drawYPos+((yOffsets*19.0f + 40.0f)*state->ds.uiUserScale),col,FONTSIZE_NORMAL,255,dat->strings[dat->locStringIDs[LOCSTR_UNKNOWN]],ALIGN_CENTER,maxLblWidth); //draw Qbeta label
     }
+  }else if(state->chartView == CHARTVIEW_QBETAPLUS){
+    if(dat->ndat.nuclData[nuclInd].qbetaplus.val != 0.0f){
+      getQValStr(tmpStr,dat->ndat.nuclData[nuclInd].qbetaplus,1);
+      SDL_strlcat(tmpStr," keV",32);
+      drawTextAlignedSized(rdat,drawXPos,drawYPos+((yOffsets*19.0f + 40.0f)*state->ds.uiUserScale),col,FONTSIZE_NORMAL,255,tmpStr,ALIGN_CENTER,maxLblWidth); //draw Qbeta+ label
+    }else{
+      drawTextAlignedSized(rdat,drawXPos,drawYPos+((yOffsets*19.0f + 40.0f)*state->ds.uiUserScale),col,FONTSIZE_NORMAL,255,dat->strings[dat->locStringIDs[LOCSTR_UNKNOWN]],ALIGN_CENTER,maxLblWidth); //draw Qbeta+ label
+    }
+  }else if(state->chartView == CHARTVIEW_QEC){
+    if(dat->ndat.nuclData[nuclInd].qec.val != 0.0f){
+      getQValStr(tmpStr,dat->ndat.nuclData[nuclInd].qec,1);
+      SDL_strlcat(tmpStr," keV",32);
+      drawTextAlignedSized(rdat,drawXPos,drawYPos+((yOffsets*19.0f + 40.0f)*state->ds.uiUserScale),col,FONTSIZE_NORMAL,255,tmpStr,ALIGN_CENTER,maxLblWidth); //draw QEC label
+    }else{
+      drawTextAlignedSized(rdat,drawXPos,drawYPos+((yOffsets*19.0f + 40.0f)*state->ds.uiUserScale),col,FONTSIZE_NORMAL,255,dat->strings[dat->locStringIDs[LOCSTR_UNKNOWN]],ALIGN_CENTER,maxLblWidth); //draw QEC label
+    }
   }else if(state->chartView == CHARTVIEW_NUMLVLS){
     SDL_snprintf(tmpStr,32,"%u",dat->ndat.nuclData[nuclInd].numLevels);
     if(dat->ndat.nuclData[nuclInd].numLevels == 1){
@@ -1902,6 +1918,10 @@ void drawChartOfNuclides(const app_data *restrict dat, app_state *restrict state
                 boxCol = getQaCol(getRawValFromDB(&dat->ndat.nuclData[i].qalpha));
               }else if(state->chartView == CHARTVIEW_QBETAMINUS){
                 boxCol = getQbCol(getRawValFromDB(&dat->ndat.nuclData[i].qbeta));
+              }else if(state->chartView == CHARTVIEW_QBETAPLUS){
+                boxCol = getQbCol(getRawValFromDB(&dat->ndat.nuclData[i].qbetaplus));
+              }else if(state->chartView == CHARTVIEW_QEC){
+                boxCol = getQbCol(getRawValFromDB(&dat->ndat.nuclData[i].qec));
               }else if(state->chartView == CHARTVIEW_NUMLVLS){
                 boxCol = getNumLvlsCol(dat->ndat.nuclData[i].numLevels,getNuclGSHalfLifeSeconds(&dat->ndat,(uint16_t)i));
               }else if(state->chartView == CHARTVIEW_UNKNOWN_ENERGY){
@@ -2067,6 +2087,10 @@ void drawChartOfNuclides(const app_data *restrict dat, app_state *restrict state
                     drawNuclBoxLabel(dat,state,rdat,rect.x,rect.y,rect.w,rect.h,(getRawValFromDB(&dat->ndat.nuclData[i].qalpha) <= -10000.0) ? whiteCol8Bit : blackCol8Bit,(uint16_t)i);
                   }else if(state->chartView == CHARTVIEW_QBETAMINUS){
                     drawNuclBoxLabel(dat,state,rdat,rect.x,rect.y,rect.w,rect.h,(getRawValFromDB(&dat->ndat.nuclData[i].qbeta) <= -3000.0) ? whiteCol8Bit : blackCol8Bit,(uint16_t)i);
+                  }else if(state->chartView == CHARTVIEW_QBETAPLUS){
+                    drawNuclBoxLabel(dat,state,rdat,rect.x,rect.y,rect.w,rect.h,(getRawValFromDB(&dat->ndat.nuclData[i].qbetaplus) <= -3000.0) ? whiteCol8Bit : blackCol8Bit,(uint16_t)i);
+                  }else if(state->chartView == CHARTVIEW_QEC){
+                    drawNuclBoxLabel(dat,state,rdat,rect.x,rect.y,rect.w,rect.h,(getRawValFromDB(&dat->ndat.nuclData[i].qec) <= -3000.0) ? whiteCol8Bit : blackCol8Bit,(uint16_t)i);
                   }else if(state->chartView == CHARTVIEW_NUMLVLS){
                     drawNuclBoxLabel(dat,state,rdat,rect.x,rect.y,rect.w,rect.h,(dat->ndat.nuclData[i].numLevels >= 200) ? whiteCol8Bit : blackCol8Bit,(uint16_t)i);
                   }else if(state->chartView == CHARTVIEW_UNKNOWN_ENERGY){
@@ -2506,6 +2530,12 @@ void drawNuclFullInfoBox(const app_data *restrict dat, app_state *restrict state
   }
   drawSelectableTextAlignedSized(rdat,&state->tss,drawXPos,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,massStr,ALIGN_RIGHT,16384);
   drawYPos += 20.0f*state->ds.uiUserScale;
+  if(dat->ndat.nuclData[nuclInd].qalpha.val != 0.0f){
+    getQValStr(descStr,dat->ndat.nuclData[nuclInd].qalpha,1);
+    SDL_snprintf(tmpStr,32,"%s=%s %s",dat->strings[dat->locStringIDs[LOCSTR_QALPHA]],descStr,getValueUnitShortStr(dat->ndat.nuclData[nuclInd].qalpha.unit));
+    rect = drawSelectableTextAlignedSized(rdat,&state->tss,drawXPos,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_RIGHT,16384);
+    drawXPos -= rect.w + 4*UI_PADDING_SIZE*state->ds.uiUserScale;
+  }
   if(dat->ndat.nuclData[nuclInd].sp.val != 0.0f){
     getQValStr(descStr,dat->ndat.nuclData[nuclInd].sp,1);
     SDL_snprintf(tmpStr,32,"%s=%s %s",dat->strings[dat->locStringIDs[LOCSTR_SP]],descStr,getValueUnitShortStr(dat->ndat.nuclData[nuclInd].sp.unit));
@@ -2519,17 +2549,24 @@ void drawNuclFullInfoBox(const app_data *restrict dat, app_state *restrict state
   }
   drawXPos = state->ds.windowXRes - NUCL_FULLINFOBOX_QVAL_POS_XR*state->ds.uiUserScale;
   drawYPos += 20.0f*state->ds.uiUserScale;
-  if(dat->ndat.nuclData[nuclInd].qbeta.val != 0.0f){
-    getQValStr(descStr,dat->ndat.nuclData[nuclInd].qbeta,1);
-    SDL_snprintf(tmpStr,32,"%s=%s %s",dat->strings[dat->locStringIDs[LOCSTR_QBETAMNUS]],descStr,getValueUnitShortStr(dat->ndat.nuclData[nuclInd].qbeta.unit));
+  if(dat->ndat.nuclData[nuclInd].qec.val != 0.0f){
+    getQValStr(descStr,dat->ndat.nuclData[nuclInd].qec,1);
+    SDL_snprintf(tmpStr,32,"%s=%s %s",dat->strings[dat->locStringIDs[LOCSTR_QEC]],descStr,getValueUnitShortStr(dat->ndat.nuclData[nuclInd].qec.unit));
     rect = drawSelectableTextAlignedSized(rdat,&state->tss,drawXPos,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_RIGHT,16384);
     drawXPos -= rect.w + 4*UI_PADDING_SIZE*state->ds.uiUserScale;
   }
-  if(dat->ndat.nuclData[nuclInd].qalpha.val != 0.0f){
-    getQValStr(descStr,dat->ndat.nuclData[nuclInd].qalpha,1);
-    SDL_snprintf(tmpStr,32,"%s=%s %s",dat->strings[dat->locStringIDs[LOCSTR_QALPHA]],descStr,getValueUnitShortStr(dat->ndat.nuclData[nuclInd].qalpha.unit));
+  if(dat->ndat.nuclData[nuclInd].qbetaplus.val != 0.0f){
+    getQValStr(descStr,dat->ndat.nuclData[nuclInd].qbetaplus,1);
+    SDL_snprintf(tmpStr,32,"%s=%s %s",dat->strings[dat->locStringIDs[LOCSTR_QBETAPLUS]],descStr,getValueUnitShortStr(dat->ndat.nuclData[nuclInd].qbetaplus.unit));
+    rect = drawSelectableTextAlignedSized(rdat,&state->tss,drawXPos,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_RIGHT,16384);
+    drawXPos -= rect.w + 4*UI_PADDING_SIZE*state->ds.uiUserScale;
+  }
+  if(dat->ndat.nuclData[nuclInd].qbeta.val != 0.0f){
+    getQValStr(descStr,dat->ndat.nuclData[nuclInd].qbeta,1);
+    SDL_snprintf(tmpStr,32,"%s=%s %s",dat->strings[dat->locStringIDs[LOCSTR_QBETAMINUS]],descStr,getValueUnitShortStr(dat->ndat.nuclData[nuclInd].qbeta.unit));
     drawSelectableTextAlignedSized(rdat,&state->tss,drawXPos,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_RIGHT,16384);
   }
+  
 
   //draw column title strings
   drawXPos = origDrawXPos;
@@ -3400,7 +3437,15 @@ void drawContextMenu(const app_data *restrict dat, const app_state *restrict sta
             drawTextAlignedSized(rdat,drawRect.x,drawRect.y + (0.4f + (float)i)*CONTEXT_MENU_ITEM_SPACING*state->ds.uiUserScale,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_LEFT,(Uint16)(drawRect.w - (PANEL_EDGE_SIZE + 6*UI_PADDING_SIZE)*state->ds.uiUserScale));
             break;
           case CHARTVIEW_QBETAMINUS:
-            SDL_snprintf(tmpStr,32,"%s %s",dat->strings[dat->locStringIDs[LOCSTR_CONTEXT_COPY]],dat->strings[dat->locStringIDs[LOCSTR_QBETAMNUS]]);
+            SDL_snprintf(tmpStr,32,"%s %s",dat->strings[dat->locStringIDs[LOCSTR_CONTEXT_COPY]],dat->strings[dat->locStringIDs[LOCSTR_QBETAMINUS]]);
+            drawTextAlignedSized(rdat,drawRect.x,drawRect.y + (0.4f + (float)i)*CONTEXT_MENU_ITEM_SPACING*state->ds.uiUserScale,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_LEFT,(Uint16)(drawRect.w - (PANEL_EDGE_SIZE + 6*UI_PADDING_SIZE)*state->ds.uiUserScale));
+            break;
+          case CHARTVIEW_QBETAPLUS:
+            SDL_snprintf(tmpStr,32,"%s %s",dat->strings[dat->locStringIDs[LOCSTR_CONTEXT_COPY]],dat->strings[dat->locStringIDs[LOCSTR_QBETAPLUS]]);
+            drawTextAlignedSized(rdat,drawRect.x,drawRect.y + (0.4f + (float)i)*CONTEXT_MENU_ITEM_SPACING*state->ds.uiUserScale,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_LEFT,(Uint16)(drawRect.w - (PANEL_EDGE_SIZE + 6*UI_PADDING_SIZE)*state->ds.uiUserScale));
+            break;
+          case CHARTVIEW_QEC:
+            SDL_snprintf(tmpStr,32,"%s %s",dat->strings[dat->locStringIDs[LOCSTR_CONTEXT_COPY]],dat->strings[dat->locStringIDs[LOCSTR_QEC]]);
             drawTextAlignedSized(rdat,drawRect.x,drawRect.y + (0.4f + (float)i)*CONTEXT_MENU_ITEM_SPACING*state->ds.uiUserScale,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_LEFT,(Uint16)(drawRect.w - (PANEL_EDGE_SIZE + 6*UI_PADDING_SIZE)*state->ds.uiUserScale));
             break;
           case CHARTVIEW_NUMLVLS:
@@ -3495,7 +3540,11 @@ void drawUI(const app_data *restrict dat, app_state *restrict state, resource_da
       }else if(state->chartView == CHARTVIEW_QALPHA){
         drawIconAndTextButton(&dat->rules.themeRules,rdat,state->ds.uiElemPosX[UIELEM_CHARTVIEW_BUTTON],(int16_t)(state->ds.uiElemPosY[UIELEM_CHARTVIEW_BUTTON] + yOffset),state->ds.uiElemWidth[UIELEM_CHARTVIEW_BUTTON],getHighlightState(state,UIELEM_CHARTVIEW_BUTTON),255,UIICON_CHARTVIEW,dat->strings[dat->locStringIDs[LOCSTR_QALPHA]]);
       }else if(state->chartView == CHARTVIEW_QBETAMINUS){
-        drawIconAndTextButton(&dat->rules.themeRules,rdat,state->ds.uiElemPosX[UIELEM_CHARTVIEW_BUTTON],(int16_t)(state->ds.uiElemPosY[UIELEM_CHARTVIEW_BUTTON] + yOffset),state->ds.uiElemWidth[UIELEM_CHARTVIEW_BUTTON],getHighlightState(state,UIELEM_CHARTVIEW_BUTTON),255,UIICON_CHARTVIEW,dat->strings[dat->locStringIDs[LOCSTR_QBETAMNUS]]);
+        drawIconAndTextButton(&dat->rules.themeRules,rdat,state->ds.uiElemPosX[UIELEM_CHARTVIEW_BUTTON],(int16_t)(state->ds.uiElemPosY[UIELEM_CHARTVIEW_BUTTON] + yOffset),state->ds.uiElemWidth[UIELEM_CHARTVIEW_BUTTON],getHighlightState(state,UIELEM_CHARTVIEW_BUTTON),255,UIICON_CHARTVIEW,dat->strings[dat->locStringIDs[LOCSTR_QBETAMINUS]]);
+      }else if(state->chartView == CHARTVIEW_QBETAPLUS){
+        drawIconAndTextButton(&dat->rules.themeRules,rdat,state->ds.uiElemPosX[UIELEM_CHARTVIEW_BUTTON],(int16_t)(state->ds.uiElemPosY[UIELEM_CHARTVIEW_BUTTON] + yOffset),state->ds.uiElemWidth[UIELEM_CHARTVIEW_BUTTON],getHighlightState(state,UIELEM_CHARTVIEW_BUTTON),255,UIICON_CHARTVIEW,dat->strings[dat->locStringIDs[LOCSTR_QBETAPLUS]]);
+      }else if(state->chartView == CHARTVIEW_QEC){
+        drawIconAndTextButton(&dat->rules.themeRules,rdat,state->ds.uiElemPosX[UIELEM_CHARTVIEW_BUTTON],(int16_t)(state->ds.uiElemPosY[UIELEM_CHARTVIEW_BUTTON] + yOffset),state->ds.uiElemWidth[UIELEM_CHARTVIEW_BUTTON],getHighlightState(state,UIELEM_CHARTVIEW_BUTTON),255,UIICON_CHARTVIEW,dat->strings[dat->locStringIDs[LOCSTR_QEC]]);
       }else if(state->chartView == CHARTVIEW_NUMLVLS){
         drawIconAndTextButton(&dat->rules.themeRules,rdat,state->ds.uiElemPosX[UIELEM_CHARTVIEW_BUTTON],(int16_t)(state->ds.uiElemPosY[UIELEM_CHARTVIEW_BUTTON] + yOffset),state->ds.uiElemWidth[UIELEM_CHARTVIEW_BUTTON],getHighlightState(state,UIELEM_CHARTVIEW_BUTTON),255,UIICON_CHARTVIEW,dat->strings[dat->locStringIDs[LOCSTR_CHARTVIEW_NUMLVLS]]);
       }else if(state->chartView == CHARTVIEW_UNKNOWN_ENERGY){

@@ -161,7 +161,7 @@ typedef struct
 
 typedef struct
 {
-  valWithErr qbeta, qalpha; //Q(beta-),Q(alpha) 
+  valWithErr qbeta, qbetaplus, qec, qalpha; //Q(beta-), Q(beta+), Q(e- capture), Q(alpha) 
   valWithErr sp, sn; //proton and neutron separation energies
   dblValWithErr massExcess; //mass excess (keV), double precision needed 'cause that's how well masses are known
   dblValWithErr beA; //binding energy per nucleon (keV), double precision needed 'cause that's how well masses are known
