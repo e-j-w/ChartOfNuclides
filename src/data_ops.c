@@ -30,10 +30,10 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 void initializeTempState(const app_data *restrict dat, app_state *restrict state, thread_manager_state *restrict tms){
   
 	//input
-	state->mouseXPx = -1;
-	state->mouseYPx = -1;
-	state->mouseHoldStartPosXPx = -1;
-	state->mouseHoldStartPosYPx = -1;
+	state->mouseXPx = -100; //need to make sure no UI elements actually extend to these coordinates
+	state->mouseYPx = -100; //need to make sure no UI elements actually extend to these coordinates
+	state->mouseHoldStartPosXPx = -100; //need to make sure no UI elements actually extend to these coordinates
+	state->mouseHoldStartPosYPx = -100; //need to make sure no UI elements actually extend to these coordinates
 	state->lastAxisValLX = 0;
 	state->lastAxisValLY = 0;
 	state->lastAxisValRX = 0;

@@ -59,6 +59,8 @@ int main(int argc, char *argv[]){
     SDL_Log("Video driver available: %s\n",SDL_GetVideoDriver(i));
   }*/
 
+  SDL_SetHint(SDL_HINT_VIDEO_ALLOW_SCREENSAVER, "1"); //prevent app from inhibiting automatic screen lock
+
   uint32_t sdlFlags = 0;
   if(cliArgs&(1U<<CLI_NOGAMEPAD)){
     sdlFlags = SDL_INIT_VIDEO;
