@@ -3,7 +3,7 @@
 
 # Linux
 
-The current code has been tested under Arch Linux and Debian 12 as of July 2025, though most recent Linux distros should work as well.
+The current code has been tested under Arch Linux and Debian 12 as of August 2025, though most recent Linux distros should work as well.
 
 ## Using Flatpak
 
@@ -80,7 +80,7 @@ Instructions to produce a 'native' build that doesn't use Flatpak.
 
 * C compiler: gcc (or clang)
 * GNU make
-* SDL3, SDL3_image, SDL3_ttf
+* [SDL3](https://github.com/libsdl-org/SDL/releases), [SDL3_image](https://github.com/libsdl-org/SDL_image/releases), [SDL3_ttf](https://github.com/libsdl-org/SDL_ttf/releases)
   * SDL3 should be built with `libdecor` on Linux when using GNOME Wayland, otherwise window decorations won't be present.
 
 For now you may have to manually compile SDL3 and its libraries, as they aren't yet packaged for many major Linux distros. Specific releases of the SDL3 libraries that this code has been tested against are listed in the [Flatpak manifest](https://github.com/e-j-w/ChartOfNuclides-flatpak/blob/master/io.github.e_j_w.ChartOfNuclides-master.yml).
