@@ -59,8 +59,8 @@ static const uint8_t UITHEME_ICON_TILE_X[UIICON_ENUM_LENGTH] = {0,0, 0, 1, 2, 2,
 static const uint8_t UITHEME_ICON_TILE_Y[UIICON_ENUM_LENGTH] = {1,9,10,10,11,10,9,9,8,8,11,11,3,3};
 
 //font sizes (assuming UI scale of 1)
-static const float fontSizes[FONTSIZE_ENUM_LENGTH] = {13.0f,15.0f,15.0f,19.0f};
-static const uint16_t fontStyles[FONTSIZE_ENUM_LENGTH] = {TTF_STYLE_NORMAL,TTF_STYLE_NORMAL,TTF_STYLE_BOLD,TTF_STYLE_NORMAL};
+static const float fontSizes[FONTSIZE_ENUM_LENGTH] = {13.0f,15.0f,15.0f,19.0f,23.0f};
+static const uint16_t fontStyles[FONTSIZE_ENUM_LENGTH] = {TTF_STYLE_NORMAL,TTF_STYLE_NORMAL,TTF_STYLE_BOLD,TTF_STYLE_NORMAL,TTF_STYLE_NORMAL};
 
 //user UI scaling factors
 static const float uiScales[UISCALE_ENUM_LENGTH] = {1.0f,1.20f,1.60f,1.85f};

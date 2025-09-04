@@ -45,7 +45,7 @@ all_reactions|All Reactions
 menuitem_preferences|Preferences
 menuitem_screenshot|Take a screenshot...
 menuitem_about|About Chart of Nuclides
-about_string_version|Version 0.7.2 - "Differential Equation"
+about_string_version|Version 0.7.3 - "Differential Equation"
 about_string_1|Developed by Jonathan Williams
 about_string_2|Nuclear structure data is sourced from ENSDF, mass data from AME2020, and isotope abundance data from NIST.
 about_string_3|This is an independently developed program not endorsed by the above entities. The accuracy or completeness of any information provided is not guaranteed.
@@ -66,14 +66,14 @@ chartview_decaymode|Decay Mode
 chartview_2plus|E(2+)
 chartview_r42|E(4+)/E(2+)
 chartview_beta2|β₂
-chartview_beA|Bind. E / A
+chartview_beA|Binding E / A
 chartview_sn|S(n)
 chartview_sp|S(p)
 chartview_qalpha|Q(α)
 chartview_qbeta|Q(β-)
 chartview_qbetaplus|Q(β+)
 chartview_qec|Q(ε)
-chartview_spin|GS spin
+chartview_spin|Ground state spin
 chartview_parity|GS parity
 chartview_num_levels|Known Levels
 chartview_unknown_energy|Ambiguous Lvls

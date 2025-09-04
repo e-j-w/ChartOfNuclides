@@ -53,11 +53,11 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #define ENSDFSTRBUFSIZE          262144 //2^18
 #define MAXCASCDELENGTH          20
 #define MAXGAMMASPERLEVEL        10
-#define MAXSPPERLEVEL            3
 #define MAXMULTPERLEVEL          3
 #define MAXNUMNUCL               3500
 #define MAXNUMLVLS               200000
 #define MAXNUMTRAN               290000
+#define MAXSPINPARVAL            190000
 #define MAXNUMDECAYMODES         11000
 #define MAXNUMREACTIONS          15000
 #define MAXRXNSPERNUCL           64
@@ -146,13 +146,13 @@ typedef struct
 {
   valWithErr energy; //level energy in keV
   valWithErr halfLife;
-  int16_t numSpinParVals; //number of assigned spin parity values
-  spinparval spval[MAXSPPERLEVEL]; //assinged spin parity value(s)
-  uint16_t numTran; //number of gamma rays in this level
-  uint32_t firstTran; //index of first transition from this level
   uint64_t populatingRxns; //bit-pattern specifying which reactions populate this level
-  int8_t numDecModes; //-1 by default for no decay modes specified (assume 100% IT in that case)
+  uint32_t firstTran; //index of first transition from this level
+  uint32_t firstSpinParVal; //index of the first spin-parity value for this level
   uint16_t firstDecMode;
+  uint16_t numTran; //number of gamma rays in this level
+  uint8_t numSpinParVals; //number of assigned spin parity values for this level
+  int8_t numDecModes; //-1 by default for no decay modes specified (assume 100% IT in that case)
   float decayProb[DECAYMODE_ENUM_LENGTH]; //% probability of each decay mode for this level
   uint8_t format; //bit 0: whether spin-parity values are half integer (if set, then spinVal is multiplied by 0.5)
   //bits 1-4: labels for special levels (see special_level_enum)
@@ -189,6 +189,7 @@ typedef struct
   int16_t numNucl; //number of nuclides for which data is stored (-1 if no nuclides)
   uint16_t numDecModes; //number of decay modes across all levels
   uint16_t numRxns; //number of populating reactions across all nuclides
+  uint32_t numSpinParVals; //number of spin-parity values across all levels
   uint16_t minNforZ[MAX_PROTON_NUM];
   uint16_t maxNforZ[MAX_PROTON_NUM];
   uint16_t minZforN[MAX_NEUTRON_NUM];
@@ -200,6 +201,7 @@ typedef struct
   transition tran[MAXNUMTRAN]; //transitions between levels
   decayMode dcyMode[MAXNUMDECAYMODES]; //decay modes of levels
   reaction rxn[MAXNUMREACTIONS]; //reactions populating nuclides
+  spinparval spv[MAXSPINPARVAL];
   char ensdfStrBuf[ENSDFSTRBUFSIZE]; //huge buffer for directly copied ENSDF strings (reaction strings, comments, etc)
   uint32_t ensdfStrBufLen;
 }ndata; //complete set of gamma data for all nuclides

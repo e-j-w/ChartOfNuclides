@@ -2311,7 +2311,11 @@ void getAbundanceStr(char strOut[32], const ndata *restrict nd, const uint16_t n
 	if(nuclInd < nd->numNucl){
 		if((nd->nuclData[nuclInd].abundance.unit & 127U) == VALUE_UNIT_PERCENT){
 			uint8_t abPrecision = (uint8_t)(nd->nuclData[nuclInd].abundance.format & 15U);
-			SDL_snprintf(strOut,32,"%.*f%%",abPrecision,(double)nd->nuclData[nuclInd].abundance.val);
+			if(nd->nuclData[nuclInd].abundance.err == 0){
+				SDL_snprintf(strOut,32,"%.*f%%",abPrecision,(double)nd->nuclData[nuclInd].abundance.val);
+			}else{
+				SDL_snprintf(strOut,32,"%.*f(%u)%%",abPrecision,(double)nd->nuclData[nuclInd].abundance.val,nd->nuclData[nuclInd].abundance.err);
+			}
 		}else{
 			SDL_snprintf(strOut,32," ");
 		}
@@ -2326,18 +2330,18 @@ void getSpinParStr(char strOut[32], const ndata *restrict nd, const uint32_t lvl
 
 	SDL_strlcpy(strOut,"",32); //clear the string
 
-	for(int i=0;i<nd->levels[lvlInd].numSpinParVals;i++){
+	for(int32_t i=0;i<nd->levels[lvlInd].numSpinParVals;i++){
 		
-		//SDL_Log("Spin: %i, parity: %i, tentative: %u\n\n",nd->levels[lvlInd].spval[i].spinVal,nd->levels[lvlInd].spval[i].parVal,tentative);
+		//SDL_Log("Spin: %i, parity: %i, tentative: %u\n\n",nd->spv[nd->levels[lvlInd].firstSpinParVal + (uint32_t)i].spinVal,nd->spv[nd->levels[lvlInd].firstSpinParVal + (uint32_t)i].parVal,tentative);
 		
-		const uint8_t tentative = (uint8_t)((uint16_t)(nd->levels[lvlInd].spval[i].format >> 10U) & 15U);
+		const uint8_t tentative = (uint8_t)((uint16_t)(nd->spv[nd->levels[lvlInd].firstSpinParVal + (uint32_t)i].format >> 10U) & 15U);
 		uint8_t prevTentative = 0;
 		if(i>0){
-			prevTentative = (uint8_t)((uint16_t)(nd->levels[lvlInd].spval[i-1].format >> 10U) & 15U);
+			prevTentative = (uint8_t)((uint16_t)(nd->spv[nd->levels[lvlInd].firstSpinParVal + (uint32_t)(i - 1)].format >> 10U) & 15U);
 		}
 		uint8_t nextTentative = 0;
-		if(i<nd->levels[lvlInd].numSpinParVals-1){
-			nextTentative = (uint8_t)((uint16_t)(nd->levels[lvlInd].spval[i+1].format >> 10U) & 15U);
+		if(i<(nd->levels[lvlInd].numSpinParVals-1)){
+			nextTentative = (uint8_t)((uint16_t)(nd->spv[nd->levels[lvlInd].firstSpinParVal + (uint32_t)(i + 1)].format >> 10U) & 15U);
 		}
 
 		if(tentative == TENTATIVESP_RANGE){
@@ -2348,9 +2352,9 @@ void getSpinParStr(char strOut[32], const ndata *restrict nd, const uint32_t lvl
 			SDL_strlcat(strOut,"Low J",32);
 		}else{
 
-			const uint8_t spinIsVar = (uint8_t)(nd->levels[lvlInd].spval[i].format & 1U);
-			const uint8_t spinVarInd = (uint8_t)((nd->levels[lvlInd].spval[i].format >> 5U) & 15U);
-			const uint8_t spinValType = (uint8_t)((nd->levels[lvlInd].spval[i].format >> 1U) & 15U);
+			const uint8_t spinIsVar = (uint8_t)(nd->spv[nd->levels[lvlInd].firstSpinParVal + (uint32_t)i].format & 1U);
+			const uint8_t spinVarInd = (uint8_t)((nd->spv[nd->levels[lvlInd].firstSpinParVal + (uint32_t)i].format >> 5U) & 15U);
+			const uint8_t spinValType = (uint8_t)((nd->spv[nd->levels[lvlInd].firstSpinParVal + (uint32_t)i].format >> 1U) & 15U);
 			
 			if((tentative == TENTATIVESP_SPINANDPARITY)||(tentative == TENTATIVESP_SPINONLY)){
 				if((i==0)||((i>0)&&((prevTentative != TENTATIVESP_SPINANDPARITY)&&(prevTentative != TENTATIVESP_SPINONLY)))){
@@ -2376,7 +2380,7 @@ void getSpinParStr(char strOut[32], const ndata *restrict nd, const uint32_t lvl
 				if(spinValType != VALUETYPE_NUMBER){
 					SDL_strlcat(strOut,getValueTypeShortStr(spinValType),32);
 				}
-				if(nd->levels[lvlInd].spval[i].spinVal == 0){
+				if(nd->spv[nd->levels[lvlInd].firstSpinParVal + (uint32_t)i].spinVal == 0){
 					//variable only
 					if(spinVarInd == 0){
 						SDL_strlcat(strOut,"J",32);
@@ -2396,23 +2400,23 @@ void getSpinParStr(char strOut[32], const ndata *restrict nd, const uint32_t lvl
 				}
 			}
 
-			if((!spinIsVar)||(nd->levels[lvlInd].spval[i].spinVal > 0)){
+			if((!spinIsVar)||(nd->spv[nd->levels[lvlInd].firstSpinParVal + (uint32_t)i].spinVal > 0)){
 				if(spinValType != VALUETYPE_NUMBER){
 					SDL_strlcat(strOut,getValueTypeShortStr(spinValType),32);
 				}
-				if(nd->levels[lvlInd].spval[i].spinVal < 255){
+				if(nd->spv[nd->levels[lvlInd].firstSpinParVal + (uint32_t)i].spinVal < 255){
 					if((nd->levels[lvlInd].format & 1U) == 1){
-						sprintf(val,"%i/2",nd->levels[lvlInd].spval[i].spinVal);
+						sprintf(val,"%i/2",nd->spv[nd->levels[lvlInd].firstSpinParVal + (uint32_t)i].spinVal);
 					}else{
-						sprintf(val,"%i",nd->levels[lvlInd].spval[i].spinVal);
+						sprintf(val,"%i",nd->spv[nd->levels[lvlInd].firstSpinParVal + (uint32_t)i].spinVal);
 					}
 					SDL_strlcat(strOut,val,32);
 				}
 			}
 			if((tentative != TENTATIVESP_SPINONLY)&&(tentative != TENTATIVESP_PARITYONLY)){
-				if(nd->levels[lvlInd].spval[i].parVal == -1){
+				if(nd->spv[nd->levels[lvlInd].firstSpinParVal + (uint32_t)i].parVal == -1){
 					SDL_strlcat(strOut,"-",32);
-				}else if(nd->levels[lvlInd].spval[i].parVal == 1){
+				}else if(nd->spv[nd->levels[lvlInd].firstSpinParVal + (uint32_t)i].parVal == 1){
 					SDL_strlcat(strOut,"+",32);
 				}
 			}
@@ -2420,9 +2424,9 @@ void getSpinParStr(char strOut[32], const ndata *restrict nd, const uint32_t lvl
 				if(i==nd->levels[lvlInd].numSpinParVals-1){
 					SDL_strlcat(strOut,")",32);
 					if(tentative == TENTATIVESP_SPINONLY){
-						if(nd->levels[lvlInd].spval[i].parVal == -1){
+						if(nd->spv[nd->levels[lvlInd].firstSpinParVal + (uint32_t)i].parVal == -1){
 							SDL_strlcat(strOut,"-",32);
-						}else if(nd->levels[lvlInd].spval[i].parVal == 1){
+						}else if(nd->spv[nd->levels[lvlInd].firstSpinParVal + (uint32_t)i].parVal == 1){
 							SDL_strlcat(strOut,"+",32);
 						}
 					}
@@ -2432,9 +2436,9 @@ void getSpinParStr(char strOut[32], const ndata *restrict nd, const uint32_t lvl
 							if(nextTentative != TENTATIVESP_SPINONLY){
 								SDL_strlcat(strOut,")",32);
 								if(tentative == TENTATIVESP_SPINONLY){
-									if(nd->levels[lvlInd].spval[i].parVal == -1){
+									if(nd->spv[nd->levels[lvlInd].firstSpinParVal + (uint32_t)i].parVal == -1){
 										SDL_strlcat(strOut,"-",32);
-									}else if(nd->levels[lvlInd].spval[i].parVal == 1){
+									}else if(nd->spv[nd->levels[lvlInd].firstSpinParVal + (uint32_t)i].parVal == 1){
 										SDL_strlcat(strOut,"+",32);
 									}
 								}
@@ -2443,18 +2447,18 @@ void getSpinParStr(char strOut[32], const ndata *restrict nd, const uint32_t lvl
 					}
 				}
 			}else if(tentative == TENTATIVESP_PARITYONLY){
-				if(nd->levels[lvlInd].spval[i].parVal == -1){
+				if(nd->spv[nd->levels[lvlInd].firstSpinParVal + (uint32_t)i].parVal == -1){
 					SDL_strlcat(strOut,"(-)",32);
-				}else if(nd->levels[lvlInd].spval[i].parVal == 1){
+				}else if(nd->spv[nd->levels[lvlInd].firstSpinParVal + (uint32_t)i].parVal == 1){
 					SDL_strlcat(strOut,"(+)",32);
 				}
 			}else if((tentative == TENTATIVESP_ASSUMED)||(tentative == TENTATIVESP_ASSUMEDSPINONLY)){
 				if(i==nd->levels[lvlInd].numSpinParVals-1){
 					SDL_strlcat(strOut,"]",32);
 					if(tentative == TENTATIVESP_ASSUMEDSPINONLY){
-						if(nd->levels[lvlInd].spval[i].parVal == -1){
+						if(nd->spv[nd->levels[lvlInd].firstSpinParVal + (uint32_t)i].parVal == -1){
 							SDL_strlcat(strOut,"-",32);
-						}else if(nd->levels[lvlInd].spval[i].parVal == 1){
+						}else if(nd->spv[nd->levels[lvlInd].firstSpinParVal + (uint32_t)i].parVal == 1){
 							SDL_strlcat(strOut,"+",32);
 						}
 					}
@@ -2464,9 +2468,9 @@ void getSpinParStr(char strOut[32], const ndata *restrict nd, const uint32_t lvl
 							if(nextTentative != TENTATIVESP_ASSUMEDSPINONLY){
 								SDL_strlcat(strOut,"]",32);
 								if(tentative == TENTATIVESP_ASSUMEDSPINONLY){
-									if(nd->levels[lvlInd].spval[i].parVal == -1){
+									if(nd->spv[nd->levels[lvlInd].firstSpinParVal + (uint32_t)i].parVal == -1){
 										SDL_strlcat(strOut,"-",32);
-									}else if(nd->levels[lvlInd].spval[i].parVal == 1){
+									}else if(nd->spv[nd->levels[lvlInd].firstSpinParVal + (uint32_t)i].parVal == 1){
 										SDL_strlcat(strOut,"+",32);
 									}
 								}
@@ -2566,8 +2570,8 @@ uint32_t get4PlusLvlInd(const ndata *restrict nd, const uint16_t nuclInd){
 			if((nd->nuclData[nuclInd].Z % 2)==0){
 				for(uint16_t i=0; i<nd->nuclData[nuclInd].numLevels; i++){
 					if(nd->levels[nd->nuclData[nuclInd].firstLevel + (uint32_t)i].numSpinParVals == 1){
-						if(nd->levels[nd->nuclData[nuclInd].firstLevel + (uint32_t)i].spval[0].spinVal == 4){
-							if(nd->levels[nd->nuclData[nuclInd].firstLevel + (uint32_t)i].spval[0].parVal == 1){
+						if(nd->spv[nd->levels[nd->nuclData[nuclInd].firstLevel + (uint32_t)i].firstSpinParVal].spinVal == 4){
+							if(nd->spv[nd->levels[nd->nuclData[nuclInd].firstLevel + (uint32_t)i].firstSpinParVal].parVal == 1){
 								//one of the spin-parity values is 4+
 								uint8_t eValueType = (uint8_t)((nd->levels[nd->nuclData[nuclInd].firstLevel + (uint32_t)i].energy.format >> 5U) & 15U);
 								if(eValueType == VALUETYPE_NUMBER){
@@ -2590,8 +2594,8 @@ uint32_t get2PlusLvlInd(const ndata *restrict nd, const uint16_t nuclInd){
 			if((nd->nuclData[nuclInd].Z % 2)==0){
 				for(uint16_t i=0; i<nd->nuclData[nuclInd].numLevels; i++){
 					if(nd->levels[nd->nuclData[nuclInd].firstLevel + (uint32_t)i].numSpinParVals == 1){
-						if(nd->levels[nd->nuclData[nuclInd].firstLevel + (uint32_t)i].spval[0].spinVal == 2){
-							if(nd->levels[nd->nuclData[nuclInd].firstLevel + (uint32_t)i].spval[0].parVal == 1){
+						if(nd->spv[nd->levels[nd->nuclData[nuclInd].firstLevel + (uint32_t)i].firstSpinParVal].spinVal == 2){
+							if(nd->spv[nd->levels[nd->nuclData[nuclInd].firstLevel + (uint32_t)i].firstSpinParVal].parVal == 1){
 								//one of the spin-parity values is 2+
 								uint8_t eValueType = (uint8_t)((nd->levels[nd->nuclData[nuclInd].firstLevel + (uint32_t)i].energy.format >> 5U) & 15U);
 								if(eValueType == VALUETYPE_NUMBER){
@@ -2610,11 +2614,11 @@ uint32_t get2PlusLvlInd(const ndata *restrict nd, const uint16_t nuclInd){
 
 int8_t getMostProbableParity(const ndata *restrict nd, const uint32_t lvlInd){
 	if(nd->levels[lvlInd].numSpinParVals == 1){
-		return nd->levels[lvlInd].spval[0].parVal;
+		return nd->spv[nd->levels[lvlInd].firstSpinParVal].parVal;
 	}else if(nd->levels[lvlInd].numSpinParVals > 0){
-		int8_t par = nd->levels[lvlInd].spval[0].parVal;
+		int8_t par = nd->spv[nd->levels[lvlInd].firstSpinParVal].parVal;
 		for(uint8_t i=1;i<nd->levels[lvlInd].numSpinParVals;i++){
-			if(nd->levels[lvlInd].spval[i].parVal != par){
+			if(nd->spv[nd->levels[lvlInd].firstSpinParVal + (uint32_t)i].parVal != par){
 				//unknown parity
 				return 0;
 			}
@@ -2626,29 +2630,29 @@ int8_t getMostProbableParity(const ndata *restrict nd, const uint32_t lvlInd){
 
 double getMostProbableSpin(const ndata *restrict nd, const uint32_t lvlInd){
 	if(nd->levels[lvlInd].numSpinParVals == 1){
-		if(nd->levels[lvlInd].spval[0].spinVal == 255){
+		if(nd->spv[nd->levels[lvlInd].firstSpinParVal].spinVal == 255){
 			//unknown spin
 			return 255.0;
 		}
 		if(nd->levels[lvlInd].format & 1U){
 			//half-integer spin
-			return 0.5*(nd->levels[lvlInd].spval[0].spinVal);
+			return 0.5*(nd->spv[nd->levels[lvlInd].firstSpinParVal].spinVal);
 		}else{
-			return 1.0*(nd->levels[lvlInd].spval[0].spinVal);
+			return 1.0*(nd->spv[nd->levels[lvlInd].firstSpinParVal].spinVal);
 		}
 	}else if(nd->levels[lvlInd].numSpinParVals > 0){
 		//return average of multiple spins
 		double avgSpin = 0.0;
 		for(uint8_t i=0;i<nd->levels[lvlInd].numSpinParVals;i++){
-			if(nd->levels[lvlInd].spval[i].spinVal == 255){
+			if(nd->spv[nd->levels[lvlInd].firstSpinParVal + (uint32_t)i].spinVal == 255){
 				//unknown spin
 				return 255.0;
 			}
 			if(nd->levels[lvlInd].format & 1U){
 				//half-integer spin
-				avgSpin += 0.5*(nd->levels[lvlInd].spval[i].spinVal);
+				avgSpin += 0.5*(nd->spv[nd->levels[lvlInd].firstSpinParVal + (uint32_t)i].spinVal);
 			}else{
-				avgSpin += 1.0*(nd->levels[lvlInd].spval[i].spinVal);
+				avgSpin += 1.0*(nd->spv[nd->levels[lvlInd].firstSpinParVal + (uint32_t)i].spinVal);
 			}
 		}
 		return avgSpin/(1.0*nd->levels[lvlInd].numSpinParVals);
