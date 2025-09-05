@@ -557,7 +557,7 @@ const char* getSpecialLvlStr(const app_data *restrict dat, const uint8_t special
 			return dat->strings[dat->locStringIDs[LOCSTR_SL_PDECAYISOMER]];
 		default:
 			SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,"getSpecialLvlStr - invalid special level type (%u).\n",specialLvlInd);
-			return " ";
+			return "";
 	}
 }
 
@@ -2163,7 +2163,7 @@ void getHalfLifeStr(char strOut[32], const app_data *restrict dat, const uint32_
 			if(showUnknown){
 				SDL_snprintf(strOut,32,"%s",dat->strings[dat->locStringIDs[LOCSTR_UNKNOWN]]);
 			}else{
-				SDL_snprintf(strOut,32," ");
+				SDL_strlcpy(strOut,"",32);
 			}
 		}else if(dat->ndat.levels[lvlInd].halfLife.val > 0.0f){
 			double hlVal = (double)(dat->ndat.levels[lvlInd].halfLife.val);
@@ -2203,13 +2203,13 @@ void getHalfLifeStr(char strOut[32], const app_data *restrict dat, const uint32_
 				}
 			}
 		}else{
-			SDL_snprintf(strOut,32," ");
+			SDL_strlcpy(strOut,"",32);
 		}
 	}else{
 		if(showUnknown){
 			SDL_snprintf(strOut,32,"%s",dat->strings[dat->locStringIDs[LOCSTR_UNKNOWN]]);
 		}else{
-			SDL_snprintf(strOut,32," ");
+			SDL_strlcpy(strOut,"",32);
 		}
 	}
 }
@@ -2261,7 +2261,7 @@ void getDecayModeStr(char strOut[32], const ndata *restrict nd, const uint32_t d
 			}
 		}
 	}else{
-		SDL_snprintf(strOut,32," ");
+		SDL_strlcpy(strOut,"",32);
 	}
 }
 
@@ -2271,10 +2271,10 @@ void getMostProbableDecayModeStr(char strOut[32], const ndata *restrict nd, cons
 
 	uint8_t hlUnit = (uint8_t)(nd->levels[lvlInd].halfLife.unit & 127U);
 	if(hlUnit == VALUE_UNIT_STABLE){
-		SDL_snprintf(strOut,32," "); //stable
+		SDL_strlcpy(strOut,"",32); //stable
 		return;
 	}else if((nd->levels[lvlInd].numDecModes == 0)&&(getLevelHalfLifeSeconds(nd,lvlInd)>1.0E15)){
-		SDL_snprintf(strOut,32," "); //roughly stable
+		SDL_strlcpy(strOut,"",32); //roughly stable
 		return;
 	}
 
@@ -2298,7 +2298,7 @@ void getMostProbableDecayModeStr(char strOut[32], const ndata *restrict nd, cons
 	}else if(nd->levels[lvlInd].numTran >0){
 		SDL_strlcpy(strOut,"IT > 0%",32);
 	}else{
-		SDL_snprintf(strOut,32," "); //couldn't find probable decay mode
+		SDL_strlcpy(strOut,"",32); //couldn't find probable decay mode
 		return;
 	}
 }
@@ -2317,10 +2317,10 @@ void getAbundanceStr(char strOut[32], const ndata *restrict nd, const uint16_t n
 				SDL_snprintf(strOut,32,"%.*f(%u)%%",abPrecision,(double)nd->nuclData[nuclInd].abundance.val,nd->nuclData[nuclInd].abundance.err);
 			}
 		}else{
-			SDL_snprintf(strOut,32," ");
+			SDL_strlcpy(strOut,"",32); //clear the string
 		}
 	}else{
-		SDL_snprintf(strOut,32," ");
+		SDL_strlcpy(strOut,"",32); //clear the string
 	}
 }
 
@@ -2360,7 +2360,7 @@ void getSpinParStr(char strOut[32], const ndata *restrict nd, const uint32_t lvl
 				if((i==0)||((i>0)&&((prevTentative != TENTATIVESP_SPINANDPARITY)&&(prevTentative != TENTATIVESP_SPINONLY)))){
 					if((i>0)&&(prevTentative == TENTATIVESP_RANGE)){
 						//previous spin parity value specified a range
-						SDL_strlcat(strOut," ",32);
+						SDL_strlcat(strOut,"",32);
 					}else{
 						SDL_strlcat(strOut,"(",32);
 					}
@@ -2369,7 +2369,7 @@ void getSpinParStr(char strOut[32], const ndata *restrict nd, const uint32_t lvl
 				if((i==0)||((i>0)&&((prevTentative != TENTATIVESP_ASSUMED)&&(prevTentative != TENTATIVESP_ASSUMEDSPINONLY)))){
 					if((i>0)&&(prevTentative == TENTATIVESP_RANGE)){
 						//previous spin parity value specified a range
-						SDL_strlcat(strOut," ",32);
+						SDL_strlcat(strOut,"",32);
 					}else{
 						SDL_strlcat(strOut,"[",32);
 					}
@@ -2482,7 +2482,7 @@ void getSpinParStr(char strOut[32], const ndata *restrict nd, const uint32_t lvl
 			if(i!=nd->levels[lvlInd].numSpinParVals-1){
 				if(nextTentative == TENTATIVESP_RANGE){
 					//next spin parity value specifies a range
-					SDL_strlcat(strOut," ",32);
+					SDL_strlcat(strOut,"",32);
 				}else{
 					SDL_strlcat(strOut,",",32);
 				}
