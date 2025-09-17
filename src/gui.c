@@ -76,82 +76,162 @@ SDL_FColor getHalfLifeCol(const double halflifeSeconds){
     col.r = 0.1f;
     col.g = 0.2f;
     col.b = 0.6f;
+  }else if(halflifeSeconds > 7.5E5){
+    col.r = 0.1f;
+    col.g = 0.225f;
+    col.b = 0.625f;
   }else if(halflifeSeconds > 5.0E5){
     col.r = 0.1f;
     col.g = 0.25f;
     col.b = 0.65f;
+  }else if(halflifeSeconds > 3.0E5){
+    col.r = 0.1f;
+    col.g = 0.275f;
+    col.b = 0.675f;
   }else if(halflifeSeconds > 1.0E5){
     col.r = 0.1f;
     col.g = 0.3f;
     col.b = 0.7f;
+  }else if(halflifeSeconds > 7.5E5){
+    col.r = 0.125f;
+    col.g = 0.325f;
+    col.b = 0.725f;
   }else if(halflifeSeconds > 5.0E4){
     col.r = 0.15f;
     col.g = 0.35f;
     col.b = 0.75f;
+  }else if(halflifeSeconds > 3.0E4){
+    col.r = 0.175f;
+    col.g = 0.375f;
+    col.b = 0.775f;
   }else if(halflifeSeconds > 1.0E4){
     col.r = 0.2f;
     col.g = 0.4f;
+    col.b = 0.8f;
+  }else if(halflifeSeconds > 7.5E3){
+    col.r = 0.225f;
+    col.g = 0.425f;
     col.b = 0.8f;
   }else if(halflifeSeconds > 5.0E3){
     col.r = 0.25f;
     col.g = 0.45f;
     col.b = 0.8f;
+  }else if(halflifeSeconds > 3E3){
+    col.r = 0.275f;
+    col.g = 0.475f;
+    col.b = 0.8f;
   }else if(halflifeSeconds > 1.0E3){
     col.r = 0.3f;
     col.g = 0.5f;
     col.b = 0.8f;
-  }else if(halflifeSeconds > 5.0E2){
+  }else if(halflifeSeconds > 7.5E2){
+    col.r = 0.3f;
+    col.g = 0.55f;
+    col.b = 0.775f;
+  }else if(halflifeSeconds > 5.0E2){ //text color inversion point (actually 600)
     col.r = 0.3f;
     col.g = 0.6f;
+    col.b = 0.75f;
+  }else if(halflifeSeconds > 3.0E2){
+    col.r = 0.3f;
+    col.g = 0.65f;
     col.b = 0.75f;
   }else if(halflifeSeconds > 1.0E2){
     col.r = 0.3f;
     col.g = 0.7f;
+    col.b = 0.725f;
+  }else if(halflifeSeconds > 7.5E1){
+    col.r = 0.3f;
+    col.g = 0.75f;
     col.b = 0.7f;
   }else if(halflifeSeconds > 5.0E1){
     col.r = 0.3f;
     col.g = 0.8f;
     col.b = 0.7f;
+  }else if(halflifeSeconds > 3.0E1){
+    col.r = 0.3f;
+    col.g = 0.85f;
+    col.b = 0.7f;
   }else if(halflifeSeconds > 1.0E1){
     col.r = 0.3f;
     col.g = 0.9f;
+    col.b = 0.7f;
+  }else if(halflifeSeconds > 7.5){
+    col.r = 0.35f;
+    col.g = 0.925f;
     col.b = 0.7f;
   }else if(halflifeSeconds > 5.0){
     col.r = 0.4f;
     col.g = 0.95f;
     col.b = 0.7f;
+  }else if(halflifeSeconds > 3.0){
+    col.r = 0.45f;
+    col.g = 0.975f;
+    col.b = 0.7f;
   }else if(halflifeSeconds > 1.0){
     col.r = 0.5f;
     col.g = 1.0f;
     col.b = 0.7f;
+  }else if(halflifeSeconds > 7.5E-1){
+    col.r = 0.55f;
+    col.g = 0.975f;
+    col.b = 0.65f;
   }else if(halflifeSeconds > 5.0E-1){
     col.r = 0.6f;
     col.g = 0.95f;
     col.b = 0.6f;
+  }else if(halflifeSeconds > 3.0E-1){
+    col.r = 0.65f;
+    col.g = 0.925f;
+    col.b = 0.55f;
   }else if(halflifeSeconds > 1.0E-1){
     col.r = 0.7f;
     col.g = 0.9f;
     col.b = 0.5f;
+  }else if(halflifeSeconds > 7.5E-2){
+    col.r = 0.75f;
+    col.g = 0.9f;
+    col.b = 0.475f;
   }else if(halflifeSeconds > 5.0E-2){
     col.r = 0.8f;
     col.g = 0.9f;
     col.b = 0.45f;
+  }else if(halflifeSeconds > 3.0E-2){
+    col.r = 0.85f;
+    col.g = 0.9f;
+    col.b = 0.425f;
   }else if(halflifeSeconds > 1.0E-2){
     col.r = 0.9f;
     col.g = 0.9f;
     col.b = 0.4f;
+  }else if(halflifeSeconds > 7.5E-3){
+    col.r = 0.925f;
+    col.g = 0.925f;
+    col.b = 0.375f;
   }else if(halflifeSeconds > 5.0E-3){
     col.r = 0.95f;
     col.g = 0.95f;
     col.b = 0.35f;
+  }else if(halflifeSeconds > 3.0E-3){
+    col.r = 0.975f;
+    col.g = 0.975f;
+    col.b = 0.325f;
   }else if(halflifeSeconds > 1.0E-3){
     col.r = 1.0f;
     col.g = 1.0f;
     col.b = 0.3f;
+  }else if(halflifeSeconds > 7.5E-4){
+    col.r = 1.0f;
+    col.g = 0.95f;
+    col.b = 0.325f;
   }else if(halflifeSeconds > 5.0E-4){
     col.r = 1.0f;
     col.g = 0.9f;
     col.b = 0.35f;
+  }else if(halflifeSeconds > 3.0E-4){
+    col.r = 1.0f;
+    col.g = 0.85f;
+    col.b = 0.375f;
   }else if(halflifeSeconds > 1.0E-4){
     col.r = 1.0f;
     col.g = 0.8f;
@@ -653,22 +733,42 @@ SDL_FColor getSpinCol(const double spin){
     col.r = 1.0f;
     col.g = 0.7f;
     col.b = 0.5f;
+  }else if(spin <= 10.0){
+    col.r = 1.0f;
+    col.g = 0.675f;
+    col.b = 0.525f;
   }else if(spin <= 11.0){
     col.r = 1.0f;
     col.g = 0.65f;
     col.b = 0.55f;
+  }else if(spin <= 12.0){
+    col.r = 1.0f;
+    col.g = 0.625f;
+    col.b = 0.575f;
   }else if(spin <= 13.0){
     col.r = 1.0f;
     col.g = 0.6f;
     col.b = 0.6f;
+  }else if(spin <= 14.0){
+    col.r = 1.0f;
+    col.g = 0.6f;
+    col.b = 0.65f;
   }else if(spin <= 15.0){
     col.r = 1.0f;
     col.g = 0.6f;
     col.b = 0.7f;
+  }else if(spin <= 16.0){
+    col.r = 1.0f;
+    col.g = 0.65f;
+    col.b = 0.75f;
   }else if(spin <= 17.0){
     col.r = 1.0f;
     col.g = 0.7f;
     col.b = 0.8f;
+  }else if(spin <= 20.0){
+    col.r = 1.0f;
+    col.g = 0.75f;
+    col.b = 0.85f;
   }else if(spin < 255.0){
     col.r = 1.0f;
     col.g = 0.8f;
@@ -1921,7 +2021,7 @@ void drawChartOfNuclides(const app_data *restrict dat, app_state *restrict state
 
   //calculate size of low box (extra info like isomers, 2+ energies etc.)
   float lowBoxHeight = 0.0f;
-  if(state->ds.chartZoomScale >= 4.5f){
+  if(state->ds.chartZoomScale >= 3.5f){
     lowBoxHeight = (boxLineLimit - 3)*10.0f*state->ds.uiUserScale;
     if(lowBoxHeight < 0.0f){
       lowBoxHeight = 0.0f;
@@ -1984,124 +2084,122 @@ void drawChartOfNuclides(const app_data *restrict dat, app_state *restrict state
               
               if(state->ds.chartZoomScale >= 3.5f){
                 uint8_t drawingLowBox = 0;
-                if(state->ds.chartZoomScale >= 4.5f){
-                  //setup low box rect
-                  lowBoxRect.x = rect.x + lowBoxPadding;
-                  lowBoxRect.y = rect.y + rect.h - lowBoxHeight - lowBoxPadding;
-                  lowBoxRect.w = nuclBoxWidth - 2.0f*lowBoxPadding;
-                  lowBoxRect.h = lowBoxHeight;
-                  if(state->chartView == CHARTVIEW_HALFLIFE){
-                    //draw isomer box
-                    uint32_t isomerLvl = dat->ndat.nuclData[i].longestIsomerLevel;
-                    const double isomerHl = getLevelHalfLifeSeconds(&dat->ndat,isomerLvl);
-                    if((isomerLvl != MAXNUMLVLS)&&(isomerLvl != (dat->ndat.nuclData[i].firstLevel + dat->ndat.nuclData[i].gsLevel))){
-                      if((isomerHl >= 1.0E-1)||(isomerHl > getNuclGSHalfLifeSeconds(&dat->ndat,(uint16_t)i))){ //only show 'important' isomers on chart
+                //setup low box rect
+                lowBoxRect.x = rect.x + lowBoxPadding;
+                lowBoxRect.y = rect.y + rect.h - lowBoxHeight - lowBoxPadding;
+                lowBoxRect.w = nuclBoxWidth - 2.0f*lowBoxPadding;
+                lowBoxRect.h = lowBoxHeight;
+                if(state->chartView == CHARTVIEW_HALFLIFE){
+                  //draw isomer box
+                  uint32_t isomerLvl = dat->ndat.nuclData[i].longestIsomerLevel;
+                  const double isomerHl = getLevelHalfLifeSeconds(&dat->ndat,isomerLvl);
+                  if((isomerLvl != MAXNUMLVLS)&&(isomerLvl != (dat->ndat.nuclData[i].firstLevel + dat->ndat.nuclData[i].gsLevel))){
+                    if((isomerHl >= 1.0E-1)||(isomerHl > getNuclGSHalfLifeSeconds(&dat->ndat,(uint16_t)i))){ //only show 'important' isomers on chart
+                      drawingLowBox = 1;
+                      SDL_FColor iboxCol = getHalfLifeCol(isomerHl);
+                      if((iboxCol.r == boxCol.r)&&(iboxCol.g == iboxCol.g)&&(iboxCol.b == boxCol.b)){
+                        //make isomer box colors slightly different, to distinguish them from
+                        //ground states of similar half-life
+                        if(getNuclGSHalfLifeSeconds(&dat->ndat,(uint16_t)i) > isomerHl){
+                          iboxCol.r *= 1.10f;
+                          iboxCol.g *= 1.10f;
+                          iboxCol.b *= 1.10f;
+                        }else{
+                          iboxCol.r *= 0.91f;
+                          iboxCol.g *= 0.91f;
+                          iboxCol.b *= 0.91f;
+                        }
+                      }
+                      if(state->ds.chartZoomScale < 4.0f){
+                        //handle fading in of isomer boxes
+                        iboxCol.a =  1.0f - (4.0f-state->ds.chartZoomScale);
+                      }
+                      drawFlatRect(rdat,lowBoxRect,iboxCol);
+                      drawisomerBoxLabel(dat,state,rdat,lowBoxRect.x,lowBoxRect.y,lowBoxRect.w,lowBoxRect.h,(isomerHl > 600) ? whiteCol8Bit : blackCol8Bit,(uint16_t)i,isomerLvl,dat->ndat.nuclData[i].longestIsomerMVal);
+                    }
+                  }
+                }else if(state->chartView == CHARTVIEW_DECAYMODE){
+                  //draw decay mode box
+                  uint32_t isomerLvl = dat->ndat.nuclData[i].longestIsomerLevel;
+                  const double isomerHl = getLevelHalfLifeSeconds(&dat->ndat,isomerLvl);
+                  if((isomerLvl != MAXNUMLVLS)&&(isomerLvl != (dat->ndat.nuclData[i].firstLevel + dat->ndat.nuclData[i].gsLevel))){
+                    if((isomerHl >= 1.0E-1)||(isomerHl > getNuclGSHalfLifeSeconds(&dat->ndat,(uint16_t)i))){ //only show 'important' isomers on chart
+                      uint8_t isomerDcyMode = getLevelMostProbableDcyMode(&dat->ndat,dat->ndat.nuclData[i].longestIsomerLevel);
+                      if(isomerDcyMode < (DECAYMODE_ENUM_LENGTH+1)){
+                        drawingLowBox = 1;
+                        SDL_FColor iboxCol = getDecayModeCol(isomerDcyMode);
+                        if((iboxCol.r == boxCol.r)&&(iboxCol.g == iboxCol.g)&&(iboxCol.b == boxCol.b)){
+                          //make isomer box colors slightly different, to distinguish them from
+                          //ground states of the same decay mode
+                          iboxCol.r *= 1.20f;
+                          iboxCol.g *= 1.20f;
+                          iboxCol.b *= 1.20f;
+                        }
+                        if(state->ds.chartZoomScale < 4.0f){
+                          //handle fading in of isomer boxes
+                          iboxCol.a =  1.0f - (4.0f-state->ds.chartZoomScale);
+                        }
+                        drawFlatRect(rdat,lowBoxRect,iboxCol);
+                        drawIsomerDecayModeBoxLabel(dat,state,rdat,lowBoxRect.x,lowBoxRect.y,lowBoxRect.w,lowBoxRect.h,getDecayModeTextCol(isomerDcyMode),(uint16_t)i,isomerLvl,dat->ndat.nuclData[i].longestIsomerMVal,isomerDcyMode);
+                      }else if(isomerHl > 1.0E15){
+                        //'stable' isomer with no known decay mode
+                        //draw its box using the half-life color
                         drawingLowBox = 1;
                         SDL_FColor iboxCol = getHalfLifeCol(isomerHl);
                         if((iboxCol.r == boxCol.r)&&(iboxCol.g == iboxCol.g)&&(iboxCol.b == boxCol.b)){
                           //make isomer box colors slightly different, to distinguish them from
-                          //ground states of similar half-life
-                          if(getNuclGSHalfLifeSeconds(&dat->ndat,(uint16_t)i) > isomerHl){
-                            iboxCol.r *= 1.10f;
-                            iboxCol.g *= 1.10f;
-                            iboxCol.b *= 1.10f;
-                          }else{
-                            iboxCol.r *= 0.91f;
-                            iboxCol.g *= 0.91f;
-                            iboxCol.b *= 0.91f;
-                          }
+                          //ground states of the same decay mode
+                          iboxCol.r += 0.1f;
+                          iboxCol.g += 0.1f;
+                          iboxCol.b += 0.1f;
                         }
-                        if(state->ds.chartZoomScale < 5.5f){
+                        if(state->ds.chartZoomScale < 4.0f){
                           //handle fading in of isomer boxes
-                          iboxCol.a =  1.0f - (5.5f-state->ds.chartZoomScale);
+                          iboxCol.a =  1.0f - (4.0f-state->ds.chartZoomScale);
                         }
                         drawFlatRect(rdat,lowBoxRect,iboxCol);
-                        drawisomerBoxLabel(dat,state,rdat,lowBoxRect.x,lowBoxRect.y,lowBoxRect.w,lowBoxRect.h,(isomerHl > 1.0E3) ? whiteCol8Bit : blackCol8Bit,(uint16_t)i,isomerLvl,dat->ndat.nuclData[i].longestIsomerMVal);
+                        drawIsomerDecayModeBoxLabel(dat,state,rdat,lowBoxRect.x,lowBoxRect.y,lowBoxRect.w,lowBoxRect.h,getDecayModeTextCol(isomerDcyMode),(uint16_t)i,isomerLvl,dat->ndat.nuclData[i].longestIsomerMVal,isomerDcyMode);
                       }
                     }
-                  }else if(state->chartView == CHARTVIEW_DECAYMODE){
-                    //draw decay mode box
-                    uint32_t isomerLvl = dat->ndat.nuclData[i].longestIsomerLevel;
-                    const double isomerHl = getLevelHalfLifeSeconds(&dat->ndat,isomerLvl);
-                    if((isomerLvl != MAXNUMLVLS)&&(isomerLvl != (dat->ndat.nuclData[i].firstLevel + dat->ndat.nuclData[i].gsLevel))){
-                      if((isomerHl >= 1.0E-1)||(isomerHl > getNuclGSHalfLifeSeconds(&dat->ndat,(uint16_t)i))){ //only show 'important' isomers on chart
-                        uint8_t isomerDcyMode = getLevelMostProbableDcyMode(&dat->ndat,dat->ndat.nuclData[i].longestIsomerLevel);
-                        if(isomerDcyMode < (DECAYMODE_ENUM_LENGTH+1)){
-                          drawingLowBox = 1;
-                          SDL_FColor iboxCol = getDecayModeCol(isomerDcyMode);
-                          if((iboxCol.r == boxCol.r)&&(iboxCol.g == iboxCol.g)&&(iboxCol.b == boxCol.b)){
-                            //make isomer box colors slightly different, to distinguish them from
-                            //ground states of the same decay mode
-                            iboxCol.r *= 1.20f;
-                            iboxCol.g *= 1.20f;
-                            iboxCol.b *= 1.20f;
-                          }
-                          if(state->ds.chartZoomScale < 5.5f){
-                            //handle fading in of isomer boxes
-                            iboxCol.a =  1.0f - (5.5f-state->ds.chartZoomScale);
-                          }
-                          drawFlatRect(rdat,lowBoxRect,iboxCol);
-                          drawIsomerDecayModeBoxLabel(dat,state,rdat,lowBoxRect.x,lowBoxRect.y,lowBoxRect.w,lowBoxRect.h,getDecayModeTextCol(isomerDcyMode),(uint16_t)i,isomerLvl,dat->ndat.nuclData[i].longestIsomerMVal,isomerDcyMode);
-                        }else if(isomerHl > 1.0E15){
-                          //'stable' isomer with no known decay mode
-                          //draw its box using the half-life color
-                          drawingLowBox = 1;
-                          SDL_FColor iboxCol = getHalfLifeCol(isomerHl);
-                          if((iboxCol.r == boxCol.r)&&(iboxCol.g == iboxCol.g)&&(iboxCol.b == boxCol.b)){
-                            //make isomer box colors slightly different, to distinguish them from
-                            //ground states of the same decay mode
-                            iboxCol.r += 0.1f;
-                            iboxCol.g += 0.1f;
-                            iboxCol.b += 0.1f;
-                          }
-                          if(state->ds.chartZoomScale < 5.5f){
-                            //handle fading in of isomer boxes
-                            iboxCol.a =  1.0f - (5.5f-state->ds.chartZoomScale);
-                          }
-                          drawFlatRect(rdat,lowBoxRect,iboxCol);
-                          drawIsomerDecayModeBoxLabel(dat,state,rdat,lowBoxRect.x,lowBoxRect.y,lowBoxRect.w,lowBoxRect.h,getDecayModeTextCol(isomerDcyMode),(uint16_t)i,isomerLvl,dat->ndat.nuclData[i].longestIsomerMVal,isomerDcyMode);
-                        }
+                  }
+                }else if(state->chartView == CHARTVIEW_SPIN){
+                  //draw spin box
+                  uint32_t isomerLvl = dat->ndat.nuclData[i].longestIsomerLevel;
+                  const double isomerHl = getLevelHalfLifeSeconds(&dat->ndat,isomerLvl);
+                  if((isomerLvl != MAXNUMLVLS)&&(isomerLvl != (dat->ndat.nuclData[i].firstLevel + dat->ndat.nuclData[i].gsLevel))){
+                    if((isomerHl >= 1.0E-1)||(isomerHl > getNuclGSHalfLifeSeconds(&dat->ndat,(uint16_t)i))){ //only show 'important' isomers on chart
+                      double isomerSpin = getMostProbableSpin(&dat->ndat,dat->ndat.nuclData[i].longestIsomerLevel);
+                      drawingLowBox = 1;
+                      SDL_FColor iboxCol = getSpinCol(isomerSpin);
+                      if(state->ds.chartZoomScale < 4.0f){
+                        //handle fading in of isomer boxes
+                        iboxCol.a =  1.0f - (4.0f-state->ds.chartZoomScale);
                       }
+                      drawFlatRect(rdat,lowBoxRect,iboxCol);
+                      drawIsomerSpinBoxLabel(dat,state,rdat,lowBoxRect.x,lowBoxRect.y,lowBoxRect.w,lowBoxRect.h,(isomerSpin <= 2.0) ? whiteCol8Bit : blackCol8Bit,(uint16_t)i,isomerLvl,dat->ndat.nuclData[i].longestIsomerMVal);
                     }
-                  }else if(state->chartView == CHARTVIEW_SPIN){
-                    //draw spin box
-                    uint32_t isomerLvl = dat->ndat.nuclData[i].longestIsomerLevel;
-                    const double isomerHl = getLevelHalfLifeSeconds(&dat->ndat,isomerLvl);
-                    if((isomerLvl != MAXNUMLVLS)&&(isomerLvl != (dat->ndat.nuclData[i].firstLevel + dat->ndat.nuclData[i].gsLevel))){
-                      if((isomerHl >= 1.0E-1)||(isomerHl > getNuclGSHalfLifeSeconds(&dat->ndat,(uint16_t)i))){ //only show 'important' isomers on chart
-                        double isomerSpin = getMostProbableSpin(&dat->ndat,dat->ndat.nuclData[i].longestIsomerLevel);
-                        drawingLowBox = 1;
-                        SDL_FColor iboxCol = getSpinCol(isomerSpin);
-                        if(state->ds.chartZoomScale < 5.5f){
-                          //handle fading in of isomer boxes
-                          iboxCol.a =  1.0f - (5.5f-state->ds.chartZoomScale);
-                        }
-                        drawFlatRect(rdat,lowBoxRect,iboxCol);
-                        drawIsomerSpinBoxLabel(dat,state,rdat,lowBoxRect.x,lowBoxRect.y,lowBoxRect.w,lowBoxRect.h,(isomerSpin <= 2.0) ? whiteCol8Bit : blackCol8Bit,(uint16_t)i,isomerLvl,dat->ndat.nuclData[i].longestIsomerMVal);
+                  }
+                }else if(state->chartView == CHARTVIEW_PARITY){
+                  //draw spin box
+                  uint32_t isomerLvl = dat->ndat.nuclData[i].longestIsomerLevel;
+                  const double isomerHl = getLevelHalfLifeSeconds(&dat->ndat,isomerLvl);
+                  if((isomerLvl != MAXNUMLVLS)&&(isomerLvl != (dat->ndat.nuclData[i].firstLevel + dat->ndat.nuclData[i].gsLevel))){
+                    if((isomerHl >= 1.0E-1)||(isomerHl > getNuclGSHalfLifeSeconds(&dat->ndat,(uint16_t)i))){ //only show 'important' isomers on chart
+                      int8_t isomerPar = getMostProbableParity(&dat->ndat,dat->ndat.nuclData[i].longestIsomerLevel);
+                      drawingLowBox = 1;
+                      SDL_FColor iboxCol = getParCol(isomerPar);
+                      if(state->ds.chartZoomScale < 4.0f){
+                        //handle fading in of isomer boxes
+                        iboxCol.a =  1.0f - (4.0f-state->ds.chartZoomScale);
                       }
-                    }
-                  }else if(state->chartView == CHARTVIEW_PARITY){
-                    //draw spin box
-                    uint32_t isomerLvl = dat->ndat.nuclData[i].longestIsomerLevel;
-                    const double isomerHl = getLevelHalfLifeSeconds(&dat->ndat,isomerLvl);
-                    if((isomerLvl != MAXNUMLVLS)&&(isomerLvl != (dat->ndat.nuclData[i].firstLevel + dat->ndat.nuclData[i].gsLevel))){
-                      if((isomerHl >= 1.0E-1)||(isomerHl > getNuclGSHalfLifeSeconds(&dat->ndat,(uint16_t)i))){ //only show 'important' isomers on chart
-                        int8_t isomerPar = getMostProbableParity(&dat->ndat,dat->ndat.nuclData[i].longestIsomerLevel);
-                        drawingLowBox = 1;
-                        SDL_FColor iboxCol = getParCol(isomerPar);
-                        if(state->ds.chartZoomScale < 5.5f){
-                          //handle fading in of isomer boxes
-                          iboxCol.a =  1.0f - (5.5f-state->ds.chartZoomScale);
-                        }
-                        drawFlatRect(rdat,lowBoxRect,iboxCol);
-                        drawIsomerSpinBoxLabel(dat,state,rdat,lowBoxRect.x,lowBoxRect.y,lowBoxRect.w,lowBoxRect.h,(isomerPar < 0) ? whiteCol8Bit : blackCol8Bit,(uint16_t)i,isomerLvl,dat->ndat.nuclData[i].longestIsomerMVal);
-                      }
+                      drawFlatRect(rdat,lowBoxRect,iboxCol);
+                      drawIsomerSpinBoxLabel(dat,state,rdat,lowBoxRect.x,lowBoxRect.y,lowBoxRect.w,lowBoxRect.h,(isomerPar < 0) ? whiteCol8Bit : blackCol8Bit,(uint16_t)i,isomerLvl,dat->ndat.nuclData[i].longestIsomerMVal);
                     }
                   }
                 }
                 if(drawingLowBox){
                   if(state->chartView == CHARTVIEW_HALFLIFE){
-                    drawNuclBoxLabel(dat,state,rdat,rect.x,rect.y,rect.w,(rect.h-lowBoxHeight-(2.0f*lowBoxPadding)),(getNuclGSHalfLifeSeconds(&dat->ndat,(uint16_t)i) > 1.0E3) ? whiteCol8Bit : blackCol8Bit,(uint16_t)i);
+                    drawNuclBoxLabel(dat,state,rdat,rect.x,rect.y,rect.w,(rect.h-lowBoxHeight-(2.0f*lowBoxPadding)),(getNuclGSHalfLifeSeconds(&dat->ndat,(uint16_t)i) > 600) ? whiteCol8Bit : blackCol8Bit,(uint16_t)i);
                   }else if(state->chartView == CHARTVIEW_DECAYMODE){
                     drawNuclBoxLabel(dat,state,rdat,rect.x,rect.y,rect.w,(rect.h-lowBoxHeight-(2.0f*lowBoxPadding)),getDecayModeTextCol(getNuclGSMostProbableDcyMode(&dat->ndat,(uint16_t)i)),(uint16_t)i);
                   }else if(state->chartView == CHARTVIEW_SPIN){
@@ -2115,7 +2213,7 @@ void drawChartOfNuclides(const app_data *restrict dat, app_state *restrict state
                   }
                 }else{
                   if(state->chartView == CHARTVIEW_HALFLIFE){
-                    drawNuclBoxLabel(dat,state,rdat,rect.x,rect.y,rect.w,rect.h,(getNuclGSHalfLifeSeconds(&dat->ndat,(uint16_t)i) > 1.0E3) ? whiteCol8Bit : blackCol8Bit,(uint16_t)i);
+                    drawNuclBoxLabel(dat,state,rdat,rect.x,rect.y,rect.w,rect.h,(getNuclGSHalfLifeSeconds(&dat->ndat,(uint16_t)i) > 600) ? whiteCol8Bit : blackCol8Bit,(uint16_t)i);
                   }else if(state->chartView == CHARTVIEW_DECAYMODE){
                     drawNuclBoxLabel(dat,state,rdat,rect.x,rect.y,rect.w,rect.h,getDecayModeTextCol(getNuclGSMostProbableDcyMode(&dat->ndat,(uint16_t)i)),(uint16_t)i);
                   }else if(state->chartView == CHARTVIEW_2PLUS){
@@ -2266,8 +2364,8 @@ void drawChartOfNuclides(const app_data *restrict dat, app_state *restrict state
   }else{
     drawFlatRect(rdat,rect,whiteCol);
   }
-  drawTextAligned(rdat,CHART_AXIS_DEPTH*0.5f*state->ds.uiUserScale,CHART_AXIS_DEPTH*0.5f*state->ds.uiUserScale,blackCol8Bit,FONTSIZE_LARGE,"Z",ALIGN_CENTER);
-  drawTextAligned(rdat,state->ds.windowXRes - CHART_AXIS_DEPTH*0.5f*state->ds.uiUserScale,state->ds.windowYRes - CHART_AXIS_DEPTH*0.5f*state->ds.uiUserScale,blackCol8Bit,FONTSIZE_LARGE,"N",ALIGN_CENTER);
+  drawTextAligned(rdat,CHART_AXIS_DEPTH*0.5f*state->ds.uiUserScale,CHART_AXIS_DEPTH*0.5f*state->ds.uiUserScale,blackCol8Bit,FONTSIZE_NORMAL_BOLD,"Z",ALIGN_CENTER);
+  drawTextAligned(rdat,state->ds.windowXRes - CHART_AXIS_DEPTH*0.5f*state->ds.uiUserScale,state->ds.windowYRes - CHART_AXIS_DEPTH*0.5f*state->ds.uiUserScale,blackCol8Bit,FONTSIZE_NORMAL_BOLD,"N",ALIGN_CENTER);
   //draw ticks
   char tmpStr[32];
   rect.y = state->ds.windowYRes - (CHART_AXIS_DEPTH*0.5f*state->ds.uiUserScale);
@@ -2277,7 +2375,7 @@ void drawChartOfNuclides(const app_data *restrict dat, app_state *restrict state
       uint16_t numInd = (uint16_t)(SDL_floorf(i));
       if((i<MAX_MASS_NUM)&&(i<=MAX_NEUTRON_NUM)){
         rect.x = (i + 0.5f - minX)*DEFAULT_NUCLBOX_DIM*state->ds.chartZoomScale*state->ds.uiUserScale;
-        if(rect.x < (state->ds.windowXRes - CHART_AXIS_DEPTH*state->ds.uiUserScale)){ //dodge axis label
+        if(rect.x < (state->ds.windowXRes - 1.5f*CHART_AXIS_DEPTH*state->ds.uiUserScale)){ //dodge axis label
           SDL_snprintf(tmpStr,32,"%u",numInd); //is this slow?
           drawTextAlignedSized(rdat,rect.x,rect.y,blackCol8Bit,FONTSIZE_NORMAL,255,tmpStr,ALIGN_CENTER,16384); //draw number label
         }
@@ -2431,7 +2529,7 @@ void drawNuclFullInfoBox(const app_data *restrict dat, app_state *restrict state
       }else{
         getLvlEnergyStr(tmpStr,&dat->ndat,lvlInd,1);
       }
-      drawSelectableTextAlignedSized(rdat,&state->tss,drawXPos,drawYPos,(hl > 1.0E3) ? whiteCol8Bit : blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_LEFT,16384);
+      drawSelectableTextAlignedSized(rdat,&state->tss,drawXPos,drawYPos,(hl > 600) ? whiteCol8Bit : blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_LEFT,16384);
       //handle special level info
       const uint8_t slInd = (uint8_t)((dat->ndat.levels[lvlInd].format >> 1U) & 15U);
       const uint8_t mValInd = (uint8_t)((dat->ndat.levels[lvlInd].format >> 5U) & 7U);
@@ -2444,28 +2542,28 @@ void drawNuclFullInfoBox(const app_data *restrict dat, app_state *restrict state
         }else{
           getNuclNameStr(mValStr,&dat->ndat.nuclData[nuclInd],0);
         }
-        drawSelectableTextAlignedSized(rdat,&state->tss,drawXPos,drawYPos,(hl > 1.0E3) ? whiteCol8Bit : blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,mValStr,ALIGN_LEFT,16384);
+        drawSelectableTextAlignedSized(rdat,&state->tss,drawXPos,drawYPos,(hl > 600) ? whiteCol8Bit : blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,mValStr,ALIGN_LEFT,16384);
       }
       if(slInd > 0){
         drawYPos += (NUCL_INFOBOX_SMALLLINE_HEIGHT*state->ds.uiUserScale + txtYOffset);
         char slStr[64];
         SDL_snprintf(slStr,64,"%s",getSpecialLvlStr(dat,slInd));
         //SDL_Log("%s\n",tmpStr);
-        drawSelectableTextAlignedSized(rdat,&state->tss,drawXPos,drawYPos,(hl > 1.0E3) ? whiteCol8Bit : blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,slStr,ALIGN_LEFT,16384);
+        drawSelectableTextAlignedSized(rdat,&state->tss,drawXPos,drawYPos,(hl > 600) ? whiteCol8Bit : blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,slStr,ALIGN_LEFT,16384);
       }
       drawYPos = levelStartDrawPos;
       drawXPos += state->ds.fullInfoColWidth[LLCOLUMN_ELEVEL]*state->ds.uiUserScale;
       getSpinParStr(tmpStr,&dat->ndat,lvlInd);
-      drawSelectableTextAlignedSized(rdat,&state->tss,drawXPos,drawYPos,(hl > 1.0E3) ? whiteCol8Bit : blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_LEFT,16384);
+      drawSelectableTextAlignedSized(rdat,&state->tss,drawXPos,drawYPos,(hl > 600) ? whiteCol8Bit : blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_LEFT,16384);
       drawXPos += state->ds.fullInfoColWidth[LLCOLUMN_JPI]*state->ds.uiUserScale;
       getHalfLifeStr(tmpStr,dat,lvlInd,1,0,state->ds.useLifetimes);
-      drawSelectableTextAlignedSized(rdat,&state->tss,drawXPos,drawYPos,(hl > 1.0E3) ? whiteCol8Bit : blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_LEFT,16384);
+      drawSelectableTextAlignedSized(rdat,&state->tss,drawXPos,drawYPos,(hl > 600) ? whiteCol8Bit : blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_LEFT,16384);
       if(dat->ndat.levels[lvlInd].numDecModes > 0){
         for(int8_t i=0; i<dat->ndat.levels[lvlInd].numDecModes; i++){
           drawYPos += (NUCL_INFOBOX_SMALLLINE_HEIGHT*state->ds.uiUserScale + txtYOffset);
           getDecayModeStr(tmpStr,&dat->ndat,dat->ndat.levels[lvlInd].firstDecMode + (uint32_t)i);
           //SDL_Log("%s\n",tmpStr);
-          drawSelectableTextAlignedSized(rdat,&state->tss,drawXPos+(2*UI_PADDING_SIZE*state->ds.uiUserScale),drawYPos,(hl > 1.0E3) ? whiteCol8Bit : blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_LEFT,16384); //draw decay mode label
+          drawSelectableTextAlignedSized(rdat,&state->tss,drawXPos+(2*UI_PADDING_SIZE*state->ds.uiUserScale),drawYPos,(hl > 600) ? whiteCol8Bit : blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_LEFT,16384); //draw decay mode label
         }
       }
       drawXPos += state->ds.fullInfoColWidth[LLCOLUMN_HALFLIFE]*state->ds.uiUserScale;
@@ -2474,35 +2572,35 @@ void drawNuclFullInfoBox(const app_data *restrict dat, app_state *restrict state
         for(uint16_t i=0; i<dat->ndat.levels[lvlInd].numTran; i++){
           float drawXPosTran = drawXPos;
           getGammaEnergyStr(tmpStr,&dat->ndat,(uint32_t)(dat->ndat.levels[lvlInd].firstTran + i),1);
-          drawSelectableTextAlignedSized(rdat,&state->tss,drawXPosTran,drawYPos,(hl > 1.0E3) ? whiteCol8Bit : blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_LEFT,16384); //draw transition energy label
+          drawSelectableTextAlignedSized(rdat,&state->tss,drawXPosTran,drawYPos,(hl > 600) ? whiteCol8Bit : blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_LEFT,16384); //draw transition energy label
           drawXPosTran += state->ds.fullInfoColWidth[LLCOLUMN_EGAMMA]*state->ds.uiUserScale;
           getGammaIntensityStr(tmpStr,&dat->ndat,(uint32_t)(dat->ndat.levels[lvlInd].firstTran + i),1);
-          drawSelectableTextAlignedSized(rdat,&state->tss,drawXPosTran,drawYPos,(hl > 1.0E3) ? whiteCol8Bit : blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_LEFT,16384); //draw transition intensity label
+          drawSelectableTextAlignedSized(rdat,&state->tss,drawXPosTran,drawYPos,(hl > 600) ? whiteCol8Bit : blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_LEFT,16384); //draw transition intensity label
           drawXPosTran += state->ds.fullInfoColWidth[LLCOLUMN_IGAMMA]*state->ds.uiUserScale;
           if(state->ds.nuclFullInfoShownColumns & (1U << LLCOLUMN_MGAMMA)){
             getGammaMultipolarityStr(tmpStr,&dat->ndat,(uint32_t)(dat->ndat.levels[lvlInd].firstTran + i));
-            drawSelectableTextAlignedSized(rdat,&state->tss,drawXPosTran,drawYPos,(hl > 1.0E3) ? whiteCol8Bit : blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_LEFT,16384); //draw transition multipolarity label
+            drawSelectableTextAlignedSized(rdat,&state->tss,drawXPosTran,drawYPos,(hl > 600) ? whiteCol8Bit : blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_LEFT,16384); //draw transition multipolarity label
             drawXPosTran += state->ds.fullInfoColWidth[LLCOLUMN_MGAMMA]*state->ds.uiUserScale;
           }
           if(state->ds.nuclFullInfoShownColumns & (1U << LLCOLUMN_DELTA)){
             getGammaDeltaStr(tmpStr,&dat->ndat,(uint32_t)(dat->ndat.levels[lvlInd].firstTran + i),1);
-            drawSelectableTextAlignedSized(rdat,&state->tss,drawXPosTran,drawYPos,(hl > 1.0E3) ? whiteCol8Bit : blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_LEFT,16384); //draw transition mixing ratio label
+            drawSelectableTextAlignedSized(rdat,&state->tss,drawXPosTran,drawYPos,(hl > 600) ? whiteCol8Bit : blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_LEFT,16384); //draw transition mixing ratio label
             drawXPosTran += state->ds.fullInfoColWidth[LLCOLUMN_DELTA]*state->ds.uiUserScale;
           }
           if(state->ds.nuclFullInfoShownColumns & (1U << LLCOLUMN_ICC)){
             getGammaICCStr(tmpStr,&dat->ndat,(uint32_t)(dat->ndat.levels[lvlInd].firstTran + i),1);
-            drawSelectableTextAlignedSized(rdat,&state->tss,drawXPosTran,drawYPos,(hl > 1.0E3) ? whiteCol8Bit : blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_LEFT,16384); //draw transition ICC label
+            drawSelectableTextAlignedSized(rdat,&state->tss,drawXPosTran,drawYPos,(hl > 600) ? whiteCol8Bit : blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_LEFT,16384); //draw transition ICC label
             drawXPosTran += state->ds.fullInfoColWidth[LLCOLUMN_ICC]*state->ds.uiUserScale;
           }
           if(dat->ndat.tran[(uint32_t)(dat->ndat.levels[lvlInd].firstTran + i)].finalLvlOffset != 0){
             float drawXPosFL = drawXPosTran;
             uint32_t finalLvlInd = getFinalLvlInd(&dat->ndat,lvlInd,(uint32_t)(dat->ndat.levels[lvlInd].firstTran + i));
             getLvlEnergyStr(tmpStr,&dat->ndat,finalLvlInd,0);
-            drawSelectableTextAlignedSized(rdat,&state->tss,drawXPosFL,drawYPos,(hl > 1.0E3) ? whiteCol8Bit : blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_LEFT,16384); //draw final level energy label
+            drawSelectableTextAlignedSized(rdat,&state->tss,drawXPosFL,drawYPos,(hl > 600) ? whiteCol8Bit : blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_LEFT,16384); //draw final level energy label
             if(state->ds.nuclFullInfoShownColumns & (1U << LLCOLUMN_FINALLEVEL_JPI)){
               drawXPosFL += (state->ds.fullInfoColWidth[LLCOLUMN_FINALLEVEL_E]+state->ds.fullInfoColWidth[LLCOLUMN_FINALLEVEL_JPI])*state->ds.uiUserScale;
               getSpinParStr(tmpStr,&dat->ndat,finalLvlInd);
-              drawSelectableTextAlignedSized(rdat,&state->tss,drawXPosFL,drawYPos,(hl > 1.0E3) ? whiteCol8Bit : blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_RIGHT,16384); //draw final level spin-parity label
+              drawSelectableTextAlignedSized(rdat,&state->tss,drawXPosFL,drawYPos,(hl > 600) ? whiteCol8Bit : blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_RIGHT,16384); //draw final level spin-parity label
             }
           }
 
