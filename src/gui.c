@@ -2017,14 +2017,17 @@ void drawChartOfNuclides(const app_data *restrict dat, app_state *restrict state
   SDL_FRect rect, lowBoxRect;
   float nuclBoxWidth = DEFAULT_NUCLBOX_DIM*state->ds.chartZoomScale*state->ds.uiUserScale;
   float lowBoxPadding = DEFAULT_LOWBOX_PADDING*state->ds.chartZoomScale*state->ds.uiUserScale;
+  if(lowBoxPadding < 4.0f*state->ds.uiUserScale){
+    lowBoxPadding = 4.0f*state->ds.uiUserScale; //prevent low box from overlapping with nuclide selection rectangle
+  }
   float boxLineLimit = powf(state->ds.chartZoomScale/MAX_CHART_ZOOM_SCALE,2.0f)*9.0f;
 
   //calculate size of low box (extra info like isomers, 2+ energies etc.)
   float lowBoxHeight = 0.0f;
   if(state->ds.chartZoomScale >= 3.5f){
     lowBoxHeight = (boxLineLimit - 3)*10.0f*state->ds.uiUserScale;
-    if(lowBoxHeight < 0.0f){
-      lowBoxHeight = 0.0f;
+    if(lowBoxHeight < 1.0f*state->ds.uiUserScale){
+      lowBoxHeight = 1.0f*state->ds.uiUserScale;
     }
     lowBoxHeight += 1.5f*DEFAULT_LOWBOX_PADDING*state->ds.chartZoomScale*state->ds.uiUserScale; //minimum size
     if(lowBoxHeight > (70.0f*state->ds.uiUserScale)){
@@ -2388,7 +2391,7 @@ void drawChartOfNuclides(const app_data *restrict dat, app_state *restrict state
       uint16_t numInd = (uint16_t)(SDL_floorf(i));
       if((i<MAX_MASS_NUM)&&(i<MAX_PROTON_NUM)){
         rect.y = (maxY - i + 0.5f)*DEFAULT_NUCLBOX_DIM*state->ds.chartZoomScale*state->ds.uiUserScale;
-        if(rect.y > CHART_AXIS_DEPTH*state->ds.uiUserScale){ //dodge axis label
+        if(rect.y > 1.2f*CHART_AXIS_DEPTH*state->ds.uiUserScale){ //dodge axis label
           SDL_snprintf(tmpStr,32,"%u",numInd); //is this slow?
           drawTextAlignedSized(rdat,rect.x,rect.y,blackCol8Bit,FONTSIZE_NORMAL,255,tmpStr,ALIGN_CENTER,16384); //draw number label
         }

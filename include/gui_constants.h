@@ -82,7 +82,7 @@ static const float uiScales[UISCALE_ENUM_LENGTH] = {1.0f,1.20f,1.60f,1.85f};
 
 #define CHARTVIEW_BUTTON_POS_XR      (UI_PADDING_SIZE) //in unscaled pixels, relative to menu button position
 #define CHARTVIEW_BUTTON_POS_Y       UI_PADDING_SIZE //in unscaled pixels
-#define CHARTVIEW_BUTTON_WIDTH       160 //in unscaled pixels
+#define CHARTVIEW_BUTTON_WIDTH       170 //in unscaled pixels
 
 #define CHARTVIEW_MENU_ITEM_SPACING  36 //in unscaled pixels
 #define CHARTVIEW_MENU_POS_XR        (MENU_BUTTON_POS_XR) //in unscaled pixels
@@ -95,7 +95,7 @@ static const float uiScales[UISCALE_ENUM_LENGTH] = {1.0f,1.20f,1.60f,1.85f};
 #define SEARCH_BUTTON_POS_Y          UI_PADDING_SIZE //in unscaled pixels
 #define SEARCH_BUTTON_WIDTH          40 //in unscaled pixels
 
-#define SEARCH_MENU_POS_XR           54 //in unscaled pixels
+#define SEARCH_MENU_POS_XR           64 //in unscaled pixels
 #define SEARCH_MENU_POS_Y            (UI_TILE_SIZE+UI_PADDING_SIZE) //in unscaled pixels
 #define SEARCH_MENU_WIDTH            360 //in unscaled pixels
 #define SEARCH_MENU_HEADER_HEIGHT    (UI_TILE_SIZE+4*UI_PADDING_SIZE+2*PANEL_EDGE_SIZE) //in unscaled pixels
@@ -170,7 +170,7 @@ static const float uiScales[UISCALE_ENUM_LENGTH] = {1.0f,1.20f,1.60f,1.85f};
 #define NUCL_INFOBOX_JPI_COL_MIN_OFFSET         130.0f //in unscaled pixels
 #define NUCL_INFOBOX_HALFLIFE_COL_MIN_OFFSET    220.0f //in unscaled pixels
 #define NUCL_INFOBOX_DECAYMODE_COL_MIN_OFFSET   340.0f //in unscaled pixels
-#define NUCL_INFOBOX_ALLLEVELS_BUTTON_WIDTH     170 //in unscaled pixels
+#define NUCL_INFOBOX_ALLLEVELS_BUTTON_WIDTH     CHARTVIEW_BUTTON_WIDTH //in unscaled pixels
 
 //full info box (level list)
 #define NUCL_FULLINFOBOX_SCROLL_TIME                    0.1f //time (in seconds) for the list scroll animation to finish
