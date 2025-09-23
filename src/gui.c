@@ -2134,9 +2134,20 @@ void drawChartOfNuclides(const app_data *restrict dat, app_state *restrict state
                         if((iboxCol.r == boxCol.r)&&(iboxCol.g == iboxCol.g)&&(iboxCol.b == boxCol.b)){
                           //make isomer box colors slightly different, to distinguish them from
                           //ground states of the same decay mode
-                          iboxCol.r *= 1.20f;
-                          iboxCol.g *= 1.20f;
-                          iboxCol.b *= 1.20f;
+                          if(isomerDcyMode == DECAYMODE_ECANDBETAPLUS){
+                            iboxCol.r *= 1.10f;
+                            iboxCol.g *= 1.10f;
+                            iboxCol.b *= 1.10f;
+                          }else if(isomerDcyMode == DECAYMODE_ALPHA){
+                            iboxCol.r *= 0.9f;
+                            iboxCol.g *= 0.9f;
+                            iboxCol.b *= 0.9f;
+                          }else{
+                            iboxCol.r *= 1.20f;
+                            iboxCol.g *= 1.20f;
+                            iboxCol.b *= 1.20f;
+                          }
+                          
                         }
                         if(state->ds.chartZoomScale < 4.0f){
                           //handle fading in of isomer boxes
@@ -2191,6 +2202,19 @@ void drawChartOfNuclides(const app_data *restrict dat, app_state *restrict state
                       int8_t isomerPar = getMostProbableParity(&dat->ndat,dat->ndat.nuclData[i].longestIsomerLevel);
                       drawingLowBox = 1;
                       SDL_FColor iboxCol = getParCol(isomerPar);
+                      if((iboxCol.r == boxCol.r)&&(iboxCol.g == iboxCol.g)&&(iboxCol.b == boxCol.b)){
+                        //make isomer box colors slightly different, to distinguish them from
+                        //ground states of the same parity
+                        if(isomerPar == 1){
+                          iboxCol.r -= 0.1f;
+                          iboxCol.g -= 0.1f;
+                          iboxCol.b -= 0.1f;
+                        }else{
+                          iboxCol.r += 0.1f;
+                          iboxCol.g += 0.1f;
+                          iboxCol.b += 0.1f;
+                        }
+                      }
                       if(state->ds.chartZoomScale < 4.0f){
                         //handle fading in of isomer boxes
                         iboxCol.a =  1.0f - (4.0f-state->ds.chartZoomScale);
