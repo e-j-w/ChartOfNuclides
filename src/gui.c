@@ -2379,10 +2379,10 @@ void drawChartOfNuclides(const app_data *restrict dat, app_state *restrict state
   }
 
   //draw x and y axes
-  rect.w = state->ds.windowXRes;
-  rect.h = CHART_AXIS_DEPTH*state->ds.uiUserScale;
+  rect.w = state->ds.windowXRes + 1.0f; //add a pixel to prevent rounding errors from fractional scaling
+  rect.h = CHART_AXIS_DEPTH*state->ds.uiUserScale + 1.0f;
   rect.x = 0;
-  rect.y = state->ds.windowYRes - rect.h;
+  rect.y = state->ds.windowYRes - rect.h + 1.0f;
   if(rdat->ssdat.takingScreenshot != 1){
     drawFlatRect(rdat,rect,whiteTransparentCol);
   }else{
