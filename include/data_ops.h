@@ -84,6 +84,7 @@ double get2PlusEnergy(const ndata *restrict nd, const uint16_t nuclInd);
 double getLevelHalfLifeSeconds(const ndata *restrict nd, const uint32_t levelInd);
 double getNuclLevelHalfLifeSeconds(const ndata *restrict nd, const uint16_t nuclInd, const uint16_t nuclLevel);
 double getNuclGSHalfLifeSeconds(const ndata *restrict nd, const uint16_t nuclInd);
+uint8_t getNuclGSHalfLifeValueType(const ndata *restrict nd, const uint16_t nuclInd);
 
 uint8_t getLevelMostProbableDcyMode(const ndata *restrict nd, const uint32_t lvlInd);
 uint8_t getNuclGSMostProbableDcyMode(const ndata *restrict nd, const uint16_t nuclInd);

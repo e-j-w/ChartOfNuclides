@@ -41,17 +41,21 @@ float getAxisTickSpacing(float zoomScale){
   }
 }
 
-SDL_FColor getHalfLifeCol(const double halflifeSeconds){
+SDL_FColor getHalfLifeCol(const double halflifeSeconds, const uint8_t valueType){
   //SDL_Log("half-life: %0.6f\n",halflifeSeconds);
   SDL_FColor col;
   col.r = 1.0f;
   col.g = 1.0f;
   col.b = 1.0f;
   col.a = 1.0f;
-  if(halflifeSeconds > 1.0E15){
+  if((halflifeSeconds >= 1.0E40)||((halflifeSeconds > 1.0E15) && ((valueType == VALUETYPE_GREATERTHAN) || (valueType == VALUETYPE_GREATEROREQUALTHAN)))){
     col.r = 0.0f;
     col.g = 0.0f;
     col.b = 0.0f;
+  }else if(halflifeSeconds > 1.0E15){
+    col.r = 0.0f;
+    col.g = 0.05f;
+    col.b = 0.25f;
   }else if(halflifeSeconds > 1.0E10){
     col.r = 0.0f;
     col.g = 0.1f;
@@ -471,7 +475,7 @@ SDL_FColor get2PlusCol(const double e2PlusKeV, const double halflifeSeconds){
     col.b = 0.9f;
   }
   //slightly darken stable nuclides
-  if(halflifeSeconds > 1.0E15){
+  if(halflifeSeconds > 1.0E40){
     col.r -= 0.1f;
     col.g -= 0.1f;
     col.b -= 0.1f;
@@ -563,7 +567,7 @@ SDL_FColor getR42Col(const double r42, const double halflifeSeconds){
     col.b = 0.9f;
   }
   //slightly darken stable nuclides
-  if(halflifeSeconds > 1.0E15){
+  if(halflifeSeconds > 1.0E40){
     col.r -= 0.1f;
     col.g -= 0.1f;
     col.b -= 0.1f;
@@ -651,7 +655,7 @@ SDL_FColor getBeta2Col(const double beta2, const double halflifeSeconds){
     col.b = 0.9f;
   }
   //slightly darken stable nuclides
-  if(halflifeSeconds > 1.0E15){
+  if(halflifeSeconds > 1.0E40){
     col.r -= 0.1f;
     col.g -= 0.1f;
     col.b -= 0.1f;
@@ -1056,7 +1060,7 @@ SDL_FColor getSnpCol(const double snpKeV){
     col.b = 1.0f;
   }
   //slightly darken stable nuclides
-  /*if(halflifeSeconds > 1.0E15){
+  /*if(halflifeSeconds > 1.0E40){
     col.r -= 0.1f;
     col.g -= 0.1f;
     col.b -= 0.1f;
@@ -1209,7 +1213,7 @@ SDL_FColor getQaCol(const double qaKeV){
     col.b = 0.0f;
   }
   //slightly darken stable nuclides
-  /*if(halflifeSeconds > 1.0E15){
+  /*if(halflifeSeconds > 1.0E40){
     col.r -= 0.1f;
     col.g -= 0.1f;
     col.b -= 0.1f;
@@ -1302,7 +1306,7 @@ SDL_FColor getQbCol(const double qbKeV){
     col.b = 0.0f;
   }
   //slightly darken stable nuclides
-  /*if(halflifeSeconds > 1.0E15){
+  /*if(halflifeSeconds > 1.0E40){
     col.r -= 0.1f;
     col.g -= 0.1f;
     col.b -= 0.1f;
@@ -1442,7 +1446,7 @@ SDL_FColor getNumLvlsCol(const uint16_t numLvls, const double halflifeSeconds){
     col.b = 0.9f;
   }
   //slightly darken stable nuclides
-  if(halflifeSeconds > 1.0E15){
+  if(halflifeSeconds > 1.0E40){
     col.r -= 0.1f;
     col.g -= 0.1f;
     col.b -= 0.1f;
@@ -1486,7 +1490,7 @@ SDL_FColor getUnknownLvlsCol(const uint16_t unknownLvls, const double halflifeSe
     col.b = 0.9f;
   }
   //slightly darken stable nuclides
-  if(halflifeSeconds > 1.0E15){
+  if(halflifeSeconds > 1.0E40){
     col.r -= 0.1f;
     col.g -= 0.1f;
     col.b -= 0.1f;
@@ -2051,7 +2055,7 @@ void drawChartOfNuclides(const app_data *restrict dat, app_state *restrict state
               //const double hl = getNuclGSHalfLifeSeconds(&dat->ndat,(uint16_t)i);
               SDL_FColor boxCol = {0.0f,0.0f,0.0f,1.0f};
               if(state->chartView == CHARTVIEW_HALFLIFE){
-                boxCol = getHalfLifeCol(getNuclGSHalfLifeSeconds(&dat->ndat,(uint16_t)i));
+                boxCol = getHalfLifeCol(getNuclGSHalfLifeSeconds(&dat->ndat,(uint16_t)i),getNuclGSHalfLifeValueType(&dat->ndat,(uint16_t)i));
               }else if(state->chartView == CHARTVIEW_DECAYMODE){
                 boxCol = getDecayModeCol(getNuclGSMostProbableDcyMode(&dat->ndat,(uint16_t)i));
               }else if(state->chartView == CHARTVIEW_2PLUS){
@@ -2099,7 +2103,7 @@ void drawChartOfNuclides(const app_data *restrict dat, app_state *restrict state
                   if((isomerLvl != MAXNUMLVLS)&&(isomerLvl != (dat->ndat.nuclData[i].firstLevel + dat->ndat.nuclData[i].gsLevel))){
                     if((isomerHl >= 1.0E-1)||(isomerHl > getNuclGSHalfLifeSeconds(&dat->ndat,(uint16_t)i))){ //only show 'important' isomers on chart
                       drawingLowBox = 1;
-                      SDL_FColor iboxCol = getHalfLifeCol(isomerHl);
+                      SDL_FColor iboxCol = getHalfLifeCol(isomerHl,(uint8_t)((dat->ndat.levels[isomerLvl].halfLife.format >> 5U) & 15U));
                       if((iboxCol.r == boxCol.r)&&(iboxCol.g == iboxCol.g)&&(iboxCol.b == boxCol.b)){
                         //make isomer box colors slightly different, to distinguish them from
                         //ground states of similar half-life
@@ -2125,6 +2129,7 @@ void drawChartOfNuclides(const app_data *restrict dat, app_state *restrict state
                   //draw decay mode box
                   uint32_t isomerLvl = dat->ndat.nuclData[i].longestIsomerLevel;
                   const double isomerHl = getLevelHalfLifeSeconds(&dat->ndat,isomerLvl);
+                  const uint8_t isomerHlType = (uint8_t)((dat->ndat.levels[isomerLvl].halfLife.format >> 5U) & 15U);
                   if((isomerLvl != MAXNUMLVLS)&&(isomerLvl != (dat->ndat.nuclData[i].firstLevel + dat->ndat.nuclData[i].gsLevel))){
                     if((isomerHl >= 1.0E-1)||(isomerHl > getNuclGSHalfLifeSeconds(&dat->ndat,(uint16_t)i))){ //only show 'important' isomers on chart
                       uint8_t isomerDcyMode = getLevelMostProbableDcyMode(&dat->ndat,dat->ndat.nuclData[i].longestIsomerLevel);
@@ -2155,11 +2160,11 @@ void drawChartOfNuclides(const app_data *restrict dat, app_state *restrict state
                         }
                         drawFlatRect(rdat,lowBoxRect,iboxCol);
                         drawIsomerDecayModeBoxLabel(dat,state,rdat,lowBoxRect.x,lowBoxRect.y,lowBoxRect.w,lowBoxRect.h,getDecayModeTextCol(isomerDcyMode),(uint16_t)i,isomerLvl,dat->ndat.nuclData[i].longestIsomerMVal,isomerDcyMode);
-                      }else if(isomerHl > 1.0E15){
+                      }else if((isomerHl > 1.0E15)&&((isomerHlType == VALUETYPE_GREATERTHAN) || (isomerHlType == VALUETYPE_GREATEROREQUALTHAN))){
                         //'stable' isomer with no known decay mode
                         //draw its box using the half-life color
                         drawingLowBox = 1;
-                        SDL_FColor iboxCol = getHalfLifeCol(isomerHl);
+                        SDL_FColor iboxCol = getHalfLifeCol(isomerHl,(uint8_t)((dat->ndat.levels[isomerLvl].halfLife.format >> 5U) & 15U));
                         if((iboxCol.r == boxCol.r)&&(iboxCol.g == iboxCol.g)&&(iboxCol.b == boxCol.b)){
                           //make isomer box colors slightly different, to distinguish them from
                           //ground states of the same decay mode
@@ -2541,7 +2546,7 @@ void drawNuclFullInfoBox(const app_data *restrict dat, app_state *restrict state
           
           rect.h = (NUCL_INFOBOX_SMALLLINE_HEIGHT*numLines)*state->ds.uiUserScale;
           rect.y = drawYPos;
-          SDL_FColor rectCol = getHalfLifeCol(hl);
+          SDL_FColor rectCol = getHalfLifeCol(hl,(uint8_t)((dat->ndat.levels[lvlInd].halfLife.format >> 5U) & 15U));
           if(txtAlpha != 255){
             rectCol.a *= txtAlpha/255.0f;
           }

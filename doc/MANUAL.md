@@ -1,10 +1,23 @@
 # User manual
 
+## What is a "chart of nuclides"?
+
+The [chart of nuclides](https://en.wikipedia.org/wiki/Table_of_nuclides) is to nuclear physics what the [periodic table of the elements](https://en.wikipedia.org/wiki/Periodic_table) is to chemistry. While the periodic table lists the known elements of nature (defined by the number of protons in the atomic nucleus), the chart of nuclides is a 2D graph showing all known isotopes in nature (defined by the number of protons **and** neutrons in the atomic nucleus).
+
+For example: while [carbon](https://en.wikipedia.org/wiki/Carbon) appears as a single element in the periodic table with 6 protons, in the chart of nuclides all known isotopes of carbon are shown, including carbon-12 and carbon-13 (which make up almost all of the carbon on Earth), carbon-14 (which is radioactive and is used in [carbon dating](https://en.wikipedia.org/wiki/Radiocarbon_dating)), as well as several other short-lived radioactive isotopes of carbon which have been studied using various nuclear reactions.
+
 ## Basic controls
 
-The main chart view can be panned by clicking and dragging with a mouse/touchpad, and zoomed in/out using the mouse wheel or scrolling on the touchpad. The controls are basically identical to something like Google Maps.
+In this program, the chart of nuclides is shown with the number of protons on the y-axis and the number of neutrons on the x-axis. The main chart view can be panned by clicking and dragging with a mouse/touchpad, and zoomed in/out using the mouse wheel or scrolling on the touchpad. The controls are basically identical to Google Maps.
 
-Right clicking on selected text or on the chart of nuclides will open a menu allowing you to copy information to the clipboard.
+Left click on the chart to select an isotope and show information about it, including:
+- Its natural abundance.
+- Its half-life (if it is radioactive)
+- Other nuclear structure properties.
+
+Selecting the 'All Levels/Gammas' button for a specific isotope will show detailed nuclear structure data for all known energy levels of the nucleus.
+
+Right clicking on selected text or on the chart will open a menu allowing you to copy information to the clipboard.
 
 ### Keyboard/gamepad controls
 

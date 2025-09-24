@@ -2741,7 +2741,7 @@ double getLevelHalfLifeSeconds(const ndata *restrict nd, const uint32_t levelInd
 		uint8_t hlUnit = (uint8_t)(nd->levels[levelInd].halfLife.unit & 127U);
 		switch(hlUnit){
 			case VALUE_UNIT_STABLE:
-				return 1.0E30; //stable
+				return 1.0E50; //stable
 			case VALUE_UNIT_YEARS:
 				return hl*365.25*24*3600;
 			case VALUE_UNIT_DAYS:
@@ -2793,6 +2793,10 @@ double getNuclGSHalfLifeSeconds(const ndata *restrict nd, const uint16_t nuclInd
 		}
 	}
 	return gsHl;
+}
+
+uint8_t getNuclGSHalfLifeValueType(const ndata *restrict nd, const uint16_t nuclInd){
+	return (uint8_t)((nd->levels[(uint32_t)(nd->nuclData[nuclInd].firstLevel + nd->nuclData[nuclInd].gsLevel)].halfLife.format >> 5U) & 15U);
 }
 
 uint8_t getLevelMostProbableDcyMode(const ndata *restrict nd, const uint32_t lvlInd){
