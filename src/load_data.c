@@ -120,7 +120,7 @@ int importAppData(app_data *restrict dat, resource_data *restrict rdat){
     SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"importAppData - couldn't read application icon data - %s.\n",SDL_GetError());
     return -1;
   }
-  free(icoData);
+  SDL_free(icoData);
   SDL_SetSurfaceRLE(rdat->iconSurface, 1); //enable RLE acceleration
 
   //load app_data
@@ -162,7 +162,7 @@ int importAppData(app_data *restrict dat, resource_data *restrict rdat){
     SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"importAppData - couldn't UI theme texture atlas data - %s.\n",SDL_GetError());
     return -1;
   }
-  free(themeData);
+  SDL_free(themeData);
   SDL_SetSurfaceRLE(surface, 1); //enable RLE acceleration
   //upload texture atlas into GPU memory
   rdat->uiThemeTex = SDL_CreateTextureFromSurface(rdat->renderer,surface);
@@ -281,7 +281,7 @@ int regenerateThemeAndFontCache(app_data *restrict dat, resource_data *restrict 
     SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"importAppData - couldn't UI theme texture atlas data - %s.\n",SDL_GetError());
     return -1;
   }
-  free(themeData);
+  SDL_free(themeData);
   SDL_SetSurfaceRLE(surface, 1); //enable RLE acceleration
   //upload texture atlas into GPU memory
   rdat->uiThemeTex = SDL_CreateTextureFromSurface(rdat->renderer,surface);
@@ -295,7 +295,8 @@ int regenerateThemeAndFontCache(app_data *restrict dat, resource_data *restrict 
     SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"regenerateFontCache - invalid font filesize (%li) from file %s - %s.\n",(long int)fontFilesize,rdat->appDataFilepath,SDL_GetError());
     return -1;
   }
-  rdat->fontData=(void*)SDL_realloc(rdat->fontData,(size_t)fontFilesize);
+  SDL_free(rdat->fontData);
+  rdat->fontData=(void*)SDL_calloc(1,(size_t)fontFilesize);
   if(rdat->fontData==NULL){
     SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,"Error","App data file read error - could not allocate memory.",rdat->window);
     SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"regenerateFontCache - couldn't allocate memory for font data.\n");

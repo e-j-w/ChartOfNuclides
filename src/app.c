@@ -101,6 +101,7 @@ int main(int argc, char *argv[]){
     SDL_Log("app_state     - allocated: %10li bytes\n",(long int)sizeof(app_state));
     SDL_Log("app_data      - allocated: %10li bytes\n",(long int)sizeof(app_data));
     SDL_Log("resource_data - allocated: %10li bytes\n",(long int)sizeof(resource_data));
+    SDL_Log("Total:                     %10li bytes\n",(long int)(sizeof(app_state) + sizeof(app_data) + sizeof(resource_data)));
   }
 
   //load preferences (needed prior to window created)
@@ -158,6 +159,7 @@ int main(int argc, char *argv[]){
     shutdownApp(gdat,1);
   }
   SDL_SetWindowIcon(gdat->rdat.window,gdat->rdat.iconSurface);
+  SDL_DestroySurface(gdat->rdat.iconSurface);
   SDL_SetWindowTitle(gdat->rdat.window,gdat->dat.rules.appName);
   if(SDL_SetAppMetadata(gdat->dat.rules.appName,"1.0","io.github.e_j_w.ChartOfNuclides")==false){
     SDL_Log("WARNING: couldn't set app metadata.\n");

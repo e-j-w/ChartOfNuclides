@@ -27,13 +27,16 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include "strops.h"
 
 #define MAXNUMPARSERVALS 10 //maximum number of values that can parsed at once on a line
+#define MAXRXNSPERNUCL   64
+#define MAX_RXN_STRLEN   128
 #define MAXCHARSPERRXN   8
+
+#define MAX_NUM_ASSETS   1024
 
 //struct which is used temporarily during data import to map names to indices 
 typedef struct
 {
-  char assetID[MAX_ARRAY_SIZE][256];
-  char assetFileExt[MAX_ARRAY_SIZE][8];
+  char assetID[MAX_NUM_ASSETS][256];
   uint16_t numAssets; //number of assets in the asset mapping
 }asset_mapping;
 

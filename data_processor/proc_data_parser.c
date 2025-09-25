@@ -24,9 +24,14 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 static unsigned int nameToAssetID(const char *name, const asset_mapping *restrict map){
   unsigned int i;
   for(i=0;i<map->numAssets;i++){
-    if(SDL_strcmp(name,map->assetID[i])==0){
-      return i;
-    }
+    if(i<MAX_NUM_ASSETS){
+			if(SDL_strcmp(name,map->assetID[i])==0){
+				return i;
+			}
+		}else{
+			SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"too many assets, could not find asset with name: %s\n",name);
+  		exit(-1);
+		}
   }
   SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"could not find asset with name: %s\n",name);
   exit(-1);
@@ -508,91 +513,103 @@ uint8_t parseRxn(reaction *rxn, const char *rxnstring, char *ensdfStrBuf, const 
 		char *modRxnStrCpy;
 		modRxnStrCpy = findReplaceAllUTF8("Decay","decay",modRxnStr);
 		SDL_strlcpy(modRxnStr,modRxnStrCpy,MAX_RXN_STRLEN-1);
-		free(modRxnStrCpy);
+		SDL_free(modRxnStrCpy);
 		modRxnStrCpy = findReplaceAllUTF8(" sf d"," SF d",modRxnStr);
 		SDL_strlcpy(modRxnStr,modRxnStrCpy,MAX_RXN_STRLEN-1);
-		free(modRxnStrCpy);
+		SDL_free(modRxnStrCpy);
 		modRxnStrCpy = findReplaceAllUTF8(" ec"," ε",modRxnStr);
 		SDL_strlcpy(modRxnStr,modRxnStrCpy,MAX_RXN_STRLEN-1);
-		free(modRxnStrCpy);
+		SDL_free(modRxnStrCpy);
 		modRxnStrCpy = findReplaceAllUTF8(" EC"," ε",modRxnStr);
 		SDL_strlcpy(modRxnStr,modRxnStrCpy,MAX_RXN_STRLEN-1);
-		free(modRxnStrCpy);
+		SDL_free(modRxnStrCpy);
+		modRxnStrCpy = findReplaceAllUTF8(" 2Ec"," 2ε",modRxnStr);
+		SDL_strlcpy(modRxnStr,modRxnStrCpy,MAX_RXN_STRLEN-1);
+		SDL_free(modRxnStrCpy);
 		modRxnStrCpy = findReplaceAllUTF8(" b-"," β-",modRxnStr);
 		SDL_strlcpy(modRxnStr,modRxnStrCpy,MAX_RXN_STRLEN-1);
-		free(modRxnStrCpy);
+		SDL_free(modRxnStrCpy);
+		modRxnStrCpy = findReplaceAllUTF8(" 2B-"," 2β-",modRxnStr);
+		SDL_strlcpy(modRxnStr,modRxnStrCpy,MAX_RXN_STRLEN-1);
+		SDL_free(modRxnStrCpy);
 		modRxnStrCpy = findReplaceAllUTF8(" b+"," β+",modRxnStr);
 		SDL_strlcpy(modRxnStr,modRxnStrCpy,MAX_RXN_STRLEN-1);
-		free(modRxnStrCpy);
+		SDL_free(modRxnStrCpy);
 		modRxnStrCpy = findReplaceAllUTF8("a dec","α dec",modRxnStr);
 		SDL_strlcpy(modRxnStr,modRxnStrCpy,MAX_RXN_STRLEN-1);
-		free(modRxnStrCpy);
+		SDL_free(modRxnStrCpy);
 		modRxnStrCpy = findReplaceAllUTF8(" it "," IT ",modRxnStr);
 		SDL_strlcpy(modRxnStr,modRxnStrCpy,MAX_RXN_STRLEN-1);
-		free(modRxnStrCpy);
+		SDL_free(modRxnStrCpy);
 		modRxnStrCpy = findReplaceAllUTF8(" D)"," days)",modRxnStr);
 		SDL_strlcpy(modRxnStr,modRxnStrCpy,MAX_RXN_STRLEN-1);
-		free(modRxnStrCpy);
+		SDL_free(modRxnStrCpy);
 		modRxnStrCpy = findReplaceAllUTF8(" M)"," min)",modRxnStr);
 		SDL_strlcpy(modRxnStr,modRxnStrCpy,MAX_RXN_STRLEN-1);
-		free(modRxnStrCpy);
+		SDL_free(modRxnStrCpy);
 		modRxnStrCpy = findReplaceAllUTF8(" S)"," s)",modRxnStr);
 		SDL_strlcpy(modRxnStr,modRxnStrCpy,MAX_RXN_STRLEN-1);
-		free(modRxnStrCpy);
+		SDL_free(modRxnStrCpy);
 		modRxnStrCpy = findReplaceAllUTF8(" Ms)"," ms)",modRxnStr);
 		SDL_strlcpy(modRxnStr,modRxnStrCpy,MAX_RXN_STRLEN-1);
-		free(modRxnStrCpy);
+		SDL_free(modRxnStrCpy);
 		modRxnStrCpy = findReplaceAllUTF8(" Us)"," μs)",modRxnStr);
 		SDL_strlcpy(modRxnStr,modRxnStrCpy,MAX_RXN_STRLEN-1);
-		free(modRxnStrCpy);
+		SDL_free(modRxnStrCpy);
 		modRxnStrCpy = findReplaceAllUTF8(" Ns)"," ns)",modRxnStr);
 		SDL_strlcpy(modRxnStr,modRxnStrCpy,MAX_RXN_STRLEN-1);
-		free(modRxnStrCpy);
+		SDL_free(modRxnStrCpy);
 		modRxnStrCpy = findReplaceAllUTF8("mu-","μ-",modRxnStr);
 		SDL_strlcpy(modRxnStr,modRxnStrCpy,MAX_RXN_STRLEN-1);
-		free(modRxnStrCpy);
+		SDL_free(modRxnStrCpy);
 		modRxnStrCpy = findReplaceAllUTF8("pi","π",modRxnStr);
 		SDL_strlcpy(modRxnStr,modRxnStrCpy,MAX_RXN_STRLEN-1);
-		free(modRxnStrCpy);
+		SDL_free(modRxnStrCpy);
 		modRxnStrCpy = findReplaceAllUTF8(",nu",",ν",modRxnStr);
 		SDL_strlcpy(modRxnStr,modRxnStrCpy,MAX_RXN_STRLEN-1);
-		free(modRxnStrCpy);
+		SDL_free(modRxnStrCpy);
 		modRxnStrCpy = findReplaceAllUTF8("(hi,","(HI,",modRxnStr);
 		SDL_strlcpy(modRxnStr,modRxnStrCpy,MAX_RXN_STRLEN-1);
-		free(modRxnStrCpy);
+		SDL_free(modRxnStrCpy);
 		modRxnStrCpy = findReplaceAllUTF8("g,g')","γ,γ')",modRxnStr);
 		SDL_strlcpy(modRxnStr,modRxnStrCpy,MAX_RXN_STRLEN-1);
-		free(modRxnStrCpy);
+		SDL_free(modRxnStrCpy);
 		modRxnStrCpy = findReplaceAllUTF8("(g,",",(γ,",modRxnStr);
 		SDL_strlcpy(modRxnStr,modRxnStrCpy,MAX_RXN_STRLEN-1);
-		free(modRxnStrCpy);
+		SDL_free(modRxnStrCpy);
 		modRxnStrCpy = findReplaceAllUTF8(",g)",",γ)",modRxnStr);
 		SDL_strlcpy(modRxnStr,modRxnStrCpy,MAX_RXN_STRLEN-1);
-		free(modRxnStrCpy);
+		SDL_free(modRxnStrCpy);
 		modRxnStrCpy = findReplaceAllUTF8("g)",")",modRxnStr);
 		SDL_strlcpy(modRxnStr,modRxnStrCpy,MAX_RXN_STRLEN-1);
-		free(modRxnStrCpy);
+		SDL_free(modRxnStrCpy);
 		modRxnStrCpy = findReplaceAllUTF8("(a,","(α,",modRxnStr);
 		SDL_strlcpy(modRxnStr,modRxnStrCpy,MAX_RXN_STRLEN-1);
-		free(modRxnStrCpy);
-		modRxnStrCpy = findReplaceAllUTF8(",pa",",pα",modRxnStr);
+		SDL_free(modRxnStrCpy);
+		modRxnStrCpy = findReplaceAllUTF8(",pa",",αp",modRxnStr);
 		SDL_strlcpy(modRxnStr,modRxnStrCpy,MAX_RXN_STRLEN-1);
-		free(modRxnStrCpy);
-		modRxnStrCpy = findReplaceAllUTF8("pa)","pα)",modRxnStr);
+		SDL_free(modRxnStrCpy);
+		modRxnStrCpy = findReplaceAllUTF8(",na",",αn",modRxnStr);
 		SDL_strlcpy(modRxnStr,modRxnStrCpy,MAX_RXN_STRLEN-1);
-		free(modRxnStrCpy);
+		SDL_free(modRxnStrCpy);
+		modRxnStrCpy = findReplaceAllUTF8("pa)","αp)",modRxnStr);
+		SDL_strlcpy(modRxnStr,modRxnStrCpy,MAX_RXN_STRLEN-1);
+		SDL_free(modRxnStrCpy);
+		modRxnStrCpy = findReplaceAllUTF8("na)","αn)",modRxnStr);
+		SDL_strlcpy(modRxnStr,modRxnStrCpy,MAX_RXN_STRLEN-1);
+		SDL_free(modRxnStrCpy);
 		modRxnStrCpy = findReplaceAllUTF8("'a","'α",modRxnStr);
 		SDL_strlcpy(modRxnStr,modRxnStrCpy,MAX_RXN_STRLEN-1);
-		free(modRxnStrCpy);
+		SDL_free(modRxnStrCpy);
 		modRxnStrCpy = findReplaceAllUTF8(",2a",",2α",modRxnStr);
 		SDL_strlcpy(modRxnStr,modRxnStrCpy,MAX_RXN_STRLEN-1);
-		free(modRxnStrCpy);
+		SDL_free(modRxnStrCpy);
 		modRxnStrCpy = findReplaceAllUTF8(",a",",α",modRxnStr);
 		SDL_strlcpy(modRxnStr,modRxnStrCpy,MAX_RXN_STRLEN-1);
-		free(modRxnStrCpy);
+		SDL_free(modRxnStrCpy);
 		modRxnStrCpy = findReplaceAllUTF8(",,",",",modRxnStr);
 		SDL_strlcpy(modRxnStr,modRxnStrCpy,MAX_RXN_STRLEN-1);
-		free(modRxnStrCpy);
+		SDL_free(modRxnStrCpy);
 
 		if(SDL_strstr(modRxnStr,"decay")!=NULL){
 			//SDL_Log("Found decay type reaction: %s\n",modRxnStr);
@@ -2520,171 +2537,153 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 
 					//add gamma rays
 					if(nd->nuclData[nd->numNucl].numLevels>0){ //check that indices are valid
-						if(nd->levels[nd->numLvls-1].numTran<MAXGAMMASPERLEVEL){
-							if(SDL_strcmp(typebuff,"  G")==0){
-								//SDL_Log("%s\n",line);
-								if(nd->levels[nd->numLvls-1].numTran == 0){
-									nd->levels[nd->numLvls-1].firstTran = nd->numTran;
-								}
-								
-								//parse the gamma intensity
-								char iBuff[9];
-								memcpy(iBuff, &line[21], 8);
-								iBuff[8] = '\0';
-								//parse the gamma intensity error
-								char ieBuff[3];
-								memcpy(ieBuff, &line[29], 2);
-								ieBuff[2] = '\0';
-								//parse the gamma multipolarity
-								char mBuff[11];
-								memcpy(mBuff, &line[31], 10);
-								mBuff[10] = '\0';
-								//parse the internal conversion coefficient
-								char iccBuff[8];
-								memcpy(iccBuff, &line[55], 7);
-								iccBuff[7] = '\0';
-								//parse the internal conversion coefficient error
-								char icceBuff[3];
-								memcpy(icceBuff, &line[62], 2);
-								icceBuff[2] = '\0';
-								//parse the mixing ratio
-								char deltaBuff[9];
-								memcpy(deltaBuff, &line[41], 8);
-								deltaBuff[8] = '\0';
-								//parse the internal mixing ratio error
-								char deltaeBuff[7];
-								memcpy(deltaeBuff, &line[49], 6);
-								deltaeBuff[6] = '\0';
-								//parse the energy
-								char ebuff[11];
-								memcpy(ebuff, &line[9], 10);
-								ebuff[10] = '\0';
-								//parse the energy error
-								char eeBuff[3];
-								memcpy(eeBuff, &line[19], 2);
-								eeBuff[2] = '\0';
-								
-								uint8_t tentativeE = 0;
-								uint8_t ambiguous = 0;
-								if(line[79]=='S'){
-									tentativeE = 1;
-								}else if(line[79]=='?'){
-									ambiguous = 1;
-								}
-								
-								uint32_t tranInd = nd->levels[nd->numLvls-1].firstTran + (uint32_t)(nd->levels[nd->numLvls-1].numTran);
+						if(SDL_strcmp(typebuff,"  G")==0){
+							//SDL_Log("%s\n",line);
+							if(nd->levels[nd->numLvls-1].numTran == 0){
+								nd->levels[nd->numLvls-1].firstTran = nd->numTran;
+							}
+							
+							//parse the gamma intensity
+							char iBuff[9];
+							memcpy(iBuff, &line[21], 8);
+							iBuff[8] = '\0';
+							//parse the gamma intensity error
+							char ieBuff[3];
+							memcpy(ieBuff, &line[29], 2);
+							ieBuff[2] = '\0';
+							//parse the gamma multipolarity
+							char mBuff[11];
+							memcpy(mBuff, &line[31], 10);
+							mBuff[10] = '\0';
+							//parse the internal conversion coefficient
+							char iccBuff[8];
+							memcpy(iccBuff, &line[55], 7);
+							iccBuff[7] = '\0';
+							//parse the internal conversion coefficient error
+							char icceBuff[3];
+							memcpy(icceBuff, &line[62], 2);
+							icceBuff[2] = '\0';
+							//parse the mixing ratio
+							char deltaBuff[9];
+							memcpy(deltaBuff, &line[41], 8);
+							deltaBuff[8] = '\0';
+							//parse the internal mixing ratio error
+							char deltaeBuff[7];
+							memcpy(deltaeBuff, &line[49], 6);
+							deltaeBuff[6] = '\0';
+							//parse the energy
+							char ebuff[11];
+							memcpy(ebuff, &line[9], 10);
+							ebuff[10] = '\0';
+							//parse the energy error
+							char eeBuff[3];
+							memcpy(eeBuff, &line[19], 2);
+							eeBuff[2] = '\0';
+							
+							uint8_t tentativeE = 0;
+							uint8_t ambiguous = 0;
+							if(line[79]=='S'){
+								tentativeE = 1;
+							}else if(line[79]=='?'){
+								ambiguous = 1;
+							}
+							
+							uint32_t tranInd = nd->levels[nd->numLvls-1].firstTran + (uint32_t)(nd->levels[nd->numLvls-1].numTran);
 
-								//process gamma energy
-								
-								//get length without trailing spaces
-								uint8_t gamEStrLen = 10;
-								for(int i=9;i>=0;i--){
-									if(SDL_isspace(ebuff[i])){
-										gamEStrLen=(uint8_t)i;
-									}else{
-										break;
-									}
+							//process gamma energy
+							
+							//get length without trailing spaces
+							uint8_t gamEStrLen = 10;
+							for(int i=9;i>=0;i--){
+								if(SDL_isspace(ebuff[i])){
+									gamEStrLen=(uint8_t)i;
+								}else{
+									break;
 								}
-								//get the position of the first non-space character
-								uint8_t gamEStartPos = 10;
-								for(uint8_t i=0;i<10;i++){
-									if(!(SDL_isspace(ebuff[i]))){
-										gamEStartPos = i;
-										break;
-									}
+							}
+							//get the position of the first non-space character
+							uint8_t gamEStartPos = 10;
+							for(uint8_t i=0;i<10;i++){
+								if(!(SDL_isspace(ebuff[i]))){
+									gamEStartPos = i;
+									break;
 								}
-								
-								//check for variables in gamma energy
-								float gammaE = 0.0f;
-								nd->tran[tranInd].energy.err=0;
-								if(SDL_isalpha(ebuff[gamEStrLen-1])&&((gamEStrLen==1) || ebuff[gamEStrLen-2]==' ')){
-									//SDL_Log("X ebuff: %s\n",ebuff);
-									nd->tran[tranInd].energy.val=0;
-									nd->tran[tranInd].energy.unit=VALUE_UNIT_NOVAL;
-									nd->tran[tranInd].energy.format = 0; //default
-									nd->tran[tranInd].energy.format |= (uint16_t)(VALUETYPE_X << 5U);
-									//record variable index (stored value = variable ASCII code)
-									nd->tran[tranInd].energy.format |= (uint16_t)(ebuff[gamEStrLen-1] << 9U);
-								}else if((gamEStartPos < 10)&&(SDL_isalpha(ebuff[gamEStartPos]))&&(ebuff[gamEStartPos+1]=='+')){
-									//gamma energy in X+number format
-									//SDL_Log("X+number ebuff: %s\n",ebuff);
-									tok = SDL_strtok_r(ebuff,"+",&saveptr);
-									if(tok != NULL){
-										tok = SDL_strtok_r(NULL,"",&saveptr); //get the rest of the string
-										if(tok != NULL){
-											gammaE = (float)atof(tok);
-											nd->tran[tranInd].energy.format = 0; //default
-											nd->tran[tranInd].energy.format |= (uint16_t)(VALUETYPE_PLUSX << 5U);
-										}
-									}
-									memcpy(ebuff, &line[9], 10); //re-constitute original buffer
-									ebuff[10] = '\0';
-									nd->tran[tranInd].energy.format |= (uint16_t)(ebuff[gamEStartPos] << 9U);
-								}else if((gamEStrLen > 1)&&(ebuff[gamEStrLen-2]=='+')&&(SDL_isalpha(ebuff[gamEStrLen-1]))){
-									//gamma energy in number+X format
-									//SDL_Log("number+X ebuff: %s\n",ebuff);
-									tok = SDL_strtok_r(ebuff,"+",&saveptr);
+							}
+							
+							//check for variables in gamma energy
+							float gammaE = 0.0f;
+							nd->tran[tranInd].energy.err=0;
+							if(SDL_isalpha(ebuff[gamEStrLen-1])&&((gamEStrLen==1) || ebuff[gamEStrLen-2]==' ')){
+								//SDL_Log("X ebuff: %s\n",ebuff);
+								nd->tran[tranInd].energy.val=0;
+								nd->tran[tranInd].energy.unit=VALUE_UNIT_NOVAL;
+								nd->tran[tranInd].energy.format = 0; //default
+								nd->tran[tranInd].energy.format |= (uint16_t)(VALUETYPE_X << 5U);
+								//record variable index (stored value = variable ASCII code)
+								nd->tran[tranInd].energy.format |= (uint16_t)(ebuff[gamEStrLen-1] << 9U);
+							}else if((gamEStartPos < 10)&&(SDL_isalpha(ebuff[gamEStartPos]))&&(ebuff[gamEStartPos+1]=='+')){
+								//gamma energy in X+number format
+								//SDL_Log("X+number ebuff: %s\n",ebuff);
+								tok = SDL_strtok_r(ebuff,"+",&saveptr);
+								if(tok != NULL){
+									tok = SDL_strtok_r(NULL,"",&saveptr); //get the rest of the string
 									if(tok != NULL){
 										gammaE = (float)atof(tok);
-										tok = SDL_strtok_r(NULL,"",&saveptr); //get the rest of the string
-										if(tok != NULL){
-											nd->tran[tranInd].energy.format = 0; //default
-											nd->tran[tranInd].energy.format |= (uint16_t)(VALUETYPE_PLUSX << 5U);
-											nd->tran[tranInd].energy.format |= (uint16_t)(tok[0] << 9U);
-											//SDL_Log("variable: %c\n",tok[0]);
-										}
+										nd->tran[tranInd].energy.format = 0; //default
+										nd->tran[tranInd].energy.format |= (uint16_t)(VALUETYPE_PLUSX << 5U);
 									}
-									memcpy(ebuff, &line[9], 10); //re-constitute original buffer
-									ebuff[10] = '\0';
-								}else{
-									//normal gamma energy
-									//SDL_Log("normal ebuff: %s (length %u)\n",ebuff,gamEStrLen);
-									gammaE = (float)atof(ebuff);
-									nd->tran[tranInd].energy.format = 0; //default
-									nd->tran[tranInd].energy.format |= (uint16_t)(tentativeE << 9U); //tentative bit
-									//SDL_Log("Found gamma at %f keV from string: %s\n",(double)gammaE,ebuff);
 								}
+								memcpy(ebuff, &line[9], 10); //re-constitute original buffer
+								ebuff[10] = '\0';
+								nd->tran[tranInd].energy.format |= (uint16_t)(ebuff[gamEStartPos] << 9U);
+							}else if((gamEStrLen > 1)&&(ebuff[gamEStrLen-2]=='+')&&(SDL_isalpha(ebuff[gamEStrLen-1]))){
+								//gamma energy in number+X format
+								//SDL_Log("number+X ebuff: %s\n",ebuff);
+								tok = SDL_strtok_r(ebuff,"+",&saveptr);
+								if(tok != NULL){
+									gammaE = (float)atof(tok);
+									tok = SDL_strtok_r(NULL,"",&saveptr); //get the rest of the string
+									if(tok != NULL){
+										nd->tran[tranInd].energy.format = 0; //default
+										nd->tran[tranInd].energy.format |= (uint16_t)(VALUETYPE_PLUSX << 5U);
+										nd->tran[tranInd].energy.format |= (uint16_t)(tok[0] << 9U);
+										//SDL_Log("variable: %c\n",tok[0]);
+									}
+								}
+								memcpy(ebuff, &line[9], 10); //re-constitute original buffer
+								ebuff[10] = '\0';
+							}else{
+								//normal gamma energy
+								//SDL_Log("normal ebuff: %s (length %u)\n",ebuff,gamEStrLen);
+								gammaE = (float)atof(ebuff);
+								nd->tran[tranInd].energy.format = 0; //default
+								nd->tran[tranInd].energy.format |= (uint16_t)(tentativeE << 9U); //tentative bit
+								//SDL_Log("Found gamma at %f keV from string: %s\n",(double)gammaE,ebuff);
+							}
 
-								
-								//get the number of sig figs
-								//SDL_Log("ebuff: %s\n",ebuff);
-								tok = SDL_strtok_r(ebuff,".",&saveptr);
+							
+							//get the number of sig figs
+							//SDL_Log("ebuff: %s\n",ebuff);
+							tok = SDL_strtok_r(ebuff,".",&saveptr);
+							if(tok!=NULL){
+								//SDL_Log("%s\n",tok);
+								tok = SDL_strtok_r(NULL,"E",&saveptr); //some gamma energies are specified with exponents
 								if(tok!=NULL){
 									//SDL_Log("%s\n",tok);
-									tok = SDL_strtok_r(NULL,"E",&saveptr); //some gamma energies are specified with exponents
-									if(tok!=NULL){
-										//SDL_Log("%s\n",tok);
-										uint16_t len = (uint16_t)SDL_strlen(tok);
-										//check for trailing empty spaces
-										for(uint16_t i=0;i<len;i++){
-											if(SDL_isspace(tok[i])){
-												len = i;
-												break;
-											}
-										}
-										nd->tran[tranInd].energy.format |= (uint16_t)(len & 15U);
-										//SDL_Log("format: %u\n",nd->tran[tranInd].energy.format);
-										if(((nd->tran[tranInd].energy.format >> 5U) & 15U) != VALUETYPE_PLUSX){
-											tok = SDL_strtok_r(NULL,"",&saveptr); //get the remaining part of the string (only get past here if the value was expressed in exponent form)
-											if(tok!=NULL){
-												//SDL_Log("energy in exponent form: %s\n",ebuff);
-												//value was in exponent format
-												nd->tran[tranInd].energy.exponent = (int8_t)atoi(tok);
-												gammaE = gammaE / powf(10.0f,(float)(nd->tran[tranInd].energy.exponent));
-												nd->tran[tranInd].energy.format |= (uint16_t)(1U << 4U); //exponent flag
-											}
+									uint16_t len = (uint16_t)SDL_strlen(tok);
+									//check for trailing empty spaces
+									for(uint16_t i=0;i<len;i++){
+										if(SDL_isspace(tok[i])){
+											len = i;
+											break;
 										}
 									}
-								}else{
-									//potentially an exponent form value with no decimal place
-									memcpy(ebuff, &line[9], 10); //re-copy buffer
-									ebuff[10] = '\0';
-									tok = SDL_strtok_r(ebuff,"E",&saveptr);
-									//SDL_Log("ebuff: %s\n",ebuff);
-									if(tok!=NULL){
+									nd->tran[tranInd].energy.format |= (uint16_t)(len & 15U);
+									//SDL_Log("format: %u\n",nd->tran[tranInd].energy.format);
+									if(((nd->tran[tranInd].energy.format >> 5U) & 15U) != VALUETYPE_PLUSX){
 										tok = SDL_strtok_r(NULL,"",&saveptr); //get the remaining part of the string (only get past here if the value was expressed in exponent form)
 										if(tok!=NULL){
-											//SDL_Log("%s\n",tok);
+											//SDL_Log("energy in exponent form: %s\n",ebuff);
 											//value was in exponent format
 											nd->tran[tranInd].energy.exponent = (int8_t)atoi(tok);
 											gammaE = gammaE / powf(10.0f,(float)(nd->tran[tranInd].energy.exponent));
@@ -2692,254 +2691,254 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 										}
 									}
 								}
-								
-								nd->tran[tranInd].energy.val=gammaE;
-								if(SDL_strcmp(eeBuff,"GT")==0){
-									nd->tran[tranInd].energy.format |= (uint16_t)(VALUETYPE_GREATERTHAN << 5U);
-								}else if(SDL_strcmp(eeBuff,"GT")==0){
-									nd->tran[tranInd].energy.format |= (uint16_t)(VALUETYPE_GREATERTHAN << 5U);
-								}else if(SDL_strcmp(eeBuff,"GE")==0){
-									nd->tran[tranInd].energy.format |= (uint16_t)(VALUETYPE_GREATEROREQUALTHAN << 5U);
-								}else if(SDL_strcmp(eeBuff,"LT")==0){
-									nd->tran[tranInd].energy.format |= (uint16_t)(VALUETYPE_LESSTHAN << 5U);
-								}else if(SDL_strcmp(eeBuff,"LE")==0){
-									nd->tran[tranInd].energy.format |= (uint16_t)(VALUETYPE_LESSOREQUALTHAN << 5U);
-								}else if(SDL_strcmp(eeBuff,"AP")==0){
-									nd->tran[tranInd].energy.format |= (uint16_t)(VALUETYPE_APPROX << 5U);
-								}else if(SDL_strcmp(eeBuff,"?")==0){
-									nd->tran[tranInd].energy.format |= (uint16_t)(VALUETYPE_UNKNOWN << 5U);
-								}else{
-									nd->tran[tranInd].energy.err=(uint8_t)atoi(eeBuff);
+							}else{
+								//potentially an exponent form value with no decimal place
+								memcpy(ebuff, &line[9], 10); //re-copy buffer
+								ebuff[10] = '\0';
+								tok = SDL_strtok_r(ebuff,"E",&saveptr);
+								//SDL_Log("ebuff: %s\n",ebuff);
+								if(tok!=NULL){
+									tok = SDL_strtok_r(NULL,"",&saveptr); //get the remaining part of the string (only get past here if the value was expressed in exponent form)
+									if(tok!=NULL){
+										//SDL_Log("%s\n",tok);
+										//value was in exponent format
+										nd->tran[tranInd].energy.exponent = (int8_t)atoi(tok);
+										gammaE = gammaE / powf(10.0f,(float)(nd->tran[tranInd].energy.exponent));
+										nd->tran[tranInd].energy.format |= (uint16_t)(1U << 4U); //exponent flag
+									}
 								}
-								if(nd->tran[tranInd].energy.unit != VALUE_UNIT_NOVAL){
-									nd->tran[tranInd].energy.unit=VALUE_UNIT_KEV;
-								}
+							}
+							
+							nd->tran[tranInd].energy.val=gammaE;
+							if(SDL_strcmp(eeBuff,"GT")==0){
+								nd->tran[tranInd].energy.format |= (uint16_t)(VALUETYPE_GREATERTHAN << 5U);
+							}else if(SDL_strcmp(eeBuff,"GT")==0){
+								nd->tran[tranInd].energy.format |= (uint16_t)(VALUETYPE_GREATERTHAN << 5U);
+							}else if(SDL_strcmp(eeBuff,"GE")==0){
+								nd->tran[tranInd].energy.format |= (uint16_t)(VALUETYPE_GREATEROREQUALTHAN << 5U);
+							}else if(SDL_strcmp(eeBuff,"LT")==0){
+								nd->tran[tranInd].energy.format |= (uint16_t)(VALUETYPE_LESSTHAN << 5U);
+							}else if(SDL_strcmp(eeBuff,"LE")==0){
+								nd->tran[tranInd].energy.format |= (uint16_t)(VALUETYPE_LESSOREQUALTHAN << 5U);
+							}else if(SDL_strcmp(eeBuff,"AP")==0){
+								nd->tran[tranInd].energy.format |= (uint16_t)(VALUETYPE_APPROX << 5U);
+							}else if(SDL_strcmp(eeBuff,"?")==0){
+								nd->tran[tranInd].energy.format |= (uint16_t)(VALUETYPE_UNKNOWN << 5U);
+							}else{
+								nd->tran[tranInd].energy.err=(uint8_t)atoi(eeBuff);
+							}
+							if(nd->tran[tranInd].energy.unit != VALUE_UNIT_NOVAL){
+								nd->tran[tranInd].energy.unit=VALUE_UNIT_KEV;
+							}
 
-								if(ambiguous){
-									nd->tran[tranInd].energy.unit |= (uint8_t)(1U << 7);
-								}
+							if(ambiguous){
+								nd->tran[tranInd].energy.unit |= (uint8_t)(1U << 7);
+							}
 
-								//check for final level of transition
-								double minEDiff = 1000.0;
-								nd->tran[tranInd].finalLvlOffset = 0;
-								uint8_t lvlValType = ((nd->levels[nd->numLvls-1].energy.format >> 5U) & 15U);
-								uint8_t gammaValType = ((nd->tran[tranInd].energy.format >> 5U) & 15U);
-								//SDL_Log("lvl type: %u, gamma type: %u\n",lvlValType,gammaValType);
-								//SDL_Log("Lvl E: %f, gamma E: %f\n",getRawValFromDB(&nd->levels[nd->numLvls-1].energy),getRawValFromDB(&nd->tran[tranInd].energy));
-								if(nd->numLvls >= 2){
-									for(uint32_t lvlInd = (nd->numLvls-2); lvlInd >= nd->nuclData[nd->numNucl].firstLevel; lvlInd--){
-										
-										//SDL_Log("Level index: %u\n",lvlInd);
-										//SDL_Log("Final lvl E: %f\n",getRawValFromDB(&nd->levels[lvlInd].energy));
-
-										if((gammaValType == VALUETYPE_X)&&(lvlValType == VALUETYPE_PLUSX)){
-											//handle special case where gamma energy is variable and defines a level
-											//offset from a previous level
-											double eDiff = fabs(getRawValFromDB(&nd->levels[lvlInd].energy) - getRawValFromDB(&nd->levels[nd->numLvls-1].energy));
-											if(eDiff < minEDiff){
-												minEDiff = eDiff;
-												nd->tran[tranInd].finalLvlOffset = (uint8_t)((nd->numLvls-1) - lvlInd);
-											}
-											//SDL_Log("finalLvlOffset 1: %u\n",nd->tran[tranInd].finalLvlOffset);
-											if(lvlInd == 0){
-												break; //handle rare integer overflow case
-											}
-											continue; //don't evaluate other conditions that don't correspond to this special case
-										}
-										
-										//handle variable level energies (ie. number+X, Y+number...)
-										//transitions cannot link between levels defined by different variables
-										uint8_t prevLvlValType = ((nd->levels[lvlInd].energy.format >> 5U) & 15U);
-										if((lvlValType == VALUETYPE_X)||(lvlValType == VALUETYPE_PLUSX)){
-											if((prevLvlValType != VALUETYPE_X)&&(prevLvlValType != VALUETYPE_PLUSX)){
-												if(lvlInd == 0){
-													break; //handle rare integer overflow case
-												}
-												continue; //skip
-											}else{
-												//check that the variables are the same
-												uint8_t var = (uint8_t)((nd->levels[nd->numLvls-1].energy.format >> 9U) & 127U);
-												uint8_t prevVar = (uint8_t)((nd->levels[lvlInd].energy.format >> 9U) & 127U);
-												if(var != prevVar){
-													if(lvlInd == 0){
-														break; //handle rare integer overflow case
-													}
-													continue; //variables don't match, skip
-												}
-											}
-										}else{
-											if((prevLvlValType == VALUETYPE_X)||(prevLvlValType == VALUETYPE_PLUSX)){
-												if(lvlInd == 0){
-													break; //handle rare integer overflow case
-												}
-												continue; //skip
-											}
-										}
-										
+							//check for final level of transition
+							double minEDiff = 1000.0;
+							nd->tran[tranInd].finalLvlOffset = 0;
+							uint8_t lvlValType = ((nd->levels[nd->numLvls-1].energy.format >> 5U) & 15U);
+							uint8_t gammaValType = ((nd->tran[tranInd].energy.format >> 5U) & 15U);
+							//SDL_Log("lvl type: %u, gamma type: %u\n",lvlValType,gammaValType);
+							//SDL_Log("Lvl E: %f, gamma E: %f\n",getRawValFromDB(&nd->levels[nd->numLvls-1].energy),getRawValFromDB(&nd->tran[tranInd].energy));
+							if(nd->numLvls >= 2){
+								for(uint32_t lvlInd = (nd->numLvls-2); lvlInd >= nd->nuclData[nd->numNucl].firstLevel; lvlInd--){
 									
-										double fudgeFactor = 3.0*SDL_sqrt(pow(getRawErrFromDB(&nd->tran[tranInd].energy),2.0) + pow(getRawErrFromDB(&nd->levels[lvlInd].energy),2.0) + pow(getRawErrFromDB(&nd->levels[nd->numLvls-1].energy),2.0));
-										fudgeFactor += pow(getRawValFromDB(&nd->tran[tranInd].energy),2.0)/(2.0E6*(nd->nuclData[nd->numNucl].Z + nd->nuclData[nd->numNucl].N)); //nuclear recoil energy approximation
-										if(fudgeFactor < 0.01){
-											fudgeFactor = 1.0; //default assumed energy resolution, when no error is reported 
+									//SDL_Log("Level index: %u\n",lvlInd);
+									//SDL_Log("Final lvl E: %f\n",getRawValFromDB(&nd->levels[lvlInd].energy));
+
+									if((gammaValType == VALUETYPE_X)&&(lvlValType == VALUETYPE_PLUSX)){
+										//handle special case where gamma energy is variable and defines a level
+										//offset from a previous level
+										double eDiff = fabs(getRawValFromDB(&nd->levels[lvlInd].energy) - getRawValFromDB(&nd->levels[nd->numLvls-1].energy));
+										if(eDiff < minEDiff){
+											minEDiff = eDiff;
+											nd->tran[tranInd].finalLvlOffset = (uint8_t)((nd->numLvls-1) - lvlInd);
 										}
-										//SDL_Log("Fudge factor: %f\n",fudgeFactor);
-										double eDiff = fabs(getRawValFromDB(&nd->levels[lvlInd].energy) - (getRawValFromDB(&nd->levels[nd->numLvls-1].energy) - getRawValFromDB(&nd->tran[tranInd].energy)));
-										if(eDiff <= fudgeFactor){
-											if(eDiff < minEDiff){
-												minEDiff = eDiff;
-												nd->tran[tranInd].finalLvlOffset = (uint8_t)((nd->numLvls-1) - lvlInd);
-											}
-											//SDL_Log("finalLvlOffset 2: %u\n",nd->tran[tranInd].finalLvlOffset);
-										}
-										
+										//SDL_Log("finalLvlOffset 1: %u\n",nd->tran[tranInd].finalLvlOffset);
 										if(lvlInd == 0){
 											break; //handle rare integer overflow case
 										}
+										continue; //don't evaluate other conditions that don't correspond to this special case
 									}
-
-									//if a final level wasn't found with the usual method, 
-									//try to simply look for a final level within a few keV
-									//without taking the error bars into account	
-									if(nd->tran[tranInd].finalLvlOffset == 0){
-										//no final level was found yet
-										if((lvlValType == VALUETYPE_NUMBER)&&(gammaValType == VALUETYPE_NUMBER)){
-											minEDiff = 5.0;
-											for(uint32_t lvlInd = (nd->numLvls-2); lvlInd >= nd->nuclData[nd->numNucl].firstLevel; lvlInd--){
-												double eDiff = fabs(getRawValFromDB(&nd->levels[lvlInd].energy) - (getRawValFromDB(&nd->levels[nd->numLvls-1].energy) - getRawValFromDB(&nd->tran[tranInd].energy)));
-												if(eDiff < minEDiff){
-													minEDiff = eDiff;
-													nd->tran[tranInd].finalLvlOffset = (uint8_t)((nd->numLvls-1) - lvlInd);
-												}
-												//SDL_Log("finalLvlOffset 3: %u\n",nd->tran[tranInd].finalLvlOffset);
+									
+									//handle variable level energies (ie. number+X, Y+number...)
+									//transitions cannot link between levels defined by different variables
+									uint8_t prevLvlValType = ((nd->levels[lvlInd].energy.format >> 5U) & 15U);
+									if((lvlValType == VALUETYPE_X)||(lvlValType == VALUETYPE_PLUSX)){
+										if((prevLvlValType != VALUETYPE_X)&&(prevLvlValType != VALUETYPE_PLUSX)){
+											if(lvlInd == 0){
+												break; //handle rare integer overflow case
+											}
+											continue; //skip
+										}else{
+											//check that the variables are the same
+											uint8_t var = (uint8_t)((nd->levels[nd->numLvls-1].energy.format >> 9U) & 127U);
+											uint8_t prevVar = (uint8_t)((nd->levels[lvlInd].energy.format >> 9U) & 127U);
+											if(var != prevVar){
 												if(lvlInd == 0){
 													break; //handle rare integer overflow case
 												}
+												continue; //variables don't match, skip
+											}
+										}
+									}else{
+										if((prevLvlValType == VALUETYPE_X)||(prevLvlValType == VALUETYPE_PLUSX)){
+											if(lvlInd == 0){
+												break; //handle rare integer overflow case
+											}
+											continue; //skip
+										}
+									}
+									
+								
+									double fudgeFactor = 3.0*SDL_sqrt(pow(getRawErrFromDB(&nd->tran[tranInd].energy),2.0) + pow(getRawErrFromDB(&nd->levels[lvlInd].energy),2.0) + pow(getRawErrFromDB(&nd->levels[nd->numLvls-1].energy),2.0));
+									fudgeFactor += pow(getRawValFromDB(&nd->tran[tranInd].energy),2.0)/(2.0E6*(nd->nuclData[nd->numNucl].Z + nd->nuclData[nd->numNucl].N)); //nuclear recoil energy approximation
+									if(fudgeFactor < 0.01){
+										fudgeFactor = 1.0; //default assumed energy resolution, when no error is reported 
+									}
+									//SDL_Log("Fudge factor: %f\n",fudgeFactor);
+									double eDiff = fabs(getRawValFromDB(&nd->levels[lvlInd].energy) - (getRawValFromDB(&nd->levels[nd->numLvls-1].energy) - getRawValFromDB(&nd->tran[tranInd].energy)));
+									if(eDiff <= fudgeFactor){
+										if(eDiff < minEDiff){
+											minEDiff = eDiff;
+											nd->tran[tranInd].finalLvlOffset = (uint8_t)((nd->numLvls-1) - lvlInd);
+										}
+										//SDL_Log("finalLvlOffset 2: %u\n",nd->tran[tranInd].finalLvlOffset);
+									}
+									
+									if(lvlInd == 0){
+										break; //handle rare integer overflow case
+									}
+								}
+
+								//if a final level wasn't found with the usual method, 
+								//try to simply look for a final level within a few keV
+								//without taking the error bars into account	
+								if(nd->tran[tranInd].finalLvlOffset == 0){
+									//no final level was found yet
+									if((lvlValType == VALUETYPE_NUMBER)&&(gammaValType == VALUETYPE_NUMBER)){
+										minEDiff = 5.0;
+										for(uint32_t lvlInd = (nd->numLvls-2); lvlInd >= nd->nuclData[nd->numNucl].firstLevel; lvlInd--){
+											double eDiff = fabs(getRawValFromDB(&nd->levels[lvlInd].energy) - (getRawValFromDB(&nd->levels[nd->numLvls-1].energy) - getRawValFromDB(&nd->tran[tranInd].energy)));
+											if(eDiff < minEDiff){
+												minEDiff = eDiff;
+												nd->tran[tranInd].finalLvlOffset = (uint8_t)((nd->numLvls-1) - lvlInd);
+											}
+											//SDL_Log("finalLvlOffset 3: %u\n",nd->tran[tranInd].finalLvlOffset);
+											if(lvlInd == 0){
+												break; //handle rare integer overflow case
 											}
 										}
 									}
 								}
-								
-								//gamma intensity
-								float gammaI = (float)atof(iBuff);
-								//get the number of sig figs
-								nd->tran[tranInd].intensity.format = 0; //default
-								//SDL_Log("ebuff: %s\n",ebuff);
-								tok = SDL_strtok_r(iBuff,".",&saveptr);
+							}
+							
+							//gamma intensity
+							float gammaI = (float)atof(iBuff);
+							//get the number of sig figs
+							nd->tran[tranInd].intensity.format = 0; //default
+							//SDL_Log("ebuff: %s\n",ebuff);
+							tok = SDL_strtok_r(iBuff,".",&saveptr);
+							if(tok!=NULL){
+								//SDL_Log("%s\n",tok);
+								tok = SDL_strtok_r(NULL,"E",&saveptr); //some gamma energies are specified with exponents
 								if(tok!=NULL){
 									//SDL_Log("%s\n",tok);
-									tok = SDL_strtok_r(NULL,"E",&saveptr); //some gamma energies are specified with exponents
+									nd->tran[tranInd].intensity.format = (uint16_t)SDL_strlen(tok);
+									//check for trailing empty spaces
+									for(uint8_t i=0;i<nd->tran[tranInd].intensity.format;i++){
+										if(SDL_isspace(tok[i])){
+											nd->tran[tranInd].intensity.format = i;
+											break;
+										}
+									}
+									if(nd->tran[tranInd].intensity.format > 15U){
+										nd->tran[tranInd].intensity.format = 15U; //only 4 bits available for precision
+									}
+									//SDL_Log("format: %u\n",nd->tran[tranInd].intensity.format);
+									tok = SDL_strtok_r(NULL,"",&saveptr); //get the remaining part of the string (only get past here if the value was expressed in exponent form)
 									if(tok!=NULL){
-										//SDL_Log("%s\n",tok);
-										nd->tran[tranInd].intensity.format = (uint16_t)SDL_strlen(tok);
-										//check for trailing empty spaces
-										for(uint8_t i=0;i<nd->tran[tranInd].intensity.format;i++){
-											if(SDL_isspace(tok[i])){
-												nd->tran[tranInd].intensity.format = i;
-												break;
-											}
-										}
-										if(nd->tran[tranInd].intensity.format > 15U){
-											nd->tran[tranInd].intensity.format = 15U; //only 4 bits available for precision
-										}
-										//SDL_Log("format: %u\n",nd->tran[tranInd].intensity.format);
-										tok = SDL_strtok_r(NULL,"",&saveptr); //get the remaining part of the string (only get past here if the value was expressed in exponent form)
-										if(tok!=NULL){
-											//SDL_Log("energy in exponent form: %s\n",ebuff);
-											//value was in exponent format
-											nd->tran[tranInd].intensity.exponent = (int8_t)atoi(tok);
-											gammaI = gammaI / powf(10.0f,(float)(nd->tran[tranInd].intensity.exponent));
-											nd->tran[tranInd].intensity.format |= (uint16_t)(1U << 4); //exponent flag
-										}
+										//SDL_Log("energy in exponent form: %s\n",ebuff);
+										//value was in exponent format
+										nd->tran[tranInd].intensity.exponent = (int8_t)atoi(tok);
+										gammaI = gammaI / powf(10.0f,(float)(nd->tran[tranInd].intensity.exponent));
+										nd->tran[tranInd].intensity.format |= (uint16_t)(1U << 4); //exponent flag
 									}
 								}
-								
-								//gamma intensity: check for special value type
-								nd->tran[tranInd].intensity.err=0;
-								tok = SDL_strtok_r(ieBuff, " ",&saveptr);
+							}
+							
+							//gamma intensity: check for special value type
+							nd->tran[tranInd].intensity.err=0;
+							tok = SDL_strtok_r(ieBuff, " ",&saveptr);
+							if(tok!=NULL){
+								if(SDL_strcmp(tok,"GT")==0){
+									nd->tran[tranInd].intensity.format |= (uint16_t)(VALUETYPE_GREATERTHAN << 5);
+								}else if(SDL_strcmp(tok,"GT")==0){
+									nd->tran[tranInd].intensity.format |= (uint16_t)(VALUETYPE_GREATERTHAN << 5);
+								}else if(SDL_strcmp(tok,"GE")==0){
+									nd->tran[tranInd].intensity.format |= (uint16_t)(VALUETYPE_GREATEROREQUALTHAN << 5);
+								}else if(SDL_strcmp(tok,"LT")==0){
+									nd->tran[tranInd].intensity.format |= (uint16_t)(VALUETYPE_LESSTHAN << 5);
+								}else if(SDL_strcmp(tok,"LE")==0){
+									nd->tran[tranInd].intensity.format |= (uint16_t)(VALUETYPE_LESSOREQUALTHAN << 5);
+								}else if(SDL_strcmp(tok,"AP")==0){
+									nd->tran[tranInd].intensity.format |= (uint16_t)(VALUETYPE_APPROX << 5);
+								}else if(SDL_strcmp(tok,"?")==0){
+									nd->tran[tranInd].intensity.format |= (uint16_t)(VALUETYPE_UNKNOWN << 5);
+								}else{
+									nd->tran[tranInd].intensity.err=(uint8_t)atoi(ieBuff);
+								}
+							}
+							
+							//gamma conversion coeff
+							float gammaICC = (float)atof(iccBuff);
+							//get the number of sig figs
+							nd->tran[tranInd].icc.format = 0; //default
+							//SDL_Log("iccBuff: %s\n",iccBuff);
+							//check for presence of exponent
+							uint8_t hasExp = 0;
+							for(uint8_t i=0; i<SDL_strlen(iccBuff);i++){
+								if(iccBuff[i]=='E'){
+									hasExp = 1;
+									break;
+								}
+							}
+							tok = SDL_strtok_r(iccBuff,".",&saveptr);
+							if(tok!=NULL){
+								//SDL_Log("tok_1: %s\n",tok);
+								tok = SDL_strtok_r(NULL,"E",&saveptr); //some values are specified with exponents
 								if(tok!=NULL){
-									if(SDL_strcmp(tok,"GT")==0){
-										nd->tran[tranInd].intensity.format |= (uint16_t)(VALUETYPE_GREATERTHAN << 5);
-									}else if(SDL_strcmp(tok,"GT")==0){
-										nd->tran[tranInd].intensity.format |= (uint16_t)(VALUETYPE_GREATERTHAN << 5);
-									}else if(SDL_strcmp(tok,"GE")==0){
-										nd->tran[tranInd].intensity.format |= (uint16_t)(VALUETYPE_GREATEROREQUALTHAN << 5);
-									}else if(SDL_strcmp(tok,"LT")==0){
-										nd->tran[tranInd].intensity.format |= (uint16_t)(VALUETYPE_LESSTHAN << 5);
-									}else if(SDL_strcmp(tok,"LE")==0){
-										nd->tran[tranInd].intensity.format |= (uint16_t)(VALUETYPE_LESSOREQUALTHAN << 5);
-									}else if(SDL_strcmp(tok,"AP")==0){
-										nd->tran[tranInd].intensity.format |= (uint16_t)(VALUETYPE_APPROX << 5);
-									}else if(SDL_strcmp(tok,"?")==0){
-										nd->tran[tranInd].intensity.format |= (uint16_t)(VALUETYPE_UNKNOWN << 5);
-									}else{
-										nd->tran[tranInd].intensity.err=(uint8_t)atoi(ieBuff);
+									//SDL_Log("tok_2: %s\n",tok);
+									nd->tran[tranInd].icc.format = (uint16_t)SDL_strlen(tok);
+									//check for trailing empty spaces
+									for(uint8_t i=0;i<nd->tran[tranInd].icc.format;i++){
+										if(SDL_isspace(tok[i])){
+											nd->tran[tranInd].icc.format = i;
+											break;
+										}
 									}
-								}
-								
-								//gamma conversion coeff
-								float gammaICC = (float)atof(iccBuff);
-								//get the number of sig figs
-								nd->tran[tranInd].icc.format = 0; //default
-								//SDL_Log("iccBuff: %s\n",iccBuff);
-								//check for presence of exponent
-								uint8_t hasExp = 0;
-								for(uint8_t i=0; i<SDL_strlen(iccBuff);i++){
-									if(iccBuff[i]=='E'){
-										hasExp = 1;
-										break;
-									}
-								}
-								tok = SDL_strtok_r(iccBuff,".",&saveptr);
-								if(tok!=NULL){
-									//SDL_Log("tok_1: %s\n",tok);
-									tok = SDL_strtok_r(NULL,"E",&saveptr); //some values are specified with exponents
+									//SDL_Log("format: %u\n",nd->tran[tranInd].icc.format);
+									tok = SDL_strtok_r(NULL,"",&saveptr); //get the remaining part of the string (only get past here if the value was expressed in exponent form)
 									if(tok!=NULL){
-										//SDL_Log("tok_2: %s\n",tok);
-										nd->tran[tranInd].icc.format = (uint16_t)SDL_strlen(tok);
-										//check for trailing empty spaces
-										for(uint8_t i=0;i<nd->tran[tranInd].icc.format;i++){
-											if(SDL_isspace(tok[i])){
-												nd->tran[tranInd].icc.format = i;
-												break;
-											}
+										//value was in exponent format
+										nd->tran[tranInd].icc.exponent = (int8_t)atoi(tok);
+										gammaICC = gammaICC / powf(10.0f,(float)(nd->tran[tranInd].icc.exponent));
+										if(nd->tran[tranInd].icc.format > 15U){
+											nd->tran[tranInd].icc.format = 15U; //only 4 bits available for precision
 										}
-										//SDL_Log("format: %u\n",nd->tran[tranInd].icc.format);
-										tok = SDL_strtok_r(NULL,"",&saveptr); //get the remaining part of the string (only get past here if the value was expressed in exponent form)
-										if(tok!=NULL){
-											//value was in exponent format
-											nd->tran[tranInd].icc.exponent = (int8_t)atoi(tok);
-											gammaICC = gammaICC / powf(10.0f,(float)(nd->tran[tranInd].icc.exponent));
-											if(nd->tran[tranInd].icc.format > 15U){
-												nd->tran[tranInd].icc.format = 15U; //only 4 bits available for precision
-											}
-											nd->tran[tranInd].icc.format |= (uint16_t)(1U << 4); //exponent flag
-											//SDL_Log("ICC in exponent form: %s, exponent: %i\n",line,nd->tran[tranInd].icc.exponent);
-										}else if(hasExp){
-											//we missed parsing the exponent...
-											//assume value was something like '3.E9', in which case the exponent was
-											//earlier parsed as the format instead
-											memcpy(iccBuff, &line[55], 7); //remake iccBuff
-											iccBuff[7] = '\0';
-											tok = SDL_strtok_r(iccBuff,".",&saveptr);
-											if(tok!=NULL){
-												tok = SDL_strtok_r(NULL,"E",&saveptr);
-												if(tok!=NULL){
-													nd->tran[tranInd].icc.exponent = (int8_t)SDL_atoi(tok);
-													gammaICC = gammaICC / powf(10.0f,(float)(nd->tran[tranInd].icc.exponent));
-													nd->tran[tranInd].icc.format = 1;
-													nd->tran[tranInd].icc.format |= (uint16_t)(1U << 4); //exponent flag
-													//SDL_Log("ICC in exponent form: %s, exponent: %i\n",line,nd->tran[tranInd].icc.exponent);
-												}
-											}
-										}
+										nd->tran[tranInd].icc.format |= (uint16_t)(1U << 4); //exponent flag
+										//SDL_Log("ICC in exponent form: %s, exponent: %i\n",line,nd->tran[tranInd].icc.exponent);
 									}else if(hasExp){
 										//we missed parsing the exponent...
-										//assume value was something like '3E9'
+										//assume value was something like '3.E9', in which case the exponent was
+										//earlier parsed as the format instead
 										memcpy(iccBuff, &line[55], 7); //remake iccBuff
 										iccBuff[7] = '\0';
-										tok = SDL_strtok_r(iccBuff,"E",&saveptr);
+										tok = SDL_strtok_r(iccBuff,".",&saveptr);
 										if(tok!=NULL){
-											tok = SDL_strtok_r(NULL,"",&saveptr); //get the remaining part of the string (only get past here if the value was expressed in exponent form)
+											tok = SDL_strtok_r(NULL,"E",&saveptr);
 											if(tok!=NULL){
 												nd->tran[tranInd].icc.exponent = (int8_t)SDL_atoi(tok);
 												gammaICC = gammaICC / powf(10.0f,(float)(nd->tran[tranInd].icc.exponent));
@@ -2949,329 +2948,349 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 											}
 										}
 									}
-								}
-
-								//gamma conversion coeff: check for special value type
-								nd->tran[tranInd].icc.err=0;
-								tok = SDL_strtok_r(icceBuff, " ",&saveptr);
-								if(tok!=NULL){
-									if(SDL_strcmp(tok,"GT")==0){
-										nd->tran[tranInd].icc.format |= (uint16_t)(VALUETYPE_GREATERTHAN << 5);
-									}else if(SDL_strcmp(tok,"GT")==0){
-										nd->tran[tranInd].icc.format |= (uint16_t)(VALUETYPE_GREATERTHAN << 5);
-									}else if(SDL_strcmp(tok,"GE")==0){
-										nd->tran[tranInd].icc.format |= (uint16_t)(VALUETYPE_GREATEROREQUALTHAN << 5);
-									}else if(SDL_strcmp(tok,"LT")==0){
-										nd->tran[tranInd].icc.format |= (uint16_t)(VALUETYPE_LESSTHAN << 5);
-									}else if(SDL_strcmp(tok,"LE")==0){
-										nd->tran[tranInd].icc.format |= (uint16_t)(VALUETYPE_LESSOREQUALTHAN << 5);
-									}else if(SDL_strcmp(tok,"AP")==0){
-										nd->tran[tranInd].icc.format |= (uint16_t)(VALUETYPE_APPROX << 5);
-									}else if(SDL_strcmp(tok,"?")==0){
-										nd->tran[tranInd].icc.format |= (uint16_t)(VALUETYPE_UNKNOWN << 5);
-									}else{
-										nd->tran[tranInd].icc.err=(uint8_t)atoi(icceBuff);
-									}
-								}
-								
-								//gamma multipolarity
-								nd->tran[tranInd].numMultipoles = 0;
-								tok = SDL_strtok_r(mBuff," ",&saveptr);
-								if(tok != NULL){
-									uint8_t tentative = 0;
-									uint8_t derived = 0;
-									//SDL_Log("%s\n",tok);
-									nd->tran[tranInd].multipole[0] = 0; //default
-									for(int i=0;i<(int)SDL_strlen(tok);i++){
-										if(nd->tran[tranInd].numMultipoles >= MAXMULTPERLEVEL){
-											SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"parseENSDFFile - too many multipoles in string: %s\n",tok);
-											return -1;
-										}
-										if(tok[i]=='('){
-											tentative = 1;
-											if(i == 0){
-												nd->tran[tranInd].multipole[nd->tran[tranInd].numMultipoles] |= (uint8_t)(TENTATIVEMULT_YES << 5);
-											}
-										}else if(tok[i]==')'){
-											tentative = 0;
-										}else if(tok[i]=='['){
-											derived = 1;
-											if(i == 0){
-												nd->tran[tranInd].multipole[nd->tran[tranInd].numMultipoles] |= (uint8_t)(TENTATIVEMULT_DERIVED << 5U);
-											}
-										}else if(tok[i]==']'){
-											derived = 0;
-										}else if((tok[i]=='+')||(tok[i]==',')){
-											nd->tran[tranInd].numMultipoles++;
-											nd->tran[tranInd].multipole[nd->tran[tranInd].numMultipoles] = 0; //default
-											if(tentative){
-												nd->tran[tranInd].multipole[nd->tran[tranInd].numMultipoles] |= (uint8_t)(TENTATIVEMULT_YES << 5);
-											}else if(derived){
-												nd->tran[tranInd].multipole[nd->tran[tranInd].numMultipoles] |= (uint8_t)(TENTATIVEMULT_DERIVED << 5);
-											}else{
-												nd->tran[tranInd].multipole[nd->tran[tranInd].numMultipoles] |= (uint8_t)(TENTATIVEMULT_NONE << 5);
-											}
-										}else if(tok[i]=='E'){
-											nd->tran[tranInd].multipole[nd->tran[tranInd].numMultipoles] &= (uint8_t)(~(uint8_t)(1U)); //unset
-										}else if(tok[i]=='M'){
-											nd->tran[tranInd].multipole[nd->tran[tranInd].numMultipoles] |= (uint8_t)(1U);
-										}else if(tok[i]=='D'){
-											//set M1 as placeholder value
-											nd->tran[tranInd].multipole[nd->tran[tranInd].numMultipoles] |= (uint8_t)(1U);
-											nd->tran[tranInd].multipole[nd->tran[tranInd].numMultipoles] |= (uint8_t)((uint8_t)(1U) << 1);
-											//specify that assignment is 'D'
-											nd->tran[tranInd].multipole[nd->tran[tranInd].numMultipoles] |= (uint8_t)(1U << 7);
-										}else if(tok[i]=='Q'){
-											//set E2 as placeholder value
-											nd->tran[tranInd].multipole[nd->tran[tranInd].numMultipoles] &= (uint8_t)(~(uint8_t)(1U)); //unset
-											nd->tran[tranInd].multipole[nd->tran[tranInd].numMultipoles] |= (uint8_t)((uint8_t)(2U) << 1);
-											//specify that assignment is 'Q'
-											nd->tran[tranInd].multipole[nd->tran[tranInd].numMultipoles] |= (uint8_t)(1U << 7);
-										}else if(SDL_isdigit(tok[i])){
-											//set multipole order
-											nd->tran[tranInd].multipole[nd->tran[tranInd].numMultipoles] |= (uint8_t)(((uint8_t)(tok[i] - '0') & 15U) << 1);
-										}
-									}
-									nd->tran[tranInd].numMultipoles++;
-									//SDL_Log("Number of multipoles: %u\n",nd->tran[tranInd].numMultipoles);
-								}else{
-									//recopy buffer
-									memcpy(mBuff, &line[31], 10);
-									mBuff[10] = '\0';
-									if(!SDL_isspace(mBuff[0])){
-										//string with no preceding or trailing spaces
-										SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,"Unhandled multipolarity string: %s\n",mBuff);
-									}
-								}
-
-								//gamma mixing ratio
-								float gammaDelta = (float)atof(deltaBuff);
-								//get the number of sig figs
-								nd->tran[tranInd].delta.format = 0; //default
-								//SDL_Log("deltaBuff: %s\n",deltaBuff);
-								//check for presence of exponent
-								hasExp = 0;
-								for(uint8_t i=0; i<SDL_strlen(deltaBuff);i++){
-									if(deltaBuff[i]=='E'){
-										hasExp = 1;
-										break;
-									}
-								}
-								tok = SDL_strtok_r(deltaBuff,".",&saveptr);
-								if(tok!=NULL){
-									//SDL_Log("tok_1: %s\n",tok);
-									tok = SDL_strtok_r(NULL,"E",&saveptr); //some values are specified with exponents
+								}else if(hasExp){
+									//we missed parsing the exponent...
+									//assume value was something like '3E9'
+									memcpy(iccBuff, &line[55], 7); //remake iccBuff
+									iccBuff[7] = '\0';
+									tok = SDL_strtok_r(iccBuff,"E",&saveptr);
 									if(tok!=NULL){
-										//SDL_Log("tok_2: %s\n",tok);
-										nd->tran[tranInd].delta.format = (uint16_t)SDL_strlen(tok);
-										//check for trailing empty spaces
-										for(uint8_t i=0;i<nd->tran[tranInd].delta.format;i++){
-											if(SDL_isspace(tok[i])){
-												nd->tran[tranInd].delta.format = i;
-												break;
-											}
-										}
-										//SDL_Log("format: %u\n",nd->tran[tranInd].delta.format);
 										tok = SDL_strtok_r(NULL,"",&saveptr); //get the remaining part of the string (only get past here if the value was expressed in exponent form)
 										if(tok!=NULL){
-											//value was in exponent format
-											nd->tran[tranInd].delta.exponent = (int8_t)atoi(tok);
-											gammaDelta = gammaDelta / powf(10.0f,(float)(nd->tran[tranInd].delta.exponent));
-											if(nd->tran[tranInd].delta.format > 15U){
-												nd->tran[tranInd].delta.format = 15U; //only 4 bits available for precision
-											}
-											nd->tran[tranInd].delta.format |= (uint16_t)(1U << 4); //exponent flag
-											//SDL_Log("mixing ratio in exponent form: %s, value: %f, exponent: %i\n",line,(double)gammaDelta,nd->tran[tranInd].delta.exponent);
-										}else if(hasExp){
-											//we missed parsing the exponent...
-											//assume value was something like '3.E9', in which case the exponent was
-											//earlier parsed as the format instead
-											memcpy(deltaBuff, &line[41], 8); //remake deltaBuff
-											deltaBuff[8] = '\0';
-											tok = SDL_strtok_r(deltaBuff,".",&saveptr);
+											nd->tran[tranInd].icc.exponent = (int8_t)SDL_atoi(tok);
+											gammaICC = gammaICC / powf(10.0f,(float)(nd->tran[tranInd].icc.exponent));
+											nd->tran[tranInd].icc.format = 1;
+											nd->tran[tranInd].icc.format |= (uint16_t)(1U << 4); //exponent flag
+											//SDL_Log("ICC in exponent form: %s, exponent: %i\n",line,nd->tran[tranInd].icc.exponent);
+										}
+									}
+								}
+							}
+
+							//gamma conversion coeff: check for special value type
+							nd->tran[tranInd].icc.err=0;
+							tok = SDL_strtok_r(icceBuff, " ",&saveptr);
+							if(tok!=NULL){
+								if(SDL_strcmp(tok,"GT")==0){
+									nd->tran[tranInd].icc.format |= (uint16_t)(VALUETYPE_GREATERTHAN << 5);
+								}else if(SDL_strcmp(tok,"GT")==0){
+									nd->tran[tranInd].icc.format |= (uint16_t)(VALUETYPE_GREATERTHAN << 5);
+								}else if(SDL_strcmp(tok,"GE")==0){
+									nd->tran[tranInd].icc.format |= (uint16_t)(VALUETYPE_GREATEROREQUALTHAN << 5);
+								}else if(SDL_strcmp(tok,"LT")==0){
+									nd->tran[tranInd].icc.format |= (uint16_t)(VALUETYPE_LESSTHAN << 5);
+								}else if(SDL_strcmp(tok,"LE")==0){
+									nd->tran[tranInd].icc.format |= (uint16_t)(VALUETYPE_LESSOREQUALTHAN << 5);
+								}else if(SDL_strcmp(tok,"AP")==0){
+									nd->tran[tranInd].icc.format |= (uint16_t)(VALUETYPE_APPROX << 5);
+								}else if(SDL_strcmp(tok,"?")==0){
+									nd->tran[tranInd].icc.format |= (uint16_t)(VALUETYPE_UNKNOWN << 5);
+								}else{
+									nd->tran[tranInd].icc.err=(uint8_t)atoi(icceBuff);
+								}
+							}
+							
+							//gamma multipolarity
+							nd->tran[tranInd].numMultipoles = 0;
+							tok = SDL_strtok_r(mBuff," ",&saveptr);
+							if(tok != NULL){
+								uint8_t tentative = 0;
+								uint8_t derived = 0;
+								//SDL_Log("%s\n",tok);
+								nd->tran[tranInd].multipole[0] = 0; //default
+								for(int i=0;i<(int)SDL_strlen(tok);i++){
+									if(nd->tran[tranInd].numMultipoles >= MAXMULTPERLEVEL){
+										SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"parseENSDFFile - too many multipoles in string: %s\n",tok);
+										return -1;
+									}
+									if(tok[i]=='('){
+										tentative = 1;
+										if(i == 0){
+											nd->tran[tranInd].multipole[nd->tran[tranInd].numMultipoles] |= (uint8_t)(TENTATIVEMULT_YES << 5);
+										}
+									}else if(tok[i]==')'){
+										tentative = 0;
+									}else if(tok[i]=='['){
+										derived = 1;
+										if(i == 0){
+											nd->tran[tranInd].multipole[nd->tran[tranInd].numMultipoles] |= (uint8_t)(TENTATIVEMULT_DERIVED << 5U);
+										}
+									}else if(tok[i]==']'){
+										derived = 0;
+									}else if((tok[i]=='+')||(tok[i]==',')){
+										nd->tran[tranInd].numMultipoles++;
+										nd->tran[tranInd].multipole[nd->tran[tranInd].numMultipoles] = 0; //default
+										if(tentative){
+											nd->tran[tranInd].multipole[nd->tran[tranInd].numMultipoles] |= (uint8_t)(TENTATIVEMULT_YES << 5);
+										}else if(derived){
+											nd->tran[tranInd].multipole[nd->tran[tranInd].numMultipoles] |= (uint8_t)(TENTATIVEMULT_DERIVED << 5);
+										}else{
+											nd->tran[tranInd].multipole[nd->tran[tranInd].numMultipoles] |= (uint8_t)(TENTATIVEMULT_NONE << 5);
+										}
+									}else if(tok[i]=='E'){
+										nd->tran[tranInd].multipole[nd->tran[tranInd].numMultipoles] &= (uint8_t)(~(uint8_t)(1U)); //unset
+									}else if(tok[i]=='M'){
+										nd->tran[tranInd].multipole[nd->tran[tranInd].numMultipoles] |= (uint8_t)(1U);
+									}else if(tok[i]=='D'){
+										//set M1 as placeholder value
+										nd->tran[tranInd].multipole[nd->tran[tranInd].numMultipoles] |= (uint8_t)(1U);
+										nd->tran[tranInd].multipole[nd->tran[tranInd].numMultipoles] |= (uint8_t)((uint8_t)(1U) << 1);
+										//specify that assignment is 'D'
+										nd->tran[tranInd].multipole[nd->tran[tranInd].numMultipoles] |= (uint8_t)(1U << 7);
+									}else if(tok[i]=='Q'){
+										//set E2 as placeholder value
+										nd->tran[tranInd].multipole[nd->tran[tranInd].numMultipoles] &= (uint8_t)(~(uint8_t)(1U)); //unset
+										nd->tran[tranInd].multipole[nd->tran[tranInd].numMultipoles] |= (uint8_t)((uint8_t)(2U) << 1);
+										//specify that assignment is 'Q'
+										nd->tran[tranInd].multipole[nd->tran[tranInd].numMultipoles] |= (uint8_t)(1U << 7);
+									}else if(SDL_isdigit(tok[i])){
+										//set multipole order
+										nd->tran[tranInd].multipole[nd->tran[tranInd].numMultipoles] |= (uint8_t)(((uint8_t)(tok[i] - '0') & 15U) << 1);
+									}
+								}
+								nd->tran[tranInd].numMultipoles++;
+								//SDL_Log("Number of multipoles: %u\n",nd->tran[tranInd].numMultipoles);
+							}else{
+								//recopy buffer
+								memcpy(mBuff, &line[31], 10);
+								mBuff[10] = '\0';
+								if(!SDL_isspace(mBuff[0])){
+									//string with no preceding or trailing spaces
+									SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,"Unhandled multipolarity string: %s\n",mBuff);
+								}
+							}
+
+							//gamma mixing ratio
+							float gammaDelta = (float)atof(deltaBuff);
+							//get the number of sig figs
+							nd->tran[tranInd].delta.format = 0; //default
+							//SDL_Log("deltaBuff: %s\n",deltaBuff);
+							//check for presence of exponent
+							hasExp = 0;
+							for(uint8_t i=0; i<SDL_strlen(deltaBuff);i++){
+								if(deltaBuff[i]=='E'){
+									hasExp = 1;
+									break;
+								}
+							}
+							tok = SDL_strtok_r(deltaBuff,".",&saveptr);
+							if(tok!=NULL){
+								//SDL_Log("tok_1: %s\n",tok);
+								tok = SDL_strtok_r(NULL,"E",&saveptr); //some values are specified with exponents
+								if(tok!=NULL){
+									//SDL_Log("tok_2: %s\n",tok);
+									nd->tran[tranInd].delta.format = (uint16_t)SDL_strlen(tok);
+									//check for trailing empty spaces
+									for(uint8_t i=0;i<nd->tran[tranInd].delta.format;i++){
+										if(SDL_isspace(tok[i])){
+											nd->tran[tranInd].delta.format = i;
+											break;
+										}
+									}
+									//SDL_Log("format: %u\n",nd->tran[tranInd].delta.format);
+									tok = SDL_strtok_r(NULL,"",&saveptr); //get the remaining part of the string (only get past here if the value was expressed in exponent form)
+									if(tok!=NULL){
+										//value was in exponent format
+										nd->tran[tranInd].delta.exponent = (int8_t)atoi(tok);
+										gammaDelta = gammaDelta / powf(10.0f,(float)(nd->tran[tranInd].delta.exponent));
+										if(nd->tran[tranInd].delta.format > 15U){
+											nd->tran[tranInd].delta.format = 15U; //only 4 bits available for precision
+										}
+										nd->tran[tranInd].delta.format |= (uint16_t)(1U << 4); //exponent flag
+										//SDL_Log("mixing ratio in exponent form: %s, value: %f, exponent: %i\n",line,(double)gammaDelta,nd->tran[tranInd].delta.exponent);
+									}else if(hasExp){
+										//we missed parsing the exponent...
+										//assume value was something like '3.E9', in which case the exponent was
+										//earlier parsed as the format instead
+										memcpy(deltaBuff, &line[41], 8); //remake deltaBuff
+										deltaBuff[8] = '\0';
+										tok = SDL_strtok_r(deltaBuff,".",&saveptr);
+										if(tok!=NULL){
+											tok = SDL_strtok_r(NULL,"E",&saveptr);
 											if(tok!=NULL){
-												tok = SDL_strtok_r(NULL,"E",&saveptr);
-												if(tok!=NULL){
-													nd->tran[tranInd].delta.exponent = (int8_t)SDL_atoi(tok);
-													gammaDelta = gammaDelta / powf(10.0f,(float)(nd->tran[tranInd].delta.exponent));
-													nd->tran[tranInd].delta.format = 1;
-													nd->tran[tranInd].delta.format |= (uint16_t)(1U << 4); //exponent flag
-													//SDL_Log("mixing ratio in exponent form: %s, exponent: %i\n",line,nd->tran[tranInd].delta.exponent);
-												}
+												nd->tran[tranInd].delta.exponent = (int8_t)SDL_atoi(tok);
+												gammaDelta = gammaDelta / powf(10.0f,(float)(nd->tran[tranInd].delta.exponent));
+												nd->tran[tranInd].delta.format = 1;
+												nd->tran[tranInd].delta.format |= (uint16_t)(1U << 4); //exponent flag
+												//SDL_Log("mixing ratio in exponent form: %s, exponent: %i\n",line,nd->tran[tranInd].delta.exponent);
 											}
 										}
 									}
 								}
+							}
 
-								//gamma mixing ratio: check for special value type
-								nd->tran[tranInd].delta.err=0;
-								tok = SDL_strtok_r(deltaeBuff, " ",&saveptr);
-								if(tok!=NULL){
-									if(SDL_strcmp(tok,"GT")==0){
-										nd->tran[tranInd].delta.format |= (uint16_t)(VALUETYPE_GREATERTHAN << 5);
-									}else if(SDL_strcmp(tok,"GT")==0){
-										nd->tran[tranInd].delta.format |= (uint16_t)(VALUETYPE_GREATERTHAN << 5);
-									}else if(SDL_strcmp(tok,"GE")==0){
-										nd->tran[tranInd].delta.format |= (uint16_t)(VALUETYPE_GREATEROREQUALTHAN << 5);
-									}else if(SDL_strcmp(tok,"LT")==0){
-										nd->tran[tranInd].delta.format |= (uint16_t)(VALUETYPE_LESSTHAN << 5);
-									}else if(SDL_strcmp(tok,"LE")==0){
-										nd->tran[tranInd].delta.format |= (uint16_t)(VALUETYPE_LESSOREQUALTHAN << 5);
-									}else if(SDL_strcmp(tok,"AP")==0){
-										nd->tran[tranInd].delta.format |= (uint16_t)(VALUETYPE_APPROX << 5);
-									}else if(SDL_strcmp(tok,"?")==0){
-										nd->tran[tranInd].delta.format |= (uint16_t)(VALUETYPE_UNKNOWN << 5);
-									}else{
-										if(deltaeBuff[0]=='+'){
-											//asymmetric errors
-											//SDL_Log("aysmmetric err: %s\n",deltaeBuff);
-											tok = SDL_strtok_r(deltaeBuff, "-",&saveptr);
-											if(tok != NULL){
-												nd->tran[tranInd].delta.err = (uint8_t)atoi(tok); //positive error
-												tok = SDL_strtok_r(NULL, "",&saveptr); //get rest of the string
-												if(tok!=NULL){
-													uint16_t negErr = ((uint16_t)atoi(tok) & 127U); //negative error
-													//SDL_Log("neg err: %u\n",negErr);
-													nd->tran[tranInd].delta.format |= (uint16_t)(VALUETYPE_ASYMERROR << 5);
-													nd->tran[tranInd].delta.format |= (uint16_t)(negErr << 9);
-												}
-											}
-										}else if(deltaeBuff[0]=='-'){
-											//asymmetric errors, negative error first
-											//SDL_Log("aysmmetric err: %s\n",deltaeBuff);
-											tok = SDL_strtok_r(deltaeBuff, "+",&saveptr);
-											if((tok != NULL)&&(SDL_strlen(tok)>1)){
-												uint16_t negErr = ((uint16_t)atoi(tok+1) & 127U); //negative error
+							//gamma mixing ratio: check for special value type
+							nd->tran[tranInd].delta.err=0;
+							tok = SDL_strtok_r(deltaeBuff, " ",&saveptr);
+							if(tok!=NULL){
+								if(SDL_strcmp(tok,"GT")==0){
+									nd->tran[tranInd].delta.format |= (uint16_t)(VALUETYPE_GREATERTHAN << 5);
+								}else if(SDL_strcmp(tok,"GT")==0){
+									nd->tran[tranInd].delta.format |= (uint16_t)(VALUETYPE_GREATERTHAN << 5);
+								}else if(SDL_strcmp(tok,"GE")==0){
+									nd->tran[tranInd].delta.format |= (uint16_t)(VALUETYPE_GREATEROREQUALTHAN << 5);
+								}else if(SDL_strcmp(tok,"LT")==0){
+									nd->tran[tranInd].delta.format |= (uint16_t)(VALUETYPE_LESSTHAN << 5);
+								}else if(SDL_strcmp(tok,"LE")==0){
+									nd->tran[tranInd].delta.format |= (uint16_t)(VALUETYPE_LESSOREQUALTHAN << 5);
+								}else if(SDL_strcmp(tok,"AP")==0){
+									nd->tran[tranInd].delta.format |= (uint16_t)(VALUETYPE_APPROX << 5);
+								}else if(SDL_strcmp(tok,"?")==0){
+									nd->tran[tranInd].delta.format |= (uint16_t)(VALUETYPE_UNKNOWN << 5);
+								}else{
+									if(deltaeBuff[0]=='+'){
+										//asymmetric errors
+										//SDL_Log("aysmmetric err: %s\n",deltaeBuff);
+										tok = SDL_strtok_r(deltaeBuff, "-",&saveptr);
+										if(tok != NULL){
+											nd->tran[tranInd].delta.err = (uint8_t)atoi(tok); //positive error
+											tok = SDL_strtok_r(NULL, "",&saveptr); //get rest of the string
+											if(tok!=NULL){
+												uint16_t negErr = ((uint16_t)atoi(tok) & 127U); //negative error
 												//SDL_Log("neg err: %u\n",negErr);
 												nd->tran[tranInd].delta.format |= (uint16_t)(VALUETYPE_ASYMERROR << 5);
 												nd->tran[tranInd].delta.format |= (uint16_t)(negErr << 9);
-												tok = SDL_strtok_r(NULL, "",&saveptr); //get rest of the string
-												if(tok!=NULL){
-													nd->tran[tranInd].delta.err = (uint8_t)atoi(tok); //positive error
-												}
 											}
-										}else{
-											nd->tran[tranInd].delta.err=(uint8_t)atoi(deltaeBuff);
 										}
+									}else if(deltaeBuff[0]=='-'){
+										//asymmetric errors, negative error first
+										//SDL_Log("aysmmetric err: %s\n",deltaeBuff);
+										tok = SDL_strtok_r(deltaeBuff, "+",&saveptr);
+										if((tok != NULL)&&(SDL_strlen(tok)>1)){
+											uint16_t negErr = ((uint16_t)atoi(tok+1) & 127U); //negative error
+											//SDL_Log("neg err: %u\n",negErr);
+											nd->tran[tranInd].delta.format |= (uint16_t)(VALUETYPE_ASYMERROR << 5);
+											nd->tran[tranInd].delta.format |= (uint16_t)(negErr << 9);
+											tok = SDL_strtok_r(NULL, "",&saveptr); //get rest of the string
+											if(tok!=NULL){
+												nd->tran[tranInd].delta.err = (uint8_t)atoi(tok); //positive error
+											}
+										}
+									}else{
+										nd->tran[tranInd].delta.err=(uint8_t)atoi(deltaeBuff);
 									}
 								}
+							}
 
-								nd->tran[tranInd].intensity.val=gammaI;
-								nd->tran[tranInd].icc.val=gammaICC;
-								if(gammaICC > 0.0f){
-									//flag that the nuclide has ICC data
-									nd->nuclData[nd->numNucl].flags |= (1U << 2);
-								}
-								nd->tran[tranInd].delta.val=gammaDelta;
-								if(gammaDelta != 0.0f){
-									//flag that the nuclide has mixing ratio data
-									nd->nuclData[nd->numNucl].flags |= (1U << 3);
-								}
-								nd->levels[nd->numLvls-1].numTran++;
-								nd->numTran++;
-									
-							}else if(SDL_strcmp(typebuff+1," G")==0){
-								//check for other properties not specified in the main record
-								uint32_t tranInd = nd->levels[nd->numLvls-1].firstTran + (uint32_t)(nd->levels[nd->numLvls-1].numTran - 1);
-								char gBuff[80],tval[80];
-								SDL_strlcpy(gBuff,line,80);
-								tok=SDL_strtok_r(gBuff," $={},",&saveptr);
-								while(tok != NULL){
-									SDL_strlcpy(tval,tok,80);
-									if(SDL_strcmp(tval,"CC")==0){
-										//SDL_Log("Found conversion coefficient in line: %s\n",line);
-										if(nd->tran[tranInd].icc.val == 0.0f){
-											tok = SDL_strtok_r(NULL," $={},",&saveptr);
-											if(tok!=NULL){
-												SDL_strlcpy(tval,tok,80);
-												//SDL_Log("tval: %s\n",tval);
-												nd->tran[tranInd].icc.val = (float)atof(tval);
-												//flag that the nuclide has ICC data
-												nd->nuclData[nd->numNucl].flags |= (1U << 2);
-												//check for presence of exponent
-												uint8_t hasExp = 0;
-												for(uint8_t i=0; i<SDL_strlen(tval);i++){
-													if(tval[i]=='E'){
-														hasExp = 1;
-														break;
-													}
+							nd->tran[tranInd].intensity.val=gammaI;
+							nd->tran[tranInd].icc.val=gammaICC;
+							if(gammaICC > 0.0f){
+								//flag that the nuclide has ICC data
+								nd->nuclData[nd->numNucl].flags |= (1U << 2);
+							}
+							nd->tran[tranInd].delta.val=gammaDelta;
+							if(gammaDelta != 0.0f){
+								//flag that the nuclide has mixing ratio data
+								nd->nuclData[nd->numNucl].flags |= (1U << 3);
+							}
+							nd->levels[nd->numLvls-1].numTran++;
+							nd->numTran++;
+							if(nd->numTran >= MAXNUMTRAN){
+								SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"number of parsed transitions exceeds the maximum (%u)!\n",MAXNUMTRAN);
+  							exit(-1);	
+							}
+								
+						}else if(SDL_strcmp(typebuff+1," G")==0){
+							//check for other properties not specified in the main record
+							uint32_t tranInd = nd->levels[nd->numLvls-1].firstTran + (uint32_t)(nd->levels[nd->numLvls-1].numTran - 1);
+							char gBuff[80],tval[80];
+							SDL_strlcpy(gBuff,line,80);
+							tok=SDL_strtok_r(gBuff," $={},",&saveptr);
+							while(tok != NULL){
+								SDL_strlcpy(tval,tok,80);
+								if(SDL_strcmp(tval,"CC")==0){
+									//SDL_Log("Found conversion coefficient in line: %s\n",line);
+									if(nd->tran[tranInd].icc.val == 0.0f){
+										tok = SDL_strtok_r(NULL," $={},",&saveptr);
+										if(tok!=NULL){
+											SDL_strlcpy(tval,tok,80);
+											//SDL_Log("tval: %s\n",tval);
+											nd->tran[tranInd].icc.val = (float)atof(tval);
+											//flag that the nuclide has ICC data
+											nd->nuclData[nd->numNucl].flags |= (1U << 2);
+											//check for presence of exponent
+											uint8_t hasExp = 0;
+											for(uint8_t i=0; i<SDL_strlen(tval);i++){
+												if(tval[i]=='E'){
+													hasExp = 1;
+													break;
 												}
-												char *saveptr2 = NULL;
-												char *tok2 = SDL_strtok_r(tval,".",&saveptr2);
+											}
+											char *saveptr2 = NULL;
+											char *tok2 = SDL_strtok_r(tval,".",&saveptr2);
+											if(tok2!=NULL){
+												//SDL_Log("tok2_1: %s\n",tok);
+												tok2 = SDL_strtok_r(NULL,"E",&saveptr2); //some values are specified with exponents
 												if(tok2!=NULL){
-													//SDL_Log("tok2_1: %s\n",tok);
-													tok2 = SDL_strtok_r(NULL,"E",&saveptr2); //some values are specified with exponents
+													//SDL_Log("tok2_2: %s\n",tok2);
+													nd->tran[tranInd].icc.format = (uint16_t)SDL_strlen(tok2);
+													//check for trailing empty spaces
+													for(uint8_t i=0;i<nd->tran[tranInd].icc.format;i++){
+														if(SDL_isspace(tok2[i])){
+															nd->tran[tranInd].icc.format = i;
+															break;
+														}
+													}
+													if(nd->tran[tranInd].icc.format > 15U){
+														nd->tran[tranInd].icc.format = 15U; //only 4 bits available for precision
+													}
+													//SDL_Log("format: %u\n",nd->tran[tranInd].icc.format);
+													tok2 = SDL_strtok_r(NULL,"",&saveptr2); //get the remaining part of the string (only get past here if the value was expressed in exponent form)
 													if(tok2!=NULL){
-														//SDL_Log("tok2_2: %s\n",tok2);
-														nd->tran[tranInd].icc.format = (uint16_t)SDL_strlen(tok2);
-														//check for trailing empty spaces
-														for(uint8_t i=0;i<nd->tran[tranInd].icc.format;i++){
-															if(SDL_isspace(tok2[i])){
-																nd->tran[tranInd].icc.format = i;
-																break;
-															}
-														}
-														if(nd->tran[tranInd].icc.format > 15U){
-															nd->tran[tranInd].icc.format = 15U; //only 4 bits available for precision
-														}
-														//SDL_Log("format: %u\n",nd->tran[tranInd].icc.format);
-														tok2 = SDL_strtok_r(NULL,"",&saveptr2); //get the remaining part of the string (only get past here if the value was expressed in exponent form)
-														if(tok2!=NULL){
-															//SDL_Log("ICC in exponent form: %s\n",line);
-															//value was in exponent format
-															nd->tran[tranInd].icc.exponent = (int8_t)atoi(tok2);
-															nd->tran[tranInd].icc.val = nd->tran[tranInd].icc.val / powf(10.0f,(float)(nd->tran[tranInd].icc.exponent));
-															nd->tran[tranInd].icc.format |= (uint16_t)(1U << 4); //exponent flag
-														}else if(hasExp){
-															//we missed parsing the exponent...
-															//assume value was something like '3.E9', in which case the exponent was
-															//earlier parsed as the format instead
-															SDL_strlcpy(tval,tok,80); //remake tval
-															tok2 = SDL_strtok_r(tval,".",&saveptr2);
-															if(tok2!=NULL){
-																tok2 = SDL_strtok_r(NULL,"E",&saveptr2);
-																if(tok2!=NULL){
-																	nd->tran[tranInd].icc.exponent = (int8_t)SDL_atoi(tok2);
-																	nd->tran[tranInd].icc.val = nd->tran[tranInd].icc.val / powf(10.0f,(float)(nd->tran[tranInd].icc.exponent));
-																	nd->tran[tranInd].icc.format = 1;
-																	nd->tran[tranInd].icc.format |= (uint16_t)(1U << 4); //exponent flag
-																	//SDL_Log("ICC in exponent form: %s, exponent: %u\n",line,nd->tran[tranInd].icc.exponent);
-																}
-															}
-														}
+														//SDL_Log("ICC in exponent form: %s\n",line);
+														//value was in exponent format
+														nd->tran[tranInd].icc.exponent = (int8_t)atoi(tok2);
+														nd->tran[tranInd].icc.val = nd->tran[tranInd].icc.val / powf(10.0f,(float)(nd->tran[tranInd].icc.exponent));
+														nd->tran[tranInd].icc.format |= (uint16_t)(1U << 4); //exponent flag
 													}else if(hasExp){
 														//we missed parsing the exponent...
-														//assume value was something like '3E9'
+														//assume value was something like '3.E9', in which case the exponent was
+														//earlier parsed as the format instead
 														SDL_strlcpy(tval,tok,80); //remake tval
-														tok2 = SDL_strtok_r(tval,"E",&saveptr2);
+														tok2 = SDL_strtok_r(tval,".",&saveptr2);
 														if(tok2!=NULL){
-															tok2 = SDL_strtok_r(NULL,"",&saveptr2); //get the remaining part of the string (only get past here if the value was expressed in exponent form)
+															tok2 = SDL_strtok_r(NULL,"E",&saveptr2);
 															if(tok2!=NULL){
 																nd->tran[tranInd].icc.exponent = (int8_t)SDL_atoi(tok2);
 																nd->tran[tranInd].icc.val = nd->tran[tranInd].icc.val / powf(10.0f,(float)(nd->tran[tranInd].icc.exponent));
 																nd->tran[tranInd].icc.format = 1;
 																nd->tran[tranInd].icc.format |= (uint16_t)(1U << 4); //exponent flag
-																//SDL_Log("ICC in exponent form: %s, exponent: %i\n",line,nd->tran[tranInd].icc.exponent);
+																//SDL_Log("ICC in exponent form: %s, exponent: %u\n",line,nd->tran[tranInd].icc.exponent);
 															}
 														}
 													}
-												}
-												tok = SDL_strtok_r(NULL," $={},",&saveptr);
-												if(tok!=NULL){
-													SDL_strlcpy(tval,tok,80);
-													//SDL_Log("tok: %s\n",tok);
-													if((tval[0]=='I')&&(SDL_strlen(tval) > 1)){
-														nd->tran[tranInd].icc.err = (uint8_t)atoi(&tval[1]);
-													}else if(SDL_isdigit(tval[0])){
-														nd->tran[tranInd].icc.err = (uint8_t)atoi(tval);
+												}else if(hasExp){
+													//we missed parsing the exponent...
+													//assume value was something like '3E9'
+													SDL_strlcpy(tval,tok,80); //remake tval
+													tok2 = SDL_strtok_r(tval,"E",&saveptr2);
+													if(tok2!=NULL){
+														tok2 = SDL_strtok_r(NULL,"",&saveptr2); //get the remaining part of the string (only get past here if the value was expressed in exponent form)
+														if(tok2!=NULL){
+															nd->tran[tranInd].icc.exponent = (int8_t)SDL_atoi(tok2);
+															nd->tran[tranInd].icc.val = nd->tran[tranInd].icc.val / powf(10.0f,(float)(nd->tran[tranInd].icc.exponent));
+															nd->tran[tranInd].icc.format = 1;
+															nd->tran[tranInd].icc.format |= (uint16_t)(1U << 4); //exponent flag
+															//SDL_Log("ICC in exponent form: %s, exponent: %i\n",line,nd->tran[tranInd].icc.exponent);
+														}
 													}
+												}
+											}
+											tok = SDL_strtok_r(NULL," $={},",&saveptr);
+											if(tok!=NULL){
+												SDL_strlcpy(tval,tok,80);
+												//SDL_Log("tok: %s\n",tok);
+												if((tval[0]=='I')&&(SDL_strlen(tval) > 1)){
+													nd->tran[tranInd].icc.err = (uint8_t)atoi(&tval[1]);
+												}else if(SDL_isdigit(tval[0])){
+													nd->tran[tranInd].icc.err = (uint8_t)atoi(tval);
 												}
 											}
 										}
 									}
-									if(tok!=NULL){
-										tok = SDL_strtok_r(NULL," $={},",&saveptr);
-									}
+								}
+								if(tok!=NULL){
+									tok = SDL_strtok_r(NULL," $={},",&saveptr);
 								}
 							}
 						}

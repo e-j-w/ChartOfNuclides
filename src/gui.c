@@ -2405,7 +2405,7 @@ void drawChartOfNuclides(const app_data *restrict dat, app_state *restrict state
   for(float i=(minX-fmodf(minX,tickSpacing));i<maxX;i+=tickSpacing){
     if(i >= 0.0f){
       uint16_t numInd = (uint16_t)(SDL_floorf(i));
-      if((i<MAX_MASS_NUM)&&(i<=MAX_NEUTRON_NUM)){
+      if(i<=MAX_NEUTRON_NUM){
         rect.x = (i + 0.5f - minX)*DEFAULT_NUCLBOX_DIM*state->ds.chartZoomScale*state->ds.uiUserScale;
         if(rect.x < (state->ds.windowXRes - 1.5f*CHART_AXIS_DEPTH*state->ds.uiUserScale)){ //dodge axis label
           SDL_snprintf(tmpStr,32,"%u",numInd); //is this slow?
@@ -2418,7 +2418,7 @@ void drawChartOfNuclides(const app_data *restrict dat, app_state *restrict state
   for(float i=(minY-fmodf(minY,tickSpacing));i<maxY;i+=tickSpacing){
     if(i >= 0.0f){
       uint16_t numInd = (uint16_t)(SDL_floorf(i));
-      if((i<MAX_MASS_NUM)&&(i<MAX_PROTON_NUM)){
+      if(i<MAX_PROTON_NUM){
         rect.y = (maxY - i + 0.5f)*DEFAULT_NUCLBOX_DIM*state->ds.chartZoomScale*state->ds.uiUserScale;
         if(rect.y > 1.2f*CHART_AXIS_DEPTH*state->ds.uiUserScale){ //dodge axis label
           SDL_snprintf(tmpStr,32,"%u",numInd); //is this slow?

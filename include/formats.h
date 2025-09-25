@@ -30,7 +30,6 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include "enums.h"
 
 //app data parameters (should all be powers of 2)
-#define MAX_ARRAY_SIZE           65536
 #define MAX_NUM_STRINGS          128  //maximum number of text strings
 
 //search parameters
@@ -51,20 +50,15 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //increasing these numbers will increase the size of 
 //the nuclear database stored in memory (and on disk)
 #define ENSDFSTRBUFSIZE          262144 //2^18
-#define MAXCASCDELENGTH          20
-#define MAXGAMMASPERLEVEL        10
 #define MAXMULTPERLEVEL          3
 #define MAXNUMNUCL               3500
 #define MAXNUMLVLS               200000
-#define MAXNUMTRAN               290000
+#define MAXNUMTRAN               300000
 #define MAXSPINPARVAL            190000
 #define MAXNUMDECAYMODES         11000
 #define MAXNUMREACTIONS          15000
-#define MAXRXNSPERNUCL           64
-#define MAX_RXN_STRLEN           64
 #define MAX_NEUTRON_NUM          200
 #define MAX_PROTON_NUM           130
-#define MAX_MASS_NUM             350
 
 #define MAX_SPIN_VARS            32 //maximum spin variables (ie. J1, J2, J3...) per nuclide
 

@@ -342,7 +342,11 @@ void stopUIAnimation(const app_data *restrict dat, app_state *restrict state, co
 			clearSelectionStrs(&state->ds,&state->tss,1); //allow strings on the info box to be selectable
 			break;
 		case UIANIM_NUCLINFOBOX_TXTFADEIN:
-			clearSelectionStrs(&state->ds,&state->tss,1); //allow strings on the full info box to be selectable
+			if(state->uiState == UISTATE_FULLLEVELINFOWITHMENU){
+				clearSelectionStrs(&state->ds,&state->tss,0); //strings on full level list are no longer selectable
+			}else{
+				clearSelectionStrs(&state->ds,&state->tss,1); //allow strings on the full info box to be selectable
+			}
 			break;
 		case UIANIM_NUCLINFOBOX_TXTFADEOUT:
 			state->ds.shownElements &= (~((uint64_t)(1) << UIELEM_NUCL_FULLINFOBOX)); //close the full info box
@@ -1116,34 +1120,34 @@ void getNuclNameStr(char strOut[32], const nucl *restrict nuclide, const uint8_t
 	//convert mass number to superscript
 	nameStrCpy = findReplaceAllUTF8("0","⁰",strOut);
 	SDL_strlcpy(strOut,nameStrCpy,32);
-	free(nameStrCpy);
+	SDL_free(nameStrCpy);
 	nameStrCpy = findReplaceAllUTF8("1","¹",strOut);
 	SDL_strlcpy(strOut,nameStrCpy,32);
-	free(nameStrCpy);
+	SDL_free(nameStrCpy);
 	nameStrCpy = findReplaceAllUTF8("2","²",strOut);
 	SDL_strlcpy(strOut,nameStrCpy,32);
-	free(nameStrCpy);
+	SDL_free(nameStrCpy);
 	nameStrCpy = findReplaceAllUTF8("3","³",strOut);
 	SDL_strlcpy(strOut,nameStrCpy,32);
-	free(nameStrCpy);
+	SDL_free(nameStrCpy);
 	nameStrCpy = findReplaceAllUTF8("4","⁴",strOut);
 	SDL_strlcpy(strOut,nameStrCpy,32);
-	free(nameStrCpy);
+	SDL_free(nameStrCpy);
 	nameStrCpy = findReplaceAllUTF8("5","⁵",strOut);
 	SDL_strlcpy(strOut,nameStrCpy,32);
-	free(nameStrCpy);
+	SDL_free(nameStrCpy);
 	nameStrCpy = findReplaceAllUTF8("6","⁶",strOut);
 	SDL_strlcpy(strOut,nameStrCpy,32);
-	free(nameStrCpy);
+	SDL_free(nameStrCpy);
 	nameStrCpy = findReplaceAllUTF8("7","⁷",strOut);
 	SDL_strlcpy(strOut,nameStrCpy,32);
-	free(nameStrCpy);
+	SDL_free(nameStrCpy);
 	nameStrCpy = findReplaceAllUTF8("8","⁸",strOut);
 	SDL_strlcpy(strOut,nameStrCpy,32);
-	free(nameStrCpy);
+	SDL_free(nameStrCpy);
 	nameStrCpy = findReplaceAllUTF8("9","⁹",strOut);
 	SDL_strlcpy(strOut,nameStrCpy,32);
-	free(nameStrCpy);
+	SDL_free(nameStrCpy);
 }
 
 uint8_t elemStrToZ(const char *elemStr){
@@ -3436,7 +3440,6 @@ void setInfoBoxDimensions(const app_data *restrict dat, app_state *restrict stat
 }
 
 void setSelectedNuclOnLevelList(const app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat, const uint16_t N, const uint16_t Z, const uint8_t updateRxn){
-	clearSelectionStrs(&state->ds,&state->tss,0); //strings on previous full level list are no longer selectable
 	uint16_t selNucl = getNuclInd(&dat->ndat,(int16_t)N,(int16_t)Z);
 	//SDL_Log("Selected nucleus: %u\n",state->chartSelectedNucl);
 	if(((selNucl < MAXNUMNUCL)&&(selNucl != state->chartSelectedNucl)) || updateRxn){
@@ -3653,7 +3656,7 @@ void contextMenuClickAction(app_data *restrict dat, app_state *restrict state, c
 					}
 					char *cpyStrCpy = findReplaceAllUTF8("%%","%",state->copiedTxt); //you copii?
 					SDL_strlcpy(state->copiedTxt,cpyStrCpy,MAX_SELECTABLE_STR_LEN);
-					free(cpyStrCpy);
+					SDL_free(cpyStrCpy);
 					SDL_SetClipboardText(state->copiedTxt);
 					//SDL_Log("Copied text to clipboard: %s\n",SDL_GetClipboardText());
 					break;
@@ -3798,7 +3801,7 @@ void contextMenuClickAction(app_data *restrict dat, app_state *restrict state, c
 						SDL_strlcpy(state->copiedTxt,&state->tss.selectableStrTxt[state->tss.selectedStr][state->tss.selStartPos],selLen+1);
 						char *selSubStrCpy = findReplaceAllUTF8("%%","%",state->copiedTxt);
 						SDL_strlcpy(state->copiedTxt,selSubStrCpy,selLen+1);
-						free(selSubStrCpy);
+						SDL_free(selSubStrCpy);
 					}
 					SDL_SetClipboardText(state->copiedTxt);
 				}
