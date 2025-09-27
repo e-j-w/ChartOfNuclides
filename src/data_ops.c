@@ -532,6 +532,33 @@ void setupNuclideContextMenu(const app_data *restrict dat, app_state *restrict s
 	startUIAnimation(dat,state,UIANIM_CONTEXT_MENU_SHOW);
 }
 
+void setupStrClickActionOrCopyContextMenu(const app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat, const uint16_t clickedStrInd){
+  state->cms.useHeaderText = 0;
+	state->cms.selectionInd = clickedStrInd;
+	state->cms.numContextMenuItems = 2;
+	state->cms.contextMenuItems[0] = CONTEXTITEM_COPY;
+	state->cms.contextMenuItems[1] = CONTEXTITEM_STRCLICKACTION;
+	state->cms.mouseOverContextItem = 255;
+	state->cms.clickedContextItem = 255;
+	updateSingleUIElemPosition(dat,state,rdat,UIELEM_CONTEXT_MENU);
+	//const SDL_FRect conMenuRect = {(float)state->ds.uiElemPosX[UIELEM_CONTEXT_MENU], (float)state->ds.uiElemPosY[UIELEM_CONTEXT_MENU], (float)state->ds.uiElemWidth[UIELEM_CONTEXT_MENU], (float)state->ds.uiElemHeight[UIELEM_CONTEXT_MENU]};
+	//removeSelectableStringsInRect(&state->tss, conMenuRect);
+	startUIAnimation(dat,state,UIANIM_CONTEXT_MENU_SHOW);
+}
+
+void setupStrClickActionContextMenu(const app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat, const uint16_t clickedStrInd){
+  state->cms.useHeaderText = 0;
+	state->cms.selectionInd = clickedStrInd;
+	state->cms.numContextMenuItems = 1;
+	state->cms.contextMenuItems[0] = CONTEXTITEM_STRCLICKACTION;
+	state->cms.mouseOverContextItem = 255;
+	state->cms.clickedContextItem = 255;
+	updateSingleUIElemPosition(dat,state,rdat,UIELEM_CONTEXT_MENU);
+	//const SDL_FRect conMenuRect = {(float)state->ds.uiElemPosX[UIELEM_CONTEXT_MENU], (float)state->ds.uiElemPosY[UIELEM_CONTEXT_MENU], (float)state->ds.uiElemWidth[UIELEM_CONTEXT_MENU], (float)state->ds.uiElemHeight[UIELEM_CONTEXT_MENU]};
+	//removeSelectableStringsInRect(&state->tss, conMenuRect);
+	startUIAnimation(dat,state,UIANIM_CONTEXT_MENU_SHOW);
+}
+
 void setupCopyContextMenu(const app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat){
   state->cms.useHeaderText = 0;
 	state->cms.numContextMenuItems = 1;
@@ -2545,6 +2572,164 @@ double getRawErrFromDB(const valWithErr *restrict valStruct){
 	return err;
 }
 
+
+//reutrns MAXNUMNUCL if the daughter is unknown, otherwise reutrns the index
+//of the daughter nuclide
+uint16_t getDecayModeDaughterNucl(const ndata *restrict nd, const uint16_t parentNucl, const uint8_t dcyMode){
+	if(parentNucl < nd->numNucl){
+		int16_t daughterN = nd->nuclData[parentNucl].N;
+		int16_t daughterZ = nd->nuclData[parentNucl].Z;
+		switch(dcyMode){
+			case DECAYMODE_BETAMINUS:
+				daughterN = (int16_t)(daughterN - 1);
+				daughterZ = (int16_t)(daughterZ + 1);
+				break;
+			case DECAYMODE_BETAPLUS:
+			case DECAYMODE_EC:
+			case DECAYMODE_ECANDBETAPLUS:
+				daughterN = (int16_t)(daughterN + 1);
+				daughterZ = (int16_t)(daughterZ - 1);
+				break;
+			case DECAYMODE_ALPHA:
+				daughterN = (int16_t)(daughterN - 2);
+				daughterZ = (int16_t)(daughterZ - 2);
+				break;
+			case DECAYMODE_BETAMINUS_ALPHA:
+				daughterN = (int16_t)(daughterN - 3);
+				daughterZ = (int16_t)(daughterZ - 1);
+				break;
+			case DECAYMODE_BETAMINUS_NEUTRON:
+				daughterN = (int16_t)(daughterN - 2);
+				daughterZ = (int16_t)(daughterZ + 1);
+				break;
+			case DECAYMODE_BETAMINUS_TWONEUTRON:
+				daughterN = (int16_t)(daughterN - 3);
+				daughterZ = (int16_t)(daughterZ + 1);
+				break;
+			case DECAYMODE_BETAMINUS_THREENEUTRON:
+				daughterN = (int16_t)(daughterN - 4);
+				daughterZ = (int16_t)(daughterZ + 1);
+				break;
+			case DECAYMODE_BETAMINUS_FOURNEUTRON:
+				daughterN = (int16_t)(daughterN - 5);
+				daughterZ = (int16_t)(daughterZ + 1);
+				break;
+			case DECAYMODE_BETAMINUS_FIVENEUTRON:
+				daughterN = (int16_t)(daughterN - 6);
+				daughterZ = (int16_t)(daughterZ + 1);
+				break;
+			case DECAYMODE_BETAMINUS_SIXNEUTRON:
+				daughterN = (int16_t)(daughterN - 7);
+				daughterZ = (int16_t)(daughterZ + 1);
+				break;
+			case DECAYMODE_BETAMINUS_SEVENNEUTRON:
+				daughterN = (int16_t)(daughterN - 8);
+				daughterZ = (int16_t)(daughterZ + 1);
+				break;
+			case DECAYMODE_BETAMINUS_PROTON:
+				daughterN = (int16_t)(daughterN - 1);
+				break;
+			case DECAYMODE_BETAPLUS_PROTON:
+			case DECAYMODE_EC_PROTON:
+				daughterN = (int16_t)(daughterN + 1);
+				daughterZ = (int16_t)(daughterZ - 2);
+				break;
+			case DECAYMODE_BETAPLUS_TWOPROTON:
+			case DECAYMODE_EC_TWOPROTON:
+				daughterN = (int16_t)(daughterN + 1);
+				daughterZ = (int16_t)(daughterZ - 3);
+				break;
+			case DECAYMODE_BETAPLUS_THREEPROTON:
+			case DECAYMODE_EC_THREEPROTON:
+				daughterN = (int16_t)(daughterN + 1);
+				daughterZ = (int16_t)(daughterZ - 4);
+				break;
+			case DECAYMODE_BETAPLUS_ALPHA:
+			case DECAYMODE_EC_ALPHA:
+				daughterN = (int16_t)(daughterN - 1);
+				daughterZ = (int16_t)(daughterZ - 3);
+				break;
+			case DECAYMODE_3H:
+				daughterN = (int16_t)(daughterN - 1);
+				daughterZ = (int16_t)(daughterZ - 2);
+				break;
+			case DECAYMODE_3HE:
+				daughterN = (int16_t)(daughterN - 2);
+				daughterZ = (int16_t)(daughterZ - 1);
+				break;
+			case DECAYMODE_DEUTERON:
+				daughterN = (int16_t)(daughterN - 1);
+				daughterZ = (int16_t)(daughterZ - 1);
+				break;
+			case DECAYMODE_NEUTRON:
+				daughterN = (int16_t)(daughterN - 1);
+				break;
+			case DECAYMODE_TWONEUTRON:
+				daughterN = (int16_t)(daughterN - 2);
+				break;
+			case DECAYMODE_PROTON:
+				daughterZ = (int16_t)(daughterZ - 1);
+				break;
+			case DECAYMODE_TWOPROTON:
+				daughterZ = (int16_t)(daughterZ - 2);
+				break;
+			case DECAYMODE_2BETAMINUS:
+				daughterN = (int16_t)(daughterN - 2);
+				daughterZ = (int16_t)(daughterZ + 2);
+				break;
+			case DECAYMODE_2BETAPLUS:
+			case DECAYMODE_2EC:
+				daughterN = (int16_t)(daughterN + 2);
+				daughterZ = (int16_t)(daughterZ - 2);
+				break;
+			case DECAYMODE_8BE:
+				daughterN = (int16_t)(daughterN - 4);
+				daughterZ = (int16_t)(daughterZ - 4);
+				break;
+			case DECAYMODE_12C:
+				daughterN = (int16_t)(daughterN - 6);
+				daughterZ = (int16_t)(daughterZ - 6);
+				break;
+			case DECAYMODE_14C:
+				daughterN = (int16_t)(daughterN - 8);
+				daughterZ = (int16_t)(daughterZ - 6);
+				break;
+			case DECAYMODE_20NE:
+				daughterN = (int16_t)(daughterN - 10);
+				daughterZ = (int16_t)(daughterZ - 10);
+				break;
+			case DECAYMODE_24NE:
+				daughterN = (int16_t)(daughterN - 14);
+				daughterZ = (int16_t)(daughterZ - 10);
+				break;
+			case DECAYMODE_25NE:
+				daughterN = (int16_t)(daughterN - 15);
+				daughterZ = (int16_t)(daughterZ - 10);
+				break;
+			case DECAYMODE_28MG:
+				daughterN = (int16_t)(daughterN - 16);
+				daughterZ = (int16_t)(daughterZ - 12);
+				break;
+			case DECAYMODE_34SI:
+				daughterN = (int16_t)(daughterN - 20);
+				daughterZ = (int16_t)(daughterZ - 14);
+				break;
+			case DECAYMODE_SPONTANEOUSFISSION:
+			case DECAYMODE_BETAMINUS_SPONTANEOUSFISSION:
+			case DECAYMODE_EC_SPONTANEOUSFISSION:
+			case DECAYMODE_ECANDBETAPLUS_SPONTANEOUSFISSION:
+				return MAXNUMNUCL; //unknown daughter
+			case DECAYMODE_IT:
+			default:
+				break;																
+		}
+		return getNuclInd(nd,daughterN,daughterZ);
+	}else{
+		SDL_Log("getDecayModeDaughterNucl - invalid parent nuclide (%u).\n",parentNucl);
+		return MAXNUMNUCL; //unknown daughter
+	}	
+}
+
 double getLevelEnergykeV(const ndata *restrict nd, const uint32_t levelInd){
 	if(levelInd < nd->numLvls){
 		double levelE = getRawValFromDB(&nd->levels[levelInd].energy);
@@ -2907,7 +3092,12 @@ uint16_t getNumTotalLvlDispLines(const ndata *restrict nd, const app_state *rest
 uint16_t getNumDispLinesUpToLvl(const ndata *restrict nd, const app_state *restrict state, const uint16_t nuclLevel){
 	uint16_t numLines = 0;
 	for(uint32_t i = nd->nuclData[state->chartSelectedNucl].firstLevel; i<(nd->nuclData[state->chartSelectedNucl].firstLevel + (uint32_t)nuclLevel); i++){
-		numLines += getNumDispLinesForLvl(nd,i);
+		if(state->ds.selectedRxn == 0){
+			numLines += getNumDispLinesForLvl(nd,i);
+		}else if(nd->levels[i].populatingRxns & ((uint64_t)(1) << (state->ds.selectedRxn-1))){
+			numLines += getNumDispLinesForLvl(nd,i);
+		}
+		
 	}
 	return numLines;
 }
@@ -3593,7 +3783,7 @@ void updateSearchUIState(const app_data *restrict dat, app_state *restrict state
   }
 }
 
-void contextMenuClickAction(app_data *restrict dat, app_state *restrict state, const uint8_t menuItemInd){
+void contextMenuClickAction(app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat, const uint8_t menuItemInd){
 	
 	if(menuItemInd >= state->cms.numContextMenuItems){
 		SDL_Log("WARNING: conextMenuClickAction - attempt to click on invalid menu item (%u).\n",menuItemInd);
@@ -3806,6 +3996,24 @@ void contextMenuClickAction(app_data *restrict dat, app_state *restrict state, c
 					SDL_SetClipboardText(state->copiedTxt);
 				}
 				//SDL_Log("Copied text to clipboard: %s\n",SDL_GetClipboardText());
+			}
+			break;
+		case CONTEXTITEM_STRCLICKACTION:
+			switch((state->tss.selectableStrProp[state->cms.selectionInd] >> 4U) & 15U){
+				case TXTCLICKACTION_GOTO_LEVEL:
+					//scroll to the specified level
+					state->ds.nuclFullInfoScrollToY = getNumDispLinesUpToLvl(&dat->ndat,state,state->tss.selectableStrClickPar[state->cms.selectionInd]); //scroll to the level of interest
+					state->ds.timeSinceFCScollStart = 0.0f;
+					state->ds.fcScrollInProgress = 1;
+					state->ds.fcScrollFinished = 0;
+					//SDL_Log("Scrolling to: %f\n",(double)state->ds.nuclFullInfoScrollToY);
+					break;
+				case TXTCLICKACTION_GOTO_DAUGHTER:
+					//go to the specified nuclide
+					setSelectedNuclOnLevelList(dat,state,rdat,(uint16_t)(dat->ndat.nuclData[state->tss.selectableStrClickPar[state->cms.selectionInd]].N),(uint16_t)(dat->ndat.nuclData[state->tss.selectableStrClickPar[state->cms.selectionInd]].Z),0);
+					break;
+				default:
+					break;
 			}
 			break;
 		case CONTEXTITEM_ENUM_LENGTH:

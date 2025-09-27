@@ -38,6 +38,8 @@ void updateUIAnimationTimes(const app_data *restrict dat, app_state *restrict st
 void updateDrawingState(const app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat, const float deltaTime);
 
 void setupNuclideContextMenu(const app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat, const uint16_t nuclInd);
+void setupStrClickActionOrCopyContextMenu(const app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat, const uint16_t clickedStrInd);
+void setupStrClickActionContextMenu(const app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat, const uint16_t clickedStrInd);
 void setupCopyContextMenu(const app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat);
 
 const char* getSpecialLvlStr(const app_data *restrict dat, const uint8_t specialLvlInd);
@@ -69,6 +71,8 @@ double getRawDblValFromDB(const dblValWithErr *restrict valStruct);
 double getRawValFromDB(const valWithErr *restrict valStruct);
 double getRawDblErrFromDB(const dblValWithErr *restrict valStruct);
 double getRawErrFromDB(const valWithErr *restrict valStruct);
+
+uint16_t getDecayModeDaughterNucl(const ndata *restrict nd, const uint16_t parentNucl, const uint8_t dcyMode);
 
 double getLevelEnergykeV(const ndata *restrict nd, const uint32_t levelInd);
 
@@ -119,7 +123,7 @@ void setSelectedNuclOnLevelList(const app_data *restrict dat, app_state *restric
 void setSelectedNuclOnChart(const app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat, const uint16_t N, const uint16_t Z, const uint8_t forcePan);
 void setSelectedNuclOnChartDirect(const app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat, const uint16_t selNucl, const uint8_t forcePan);
 void updateSearchUIState(const app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat);
-void contextMenuClickAction(app_data *restrict dat, app_state *restrict state, const uint8_t menuItemInd);
+void contextMenuClickAction(app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat, const uint8_t menuItemInd);
 void uiElemHoldAction(const app_data *restrict dat, app_state *restrict state, const uint8_t uiElemID);
 void uiElemMouseoverAction(const app_state *restrict state, resource_data *restrict rdat);
 void uiElemClickAction(app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat, const uint8_t doubleClick, const uint8_t uiElemID);

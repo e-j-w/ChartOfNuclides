@@ -803,6 +803,7 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
     }
 
     //handle selectable text strings
+    uint16_t clickedSelStr = MAX_SELECTABLE_STRS;
     if(state->ds.textDragInProgress == 1){
       //update text selection drag state
       if(state->mouseXPx >= 0.0f){ //only update the selection position if the mouse is still in the window
@@ -823,6 +824,10 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
         for(uint16_t i=0; i<state->tss.numSelStrs; i++){
           if((state->mouseXPx >= state->tss.selectableStrRect[i].x)&&(state->mouseXPx < (state->tss.selectableStrRect[i].x + state->tss.selectableStrRect[i].w))){
             if((state->mouseYPx >= state->tss.selectableStrRect[i].y)&&(state->mouseYPx < (state->tss.selectableStrRect[i].y + state->tss.selectableStrRect[i].h))){
+              if((state->tss.selectableStrProp[i] & (uint8_t)(1U << 3U))&&(rightClick)){
+                //if the string is clickable, and has been right clicked...
+                clickedSelStr = i;
+              }
               //if(state->mouseMovedDuringClick == 0){
                 //mouse is over selectable text
                 //SDL_Log("Mouse over selectable string %u.\n",i);
@@ -860,15 +865,30 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
     }
 
     if(rightClick){
+      //check for clickable strings
+
+      //check if there is a text selection
       SDL_FRect selRect = getTextSelRect(&state->tss,rdat);
       if((state->mouseRightClickPosXPx >= selRect.x)&&(state->mouseRightClickPosXPx < (selRect.x + selRect.w))){
         if((state->mouseRightClickPosYPx >= selRect.y)&&(state->mouseRightClickPosYPx < (selRect.y + selRect.h))){
           //right clicked on selected text
           //SDL_Log("Right click on selected text.\n");
-          setupCopyContextMenu(dat,state,rdat);
+          if(state->tss.selectedStr != clickedSelStr){
+            setupCopyContextMenu(dat,state,rdat);
+          }else{
+            setupStrClickActionOrCopyContextMenu(dat,state,rdat,clickedSelStr);
+          }
           rightClick = 0; //unset
         }
       }
+
+      if((rightClick)&&(clickedSelStr != MAX_SELECTABLE_STRS)){
+        //right clicked on unselected but clickable text
+        //SDL_Log("Right click on clickable text.\n");
+        setupStrClickActionContextMenu(dat,state,rdat,clickedSelStr);
+        rightClick = 0; //unset
+      }
+      
       if(rightClick){
         if(state->cms.numContextMenuItems > 0){
           startUIAnimation(dat,state,UIANIM_CONTEXT_MENU_HIDE); //menu will be closed after animation finishes
@@ -905,7 +925,7 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
                     if((state->mouseMovedDuringClick == 0)||(chartDraggable)){
                       state->cms.clickedContextItem = i;
                       //SDL_Log("Clicked context menu item %u.\n",state->cms.clickedContextItem);
-                      contextMenuClickAction(dat,state,i);
+                      contextMenuClickAction(dat,state,rdat,i);
                       break;
                     }
                   }
