@@ -111,9 +111,9 @@ static const float uiScales[UISCALE_ENUM_LENGTH] = {1.0f,1.20f,1.60f,1.85f};
 #define RXN_MENU_ITEM_MAXCHARS       25
 
 //context menu
-#define CONTEXT_MENU_HEADER_HEIGHT   40  //in unscaled pixels
+#define CONTEXT_MENU_HEADER_HEIGHT   32  //in unscaled pixels
 #define CONTEXT_MENU_WIDTH           190 //in unscaled pixels
-#define CONTEXT_MENU_ITEM_SPACING    36  //in unscaled pixels
+#define CONTEXT_MENU_ITEM_SPACING    28  //in unscaled pixels
 
 //zoom buttons
 #define ZOOM_BUTTON_POS_XR           UI_PADDING_SIZE   //in unscaled pixels

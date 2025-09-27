@@ -3584,7 +3584,7 @@ void drawContextMenu(const app_data *restrict dat, const app_state *restrict sta
   //draw header text
   if(state->cms.useHeaderText){
     drawRect.x = state->ds.uiElemPosX[UIELEM_CONTEXT_MENU] + (PANEL_EDGE_SIZE + 3*UI_PADDING_SIZE)*state->ds.uiUserScale;
-    drawRect.y = ((float)state->ds.uiElemPosY[UIELEM_CONTEXT_MENU] + (2*PANEL_EDGE_SIZE + 3*UI_PADDING_SIZE)*state->ds.uiUserScale);
+    drawRect.y = ((float)state->ds.uiElemPosY[UIELEM_CONTEXT_MENU] + (PANEL_EDGE_SIZE + 3*UI_PADDING_SIZE)*state->ds.uiUserScale);
     drawTextAlignedSized(rdat,drawRect.x,drawRect.y,blackCol8Bit,FONTSIZE_LARGE,txtAlpha,state->cms.headerText,ALIGN_LEFT,16384);
   }
   
