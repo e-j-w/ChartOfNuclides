@@ -25,15 +25,15 @@ using game data/state */
 #include "formats.h"
 
 //function prototypes
-void initializeTempState(const app_data *restrict dat, app_state *restrict state, thread_manager_state *restrict tms);
+void initializeTempState(const app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat, thread_manager_state *restrict tms);
 
 void takeScreenshot(resource_data *restrict rdat);
 
 void clearSelectionStrs(const drawing_state *restrict ds, text_selection_state *restrict tss, const uint8_t modifiableAfter);
 
-void startUIAnimation(const app_data *restrict dat, app_state *restrict state, const uint8_t uiAnim);
-void stopUIAnimation(const app_data *restrict dat, app_state *restrict state, const uint8_t uiAnim);
-void updateUIAnimationTimes(const app_data *restrict dat, app_state *restrict state, const float deltaTime);
+void startUIAnimation(const app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat, const uint8_t uiAnim);
+void stopUIAnimation(const app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat, const uint8_t uiAnim);
+void updateUIAnimationTimes(const app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat, const float deltaTime);
 
 void updateDrawingState(const app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat, const float deltaTime);
 
@@ -116,7 +116,7 @@ float mouseYPxToZ(const drawing_state *restrict ds, const float mouseY);
 float getChartWidthNAfterZoom(const drawing_state *restrict ds);
 float getChartHeightZAfterZoom(const drawing_state *restrict ds);
 
-void changeUIState(const app_data *restrict dat, app_state *restrict state, const uint8_t newState);
+void changeUIState(const app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat, const uint8_t newState);
 void panChartToPos(const app_data *restrict dat, drawing_state *restrict ds, const uint16_t posN, const uint16_t posZ, float panTime);
 uint16_t getNearestNuclInd(const app_data *restrict dat, const int16_t N, const int16_t Z);
 void setSelectedNuclOnLevelList(const app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat, const uint16_t N, const uint16_t Z, const uint8_t updateRxn);

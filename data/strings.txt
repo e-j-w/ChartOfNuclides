@@ -77,10 +77,11 @@ chartview_spin|Ground state spin
 chartview_parity|GS parity
 chartview_num_levels|Known Levels
 chartview_unknown_energy|Ambiguous Lvls
-context_copy|Copy
+context_copy|Copy selected text
 context_copy_nuclname|Copy Nuclide Name
 context_copy_nuclinfo|Copy Nuclide Info
 search_placeholder|Type to search (eg. '32Si')
+search_placeholder_levelinfo|Type to search (eg. level/gamma energy)
 search_result_nuclide|Nuclide / Isotope
 search_result_egamma|Transition
 search_result_elevel|Excited State

@@ -2851,6 +2851,8 @@ void drawNuclFullInfoBox(const app_data *restrict dat, app_state *restrict state
       getRxnStr(rxnStr,&dat->ndat,dat->ndat.nuclData[state->chartSelectedNucl].firstRxn + (uint32_t)(state->ds.selectedRxn-1));
       drawDropDownTextButton(&dat->rules.themeRules,rdat,state->ds.uiElemPosX[UIELEM_NUCL_FULLINFOBOX_RXNBUTTON],(int16_t)(state->ds.uiElemPosY[UIELEM_NUCL_FULLINFOBOX_RXNBUTTON] - txtYOffset),state->ds.uiElemWidth[UIELEM_NUCL_FULLINFOBOX_RXNBUTTON],getHighlightState(state,UIELEM_NUCL_FULLINFOBOX_RXNBUTTON),txtAlpha,rxnStr);
     }
+    //search button
+    drawIconButton(&dat->rules.themeRules,rdat,(int16_t)(state->ds.uiElemPosX[UIELEM_SEARCH_BUTTON]),(int16_t)(state->ds.uiElemPosY[UIELEM_SEARCH_BUTTON] - txtYOffset),state->ds.uiElemWidth[UIELEM_SEARCH_BUTTON],getHighlightState(state,UIELEM_SEARCH_BUTTON),1.0f,UIICON_SEARCH);
   }
   
 }
@@ -3302,7 +3304,11 @@ void drawSearchMenu(const app_data *restrict dat, const app_state *restrict stat
 
   //draw entry box
   if(state->ds.searchEntryDispNumChars == 65535U){
-    drawIconAndTextEntryBox(&dat->rules.themeRules,rdat,state->ds.uiElemPosX[UIELEM_SEARCH_ENTRYBOX],(int16_t)(state->ds.uiElemPosY[UIELEM_SEARCH_ENTRYBOX]+yOffset),state->ds.uiElemWidth[UIELEM_SEARCH_ENTRYBOX],getHighlightState(state,UIELEM_SEARCH_ENTRYBOX),HIGHLIGHT_INACTIVE,alpha8,UIICON_SEARCHGRAY,dat->strings[dat->locStringIDs[LOCSTR_SEARCH_PLACEHOLDER]],0,256,-1);
+    if((state->uiState == UISTATE_FULLLEVELINFOWITHMENU)||(state->uiState == UISTATE_FULLLEVELINFO)){
+      drawIconAndTextEntryBox(&dat->rules.themeRules,rdat,state->ds.uiElemPosX[UIELEM_SEARCH_ENTRYBOX],(int16_t)(state->ds.uiElemPosY[UIELEM_SEARCH_ENTRYBOX]+yOffset),state->ds.uiElemWidth[UIELEM_SEARCH_ENTRYBOX],getHighlightState(state,UIELEM_SEARCH_ENTRYBOX),HIGHLIGHT_INACTIVE,alpha8,UIICON_SEARCHGRAY,dat->strings[dat->locStringIDs[LOCSTR_SEARCH_PLACEHOLDER_LEVELINFO]],0,256,-1);
+    }else{
+      drawIconAndTextEntryBox(&dat->rules.themeRules,rdat,state->ds.uiElemPosX[UIELEM_SEARCH_ENTRYBOX],(int16_t)(state->ds.uiElemPosY[UIELEM_SEARCH_ENTRYBOX]+yOffset),state->ds.uiElemWidth[UIELEM_SEARCH_ENTRYBOX],getHighlightState(state,UIELEM_SEARCH_ENTRYBOX),HIGHLIGHT_INACTIVE,alpha8,UIICON_SEARCHGRAY,dat->strings[dat->locStringIDs[LOCSTR_SEARCH_PLACEHOLDER]],0,256,-1);
+    }
   }else{
     drawIconAndTextEntryBox(&dat->rules.themeRules,rdat,state->ds.uiElemPosX[UIELEM_SEARCH_ENTRYBOX],(int16_t)(state->ds.uiElemPosY[UIELEM_SEARCH_ENTRYBOX]+yOffset),state->ds.uiElemWidth[UIELEM_SEARCH_ENTRYBOX],getHighlightState(state,UIELEM_SEARCH_ENTRYBOX),HIGHLIGHT_NORMAL,alpha8,UIICON_SEARCH,state->ss.searchString,state->ds.searchEntryDispStartChar,state->ds.searchEntryDispNumChars,state->searchCursorPos);
   }

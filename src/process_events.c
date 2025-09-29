@@ -486,7 +486,7 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
       if(state->uiState == UISTATE_FULLLEVELINFOWITHMENU){
         if(state->ds.fcNuclChangeInProgress == 0){
           if((state->ds.shownElements & ((uint64_t)(1) << UIELEM_RXN_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_RXN_MENU_HIDE]==0.0f)){
-            startUIAnimation(dat,state,UIANIM_RXN_MENU_SHOW);
+            startUIAnimation(dat,state,rdat,UIANIM_RXN_MENU_SHOW);
           }
           goto change_lvl_list_nucl;
         }
@@ -735,8 +735,8 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
       //close the chart view menu
       uiElemClickAction(dat,state,rdat,0,UIELEM_SEARCH_BUTTON);
     }else if((state->ds.shownElements & ((uint64_t)(1) << UIELEM_NUCL_INFOBOX))&&(state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_HIDE]==0.0f)){
-      startUIAnimation(dat,state,UIANIM_NUCLINFOBOX_HIDE); //hide the info box, see stopUIAnimation() for info box hiding action
-      startUIAnimation(dat,state,UIANIM_NUCLHIGHLIGHT_HIDE);
+      startUIAnimation(dat,state,rdat,UIANIM_NUCLINFOBOX_HIDE); //hide the info box, see stopUIAnimation() for info box hiding action
+      startUIAnimation(dat,state,rdat,UIANIM_NUCLHIGHLIGHT_HIDE);
     }else if((state->ds.shownElements & ((uint64_t)(1) << UIELEM_RXN_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_RXN_MENU_HIDE]==0.0f)){
       //close the reaction menu
       uiElemClickAction(dat,state,rdat,0,UIELEM_NUCL_FULLINFOBOX_RXNBUTTON);
@@ -747,7 +747,7 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
       uiElemClickAction(dat,state,rdat,0,UIELEM_NUCL_FULLINFOBOX_BACKBUTTON); //go back to the main chart
       state->mouseholdElement = UIELEM_ENUM_LENGTH;
     }else if(state->cms.numContextMenuItems > 0){
-      startUIAnimation(dat,state,UIANIM_CONTEXT_MENU_HIDE); //menu will be closed after animation finishes
+      startUIAnimation(dat,state,rdat,UIANIM_CONTEXT_MENU_HIDE); //menu will be closed after animation finishes
     }else if(state->ds.windowFullscreenMode){
       //exit fullscreen
       state->ds.windowFullscreenMode = 0;
@@ -891,7 +891,7 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
       
       if(rightClick){
         if(state->cms.numContextMenuItems > 0){
-          startUIAnimation(dat,state,UIANIM_CONTEXT_MENU_HIDE); //menu will be closed after animation finishes
+          startUIAnimation(dat,state,rdat,UIANIM_CONTEXT_MENU_HIDE); //menu will be closed after animation finishes
         }
       }
     }
@@ -1083,7 +1083,7 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
       }
     }else if(state->cms.numContextMenuItems > 0){
       if(state->mouseClickPosXPx >= 0.0f){
-        startUIAnimation(dat,state,UIANIM_CONTEXT_MENU_HIDE); //menu will be closed after animation finishes
+        startUIAnimation(dat,state,rdat,UIANIM_CONTEXT_MENU_HIDE); //menu will be closed after animation finishes
       }
     }
   }else{

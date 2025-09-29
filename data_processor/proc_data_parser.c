@@ -327,6 +327,7 @@ static int parseAppRules(app_data *restrict dat, asset_mapping *restrict stringI
 	dat->locStringIDs[LOCSTR_CONTEXT_COPY_NUCLNAME] = (uint16_t)nameToAssetID("context_copy_nuclname",stringIDmap);
 	dat->locStringIDs[LOCSTR_CONTEXT_COPY_NUCLINFO] = (uint16_t)nameToAssetID("context_copy_nuclinfo",stringIDmap);
 	dat->locStringIDs[LOCSTR_SEARCH_PLACEHOLDER] = (uint16_t)nameToAssetID("search_placeholder",stringIDmap);
+	dat->locStringIDs[LOCSTR_SEARCH_PLACEHOLDER_LEVELINFO] = (uint16_t)nameToAssetID("search_placeholder_levelinfo",stringIDmap);
 	dat->locStringIDs[LOCSTR_SEARCHRES_NUCLIDE] = (uint16_t)nameToAssetID("search_result_nuclide",stringIDmap);
 	dat->locStringIDs[LOCSTR_SEARCHRES_EGAMMA] = (uint16_t)nameToAssetID("search_result_egamma",stringIDmap);
 	dat->locStringIDs[LOCSTR_SEARCHRES_ELEVEL] = (uint16_t)nameToAssetID("search_result_elevel",stringIDmap);

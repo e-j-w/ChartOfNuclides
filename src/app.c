@@ -106,7 +106,7 @@ int main(int argc, char *argv[]){
 
   //load preferences (needed prior to window created)
   gdat->rdat.appPrefPath = SDL_GetPrefPath("ChartOfNuclides","chart"); //setup path
-  initializeTempState(&gdat->dat,&gdat->state,&gdat->tms);
+  initializeTempState(&gdat->dat,&gdat->state,&gdat->rdat,&gdat->tms); //data_ops.c
   updatePrefsFromConfigFile(gdat->rdat.appPrefPath,&gdat->dat.rules,&gdat->state); //read settings from .ini file
 
   //setup the application window
@@ -179,7 +179,7 @@ int main(int argc, char *argv[]){
     gdat->state.gamepadDisabled = 1;
   }
 
-  startUIAnimation(&gdat->dat,&gdat->state,UIANIM_CHART_FADEIN);
+  startUIAnimation(&gdat->dat,&gdat->state,&gdat->rdat,UIANIM_CHART_FADEIN);
   
   //main loop
   while(!gdat->state.quitAppFlag){
@@ -196,7 +196,7 @@ int main(int argc, char *argv[]){
 
     updateThreads(&gdat->dat,&gdat->state,&gdat->rdat,&gdat->tms);
 
-    updateUIAnimationTimes(&gdat->dat,&gdat->state,deltaTime);
+    updateUIAnimationTimes(&gdat->dat,&gdat->state,&gdat->rdat,deltaTime);
 
     updateDrawingState(&gdat->dat,&gdat->state,&gdat->rdat,deltaTime);
 
