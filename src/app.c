@@ -203,11 +203,11 @@ int main(int argc, char *argv[]){
     processFrameEvents(&gdat->dat,&gdat->state,&gdat->rdat); //can block the main thread to save CPU, see process_events.h
     
     if(gdat->state.searchStrUpdated){
-      if(gdat->state.ss.searchInProgress == 0){
+      if(gdat->state.ss.searchInProgress == SEARCHSTATE_NOTSEARCHING){
         gdat->state.searchStrUpdated = 0; //reset flag
         //start the search
         if(startSearchThreads(&gdat->dat,&gdat->state,&gdat->tms)<0){
-          gdat->state.ss.searchInProgress = 0; //unable to start search
+          gdat->state.ss.searchInProgress = SEARCHSTATE_NOTSEARCHING; //unable to start search
         }
       }
     }

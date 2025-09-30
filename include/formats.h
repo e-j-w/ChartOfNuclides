@@ -287,9 +287,9 @@ typedef struct
   uint8_t numResults; //the number of results returned so far
   uint8_t numSearchTok;
   uint8_t boostedResultType;  //result type which is prioritized, values from search_agent_enum
-  uint16_t boostedNucl; //nuclide which is prioritized, MAXNUMNUCL if none
+  uint16_t boostedNucl; //nuclide which is prioritized, MAXNUMNUCL if none (or if only one nuclide is being searched, specifies that nuclide)
   uint32_t finishedSearchAgents; //bit pattern specifying which search agents have finished
-  uint8_t searchInProgress; //=1 if a search is currently being performed
+  uint8_t searchInProgress; //values from search_state_enum
   SDL_Semaphore *canUpdateResults;
 }search_state; //struct containing search data
 

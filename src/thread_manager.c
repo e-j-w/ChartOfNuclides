@@ -50,7 +50,9 @@ int tpFunc(void *data){
             }
             //SDL_Log("Searching for special strings...\n");
             searchSpecialStrings(&tdat->state->ss);
-            searchNuclides(&tdat->dat->ndat,&tdat->state->ss);
+            if(tdat->state->ss.searchInProgress != SEARCHSTATE_SEARCHING_SINGLENUCL){
+              searchNuclides(&tdat->dat->ndat,&tdat->state->ss);
+            }
             tdat->state->ss.finishedSearchAgents |= (uint32_t)(1U << SEARCHAGENT_PARSESPECIALSTRS); //flag search agent as finished
             tdat->state->ss.finishedSearchAgents |= (uint32_t)(1U << SEARCHAGENT_NUCLIDE); //flag search agent as finished
             break;
@@ -136,8 +138,13 @@ int startSearchThreads(app_data *restrict dat, app_state *restrict state, thread
   memset(state->ss.updatedResults,0,sizeof(state->ss.updatedResults));
   state->ss.finishedSearchAgents = 0;
   state->ss.numUpdatedResults = 0;
-  state->ss.searchInProgress = 1;
-  state->ss.boostedNucl = MAXNUMNUCL;
+  if((state->uiState == UISTATE_FULLLEVELINFO)||(state->uiState == UISTATE_FULLLEVELINFOWITHMENU)){
+    state->ss.searchInProgress = SEARCHSTATE_SEARCHING_SINGLENUCL;
+    state->ss.boostedNucl = state->chartSelectedNucl;
+  }else{
+    state->ss.searchInProgress = SEARCHSTATE_SEARCHING;
+    state->ss.boostedNucl = MAXNUMNUCL;
+  }
   state->ss.boostedResultType = SEARCHAGENT_TOKENIZE; //default value
 
   //determine number of threads
@@ -234,7 +241,7 @@ void updateThreads(const app_data *restrict dat, app_state *restrict state, reso
       }
       updateSearchUIState(dat,state,rdat);
       tms->masterThreadState = THREADSTATE_KILL;
-      state->ss.searchInProgress = 0; //allow another search to occur
+      state->ss.searchInProgress = SEARCHSTATE_NOTSEARCHING; //allow another search to occur
     }
   }
 }

@@ -96,7 +96,7 @@ void initializeTempState(const app_data *restrict dat, app_state *restrict state
 	state->ds.infoBoxPrevX = -1.0f;
 	state->cms.numContextMenuItems = 0;
 	state->ss.numResults = 0;
-	state->ss.searchInProgress = 0;
+	state->ss.searchInProgress = SEARCHSTATE_NOTSEARCHING;
 	state->ss.canUpdateResults = SDL_CreateSemaphore(1);
 	clearSelectionStrs(&state->ds,&state->tss,0);
 	memset(state->ds.uiElemExtPlusX,0,sizeof(state->ds.uiElemExtPlusX));
@@ -287,7 +287,9 @@ void stopUIAnimation(const app_data *restrict dat, app_state *restrict state, re
 					if(state->ds.shownElements & ((uint64_t)(1) << UIELEM_NUCL_INFOBOX)){
 						changeUIState(dat,state,rdat,UISTATE_INFOBOX);
 					}else if(state->ds.shownElements & ((uint64_t)(1) << UIELEM_NUCL_FULLINFOBOX)){
-						changeUIState(dat,state,rdat,UISTATE_FULLLEVELINFO);
+						if((state->mouseoverElement != UIELEM_NUCL_FULLINFOBOX_RXNBUTTON)||(state->lastOpenedMenu != UIELEM_RXN_MENU)||(state->lastInputType != INPUT_TYPE_KEYBOARD)){
+							changeUIState(dat,state,rdat,UISTATE_FULLLEVELINFO);
+						}
 					}else{
 						changeUIState(dat,state,rdat,UISTATE_CHARTONLY);
 					}
@@ -303,7 +305,9 @@ void stopUIAnimation(const app_data *restrict dat, app_state *restrict state, re
 			if(!(state->ds.shownElements & ((uint64_t)(1) << UIELEM_PRIMARY_MENU))){
 				if(!(state->ds.shownElements & ((uint64_t)(1) << UIELEM_CHARTOFNUCLIDES))){ //in case the menu was hidden by going back to the main chart
 					if((state->mouseoverElement != UIELEM_NUCL_FULLINFOBOX_BACKBUTTON)||(state->lastOpenedMenu != UIELEM_NUCL_FULLINFOBOX_BACKBUTTON)||(state->lastInputType != INPUT_TYPE_KEYBOARD)){
-						changeUIState(dat,state,rdat,UISTATE_FULLLEVELINFO);
+						if((state->mouseoverElement != UIELEM_SEARCH_BUTTON)||(state->lastOpenedMenu != UIELEM_SEARCH_MENU)||(state->lastInputType != INPUT_TYPE_KEYBOARD)){
+							changeUIState(dat,state,rdat,UISTATE_FULLLEVELINFO);
+						}
 					}
 				}
 			}
@@ -4018,6 +4022,7 @@ void contextMenuClickAction(app_data *restrict dat, app_state *restrict state, r
 			switch((state->tss.selectableStrProp[state->cms.selectionInd] >> 4U) & 15U){
 				case TXTCLICKACTION_GOTO_LEVEL:
 					//scroll to the specified level
+					state->ds.nuclFullInfoScrollStartY = state->ds.nuclFullInfoScrollY;
 					state->ds.nuclFullInfoScrollToY = getNumDispLinesUpToLvl(&dat->ndat,state,state->tss.selectableStrClickPar[state->cms.selectionInd]); //scroll to the level of interest
 					state->ds.timeSinceFCScollStart = 0.0f;
 					state->ds.fcScrollInProgress = 1;
@@ -4049,7 +4054,11 @@ void searchResultClickAction(app_data *restrict dat, app_state *restrict state, 
 
 	startUIAnimation(dat,state,rdat,UIANIM_SEARCH_MENU_HIDE); //menu will be closed after animation finishes
 	state->clickedUIElem = UIELEM_ENUM_LENGTH; //'unclick' the menu button
-	changeUIState(dat,state,rdat,UISTATE_CHARTONLY); //prevents mouseover from still highlighting buttons while the menu closes
+	if(state->uiState == UISTATE_FULLLEVELINFOWITHMENU){
+		changeUIState(dat,state,rdat,UISTATE_FULLLEVELINFO); //prevents mouseover from still highlighting buttons while the menu closes
+	}else{
+		changeUIState(dat,state,rdat,UISTATE_CHARTONLY); //prevents mouseover from still highlighting buttons while the menu closes
+	}
 	
 	uint16_t nuclLevel = 65535U;
 	switch(state->ss.results[resultInd].resultType){
@@ -4058,8 +4067,10 @@ void searchResultClickAction(app_data *restrict dat, app_state *restrict state, 
 			break;
 		case SEARCHAGENT_GAMMACASCADE:
 		case SEARCHAGENT_EGAMMA:
-			setSelectedNuclOnChartDirect(dat,state,rdat,(uint16_t)(state->ss.results[resultInd].resultVal[0]),1);
-			uiElemClickAction(dat,state,rdat,0,UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON);
+			if((state->uiState != UISTATE_FULLLEVELINFO)&&(state->uiState != UISTATE_FULLLEVELINFOWITHMENU)){
+				setSelectedNuclOnChartDirect(dat,state,rdat,(uint16_t)(state->ss.results[resultInd].resultVal[0]),1);
+				uiElemClickAction(dat,state,rdat,0,UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON);
+			}
 			//get the level corresponding to the transition
 			for(uint16_t i=0; i<dat->ndat.nuclData[state->ss.results[resultInd].resultVal[0]].numLevels; i++){
 				uint32_t firstTran = dat->ndat.levels[dat->ndat.nuclData[state->ss.results[resultInd].resultVal[0]].firstLevel + i].firstTran;
@@ -4073,27 +4084,66 @@ void searchResultClickAction(app_data *restrict dat, app_state *restrict state, 
 					break;
 				}
 			}
-			state->ds.nuclFullInfoScrollY = getNumDispLinesUpToLvl(&dat->ndat,state,nuclLevel); //scroll to the level of interest
+			if((state->uiState != UISTATE_FULLLEVELINFO)&&(state->uiState != UISTATE_FULLLEVELINFOWITHMENU)){
+				state->ds.nuclFullInfoScrollY = getNumDispLinesUpToLvl(&dat->ndat,state,nuclLevel); //scroll to the level of interest
+			}else{
+				//search within level list, scroll to result
+				state->ds.nuclFullInfoScrollStartY = state->ds.nuclFullInfoScrollY;
+				state->ds.nuclFullInfoScrollToY = getNumDispLinesUpToLvl(&dat->ndat,state,nuclLevel); //scroll to the level of interest
+				state->ds.timeSinceFCScollStart = 0.0f;
+				state->ds.fcScrollInProgress = 1;
+				state->ds.fcScrollFinished = 0;
+			}
 			break;
 		case SEARCHAGENT_ELEVEL:
-			setSelectedNuclOnChartDirect(dat,state,rdat,(uint16_t)(state->ss.results[resultInd].resultVal[0]),1);
-			uiElemClickAction(dat,state,rdat,0,UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON);
-			nuclLevel = (uint16_t)(state->ss.results[resultInd].resultVal[1] - dat->ndat.nuclData[state->ss.results[resultInd].resultVal[0]].firstLevel);
-			state->ds.nuclFullInfoScrollY = getNumDispLinesUpToLvl(&dat->ndat,state,nuclLevel); //scroll to the level of interest
-			break;
-		case SEARCHAGENT_ELEVELDIFF:
-			setSelectedNuclOnChartDirect(dat,state,rdat,(uint16_t)(state->ss.results[resultInd].resultVal[0]),1);
-			uiElemClickAction(dat,state,rdat,0,UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON);
-			nuclLevel = (uint16_t)(state->ss.results[resultInd].resultVal[1] - dat->ndat.nuclData[state->ss.results[resultInd].resultVal[0]].firstLevel);
-			state->ds.nuclFullInfoScrollY = getNumDispLinesUpToLvl(&dat->ndat,state,nuclLevel); //scroll to the level of interest
-			break;
-		case SEARCHAGENT_HALFLIFE:
-			setSelectedNuclOnChartDirect(dat,state,rdat,(uint16_t)(state->ss.results[resultInd].resultVal[0]),1);
-			if(state->ss.results[resultInd].resultVal[1] != (dat->ndat.nuclData[state->ss.results[resultInd].resultVal[0]].firstLevel + dat->ndat.nuclData[state->ss.results[resultInd].resultVal[0]].gsLevel)){
-				//half-life was of an excited state
+			if((state->uiState != UISTATE_FULLLEVELINFO)&&(state->uiState != UISTATE_FULLLEVELINFOWITHMENU)){
+				setSelectedNuclOnChartDirect(dat,state,rdat,(uint16_t)(state->ss.results[resultInd].resultVal[0]),1);
 				uiElemClickAction(dat,state,rdat,0,UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON);
 				nuclLevel = (uint16_t)(state->ss.results[resultInd].resultVal[1] - dat->ndat.nuclData[state->ss.results[resultInd].resultVal[0]].firstLevel);
 				state->ds.nuclFullInfoScrollY = getNumDispLinesUpToLvl(&dat->ndat,state,nuclLevel); //scroll to the level of interest
+			}else{
+				//search within level list, scroll to result
+				nuclLevel = (uint16_t)(state->ss.results[resultInd].resultVal[1] - dat->ndat.nuclData[state->ss.results[resultInd].resultVal[0]].firstLevel);
+				state->ds.nuclFullInfoScrollStartY = state->ds.nuclFullInfoScrollY;
+				state->ds.nuclFullInfoScrollToY = getNumDispLinesUpToLvl(&dat->ndat,state,nuclLevel); //scroll to the level of interest
+				state->ds.timeSinceFCScollStart = 0.0f;
+				state->ds.fcScrollInProgress = 1;
+				state->ds.fcScrollFinished = 0;
+			}
+			break;
+		case SEARCHAGENT_ELEVELDIFF:
+			if((state->uiState != UISTATE_FULLLEVELINFO)&&(state->uiState != UISTATE_FULLLEVELINFOWITHMENU)){
+				setSelectedNuclOnChartDirect(dat,state,rdat,(uint16_t)(state->ss.results[resultInd].resultVal[0]),1);
+				uiElemClickAction(dat,state,rdat,0,UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON);
+				nuclLevel = (uint16_t)(state->ss.results[resultInd].resultVal[1] - dat->ndat.nuclData[state->ss.results[resultInd].resultVal[0]].firstLevel);
+				state->ds.nuclFullInfoScrollY = getNumDispLinesUpToLvl(&dat->ndat,state,nuclLevel); //scroll to the level of interest
+			}else{
+				//search within level list, scroll to result
+				nuclLevel = (uint16_t)(state->ss.results[resultInd].resultVal[1] - dat->ndat.nuclData[state->ss.results[resultInd].resultVal[0]].firstLevel);
+				state->ds.nuclFullInfoScrollStartY = state->ds.nuclFullInfoScrollY;
+				state->ds.nuclFullInfoScrollToY = getNumDispLinesUpToLvl(&dat->ndat,state,nuclLevel); //scroll to the level of interest
+				state->ds.timeSinceFCScollStart = 0.0f;
+				state->ds.fcScrollInProgress = 1;
+				state->ds.fcScrollFinished = 0;
+			}
+			break;
+		case SEARCHAGENT_HALFLIFE:
+			if((state->uiState != UISTATE_FULLLEVELINFO)&&(state->uiState != UISTATE_FULLLEVELINFOWITHMENU)){
+				setSelectedNuclOnChartDirect(dat,state,rdat,(uint16_t)(state->ss.results[resultInd].resultVal[0]),1);
+				if(state->ss.results[resultInd].resultVal[1] != (dat->ndat.nuclData[state->ss.results[resultInd].resultVal[0]].firstLevel + dat->ndat.nuclData[state->ss.results[resultInd].resultVal[0]].gsLevel)){
+					//half-life was of an excited state
+					uiElemClickAction(dat,state,rdat,0,UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON);
+					nuclLevel = (uint16_t)(state->ss.results[resultInd].resultVal[1] - dat->ndat.nuclData[state->ss.results[resultInd].resultVal[0]].firstLevel);
+					state->ds.nuclFullInfoScrollY = getNumDispLinesUpToLvl(&dat->ndat,state,nuclLevel); //scroll to the level of interest
+				}
+			}else{
+				//search within level list, scroll to result
+				nuclLevel = (uint16_t)(state->ss.results[resultInd].resultVal[1] - dat->ndat.nuclData[state->ss.results[resultInd].resultVal[0]].firstLevel);
+				state->ds.nuclFullInfoScrollStartY = state->ds.nuclFullInfoScrollY;
+				state->ds.nuclFullInfoScrollToY = getNumDispLinesUpToLvl(&dat->ndat,state,nuclLevel); //scroll to the level of interest
+				state->ds.timeSinceFCScollStart = 0.0f;
+				state->ds.fcScrollInProgress = 1;
+				state->ds.fcScrollFinished = 0;
 			}
 			break;
 		default:
@@ -4212,7 +4262,7 @@ void uiElemClickAction(app_data *restrict dat, app_state *restrict state, resour
 				state->ds.shownElements |= ((uint64_t)(1) << UIELEM_SEARCH_MENU);
 				state->lastOpenedMenu = UIELEM_SEARCH_MENU;
 				startUIAnimation(dat,state,rdat,UIANIM_SEARCH_MENU_SHOW);
-				if(state->uiState == UISTATE_FULLLEVELINFO){
+				if((state->uiState == UISTATE_FULLLEVELINFO)||(state->uiState == UISTATE_FULLLEVELINFOWITHMENU)){
 					changeUIState(dat,state,rdat,UISTATE_FULLLEVELINFOWITHMENU);
 				}else{
 					changeUIState(dat,state,rdat,UISTATE_CHARTWITHMENU);

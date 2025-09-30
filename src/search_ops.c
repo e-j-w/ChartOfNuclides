@@ -57,8 +57,8 @@ void sortAndAppendResult(search_state *restrict ss, search_result *restrict res)
 		res->relevance *= 100.0f;
 	}
 	if((res->resultType == SEARCHAGENT_EGAMMA)||(res->resultType == SEARCHAGENT_ELEVEL)||(res->resultType == SEARCHAGENT_GAMMACASCADE)||(res->resultType == SEARCHAGENT_HALFLIFE)||(res->resultType == SEARCHAGENT_ELEVELDIFF)){
-		if(res->resultVal[0] == ss->boostedNucl){
-			//gamma or half-life matching a nuclide
+		if((ss->searchInProgress != SEARCHSTATE_SEARCHING_SINGLENUCL)&&(res->resultVal[0] == ss->boostedNucl)){
+			//gamma, level, or half-life matching a nuclide
 			res->relevance *= 100.0f;
 		}
 	}
@@ -136,6 +136,11 @@ void searchELevel(const ndata *restrict ndat, const app_state *state, search_sta
 			//valid energy
 			for(int16_t j=0; j<ndat->numNucl; j++){
 
+				if((ss->searchInProgress == SEARCHSTATE_SEARCHING_SINGLENUCL)&&(j!=ss->boostedNucl)){
+					//if doing a single-nuclide search, skip all other nuclides
+					continue;
+				}
+
 				float proximityFactor = 0.0f;
 				if(state->ds.chartZoomScale > 5.0f){
 					if(state->chartSelectedNucl != MAXNUMNUCL){
@@ -154,6 +159,15 @@ void searchELevel(const ndata *restrict ndat, const app_state *state, search_sta
 				}
 
 				for(uint32_t k=ndat->nuclData[j].firstLevel; k<(ndat->nuclData[j].firstLevel + (uint32_t)ndat->nuclData[j].numLevels); k++){
+					
+					//for single nuclide searches, if a specific reaction is selected,
+					//do not search levels that are not populated in that reaction
+					if((ss->searchInProgress == SEARCHSTATE_SEARCHING_SINGLENUCL)&&(state->ds.selectedRxn != 0)){
+						if(!(ndat->levels[k].populatingRxns & ((uint64_t)(1) << (state->ds.selectedRxn-1)))){
+							continue;
+						}
+					}
+								
 					if((((ndat->levels[k].energy.format >> 5U) & 15U)) == VALUETYPE_NUMBER){ //ignore variable energy
 						double rawEVal = getRawValFromDB(&ndat->levels[k].energy);
 						double rawErrVal = getRawErrFromDB(&ndat->levels[k].energy);
@@ -209,6 +223,11 @@ void searchELevelDiff(const ndata *restrict ndat, const app_state *state, search
 			//valid energy
 			for(uint16_t j=0; j<ndat->numNucl; j++){
 
+				if((ss->searchInProgress == SEARCHSTATE_SEARCHING_SINGLENUCL)&&(j!=ss->boostedNucl)){
+					//if doing a single-nuclide search, skip all other nuclides
+					continue;
+				}
+
 				float proximityFactor = 0.0f;
 				if(state->ds.chartZoomScale > 5.0f){
 					if(state->chartSelectedNucl != MAXNUMNUCL){
@@ -228,6 +247,15 @@ void searchELevelDiff(const ndata *restrict ndat, const app_state *state, search
 				
 				uint32_t lastLvlInd = (ndat->nuclData[j].firstLevel + (uint32_t)ndat->nuclData[j].numLevels);
 				for(uint32_t k=ndat->nuclData[j].firstLevel; k<lastLvlInd; k++){
+
+					//for single nuclide searches, if a specific reaction is selected,
+					//do not search levels that are not populated in that reaction
+					if((ss->searchInProgress == SEARCHSTATE_SEARCHING_SINGLENUCL)&&(state->ds.selectedRxn != 0)){
+						if(!(ndat->levels[k].populatingRxns & ((uint64_t)(1) << (state->ds.selectedRxn-1)))){
+							continue;
+						}
+					}
+
 					if((((ndat->levels[k].energy.format >> 5U) & 15U)) == VALUETYPE_NUMBER){ //ignore variable energy
 						for(uint32_t l=k+1; l<lastLvlInd; l++){
 							if((((ndat->levels[l].energy.format >> 5U) & 15U)) == VALUETYPE_NUMBER){ //ignore variable energy
@@ -291,6 +319,11 @@ void searchEGamma(const ndata *restrict ndat, const app_state *state, search_sta
 			//valid energy
 			for(int16_t j=0; j<ndat->numNucl; j++){
 
+				if((ss->searchInProgress == SEARCHSTATE_SEARCHING_SINGLENUCL)&&(j!=ss->boostedNucl)){
+					//if doing a single-nuclide search, skip all other nuclides
+					continue;
+				}
+
 				float proximityFactor = 0.0f;
 				if(state->ds.chartZoomScale > 5.0f){
 					if(state->chartSelectedNucl != MAXNUMNUCL){
@@ -309,6 +342,15 @@ void searchEGamma(const ndata *restrict ndat, const app_state *state, search_sta
 				}
 				
 				for(uint32_t k=ndat->nuclData[j].firstLevel; k<(ndat->nuclData[j].firstLevel + (uint32_t)ndat->nuclData[j].numLevels); k++){
+					
+					//for single nuclide searches, if a specific reaction is selected,
+					//do not search levels that are not populated in that reaction
+					if((ss->searchInProgress == SEARCHSTATE_SEARCHING_SINGLENUCL)&&(state->ds.selectedRxn != 0)){
+						if(!(ndat->levels[k].populatingRxns & ((uint64_t)(1) << (state->ds.selectedRxn-1)))){
+							continue;
+						}
+					}
+					
 					for(uint32_t l=ndat->levels[k].firstTran; l<(ndat->levels[k].firstTran + (uint32_t)ndat->levels[k].numTran); l++){
 						if((((ndat->tran[l].energy.format >> 5U) & 15U)) != VALUETYPE_X){ //ignore variable energy
 							double rawEVal = getRawValFromDB(&ndat->tran[l].energy);
@@ -392,6 +434,12 @@ void searchGammaCascade(const ndata *restrict ndat, const app_state *state, sear
 	if(numCascadeGammas > 1){
 		//search for nuclides containing all of the cascade's gammas in coincidenc
 		for(int16_t i=0; i<ndat->numNucl; i++){
+
+			if((ss->searchInProgress == SEARCHSTATE_SEARCHING_SINGLENUCL)&&(i!=ss->boostedNucl)){
+				//if doing a single-nuclide search, skip all other nuclides
+				continue;
+			}
+
 			if(ndat->nuclData[i].numLevels > 1){
 
 				float proximityFactor = 0.0f;
@@ -415,6 +463,15 @@ void searchGammaCascade(const ndata *restrict ndat, const app_state *state, sear
 					if(j==0){
 						break; //safety valve
 					}
+					
+					//for single nuclide searches, if a specific reaction is selected,
+					//do not search levels that are not populated in that reaction
+					if((ss->searchInProgress == SEARCHSTATE_SEARCHING_SINGLENUCL)&&(state->ds.selectedRxn != 0)){
+						if(!(ndat->levels[j].populatingRxns & ((uint64_t)(1) << (state->ds.selectedRxn-1)))){
+							continue;
+						}
+					}
+					
 					for(uint32_t k=ndat->levels[j].firstTran; k<(ndat->levels[j].firstTran + (uint32_t)ndat->levels[j].numTran); k++){
 						if((((ndat->tran[k].energy.format >> 5U) & 15U)) != VALUETYPE_X){ //ignore variable energy
 							double rawEVal = getRawValFromDB(&ndat->tran[k].energy);
@@ -534,6 +591,11 @@ void searchHalfLife(const ndata *restrict ndat, const app_state *state, search_s
 			}
 			for(int16_t j=0; j<ndat->numNucl; j++){
 
+				if((ss->searchInProgress == SEARCHSTATE_SEARCHING_SINGLENUCL)&&(j!=ss->boostedNucl)){
+					//if doing a single-nuclide search, skip all other nuclides
+					continue;
+				}
+
 				float proximityFactor = 0.0f;
 				if(state->ds.chartZoomScale > 5.0f){
 					if(state->chartSelectedNucl != MAXNUMNUCL){
@@ -553,6 +615,15 @@ void searchHalfLife(const ndata *restrict ndat, const app_state *state, search_s
 				
 				//SDL_Log("proximityFactor: %f\n",(double)proximityFactor);
 				for(uint32_t k=ndat->nuclData[j].firstLevel; k<(ndat->nuclData[j].firstLevel + (uint32_t)ndat->nuclData[j].numLevels); k++){
+					
+					//for single nuclide searches, if a specific reaction is selected,
+					//do not search levels that are not populated in that reaction
+					if((ss->searchInProgress == SEARCHSTATE_SEARCHING_SINGLENUCL)&&(state->ds.selectedRxn != 0)){
+						if(!(ndat->levels[k].populatingRxns & ((uint64_t)(1) << (state->ds.selectedRxn-1)))){
+							continue;
+						}
+					}
+					
 					uint8_t hlValueType = (uint8_t)((ndat->levels[k].halfLife.format >> 5U) & 15U);
 					if((hlValueType == VALUETYPE_NUMBER)||(hlValueType == VALUETYPE_ASYMERROR)){
 						double rawHlVal = getRawValFromDB(&ndat->levels[k].halfLife);

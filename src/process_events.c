@@ -344,14 +344,8 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
               }
             }
           }else if(right && !left){
-            if(!(state->ds.shownElements & ((uint64_t)(1) << UIELEM_NUCL_FULLINFOBOX))){
-              if((state->ds.shownElements & ((uint64_t)(1) << UIELEM_PRIMARY_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_PRIMARY_MENU_SHOW]==0.0f)){
-                uiElemClickAction(dat,state,rdat,0,UIELEM_SEARCH_BUTTON); //open the search menu
-              }
-            }else{
-              if((state->ds.shownElements & ((uint64_t)(1) << UIELEM_PRIMARY_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_PRIMARY_MENU_SHOW]==0.0f)){
-                uiElemClickAction(dat,state,rdat,0,UIELEM_NUCL_FULLINFOBOX_RXNBUTTON); //open the reaction menu
-              }
+            if((state->ds.shownElements & ((uint64_t)(1) << UIELEM_PRIMARY_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_PRIMARY_MENU_SHOW]==0.0f)){
+              uiElemClickAction(dat,state,rdat,0,UIELEM_SEARCH_BUTTON); //open the search menu
             }
           }
         }
@@ -404,12 +398,20 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
       }else if(state->clickedUIElem == UIELEM_SEARCH_BUTTON){
         //search menu navigation using arrow keys
         if(right && !left){
-          if((state->ds.shownElements & ((uint64_t)(1) << UIELEM_SEARCH_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_SEARCH_MENU_SHOW]==0.0f)){
-            uiElemClickAction(dat,state,rdat,0,UIELEM_CHARTVIEW_BUTTON); //open the chart view menu
+          if(!(state->ds.shownElements & ((uint64_t)(1) << UIELEM_NUCL_FULLINFOBOX))){
+            if((state->ds.shownElements & ((uint64_t)(1) << UIELEM_SEARCH_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_SEARCH_MENU_SHOW]==0.0f)){
+              uiElemClickAction(dat,state,rdat,0,UIELEM_CHARTVIEW_BUTTON); //open the chart view menu
+            }
+          }else{
+            if((state->ds.shownElements & ((uint64_t)(1) << UIELEM_SEARCH_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_SEARCH_MENU_SHOW]==0.0f)){
+              uiElemClickAction(dat,state,rdat,0,UIELEM_NUCL_FULLINFOBOX_RXNBUTTON); //open the reaction menu
+              state->mouseoverElement = UIELEM_NUCL_FULLINFOBOX_RXNBUTTON; //highlight the reaction button (has to happen after uiElemClickAction, as this is reset during click action)
+              state->lastOpenedMenu = UIELEM_RXN_MENU; //set reaction menu as selected
+            }
           }
         }else if(left && !right){
           if((state->ds.shownElements & ((uint64_t)(1) << UIELEM_SEARCH_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_SEARCH_MENU_SHOW]==0.0f)){
-            uiElemClickAction(dat,state,rdat,0,UIELEM_MENU_BUTTON); //open the search menu
+            uiElemClickAction(dat,state,rdat,0,UIELEM_MENU_BUTTON); //open the primary menu
           }
         }
       }else if(state->clickedUIElem == UIELEM_NUCL_FULLINFOBOX_RXNBUTTON){
@@ -423,7 +425,9 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
             }
           }else if(left && !right){
             if((state->ds.shownElements & ((uint64_t)(1) << UIELEM_RXN_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_RXN_MENU_SHOW]==0.0f)){
-              uiElemClickAction(dat,state,rdat,0,UIELEM_MENU_BUTTON); //open the primary menu
+              uiElemClickAction(dat,state,rdat,0,UIELEM_SEARCH_BUTTON); //open the search menu
+              state->mouseoverElement = UIELEM_SEARCH_BUTTON; //highlight the search button (has to happen after uiElemClickAction, as this is reset during click action)
+              state->lastOpenedMenu = UIELEM_SEARCH_MENU; //set search menu as selected
             }
           }else if(down && !up){
             state->ds.mouseOverRxn = 0;
@@ -683,7 +687,7 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
         state->mouseholdElement = state->mouseoverElement;
         uiElemClickAction(dat,state,rdat,0,state->mouseoverElement);
       }
-    }else if((state->ds.shownElements & ((uint64_t)(1) << UIELEM_NUCL_INFOBOX))&&(state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_SHOW]==0.0f)&&(state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_EXPAND]==0.0f)&&(state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_HIDE]==0.0f)){
+    }else if((state->ds.shownElements & ((uint64_t)(1) << UIELEM_NUCL_INFOBOX))&&(state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_SHOW]==0.0f)&&(state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_EXPAND]==0.0f)&&(state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_HIDE]==0.0f)&&(state->ds.timeLeftInUIAnimation[UIANIM_SEARCH_MENU_HIDE]==0.0f)){
       if(!(((dat->ndat.nuclData[state->chartSelectedNucl].N+1) < getMinChartN(&state->ds))||(dat->ndat.nuclData[state->chartSelectedNucl].N > getMaxChartN(&state->ds)))){
         state->mouseholdElement = UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON;
         uiElemClickAction(dat,state,rdat,0,UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON);
@@ -770,6 +774,10 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
       }
     }else if((state->uiState == UISTATE_FULLLEVELINFO)||(state->uiState == UISTATE_FULLLEVELINFOWITHMENU)){
       switch(state->lastOpenedMenu){
+        case UIELEM_SEARCH_MENU:
+          uiElemClickAction(dat,state,rdat,0,UIELEM_SEARCH_BUTTON);
+          state->mouseoverElement = UIELEM_ENUM_LENGTH;
+          break;
         case UIELEM_NUCL_FULLINFOBOX_BACKBUTTON:
           if(state->uiState == UISTATE_FULLLEVELINFO){
             state->uiState = UISTATE_FULLLEVELINFOWITHMENU; //allow menu navigation by keyboard
@@ -781,6 +789,7 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
           break;
         case UIELEM_RXN_MENU:
           uiElemClickAction(dat,state,rdat,0,UIELEM_NUCL_FULLINFOBOX_RXNBUTTON);
+          state->mouseoverElement = UIELEM_ENUM_LENGTH;
           break;
         case UIELEM_PRIMARY_MENU:
         default:
@@ -1458,7 +1467,7 @@ void processSingleEvent(app_data *restrict dat, app_state *restrict state, resou
           break;
         case SDL_SCANCODE_F:
           if(state->kbdModVal == KBD_MOD_CTRL){
-            if(state->ds.shownElements & ((uint64_t)(1) << UIELEM_CHARTOFNUCLIDES)){
+            if((state->uiState == UISTATE_CHARTONLY)||(state->uiState == UISTATE_CHARTWITHMENU)||(state->uiState == UISTATE_INFOBOX)||(state->uiState == UISTATE_FULLLEVELINFO)||(state->uiState == UISTATE_FULLLEVELINFOWITHMENU)){
               uiElemClickAction(dat,state,rdat,0,UIELEM_SEARCH_BUTTON); //open search, also activates text input
             }
           }else{

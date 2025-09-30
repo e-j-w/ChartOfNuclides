@@ -2045,6 +2045,18 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 							reorderedRxns++;
 						}
 					}
+					//make sure any levels populated in the decay of another level flagged as populated in a given reaction
+					//are also flagged for that reaction
+					for(uint8_t i=reorderedRxns; i<nd->nuclData[nd->numNucl].numRxns; i++){
+						for(uint32_t j=(uint32_t)(nd->nuclData[nd->numNucl].firstLevel+nd->nuclData[nd->numNucl].numLevels-1); j>=nd->nuclData[nd->numNucl].firstLevel; j--){
+							if(nd->levels[j].populatingRxns & ((uint64_t)(1) << i)){
+								for(uint32_t k=nd->levels[j].firstTran; k<nd->levels[j].firstTran+nd->levels[j].numTran; k++){
+									uint32_t finalLevelInd = (uint32_t)(j - nd->tran[k].finalLvlOffset);
+									nd->levels[finalLevelInd].populatingRxns |= ((uint64_t)(1) << i);
+								}
+							}
+						}
+					}
 				}
 				
 
