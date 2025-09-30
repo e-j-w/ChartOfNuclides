@@ -5155,6 +5155,7 @@ void updateSingleUIElemPosition(const app_data *restrict dat, app_state *restric
 			state->ds.uiElemHeight[UIELEM_NUCL_FULLINFOBOX_RXNBUTTON] = (int16_t)(UI_TILE_SIZE*state->ds.uiUserScale);
 			state->ds.uiElemPosX[UIELEM_NUCL_FULLINFOBOX_RXNBUTTON] = (int16_t)(state->ds.windowXRes-state->ds.uiElemWidth[UIELEM_NUCL_FULLINFOBOX_RXNBUTTON]-(NUCL_FULLINFOBOX_RXNBUTTON_POS_XR*state->ds.uiUserScale));
 			state->ds.uiElemPosY[UIELEM_NUCL_FULLINFOBOX_RXNBUTTON] = (int16_t)(NUCL_FULLINFOBOX_BACKBUTTON_POS_Y*state->ds.uiUserScale);
+			state->ds.uiElemExtPlusX[UIELEM_NUCL_FULLINFOBOX_RXNBUTTON] = (uint16_t)((NUCL_FULLINFOBOX_RXNBUTTON_POS_XR+1.0f)*state->ds.uiUserScale); //Fitt's law
 			state->ds.uiElemExtMinusY[UIELEM_NUCL_FULLINFOBOX_RXNBUTTON] = (uint16_t)((NUCL_FULLINFOBOX_BACKBUTTON_POS_Y+1.0f)*state->ds.uiUserScale); //Fitt's law
 			break;
 		case UIELEM_RXN_MENU:
