@@ -4,7 +4,7 @@ CFLAGS = -O2 -Wall -Wextra -Wpedantic -Wc++-compat -Wdouble-promotion -Wshadow -
 SDL = `pkg-config sdl3 --libs --cflags` -lSDL3_image -lSDL3_ttf
 COMMON = include/formats.h include/enums.h include/gui_constants.h
 OBJ = lib/strops.o lib/juicer.o io_ops.o load_data.o data_ops.o search_ops.o gui.o drawing.o process_events.o thread_manager.o
-INC =  -I./include -I./src -I./lib/juicer -I./lib/strops
+INC =  -I./include -I./src
 CC = gcc
 #CC = clang
 
@@ -44,7 +44,7 @@ uninstall-linux:
 all: $(OBJ) proc_data chart
 
 chart: src/*.c include/*.h $(OBJ) chart.dat
-	$(CC) src/app.c $(INC) $(OBJ) $(SDL) $(CFLAGS) -lm -o chart
+	$(CC) src/app.c $(INC) -I./lib/strops -I./lib/juicer $(OBJ) $(SDL) $(CFLAGS) -lm -o chart
 
 chart.dat: proc_data
 	@if [ ! -f chart.dat ]; then \
@@ -64,28 +64,28 @@ load_data.o: src/load_data.c include/load_data.h $(COMMON)
 	$(CC) src/load_data.c $(INC) $(CFLAGS) -c -o load_data.o
 
 data_ops.o: src/data_ops.c include/data_ops.h $(COMMON)
-	$(CC) src/data_ops.c $(INC) $(CFLAGS) -c -o data_ops.o
+	$(CC) src/data_ops.c $(INC) -I./lib/strops -I./lib/juicer $(CFLAGS) -c -o data_ops.o
 
 search_ops.o: src/search_ops.c include/search_ops.h $(COMMON)
 	$(CC) src/search_ops.c $(INC) $(CFLAGS) -c -o search_ops.o
 
 drawing.o: src/drawing.c include/drawing.h $(COMMON)
-	$(CC) src/drawing.c $(INC) $(CFLAGS) -c -o drawing.o
+	$(CC) src/drawing.c $(INC) -I./lib/juicer $(CFLAGS) -c -o drawing.o
 
 gui.o: src/gui.c include/gui.h $(COMMON)
-	$(CC) src/gui.c $(INC) $(CFLAGS) -c -o gui.o
+	$(CC) src/gui.c $(INC) -I./lib/strops -I./lib/juicer $(CFLAGS) -c -o gui.o
 
 process_events.o: src/process_events.c include/process_events.h $(COMMON)
-	$(CC) src/process_events.c $(INC) $(CFLAGS) -c -o process_events.o
+	$(CC) src/process_events.c $(INC) -I./lib/strops $(CFLAGS) -c -o process_events.o
 
 thread_manager.o: src/thread_manager.c include/thread_manager.h $(COMMON)
 	$(CC) src/thread_manager.c $(INC) $(CFLAGS) -c -o thread_manager.o
 
 proc_data: data_processor/proc_data.c data_processor/proc_data.h proc_data_parser.o $(OBJ)
-	$(CC) data_processor/proc_data.c proc_data_parser.o $(OBJ) -I./data_processor $(INC) $(SDL) $(CFLAGS) -lm -o proc_data
+	$(CC) data_processor/proc_data.c proc_data_parser.o $(OBJ) -I./data_processor -I./lib/strops $(INC) $(SDL) $(CFLAGS) -lm -o proc_data
 
 proc_data_parser.o: data_processor/proc_data_parser.c data_processor/proc_data_parser.h $(COMMON)
-	$(CC) data_processor/proc_data_parser.c $(INC) $(CFLAGS) -c -o proc_data_parser.o
+	$(CC) data_processor/proc_data_parser.c $(INC) -I./lib/strops $(CFLAGS) -c -o proc_data_parser.o
 
 clean:
 	rm -rf *~ *# */*.o *.o chart proc_data chart.dat

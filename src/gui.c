@@ -3334,36 +3334,51 @@ void drawSearchMenu(const app_data *restrict dat, const app_state *restrict stat
           drawTextAlignedSized(rdat,drawRect.x+12.0f*state->ds.uiUserScale,drawRect.y+(SEARCH_MENU_RESULT_HEIGHT-32.0f)*state->ds.uiUserScale,grayCol8Bit,FONTSIZE_NORMAL,alpha8,dat->strings[dat->locStringIDs[LOCSTR_SEARCHRES_NUCLIDE]],ALIGN_LEFT,16384);
           break;
         case SEARCHAGENT_EGAMMA:
-          getNuclNameStr(eStr,&dat->ndat.nuclData[state->ss.results[i].resultVal[0]],255);
-          getGammaEnergyStr(eStr2,&dat->ndat,state->ss.results[i].resultVal[1],1);
-          SDL_snprintf(tmpStr,64,"%s - %s keV",eStr,eStr2);
+          if((state->uiState == UISTATE_FULLLEVELINFOWITHMENU)||(state->uiState == UISTATE_FULLLEVELINFO)){
+            getGammaEnergyStr(eStr2,&dat->ndat,state->ss.results[i].resultVal[1],1);
+            SDL_snprintf(tmpStr,64,"%s keV",eStr2);
+          }else{
+            getNuclNameStr(eStr,&dat->ndat.nuclData[state->ss.results[i].resultVal[0]],255);
+            getGammaEnergyStr(eStr2,&dat->ndat,state->ss.results[i].resultVal[1],1);
+            SDL_snprintf(tmpStr,64,"%s – %s keV",eStr,eStr2);
+          }
           drawTextAlignedSized(rdat,drawRect.x+12.0f*state->ds.uiUserScale,drawRect.y+(16.0f*state->ds.uiUserScale),blackCol8Bit,FONTSIZE_LARGE,alpha8,tmpStr,ALIGN_LEFT,16384); //draw element and gamma label
           drawTextAlignedSized(rdat,drawRect.x+12.0f*state->ds.uiUserScale,drawRect.y+(SEARCH_MENU_RESULT_HEIGHT-32.0f)*state->ds.uiUserScale,grayCol8Bit,FONTSIZE_NORMAL,alpha8,dat->strings[dat->locStringIDs[LOCSTR_SEARCHRES_EGAMMA]],ALIGN_LEFT,16384);
           break;
         case SEARCHAGENT_ELEVEL:
-          if(state->ss.results[i].resultVal[1] != (dat->ndat.nuclData[state->ss.results[i].resultVal[0]].firstLevel + dat->ndat.nuclData[state->ss.results[i].resultVal[0]].gsLevel)){
-            if(getLevelHalfLifeSeconds(&dat->ndat,state->ss.results[i].resultVal[1]) >= ISOMER_MVAL_E_THRESHOLD){
-              if(dat->ndat.nuclData[state->ss.results[i].resultVal[0]].numIsomerMVals > 1){
-                const uint8_t mValInd = (uint8_t)((dat->ndat.levels[state->ss.results[i].resultVal[1]].format >> 5U) & 7U);
-                getNuclNameStr(eStr,&dat->ndat.nuclData[state->ss.results[i].resultVal[0]],mValInd);
+          if((state->uiState == UISTATE_FULLLEVELINFOWITHMENU)||(state->uiState == UISTATE_FULLLEVELINFO)){
+            getLvlEnergyStr(eStr2,&dat->ndat,state->ss.results[i].resultVal[1],1);
+            SDL_snprintf(tmpStr,64,"%s keV",eStr2);
+          }else{
+            if(state->ss.results[i].resultVal[1] != (dat->ndat.nuclData[state->ss.results[i].resultVal[0]].firstLevel + dat->ndat.nuclData[state->ss.results[i].resultVal[0]].gsLevel)){
+              if(getLevelHalfLifeSeconds(&dat->ndat,state->ss.results[i].resultVal[1]) >= ISOMER_MVAL_E_THRESHOLD){
+                if(dat->ndat.nuclData[state->ss.results[i].resultVal[0]].numIsomerMVals > 1){
+                  const uint8_t mValInd = (uint8_t)((dat->ndat.levels[state->ss.results[i].resultVal[1]].format >> 5U) & 7U);
+                  getNuclNameStr(eStr,&dat->ndat.nuclData[state->ss.results[i].resultVal[0]],mValInd);
+                }else{
+                  getNuclNameStr(eStr,&dat->ndat.nuclData[state->ss.results[i].resultVal[0]],0);
+                }
               }else{
-                getNuclNameStr(eStr,&dat->ndat.nuclData[state->ss.results[i].resultVal[0]],0);
+                getNuclNameStr(eStr,&dat->ndat.nuclData[state->ss.results[i].resultVal[0]],255);
               }
             }else{
               getNuclNameStr(eStr,&dat->ndat.nuclData[state->ss.results[i].resultVal[0]],255);
             }
-          }else{
-            getNuclNameStr(eStr,&dat->ndat.nuclData[state->ss.results[i].resultVal[0]],255);
+            getLvlEnergyStr(eStr2,&dat->ndat,state->ss.results[i].resultVal[1],1);
+            SDL_snprintf(tmpStr,64,"%s – %s keV",eStr,eStr2);
           }
-          getLvlEnergyStr(eStr2,&dat->ndat,state->ss.results[i].resultVal[1],1);
-          SDL_snprintf(tmpStr,64,"%s - %s keV",eStr,eStr2);
           drawTextAlignedSized(rdat,drawRect.x+12.0f*state->ds.uiUserScale,drawRect.y+(16.0f*state->ds.uiUserScale),blackCol8Bit,FONTSIZE_LARGE,alpha8,tmpStr,ALIGN_LEFT,16384); //draw element and level label
           drawTextAlignedSized(rdat,drawRect.x+12.0f*state->ds.uiUserScale,drawRect.y+(SEARCH_MENU_RESULT_HEIGHT-32.0f)*state->ds.uiUserScale,grayCol8Bit,FONTSIZE_NORMAL,alpha8,dat->strings[dat->locStringIDs[LOCSTR_SEARCHRES_ELEVEL]],ALIGN_LEFT,16384);
           break;
         case SEARCHAGENT_ELEVELDIFF:
-          getNuclNameStr(eStr,&dat->ndat.nuclData[state->ss.results[i].resultVal[0]],255);
-          getLvlEnergyStr(eStr2,&dat->ndat,state->ss.results[i].resultVal[2],1);
-          SDL_snprintf(tmpStr,64,"%s - %s to ",eStr,eStr2);
+          if((state->uiState == UISTATE_FULLLEVELINFOWITHMENU)||(state->uiState == UISTATE_FULLLEVELINFO)){
+            getLvlEnergyStr(eStr2,&dat->ndat,state->ss.results[i].resultVal[2],1);
+            SDL_snprintf(tmpStr,64,"%s to ",eStr2);
+          }else{
+            getNuclNameStr(eStr,&dat->ndat.nuclData[state->ss.results[i].resultVal[0]],255);
+            getLvlEnergyStr(eStr2,&dat->ndat,state->ss.results[i].resultVal[2],1);
+            SDL_snprintf(tmpStr,64,"%s - %s to ",eStr,eStr2);
+          }
           getLvlEnergyStr(eStr2,&dat->ndat,state->ss.results[i].resultVal[1],1);
           SDL_strlcat(tmpStr,eStr2,64);
           SDL_strlcat(tmpStr," keV",64);
@@ -3376,51 +3391,83 @@ void drawSearchMenu(const app_data *restrict dat, const app_state *restrict stat
           drawTextAlignedSized(rdat,drawRect.x+12.0f*state->ds.uiUserScale,drawRect.y+(SEARCH_MENU_RESULT_HEIGHT-32.0f)*state->ds.uiUserScale,grayCol8Bit,FONTSIZE_NORMAL,alpha8,tmpStr,ALIGN_LEFT,16384);
           break;
         case SEARCHAGENT_GAMMACASCADE:
-          getNuclNameStr(eStr,&dat->ndat.nuclData[state->ss.results[i].resultVal[0]],255);
-          int32_t length = 0;
-          uint8_t numCascadeGammas = 0;
-          for(uint8_t j=1; j<SEARCH_RESULT_DATASIZE; j++){
-            if(state->ss.results[i].resultVal[j] == UNUSED_SEARCH_RESULT){
-              break;
+          if((state->uiState == UISTATE_FULLLEVELINFOWITHMENU)||(state->uiState == UISTATE_FULLLEVELINFO)){
+            int32_t length = 0;
+            uint8_t numCascadeGammas = 0;
+            for(uint8_t j=1; j<SEARCH_RESULT_DATASIZE; j++){
+              if(state->ss.results[i].resultVal[j] == UNUSED_SEARCH_RESULT){
+                break;
+              }
+              numCascadeGammas++;
             }
-            numCascadeGammas++;
+            if(numCascadeGammas > 3){
+              numCascadeGammas = 3; //truncate the string so it fits in the box
+            }
+            for(uint8_t j=1; j<numCascadeGammas; j++){
+              length += SDL_snprintf(tmpStr+length,(uint64_t)(64-length),"%0.0f, ",(double)(dat->ndat.tran[state->ss.results[i].resultVal[j]].energy.val));
+            }
+            SDL_snprintf(tmpStr+length,(uint64_t)(64-length),"%0.0f keV",(double)(dat->ndat.tran[state->ss.results[i].resultVal[numCascadeGammas]].energy.val));
+          }else{
+            getNuclNameStr(eStr,&dat->ndat.nuclData[state->ss.results[i].resultVal[0]],255);
+            int32_t length = 0;
+            uint8_t numCascadeGammas = 0;
+            for(uint8_t j=1; j<SEARCH_RESULT_DATASIZE; j++){
+              if(state->ss.results[i].resultVal[j] == UNUSED_SEARCH_RESULT){
+                break;
+              }
+              numCascadeGammas++;
+            }
+            if(numCascadeGammas > 3){
+              numCascadeGammas = 3; //truncate the string so it fits in the box
+            }
+            length += SDL_snprintf(tmpStr+length,64,"%s – ",eStr);
+            for(uint8_t j=1; j<numCascadeGammas; j++){
+              length += SDL_snprintf(tmpStr+length,(uint64_t)(64-length),"%0.0f, ",(double)(dat->ndat.tran[state->ss.results[i].resultVal[j]].energy.val));
+            }
+            SDL_snprintf(tmpStr+length,(uint64_t)(64-length),"%0.0f keV",(double)(dat->ndat.tran[state->ss.results[i].resultVal[numCascadeGammas]].energy.val));
           }
-          if(numCascadeGammas > 3){
-            numCascadeGammas = 3; //truncate the string so it fits in the box
-          }
-          length += SDL_snprintf(tmpStr+length,64,"%s - ",eStr);
-          for(uint8_t j=1; j<numCascadeGammas; j++){
-            length += SDL_snprintf(tmpStr+length,(uint64_t)(64-length),"%0.0f, ",(double)(dat->ndat.tran[state->ss.results[i].resultVal[j]].energy.val));
-          }
-          length += SDL_snprintf(tmpStr+length,(uint64_t)(64-length),"%0.0f keV",(double)(dat->ndat.tran[state->ss.results[i].resultVal[numCascadeGammas]].energy.val));
           drawTextAlignedSized(rdat,drawRect.x+12.0f*state->ds.uiUserScale,drawRect.y+(16.0f*state->ds.uiUserScale),blackCol8Bit,FONTSIZE_LARGE,alpha8,tmpStr,ALIGN_LEFT,16384); //draw element and cascade label
           drawTextAlignedSized(rdat,drawRect.x+12.0f*state->ds.uiUserScale,drawRect.y+(SEARCH_MENU_RESULT_HEIGHT-32.0f)*state->ds.uiUserScale,grayCol8Bit,FONTSIZE_NORMAL,alpha8,dat->strings[dat->locStringIDs[LOCSTR_SEARCHRES_GAMMACASCADE]],ALIGN_LEFT,16384);
           break;
         case SEARCHAGENT_HALFLIFE:
           getHalfLifeStr(eStr2,dat,state->ss.results[i].resultVal[1],1,0,state->ds.useLifetimes);
-          if(state->ss.results[i].resultVal[1] != (dat->ndat.nuclData[state->ss.results[i].resultVal[0]].firstLevel + dat->ndat.nuclData[state->ss.results[i].resultVal[0]].gsLevel)){
-            if(getLevelHalfLifeSeconds(&dat->ndat,state->ss.results[i].resultVal[1]) >= ISOMER_MVAL_E_THRESHOLD){
-              if(dat->ndat.nuclData[state->ss.results[i].resultVal[0]].numIsomerMVals > 1){
-                const uint8_t mValInd = (uint8_t)((dat->ndat.levels[state->ss.results[i].resultVal[1]].format >> 5U) & 7U);
-                getNuclNameStr(eStr,&dat->ndat.nuclData[state->ss.results[i].resultVal[0]],mValInd);
+          if((state->uiState == UISTATE_FULLLEVELINFOWITHMENU)||(state->uiState == UISTATE_FULLLEVELINFO)){
+            SDL_snprintf(tmpStr,64,"%s",eStr2);
+          }else{
+            if(state->ss.results[i].resultVal[1] != (dat->ndat.nuclData[state->ss.results[i].resultVal[0]].firstLevel + dat->ndat.nuclData[state->ss.results[i].resultVal[0]].gsLevel)){
+              if(getLevelHalfLifeSeconds(&dat->ndat,state->ss.results[i].resultVal[1]) >= ISOMER_MVAL_E_THRESHOLD){
+                if(dat->ndat.nuclData[state->ss.results[i].resultVal[0]].numIsomerMVals > 1){
+                  const uint8_t mValInd = (uint8_t)((dat->ndat.levels[state->ss.results[i].resultVal[1]].format >> 5U) & 7U);
+                  getNuclNameStr(eStr,&dat->ndat.nuclData[state->ss.results[i].resultVal[0]],mValInd);
+                }else{
+                  getNuclNameStr(eStr,&dat->ndat.nuclData[state->ss.results[i].resultVal[0]],0);
+                }
+                SDL_snprintf(tmpStr,64,"%s – %s",eStr,eStr2);
               }else{
-                getNuclNameStr(eStr,&dat->ndat.nuclData[state->ss.results[i].resultVal[0]],0);
+                getNuclNameStr(eStr,&dat->ndat.nuclData[state->ss.results[i].resultVal[0]],255);
+                SDL_snprintf(tmpStr,64,"%s – %s",eStr,eStr2);
               }
-              SDL_snprintf(tmpStr,64,"%s - %s",eStr,eStr2);
             }else{
               getNuclNameStr(eStr,&dat->ndat.nuclData[state->ss.results[i].resultVal[0]],255);
-              SDL_snprintf(tmpStr,64,"%s* - %s",eStr,eStr2);
+              SDL_snprintf(tmpStr,64,"%s – %s",eStr,eStr2);
             }
-          }else{
-            getNuclNameStr(eStr,&dat->ndat.nuclData[state->ss.results[i].resultVal[0]],255);
-            SDL_snprintf(tmpStr,64,"%s - %s",eStr,eStr2);
           }
           drawTextAlignedSized(rdat,drawRect.x+12.0f*state->ds.uiUserScale,drawRect.y+(16.0f*state->ds.uiUserScale),blackCol8Bit,FONTSIZE_LARGE,alpha8,tmpStr,ALIGN_LEFT,16384); //draw element and half-life label
-          if(state->ds.useLifetimes){
-            drawTextAlignedSized(rdat,drawRect.x+12.0f*state->ds.uiUserScale,drawRect.y+(SEARCH_MENU_RESULT_HEIGHT-32.0f)*state->ds.uiUserScale,grayCol8Bit,FONTSIZE_NORMAL,alpha8,dat->strings[dat->locStringIDs[LOCSTR_SEARCHRES_LIFETIME]],ALIGN_LEFT,16384);
+          if(state->ss.results[i].resultVal[1] == (uint32_t)(dat->ndat.nuclData[state->ss.results[i].resultVal[0]].firstLevel + dat->ndat.nuclData[state->ss.results[i].resultVal[0]].gsLevel)){
+            if(state->ds.useLifetimes){
+              SDL_snprintf(tmpStr,64,"%s – ground state",dat->strings[dat->locStringIDs[LOCSTR_SEARCHRES_LIFETIME]]);
+            }else{
+              SDL_snprintf(tmpStr,64,"%s – ground state",dat->strings[dat->locStringIDs[LOCSTR_SEARCHRES_HALFLIFE]]);
+            }
           }else{
-            drawTextAlignedSized(rdat,drawRect.x+12.0f*state->ds.uiUserScale,drawRect.y+(SEARCH_MENU_RESULT_HEIGHT-32.0f)*state->ds.uiUserScale,grayCol8Bit,FONTSIZE_NORMAL,alpha8,dat->strings[dat->locStringIDs[LOCSTR_SEARCHRES_HALFLIFE]],ALIGN_LEFT,16384);
+            getLvlEnergyStr(eStr2,&dat->ndat,state->ss.results[i].resultVal[1],1);
+            if(state->ds.useLifetimes){
+              SDL_snprintf(tmpStr,64,"%s – %s keV level",dat->strings[dat->locStringIDs[LOCSTR_SEARCHRES_LIFETIME]],eStr2);
+            }else{
+              SDL_snprintf(tmpStr,64,"%s – %s keV level",dat->strings[dat->locStringIDs[LOCSTR_SEARCHRES_HALFLIFE]],eStr2);
+            }
           }
+          drawTextAlignedSized(rdat,drawRect.x+12.0f*state->ds.uiUserScale,drawRect.y+(SEARCH_MENU_RESULT_HEIGHT-32.0f)*state->ds.uiUserScale,grayCol8Bit,FONTSIZE_NORMAL,alpha8,tmpStr,ALIGN_LEFT,16384);
           break;
         default:
           continue;

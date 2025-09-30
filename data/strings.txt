@@ -27,7 +27,7 @@ unknown|Unknown
 level_info_header|Levels and gammas:
 energy_kev|Energy (keV)
 jpi|Jπ
-halflife|t1/2
+halflife|t(1/2)
 lifetime|τ
 decay_mode|Decay Mode
 energy_gamma|E(γ) (keV)
@@ -45,7 +45,7 @@ all_reactions|All Reactions
 menuitem_preferences|Preferences
 menuitem_screenshot|Take a screenshot...
 menuitem_about|About Chart of Nuclides
-about_string_version|Version 0.8.0 - "Differential Equation"
+about_string_version|Version 0.8.0 – "Differential Equation"
 about_string_1|Developed by Jonathan Williams
 about_string_2|Nuclear structure data is sourced from ENSDF, mass data from AME2020, and isotope abundance data from NIST.
 about_string_3|This is an independently developed program not endorsed by the above entities. The accuracy or completeness of any information provided is not guaranteed.
