@@ -324,6 +324,7 @@ static int parseAppRules(app_data *restrict dat, asset_mapping *restrict stringI
 	dat->locStringIDs[LOCSTR_CHARTVIEW_NUMLVLS] = (uint16_t)nameToAssetID("chartview_num_levels",stringIDmap);
 	dat->locStringIDs[LOCSTR_CHARTVIEW_UNKNOWN_ENERGY] = (uint16_t)nameToAssetID("chartview_unknown_energy",stringIDmap);
 	dat->locStringIDs[LOCSTR_CONTEXT_COPY] = (uint16_t)nameToAssetID("context_copy",stringIDmap);
+	dat->locStringIDs[LOCSTR_CONTEXT_COPYTEXT] = (uint16_t)nameToAssetID("context_copytext",stringIDmap);
 	dat->locStringIDs[LOCSTR_CONTEXT_COPY_NUCLNAME] = (uint16_t)nameToAssetID("context_copy_nuclname",stringIDmap);
 	dat->locStringIDs[LOCSTR_CONTEXT_COPY_NUCLINFO] = (uint16_t)nameToAssetID("context_copy_nuclinfo",stringIDmap);
 	dat->locStringIDs[LOCSTR_SEARCH_PLACEHOLDER] = (uint16_t)nameToAssetID("search_placeholder",stringIDmap);
