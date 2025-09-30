@@ -60,6 +60,7 @@ int main(int argc, char *argv[]){
   }*/
 
   SDL_SetHint(SDL_HINT_VIDEO_ALLOW_SCREENSAVER, "1"); //prevent app from inhibiting automatic screen lock
+  SDL_SetHint(SDL_HINT_MOUSE_FOCUS_CLICKTHROUGH, "1"); //allow mouse events when clicking on the window in an unfocused state (so the user doesn't have to click twice)
 
   uint32_t sdlFlags = 0;
   if(cliArgs&(1U<<CLI_NOGAMEPAD)){
