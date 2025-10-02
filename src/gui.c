@@ -3343,7 +3343,9 @@ void drawSearchMenu(const app_data *restrict dat, const app_state *restrict stat
             SDL_snprintf(tmpStr,64,"%s – %s keV",eStr,eStr2);
           }
           drawTextAlignedSized(rdat,drawRect.x+12.0f*state->ds.uiUserScale,drawRect.y+(16.0f*state->ds.uiUserScale),blackCol8Bit,FONTSIZE_LARGE,alpha8,tmpStr,ALIGN_LEFT,16384); //draw element and gamma label
-          drawTextAlignedSized(rdat,drawRect.x+12.0f*state->ds.uiUserScale,drawRect.y+(SEARCH_MENU_RESULT_HEIGHT-32.0f)*state->ds.uiUserScale,grayCol8Bit,FONTSIZE_NORMAL,alpha8,dat->strings[dat->locStringIDs[LOCSTR_SEARCHRES_EGAMMA]],ALIGN_LEFT,16384);
+          getLvlEnergyStr(eStr2,&dat->ndat,state->ss.results[i].resultVal[2],1);
+          SDL_snprintf(tmpStr,64,"%s from the %s keV level",dat->strings[dat->locStringIDs[LOCSTR_SEARCHRES_EGAMMA]],eStr2);
+          drawTextAlignedSized(rdat,drawRect.x+12.0f*state->ds.uiUserScale,drawRect.y+(SEARCH_MENU_RESULT_HEIGHT-32.0f)*state->ds.uiUserScale,grayCol8Bit,FONTSIZE_NORMAL,alpha8,tmpStr,ALIGN_LEFT,16384);
           break;
         case SEARCHAGENT_ELEVEL:
           if((state->uiState == UISTATE_FULLLEVELINFOWITHMENU)||(state->uiState == UISTATE_FULLLEVELINFO)){

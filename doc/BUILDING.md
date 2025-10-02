@@ -3,7 +3,7 @@
 
 # Linux
 
-The current code has been tested under Arch Linux and Debian 12 as of September 2025, though most recent Linux distros should work as well.
+The current code has been tested under Arch Linux and Debian 12 as of October 2025, though most recent Linux distros should work as well.
 
 ## Using Flatpak
 

@@ -1423,6 +1423,7 @@ void processSingleEvent(app_data *restrict dat, app_state *restrict state, resou
           state->inputFlags |= (1U << INPUT_BACK);
           break;
         case SDL_SCANCODE_BACKSPACE:
+        case SDL_SCANCODE_DELETE:
           if(!(SDL_TextInputActive(rdat->window))){
             state->inputFlags |= (1U << INPUT_BACK);
           }else{

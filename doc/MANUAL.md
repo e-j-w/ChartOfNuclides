@@ -31,7 +31,7 @@ The program is also designed to be fully navigable with a keyboard and/or gamepa
 | ] / [              | Left/right shoulder buttons | Cycle between view modes for the chart (half-life, 2+ energy, etc.), or between reaction datasets in the detail view |
 | Enter              | A / Circle (right button)   | Select menu items |
 | Alt                | X / Triangle (top button)   | Open menu |
-| Escape / backspace | B / Cross (bottom button)   | Exit out of open menus, cancel selection, etc. |
+| Escape / backspace / delete | B / Cross (bottom button)   | Exit out of open menus, cancel selection, etc. |
 | Ctrl+C             | N/A                         | Copy selected text to clipboard |
 | Ctrl+F             | N/A                         | Search |
 | F11                | Home button                 | Toggle fullscreen mode |
@@ -41,7 +41,7 @@ The program is also designed to be fully navigable with a keyboard and/or gamepa
 
 ## Searching
 
-The search interface is opened by clicking on the search button (magnifying glass icon) in the upper-right corner of the main chart view, or using the keyboard shortcut `Ctrl+F`. You can then type a search query using the keyboard, and search results will be shown below in real time. Click on a search result (or use the arrow keys to navigate to it and then select it with `Enter`) to navigate to the corresponding region of the chart or show the relevant level/gamma information.
+The search interface is opened by clicking on the search button (magnifying glass icon) in the upper-right corner, or using the keyboard shortcut `Ctrl+F`. You can then type a search query using the keyboard, and search results will be shown below in real time. Click on a search result (or use the arrow keys to navigate to it and then select it with `Enter`) to navigate to the corresponding region of the chart or show the relevant level/gamma information.
 
 Example search queries include:
 
@@ -54,4 +54,4 @@ Example search queries include:
 | Gamma-ray cascade       | Energies (in keV) of a sequence of gamma-ray transitions in a nuclide. Can be combined with the nuclide name.  | `263 685 1477` (shows isomeric cascades in 93Mo), `1274 2083` (shows 4+ to 2+ to 0+ cascade in 22Ne) | Prioritze search results of this type by adding `cascade` to the search query. |
 | Half-life / Lifetime    | Half-life of a nuclide (or the mean lifetime, if enabled in the preferences). Half-lives of excited states can also be searched, but will be shown with lower priority. Can be combined with the nuclide name. | `99Tc 6.0076` (shows isomer of 99Tc) | Prioritze search results of this type by adding `halflife` to the search query. |
 
-To focus the search results on a specific region of the chart, first zoom in to that region on the chart before searching.
+To focus the search results on a specific region of the chart, first zoom in to that region on the chart before searching. To only include results from a given nuclide, search from the levels / gammas list of that nuclide (selecting a specific reaction will limit the search results to the data from that reaction).

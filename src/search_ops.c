@@ -388,6 +388,7 @@ void searchEGamma(const ndata *restrict ndat, const app_state *state, search_sta
 									res.resultType = SEARCHAGENT_EGAMMA;
 									res.resultVal[0] = (uint32_t)j; //nuclide index
 									res.resultVal[1] = (uint32_t)l; //transition index
+									res.resultVal[2] = (uint32_t)k; //level index
 									//SDL_Log("Found transition %u\n",res.resultVal[1]);
 									sortAndAppendResult(ss,&res);
 								}
