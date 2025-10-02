@@ -1177,7 +1177,7 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
         state->ds.zoomFinished = 0;
       }
       //SDL_Log("scale: %0.2f\n",(double)state->ds.chartZoomScale);
-    }else if(state->uiState == UISTATE_FULLLEVELINFO){
+    }else if((state->uiState == UISTATE_FULLLEVELINFO)||(state->uiState == UISTATE_FULLLEVELINFOWITHMENU)){
       fcScrollAction(state,state->zoomDeltaVal*0.55f);
     }
     
