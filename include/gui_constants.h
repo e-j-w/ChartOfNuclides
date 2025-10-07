@@ -219,5 +219,7 @@ static const SDL_FColor txtSelCol = {0.8f,0.8f,1.0f,0.6f};
 static const SDL_Color whiteCol8Bit = {255,255,255,255};
 static const SDL_Color grayCol8Bit = {127,127,127,255};
 static const SDL_Color blackCol8Bit = {0,0,0,255};
+static const SDL_Color darkGreenTxtCol8Bit = {0,150,0,255};
+static const SDL_Color darkRedTxtCol8Bit = {150,0,0,255};
 
 #endif

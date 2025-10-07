@@ -7,7 +7,7 @@
    viewBox="0 0 25.399997 101.6"
    version="1.1"
    id="svg1"
-   inkscape:version="1.4 (e7c3feb100, 2024-10-09)"
+   inkscape:version="1.4.2 (ebf0e940d0, 2025-05-08)"
    sodipodi:docname="theme.svg"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
@@ -27,11 +27,11 @@
      inkscape:deskcolor="#d1d1d1"
      inkscape:document-units="px"
      showgrid="false"
-     inkscape:zoom="5.4672953"
-     inkscape:cx="-14.449558"
-     inkscape:cy="22.863225"
-     inkscape:window-width="1920"
-     inkscape:window-height="1016"
+     inkscape:zoom="8.8629982"
+     inkscape:cx="21.098955"
+     inkscape:cy="286.69756"
+     inkscape:window-width="1504"
+     inkscape:window-height="931"
      inkscape:window-x="0"
      inkscape:window-y="0"
      inkscape:window-maximized="1"
@@ -329,8 +329,8 @@
      inkscape:groupmode="layer"
      id="layer1">
     <path
-       style="fill:#ffffff;stroke-width:0.26458332;stroke-linecap:butt;stroke-opacity:1;stroke:#cbcbcb;stroke-dasharray:none;fill-opacity:1"
-       d="m 1.3229167,79.375001 2.9104167,-2.910416 2.9104168,2.910416"
+       style="fill:#ffffff;fill-opacity:1;stroke:#cbcbcb;stroke-width:0.37041664;stroke-linecap:butt;stroke-dasharray:none;stroke-opacity:1"
+       d="m 1.8337316,79.392144 2.3995549,-2.699818 2.3995549,2.699818"
        id="path1" />
     <rect
        style="opacity:0.99;fill:none;fill-opacity:1;stroke:#cbcbcb;stroke-width:0.320819;stroke-linecap:round;stroke-dasharray:none;stroke-opacity:0.04649015"
@@ -511,11 +511,11 @@
        ry="0.66146088"
        transform="rotate(90)" />
     <rect
-       style="fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:0.300854;stroke-opacity:1"
+       style="fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:0.276502;stroke-opacity:1"
        id="rect3"
-       width="6.0079222"
+       width="5.074708"
        height="3.0091989"
-       x="1.2293724"
+       x="1.6959791"
        y="79.276215"
        rx="0"
        ry="0" />

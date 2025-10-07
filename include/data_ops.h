@@ -52,7 +52,7 @@ const char* getValueTypeShortStr(const uint8_t type);
 const char* getDecayTypeShortStr(const uint8_t type);
 const char* getElementFamilyStr(const app_data *restrict dat, const int16_t Z);
 void getMassValStr(char strOut[32], const dblValWithErr mVal, const uint8_t showErr);
-void getQValStr(char strOut[32], const valWithErr qVal, const uint8_t showErr);
+void getQValStr(char strOut[32], const valWithErr qVal, const uint8_t showErr, const uint8_t negSign);
 void getGammaEnergyStr(char strOut[32], const ndata *restrict nd, const uint32_t tranInd, const uint8_t showErr);
 void getGammaICCStr(char strOut[32], const ndata *restrict nd, const uint32_t tranInd, const uint8_t showErr);
 void getGammaDeltaStr(char strOut[32], const ndata *restrict nd, const uint32_t tranInd, const uint8_t showErr);

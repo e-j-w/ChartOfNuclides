@@ -1875,7 +1875,7 @@ void drawNuclBoxLabelDetails(const app_data *restrict dat, app_state *restrict s
     }
   }else if(state->chartView == CHARTVIEW_SN){
     if(dat->ndat.nuclData[nuclInd].sn.val != 0.0f){
-      getQValStr(tmpStr,dat->ndat.nuclData[nuclInd].sn,1);
+      getQValStr(tmpStr,dat->ndat.nuclData[nuclInd].sn,1,0);
       SDL_strlcat(tmpStr," keV",32);
       drawTextAlignedSized(rdat,drawXPos,drawYPos+((yOffsets*labelLineSpacing + 40.0f)*state->ds.uiUserScale),col,labelFontInd,255,tmpStr,ALIGN_CENTER,maxLblWidth); //draw Sn label
     }else{
@@ -1883,7 +1883,7 @@ void drawNuclBoxLabelDetails(const app_data *restrict dat, app_state *restrict s
     }
   }else if(state->chartView == CHARTVIEW_SP){
     if(dat->ndat.nuclData[nuclInd].sp.val != 0.0f){
-      getQValStr(tmpStr,dat->ndat.nuclData[nuclInd].sp,1);
+      getQValStr(tmpStr,dat->ndat.nuclData[nuclInd].sp,1,0);
       SDL_strlcat(tmpStr," keV",32);
       drawTextAlignedSized(rdat,drawXPos,drawYPos+((yOffsets*labelLineSpacing + 40.0f)*state->ds.uiUserScale),col,labelFontInd,255,tmpStr,ALIGN_CENTER,maxLblWidth); //draw Sp label
     }else{
@@ -1891,7 +1891,7 @@ void drawNuclBoxLabelDetails(const app_data *restrict dat, app_state *restrict s
     }
   }else if(state->chartView == CHARTVIEW_QALPHA){
     if(dat->ndat.nuclData[nuclInd].qalpha.val != 0.0f){
-      getQValStr(tmpStr,dat->ndat.nuclData[nuclInd].qalpha,1);
+      getQValStr(tmpStr,dat->ndat.nuclData[nuclInd].qalpha,1,0);
       SDL_strlcat(tmpStr," keV",32);
       drawTextAlignedSized(rdat,drawXPos,drawYPos+((yOffsets*labelLineSpacing + 40.0f)*state->ds.uiUserScale),col,labelFontInd,255,tmpStr,ALIGN_CENTER,maxLblWidth); //draw Qalpha label
     }else{
@@ -1899,7 +1899,7 @@ void drawNuclBoxLabelDetails(const app_data *restrict dat, app_state *restrict s
     }
   }else if(state->chartView == CHARTVIEW_QBETAMINUS){
     if(dat->ndat.nuclData[nuclInd].qbeta.val != 0.0f){
-      getQValStr(tmpStr,dat->ndat.nuclData[nuclInd].qbeta,1);
+      getQValStr(tmpStr,dat->ndat.nuclData[nuclInd].qbeta,1,0);
       SDL_strlcat(tmpStr," keV",32);
       drawTextAlignedSized(rdat,drawXPos,drawYPos+((yOffsets*labelLineSpacing + 40.0f)*state->ds.uiUserScale),col,labelFontInd,255,tmpStr,ALIGN_CENTER,maxLblWidth); //draw Qbeta label
     }else{
@@ -1907,7 +1907,7 @@ void drawNuclBoxLabelDetails(const app_data *restrict dat, app_state *restrict s
     }
   }else if(state->chartView == CHARTVIEW_QBETAPLUS){
     if(dat->ndat.nuclData[nuclInd].qbetaplus.val != 0.0f){
-      getQValStr(tmpStr,dat->ndat.nuclData[nuclInd].qbetaplus,1);
+      getQValStr(tmpStr,dat->ndat.nuclData[nuclInd].qbetaplus,1,0);
       SDL_strlcat(tmpStr," keV",32);
       drawTextAlignedSized(rdat,drawXPos,drawYPos+((yOffsets*labelLineSpacing + 40.0f)*state->ds.uiUserScale),col,labelFontInd,255,tmpStr,ALIGN_CENTER,maxLblWidth); //draw Qbeta+ label
     }else{
@@ -1915,7 +1915,7 @@ void drawNuclBoxLabelDetails(const app_data *restrict dat, app_state *restrict s
     }
   }else if(state->chartView == CHARTVIEW_QEC){
     if(dat->ndat.nuclData[nuclInd].qec.val != 0.0f){
-      getQValStr(tmpStr,dat->ndat.nuclData[nuclInd].qec,1);
+      getQValStr(tmpStr,dat->ndat.nuclData[nuclInd].qec,1,0);
       SDL_strlcat(tmpStr," keV",32);
       drawTextAlignedSized(rdat,drawXPos,drawYPos+((yOffsets*labelLineSpacing + 40.0f)*state->ds.uiUserScale),col,labelFontInd,255,tmpStr,ALIGN_CENTER,maxLblWidth); //draw QEC label
     }else{
@@ -2458,6 +2458,8 @@ void drawInfoBoxHeader(const app_data *restrict dat, app_state *restrict state, 
     SDL_snprintf(tmpStr,32,"%s (%s)",nuclStr,getFullElemStr((uint8_t)dat->ndat.nuclData[nuclInd].Z,(uint8_t)dat->ndat.nuclData[nuclInd].N));
   }else if((uint16_t)(dat->ndat.nuclData[nuclInd].Z == 0)&&(dat->ndat.nuclData[nuclInd].N <= 5)){
     SDL_snprintf(tmpStr,32,"%s (%s)",nuclStr,getFullElemStr((uint8_t)dat->ndat.nuclData[nuclInd].Z,(uint8_t)dat->ndat.nuclData[nuclInd].N));
+  }else if((uint16_t)(dat->ndat.nuclData[nuclInd].Z == 2)&&(dat->ndat.nuclData[nuclInd].N == 2)){
+    SDL_snprintf(tmpStr,32,"%s (%s-%u) (α)",nuclStr,getFullElemStr((uint8_t)dat->ndat.nuclData[nuclInd].Z,(uint8_t)dat->ndat.nuclData[nuclInd].N),nucA);
   }else{
     SDL_snprintf(tmpStr,32,"%s (%s-%u)",nuclStr,getFullElemStr((uint8_t)dat->ndat.nuclData[nuclInd].Z,(uint8_t)dat->ndat.nuclData[nuclInd].N),nucA);
   }
@@ -2769,40 +2771,64 @@ void drawNuclFullInfoBox(const app_data *restrict dat, app_state *restrict state
   drawSelectableTextAlignedSized(rdat,&state->tss,drawXPos,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,massStr,ALIGN_RIGHT,16384);
   drawYPos += 20.0f*state->ds.uiUserScale;
   if(dat->ndat.nuclData[nuclInd].qalpha.val != 0.0f){
-    getQValStr(descStr,dat->ndat.nuclData[nuclInd].qalpha,1);
+    getQValStr(descStr,dat->ndat.nuclData[nuclInd].qalpha,1,0);
     SDL_snprintf(tmpStr,32,"%s=%s %s",dat->strings[dat->locStringIDs[LOCSTR_QALPHA]],descStr,getValueUnitShortStr(dat->ndat.nuclData[nuclInd].qalpha.unit));
-    rect = drawSelectableTextAlignedSized(rdat,&state->tss,drawXPos,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_RIGHT,16384);
+    if(dat->ndat.nuclData[nuclInd].qalpha.val > 0.0f){
+      rect = drawSelectableTextAlignedSized(rdat,&state->tss,drawXPos,drawYPos,darkGreenTxtCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_RIGHT,16384);
+    }else{
+      rect = drawSelectableTextAlignedSized(rdat,&state->tss,drawXPos,drawYPos,darkRedTxtCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_RIGHT,16384);
+    }
     drawXPos -= rect.w + 4*UI_PADDING_SIZE*state->ds.uiUserScale;
   }
   if(dat->ndat.nuclData[nuclInd].sp.val != 0.0f){
-    getQValStr(descStr,dat->ndat.nuclData[nuclInd].sp,1);
-    SDL_snprintf(tmpStr,32,"%s=%s %s",dat->strings[dat->locStringIDs[LOCSTR_SP]],descStr,getValueUnitShortStr(dat->ndat.nuclData[nuclInd].sp.unit));
-    rect = drawSelectableTextAlignedSized(rdat,&state->tss,drawXPos,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_RIGHT,16384);
+    getQValStr(descStr,dat->ndat.nuclData[nuclInd].sp,1,1); //Q(p), not S(p)
+    SDL_snprintf(tmpStr,32,"%s=%s %s",dat->strings[dat->locStringIDs[LOCSTR_QP]],descStr,getValueUnitShortStr(dat->ndat.nuclData[nuclInd].sp.unit));
+    if(dat->ndat.nuclData[nuclInd].sp.val < 0.0f){
+      rect = drawSelectableTextAlignedSized(rdat,&state->tss,drawXPos,drawYPos,darkGreenTxtCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_RIGHT,16384);
+    }else{
+      rect = drawSelectableTextAlignedSized(rdat,&state->tss,drawXPos,drawYPos,darkRedTxtCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_RIGHT,16384);
+    }
     drawXPos -= rect.w + 4*UI_PADDING_SIZE*state->ds.uiUserScale;
   }
   if(dat->ndat.nuclData[nuclInd].sn.val != 0.0f){
-    getQValStr(descStr,dat->ndat.nuclData[nuclInd].sn,1);
-    SDL_snprintf(tmpStr,32,"%s=%s %s",dat->strings[dat->locStringIDs[LOCSTR_SN]],descStr,getValueUnitShortStr(dat->ndat.nuclData[nuclInd].sn.unit));
-    drawSelectableTextAlignedSized(rdat,&state->tss,drawXPos,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_RIGHT,16384);
+    getQValStr(descStr,dat->ndat.nuclData[nuclInd].sn,1,1); //Q(n), not S(n)
+    SDL_snprintf(tmpStr,32,"%s=%s %s",dat->strings[dat->locStringIDs[LOCSTR_QN]],descStr,getValueUnitShortStr(dat->ndat.nuclData[nuclInd].sn.unit));
+    if(dat->ndat.nuclData[nuclInd].sn.val < 0.0f){
+      drawSelectableTextAlignedSized(rdat,&state->tss,drawXPos,drawYPos,darkGreenTxtCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_RIGHT,16384);
+    }else{
+      drawSelectableTextAlignedSized(rdat,&state->tss,drawXPos,drawYPos,darkRedTxtCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_RIGHT,16384);
+    }
   }
   drawXPos = state->ds.windowXRes - NUCL_FULLINFOBOX_QVAL_POS_XR*state->ds.uiUserScale;
   drawYPos += 20.0f*state->ds.uiUserScale;
   if(dat->ndat.nuclData[nuclInd].qec.val != 0.0f){
-    getQValStr(descStr,dat->ndat.nuclData[nuclInd].qec,1);
+    getQValStr(descStr,dat->ndat.nuclData[nuclInd].qec,1,0);
     SDL_snprintf(tmpStr,32,"%s=%s %s",dat->strings[dat->locStringIDs[LOCSTR_QEC]],descStr,getValueUnitShortStr(dat->ndat.nuclData[nuclInd].qec.unit));
-    rect = drawSelectableTextAlignedSized(rdat,&state->tss,drawXPos,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_RIGHT,16384);
+    if(dat->ndat.nuclData[nuclInd].qec.val > 0.0f){
+      rect = drawSelectableTextAlignedSized(rdat,&state->tss,drawXPos,drawYPos,darkGreenTxtCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_RIGHT,16384);
+    }else{
+      rect = drawSelectableTextAlignedSized(rdat,&state->tss,drawXPos,drawYPos,darkRedTxtCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_RIGHT,16384);
+    }
     drawXPos -= rect.w + 4*UI_PADDING_SIZE*state->ds.uiUserScale;
   }
   if(dat->ndat.nuclData[nuclInd].qbetaplus.val != 0.0f){
-    getQValStr(descStr,dat->ndat.nuclData[nuclInd].qbetaplus,1);
+    getQValStr(descStr,dat->ndat.nuclData[nuclInd].qbetaplus,1,0);
     SDL_snprintf(tmpStr,32,"%s=%s %s",dat->strings[dat->locStringIDs[LOCSTR_QBETAPLUS]],descStr,getValueUnitShortStr(dat->ndat.nuclData[nuclInd].qbetaplus.unit));
-    rect = drawSelectableTextAlignedSized(rdat,&state->tss,drawXPos,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_RIGHT,16384);
+    if(dat->ndat.nuclData[nuclInd].qbetaplus.val > 0.0f){
+      rect = drawSelectableTextAlignedSized(rdat,&state->tss,drawXPos,drawYPos,darkGreenTxtCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_RIGHT,16384);
+    }else{
+      rect = drawSelectableTextAlignedSized(rdat,&state->tss,drawXPos,drawYPos,darkRedTxtCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_RIGHT,16384);
+    }
     drawXPos -= rect.w + 4*UI_PADDING_SIZE*state->ds.uiUserScale;
   }
   if(dat->ndat.nuclData[nuclInd].qbeta.val != 0.0f){
-    getQValStr(descStr,dat->ndat.nuclData[nuclInd].qbeta,1);
+    getQValStr(descStr,dat->ndat.nuclData[nuclInd].qbeta,1,0);
     SDL_snprintf(tmpStr,32,"%s=%s %s",dat->strings[dat->locStringIDs[LOCSTR_QBETAMINUS]],descStr,getValueUnitShortStr(dat->ndat.nuclData[nuclInd].qbeta.unit));
-    drawSelectableTextAlignedSized(rdat,&state->tss,drawXPos,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_RIGHT,16384);
+    if(dat->ndat.nuclData[nuclInd].qbeta.val > 0.0f){
+      drawSelectableTextAlignedSized(rdat,&state->tss,drawXPos,drawYPos,darkGreenTxtCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_RIGHT,16384);
+    }else{
+      drawSelectableTextAlignedSized(rdat,&state->tss,drawXPos,drawYPos,darkRedTxtCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_RIGHT,16384);
+    }
   }
   
 

@@ -1907,33 +1907,37 @@ void getMassValStr(char strOut[32], const dblValWithErr mVal, const uint8_t show
 	}
 }
 
-void getQValStr(char strOut[32], const valWithErr qVal, const uint8_t showErr){
+void getQValStr(char strOut[32], const valWithErr qVal, const uint8_t showErr, const uint8_t negSign){
 	uint8_t qPrecision = (uint8_t)(qVal.format & 15U);
 	uint8_t qExponent = (uint8_t)((qVal.format >> 4U) & 1U);
+	double val = (double)(qVal.val);
+	if(negSign){
+		val = val*-1.0;
+	}
 	if((showErr == 0)||(qVal.err == 0)){
 		if(qExponent == 0){
-			SDL_snprintf(strOut,32,"%.*f",qPrecision,(double)(qVal.val));
+			SDL_snprintf(strOut,32,"%.*f",qPrecision,val);
 		}else{
-			SDL_snprintf(strOut,32,"%.*fE%i",qPrecision,(double)(qVal.val),qVal.exponent);
+			SDL_snprintf(strOut,32,"%.*fE%i",qPrecision,val,qVal.exponent);
 		}
 	}else{
 		if(qExponent == 0){
 			if(qVal.err == 255){
 				//systematic
-				SDL_snprintf(strOut,32,"%.*f(sys.)",qPrecision,(double)(qVal.val));
+				SDL_snprintf(strOut,32,"%.*f(sys.)",qPrecision,val);
 			}else if(qVal.err == 254){
 				//calculated
-				SDL_snprintf(strOut,32,"%.*f(calc.)",qPrecision,(double)(qVal.val));
+				SDL_snprintf(strOut,32,"%.*f(calc.)",qPrecision,val);
 			}else{
-				SDL_snprintf(strOut,32,"%.*f(%u)",qPrecision,(double)(qVal.val),qVal.err);
+				SDL_snprintf(strOut,32,"%.*f(%u)",qPrecision,val,qVal.err);
 			}
 		}else{
 			if(qVal.err == 255){
-				SDL_snprintf(strOut,32,"%.*f(sys.)E%i",qPrecision,(double)(qVal.val),qVal.exponent);
+				SDL_snprintf(strOut,32,"%.*f(sys.)E%i",qPrecision,val,qVal.exponent);
 			}else if(qVal.err == 254){
-				SDL_snprintf(strOut,32,"%.*f(calc.)E%i",qPrecision,(double)(qVal.val),qVal.exponent);
+				SDL_snprintf(strOut,32,"%.*f(calc.)E%i",qPrecision,val,qVal.exponent);
 			}else{
-				SDL_snprintf(strOut,32,"%.*f(%u)E%i",qPrecision,(double)(qVal.val),qVal.err,qVal.exponent);
+				SDL_snprintf(strOut,32,"%.*f(%u)E%i",qPrecision,val,qVal.err,qVal.exponent);
 			}
 		}
 	}
@@ -3934,7 +3938,7 @@ void contextMenuClickAction(app_data *restrict dat, app_state *restrict state, r
 				case CHARTVIEW_SN:
 					; //suppress warning
 					char tmpSnStr[32];
-					getQValStr(tmpSnStr,dat->ndat.nuclData[state->cms.selectionInd].sn,1);
+					getQValStr(tmpSnStr,dat->ndat.nuclData[state->cms.selectionInd].sn,1,0);
 					SDL_snprintf(state->copiedTxt,MAX_SELECTABLE_STR_LEN,"%s: %s %s",dat->strings[dat->locStringIDs[LOCSTR_SN]],tmpSnStr,getValueUnitShortStr(dat->ndat.nuclData[state->cms.selectionInd].sn.unit));
 					SDL_SetClipboardText(state->copiedTxt);
 					//SDL_Log("Copied text to clipboard: %s\n",SDL_GetClipboardText());
@@ -3942,7 +3946,7 @@ void contextMenuClickAction(app_data *restrict dat, app_state *restrict state, r
 				case CHARTVIEW_SP:
 					; //suppress warning
 					char tmpSpStr[32];
-					getQValStr(tmpSpStr,dat->ndat.nuclData[state->cms.selectionInd].sp,1);
+					getQValStr(tmpSpStr,dat->ndat.nuclData[state->cms.selectionInd].sp,1,0);
 					SDL_snprintf(state->copiedTxt,MAX_SELECTABLE_STR_LEN,"%s: %s %s",dat->strings[dat->locStringIDs[LOCSTR_SP]],tmpSpStr,getValueUnitShortStr(dat->ndat.nuclData[state->cms.selectionInd].sp.unit));
 					SDL_SetClipboardText(state->copiedTxt);
 					//SDL_Log("Copied text to clipboard: %s\n",SDL_GetClipboardText());
@@ -3950,7 +3954,7 @@ void contextMenuClickAction(app_data *restrict dat, app_state *restrict state, r
 				case CHARTVIEW_QALPHA:
 					; //suppress warning
 					char tmpQaStr[32];
-					getQValStr(tmpQaStr,dat->ndat.nuclData[state->cms.selectionInd].qalpha,1);
+					getQValStr(tmpQaStr,dat->ndat.nuclData[state->cms.selectionInd].qalpha,1,0);
 					SDL_snprintf(state->copiedTxt,MAX_SELECTABLE_STR_LEN,"%s: %s %s",dat->strings[dat->locStringIDs[LOCSTR_QALPHA]],tmpQaStr,getValueUnitShortStr(dat->ndat.nuclData[state->cms.selectionInd].qalpha.unit));
 					SDL_SetClipboardText(state->copiedTxt);
 					//SDL_Log("Copied text to clipboard: %s\n",SDL_GetClipboardText());
@@ -3958,7 +3962,7 @@ void contextMenuClickAction(app_data *restrict dat, app_state *restrict state, r
 				case CHARTVIEW_QBETAMINUS:
 					; //suppress warning
 					char tmpQbStr[32];
-					getQValStr(tmpQbStr,dat->ndat.nuclData[state->cms.selectionInd].qbeta,1);
+					getQValStr(tmpQbStr,dat->ndat.nuclData[state->cms.selectionInd].qbeta,1,0);
 					SDL_snprintf(state->copiedTxt,MAX_SELECTABLE_STR_LEN,"%s: %s %s",dat->strings[dat->locStringIDs[LOCSTR_QBETAMINUS]],tmpQbStr,getValueUnitShortStr(dat->ndat.nuclData[state->cms.selectionInd].qbeta.unit));
 					SDL_SetClipboardText(state->copiedTxt);
 					//SDL_Log("Copied text to clipboard: %s\n",SDL_GetClipboardText());
@@ -3966,7 +3970,7 @@ void contextMenuClickAction(app_data *restrict dat, app_state *restrict state, r
 				case CHARTVIEW_QBETAPLUS:
 					; //suppress warning
 					char tmpQbpStr[32];
-					getQValStr(tmpQbpStr,dat->ndat.nuclData[state->cms.selectionInd].qbetaplus,1);
+					getQValStr(tmpQbpStr,dat->ndat.nuclData[state->cms.selectionInd].qbetaplus,1,0);
 					SDL_snprintf(state->copiedTxt,MAX_SELECTABLE_STR_LEN,"%s: %s %s",dat->strings[dat->locStringIDs[LOCSTR_QBETAPLUS]],tmpQbpStr,getValueUnitShortStr(dat->ndat.nuclData[state->cms.selectionInd].qbetaplus.unit));
 					SDL_SetClipboardText(state->copiedTxt);
 					//SDL_Log("Copied text to clipboard: %s\n",SDL_GetClipboardText());
@@ -3974,7 +3978,7 @@ void contextMenuClickAction(app_data *restrict dat, app_state *restrict state, r
 				case CHARTVIEW_QEC:
 					; //suppress warning
 					char tmpQecStr[32];
-					getQValStr(tmpQecStr,dat->ndat.nuclData[state->cms.selectionInd].qec,1);
+					getQValStr(tmpQecStr,dat->ndat.nuclData[state->cms.selectionInd].qec,1,0);
 					SDL_snprintf(state->copiedTxt,MAX_SELECTABLE_STR_LEN,"%s: %s %s",dat->strings[dat->locStringIDs[LOCSTR_QEC]],tmpQecStr,getValueUnitShortStr(dat->ndat.nuclData[state->cms.selectionInd].qec.unit));
 					SDL_SetClipboardText(state->copiedTxt);
 					//SDL_Log("Copied text to clipboard: %s\n",SDL_GetClipboardText());

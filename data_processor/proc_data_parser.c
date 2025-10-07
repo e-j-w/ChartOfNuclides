@@ -253,6 +253,8 @@ static int parseAppRules(app_data *restrict dat, asset_mapping *restrict stringI
 	dat->locStringIDs[LOCSTR_QBETAMINUS] = (uint16_t)nameToAssetID("q_betaminus",stringIDmap);
 	dat->locStringIDs[LOCSTR_QBETAPLUS] = (uint16_t)nameToAssetID("q_betaplus",stringIDmap);
 	dat->locStringIDs[LOCSTR_QEC] = (uint16_t)nameToAssetID("q_ec",stringIDmap);
+	dat->locStringIDs[LOCSTR_QP] = (uint16_t)nameToAssetID("q_p",stringIDmap);
+	dat->locStringIDs[LOCSTR_QN] = (uint16_t)nameToAssetID("q_n",stringIDmap);
 	dat->locStringIDs[LOCSTR_SP] = (uint16_t)nameToAssetID("protonsep_energy",stringIDmap);
 	dat->locStringIDs[LOCSTR_SN] = (uint16_t)nameToAssetID("neutronsep_energy",stringIDmap);
 	dat->locStringIDs[LOCSTR_ATOMIC_MASS] = (uint16_t)nameToAssetID("atomic_mass",stringIDmap);
@@ -539,6 +541,9 @@ uint8_t parseRxn(reaction *rxn, const char *rxnstring, char *ensdfStrBuf, const 
 		modRxnStrCpy = findReplaceAllUTF8(" b+"," β+",modRxnStr);
 		SDL_strlcpy(modRxnStr,modRxnStrCpy,MAX_RXN_STRLEN-1);
 		SDL_free(modRxnStrCpy);
+		modRxnStrCpy = findReplaceAllUTF8("+b+","+β+",modRxnStr);
+		SDL_strlcpy(modRxnStr,modRxnStrCpy,MAX_RXN_STRLEN-1);
+		SDL_free(modRxnStrCpy);
 		modRxnStrCpy = findReplaceAllUTF8("a dec","α dec",modRxnStr);
 		SDL_strlcpy(modRxnStr,modRxnStrCpy,MAX_RXN_STRLEN-1);
 		SDL_free(modRxnStrCpy);
@@ -609,6 +614,12 @@ uint8_t parseRxn(reaction *rxn, const char *rxnstring, char *ensdfStrBuf, const 
 		SDL_strlcpy(modRxnStr,modRxnStrCpy,MAX_RXN_STRLEN-1);
 		SDL_free(modRxnStrCpy);
 		modRxnStrCpy = findReplaceAllUTF8(",a",",α",modRxnStr);
+		SDL_strlcpy(modRxnStr,modRxnStrCpy,MAX_RXN_STRLEN-1);
+		SDL_free(modRxnStrCpy);
+		modRxnStrCpy = findReplaceAllUTF8("(k-","(K-",modRxnStr);
+		SDL_strlcpy(modRxnStr,modRxnStrCpy,MAX_RXN_STRLEN-1);
+		SDL_free(modRxnStrCpy);
+		modRxnStrCpy = findReplaceAllUTF8("(k+","(K+",modRxnStr);
 		SDL_strlcpy(modRxnStr,modRxnStrCpy,MAX_RXN_STRLEN-1);
 		SDL_free(modRxnStrCpy);
 		modRxnStrCpy = findReplaceAllUTF8(",,",",",modRxnStr);
