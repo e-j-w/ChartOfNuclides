@@ -1196,19 +1196,17 @@ void processSingleEvent(app_data *restrict dat, app_state *restrict state, resou
       break;
     case SDL_EVENT_GAMEPAD_ADDED:
       //setup the gamepad
-      if(state->gamepadDisabled == 0){
-        SDL_Log("Gamepad added.\n");
-        rdat->gamepad = NULL;
-        int num_joysticks;
-        SDL_JoystickID *joysticks = SDL_GetJoysticks(&num_joysticks);
-        for(int i=0; i<num_joysticks; i++){
-          if(SDL_IsGamepad(joysticks[i])){
-            rdat->gamepad = SDL_OpenGamepad(joysticks[i]);
-            if(rdat->gamepad){
-              break;
-            }else{
-              SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,"Could not open game gamepad %i: %s\n", i, SDL_GetError());
-            }
+      SDL_Log("Gamepad added.\n");
+      rdat->gamepad = NULL;
+      int num_joysticks;
+      SDL_JoystickID *joysticks = SDL_GetJoysticks(&num_joysticks);
+      for(int i=0; i<num_joysticks; i++){
+        if(SDL_IsGamepad(joysticks[i])){
+          rdat->gamepad = SDL_OpenGamepad(joysticks[i]);
+          if(rdat->gamepad){
+            break;
+          }else{
+            SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,"Could not open game gamepad %i: %s\n", i, SDL_GetError());
           }
         }
       }

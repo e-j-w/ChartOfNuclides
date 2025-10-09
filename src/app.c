@@ -39,7 +39,7 @@ void shutdownApp(const global_data *gdat, const uint8_t skipDealloc){
   exit(0);
 }
 
-int main(int argc, char *argv[]){
+int main(){
 
   setlocale(LC_ALL, "en_ca.UTF-8");
 
@@ -47,14 +47,6 @@ int main(int argc, char *argv[]){
   setbuf(stdout,NULL); //needed to show printf output on Windows
   #endif
 
-  //parse command line arguments
-  uint8_t cliArgs = 0;
-  for(int i=1; i<argc; i++){
-    if(strcmp(argv[i],"--nogamepad")==0){
-      cliArgs |= (uint8_t)(1U<<CLI_NOGAMEPAD);
-    }
-  }
-  
   /*for(i=0;i<SDL_GetNumVideoDrivers();i++){
     SDL_Log("Video driver available: %s\n",SDL_GetVideoDriver(i));
   }*/
@@ -63,11 +55,7 @@ int main(int argc, char *argv[]){
   SDL_SetHint(SDL_HINT_MOUSE_FOCUS_CLICKTHROUGH, "1"); //allow mouse events when clicking on the window in an unfocused state (so the user doesn't have to click twice)
 
   uint32_t sdlFlags = 0;
-  if(cliArgs&(1U<<CLI_NOGAMEPAD)){
-    sdlFlags = SDL_INIT_VIDEO;
-  }else{
-    sdlFlags = SDL_INIT_VIDEO|SDL_INIT_GAMEPAD;
-  }
+  sdlFlags = SDL_INIT_VIDEO|SDL_INIT_GAMEPAD;
   if(strcmp(SDL_GetPlatform(),"Linux")==0){
     //Use Wayland by default on Linux instead of X11,
     //since Wayland seems to have better frame pacing,
@@ -173,13 +161,6 @@ int main(int argc, char *argv[]){
   float deltaTime = 0.0f;
   float freqFac = 1000.0f/(float)SDL_GetPerformanceFrequency();
 
-  //deal with effects of command line arguments
-  gdat->state.gamepadDisabled = 0;
-  if(cliArgs&(1U<<CLI_NOGAMEPAD)){
-    SDL_Log("Disabling gamepad/gamepad from command line option.\n");
-    gdat->state.gamepadDisabled = 1;
-  }
-
   startUIAnimation(&gdat->dat,&gdat->state,&gdat->rdat,UIANIM_CHART_FADEIN);
   
   //main loop
@@ -223,8 +204,8 @@ int main(int argc, char *argv[]){
     if(gdat->rdat.ssdat.takingScreenshot == 1){
       takeScreenshot(&gdat->rdat); //data_ops.c
       //we don't render the frame to screen when taking a screenshot, since that
-      //would cause a 'flicker' due the the UI elements not included in 
-      //screenshots being missing from the frame 
+      //would cause a 'flicker' due the the UI elements not included in
+      //screenshots being missing from the frame
     }else{
       SDL_RenderPresent(gdat->rdat.renderer); //tell the renderer to actually show the image
     }

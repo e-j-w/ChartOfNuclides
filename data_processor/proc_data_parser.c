@@ -257,6 +257,10 @@ static int parseAppRules(app_data *restrict dat, asset_mapping *restrict stringI
 	dat->locStringIDs[LOCSTR_QN] = (uint16_t)nameToAssetID("q_n",stringIDmap);
 	dat->locStringIDs[LOCSTR_SP] = (uint16_t)nameToAssetID("protonsep_energy",stringIDmap);
 	dat->locStringIDs[LOCSTR_SN] = (uint16_t)nameToAssetID("neutronsep_energy",stringIDmap);
+	dat->locStringIDs[LOCSTR_SA] = (uint16_t)nameToAssetID("alphasep_energy",stringIDmap);
+	dat->locStringIDs[LOCSTR_SP_LONG] = (uint16_t)nameToAssetID("protonsep_energy_long",stringIDmap);
+	dat->locStringIDs[LOCSTR_SN_LONG] = (uint16_t)nameToAssetID("neutronsep_energy_long",stringIDmap);
+	dat->locStringIDs[LOCSTR_SA_LONG] = (uint16_t)nameToAssetID("alphasep_energy_long",stringIDmap);
 	dat->locStringIDs[LOCSTR_ATOMIC_MASS] = (uint16_t)nameToAssetID("atomic_mass",stringIDmap);
 	dat->locStringIDs[LOCSTR_MASS_UNKNOWN] = (uint16_t)nameToAssetID("mass_unknown",stringIDmap);
 	dat->locStringIDs[LOCSTR_ELEM_TYPE] = (uint16_t)nameToAssetID("element_type",stringIDmap);
@@ -1872,7 +1876,7 @@ uint8_t parseDcyModeSubstr(ndata *nd, const uint16_t dcyModeInd, const char *sub
 //set initial databae values prior to importing data
 void initialize_database(ndata *nd){
 	
-	memset(nd,0,sizeof(ndata));
+	SDL_memset(nd,0,sizeof(ndata));
 	
 	nd->numNucl = -1;
 	nd->numLvls = 0;
@@ -2084,7 +2088,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 					nd->nuclData[nd->numNucl].longestIsomerLevel = MAXNUMLVLS;
 					nd->nuclData[nd->numNucl].abundance.unit = VALUE_UNIT_NOVAL; //default
 					nd->nuclData[nd->numNucl].firstRxn = nd->numRxns;
-					memset(&varDat,0,sizeof(sp_var_data));
+					SDL_memset(&varDat,0,sizeof(sp_var_data));
 					//SDL_Log("Adding gamma data for nucleus %s\n",val[0]);
 					memcpy(nuclNameStr,val[0],10);
 					nuclNameStr[9] = '\0'; //terminate string
@@ -4437,7 +4441,7 @@ int parseAppData(app_data *restrict dat, const char *appBasePath){
 
 	//set default values
 	dat->numStrings=0;
-	memset(dat->locStringIDs,0,sizeof(dat->locStringIDs));
+	SDL_memset(dat->locStringIDs,0,sizeof(dat->locStringIDs));
 
 	//start parsing data
 	if(parseStrings(dat,stringIDmap,appBasePath)==-1) return -1;

@@ -2525,9 +2525,49 @@ void drawNuclFullInfoBox(const app_data *restrict dat, app_state *restrict state
   rect.x = origDrawXPos - 2*UI_PADDING_SIZE*state->ds.uiUserScale;
   rect.w = allColWidth + 4*UI_PADDING_SIZE*state->ds.uiUserScale;
   //SDL_Log("drawYPos: %f\n",(double)drawYPos);
+  //SDL_Log("Scroll: %f / %f\n",(double)state->ds.nuclFullInfoScrollY,(double)state->ds.nuclFullInfoMaxScrollY);
   float levelStartDrawPos;
   for(uint32_t lvlInd = dat->ndat.nuclData[nuclInd].firstLevel; lvlInd<(dat->ndat.nuclData[nuclInd].firstLevel+dat->ndat.nuclData[nuclInd].numLevels); lvlInd++){
-    
+
+    //draw Q-values in-line
+    if((lvlInd > dat->ndat.nuclData[nuclInd].firstLevel)&&(lvlInd<=state->ds.nuclFullInfoLastDispLvl)){
+      for(uint8_t i=0; i<QVAL_ENUM_LENGTH; i++){
+        uint8_t j = state->ds.fullInfoQValOrder[i];
+        if(state->ds.fullInfoQValEntryPos[j] == lvlInd){
+          if(((drawYPos + NUCL_INFOBOX_SMALLLINE_HEIGHT*state->ds.uiUserScale) >= NUCL_FULLINFOBOX_LEVELLIST_POS_Y)&&(drawYPos <= state->ds.windowYRes)){
+            char descStr[64], qValStr[64];
+            switch(j){
+              case QVAL_SN:
+                drawXPos = state->ds.windowXRes/2.0f;
+                getQValStr(descStr,dat->ndat.nuclData[nuclInd].sn,1,0);
+                SDL_snprintf(qValStr,64,"%s: %s=%s %s",dat->strings[dat->locStringIDs[LOCSTR_SN_LONG]],dat->strings[dat->locStringIDs[LOCSTR_SN]],descStr,getValueUnitShortStr(dat->ndat.nuclData[nuclInd].sn.unit));
+                drawSelectableTextAlignedSized(rdat,&state->tss,drawXPos,drawYPos+(0.5f*NUCL_INFOBOX_SMALLLINE_HEIGHT*state->ds.uiUserScale),blackCol8Bit,FONTSIZE_NORMAL_BOLD,txtAlpha,qValStr,ALIGN_CENTER,16384);
+                break;
+              case QVAL_SP:
+                drawXPos = state->ds.windowXRes/2.0f;
+                getQValStr(descStr,dat->ndat.nuclData[nuclInd].sp,1,0);
+                SDL_snprintf(qValStr,64,"%s: %s=%s %s",dat->strings[dat->locStringIDs[LOCSTR_SP_LONG]],dat->strings[dat->locStringIDs[LOCSTR_SP]],descStr,getValueUnitShortStr(dat->ndat.nuclData[nuclInd].sp.unit));
+                drawSelectableTextAlignedSized(rdat,&state->tss,drawXPos,drawYPos+(0.5f*NUCL_INFOBOX_SMALLLINE_HEIGHT*state->ds.uiUserScale),blackCol8Bit,FONTSIZE_NORMAL_BOLD,txtAlpha,qValStr,ALIGN_CENTER,16384);
+                break;
+              case QVAL_SA:
+                drawXPos = state->ds.windowXRes/2.0f;
+                getQValStr(descStr,dat->ndat.nuclData[nuclInd].qalpha,1,1); //S(alpha), not Q(alpha)
+                SDL_snprintf(qValStr,64,"%s: %s=%s %s",dat->strings[dat->locStringIDs[LOCSTR_SA_LONG]],dat->strings[dat->locStringIDs[LOCSTR_SA]],descStr,getValueUnitShortStr(dat->ndat.nuclData[nuclInd].qalpha.unit));
+                drawSelectableTextAlignedSized(rdat,&state->tss,drawXPos,drawYPos+(0.5f*NUCL_INFOBOX_SMALLLINE_HEIGHT*state->ds.uiUserScale),blackCol8Bit,FONTSIZE_NORMAL_BOLD,txtAlpha,qValStr,ALIGN_CENTER,16384);
+                break;
+              default:
+                break;
+            }
+            drawYPos += (NUCL_INFOBOX_SMALLLINE_HEIGHT*state->ds.uiUserScale + txtYOffset);
+            //draw divider line
+            drawLine(rdat,floorf(rect.x),ceilf(drawYPos),ceilf(rect.x+rect.w),ceilf(drawYPos),ceilf(NUCL_FULLINFOBOX_DIVIDER_LINE_THICKNESS*state->ds.uiUserScale),dividerLineCol,dividerLineCol);
+          }else{
+            drawYPos += (NUCL_INFOBOX_SMALLLINE_HEIGHT*state->ds.uiUserScale + txtYOffset); //without this, searches for levels listed after a Q-value won't go to the correct line
+          }
+        }
+      }
+    }
+
     //skip all levels which are not part of the selected reaction
     //SDL_Log("Lvl %u populating rxns: %lu\n",lvlInd,dat->ndat.levels[lvlInd].populatingRxns);
     if(state->ds.selectedRxn > 0){

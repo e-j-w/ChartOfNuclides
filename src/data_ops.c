@@ -54,7 +54,7 @@ void initializeTempState(const app_data *restrict dat, app_state *restrict state
 	state->ds.windowXRes = 880;
 	state->ds.windowYRes = 580;
 	state->ds.drawPerformanceStats = 0;
-	memset(state->ss.searchString,0,sizeof(state->ss.searchString));
+	SDL_memset(state->ss.searchString,0,sizeof(state->ss.searchString));
 	state->searchStrUpdated = 0;
 	//ui state
 	state->lastUIState = UISTATE_CHARTONLY;
@@ -99,10 +99,10 @@ void initializeTempState(const app_data *restrict dat, app_state *restrict state
 	state->ss.searchInProgress = SEARCHSTATE_NOTSEARCHING;
 	state->ss.canUpdateResults = SDL_CreateSemaphore(1);
 	clearSelectionStrs(&state->ds,&state->tss,0);
-	memset(state->ds.uiElemExtPlusX,0,sizeof(state->ds.uiElemExtPlusX));
-	memset(state->ds.uiElemExtPlusY,0,sizeof(state->ds.uiElemExtPlusY));
-	memset(state->ds.uiElemExtMinusX,0,sizeof(state->ds.uiElemExtMinusX));
-	memset(state->ds.uiElemExtMinusY,0,sizeof(state->ds.uiElemExtMinusY));
+	SDL_memset(state->ds.uiElemExtPlusX,0,sizeof(state->ds.uiElemExtPlusX));
+	SDL_memset(state->ds.uiElemExtPlusY,0,sizeof(state->ds.uiElemExtPlusY));
+	SDL_memset(state->ds.uiElemExtMinusX,0,sizeof(state->ds.uiElemExtMinusX));
+	SDL_memset(state->ds.uiElemExtMinusY,0,sizeof(state->ds.uiElemExtMinusY));
 	//threads
 	for(uint8_t i=0;i<MAX_NUM_THREADS;i++){
 		tms->threadData[i].threadState = THREADSTATE_DEAD;
@@ -3089,24 +3089,69 @@ uint16_t getNumScreenLvlDispLines(const drawing_state *restrict ds){
 uint16_t getNumTotalLvlDispLines(const ndata *restrict nd, const app_state *restrict state){
 	uint16_t numLines = 0;
 	for(uint32_t lvlInd = nd->nuclData[state->chartSelectedNucl].firstLevel; lvlInd<(nd->nuclData[state->chartSelectedNucl].firstLevel + nd->nuclData[state->chartSelectedNucl].numLevels); lvlInd++){
+		
 		if(state->ds.selectedRxn == 0){
 			numLines += getNumDispLinesForLvl(nd,lvlInd);
 		}else if(nd->levels[lvlInd].populatingRxns & ((uint64_t)(1) << (state->ds.selectedRxn-1))){
 			numLines += getNumDispLinesForLvl(nd,lvlInd);
 		}
+
+		//account for Q-values
+		if(lvlInd<=state->ds.nuclFullInfoLastDispLvl){
+			if(lvlInd>nd->nuclData[state->chartSelectedNucl].firstLevel){
+				for(int i=0; i<QVAL_ENUM_LENGTH; i++){
+					if(state->ds.fullInfoQValEntryPos[i] == lvlInd){
+						switch(i){
+							case QVAL_SN:
+							case QVAL_SP:
+							case QVAL_SA:
+								//SDL_Log("getNumTotalLvlDispLines - adding line for Q-value: %i\n",i);
+								numLines++;
+								break;
+							default:
+								break;
+						}
+					}
+				}
+			}
+		}
 	}
 	return numLines;
 }
 uint16_t getNumDispLinesUpToLvl(const ndata *restrict nd, const app_state *restrict state, const uint16_t nuclLevel){
+	
 	uint16_t numLines = 0;
 	for(uint32_t i = nd->nuclData[state->chartSelectedNucl].firstLevel; i<(nd->nuclData[state->chartSelectedNucl].firstLevel + (uint32_t)nuclLevel); i++){
+		
 		if(state->ds.selectedRxn == 0){
 			numLines += getNumDispLinesForLvl(nd,i);
 		}else if(nd->levels[i].populatingRxns & ((uint64_t)(1) << (state->ds.selectedRxn-1))){
 			numLines += getNumDispLinesForLvl(nd,i);
 		}
 		
+		//account for Q-values
+		if(i<=state->ds.nuclFullInfoLastDispLvl){
+			if(i>nd->nuclData[state->chartSelectedNucl].firstLevel){
+				for(int j=0; j<QVAL_ENUM_LENGTH; j++){
+					if(state->ds.fullInfoQValEntryPos[j] == i){
+						switch(j){
+							case QVAL_SN:
+							case QVAL_SP:
+							case QVAL_SA:
+								//SDL_Log("getNumDispLinesUpToLvl - adding line for Q-value: %i\n",j);
+								numLines++;
+								break;
+							default:
+								break;
+						}
+					}
+				}
+			}
+		}
+
 	}
+	
+	
 	return numLines;
 }
 
@@ -3472,7 +3517,83 @@ void setFullLevelInfoDimensions(const app_data *restrict dat, app_state *restric
 	state->ds.fullInfoColWidth[LLCOLUMN_FINALLEVEL_E] = NUCL_FULLINFOBOX_FINALLEVEL_E_COL_MIN_WIDTH;
 	state->ds.fullInfoColWidth[LLCOLUMN_FINALLEVEL_JPI] = NUCL_FULLINFOBOX_FINALLEVEL_JPI_COL_MIN_WIDTH;
 
+	//determine last visible level
+	if(state->ds.selectedRxn == 0){
+		state->ds.nuclFullInfoLastDispLvl = (uint32_t)(dat->ndat.nuclData[state->chartSelectedNucl].firstLevel + dat->ndat.nuclData[state->chartSelectedNucl].numLevels - 1);
+	}else{
+		for(uint32_t lvlInd = dat->ndat.nuclData[state->chartSelectedNucl].firstLevel; lvlInd<(dat->ndat.nuclData[state->chartSelectedNucl].firstLevel + dat->ndat.nuclData[state->chartSelectedNucl].numLevels); lvlInd++){
+			if(dat->ndat.levels[lvlInd].populatingRxns & ((uint64_t)(1) << (state->ds.selectedRxn-1))){
+				state->ds.nuclFullInfoLastDispLvl = lvlInd;
+			}
+		}
+	}
+
+	SDL_memset(state->ds.fullInfoQValEntryPos,0,sizeof(state->ds.fullInfoQValEntryPos));
+	SDL_memset(state->ds.fullInfoQValOrder,0,sizeof(state->ds.fullInfoQValOrder));
+
 	for(uint32_t lvlInd = dat->ndat.nuclData[selNucl].firstLevel; lvlInd<(dat->ndat.nuclData[selNucl].firstLevel+dat->ndat.nuclData[selNucl].numLevels); lvlInd++){
+		
+		//check for q-val positions, and order them properly so that lower values will always be drawn first
+		//should replace this block with an actual proper sort algorithm at some point
+		if(getRawValFromDB(&dat->ndat.nuclData[selNucl].sn) < getRawValFromDB(&dat->ndat.nuclData[selNucl].sp)){
+			if(getRawValFromDB(&dat->ndat.nuclData[selNucl].sn) < (getRawValFromDB(&dat->ndat.nuclData[selNucl].qalpha)*-1.0)){
+				state->ds.fullInfoQValOrder[0] = QVAL_SN;
+				if(getRawValFromDB(&dat->ndat.nuclData[selNucl].sp) < (getRawValFromDB(&dat->ndat.nuclData[selNucl].qalpha)*-1.0)){
+					state->ds.fullInfoQValOrder[1] = QVAL_SP;
+					state->ds.fullInfoQValOrder[2] = QVAL_SA;
+				}else{
+					state->ds.fullInfoQValOrder[2] = QVAL_SP;
+					state->ds.fullInfoQValOrder[1] = QVAL_SA;
+				}
+			}else{
+				state->ds.fullInfoQValOrder[0] = QVAL_SA;
+				state->ds.fullInfoQValOrder[1] = QVAL_SN;
+				state->ds.fullInfoQValOrder[2] = QVAL_SP;
+			}
+		}else if(getRawValFromDB(&dat->ndat.nuclData[selNucl].sp) < (getRawValFromDB(&dat->ndat.nuclData[selNucl].qalpha)*-1.0)){
+			state->ds.fullInfoQValOrder[0] = QVAL_SP;
+			if(getRawValFromDB(&dat->ndat.nuclData[selNucl].sn) < (getRawValFromDB(&dat->ndat.nuclData[selNucl].qalpha)*-1.0)){
+				state->ds.fullInfoQValOrder[1] = QVAL_SN;
+				state->ds.fullInfoQValOrder[2] = QVAL_SA;
+			}else{
+				state->ds.fullInfoQValOrder[1] = QVAL_SA;
+				state->ds.fullInfoQValOrder[2] = QVAL_SN;
+			}
+		}else{
+			state->ds.fullInfoQValOrder[0] = QVAL_SA;
+			state->ds.fullInfoQValOrder[1] = QVAL_SP;
+			state->ds.fullInfoQValOrder[2] = QVAL_SN;
+		}
+		if(lvlInd > dat->ndat.nuclData[selNucl].firstLevel){
+			for(int i=0; i<QVAL_ENUM_LENGTH; i++){
+				switch(i){
+					case QVAL_SN:
+						if(getRawValFromDB(&dat->ndat.nuclData[selNucl].sn) > getRawValFromDB(&dat->ndat.levels[lvlInd-1].energy)){
+							if(getRawValFromDB(&dat->ndat.nuclData[selNucl].sn) <= getRawValFromDB(&dat->ndat.levels[lvlInd].energy)){
+								state->ds.fullInfoQValEntryPos[i] = lvlInd;
+							}
+						}
+						break;
+					case QVAL_SP:
+						if(getRawValFromDB(&dat->ndat.nuclData[selNucl].sp) > getRawValFromDB(&dat->ndat.levels[lvlInd-1].energy)){
+							if(getRawValFromDB(&dat->ndat.nuclData[selNucl].sp) <= getRawValFromDB(&dat->ndat.levels[lvlInd].energy)){
+								state->ds.fullInfoQValEntryPos[i] = lvlInd;
+							}
+						}
+						break;
+					case QVAL_SA:
+						if((getRawValFromDB(&dat->ndat.nuclData[selNucl].qalpha)*-1.0) > getRawValFromDB(&dat->ndat.levels[lvlInd-1].energy)){
+							if((getRawValFromDB(&dat->ndat.nuclData[selNucl].qalpha)*-1.0) <= getRawValFromDB(&dat->ndat.levels[lvlInd].energy)){
+								state->ds.fullInfoQValEntryPos[i] = lvlInd;
+							}
+						}
+						break;
+					default:
+						break;
+				}
+			}
+		}
+		
 		getLvlEnergyStr(tmpStr,&dat->ndat,lvlInd,1);
 		tmpWidth = getTextWidthScaleIndependent(rdat,FONTSIZE_NORMAL,tmpStr) + 2*UI_PADDING_SIZE;
 		if(tmpWidth > state->ds.fullInfoColWidth[LLCOLUMN_ELEVEL]){
@@ -4190,7 +4311,7 @@ void uiElemClickAction(app_data *restrict dat, app_state *restrict state, resour
 			state->clickedUIElem = UIELEM_ENUM_LENGTH; //'unclick' the menu button
 			//stop search input
 			if(SDL_TextInputActive(rdat->window)){
-				memset(state->ss.searchString,0,sizeof(state->ss.searchString));
+				SDL_memset(state->ss.searchString,0,sizeof(state->ss.searchString));
 				state->searchCursorPos = 0;
 				state->searchSelectionLen = 0;
 				state->ds.searchEntryDispStartChar = 0;
@@ -4255,7 +4376,7 @@ void uiElemClickAction(app_data *restrict dat, app_state *restrict state, resour
         state->clickedUIElem = UIELEM_ENUM_LENGTH; //'unclick' the menu button
 				//stop search input
 				if(SDL_TextInputActive(rdat->window)){
-					memset(state->ss.searchString,0,sizeof(state->ss.searchString));
+					SDL_memset(state->ss.searchString,0,sizeof(state->ss.searchString));
 					state->searchCursorPos = 0;
 					state->searchSelectionLen = 0;
 					state->ds.searchEntryDispStartChar = 0;
@@ -4274,7 +4395,7 @@ void uiElemClickAction(app_data *restrict dat, app_state *restrict state, resour
 				state->clickedUIElem = UIELEM_SEARCH_BUTTON;
 				state->mouseholdElement = UIELEM_ENUM_LENGTH; //remove any previous selection highlight (from previous searches)
 				//start search input
-				memset(state->ss.searchString,0,sizeof(state->ss.searchString));
+				SDL_memset(state->ss.searchString,0,sizeof(state->ss.searchString));
 				state->ss.numResults = 0;
 				state->searchCursorPos = 0;
 				state->searchSelectionLen = 0;

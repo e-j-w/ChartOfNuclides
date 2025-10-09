@@ -135,7 +135,7 @@ int startSearchThreads(app_data *restrict dat, app_state *restrict state, thread
   }
 
   //initialize search state
-  memset(state->ss.updatedResults,0,sizeof(state->ss.updatedResults));
+  SDL_memset(state->ss.updatedResults,0,sizeof(state->ss.updatedResults));
   state->ss.finishedSearchAgents = 0;
   state->ss.numUpdatedResults = 0;
   if((state->uiState == UISTATE_FULLLEVELINFO)||(state->uiState == UISTATE_FULLLEVELINFOWITHMENU)){

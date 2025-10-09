@@ -11,6 +11,10 @@ q_p|Q(p)
 q_n|Q(n)
 protonsep_energy|S(p)
 neutronsep_energy|S(n)
+alphasep_energy|S(α)
+protonsep_energy_long|Proton separation energy
+neutronsep_energy_long|Neutron separation energy
+alphasep_energy_long|Alpha threshold
 atomic_mass|Atomic Mass
 mass_unknown|Mass Unknown
 element_type|Element type

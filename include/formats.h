@@ -240,9 +240,12 @@ typedef struct
   float infoBoxWidth, infoBoxEColOffset, infoBoxJpiColOffset, infoBoxHlColOffset, infoBoxDcyModeColOffset;
   float infoBoxCurrentX, infoBoxCurrentY, infoBoxCurrentDispWidth, infoBoxCurrentDispHeight, infoBoxPrevX, infoBoxPrevY, infoBoxPrevDispWidth, infoBoxPrevDispHeight;
   float fullInfoColWidth[LLCOLUMN_ENUM_LENGTH];
+  uint32_t fullInfoQValEntryPos[QVAL_ENUM_LENGTH]; //positions to show Q values in-line with the level list
+  uint8_t fullInfoQValOrder[QVAL_ENUM_LENGTH]; //specifies the order in which to display Q values
   float nuclFullInfoScrollStartY, nuclFullInfoScrollToY, nuclFullInfoScrollY; //full level info view: number of lines scrolled in the y-direction
   uint16_t nuclFullInfoMaxScrollY; //maximum scroll position, in lines
   uint16_t nuclFullInfoShownColumns; //bit-pattern describing which columns are shown in the full level info view (values from level_list_column_enum)
+  uint32_t nuclFullInfoLastDispLvl; //the index of the last level to be displayed on the level list (used to determine which Q values are shown in-line)
   uint8_t rxnMenuColumns; //how many columns to use in the reaction menu
   uint8_t mouseOverRxn, mouseHoldRxn, selectedRxn; //which item in the reaction menu is moused-over/selected, =255 if none
   uint64_t shownElements; //bit pattern describing which UI elements are being shown, values from ui_element_enum
@@ -348,7 +351,6 @@ typedef struct
   unsigned int searchStrUpdated : 1;
   unsigned int kbdModVal : 2; //values from kbd_mod_enum
   unsigned int lastInputType : 2; //0=keyboard, 1=apppad, 2=mouse
-  unsigned int gamepadDisabled : 1; //1=gamepad/apppad disabled
   
   unsigned int quitAppFlag : 1; //0=take no action, 1=quit app
 }app_state; //structure containing all app state data (persistent AND temporary)
