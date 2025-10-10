@@ -3576,21 +3576,42 @@ void setFullLevelInfoDimensions(const app_data *restrict dat, app_state *restric
 					case QVAL_SN:
 						if(getRawValFromDB(&dat->ndat.nuclData[selNucl].sn) > getRawValFromDB(&dat->ndat.levels[lvlInd-1].energy)){
 							if(getRawValFromDB(&dat->ndat.nuclData[selNucl].sn) <= getRawValFromDB(&dat->ndat.levels[lvlInd].energy)){
-								state->ds.fullInfoQValEntryPos[i] = lvlInd;
+								uint8_t enValueType = (uint8_t)((dat->ndat.levels[lvlInd-1].energy.format >> 5U) & 15U);
+								uint8_t enValueType2 = (uint8_t)((dat->ndat.levels[lvlInd].energy.format >> 5U) & 15U);
+								//only consider non-variable or non-limit energies
+								if((enValueType == VALUETYPE_NUMBER)||(enValueType == VALUETYPE_ASYMERROR)||(enValueType == VALUETYPE_APPROX)){
+									if((enValueType2 == VALUETYPE_NUMBER)||(enValueType2 == VALUETYPE_ASYMERROR)||(enValueType2 == VALUETYPE_APPROX)){
+										state->ds.fullInfoQValEntryPos[i] = lvlInd;
+									}
+								}
 							}
 						}
 						break;
 					case QVAL_SP:
 						if(getRawValFromDB(&dat->ndat.nuclData[selNucl].sp) > getRawValFromDB(&dat->ndat.levels[lvlInd-1].energy)){
 							if(getRawValFromDB(&dat->ndat.nuclData[selNucl].sp) <= getRawValFromDB(&dat->ndat.levels[lvlInd].energy)){
-								state->ds.fullInfoQValEntryPos[i] = lvlInd;
+								uint8_t enValueType = (uint8_t)((dat->ndat.levels[lvlInd-1].energy.format >> 5U) & 15U);
+								uint8_t enValueType2 = (uint8_t)((dat->ndat.levels[lvlInd].energy.format >> 5U) & 15U);
+								//only consider non-variable or non-limit energies
+								if((enValueType == VALUETYPE_NUMBER)||(enValueType == VALUETYPE_ASYMERROR)||(enValueType == VALUETYPE_APPROX)){
+									if((enValueType2 == VALUETYPE_NUMBER)||(enValueType2 == VALUETYPE_ASYMERROR)||(enValueType2 == VALUETYPE_APPROX)){
+										state->ds.fullInfoQValEntryPos[i] = lvlInd;
+									}
+								}
 							}
 						}
 						break;
 					case QVAL_SA:
 						if((getRawValFromDB(&dat->ndat.nuclData[selNucl].qalpha)*-1.0) > getRawValFromDB(&dat->ndat.levels[lvlInd-1].energy)){
 							if((getRawValFromDB(&dat->ndat.nuclData[selNucl].qalpha)*-1.0) <= getRawValFromDB(&dat->ndat.levels[lvlInd].energy)){
-								state->ds.fullInfoQValEntryPos[i] = lvlInd;
+								uint8_t enValueType = (uint8_t)((dat->ndat.levels[lvlInd-1].energy.format >> 5U) & 15U);
+								uint8_t enValueType2 = (uint8_t)((dat->ndat.levels[lvlInd].energy.format >> 5U) & 15U);
+								//only consider non-variable or non-limit energies
+								if((enValueType == VALUETYPE_NUMBER)||(enValueType == VALUETYPE_ASYMERROR)||(enValueType == VALUETYPE_APPROX)){
+									if((enValueType2 == VALUETYPE_NUMBER)||(enValueType2 == VALUETYPE_ASYMERROR)||(enValueType2 == VALUETYPE_APPROX)){
+										state->ds.fullInfoQValEntryPos[i] = lvlInd;
+									}
+								}
 							}
 						}
 						break;
