@@ -374,7 +374,7 @@ typedef struct
   //using different fonts (rather than resizing a single font) decreases CPU usage at the expense of memory
   TTF_TextEngine *te;
   TTF_Font *font[FONTSIZE_ENUM_LENGTH]; //the default font
-  void *fontData; //memory address of the font data (must stay alive as long as fonts are used)
+  void *fontData, *fontDataBold; //memory address of the font data (must stay alive as long as fonts are used)
   SDL_Cursor *defaultCursor, *dragCursor, *textEntryCursor;
   SDL_Gamepad *gamepad;
   SDL_Renderer *renderer;

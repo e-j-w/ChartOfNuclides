@@ -170,7 +170,7 @@ int importAppData(app_data *restrict dat, resource_data *restrict rdat){
   SDL_DestroySurface(surface);
   
   //load font
-  int64_t fontFilesize=0;
+  int64_t fontFilesize=0, fontFilesizeBold=0;
   if((SDL_ReadIO(inp,&fontFilesize,sizeof(int64_t))!=sizeof(int64_t))||(fontFilesize<=0)){
     SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,"Error","App data file read error - invalid data size.",rdat->window);
     SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"importAppData - invalid font filesize (%li) from file %s - %s.\n",(long int)fontFilesize,rdat->appDataFilepath,SDL_GetError());
@@ -187,15 +187,37 @@ int importAppData(app_data *restrict dat, resource_data *restrict rdat){
     SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"importAppData - couldn't read font data from file %s - %s.\n",rdat->appDataFilepath,SDL_GetError());
     return -1;
   }
+  //load bold font
+  if((SDL_ReadIO(inp,&fontFilesizeBold,sizeof(int64_t))!=sizeof(int64_t))||(fontFilesizeBold<=0)){
+    SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,"Error","App data file read error - invalid data size.",rdat->window);
+    SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"importAppData - invalid font filesize (%li) from file %s - %s.\n",(long int)fontFilesizeBold,rdat->appDataFilepath,SDL_GetError());
+    return -1;
+  }
+  rdat->fontDataBold=(void*)SDL_calloc(1,(size_t)fontFilesizeBold);
+  if(rdat->fontDataBold==NULL){
+    SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,"Error","App data file read error - could not allocate memory.",rdat->window);
+    SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"importAppData - couldn't allocate memory for bold font data.\n");
+    exit(-1);
+  }
+  if(SDL_ReadIO(inp,rdat->fontDataBold,(size_t)fontFilesizeBold)!=(size_t)fontFilesizeBold){
+    SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"importAppData - couldn't read bold font data from file %s - %s.\n",rdat->appDataFilepath,SDL_GetError());
+    return -1;
+  }
 
   for(uint8_t i=0; i<FONTSIZE_ENUM_LENGTH; i++){
-    rdat->font[i] = TTF_OpenFontIO(SDL_IOFromConstMem(rdat->fontData,(size_t)fontFilesize),false,(float)(fontSizes[i]*rdat->uiScale));
+    if(fontStyles[i]==TTF_STYLE_BOLD){
+      //bold font
+      rdat->font[i] = TTF_OpenFontIO(SDL_IOFromConstMem(rdat->fontDataBold,(size_t)fontFilesizeBold),false,(float)(fontSizes[i]*rdat->uiScale));
+      TTF_SetFontStyle(rdat->font[i],TTF_STYLE_NORMAL); //glyphs are already bolded
+    }else{
+      rdat->font[i] = TTF_OpenFontIO(SDL_IOFromConstMem(rdat->fontData,(size_t)fontFilesize),false,(float)(fontSizes[i]*rdat->uiScale));
+      TTF_SetFontStyle(rdat->font[i],fontStyles[i]);
+    }
     if(rdat->font[i]==NULL){
       SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,"Error","App data file read error - unable to load resource.",rdat->window);
       SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"importAppData - couldn't read font resource %u - %s.\n",i,SDL_GetError());
       return -1;
     }
-    TTF_SetFontStyle(rdat->font[i],fontStyles[i]);
     TTF_SetFontHinting(rdat->font[i],TTF_HINTING_LIGHT_SUBPIXEL);
   }
 
@@ -229,7 +251,7 @@ int importAppData(app_data *restrict dat, resource_data *restrict rdat){
 int regenerateThemeAndFontCache(app_data *restrict dat, resource_data *restrict rdat){
   
   if(rdat->themeOffset <= 0){
-    SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,"regenerateFontCache - attempting to regenerate cache when app data was not previously imported. Doing that now...\n");
+    SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,"regenerateThemeAndFontCache - attempting to regenerate cache when app data was not previously imported. Doing that now...\n");
     return importAppData(dat,rdat);
   }
 
@@ -242,7 +264,7 @@ int regenerateThemeAndFontCache(app_data *restrict dat, resource_data *restrict 
   }
   if(SDL_SeekIO(inp,(Sint64)rdat->themeOffset,SDL_IO_SEEK_SET)<0){
     SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,"Error","App data file I/O error.",rdat->window);
-    SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"regenerateFontCache - couldn't seek to theme data in file %s - %s.\n",rdat->appDataFilepath,SDL_GetError());
+    SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"regenerateThemeAndFontCache - couldn't seek to theme data in file %s - %s.\n",rdat->appDataFilepath,SDL_GetError());
     return -1;
   }
 
@@ -261,24 +283,24 @@ int regenerateThemeAndFontCache(app_data *restrict dat, resource_data *restrict 
   int64_t fileSize=0;
   if((SDL_ReadIO(inp,&fileSize,sizeof(int64_t))!=sizeof(int64_t))||(fileSize<=0)){
     SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,"Error","App data file read error - invalid data size.",rdat->window);
-    SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"importAppData - invalid texture atlas filesize (%li) from file %s.\n",(long int)fileSize,rdat->appDataFilepath);
+    SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"regenerateThemeAndFontCache - invalid texture atlas filesize (%li) from file %s.\n",(long int)fileSize,rdat->appDataFilepath);
     return -1;
   }
   void *themeData=(void*)SDL_calloc(1,(size_t)fileSize);
   if(themeData==NULL){
     SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,"Error","App data file read error - could not allocate memory.",rdat->window);
-    SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"importAppData - couldn't allocate memory for UI theme texture data.\n");
+    SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"regenerateThemeAndFontCache - couldn't allocate memory for UI theme texture data.\n");
     exit(-1);
   }
   if(SDL_ReadIO(inp,themeData,(size_t)fileSize)!=(size_t)fileSize){
     SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,"Error","App data file I/O error.",rdat->window);
-    SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"importAppData - couldn't read UI theme texture data from file %s - %s.\n",rdat->appDataFilepath,SDL_GetError());
+    SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"regenerateThemeAndFontCache - couldn't read UI theme texture data from file %s - %s.\n",rdat->appDataFilepath,SDL_GetError());
     return -1;
   }
   SDL_Surface *surface = IMG_LoadSizedSVG_IO(SDL_IOFromConstMem(themeData,(size_t)fileSize),(int)(UI_TILE_SIZE*UI_THEME_TEX_TILES_X*rdat->uiThemeScale),(int)(UI_TILE_SIZE*UI_THEME_TEX_TILES_Y*rdat->uiThemeScale));
   if(surface == NULL){
     SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,"Error","App data file I/O error.",rdat->window);
-    SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"importAppData - couldn't UI theme texture atlas data - %s.\n",SDL_GetError());
+    SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"regenerateThemeAndFontCache - couldn't UI theme texture atlas data - %s.\n",SDL_GetError());
     return -1;
   }
   SDL_free(themeData);
@@ -289,39 +311,62 @@ int regenerateThemeAndFontCache(app_data *restrict dat, resource_data *restrict 
   SDL_DestroySurface(surface);
 
   //load font
-  int64_t fontFilesize=0;
+  int64_t fontFilesize=0, fontFilesizeBold=0;
   if((SDL_ReadIO(inp,&fontFilesize,sizeof(int64_t))!=sizeof(int64_t))||(fontFilesize<=0)){
     SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,"Error","App data file read error - invalid data size.",rdat->window);
-    SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"regenerateFontCache - invalid font filesize (%li) from file %s - %s.\n",(long int)fontFilesize,rdat->appDataFilepath,SDL_GetError());
+    SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"regenerateThemeAndFontCache - invalid font filesize (%li) from file %s - %s.\n",(long int)fontFilesize,rdat->appDataFilepath,SDL_GetError());
     return -1;
   }
   SDL_free(rdat->fontData);
   rdat->fontData=(void*)SDL_calloc(1,(size_t)fontFilesize);
   if(rdat->fontData==NULL){
     SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,"Error","App data file read error - could not allocate memory.",rdat->window);
-    SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"regenerateFontCache - couldn't allocate memory for font data.\n");
+    SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"regenerateThemeAndFontCache - couldn't allocate memory for font data.\n");
     exit(-1);
   }
   if(SDL_ReadIO(inp,rdat->fontData,(size_t)fontFilesize)!=(size_t)fontFilesize){
-    SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"regenerateFontCache - couldn't read font data from file %s - %s.\n",rdat->appDataFilepath,SDL_GetError());
+    SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"regenerateThemeAndFontCache - couldn't read font data from file %s - %s.\n",rdat->appDataFilepath,SDL_GetError());
+    return -1;
+  }
+  //load bold font
+  if((SDL_ReadIO(inp,&fontFilesizeBold,sizeof(int64_t))!=sizeof(int64_t))||(fontFilesizeBold<=0)){
+    SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,"Error","App data file read error - invalid data size.",rdat->window);
+    SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"regenerateThemeAndFontCache - invalid font filesize (%li) from file %s - %s.\n",(long int)fontFilesizeBold,rdat->appDataFilepath,SDL_GetError());
+    return -1;
+  }
+  SDL_free(rdat->fontDataBold);
+  rdat->fontDataBold=(void*)SDL_calloc(1,(size_t)fontFilesizeBold);
+  if(rdat->fontDataBold==NULL){
+    SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,"Error","App data file read error - could not allocate memory.",rdat->window);
+    SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"regenerateThemeAndFontCache - couldn't allocate memory for bold font data.\n");
+    exit(-1);
+  }
+  if(SDL_ReadIO(inp,rdat->fontDataBold,(size_t)fontFilesizeBold)!=(size_t)fontFilesizeBold){
+    SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"regenerateThemeAndFontCache - couldn't read bold font data from file %s - %s.\n",rdat->appDataFilepath,SDL_GetError());
     return -1;
   }
 
   for(uint8_t i=0; i<FONTSIZE_ENUM_LENGTH; i++){
-    rdat->font[i] = TTF_OpenFontIO(SDL_IOFromConstMem(rdat->fontData,(size_t)fontFilesize),false,(float)(fontSizes[i]*rdat->uiScale));
+    if(fontStyles[i]==TTF_STYLE_BOLD){
+      //bold font
+      rdat->font[i] = TTF_OpenFontIO(SDL_IOFromConstMem(rdat->fontDataBold,(size_t)fontFilesizeBold),false,(float)(fontSizes[i]*rdat->uiScale));
+      TTF_SetFontStyle(rdat->font[i],TTF_STYLE_NORMAL); //glyphs are already bolded
+    }else{
+      rdat->font[i] = TTF_OpenFontIO(SDL_IOFromConstMem(rdat->fontData,(size_t)fontFilesize),false,(float)(fontSizes[i]*rdat->uiScale));
+      TTF_SetFontStyle(rdat->font[i],fontStyles[i]);
+    }
     if(rdat->font[i]==NULL){
       SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,"Error","App data file read error - unable to load resource.",rdat->window);
-      SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"importAppData - couldn't read font resource %u - %s.\n",i,SDL_GetError());
+      SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"regenerateThemeAndFontCache - couldn't read font resource %u - %s.\n",i,SDL_GetError());
       return -1;
     }
-    TTF_SetFontStyle(rdat->font[i],fontStyles[i]);
     TTF_SetFontHinting(rdat->font[i],TTF_HINTING_LIGHT_SUBPIXEL);
     
   }
 
   if(SDL_CloseIO(inp)==0){
     SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,"Error","App data file I/O error.",rdat->window);
-    SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"regenerateFontCache - failed to close data file %s\n",rdat->appDataFilepath);
+    SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"regenerateThemeAndFontCache - failed to close data file %s\n",rdat->appDataFilepath);
     return -1;
   }
 

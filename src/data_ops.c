@@ -2930,6 +2930,11 @@ double get2PlusEnergy(const ndata *restrict nd, const uint16_t nuclInd){
 
 double getLevelHalfLifeSeconds(const ndata *restrict nd, const uint32_t levelInd){
 	if(levelInd < nd->numLvls){
+		uint8_t hlValueType = (uint8_t)((nd->levels[levelInd].halfLife.format >> 5U) & 15U);
+		if((hlValueType == VALUETYPE_LESSOREQUALTHAN)||(hlValueType == VALUETYPE_LESSTHAN)||(hlValueType == VALUETYPE_UNKNOWN)){
+			//unknown half-life
+			return -2.0;
+		}
 		double hl = getRawValFromDB(&nd->levels[levelInd].halfLife);
 		if(hl < 0.0){
 			//unknown half-life
@@ -3122,14 +3127,16 @@ uint16_t getNumDispLinesUpToLvl(const ndata *restrict nd, const app_state *restr
 	
 	uint16_t numLines = 0;
 	for(uint32_t i = nd->nuclData[state->chartSelectedNucl].firstLevel; i<(nd->nuclData[state->chartSelectedNucl].firstLevel + (uint32_t)nuclLevel); i++){
-		
 		if(state->ds.selectedRxn == 0){
 			numLines += getNumDispLinesForLvl(nd,i);
 		}else if(nd->levels[i].populatingRxns & ((uint64_t)(1) << (state->ds.selectedRxn-1))){
 			numLines += getNumDispLinesForLvl(nd,i);
 		}
-		
+	}
+
+	for(uint32_t i = nd->nuclData[state->chartSelectedNucl].firstLevel; i<(nd->nuclData[state->chartSelectedNucl].firstLevel + (uint32_t)nuclLevel + 1); i++){
 		//account for Q-values
+		//different loop condition is neccessary for the case when nuclLevel has a Q-value shown directly above it
 		if(i<=state->ds.nuclFullInfoLastDispLvl){
 			if(i>nd->nuclData[state->chartSelectedNucl].firstLevel){
 				for(int j=0; j<QVAL_ENUM_LENGTH; j++){
@@ -3148,7 +3155,6 @@ uint16_t getNumDispLinesUpToLvl(const ndata *restrict nd, const app_state *restr
 				}
 			}
 		}
-
 	}
 	
 	
