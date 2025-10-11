@@ -69,7 +69,6 @@ static int writeAsset(SDL_IOStream *out, const char *assetPath, const char *base
 int main(int argc, char *argv[]){
 
   (void)argc; (void)argv; //required main function parameters are unused
-  
   setlocale(LC_ALL, "en_ca.UTF-8");
 
   if(SDL_Init(0)==0){

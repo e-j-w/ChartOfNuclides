@@ -39,8 +39,9 @@ void shutdownApp(const global_data *gdat, const uint8_t skipDealloc){
   exit(0);
 }
 
-int main(){
+int main(int argc, char *argv[]){
 
+  (void)argc; (void)argv; //required main function parameters are unused
   setlocale(LC_ALL, "en_ca.UTF-8");
 
   #ifdef __MINGW32__
