@@ -2384,7 +2384,7 @@ void getSpinParStr(char strOut[32], const ndata *restrict nd, const uint32_t lvl
 		}
 
 		if(tentative == TENTATIVESP_RANGE){
-			SDL_strlcat(strOut,"to",32);
+			SDL_strlcat(strOut," to ",32);
 		}else if(tentative == TENTATIVESP_HIGHJ){
 			SDL_strlcat(strOut,"High J",32);
 		}else if(tentative == TENTATIVESP_LOWJ){

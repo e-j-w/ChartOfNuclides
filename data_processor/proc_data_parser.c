@@ -1087,29 +1087,33 @@ void parseSpinPar(ndata *nd, level * lev, sp_var_data * varDat, char * spstring)
 			uint8_t spVarNum = 255; //temp var for spin variable assignment
 
 			//special cases
-			if(SDL_strcmp(val[i],"TO")==0){
+			if((SDL_strcmp(val[i],"TO")==0)||(SDL_strcmp(val[i],"to")==0)){
 				//specifies a range between the prior and next spin values
-				//eg. '3/2 TO 7/2'
+				//eg. '3/2 TO 7/2', '8+ to 10+' (in 54Co)
 				nd->spv[nd->numSpinParVals].format |= ((TENTATIVESP_RANGE & 15U) << 10U);
 				nd->spv[nd->numSpinParVals].spinVal = 255;
 				lev->numSpinParVals++;
+				nd->numSpinParVals++;
+				//printf("to %s\n",val[i+1]);
 				continue;
 			}else if(SDL_strcmp(val[i],"&")==0){
 				//equivalent to a comma 
 				continue;
-			}else if(SDL_strcmp(val[i],"AND")==0){
+			}else if((SDL_strcmp(val[i],"AND")==0)||(SDL_strcmp(val[i],"and")==0)){
 				//equivalent to a comma 
 				continue;
 			}else if((i<(numTok-1))&&(SDL_strcmp(val[i],"HIGH")==0)&&(SDL_strcmp(val[i+1],"J")==0)){
 				nd->spv[nd->numSpinParVals].format |= ((TENTATIVESP_HIGHJ & 15U) << 10U);
 				nd->spv[nd->numSpinParVals].spinVal = 255;
 				lev->numSpinParVals++;
+				nd->numSpinParVals++;
 				i++;
 				continue;
 			}else if((i<(numTok-1))&&(SDL_strcmp(val[i],"LOW")==0)&&(SDL_strcmp(val[i+1],"J")==0)){
 				nd->spv[nd->numSpinParVals].format |= ((TENTATIVESP_LOWJ & 15U) << 10U);
 				nd->spv[nd->numSpinParVals].spinVal = 255;
 				lev->numSpinParVals++;
+				nd->numSpinParVals++;
 				i++;
 				continue;
 			}
