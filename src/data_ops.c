@@ -5260,6 +5260,8 @@ void updateSingleUIElemPosition(const app_data *restrict dat, app_state *restric
 			updateSingleUIElemPosition(dat,state,rdat,UIELEM_PREFS_DIALOG_REACTIONMODE_DROPDOWN);
 			updateSingleUIElemPosition(dat,state,rdat,UIELEM_PREFS_UISCALE_MENU);
 			updateSingleUIElemPosition(dat,state,rdat,UIELEM_PREFS_REACTIONMODE_MENU);
+			updateSingleUIElemPosition(dat,state,rdat,UIELEM_RMM_EXCLUDE_BUTTON);
+			updateSingleUIElemPosition(dat,state,rdat,UIELEM_RMM_HIGHLIGHT_BUTTON);
 			updateSingleUIElemPosition(dat,state,rdat,UIELEM_UISM_SMALL_BUTTON);
 			updateSingleUIElemPosition(dat,state,rdat,UIELEM_UISM_DEFAULT_BUTTON);
 			updateSingleUIElemPosition(dat,state,rdat,UIELEM_UISM_LARGE_BUTTON);
