@@ -132,17 +132,20 @@ static const float uiScales[UISCALE_ENUM_LENGTH] = {1.0f,1.20f,1.60f,1.85f};
 #define ABOUT_BOX_STR4_Y           284.0f //in unscaled pixels
 
 //preferences dialog
-#define PREFS_DIALOG_NUM_UIELEMENTS             5
-#define PREFS_DIALOG_WIDTH                      340 //in unscaled pixels
-#define PREFS_DIALOG_HEIGHT                     260 //in unscaled pixels
-#define PREFS_DIALOG_HEADERTXT_X                (6*UI_PADDING_SIZE)
-#define PREFS_DIALOG_HEADERTXT_Y                (6*UI_PADDING_SIZE)
-#define PREFS_DIALOG_PREF_Y_SPACING             36.0f //in unscaled pixels
-#define PREFS_DIALOG_PREFCOL1_X                 (6*UI_PADDING_SIZE)
-#define PREFS_DIALOG_PREFCOL1_Y                 82.0f //in unscaled pixels
-#define PREFS_DIALOG_UISCALE_BUTTON_WIDTH       120 //in unscaled pixels
-#define PREFS_DIALOG_UISCALE_MENU_WIDTH         140 //in unscaled pixels
-#define PREFS_DIALOG_UISCALE_MENU_ITEM_SPACING  36 //in unscaled pixels
+#define PREFS_DIALOG_NUM_UIELEMENTS                  6
+#define PREFS_DIALOG_WIDTH                           520 //in unscaled pixels
+#define PREFS_DIALOG_HEIGHT                          296 //in unscaled pixels
+#define PREFS_DIALOG_HEADERTXT_X                     (6*UI_PADDING_SIZE)
+#define PREFS_DIALOG_HEADERTXT_Y                     (6*UI_PADDING_SIZE)
+#define PREFS_DIALOG_PREF_Y_SPACING                  36.0f //in unscaled pixels
+#define PREFS_DIALOG_PREFCOL1_X                      (6*UI_PADDING_SIZE)
+#define PREFS_DIALOG_PREFCOL1_Y                      82.0f //in unscaled pixels
+#define PREFS_DIALOG_UISCALE_BUTTON_WIDTH            120 //in unscaled pixels
+#define PREFS_DIALOG_REACTIONMODE_BUTTON_WIDTH       310 //in unscaled pixels
+#define PREFS_DIALOG_UISCALE_MENU_WIDTH              140 //in unscaled pixels
+#define PREFS_DIALOG_UISCALE_MENU_ITEM_SPACING       36 //in unscaled pixels
+#define PREFS_DIALOG_REACTIONMODE_MENU_WIDTH         290 //in unscaled pixels
+#define PREFS_DIALOG_REACTIONMODE_MENU_ITEM_SPACING  PREFS_DIALOG_UISCALE_MENU_ITEM_SPACING //in unscaled pixels
 
 //chart of nuclides
 #define DEFAULT_NUCLBOX_DIM                8.0f
@@ -161,7 +164,7 @@ static const float uiScales[UISCALE_ENUM_LENGTH] = {1.0f,1.20f,1.60f,1.85f};
 
 //info box
 #define NUCL_INFOBOX_X_PADDING                  (UI_PADDING_SIZE+CHART_AXIS_DEPTH) //in unscaled pixels
-#define NUCL_INFOBOX_MIN_WIDTH                  470 //in unscaled pixels
+#define NUCL_INFOBOX_MIN_WIDTH                  486 //in unscaled pixels
 #define NUCL_INFOBOX_MIN_HEIGHT                 114 //in unscaled pixels
 #define NUCL_INFOBOX_ABUNDANCE_LINE_HEIGHT      28 //in unscaled pixels
 #define NUCL_INFOBOX_BIGLINE_HEIGHT             30.0f //in unscaled pixels
@@ -198,7 +201,7 @@ static const float uiScales[UISCALE_ENUM_LENGTH] = {1.0f,1.20f,1.60f,1.85f};
 #define NUCL_FULLINFOBOX_LEVELLIST_HEADER_POS_Y         112.0f //in unscaled pixels
 #define NUCL_FULLINFOBOX_LEVELLIST_POS_Y                (NUCL_FULLINFOBOX_LEVELLIST_HEADER_POS_Y + 46.0f) //in unscaled pixels
 #define NUCL_FULLINFOBOX_SCROLLBAR_POS_XR               (4*UI_PADDING_SIZE)
-#define NUCL_FULLINFOBOX_ONECOL_DISPLAY_PADDING         (2*UI_PADDING_SIZE)
+#define NUCL_FULLINFOBOX_ONECOL_DISPLAY_PADDING         (3*UI_PADDING_SIZE)
 #define NUCL_FULLINFOBOX_ALLCOL_DISPLAY_PADDING         (UI_TILE_SIZE)
 
 //performance overlay

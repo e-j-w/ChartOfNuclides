@@ -257,6 +257,7 @@ typedef struct
   uint16_t uiElemExtPlusX[UIELEM_ENUM_LENGTH], uiElemExtPlusY[UIELEM_ENUM_LENGTH], uiElemExtMinusX[UIELEM_ENUM_LENGTH], uiElemExtMinusY[UIELEM_ENUM_LENGTH]; //'extension' of each UI element, to allow mouse interactions outside of the visible area of the UI element (eg. so that checkbox text can be clicked as well as the checkbox itself)
   uint16_t searchEntryDispStartChar, searchEntryDispNumChars; //search string display state
   uint8_t interfaceSizeInd; //user preference for UI scaling, values from ui_scale_enum
+  uint8_t reactionModeInd; //user preference for reaction display mode, values from reaction_mode_enum
   unsigned int fcScrollInProgress : 1;
   unsigned int fcScrollFinished : 1;
   unsigned int fcNuclChangeInProgress : 1;

@@ -2,7 +2,7 @@
 
 //insert a string into another string at the specified position 
 //return value: 0 if output is not truncated, 1 if it is truncated,-1 if there is no change
-int strInsert(char *dest, size_t destsize, const char *ins, size_t position){
+int32_t strInsert(char *dest, size_t destsize, const char *ins, size_t position){
 
   if(!ins){
     return -1;  //invalid parameter
@@ -49,7 +49,7 @@ int strInsert(char *dest, size_t destsize, const char *ins, size_t position){
 //in the string gets deleted (equivalent to cursor position when
 //editing text)
 //return value: 0 on success, -1 on failure (unchanged output string)
-int strDelChar(char *dest, size_t destsize, size_t position){
+int32_t strDelChar(char *dest, size_t destsize, size_t position){
 
   if(position == 0){
     return -1; //cursor prior to any character in the string
@@ -80,9 +80,9 @@ char* findReplaceUTF8(const char *findstr, const char *replacestr, const char *o
   size_t len_findstr = strlen(findstr);
   size_t len = strlen(origstr);
   
-  int diff = (int)(len_replace - len_findstr); //can be negative!
+  int32_t diff = (int32_t)(len_replace - len_findstr); //can be negative!
   
-  size_t new_string_len = (size_t)((int)(len) + diff + 1);
+  size_t new_string_len = (size_t)((int32_t)(len) + diff + 1);
   if(new_string_len < (len+1)){
     new_string_len = len+1; //because the original string might be copied back here...
   }
@@ -135,6 +135,61 @@ size_t UTF8Strlen(const char *utf8str){
 }
 
 //in case the isacii() function is unavailable...
-int charIsAscii(const char c){
+int32_t charIsAscii(const char c){
   return (!((c & 0x80) == 0x80));
 }
+
+int32_t charIsUTF8Continuation(const char c){
+  return (c & 0xc0) == 0x80;
+}
+
+int32_t strIsUTF8_1byte(const char *c){
+  if(strlen(c) > 0){
+    return (c[0] & 0x80) == 0x0;
+  }else{
+    return 0;
+  }
+}
+
+int32_t strIsUTF8_2byte(const char *c){
+  if(strlen(c) > 1){
+    return (c[0] & 0xe0) == 0xc0 && !charIsUTF8Continuation(c[0]) && charIsUTF8Continuation(c[1]);
+  }else{
+    return 0;
+  }
+}
+
+int32_t strIsUTF8_3byte(const char *c){
+  if(strlen(c) > 2){
+    return (c[0] & 0xf0) == 0xe0 && !charIsUTF8Continuation(c[0]) && charIsUTF8Continuation(c[1]) && charIsUTF8Continuation(c[2]);
+  }else{
+    return 0;
+  }
+}
+
+int32_t strIsUTF8_4byte(const char *c){
+  if(strlen(c) > 3){
+    return (c[0] & 0xf8) == 0xf0 && !charIsUTF8Continuation(c[0]) && charIsUTF8Continuation(c[1]) && charIsUTF8Continuation(c[2]) && charIsUTF8Continuation(c[3]);
+  }else{
+    return 0;
+  }
+}
+
+//returns length of first ASCII or UTF-8 character
+int32_t strStartsWithValidUTF8OrASCIIChar(const char *c){
+  if(strlen(c) > 0){
+    if(strIsUTF8_1byte(c)){
+      return 1;
+    }else if(strIsUTF8_2byte(c)){
+      return 2;
+    }else if(strIsUTF8_3byte(c)){
+      return 3;
+    }else if(strIsUTF8_4byte(c)){
+      return 4;
+    }else if(charIsAscii(c[0])){
+      return 1;
+    }
+  }
+  return 0;
+}
+

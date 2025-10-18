@@ -121,6 +121,11 @@ static int readConfigFile(FILE *file, app_state *restrict state){
         if((sval >= 0)&&(sval < UISCALE_ENUM_LENGTH)){
           state->ds.interfaceSizeInd = (uint8_t)sval;
         }
+      }else if(strcmp(par,"reaction_mode") == 0){
+        int rval = atoi(val);
+        if((rval >= 0)&&(rval < REACTIONMODE_ENUM_LENGTH)){
+          state->ds.reactionModeInd = (uint8_t)rval;
+        }
       }else if(strcmp(par,"gamepad_deadzone") == 0){
         int dz = atoi(val);
         if((dz > 1000)&&(dz < 32768)){
@@ -192,6 +197,7 @@ static int writeConfigFile(FILE *file, const app_rules *restrict rules, const ap
     fprintf(file,"use_ui_animations=no\n");
   }
   fprintf(file,"user_interface_size=%u\n",state->ds.interfaceSizeInd);
+  fprintf(file,"reaction_mode=%u\n",state->ds.reactionModeInd);
 
   fprintf(file,"\n### Gamepad Settings ###\n");
   fprintf(file,"gamepad_deadzone=%i\n",state->gamepadDeadzone);

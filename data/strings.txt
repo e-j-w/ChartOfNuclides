@@ -51,7 +51,7 @@ all_reactions|All Reactions
 menuitem_preferences|Preferences
 menuitem_screenshot|Take a screenshot...
 menuitem_about|About Chart of Nuclides
-about_string_version|Version 0.8.1 – "Differential Equation"
+about_string_version|Version 0.8.2 – "Differential Equation"
 about_string_1|Developed by Jonathan Williams
 about_string_2|Nuclear structure data is sourced from ENSDF, mass data from AME2020, and isotope abundance data from NIST.
 about_string_3|This is an independently developed program not endorsed by the above entities. The accuracy or completeness of any information provided is not guaranteed.
@@ -103,3 +103,7 @@ small|Small
 default|Default
 large|Large
 huge|Huge
+reaction_mode|Reaction display mode
+reactionmode_exclude|Only show selected reaction data
+reactionmode_highlight|Highlight levels from selected reaction
+levels_bolded|Bolded levels

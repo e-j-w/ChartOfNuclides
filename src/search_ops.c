@@ -162,7 +162,7 @@ void searchELevel(const ndata *restrict ndat, const app_state *state, search_sta
 					
 					//for single nuclide searches, if a specific reaction is selected,
 					//do not search levels that are not populated in that reaction
-					if((ss->searchInProgress == SEARCHSTATE_SEARCHING_SINGLENUCL)&&(state->ds.selectedRxn != 0)){
+					if((ss->searchInProgress == SEARCHSTATE_SEARCHING_SINGLENUCL)&&(state->ds.selectedRxn != 0)&&(state->ds.reactionModeInd != REACTIONMODE_HIGHLIGHT)){
 						if(!(ndat->levels[k].populatingRxns & ((uint64_t)(1) << (state->ds.selectedRxn-1)))){
 							continue;
 						}
