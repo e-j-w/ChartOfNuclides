@@ -4738,7 +4738,9 @@ void uiElemClickAction(app_data *restrict dat, app_state *restrict state, resour
 			state->clickedUIElem = UIELEM_ENUM_LENGTH; //'unclick' the menu button
 			state->ds.reactionModeInd = REACTIONMODE_EXCLUDE;
 			if(state->ds.shownElements & ((uint64_t)(1) << UIELEM_NUCL_FULLINFOBOX)){
-				setSelectedNuclOnLevelList(dat,state,rdat,(uint16_t)(dat->ndat.nuclData[state->chartSelectedNucl].N),(uint16_t)(dat->ndat.nuclData[state->chartSelectedNucl].Z),1);
+				if(state->ds.selectedRxn > 0){
+					setSelectedNuclOnLevelList(dat,state,rdat,(uint16_t)(dat->ndat.nuclData[state->chartSelectedNucl].N),(uint16_t)(dat->ndat.nuclData[state->chartSelectedNucl].Z),1);
+				}
 			}
 			break;
 		case UIELEM_RMM_HIGHLIGHT_BUTTON:
@@ -4746,7 +4748,9 @@ void uiElemClickAction(app_data *restrict dat, app_state *restrict state, resour
 			state->clickedUIElem = UIELEM_ENUM_LENGTH; //'unclick' the menu button
 			state->ds.reactionModeInd = REACTIONMODE_HIGHLIGHT;
 			if(state->ds.shownElements & ((uint64_t)(1) << UIELEM_NUCL_FULLINFOBOX)){
-				setSelectedNuclOnLevelList(dat,state,rdat,(uint16_t)(dat->ndat.nuclData[state->chartSelectedNucl].N),(uint16_t)(dat->ndat.nuclData[state->chartSelectedNucl].Z),1);
+				if(state->ds.selectedRxn > 0){
+					setSelectedNuclOnLevelList(dat,state,rdat,(uint16_t)(dat->ndat.nuclData[state->chartSelectedNucl].N),(uint16_t)(dat->ndat.nuclData[state->chartSelectedNucl].Z),1);
+				}
 			}
 			break;
 		case UIELEM_ZOOMIN_BUTTON:
