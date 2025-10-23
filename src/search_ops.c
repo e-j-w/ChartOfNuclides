@@ -75,7 +75,7 @@ void sortAndAppendResult(search_state *restrict ss, search_result *restrict res)
 		ss->numUpdatedResults++;
 	}else{
 		//assuming results are already sorted...
-		//overwrite that lowest ranked result with the new result
+		//overwrite the lowest ranked result with the new result
 		memcpy(&ss->updatedResults[MAX_SEARCH_RESULTS-1],res,sizeof(search_result));
 	}
 	
@@ -176,6 +176,12 @@ void searchELevel(const ndata *restrict ndat, const app_state *state, search_sta
 							if(errBound < rawEVal*0.005){
 								errBound = rawEVal*0.005;
 							}
+							if(errBound < 3.0){
+								errBound = 3.0;
+							}
+							if(ss->broadSearch == 1){
+								errBound = errBound*5.0;
+							}
 							if(((rawEVal - errBound) <= eSearch)&&((rawEVal + errBound) >= eSearch)){
 								//energy matches query
 								search_result res;
@@ -264,6 +270,9 @@ void searchELevelDiff(const ndata *restrict ndat, const app_state *state, search
 								double errBound = 3.0*(getRawErrFromDB(&ndat->levels[l].energy) + getRawErrFromDB(&ndat->levels[k].energy));
 								if(errBound < diffVal*0.005){
 									errBound = diffVal*0.005;
+								}
+								if(ss->broadSearch == 1){
+									errBound = errBound*5.0;
 								}
 
 								if((diffVal - errBound) > eSearch){
@@ -359,6 +368,12 @@ void searchEGamma(const ndata *restrict ndat, const app_state *state, search_sta
 								double errBound = 3.0*rawErrVal;
 								if(errBound < rawEVal*0.005){
 									errBound = rawEVal*0.005;
+								}
+								if(errBound < 3.0){
+									errBound = 3.0;
+								}
+								if(ss->broadSearch == 1){
+									errBound = errBound*5.0;
 								}
 								if(((rawEVal - errBound) <= eSearch)&&((rawEVal + errBound) >= eSearch)){
 									//energy matches query
@@ -481,6 +496,9 @@ void searchGammaCascade(const ndata *restrict ndat, const app_state *state, sear
 								double errBound = 3.0*rawErrVal;
 								if(errBound < rawEVal*0.005){
 									errBound = rawEVal*0.005;
+								}
+								if(ss->broadSearch == 1){
+									errBound = errBound*5.0;
 								}
 								
 								for(uint8_t l=0; l<numCascadeGammas; l++){
@@ -633,6 +651,9 @@ void searchHalfLife(const ndata *restrict ndat, const app_state *state, search_s
 							double errBound = 3.0*rawErrVal;
 							if(errBound < rawHlVal*0.005){
 								errBound = rawHlVal*0.005;
+							}
+							if(ss->broadSearch == 1){
+								errBound = errBound*5.0;
 							}
 							if(((rawHlVal - errBound) <= hlSearch)&&((rawHlVal + errBound) >= hlSearch)){
 								//energy matches query
@@ -815,20 +836,23 @@ void searchSpecialStrings(search_state *restrict ss){
 		for(uint8_t j=0; j<len; j++){
 			tmpStr[j] = (char)SDL_tolower(tmpStr[j]); //convert entire string to lowercase
 		}
-		if((SDL_strcmp(tmpStr,"level")==0)||(SDL_strcmp(tmpStr,"lvl")==0)||(SDL_strcmp(tmpStr,"state")==0)){
+		if((SDL_strncmp(tmpStr,"lev",3)==0)||(SDL_strcmp(tmpStr,"lvl")==0)||(SDL_strcmp(tmpStr,"state")==0)){
 			ss->boostedResultType = SEARCHAGENT_ELEVEL;
 			return;
-		}else if((SDL_strcmp(tmpStr,"gamma")==0)||(SDL_strcmp(tmpStr,"transition")==0)){
+		}else if((SDL_strcmp(tmpStr,"gamma")==0)||(SDL_strncmp(tmpStr,"tran",4)==0)){
 			ss->boostedResultType = SEARCHAGENT_EGAMMA;
 			return;
-		}else if(SDL_strcmp(tmpStr,"cascade")==0){
+		}else if(SDL_strncmp(tmpStr,"casc",4)==0){
 			ss->boostedResultType = SEARCHAGENT_GAMMACASCADE;
 			return;
-		}else if((SDL_strcmp(tmpStr,"halflife")==0)||(SDL_strcmp(tmpStr,"half life")==0)||(SDL_strcmp(tmpStr,"lifetime")==0)){
+		}else if((SDL_strcmp(tmpStr,"hl")==0)||(SDL_strcmp(tmpStr,"halflife")==0)||(SDL_strcmp(tmpStr,"half life")==0)||(SDL_strcmp(tmpStr,"lt")==0)||(SDL_strcmp(tmpStr,"lifetime")==0)){
 			ss->boostedResultType = SEARCHAGENT_HALFLIFE;
 			return;
 		}else if(SDL_strncmp(tmpStr,"diff",4)==0){
 			ss->boostedResultType = SEARCHAGENT_ELEVELDIFF;
+			return;
+		}else if((SDL_strcmp(tmpStr,"broad")==0)||(SDL_strcmp(tmpStr,"wide")==0)){
+			ss->broadSearch = 1;
 			return;
 		}
 		

@@ -146,6 +146,7 @@ int startSearchThreads(app_data *restrict dat, app_state *restrict state, thread
     state->ss.boostedNucl = MAXNUMNUCL;
   }
   state->ss.boostedResultType = SEARCHAGENT_TOKENIZE; //default value
+  state->ss.broadSearch = 0;
 
   //determine number of threads
   tms->numThreads = SEARCHAGENT_ENUM_LENGTH;

@@ -291,6 +291,7 @@ typedef struct
   uint8_t numResults; //the number of results returned so far
   uint8_t numSearchTok;
   uint8_t boostedResultType;  //result type which is prioritized, values from search_agent_enum
+  uint8_t broadSearch; //0=use regular error bounds, 1=search with wider error bounds
   uint16_t boostedNucl; //nuclide which is prioritized, MAXNUMNUCL if none (or if only one nuclide is being searched, specifies that nuclide)
   uint32_t finishedSearchAgents; //bit pattern specifying which search agents have finished
   uint8_t searchInProgress; //values from search_state_enum
