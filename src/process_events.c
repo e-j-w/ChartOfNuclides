@@ -848,7 +848,7 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
 
     //handle selectable text strings
     uint16_t clickedSelStr = MAX_SELECTABLE_STRS;
-    if(state->ds.textDragInProgress == 1){
+    if((state->ds.textDragInProgress == TXTDRAGSTATE_DRAG_OVER_TXT)||(state->ds.textDragInProgress == TXTDRAGSTATE_DRAG_NOT_OVER_TXT)){
       //update text selection drag state
       if(state->mouseXPx >= 0.0f){ //only update the selection position if the mouse is still in the window
         float cursorRelPos = (state->mouseXPx - state->tss.selectableStrRect[state->tss.selectedStr].x)/state->ds.uiUserScale; //position of the cursor relative to the start of the selectable text
@@ -858,10 +858,21 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
         state->tss.selEndPos = (uint8_t)(getNumTextCharsUnderWidth(rdat,(uint16_t)(cursorRelPos),state->tss.selectableStrTxt[state->tss.selectedStr],0,state->tss.selectableStrProp[state->tss.selectedStr] & 7U));
         state->ds.forceRedraw = 1;
       }
+      //SDL_Log("start: %u, end: %u, len: %lu, strInd: %u\n",state->tss.selStartPos,state->tss.selEndPos,SDL_strlen(state->tss.selectableStrTxt[state->tss.selectedStr]),state->tss.selectedStr);
+      if((state->tss.selStartPos == 0)&&(state->tss.selEndPos == 0)){
+        state->tss.selectedStr = 65535; //de-select text
+        state->ds.textDragInProgress = TXTDRAGSTATE_DRAG_NOT_OVER_TXT;
+      }else{
+        uint8_t len = (uint8_t)(SDL_strlen(state->tss.selectableStrTxt[state->tss.selectedStr]));
+        if((state->tss.selStartPos == len)&&(state->tss.selEndPos == len)){
+          state->tss.selectedStr = 65535; //de-select text
+          state->ds.textDragInProgress = TXTDRAGSTATE_DRAG_NOT_OVER_TXT;
+        }
+      }
     }else{
-      state->ds.textDragInProgress = 0;
+      state->ds.textDragInProgress = TXTDRAGSTATE_NO_DRAG;
     }
-    if(((state->ds.textDragInProgress == 0)&&(state->ds.chartDragInProgress == 0))||(doubleClick)){
+    if((((state->ds.textDragInProgress == TXTDRAGSTATE_NO_DRAG)||(state->ds.textDragInProgress == TXTDRAGSTATE_DRAG_NOT_OVER_TXT))&&(state->ds.chartDragInProgress == 0))||(doubleClick)){
       //check for the mouse position with respect to any selectable strings
       if(state->cms.numContextMenuItems == 0){
         //cannot select text when context menu is open
@@ -875,7 +886,7 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
               //if(state->mouseMovedDuringClick == 0){
                 //mouse is over selectable text
                 //SDL_Log("Mouse over selectable string %u.\n",i);
-                state->ds.textDragInProgress = 2;
+                state->ds.textDragInProgress = TXTDRAGSTATE_HOVER_OVER_TXT;
                 if((state->mouseHoldStartPosXPx >= 0.0f)||(doubleClick)){
                   float cursorRelPos = (state->mouseHoldStartPosXPx - state->tss.selectableStrRect[i].x)/state->ds.uiUserScale; //position of the cursor relative to the start of the selectable text
                   if(cursorRelPos < 0.0f){
@@ -887,13 +898,13 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
                     if(doubleClick){
                       //select entire string
                       //SDL_Log("Selecting entire string.\n");
-                      state->ds.textDragInProgress = 0;
+                      state->ds.textDragInProgress = TXTDRAGSTATE_NO_DRAG;
                       state->tss.selStartPos = 0;
                       state->tss.selEndPos = (uint8_t)SDL_strlen(state->tss.selectableStrTxt[i]);
                     }else{
                       //start drag over text
                       state->ds.textDragStartMouseX = state->mouseXPx;
-                      state->ds.textDragInProgress = 1;
+                      state->ds.textDragInProgress = TXTDRAGSTATE_DRAG_OVER_TXT;
                       state->tss.selStartPos = (uint8_t)(getNumTextCharsUnderWidth(rdat,(uint16_t)(cursorRelPos),state->tss.selectableStrTxt[i],0,state->tss.selectableStrProp[i] & 7U));
                       state->tss.selEndPos = state->tss.selStartPos;
                     }
@@ -1050,7 +1061,7 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
         }
 
         //handle click and drag on the chart of nuclides
-        if((chartDraggable)&&(state->mouseoverElement == UIELEM_ENUM_LENGTH)&&(state->mouseHoldStartPosXPx >= 0.0f)&&(state->ds.textDragInProgress == 0)&&(state->cms.numContextMenuItems == 0)){
+        if((chartDraggable)&&(state->mouseoverElement == UIELEM_ENUM_LENGTH)&&(state->mouseHoldStartPosXPx >= 0.0f)&&(state->ds.textDragInProgress == TXTDRAGSTATE_NO_DRAG)&&(state->cms.numContextMenuItems == 0)){
           state->ds.chartDragStartX = state->ds.chartPosX;
           state->ds.chartDragStartY = state->ds.chartPosY;
           state->ds.chartDragStartMouseX = state->mouseXPx;
@@ -1073,7 +1084,7 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
         state->ds.chartDragFinished = 1;
         clearSelectionStrs(&state->ds,&state->tss,1); //allow strings on the chart to be selectable
       }
-      if(state->ds.textDragInProgress == 1){
+      if((state->ds.textDragInProgress == TXTDRAGSTATE_DRAG_OVER_TXT)||(state->ds.textDragInProgress == TXTDRAGSTATE_DRAG_NOT_OVER_TXT)){
         if(state->mouseXPx >= 0.0f){ //only update the selection position if the mouse is still in the window
           float cursorRelPos = (state->mouseXPx - state->tss.selectableStrRect[state->tss.selectedStr].x)/state->ds.uiUserScale; //position of the cursor relative to the start of the selectable text
           if(cursorRelPos < 0.0f){
@@ -1090,7 +1101,7 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
 
     //check for mouse click, outside of buttons
     if(state->mouseHoldStartPosXPx >= 0.0f){
-      if(state->ds.textDragInProgress == 0){
+      if(state->ds.textDragInProgress == TXTDRAGSTATE_NO_DRAG){
         if(state->cms.numContextMenuItems == 0){
           state->tss.selectedStr = 65535; //de-select text
         }

@@ -86,7 +86,7 @@ void initializeTempState(const app_data *restrict dat, app_state *restrict state
 	state->ds.chartDragFinished = 0;
 	state->ds.textDragFinished = 0;
 	state->ds.chartDragInProgress = 0;
-	state->ds.textDragInProgress = 0;
+	state->ds.textDragInProgress = TXTDRAGSTATE_NO_DRAG;
 	state->ds.fcScrollFinished = 0;
 	state->ds.fcScrollInProgress = 0;
 	state->ds.fcNuclChangeInProgress = 0;
@@ -407,7 +407,7 @@ void updateDrawingState(const app_data *restrict dat, app_state *restrict state,
 		SDL_SetCursor(rdat->defaultCursor); //set cursor back to default
 	}
 	if(state->ds.textDragFinished){
-		state->ds.textDragInProgress = 0;
+		state->ds.textDragInProgress = TXTDRAGSTATE_NO_DRAG;
 		state->ds.textDragFinished = 0; //reset flag
 		SDL_SetCursor(rdat->defaultCursor); //set cursor back to default
 	}
@@ -442,7 +442,7 @@ void updateDrawingState(const app_data *restrict dat, app_state *restrict state,
 		}
 		//SDL_Log("zoom scale: %0.4f\n",(double)state->ds.chartZoomScale);
 	}
-	if(state->ds.textDragInProgress == 1){
+	if(state->ds.textDragInProgress == TXTDRAGSTATE_DRAG_OVER_TXT){
 		if(state->lastInputType == INPUT_TYPE_MOUSE){
       SDL_SetCursor(rdat->textEntryCursor); //set mouse cursor
     }
@@ -3952,7 +3952,7 @@ void uiElemMouseoverAction(const app_state *restrict state, resource_data *restr
 			SDL_SetCursor(rdat->textEntryCursor);
 			break;
 		default:
-			if(state->ds.textDragInProgress == 0){
+			if(state->ds.textDragInProgress == TXTDRAGSTATE_NO_DRAG){
 				SDL_SetCursor(rdat->defaultCursor);
 			}else{
 				SDL_SetCursor(rdat->textEntryCursor);
