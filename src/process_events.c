@@ -649,8 +649,11 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
     }else if(state->uiState == UISTATE_FULLLEVELINFO){
       if(state->ds.selectedRxn == 0){
         state->ds.selectedRxn = dat->ndat.nuclData[state->chartSelectedNucl].numRxns;
-      }else{
+      }else if(state->ds.selectedRxn < 255){
         state->ds.selectedRxn--;
+      }else if(state->ds.selectedRxn == 255){
+        //leave coincidence display mode
+        state->ds.selectedRxn = 0;
       }
       //SDL_Log("Changed selected reaction to %u.\n",state->ds.selectedRxn);
       setSelectedNuclOnLevelList(dat,state,rdat,(uint16_t)(dat->ndat.nuclData[state->chartSelectedNucl].N),(uint16_t)(dat->ndat.nuclData[state->chartSelectedNucl].Z),1);
@@ -664,6 +667,9 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
       }
     }else if(state->uiState == UISTATE_FULLLEVELINFO){
       if(state->ds.selectedRxn == dat->ndat.nuclData[state->chartSelectedNucl].numRxns){
+        state->ds.selectedRxn = 0;
+      }else if(state->ds.selectedRxn == 255){
+        //leave coincidence display mode
         state->ds.selectedRxn = 0;
       }else{
         state->ds.selectedRxn++;
@@ -1244,19 +1250,21 @@ void processSingleEvent(app_data *restrict dat, app_state *restrict state, resou
     case SDL_EVENT_WINDOW_DISPLAY_SCALE_CHANGED:
       updateWindowRes(dat,state,rdat);
       break;
-    case SDL_EVENT_GAMEPAD_ADDED:
-      //setup the gamepad
-      SDL_Log("Gamepad added.\n");
-      rdat->gamepad = NULL;
-      int num_joysticks;
-      SDL_JoystickID *joysticks = SDL_GetJoysticks(&num_joysticks);
-      for(int i=0; i<num_joysticks; i++){
-        if(SDL_IsGamepad(joysticks[i])){
-          rdat->gamepad = SDL_OpenGamepad(joysticks[i]);
-          if(rdat->gamepad){
-            break;
-          }else{
-            SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,"Could not open game gamepad %i: %s\n", i, SDL_GetError());
+    case SDL_EVENT_GAMEPAD_ADDED: 
+      {//prevent -Wjump-misses-init
+        //setup the gamepad
+        SDL_Log("Gamepad added.\n");
+        rdat->gamepad = NULL;
+        int num_joysticks;
+        SDL_JoystickID *joysticks = SDL_GetJoysticks(&num_joysticks);
+        for(int i=0; i<num_joysticks; i++){
+          if(SDL_IsGamepad(joysticks[i])){
+            rdat->gamepad = SDL_OpenGamepad(joysticks[i]);
+            if(rdat->gamepad){
+              break;
+            }else{
+              SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,"Could not open game gamepad %i: %s\n", i, SDL_GetError());
+            }
           }
         }
       }

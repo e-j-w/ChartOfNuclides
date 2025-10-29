@@ -1,12 +1,19 @@
 # User manual
 
+- [What is a "chart of nuclides"?](#what-is-a-chart-of-nuclides)
+- [Basic navigation](#basic-navigation)
+- [Level list navigation](#level-list-navigation)
+- [Keyboard/gamepad controls](#keyboardgamepad-controls)
+- [Searching](#searching)
+
+
 ## What is a "chart of nuclides"?
 
 The [chart of nuclides](https://en.wikipedia.org/wiki/Table_of_nuclides) is to nuclear physics what the [periodic table of the elements](https://en.wikipedia.org/wiki/Periodic_table) is to chemistry. While the periodic table lists the known elements of nature (defined by the number of protons in the atomic nucleus), the chart of nuclides is a 2D graph showing all known isotopes in nature (defined by the number of protons **and** neutrons in the atomic nucleus).
 
 For example: while [carbon](https://en.wikipedia.org/wiki/Carbon) appears as a single element in the periodic table with 6 protons, in the chart of nuclides all known isotopes of carbon are shown, including carbon-12 and carbon-13 (which make up almost all of the carbon on Earth), carbon-14 (which is radioactive and is used in [carbon dating](https://en.wikipedia.org/wiki/Radiocarbon_dating)), as well as several other short-lived radioactive isotopes of carbon which have been studied using various nuclear reactions.
 
-## Basic controls
+## Basic navigation
 
 In this program, the chart of nuclides is shown with the number of protons on the y-axis and the number of neutrons on the x-axis. The main chart view can be panned by clicking and dragging with a mouse/touchpad, and zoomed in/out using the mouse wheel or scrolling on the touchpad. The controls are basically identical to Google Maps.
 
@@ -19,9 +26,18 @@ Selecting the 'All Levels/Gammas' button for a specific isotope will show detail
 
 Right clicking on selected text or on the chart will open a menu allowing you to copy information to the clipboard.
 
-### Keyboard/gamepad controls
+## Level list navigation
 
-The program is also designed to be fully navigable with a keyboard and/or gamepad.
+The level list view (accessed using the 'All Levels/Gammas' button) shows detailed information for all known energy levels of the selected nuclide. The list is scrollable, and levels are shown in ascending order of level energy (in units of [keV](https://en.wikipedia.org/wiki/Electronvolt)). By default all available data is shown, however data from specific datasets (corresponding to different nuclear reactions or decay modes) can be selected using the dropdown menu at the top of the screen.
+
+Right clicking on a specific level energy gives the option to show only levels which are coincident with (feed into or are decay products of) that level.
+
+Right clicking on a specific transition energy gives the option to show the final level of that transition.
+
+
+## Keyboard/gamepad controls
+
+The program is designed to be mostly navigable with a keyboard and/or gamepad.
 
 | Key(s)             | Gamepad button(s)           | Action |
 | :----------------- | :-------------------------- |:----- |
@@ -38,6 +54,7 @@ The program is also designed to be fully navigable with a keyboard and/or gamepa
 | P                  | N/A                         | Toggle debug overlay (shows FPS and other stats) |
 | Ctrl+S             | N/A                         | Take a screenshot (UI elements will be omitted from the image) |
 | Ctrl+Q             | N/A                         | Quit application |
+
 
 ## Searching
 

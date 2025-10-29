@@ -3092,6 +3092,91 @@ uint16_t getNuclInd(const ndata *restrict nd, const int16_t N, const int16_t Z){
 	return MAXNUMNUCL;
 }
 
+//flags levels which decay to or are decay products of the specified level
+void setCoincLvlFlags(const ndata *restrict nd, app_state *restrict state, const uint16_t nuclInd, const uint16_t nuclLevel){
+	
+	const uint32_t lvlInd = nd->nuclData[nuclInd].firstLevel + (uint32_t)nuclLevel;
+	SDL_memset(state->flaggedCoincLvls,0,sizeof(state->flaggedCoincLvls));
+	
+	//flag the level of interest
+	if(nuclLevel < MAX_COINC_FLAGGED_LVLS){
+		uint32_t bpInd = (uint32_t)(nuclLevel)/64;
+		state->flaggedCoincLvls[bpInd] |= (uint64_t)((uint64_t)(1) << ((uint32_t)nuclLevel - (bpInd*64)));
+		//SDL_Log("Flagged level %u.\n",nuclLevel);
+	}else{
+		SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,"setCoincLvlFlags - couldn't flag coincident level with index: %u\n",nuclLevel);
+	}
+
+	//first find anything that decays to the flagged level of interest
+	//(or to any other level that was already flagged as decaying to the level of interest)
+	for(uint32_t i = lvlInd+1; i < (nd->nuclData[nuclInd].firstLevel + (uint32_t)nd->nuclData[nuclInd].numLevels); i++){
+		for(uint32_t j=nd->levels[i].firstTran; j<(nd->levels[i].firstTran + (uint32_t)nd->levels[i].numTran); j++){
+			uint32_t finalLvl = getFinalLvlInd(nd,i,j);
+			uint32_t lvlOffset = (uint32_t)(finalLvl - nd->nuclData[nuclInd].firstLevel);
+			if(lvlOffset < MAX_COINC_FLAGGED_LVLS){
+				uint32_t bpInd = lvlOffset/64;
+				if(state->flaggedCoincLvls[bpInd] & (uint64_t)((uint64_t)(1) << (lvlOffset - (bpInd*64)))){
+					//final level was already flagged,
+					//so flag the initial level as well
+					lvlOffset = (uint32_t)(i - nd->nuclData[nuclInd].firstLevel);
+					if(lvlOffset < MAX_COINC_FLAGGED_LVLS){
+						bpInd = lvlOffset/64; //bit-pattern index (maximum int size is 64 bits)
+						state->flaggedCoincLvls[bpInd] |= (uint64_t)((uint64_t)(1) << (lvlOffset - (bpInd*64)));
+						//SDL_Log("Flagged level %u.\n",lvlOffset);
+					}else{
+						SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,"setCoincLvlFlags - couldn't flag coincident level with index: %u\n",lvlOffset);
+					}
+					break; //go to next level
+				}
+				//SDL_Log("Flagged level %u.\n",lvlOffset);
+			}
+		}
+	}
+
+	//now find anything that the level of interest decays to
+	for(uint32_t i = lvlInd; i > nd->nuclData[nuclInd].firstLevel; i--){
+		uint32_t lvlOffset = (uint32_t)(i - nd->nuclData[nuclInd].firstLevel);
+		if(lvlOffset < MAX_COINC_FLAGGED_LVLS){
+			uint32_t bpInd = lvlOffset/64; //bit-pattern index (maximum int size is 64 bits)
+			if(state->flaggedCoincLvls[bpInd] & (uint64_t)((uint64_t)(1) << (lvlOffset - (bpInd*64)))){
+				for(uint32_t j=nd->levels[i].firstTran; j<(nd->levels[i].firstTran + (uint32_t)nd->levels[i].numTran); j++){
+					lvlOffset = (uint32_t)(getFinalLvlInd(nd,i,j) - nd->nuclData[nuclInd].firstLevel);
+					if(lvlOffset < MAX_COINC_FLAGGED_LVLS){
+						bpInd = lvlOffset/64;
+						state->flaggedCoincLvls[bpInd] |= (uint64_t)((uint64_t)(1) << (lvlOffset - (bpInd*64)));
+						//SDL_Log("Flagged level %u.\n",lvlOffset);
+					}else{
+						SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,"setCoincLvlFlags - couldn't flag coincident level with index: %u\n",lvlOffset);
+					}
+				}
+			}
+		}
+	}
+
+}
+
+
+//checks whether a level is displayed in the level list,
+//based on the current app state
+uint8_t isLvlDisplayed(const ndata *restrict nd, const app_state *restrict state, const uint16_t nuclInd, const uint16_t nuclLvlInd){
+	if(state->ds.selectedRxn == 0){
+		return 1;
+	}else if(state->ds.selectedRxn == 255){
+		//coincidence display mode
+		if(nuclLvlInd < MAX_COINC_FLAGGED_LVLS){
+			const uint32_t bpInd = nuclLvlInd/64; //bit-pattern index (maximum int size is 64 bits)
+			if(state->flaggedCoincLvls[bpInd] & (uint64_t)((uint64_t)(1) << (nuclLvlInd - (bpInd*64)))){
+				return 1;
+			}
+		}
+	}else if(state->ds.reactionModeInd == REACTIONMODE_HIGHLIGHT){
+		return 1;
+	}else if(nd->levels[nd->nuclData[nuclInd].firstLevel + (uint32_t)nuclLvlInd].populatingRxns & ((uint64_t)(1) << (state->ds.selectedRxn-1))){
+		return 1;
+	}
+	return 0;
+}
+
 uint16_t getNumScreenLvlDispLines(const drawing_state *restrict ds){
 	return (uint16_t)(SDL_floorf((ds->windowYRes - NUCL_FULLINFOBOX_LEVELLIST_POS_Y)/(NUCL_INFOBOX_SMALLLINE_HEIGHT*ds->uiUserScale) - 2*ds->uiUserScale)); //somewhat hacky, to make sure all levels are visible on all UI scales
 }
@@ -3099,9 +3184,7 @@ uint16_t getNumTotalLvlDispLines(const ndata *restrict nd, const app_state *rest
 	uint16_t numLines = 0;
 	for(uint32_t lvlInd = nd->nuclData[state->chartSelectedNucl].firstLevel; lvlInd<(nd->nuclData[state->chartSelectedNucl].firstLevel + nd->nuclData[state->chartSelectedNucl].numLevels); lvlInd++){
 		
-		if((state->ds.selectedRxn == 0)||(state->ds.reactionModeInd == REACTIONMODE_HIGHLIGHT)){
-			numLines += getNumDispLinesForLvl(nd,lvlInd);
-		}else if(nd->levels[lvlInd].populatingRxns & ((uint64_t)(1) << (state->ds.selectedRxn-1))){
+		if(isLvlDisplayed(nd,state,state->chartSelectedNucl,(uint16_t)(lvlInd - nd->nuclData[state->chartSelectedNucl].firstLevel))){
 			numLines += getNumDispLinesForLvl(nd,lvlInd);
 		}
 
@@ -3131,9 +3214,7 @@ uint16_t getNumDispLinesUpToLvl(const ndata *restrict nd, const app_state *restr
 	
 	uint16_t numLines = 0;
 	for(uint32_t i = nd->nuclData[state->chartSelectedNucl].firstLevel; i<(nd->nuclData[state->chartSelectedNucl].firstLevel + (uint32_t)nuclLevel); i++){
-		if((state->ds.selectedRxn == 0)||(state->ds.reactionModeInd == REACTIONMODE_HIGHLIGHT)){
-			numLines += getNumDispLinesForLvl(nd,i);
-		}else if(nd->levels[i].populatingRxns & ((uint64_t)(1) << (state->ds.selectedRxn-1))){
+		if(isLvlDisplayed(nd,state,state->chartSelectedNucl,(uint16_t)(i - nd->nuclData[state->chartSelectedNucl].firstLevel))){
 			numLines += getNumDispLinesForLvl(nd,i);
 		}
 	}
@@ -3545,15 +3626,13 @@ void setFullLevelInfoDimensions(const app_data *restrict dat, app_state *restric
 	state->ds.fullInfoColWidth[LLCOLUMN_FINALLEVEL_JPI] = NUCL_FULLINFOBOX_FINALLEVEL_JPI_COL_MIN_WIDTH;
 
 	//determine last visible level
-	if((state->ds.selectedRxn == 0)||(state->ds.reactionModeInd == REACTIONMODE_HIGHLIGHT)){
-		state->ds.nuclFullInfoLastDispLvl = (uint32_t)(dat->ndat.nuclData[state->chartSelectedNucl].firstLevel + dat->ndat.nuclData[state->chartSelectedNucl].numLevels - 1);
-	}else{
-		for(uint32_t lvlInd = dat->ndat.nuclData[state->chartSelectedNucl].firstLevel; lvlInd<(dat->ndat.nuclData[state->chartSelectedNucl].firstLevel + dat->ndat.nuclData[state->chartSelectedNucl].numLevels); lvlInd++){
-			if(dat->ndat.levels[lvlInd].populatingRxns & ((uint64_t)(1) << (state->ds.selectedRxn-1))){
-				state->ds.nuclFullInfoLastDispLvl = lvlInd;
-			}
+	for(uint16_t nuclLvlInd = 0; nuclLvlInd<dat->ndat.nuclData[selNucl].numLevels; nuclLvlInd++){
+		if(isLvlDisplayed(&dat->ndat,state,selNucl,nuclLvlInd)==1){
+			//SDL_Log("Level %u is displayed.\n",nuclLvlInd);
+			state->ds.nuclFullInfoLastDispLvl = dat->ndat.nuclData[selNucl].firstLevel + (uint32_t)nuclLvlInd;
 		}
 	}
+	//SDL_Log("Last visible level: %u (nucl index %u, rxn %u)\n",state->ds.nuclFullInfoLastDispLvl,(uint32_t)(state->ds.nuclFullInfoLastDispLvl - dat->ndat.nuclData[selNucl].firstLevel),state->ds.selectedRxn);
 
 	SDL_memset(state->ds.fullInfoQValEntryPos,0,sizeof(state->ds.fullInfoQValEntryPos));
 	SDL_memset(state->ds.fullInfoQValOrder,0,sizeof(state->ds.fullInfoQValOrder));
@@ -3929,16 +4008,17 @@ void setSelectedNuclOnChartDirect(const app_data *restrict dat, app_state *restr
 void uiElemHoldAction(const app_data *restrict dat, app_state *restrict state, const uint8_t uiElemID){
 	switch(uiElemID){
 		case UIELEM_NUCL_FULLINFOBOX_SCROLLBAR:
-			; //empty statement to suppress -Wpedantic warning
-			const float screenNumLines = (float)(getNumScreenLvlDispLines(&state->ds));
-			state->ds.nuclFullInfoScrollY = state->ds.nuclFullInfoMaxScrollY*(state->mouseYPx - state->ds.uiElemPosY[UIELEM_NUCL_FULLINFOBOX_SCROLLBAR])/((float)state->ds.uiElemHeight[UIELEM_NUCL_FULLINFOBOX_SCROLLBAR]*(1.0f - screenNumLines/(float)(getNumTotalLvlDispLines(&dat->ndat,state))));
-			state->ds.nuclFullInfoScrollY -=  screenNumLines*0.5f; //center scrollbar on mouse 9moving the scrollbar by half its length scrolls the view by half the number of lines visible on screen)
-			if(state->ds.nuclFullInfoScrollY < 0.0f){
-				state->ds.nuclFullInfoScrollY = 0.0f;
-			}else if(state->ds.nuclFullInfoScrollY > state->ds.nuclFullInfoMaxScrollY){
-				state->ds.nuclFullInfoScrollY = state->ds.nuclFullInfoMaxScrollY;
+			{//prevent -Wjump-misses-init
+				const float screenNumLines = (float)(getNumScreenLvlDispLines(&state->ds));
+				state->ds.nuclFullInfoScrollY = state->ds.nuclFullInfoMaxScrollY*(state->mouseYPx - state->ds.uiElemPosY[UIELEM_NUCL_FULLINFOBOX_SCROLLBAR])/((float)state->ds.uiElemHeight[UIELEM_NUCL_FULLINFOBOX_SCROLLBAR]*(1.0f - screenNumLines/(float)(getNumTotalLvlDispLines(&dat->ndat,state))));
+				state->ds.nuclFullInfoScrollY -=  screenNumLines*0.5f; //center scrollbar on mouse 9moving the scrollbar by half its length scrolls the view by half the number of lines visible on screen)
+				if(state->ds.nuclFullInfoScrollY < 0.0f){
+					state->ds.nuclFullInfoScrollY = 0.0f;
+				}else if(state->ds.nuclFullInfoScrollY > state->ds.nuclFullInfoMaxScrollY){
+					state->ds.nuclFullInfoScrollY = state->ds.nuclFullInfoMaxScrollY;
+				}
+				clearSelectionStrs(&state->ds,&state->tss,1); //selection string positions are changed on scroll
 			}
-			clearSelectionStrs(&state->ds,&state->tss,1); //selection string positions are changed on scroll
 			break;
 		default:
 			break;
@@ -3987,185 +4067,200 @@ void contextMenuClickAction(app_data *restrict dat, app_state *restrict state, r
 	
 	switch(state->cms.contextMenuItems[menuItemInd]){
 		case CONTEXTITEM_NUCLNAME:
-			; //suppress warning
 			getNuclNameStr(state->copiedTxt,&dat->ndat.nuclData[state->cms.selectionInd],255);
 			SDL_SetClipboardText(state->copiedTxt);
 			//SDL_Log("Copied text to clipboard: %s\n",SDL_GetClipboardText());
 			break;
 		case CONTEXTITEM_NUCLINFO:
-			; //suppress warning
-			char tmpStr[32];
-			getNuclNameStr(tmpStr,&dat->ndat.nuclData[state->cms.selectionInd],255);
-			SDL_snprintf(state->copiedTxt,MAX_SELECTABLE_STR_LEN,"%s, %s: %i, %s: %i, %s: ",tmpStr, dat->strings[dat->locStringIDs[LOCSTR_PROTONSDESC]],dat->ndat.nuclData[state->cms.selectionInd].Z,dat->strings[dat->locStringIDs[LOCSTR_NEUTRONSDESC]],dat->ndat.nuclData[state->cms.selectionInd].N,dat->strings[dat->locStringIDs[LOCSTR_JPI]]);
-			getSpinParStr(tmpStr,&dat->ndat,dat->ndat.nuclData[state->cms.selectionInd].firstLevel + dat->ndat.nuclData[state->cms.selectionInd].gsLevel);
-			if(SDL_strlen(tmpStr) > 0){
-				SDL_strlcat(state->copiedTxt,tmpStr,MAX_SELECTABLE_STR_LEN);
-			}else{
-				SDL_strlcat(state->copiedTxt,dat->strings[dat->locStringIDs[LOCSTR_UNKNOWN]],MAX_SELECTABLE_STR_LEN);
+			{//prevent -Wjump-misses-init
+				char tmpStr[32];
+				getNuclNameStr(tmpStr,&dat->ndat.nuclData[state->cms.selectionInd],255);
+				SDL_snprintf(state->copiedTxt,MAX_SELECTABLE_STR_LEN,"%s, %s: %i, %s: %i, %s: ",tmpStr, dat->strings[dat->locStringIDs[LOCSTR_PROTONSDESC]],dat->ndat.nuclData[state->cms.selectionInd].Z,dat->strings[dat->locStringIDs[LOCSTR_NEUTRONSDESC]],dat->ndat.nuclData[state->cms.selectionInd].N,dat->strings[dat->locStringIDs[LOCSTR_JPI]]);
+				getSpinParStr(tmpStr,&dat->ndat,dat->ndat.nuclData[state->cms.selectionInd].firstLevel + dat->ndat.nuclData[state->cms.selectionInd].gsLevel);
+				if(SDL_strlen(tmpStr) > 0){
+					SDL_strlcat(state->copiedTxt,tmpStr,MAX_SELECTABLE_STR_LEN);
+				}else{
+					SDL_strlcat(state->copiedTxt,dat->strings[dat->locStringIDs[LOCSTR_UNKNOWN]],MAX_SELECTABLE_STR_LEN);
+				}
+				SDL_SetClipboardText(state->copiedTxt);
+				//SDL_Log("Copied text to clipboard: %s\n",SDL_GetClipboardText());
 			}
-			SDL_SetClipboardText(state->copiedTxt);
-			//SDL_Log("Copied text to clipboard: %s\n",SDL_GetClipboardText());
 			break;
 		case CONTEXTITEM_CHART_PROPERTY:
-			; //suppress warning
-			const uint32_t gsLevInd = (uint32_t)(dat->ndat.nuclData[state->cms.selectionInd].firstLevel + dat->ndat.nuclData[state->cms.selectionInd].gsLevel);
-			switch(state->chartView){
-				case CHARTVIEW_HALFLIFE:
-					; //suppress warning
-					char tmpHlStr[32];
-					getGSHalfLifeStr(tmpHlStr,dat,state->cms.selectionInd,state->ds.useLifetimes);
-					if(state->ds.useLifetimes){
-						SDL_snprintf(state->copiedTxt,MAX_SELECTABLE_STR_LEN,"%s: %s",dat->strings[dat->locStringIDs[LOCSTR_LIFETIME]],tmpHlStr);
-					}else{
-						SDL_snprintf(state->copiedTxt,MAX_SELECTABLE_STR_LEN,"%s: %s",dat->strings[dat->locStringIDs[LOCSTR_HALFLIFE]],tmpHlStr);
-					}
-					SDL_SetClipboardText(state->copiedTxt);
-					//SDL_Log("Copied text to clipboard: %s\n",SDL_GetClipboardText());
-					break;
-				case CHARTVIEW_DECAYMODE:
-					if((dat->ndat.levels[gsLevInd].halfLife.unit & 127U) == VALUE_UNIT_STABLE){
-						//if the nuclide is stable, show the 'STABLE' label
-						getGSHalfLifeStr(state->copiedTxt,dat,state->cms.selectionInd,state->ds.useLifetimes);
-					}else{
-						char tmpDecStr[32];
-						state->copiedTxt[0] = '\0'; //empty string to be copied
-						for(int8_t i=0; i<dat->ndat.levels[gsLevInd].numDecModes; i++){
-							getDecayModeStr(tmpDecStr,&dat->ndat,dat->ndat.levels[gsLevInd].firstDecMode + (uint32_t)i);
-							SDL_strlcat(state->copiedTxt,tmpDecStr,MAX_SELECTABLE_STR_LEN);
-							if(i<(dat->ndat.levels[gsLevInd].numDecModes - 1)){
-								SDL_strlcat(state->copiedTxt,", ",MAX_SELECTABLE_STR_LEN);
+			{//prevent -Wjump-misses-init
+				const uint32_t gsLevInd = (uint32_t)(dat->ndat.nuclData[state->cms.selectionInd].firstLevel + dat->ndat.nuclData[state->cms.selectionInd].gsLevel);
+				switch(state->chartView){
+					case CHARTVIEW_HALFLIFE:
+						{//prevent -Wjump-misses-init
+							char tmpHlStr[32];
+							getGSHalfLifeStr(tmpHlStr,dat,state->cms.selectionInd,state->ds.useLifetimes);
+							if(state->ds.useLifetimes){
+								SDL_snprintf(state->copiedTxt,MAX_SELECTABLE_STR_LEN,"%s: %s",dat->strings[dat->locStringIDs[LOCSTR_LIFETIME]],tmpHlStr);
+							}else{
+								SDL_snprintf(state->copiedTxt,MAX_SELECTABLE_STR_LEN,"%s: %s",dat->strings[dat->locStringIDs[LOCSTR_HALFLIFE]],tmpHlStr);
 							}
+							SDL_SetClipboardText(state->copiedTxt);
+							//SDL_Log("Copied text to clipboard: %s\n",SDL_GetClipboardText());
 						}
-					}
-					char *cpyStrCpy = findReplaceAllUTF8("%%","%",state->copiedTxt); //you copii?
-					SDL_strlcpy(state->copiedTxt,cpyStrCpy,MAX_SELECTABLE_STR_LEN);
-					SDL_free(cpyStrCpy);
-					SDL_SetClipboardText(state->copiedTxt);
-					//SDL_Log("Copied text to clipboard: %s\n",SDL_GetClipboardText());
-					break;
-				case CHARTVIEW_2PLUS:
-					; //suppress warning
-					uint32_t plus2Lvl = get2PlusLvlInd(&dat->ndat,state->cms.selectionInd);
-					if(plus2Lvl != MAXNUMLVLS){
-						char tmpEnStr[32];
-						getLvlEnergyStr(tmpEnStr,&dat->ndat,plus2Lvl,1);
-						SDL_strlcat(tmpEnStr," keV",32);
-						SDL_snprintf(state->copiedTxt,MAX_SELECTABLE_STR_LEN,"%s: %s",dat->strings[dat->locStringIDs[LOCSTR_CHARTVIEW_2PLUS]],tmpEnStr);
-					}else{
-						SDL_snprintf(state->copiedTxt,MAX_SELECTABLE_STR_LEN,"%s: %s",dat->strings[dat->locStringIDs[LOCSTR_CHARTVIEW_2PLUS]],dat->strings[dat->locStringIDs[LOCSTR_UNKNOWN]]);
-					}
-					SDL_SetClipboardText(state->copiedTxt);
-					//SDL_Log("Copied text to clipboard: %s\n",SDL_GetClipboardText());
-					break;
-				case CHARTVIEW_R42:
-					; //suppress warning
-					double r42 = getR42(&dat->ndat,state->cms.selectionInd);
-					if(r42 > 0.0){
-						SDL_snprintf(state->copiedTxt,MAX_SELECTABLE_STR_LEN,"R₄₂: %0.2f",r42);
-					}else{
-						SDL_snprintf(state->copiedTxt,MAX_SELECTABLE_STR_LEN,"R₄₂: %s",dat->strings[dat->locStringIDs[LOCSTR_UNKNOWN]]);
-					}
-					SDL_SetClipboardText(state->copiedTxt);
-					//SDL_Log("Copied text to clipboard: %s\n",SDL_GetClipboardText());
-					break;
-				case CHARTVIEW_BETA2:
-					; //suppress warning
-					double beta2 = getBeta2(&dat->ndat,state->cms.selectionInd);
-					if(beta2 > 0.0){
-						SDL_snprintf(state->copiedTxt,MAX_SELECTABLE_STR_LEN,"%s: %0.2f",dat->strings[dat->locStringIDs[LOCSTR_CHARTVIEW_BETA2]], beta2);
-					}else{
-						SDL_snprintf(state->copiedTxt,MAX_SELECTABLE_STR_LEN,"%s: %s",dat->strings[dat->locStringIDs[LOCSTR_CHARTVIEW_BETA2]], dat->strings[dat->locStringIDs[LOCSTR_UNKNOWN]]);
-					}
-					SDL_SetClipboardText(state->copiedTxt);
-					//SDL_Log("Copied text to clipboard: %s\n",SDL_GetClipboardText());
-					break;
-				case CHARTVIEW_SPIN:
-				case CHARTVIEW_PARITY:
-					if(getMostProbableSpin(&dat->ndat,gsLevInd) >= 255.0){
-						SDL_snprintf(state->copiedTxt,MAX_SELECTABLE_STR_LEN,"%s: %s",dat->strings[dat->locStringIDs[LOCSTR_JPI]],dat->strings[dat->locStringIDs[LOCSTR_UNKNOWN]]);
-					}else{
-						char tmpJPiStr[32];
-						getSpinParStr(tmpJPiStr,&dat->ndat,gsLevInd);
-						SDL_snprintf(state->copiedTxt,MAX_SELECTABLE_STR_LEN,"%s: %s",dat->strings[dat->locStringIDs[LOCSTR_JPI]],tmpJPiStr);
-					}
-					SDL_SetClipboardText(state->copiedTxt);
-					//SDL_Log("Copied text to clipboard: %s\n",SDL_GetClipboardText());
-					break;
-				case CHARTVIEW_BEA:
-					; //suppress warning
-					double beA = getBEA(&dat->ndat,state->cms.selectionInd);
-					if(beA > 0.0){
-						char tmpBEAStr[32];
-						getMassValStr(tmpBEAStr,dat->ndat.nuclData[state->cms.selectionInd].beA,1);
-						SDL_snprintf(state->copiedTxt,MAX_SELECTABLE_STR_LEN,"%s: %s keV",dat->strings[dat->locStringIDs[LOCSTR_CHARTVIEW_BEA]],tmpBEAStr);
-					}else{
-						SDL_snprintf(state->copiedTxt,MAX_SELECTABLE_STR_LEN,"%s: %s",dat->strings[dat->locStringIDs[LOCSTR_CHARTVIEW_BEA]],dat->strings[dat->locStringIDs[LOCSTR_UNKNOWN]]);
-					}
-					SDL_SetClipboardText(state->copiedTxt);
-					//SDL_Log("Copied text to clipboard: %s\n",SDL_GetClipboardText());
-					break;
-				case CHARTVIEW_SN:
-					; //suppress warning
-					char tmpSnStr[32];
-					getQValStr(tmpSnStr,dat->ndat.nuclData[state->cms.selectionInd].sn,1,0);
-					SDL_snprintf(state->copiedTxt,MAX_SELECTABLE_STR_LEN,"%s: %s %s",dat->strings[dat->locStringIDs[LOCSTR_SN]],tmpSnStr,getValueUnitShortStr(dat->ndat.nuclData[state->cms.selectionInd].sn.unit));
-					SDL_SetClipboardText(state->copiedTxt);
-					//SDL_Log("Copied text to clipboard: %s\n",SDL_GetClipboardText());
-					break;
-				case CHARTVIEW_SP:
-					; //suppress warning
-					char tmpSpStr[32];
-					getQValStr(tmpSpStr,dat->ndat.nuclData[state->cms.selectionInd].sp,1,0);
-					SDL_snprintf(state->copiedTxt,MAX_SELECTABLE_STR_LEN,"%s: %s %s",dat->strings[dat->locStringIDs[LOCSTR_SP]],tmpSpStr,getValueUnitShortStr(dat->ndat.nuclData[state->cms.selectionInd].sp.unit));
-					SDL_SetClipboardText(state->copiedTxt);
-					//SDL_Log("Copied text to clipboard: %s\n",SDL_GetClipboardText());
-					break;
-				case CHARTVIEW_QALPHA:
-					; //suppress warning
-					char tmpQaStr[32];
-					getQValStr(tmpQaStr,dat->ndat.nuclData[state->cms.selectionInd].qalpha,1,0);
-					SDL_snprintf(state->copiedTxt,MAX_SELECTABLE_STR_LEN,"%s: %s %s",dat->strings[dat->locStringIDs[LOCSTR_QALPHA]],tmpQaStr,getValueUnitShortStr(dat->ndat.nuclData[state->cms.selectionInd].qalpha.unit));
-					SDL_SetClipboardText(state->copiedTxt);
-					//SDL_Log("Copied text to clipboard: %s\n",SDL_GetClipboardText());
-					break;
-				case CHARTVIEW_QBETAMINUS:
-					; //suppress warning
-					char tmpQbStr[32];
-					getQValStr(tmpQbStr,dat->ndat.nuclData[state->cms.selectionInd].qbeta,1,0);
-					SDL_snprintf(state->copiedTxt,MAX_SELECTABLE_STR_LEN,"%s: %s %s",dat->strings[dat->locStringIDs[LOCSTR_QBETAMINUS]],tmpQbStr,getValueUnitShortStr(dat->ndat.nuclData[state->cms.selectionInd].qbeta.unit));
-					SDL_SetClipboardText(state->copiedTxt);
-					//SDL_Log("Copied text to clipboard: %s\n",SDL_GetClipboardText());
-					break;
-				case CHARTVIEW_QBETAPLUS:
-					; //suppress warning
-					char tmpQbpStr[32];
-					getQValStr(tmpQbpStr,dat->ndat.nuclData[state->cms.selectionInd].qbetaplus,1,0);
-					SDL_snprintf(state->copiedTxt,MAX_SELECTABLE_STR_LEN,"%s: %s %s",dat->strings[dat->locStringIDs[LOCSTR_QBETAPLUS]],tmpQbpStr,getValueUnitShortStr(dat->ndat.nuclData[state->cms.selectionInd].qbetaplus.unit));
-					SDL_SetClipboardText(state->copiedTxt);
-					//SDL_Log("Copied text to clipboard: %s\n",SDL_GetClipboardText());
-					break;
-				case CHARTVIEW_QEC:
-					; //suppress warning
-					char tmpQecStr[32];
-					getQValStr(tmpQecStr,dat->ndat.nuclData[state->cms.selectionInd].qec,1,0);
-					SDL_snprintf(state->copiedTxt,MAX_SELECTABLE_STR_LEN,"%s: %s %s",dat->strings[dat->locStringIDs[LOCSTR_QEC]],tmpQecStr,getValueUnitShortStr(dat->ndat.nuclData[state->cms.selectionInd].qec.unit));
-					SDL_SetClipboardText(state->copiedTxt);
-					//SDL_Log("Copied text to clipboard: %s\n",SDL_GetClipboardText());
-					break;
-				case CHARTVIEW_NUMLVLS:
-					SDL_snprintf(state->copiedTxt,MAX_SELECTABLE_STR_LEN,"%s: %u",dat->strings[dat->locStringIDs[LOCSTR_CHARTVIEW_NUMLVLS]],dat->ndat.nuclData[state->cms.selectionInd].numLevels);
-					SDL_SetClipboardText(state->copiedTxt);
-					//SDL_Log("Copied text to clipboard: %s\n",SDL_GetClipboardText());
-					break;
-				case CHARTVIEW_UNKNOWN_ENERGY:
-					; //suppress warning
-					const uint16_t numUnknowns = getNumUnknownLvls(&dat->ndat,state->cms.selectionInd);
-					SDL_snprintf(state->copiedTxt,MAX_SELECTABLE_STR_LEN,"%s: %u",dat->strings[dat->locStringIDs[LOCSTR_CHARTVIEW_UNKNOWN_ENERGY]],numUnknowns);
-					SDL_SetClipboardText(state->copiedTxt);
-					//SDL_Log("Copied text to clipboard: %s\n",SDL_GetClipboardText());
-					break;
-				default:
-					break;
+						break;
+					case CHARTVIEW_DECAYMODE:
+						{//prevent -Wjump-misses-init
+							if((dat->ndat.levels[gsLevInd].halfLife.unit & 127U) == VALUE_UNIT_STABLE){
+								//if the nuclide is stable, show the 'STABLE' label
+								getGSHalfLifeStr(state->copiedTxt,dat,state->cms.selectionInd,state->ds.useLifetimes);
+							}else{
+								char tmpDecStr[32];
+								state->copiedTxt[0] = '\0'; //empty string to be copied
+								for(int8_t i=0; i<dat->ndat.levels[gsLevInd].numDecModes; i++){
+									getDecayModeStr(tmpDecStr,&dat->ndat,dat->ndat.levels[gsLevInd].firstDecMode + (uint32_t)i);
+									SDL_strlcat(state->copiedTxt,tmpDecStr,MAX_SELECTABLE_STR_LEN);
+									if(i<(dat->ndat.levels[gsLevInd].numDecModes - 1)){
+										SDL_strlcat(state->copiedTxt,", ",MAX_SELECTABLE_STR_LEN);
+									}
+								}
+							}
+							char *cpyStrCpy = findReplaceAllUTF8("%%","%",state->copiedTxt); //you copii?
+							SDL_strlcpy(state->copiedTxt,cpyStrCpy,MAX_SELECTABLE_STR_LEN);
+							SDL_free(cpyStrCpy);
+							SDL_SetClipboardText(state->copiedTxt);
+							//SDL_Log("Copied text to clipboard: %s\n",SDL_GetClipboardText());
+						}
+						break;
+					case CHARTVIEW_2PLUS:
+						{//prevent -Wjump-misses-init
+							uint32_t plus2Lvl = get2PlusLvlInd(&dat->ndat,state->cms.selectionInd);
+							if(plus2Lvl != MAXNUMLVLS){
+								char tmpEnStr[32];
+								getLvlEnergyStr(tmpEnStr,&dat->ndat,plus2Lvl,1);
+								SDL_strlcat(tmpEnStr," keV",32);
+								SDL_snprintf(state->copiedTxt,MAX_SELECTABLE_STR_LEN,"%s: %s",dat->strings[dat->locStringIDs[LOCSTR_CHARTVIEW_2PLUS]],tmpEnStr);
+							}else{
+								SDL_snprintf(state->copiedTxt,MAX_SELECTABLE_STR_LEN,"%s: %s",dat->strings[dat->locStringIDs[LOCSTR_CHARTVIEW_2PLUS]],dat->strings[dat->locStringIDs[LOCSTR_UNKNOWN]]);
+							}
+							SDL_SetClipboardText(state->copiedTxt);
+							//SDL_Log("Copied text to clipboard: %s\n",SDL_GetClipboardText());
+						}
+						break;
+					case CHARTVIEW_R42:
+						{//prevent -Wjump-misses-init
+							double r42 = getR42(&dat->ndat,state->cms.selectionInd);
+							if(r42 > 0.0){
+								SDL_snprintf(state->copiedTxt,MAX_SELECTABLE_STR_LEN,"R₄₂: %0.2f",r42);
+							}else{
+								SDL_snprintf(state->copiedTxt,MAX_SELECTABLE_STR_LEN,"R₄₂: %s",dat->strings[dat->locStringIDs[LOCSTR_UNKNOWN]]);
+							}
+							SDL_SetClipboardText(state->copiedTxt);
+							//SDL_Log("Copied text to clipboard: %s\n",SDL_GetClipboardText());
+						}
+						break;
+					case CHARTVIEW_BETA2:
+						{//prevent -Wjump-misses-init
+							double beta2 = getBeta2(&dat->ndat,state->cms.selectionInd);
+							if(beta2 > 0.0){
+								SDL_snprintf(state->copiedTxt,MAX_SELECTABLE_STR_LEN,"%s: %0.2f",dat->strings[dat->locStringIDs[LOCSTR_CHARTVIEW_BETA2]], beta2);
+							}else{
+								SDL_snprintf(state->copiedTxt,MAX_SELECTABLE_STR_LEN,"%s: %s",dat->strings[dat->locStringIDs[LOCSTR_CHARTVIEW_BETA2]], dat->strings[dat->locStringIDs[LOCSTR_UNKNOWN]]);
+							}
+							SDL_SetClipboardText(state->copiedTxt);
+							//SDL_Log("Copied text to clipboard: %s\n",SDL_GetClipboardText());
+						}
+						break;
+					case CHARTVIEW_SPIN:
+					case CHARTVIEW_PARITY:
+						if(getMostProbableSpin(&dat->ndat,gsLevInd) >= 255.0){
+							SDL_snprintf(state->copiedTxt,MAX_SELECTABLE_STR_LEN,"%s: %s",dat->strings[dat->locStringIDs[LOCSTR_JPI]],dat->strings[dat->locStringIDs[LOCSTR_UNKNOWN]]);
+						}else{
+							char tmpJPiStr[32];
+							getSpinParStr(tmpJPiStr,&dat->ndat,gsLevInd);
+							SDL_snprintf(state->copiedTxt,MAX_SELECTABLE_STR_LEN,"%s: %s",dat->strings[dat->locStringIDs[LOCSTR_JPI]],tmpJPiStr);
+						}
+						SDL_SetClipboardText(state->copiedTxt);
+						//SDL_Log("Copied text to clipboard: %s\n",SDL_GetClipboardText());
+						break;
+					case CHARTVIEW_BEA:
+						{//prevent -Wjump-misses-init
+							double beA = getBEA(&dat->ndat,state->cms.selectionInd);
+							if(beA > 0.0){
+								char tmpBEAStr[32];
+								getMassValStr(tmpBEAStr,dat->ndat.nuclData[state->cms.selectionInd].beA,1);
+								SDL_snprintf(state->copiedTxt,MAX_SELECTABLE_STR_LEN,"%s: %s keV",dat->strings[dat->locStringIDs[LOCSTR_CHARTVIEW_BEA]],tmpBEAStr);
+							}else{
+								SDL_snprintf(state->copiedTxt,MAX_SELECTABLE_STR_LEN,"%s: %s",dat->strings[dat->locStringIDs[LOCSTR_CHARTVIEW_BEA]],dat->strings[dat->locStringIDs[LOCSTR_UNKNOWN]]);
+							}
+							SDL_SetClipboardText(state->copiedTxt);
+							//SDL_Log("Copied text to clipboard: %s\n",SDL_GetClipboardText());
+						}
+						break;
+					case CHARTVIEW_SN:
+						{//prevent -Wjump-misses-init
+							char tmpSnStr[32];
+							getQValStr(tmpSnStr,dat->ndat.nuclData[state->cms.selectionInd].sn,1,0);
+							SDL_snprintf(state->copiedTxt,MAX_SELECTABLE_STR_LEN,"%s: %s %s",dat->strings[dat->locStringIDs[LOCSTR_SN]],tmpSnStr,getValueUnitShortStr(dat->ndat.nuclData[state->cms.selectionInd].sn.unit));
+							SDL_SetClipboardText(state->copiedTxt);
+							//SDL_Log("Copied text to clipboard: %s\n",SDL_GetClipboardText());
+						}
+						break;
+					case CHARTVIEW_SP:
+						{//prevent -Wjump-misses-init
+							char tmpSpStr[32];
+							getQValStr(tmpSpStr,dat->ndat.nuclData[state->cms.selectionInd].sp,1,0);
+							SDL_snprintf(state->copiedTxt,MAX_SELECTABLE_STR_LEN,"%s: %s %s",dat->strings[dat->locStringIDs[LOCSTR_SP]],tmpSpStr,getValueUnitShortStr(dat->ndat.nuclData[state->cms.selectionInd].sp.unit));
+							SDL_SetClipboardText(state->copiedTxt);
+							//SDL_Log("Copied text to clipboard: %s\n",SDL_GetClipboardText());
+						}
+						break;
+					case CHARTVIEW_QALPHA:
+						{//prevent -Wjump-misses-init
+							char tmpQaStr[32];
+							getQValStr(tmpQaStr,dat->ndat.nuclData[state->cms.selectionInd].qalpha,1,0);
+							SDL_snprintf(state->copiedTxt,MAX_SELECTABLE_STR_LEN,"%s: %s %s",dat->strings[dat->locStringIDs[LOCSTR_QALPHA]],tmpQaStr,getValueUnitShortStr(dat->ndat.nuclData[state->cms.selectionInd].qalpha.unit));
+							SDL_SetClipboardText(state->copiedTxt);
+							//SDL_Log("Copied text to clipboard: %s\n",SDL_GetClipboardText());
+						}
+						break;
+					case CHARTVIEW_QBETAMINUS:
+						{//prevent -Wjump-misses-init
+							char tmpQbStr[32];
+							getQValStr(tmpQbStr,dat->ndat.nuclData[state->cms.selectionInd].qbeta,1,0);
+							SDL_snprintf(state->copiedTxt,MAX_SELECTABLE_STR_LEN,"%s: %s %s",dat->strings[dat->locStringIDs[LOCSTR_QBETAMINUS]],tmpQbStr,getValueUnitShortStr(dat->ndat.nuclData[state->cms.selectionInd].qbeta.unit));
+							SDL_SetClipboardText(state->copiedTxt);
+							//SDL_Log("Copied text to clipboard: %s\n",SDL_GetClipboardText());
+						}
+						break;
+					case CHARTVIEW_QBETAPLUS:
+						{//prevent -Wjump-misses-init
+							char tmpQbpStr[32];
+							getQValStr(tmpQbpStr,dat->ndat.nuclData[state->cms.selectionInd].qbetaplus,1,0);
+							SDL_snprintf(state->copiedTxt,MAX_SELECTABLE_STR_LEN,"%s: %s %s",dat->strings[dat->locStringIDs[LOCSTR_QBETAPLUS]],tmpQbpStr,getValueUnitShortStr(dat->ndat.nuclData[state->cms.selectionInd].qbetaplus.unit));
+							SDL_SetClipboardText(state->copiedTxt);
+							//SDL_Log("Copied text to clipboard: %s\n",SDL_GetClipboardText());
+						}
+						break;
+					case CHARTVIEW_QEC:
+						{//prevent -Wjump-misses-init
+							char tmpQecStr[32];
+							getQValStr(tmpQecStr,dat->ndat.nuclData[state->cms.selectionInd].qec,1,0);
+							SDL_snprintf(state->copiedTxt,MAX_SELECTABLE_STR_LEN,"%s: %s %s",dat->strings[dat->locStringIDs[LOCSTR_QEC]],tmpQecStr,getValueUnitShortStr(dat->ndat.nuclData[state->cms.selectionInd].qec.unit));
+							SDL_SetClipboardText(state->copiedTxt);
+							//SDL_Log("Copied text to clipboard: %s\n",SDL_GetClipboardText());
+						}
+						break;
+					case CHARTVIEW_NUMLVLS:
+						SDL_snprintf(state->copiedTxt,MAX_SELECTABLE_STR_LEN,"%s: %u",dat->strings[dat->locStringIDs[LOCSTR_CHARTVIEW_NUMLVLS]],dat->ndat.nuclData[state->cms.selectionInd].numLevels);
+						SDL_SetClipboardText(state->copiedTxt);
+						//SDL_Log("Copied text to clipboard: %s\n",SDL_GetClipboardText());
+						break;
+					case CHARTVIEW_UNKNOWN_ENERGY:
+						{//prevent -Wjump-misses-init
+							const uint16_t numUnknowns = getNumUnknownLvls(&dat->ndat,state->cms.selectionInd);
+							SDL_snprintf(state->copiedTxt,MAX_SELECTABLE_STR_LEN,"%s: %u",dat->strings[dat->locStringIDs[LOCSTR_CHARTVIEW_UNKNOWN_ENERGY]],numUnknowns);
+							SDL_SetClipboardText(state->copiedTxt);
+							//SDL_Log("Copied text to clipboard: %s\n",SDL_GetClipboardText());
+						}
+						break;
+					default:
+						break;
+				}
 			}
 			break;
 		case CONTEXTITEM_COPY:
@@ -4196,6 +4291,13 @@ void contextMenuClickAction(app_data *restrict dat, app_state *restrict state, r
 				case TXTCLICKACTION_GOTO_LEVEL:
 					//scroll to the specified level
 					state->ds.nuclFullInfoScrollStartY = state->ds.nuclFullInfoScrollY;
+					if(isLvlDisplayed(&dat->ndat,state,state->chartSelectedNucl,state->tss.selectableStrClickPar[state->cms.selectionInd]) == 0){
+						//the current display mode or reaction selection doesn't include the final level,
+						//so go back to showing the full data before scrolling to the final level
+						state->ds.selectedRxn = 0;
+						setSelectedNuclOnLevelList(dat,state,rdat,(uint16_t)(dat->ndat.nuclData[state->chartSelectedNucl].N),(uint16_t)(dat->ndat.nuclData[state->chartSelectedNucl].Z),1); //update and re-draw level list
+					}
+					//scroll to the final level
 					state->ds.nuclFullInfoScrollToY = getNumDispLinesUpToLvl(&dat->ndat,state,state->tss.selectableStrClickPar[state->cms.selectionInd]); //scroll to the level of interest
 					state->ds.timeSinceFCScollStart = 0.0f;
 					state->ds.fcScrollInProgress = 1;
@@ -4205,6 +4307,14 @@ void contextMenuClickAction(app_data *restrict dat, app_state *restrict state, r
 				case TXTCLICKACTION_GOTO_DAUGHTER:
 					//go to the specified nuclide
 					setSelectedNuclOnLevelList(dat,state,rdat,(uint16_t)(dat->ndat.nuclData[state->tss.selectableStrClickPar[state->cms.selectionInd]].N),(uint16_t)(dat->ndat.nuclData[state->tss.selectableStrClickPar[state->cms.selectionInd]].Z),0);
+					break;
+				case TXTCLICKACTION_SHOW_COINC:
+					if(state->chartSelectedNucl < MAXNUMNUCL){
+						state->coincLvlFlag = state->tss.selectableStrClickPar[state->cms.selectionInd];
+						setCoincLvlFlags(&dat->ndat,state,state->chartSelectedNucl,state->tss.selectableStrClickPar[state->cms.selectionInd]);
+						state->ds.selectedRxn = 255; //coincident level display mode
+						setSelectedNuclOnLevelList(dat,state,rdat,(uint16_t)(dat->ndat.nuclData[state->chartSelectedNucl].N),(uint16_t)(dat->ndat.nuclData[state->chartSelectedNucl].Z),1); //update and re-draw level list
+					}
 					break;
 				default:
 					break;
@@ -4262,6 +4372,12 @@ void searchResultClickAction(app_data *restrict dat, app_state *restrict state, 
 			}else{
 				//search within level list, scroll to result
 				state->ds.nuclFullInfoScrollStartY = state->ds.nuclFullInfoScrollY;
+				if(isLvlDisplayed(&dat->ndat,state,state->chartSelectedNucl,nuclLevel) == 0){
+					//the current display mode or reaction selection doesn't include the level of interest,
+					//so go back to showing the full data before scrolling to that level
+					state->ds.selectedRxn = 0;
+					setSelectedNuclOnLevelList(dat,state,rdat,(uint16_t)(dat->ndat.nuclData[state->chartSelectedNucl].N),(uint16_t)(dat->ndat.nuclData[state->chartSelectedNucl].Z),1); //update and re-draw level list
+				}
 				state->ds.nuclFullInfoScrollToY = getNumDispLinesUpToLvl(&dat->ndat,state,nuclLevel); //scroll to the level of interest
 				state->ds.timeSinceFCScollStart = 0.0f;
 				state->ds.fcScrollInProgress = 1;
@@ -4278,6 +4394,12 @@ void searchResultClickAction(app_data *restrict dat, app_state *restrict state, 
 				//search within level list, scroll to result
 				nuclLevel = (uint16_t)(state->ss.results[resultInd].resultVal[1] - dat->ndat.nuclData[state->ss.results[resultInd].resultVal[0]].firstLevel);
 				state->ds.nuclFullInfoScrollStartY = state->ds.nuclFullInfoScrollY;
+				if(isLvlDisplayed(&dat->ndat,state,state->chartSelectedNucl,nuclLevel) == 0){
+					//the current display mode or reaction selection doesn't include the level of interest,
+					//so go back to showing the full data before scrolling to that level
+					state->ds.selectedRxn = 0;
+					setSelectedNuclOnLevelList(dat,state,rdat,(uint16_t)(dat->ndat.nuclData[state->chartSelectedNucl].N),(uint16_t)(dat->ndat.nuclData[state->chartSelectedNucl].Z),1); //update and re-draw level list
+				}
 				state->ds.nuclFullInfoScrollToY = getNumDispLinesUpToLvl(&dat->ndat,state,nuclLevel); //scroll to the level of interest
 				state->ds.timeSinceFCScollStart = 0.0f;
 				state->ds.fcScrollInProgress = 1;
@@ -4294,6 +4416,12 @@ void searchResultClickAction(app_data *restrict dat, app_state *restrict state, 
 				//search within level list, scroll to result
 				nuclLevel = (uint16_t)(state->ss.results[resultInd].resultVal[1] - dat->ndat.nuclData[state->ss.results[resultInd].resultVal[0]].firstLevel);
 				state->ds.nuclFullInfoScrollStartY = state->ds.nuclFullInfoScrollY;
+				if(isLvlDisplayed(&dat->ndat,state,state->chartSelectedNucl,nuclLevel) == 0){
+					//the current display mode or reaction selection doesn't include the level of interest,
+					//so go back to showing the full data before scrolling to that level
+					state->ds.selectedRxn = 0;
+					setSelectedNuclOnLevelList(dat,state,rdat,(uint16_t)(dat->ndat.nuclData[state->chartSelectedNucl].N),(uint16_t)(dat->ndat.nuclData[state->chartSelectedNucl].Z),1); //update and re-draw level list
+				}
 				state->ds.nuclFullInfoScrollToY = getNumDispLinesUpToLvl(&dat->ndat,state,nuclLevel); //scroll to the level of interest
 				state->ds.timeSinceFCScollStart = 0.0f;
 				state->ds.fcScrollInProgress = 1;
@@ -4313,6 +4441,12 @@ void searchResultClickAction(app_data *restrict dat, app_state *restrict state, 
 				//search within level list, scroll to result
 				nuclLevel = (uint16_t)(state->ss.results[resultInd].resultVal[1] - dat->ndat.nuclData[state->ss.results[resultInd].resultVal[0]].firstLevel);
 				state->ds.nuclFullInfoScrollStartY = state->ds.nuclFullInfoScrollY;
+				if(isLvlDisplayed(&dat->ndat,state,state->chartSelectedNucl,nuclLevel) == 0){
+					//the current display mode or reaction selection doesn't include the level of interest,
+					//so go back to showing the full data before scrolling to that level
+					state->ds.selectedRxn = 0;
+					setSelectedNuclOnLevelList(dat,state,rdat,(uint16_t)(dat->ndat.nuclData[state->chartSelectedNucl].N),(uint16_t)(dat->ndat.nuclData[state->chartSelectedNucl].Z),1); //update and re-draw level list
+				}
 				state->ds.nuclFullInfoScrollToY = getNumDispLinesUpToLvl(&dat->ndat,state,nuclLevel); //scroll to the level of interest
 				state->ds.timeSinceFCScollStart = 0.0f;
 				state->ds.fcScrollInProgress = 1;
@@ -4738,7 +4872,7 @@ void uiElemClickAction(app_data *restrict dat, app_state *restrict state, resour
 			state->clickedUIElem = UIELEM_ENUM_LENGTH; //'unclick' the menu button
 			state->ds.reactionModeInd = REACTIONMODE_EXCLUDE;
 			if(state->ds.shownElements & ((uint64_t)(1) << UIELEM_NUCL_FULLINFOBOX)){
-				if(state->ds.selectedRxn > 0){
+				if((state->ds.selectedRxn > 0)&&(state->ds.selectedRxn < 255)){
 					setSelectedNuclOnLevelList(dat,state,rdat,(uint16_t)(dat->ndat.nuclData[state->chartSelectedNucl].N),(uint16_t)(dat->ndat.nuclData[state->chartSelectedNucl].Z),1);
 				}
 			}
@@ -4748,7 +4882,7 @@ void uiElemClickAction(app_data *restrict dat, app_state *restrict state, resour
 			state->clickedUIElem = UIELEM_ENUM_LENGTH; //'unclick' the menu button
 			state->ds.reactionModeInd = REACTIONMODE_HIGHLIGHT;
 			if(state->ds.shownElements & ((uint64_t)(1) << UIELEM_NUCL_FULLINFOBOX)){
-				if(state->ds.selectedRxn > 0){
+				if((state->ds.selectedRxn > 0)&&(state->ds.selectedRxn < 255)){
 					setSelectedNuclOnLevelList(dat,state,rdat,(uint16_t)(dat->ndat.nuclData[state->chartSelectedNucl].N),(uint16_t)(dat->ndat.nuclData[state->chartSelectedNucl].Z),1);
 				}
 			}
@@ -5151,19 +5285,21 @@ void updateSingleUIElemPosition(const app_data *restrict dat, app_state *restric
 			state->ds.uiElemHeight[uiElemInd] = (int16_t)((PRIMARY_MENU_ITEM_SPACING - UI_PADDING_SIZE)*state->ds.uiUserScale);
 			break;
 		case UIELEM_CHARTVIEW_MENU:
-			state->ds.uiElemWidth[uiElemInd] = (int16_t)((CHARTVIEW_MENU_WIDTH*CHARTVIEW_MENU_COLUMNS - 4*PANEL_EDGE_SIZE)*state->ds.uiUserScale);
-			uint8_t numViewsPerCol = (uint8_t)SDL_ceilf(((float)CHARTVIEW_ENUM_LENGTH)/(1.0f*((float)CHARTVIEW_MENU_COLUMNS)));
-			float heightFrac = (1.0f*numViewsPerCol + (float)CHARTVIEW_MENU_COLUMNS)/(1.0f*((float)CHARTVIEW_ENUM_LENGTH) + (float)CHARTVIEW_MENU_COLUMNS);
-			state->ds.uiElemHeight[uiElemInd] = (int16_t)(CHARTVIEW_MENU_HEIGHT*heightFrac*state->ds.uiUserScale);
-			state->ds.uiElemPosX[uiElemInd] = (int16_t)(state->ds.windowXRes-(state->ds.uiElemWidth[uiElemInd] + CHARTVIEW_MENU_POS_XR*state->ds.uiUserScale));
-			state->ds.uiElemPosY[uiElemInd] = (int16_t)(CHARTVIEW_MENU_POS_Y*state->ds.uiUserScale);
-			float cvmButtonWidth = (CHARTVIEW_MENU_WIDTH - 2*CHARTVIEW_MENU_COLUMNS*PANEL_EDGE_SIZE - 4*CHARTVIEW_MENU_COLUMNS*UI_PADDING_SIZE);
-			float cvmButtonHeight = (CHARTVIEW_MENU_ITEM_SPACING - UI_PADDING_SIZE);
-			for(uint8_t i=0; i<CHARTVIEW_ENUM_LENGTH; i++){
-				state->ds.uiElemWidth[(int32_t)UIELEM_CHARTVIEW_MENU-((int32_t)CHARTVIEW_ENUM_LENGTH)+i] = (int16_t)(cvmButtonWidth*state->ds.uiUserScale);
-				state->ds.uiElemHeight[(int32_t)UIELEM_CHARTVIEW_MENU-((int32_t)CHARTVIEW_ENUM_LENGTH)+i] = (int16_t)(cvmButtonHeight*state->ds.uiUserScale);
-				state->ds.uiElemPosX[(int32_t)UIELEM_CHARTVIEW_MENU-((int32_t)CHARTVIEW_ENUM_LENGTH)+i] = (int16_t)(state->ds.windowXRes-((CHARTVIEW_MENU_WIDTH+CHARTVIEW_MENU_POS_XR - 4*PANEL_EDGE_SIZE - 4*UI_PADDING_SIZE + (float)(((CHARTVIEW_MENU_COLUMNS-1) - (i/numViewsPerCol))*(cvmButtonWidth + UI_TILE_SIZE - UI_PADDING_SIZE)))*state->ds.uiUserScale) );
-				state->ds.uiElemPosY[(int32_t)UIELEM_CHARTVIEW_MENU-((int32_t)CHARTVIEW_ENUM_LENGTH)+i] = (int16_t)((CHARTVIEW_MENU_POS_Y + PANEL_EDGE_SIZE + CHARTVIEW_MENU_ITEM_SPACING + 2*UI_PADDING_SIZE + (float)((i%numViewsPerCol)*CHARTVIEW_MENU_ITEM_SPACING))*state->ds.uiUserScale);
+			{//prevent -Wjump-misses-init
+				state->ds.uiElemWidth[uiElemInd] = (int16_t)((CHARTVIEW_MENU_WIDTH*CHARTVIEW_MENU_COLUMNS - 4*PANEL_EDGE_SIZE)*state->ds.uiUserScale);
+				uint8_t numViewsPerCol = (uint8_t)SDL_ceilf(((float)CHARTVIEW_ENUM_LENGTH)/(1.0f*((float)CHARTVIEW_MENU_COLUMNS)));
+				float heightFrac = (1.0f*numViewsPerCol + (float)CHARTVIEW_MENU_COLUMNS)/(1.0f*((float)CHARTVIEW_ENUM_LENGTH) + (float)CHARTVIEW_MENU_COLUMNS);
+				state->ds.uiElemHeight[uiElemInd] = (int16_t)(CHARTVIEW_MENU_HEIGHT*heightFrac*state->ds.uiUserScale);
+				state->ds.uiElemPosX[uiElemInd] = (int16_t)(state->ds.windowXRes-(state->ds.uiElemWidth[uiElemInd] + CHARTVIEW_MENU_POS_XR*state->ds.uiUserScale));
+				state->ds.uiElemPosY[uiElemInd] = (int16_t)(CHARTVIEW_MENU_POS_Y*state->ds.uiUserScale);
+				float cvmButtonWidth = (CHARTVIEW_MENU_WIDTH - 2*CHARTVIEW_MENU_COLUMNS*PANEL_EDGE_SIZE - 4*CHARTVIEW_MENU_COLUMNS*UI_PADDING_SIZE);
+				float cvmButtonHeight = (CHARTVIEW_MENU_ITEM_SPACING - UI_PADDING_SIZE);
+				for(uint8_t i=0; i<CHARTVIEW_ENUM_LENGTH; i++){
+					state->ds.uiElemWidth[(int32_t)UIELEM_CHARTVIEW_MENU-((int32_t)CHARTVIEW_ENUM_LENGTH)+i] = (int16_t)(cvmButtonWidth*state->ds.uiUserScale);
+					state->ds.uiElemHeight[(int32_t)UIELEM_CHARTVIEW_MENU-((int32_t)CHARTVIEW_ENUM_LENGTH)+i] = (int16_t)(cvmButtonHeight*state->ds.uiUserScale);
+					state->ds.uiElemPosX[(int32_t)UIELEM_CHARTVIEW_MENU-((int32_t)CHARTVIEW_ENUM_LENGTH)+i] = (int16_t)(state->ds.windowXRes-((CHARTVIEW_MENU_WIDTH+CHARTVIEW_MENU_POS_XR - 4*PANEL_EDGE_SIZE - 4*UI_PADDING_SIZE + (float)(((CHARTVIEW_MENU_COLUMNS-1) - (i/numViewsPerCol))*(cvmButtonWidth + UI_TILE_SIZE - UI_PADDING_SIZE)))*state->ds.uiUserScale) );
+					state->ds.uiElemPosY[(int32_t)UIELEM_CHARTVIEW_MENU-((int32_t)CHARTVIEW_ENUM_LENGTH)+i] = (int16_t)((CHARTVIEW_MENU_POS_Y + PANEL_EDGE_SIZE + CHARTVIEW_MENU_ITEM_SPACING + 2*UI_PADDING_SIZE + (float)((i%numViewsPerCol)*CHARTVIEW_MENU_ITEM_SPACING))*state->ds.uiUserScale);
+				}
 			}
 			break;
 		case UIELEM_SEARCH_MENU:
@@ -5359,34 +5495,38 @@ void updateSingleUIElemPosition(const app_data *restrict dat, app_state *restric
 			state->ds.uiElemHeight[UIELEM_RMM_HIGHLIGHT_BUTTON] = (int16_t)((PREFS_DIALOG_REACTIONMODE_MENU_ITEM_SPACING - UI_PADDING_SIZE)*state->ds.uiUserScale);
 			break;
 		case UIELEM_NUCL_INFOBOX:
-			state->ds.uiElemPosX[uiElemInd] = (int16_t)((state->ds.windowXRes - state->ds.infoBoxWidth*state->ds.uiUserScale)/2);
-			int16_t freeXSpace = (int16_t)(state->ds.windowXRes - state->ds.infoBoxWidth*state->ds.uiUserScale);
-			if(freeXSpace < 4*NUCL_INFOBOX_X_PADDING*state->ds.uiUserScale){
-				state->ds.uiElemPosX[uiElemInd] += (int16_t)(NUCL_INFOBOX_X_PADDING*state->ds.uiUserScale - freeXSpace/4); //make sure info box doesn't bump up against y-axis
+			{//prevent -Wjump-misses-init
+				state->ds.uiElemPosX[uiElemInd] = (int16_t)((state->ds.windowXRes - state->ds.infoBoxWidth*state->ds.uiUserScale)/2);
+				int16_t freeXSpace = (int16_t)(state->ds.windowXRes - state->ds.infoBoxWidth*state->ds.uiUserScale);
+				if(freeXSpace < 4*NUCL_INFOBOX_X_PADDING*state->ds.uiUserScale){
+					state->ds.uiElemPosX[uiElemInd] += (int16_t)(NUCL_INFOBOX_X_PADDING*state->ds.uiUserScale - freeXSpace/4); //make sure info box doesn't bump up against y-axis
+				}
+				state->ds.uiElemHeight[uiElemInd] = (int16_t)(((float)NUCL_INFOBOX_MIN_HEIGHT + state->ds.infoBoxTableHeight + 2*PANEL_EDGE_SIZE)*state->ds.uiUserScale);
+				state->ds.uiElemPosY[uiElemInd] = (int16_t)(state->ds.windowYRes - state->ds.uiElemHeight[uiElemInd] - (int16_t)((UI_PADDING_SIZE + CHART_AXIS_DEPTH)*state->ds.uiUserScale));
+				state->ds.uiElemWidth[uiElemInd] = (int16_t)(state->ds.infoBoxWidth*state->ds.uiUserScale);
+				//update child/dependant UI elements
+				updateSingleUIElemPosition(dat,state,rdat,UIELEM_NUCL_INFOBOX_CLOSEBUTTON);
+				updateSingleUIElemPosition(dat,state,rdat,UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON);
 			}
-			state->ds.uiElemHeight[uiElemInd] = (int16_t)(((float)NUCL_INFOBOX_MIN_HEIGHT + state->ds.infoBoxTableHeight + 2*PANEL_EDGE_SIZE)*state->ds.uiUserScale);
-			state->ds.uiElemPosY[uiElemInd] = (int16_t)(state->ds.windowYRes - state->ds.uiElemHeight[uiElemInd] - (int16_t)((UI_PADDING_SIZE + CHART_AXIS_DEPTH)*state->ds.uiUserScale));
-			state->ds.uiElemWidth[uiElemInd] = (int16_t)(state->ds.infoBoxWidth*state->ds.uiUserScale);
-			//update child/dependant UI elements
-			updateSingleUIElemPosition(dat,state,rdat,UIELEM_NUCL_INFOBOX_CLOSEBUTTON);
-			updateSingleUIElemPosition(dat,state,rdat,UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON);
 			break;
 		case UIELEM_NUCL_INFOBOX_CLOSEBUTTON:
-			; //suppress warning
-			SDL_FRect closeButtonPos = getInfoBoxCloseButtonPos(state,(float)state->ds.uiElemPosX[UIELEM_NUCL_INFOBOX],(float)state->ds.uiElemPosY[UIELEM_NUCL_INFOBOX],(float)state->ds.uiElemWidth[UIELEM_NUCL_INFOBOX]);
-			state->ds.uiElemWidth[UIELEM_NUCL_INFOBOX_CLOSEBUTTON] = (int16_t)(closeButtonPos.w);
-			state->ds.uiElemHeight[UIELEM_NUCL_INFOBOX_CLOSEBUTTON] = (int16_t)(closeButtonPos.h);
-			state->ds.uiElemPosX[UIELEM_NUCL_INFOBOX_CLOSEBUTTON] = (int16_t)(closeButtonPos.x);
-			state->ds.uiElemPosY[UIELEM_NUCL_INFOBOX_CLOSEBUTTON] = (int16_t)(closeButtonPos.y);
+			{//prevent -Wjump-misses-init
+				SDL_FRect closeButtonPos = getInfoBoxCloseButtonPos(state,(float)state->ds.uiElemPosX[UIELEM_NUCL_INFOBOX],(float)state->ds.uiElemPosY[UIELEM_NUCL_INFOBOX],(float)state->ds.uiElemWidth[UIELEM_NUCL_INFOBOX]);
+				state->ds.uiElemWidth[UIELEM_NUCL_INFOBOX_CLOSEBUTTON] = (int16_t)(closeButtonPos.w);
+				state->ds.uiElemHeight[UIELEM_NUCL_INFOBOX_CLOSEBUTTON] = (int16_t)(closeButtonPos.h);
+				state->ds.uiElemPosX[UIELEM_NUCL_INFOBOX_CLOSEBUTTON] = (int16_t)(closeButtonPos.x);
+				state->ds.uiElemPosY[UIELEM_NUCL_INFOBOX_CLOSEBUTTON] = (int16_t)(closeButtonPos.y);
+			}
 			break;
 		case UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON:
-			; //suppress warning
-			SDL_FRect allLvlButtonPos = getInfoBoxAllLvlButtonPos(state,(float)state->ds.uiElemPosX[UIELEM_NUCL_INFOBOX],(float)state->ds.uiElemPosY[UIELEM_NUCL_INFOBOX],(float)state->ds.uiElemWidth[UIELEM_NUCL_INFOBOX]);
-			state->ds.uiElemWidth[UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON] = (int16_t)(allLvlButtonPos.w);
-			state->ds.uiElemHeight[UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON] = (int16_t)(allLvlButtonPos.h);
-			state->ds.uiElemPosX[UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON] = (int16_t)(allLvlButtonPos.x);
-			state->ds.uiElemPosY[UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON] = (int16_t)(allLvlButtonPos.y);
-			//SDL_Log("x: %u, y: %u, w: %u, h: %u\n",state->ds.uiElemPosX[UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON],state->ds.uiElemPosY[UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON],state->ds.uiElemWidth[UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON],state->ds.uiElemHeight[UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON]);
+			{//prevent -Wjump-misses-init
+				SDL_FRect allLvlButtonPos = getInfoBoxAllLvlButtonPos(state,(float)state->ds.uiElemPosX[UIELEM_NUCL_INFOBOX],(float)state->ds.uiElemPosY[UIELEM_NUCL_INFOBOX],(float)state->ds.uiElemWidth[UIELEM_NUCL_INFOBOX]);
+				state->ds.uiElemWidth[UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON] = (int16_t)(allLvlButtonPos.w);
+				state->ds.uiElemHeight[UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON] = (int16_t)(allLvlButtonPos.h);
+				state->ds.uiElemPosX[UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON] = (int16_t)(allLvlButtonPos.x);
+				state->ds.uiElemPosY[UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON] = (int16_t)(allLvlButtonPos.y);
+				//SDL_Log("x: %u, y: %u, w: %u, h: %u\n",state->ds.uiElemPosX[UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON],state->ds.uiElemPosY[UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON],state->ds.uiElemWidth[UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON],state->ds.uiElemHeight[UIELEM_NUCL_INFOBOX_ALLLEVELSBUTTON]);
+			}
 			break;
 		case UIELEM_NUCL_FULLINFOBOX_BACKBUTTON:
 			state->ds.uiElemPosX[UIELEM_NUCL_FULLINFOBOX_BACKBUTTON] = (int16_t)(state->ds.windowXRes-(NUCL_FULLINFOBOX_BACKBUTTON_WIDTH+NUCL_FULLINFOBOX_BACKBUTTON_POS_XR)*state->ds.uiUserScale);
@@ -5397,56 +5537,71 @@ void updateSingleUIElemPosition(const app_data *restrict dat, app_state *restric
 			state->ds.uiElemExtMinusY[UIELEM_NUCL_FULLINFOBOX_BACKBUTTON] = (uint16_t)((NUCL_FULLINFOBOX_BACKBUTTON_POS_Y+1.0f)*state->ds.uiUserScale); //Fitt's law
 			break;
 		case UIELEM_NUCL_FULLINFOBOX_RXNBUTTON:
-			if(state->ds.selectedRxn == 0){
-				state->ds.uiElemWidth[UIELEM_NUCL_FULLINFOBOX_RXNBUTTON] = (int16_t)(NUCL_FULLINFOBOX_RXNBUTTON_WIDTH*state->ds.uiUserScale);
-			}else{
-				char rxnStr[32];
-    		getRxnStr(rxnStr,&dat->ndat,dat->ndat.nuclData[state->chartSelectedNucl].firstRxn + (uint32_t)(state->ds.selectedRxn-1));
-				if(state->ds.reactionModeInd == REACTIONMODE_HIGHLIGHT){
-					char selStr[64];
-					SDL_snprintf(selStr,64,"%s: %s",dat->strings[dat->locStringIDs[LOCSTR_LEVELS_BOLDED]],rxnStr);
+			{//prevent -Wjump-misses-init
+				if(state->ds.selectedRxn == 0){
+					state->ds.uiElemWidth[UIELEM_NUCL_FULLINFOBOX_RXNBUTTON] = (int16_t)(NUCL_FULLINFOBOX_RXNBUTTON_WIDTH*state->ds.uiUserScale);
+				}else if(state->ds.selectedRxn == 255){
+					//coincident levels mode
+					char selStr[64], tmpStr[32];
+					uint8_t eValueType = (uint8_t)((dat->ndat.levels[(uint32_t)(dat->ndat.nuclData[state->chartSelectedNucl].firstLevel + state->coincLvlFlag)].energy.format >> 5U) & 15U);
+					if((eValueType == VALUETYPE_NUMBER)&&(getRawValFromDB(&dat->ndat.levels[(uint32_t)(dat->ndat.nuclData[state->chartSelectedNucl].firstLevel + state->coincLvlFlag)].energy)==0.0)){
+						SDL_snprintf(selStr,64,"%s %s",dat->strings[dat->locStringIDs[LOCSTR_LEVELS_COINC]],dat->strings[dat->locStringIDs[LOCSTR_GROUND_STATE]]);
+					}else{
+						getLvlEnergyStr(tmpStr,&dat->ndat,(uint32_t)(dat->ndat.nuclData[state->chartSelectedNucl].firstLevel + state->coincLvlFlag),0);
+						SDL_snprintf(selStr,64,"%s %s keV level",dat->strings[dat->locStringIDs[LOCSTR_LEVELS_COINC]],tmpStr);
+					}
 					state->ds.uiElemWidth[UIELEM_NUCL_FULLINFOBOX_RXNBUTTON] = (int16_t)(getTextWidth(rdat,FONTSIZE_NORMAL,selStr)/rdat->uiDPIScale + 70*state->ds.uiUserScale);
 				}else{
-					state->ds.uiElemWidth[UIELEM_NUCL_FULLINFOBOX_RXNBUTTON] = (int16_t)(getTextWidth(rdat,FONTSIZE_NORMAL,rxnStr)/rdat->uiDPIScale + 70*state->ds.uiUserScale);
+					char rxnStr[32];
+					getRxnStr(rxnStr,&dat->ndat,dat->ndat.nuclData[state->chartSelectedNucl].firstRxn + (uint32_t)(state->ds.selectedRxn-1));
+					if(state->ds.reactionModeInd == REACTIONMODE_HIGHLIGHT){
+						char selStr[64];
+						SDL_snprintf(selStr,64,"%s: %s",dat->strings[dat->locStringIDs[LOCSTR_LEVELS_BOLDED]],rxnStr);
+						state->ds.uiElemWidth[UIELEM_NUCL_FULLINFOBOX_RXNBUTTON] = (int16_t)(getTextWidth(rdat,FONTSIZE_NORMAL,selStr)/rdat->uiDPIScale + 70*state->ds.uiUserScale);
+					}else{
+						state->ds.uiElemWidth[UIELEM_NUCL_FULLINFOBOX_RXNBUTTON] = (int16_t)(getTextWidth(rdat,FONTSIZE_NORMAL,rxnStr)/rdat->uiDPIScale + 70*state->ds.uiUserScale);
+					}
 				}
+				state->ds.uiElemHeight[UIELEM_NUCL_FULLINFOBOX_RXNBUTTON] = (int16_t)(UI_TILE_SIZE*state->ds.uiUserScale);
+				state->ds.uiElemPosX[UIELEM_NUCL_FULLINFOBOX_RXNBUTTON] = (int16_t)(state->ds.windowXRes-state->ds.uiElemWidth[UIELEM_NUCL_FULLINFOBOX_RXNBUTTON]-(NUCL_FULLINFOBOX_RXNBUTTON_POS_XR*state->ds.uiUserScale));
+				state->ds.uiElemPosY[UIELEM_NUCL_FULLINFOBOX_RXNBUTTON] = (int16_t)(NUCL_FULLINFOBOX_BACKBUTTON_POS_Y*state->ds.uiUserScale);
+				state->ds.uiElemExtPlusX[UIELEM_NUCL_FULLINFOBOX_RXNBUTTON] = (uint16_t)((NUCL_FULLINFOBOX_RXNBUTTON_POS_XR+1.0f)*state->ds.uiUserScale); //Fitt's law
+				state->ds.uiElemExtMinusY[UIELEM_NUCL_FULLINFOBOX_RXNBUTTON] = (uint16_t)((NUCL_FULLINFOBOX_BACKBUTTON_POS_Y+1.0f)*state->ds.uiUserScale); //Fitt's law
 			}
-			state->ds.uiElemHeight[UIELEM_NUCL_FULLINFOBOX_RXNBUTTON] = (int16_t)(UI_TILE_SIZE*state->ds.uiUserScale);
-			state->ds.uiElemPosX[UIELEM_NUCL_FULLINFOBOX_RXNBUTTON] = (int16_t)(state->ds.windowXRes-state->ds.uiElemWidth[UIELEM_NUCL_FULLINFOBOX_RXNBUTTON]-(NUCL_FULLINFOBOX_RXNBUTTON_POS_XR*state->ds.uiUserScale));
-			state->ds.uiElemPosY[UIELEM_NUCL_FULLINFOBOX_RXNBUTTON] = (int16_t)(NUCL_FULLINFOBOX_BACKBUTTON_POS_Y*state->ds.uiUserScale);
-			state->ds.uiElemExtPlusX[UIELEM_NUCL_FULLINFOBOX_RXNBUTTON] = (uint16_t)((NUCL_FULLINFOBOX_RXNBUTTON_POS_XR+1.0f)*state->ds.uiUserScale); //Fitt's law
-			state->ds.uiElemExtMinusY[UIELEM_NUCL_FULLINFOBOX_RXNBUTTON] = (uint16_t)((NUCL_FULLINFOBOX_BACKBUTTON_POS_Y+1.0f)*state->ds.uiUserScale); //Fitt's law
 			break;
 		case UIELEM_RXN_MENU:
-			state->ds.uiElemPosY[uiElemInd] = (int16_t)(state->ds.uiElemPosY[UIELEM_NUCL_FULLINFOBOX_RXNBUTTON] + state->ds.uiElemHeight[UIELEM_NUCL_FULLINFOBOX_RXNBUTTON]);
-			float effResY = (float)(state->ds.windowYRes);
-			if(effResY > 650.0f*state->ds.uiUserScale){
-				effResY = 650.0f*state->ds.uiUserScale; //limit vertical size of the menu
-			}
-			state->ds.rxnMenuColumns = (uint8_t)(SDL_ceilf((dat->ndat.nuclData[state->chartSelectedNucl].numRxns+1.0f)/SDL_floorf((float)(effResY - state->ds.uiElemPosY[uiElemInd])/(RXN_MENU_ITEM_SPACING*state->ds.uiUserScale) - 1.0f)));
-			if(state->ds.rxnMenuColumns == 0){
-				state->ds.rxnMenuColumns = 1;
-			}
-			if((state->ds.rxnMenuColumns < 3)&&(((dat->ndat.nuclData[state->chartSelectedNucl].numRxns+1.0f)/state->ds.rxnMenuColumns) > 8.5f)){
-				state->ds.rxnMenuColumns++;
-			}
-			//SDL_Log("numRxns: %u, columns: %u\n",dat->ndat.nuclData[state->chartSelectedNucl].numRxns,state->ds.rxnMenuColumns);
-			int16_t menuWidth = (int16_t)((RXN_MENU_COLUMN_WIDTH*state->ds.rxnMenuColumns + 4.0f*PANEL_EDGE_SIZE)*state->ds.uiUserScale);
-			while(menuWidth > (state->ds.windowXRes - 2*UI_PADDING_SIZE*state->ds.uiUserScale)){
-				if(state->ds.rxnMenuColumns > 1){
-					state->ds.rxnMenuColumns--;
-					menuWidth = (int16_t)((RXN_MENU_COLUMN_WIDTH*state->ds.rxnMenuColumns + 4.0f*PANEL_EDGE_SIZE)*state->ds.uiUserScale);
-				}else{
-					break;
+			{//prevent -Wjump-misses-init
+				state->ds.uiElemPosY[uiElemInd] = (int16_t)(state->ds.uiElemPosY[UIELEM_NUCL_FULLINFOBOX_RXNBUTTON] + state->ds.uiElemHeight[UIELEM_NUCL_FULLINFOBOX_RXNBUTTON]);
+				float effResY = (float)(state->ds.windowYRes);
+				if(effResY > 650.0f*state->ds.uiUserScale){
+					effResY = 650.0f*state->ds.uiUserScale; //limit vertical size of the menu
 				}
+				state->ds.rxnMenuColumns = (uint8_t)(SDL_ceilf((dat->ndat.nuclData[state->chartSelectedNucl].numRxns+1.0f)/SDL_floorf((float)(effResY - state->ds.uiElemPosY[uiElemInd])/(RXN_MENU_ITEM_SPACING*state->ds.uiUserScale) - 1.0f)));
+				if(state->ds.rxnMenuColumns == 0){
+					state->ds.rxnMenuColumns = 1;
+				}
+				if((state->ds.rxnMenuColumns < 3)&&(((dat->ndat.nuclData[state->chartSelectedNucl].numRxns+1.0f)/state->ds.rxnMenuColumns) > 8.5f)){
+					state->ds.rxnMenuColumns++;
+				}
+				//SDL_Log("numRxns: %u, columns: %u\n",dat->ndat.nuclData[state->chartSelectedNucl].numRxns,state->ds.rxnMenuColumns);
+				int16_t menuWidth = (int16_t)((RXN_MENU_COLUMN_WIDTH*state->ds.rxnMenuColumns + 4.0f*PANEL_EDGE_SIZE)*state->ds.uiUserScale);
+				while(menuWidth > (state->ds.windowXRes - 2*UI_PADDING_SIZE*state->ds.uiUserScale)){
+					if(state->ds.rxnMenuColumns > 1){
+						state->ds.rxnMenuColumns--;
+						menuWidth = (int16_t)((RXN_MENU_COLUMN_WIDTH*state->ds.rxnMenuColumns + 4.0f*PANEL_EDGE_SIZE)*state->ds.uiUserScale);
+					}else{
+						break;
+					}
+				}
+				state->ds.uiElemWidth[uiElemInd] = menuWidth;
+				state->ds.uiElemHeight[uiElemInd] = (int16_t)((SDL_ceilf((dat->ndat.nuclData[state->chartSelectedNucl].numRxns+1.0f)/(state->ds.rxnMenuColumns*1.0f))*RXN_MENU_ITEM_SPACING + 2*PANEL_EDGE_SIZE + 3*UI_PADDING_SIZE)*state->ds.uiUserScale);
+				state->ds.uiElemPosX[uiElemInd] = (int16_t)(state->ds.uiElemPosX[UIELEM_NUCL_FULLINFOBOX_RXNBUTTON] + state->ds.uiElemWidth[UIELEM_NUCL_FULLINFOBOX_RXNBUTTON]/2 - state->ds.uiElemWidth[UIELEM_RXN_MENU]/2);
+				if((state->ds.uiElemPosX[uiElemInd] + state->ds.uiElemWidth[uiElemInd]) > state->ds.windowXRes){
+					//offset menu to keep it on-screen
+					state->ds.uiElemPosX[uiElemInd] = (int16_t)(state->ds.windowXRes - state->ds.uiElemWidth[uiElemInd] - UI_PADDING_SIZE*state->ds.uiUserScale);
+				}
+				//SDL_Log("position: %i %i, dimensions: %i %i\n",state->ds.uiElemPosX[uiElemInd],state->ds.uiElemPosY[uiElemInd],state->ds.uiElemWidth[uiElemInd],state->ds.uiElemHeight[uiElemInd]);
 			}
-			state->ds.uiElemWidth[uiElemInd] = menuWidth;
-			state->ds.uiElemHeight[uiElemInd] = (int16_t)((SDL_ceilf((dat->ndat.nuclData[state->chartSelectedNucl].numRxns+1.0f)/(state->ds.rxnMenuColumns*1.0f))*RXN_MENU_ITEM_SPACING + 2*PANEL_EDGE_SIZE + 3*UI_PADDING_SIZE)*state->ds.uiUserScale);
-			state->ds.uiElemPosX[uiElemInd] = (int16_t)(state->ds.uiElemPosX[UIELEM_NUCL_FULLINFOBOX_RXNBUTTON] + state->ds.uiElemWidth[UIELEM_NUCL_FULLINFOBOX_RXNBUTTON]/2 - state->ds.uiElemWidth[UIELEM_RXN_MENU]/2);
-			if((state->ds.uiElemPosX[uiElemInd] + state->ds.uiElemWidth[uiElemInd]) > state->ds.windowXRes){
-				//offset menu to keep it on-screen
-				state->ds.uiElemPosX[uiElemInd] = (int16_t)(state->ds.windowXRes - state->ds.uiElemWidth[uiElemInd] - UI_PADDING_SIZE*state->ds.uiUserScale);
-			}
-			//SDL_Log("position: %i %i, dimensions: %i %i\n",state->ds.uiElemPosX[uiElemInd],state->ds.uiElemPosY[uiElemInd],state->ds.uiElemWidth[uiElemInd],state->ds.uiElemHeight[uiElemInd]);
 			break;
 		case UIELEM_NUCL_FULLINFOBOX_SCROLLBAR:
 			state->ds.uiElemPosX[UIELEM_NUCL_FULLINFOBOX_SCROLLBAR] = (int16_t)(state->ds.windowXRes - NUCL_FULLINFOBOX_SCROLLBAR_POS_XR*state->ds.uiUserScale);

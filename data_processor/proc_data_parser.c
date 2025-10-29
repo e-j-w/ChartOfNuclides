@@ -262,6 +262,7 @@ static int parseAppRules(app_data *restrict dat, asset_mapping *restrict stringI
 	dat->locStringIDs[LOCSTR_SA_LONG] = (uint16_t)nameToAssetID("alphasep_energy_long",stringIDmap);
 	dat->locStringIDs[LOCSTR_ATOMIC_MASS] = (uint16_t)nameToAssetID("atomic_mass",stringIDmap);
 	dat->locStringIDs[LOCSTR_MASS_UNKNOWN] = (uint16_t)nameToAssetID("mass_unknown",stringIDmap);
+	dat->locStringIDs[LOCSTR_GROUND_STATE] = (uint16_t)nameToAssetID("ground_state",stringIDmap);
 	dat->locStringIDs[LOCSTR_ELEM_TYPE] = (uint16_t)nameToAssetID("element_type",stringIDmap);
 	dat->locStringIDs[LOCSTR_ELEMTYPE_NONELEMENT] = (uint16_t)nameToAssetID("elemtype_nonelement",stringIDmap);
 	dat->locStringIDs[LOCSTR_ELEMTYPE_NONMETAL] = (uint16_t)nameToAssetID("elemtype_nonmetal",stringIDmap);
@@ -343,6 +344,7 @@ static int parseAppRules(app_data *restrict dat, asset_mapping *restrict stringI
 	dat->locStringIDs[LOCSTR_SEARCHRES_LIFETIME] = (uint16_t)nameToAssetID("search_result_lifetime",stringIDmap);
 	dat->locStringIDs[LOCSTR_CLICKACTION_GOTOLEVEL] = (uint16_t)nameToAssetID("clickaction_goto_level",stringIDmap);
 	dat->locStringIDs[LOCSTR_CLICKACTION_GOTODAUGHTER] = (uint16_t)nameToAssetID("clickaction_goto_daughter",stringIDmap);
+	dat->locStringIDs[LOCSTR_CLICKACTION_SHOWCOINC] = (uint16_t)nameToAssetID("clickaction_show_coinc",stringIDmap);
 	dat->locStringIDs[LOCSTR_PREF_UISCALE] = (uint16_t)nameToAssetID("interface_size",stringIDmap);
 	dat->locStringIDs[LOCSTR_SMALL] = (uint16_t)nameToAssetID("small",stringIDmap);
 	dat->locStringIDs[LOCSTR_LARGE] = (uint16_t)nameToAssetID("large",stringIDmap);
@@ -352,6 +354,7 @@ static int parseAppRules(app_data *restrict dat, asset_mapping *restrict stringI
 	dat->locStringIDs[LOCSTR_PREF_REACTIONMODE_EXCLUDE] = (uint16_t)nameToAssetID("reactionmode_exclude",stringIDmap);
 	dat->locStringIDs[LOCSTR_PREF_REACTIONMODE_HIGHLIGHT] = (uint16_t)nameToAssetID("reactionmode_highlight",stringIDmap);
 	dat->locStringIDs[LOCSTR_LEVELS_BOLDED] = (uint16_t)nameToAssetID("levels_bolded",stringIDmap);
+	dat->locStringIDs[LOCSTR_LEVELS_COINC] = (uint16_t)nameToAssetID("levels_coinc",stringIDmap);
 
   return 0; //success
 
@@ -581,6 +584,12 @@ uint8_t parseRxn(reaction *rxn, const char *rxnstring, char *ensdfStrBuf, const 
 		modRxnStrCpy = findReplaceAllUTF8("pi","π",modRxnStr);
 		SDL_strlcpy(modRxnStr,modRxnStrCpy,MAX_RXN_STRLEN-1);
 		SDL_free(modRxnStrCpy);
+		modRxnStrCpy = findReplaceAllUTF8(",nug",",ν",modRxnStr);
+		SDL_strlcpy(modRxnStr,modRxnStrCpy,MAX_RXN_STRLEN-1);
+		SDL_free(modRxnStrCpy);
+		modRxnStrCpy = findReplaceAllUTF8(",nua",",να",modRxnStr);
+		SDL_strlcpy(modRxnStr,modRxnStrCpy,MAX_RXN_STRLEN-1);
+		SDL_free(modRxnStrCpy);
 		modRxnStrCpy = findReplaceAllUTF8(",nu",",ν",modRxnStr);
 		SDL_strlcpy(modRxnStr,modRxnStrCpy,MAX_RXN_STRLEN-1);
 		SDL_free(modRxnStrCpy);
@@ -596,7 +605,31 @@ uint8_t parseRxn(reaction *rxn, const char *rxnstring, char *ensdfStrBuf, const 
 		modRxnStrCpy = findReplaceAllUTF8(",g)",",γ)",modRxnStr);
 		SDL_strlcpy(modRxnStr,modRxnStrCpy,MAX_RXN_STRLEN-1);
 		SDL_free(modRxnStrCpy);
-		modRxnStrCpy = findReplaceAllUTF8("g)",")",modRxnStr);
+		modRxnStrCpy = findReplaceAllUTF8("ag)","a)",modRxnStr);
+		SDL_strlcpy(modRxnStr,modRxnStrCpy,MAX_RXN_STRLEN-1);
+		SDL_free(modRxnStrCpy);
+		modRxnStrCpy = findReplaceAllUTF8("ng)","n)",modRxnStr);
+		SDL_strlcpy(modRxnStr,modRxnStrCpy,MAX_RXN_STRLEN-1);
+		SDL_free(modRxnStrCpy);
+		modRxnStrCpy = findReplaceAllUTF8("pg)","p)",modRxnStr);
+		SDL_strlcpy(modRxnStr,modRxnStrCpy,MAX_RXN_STRLEN-1);
+		SDL_free(modRxnStrCpy);
+		modRxnStrCpy = findReplaceAllUTF8("dg)","d)",modRxnStr);
+		SDL_strlcpy(modRxnStr,modRxnStrCpy,MAX_RXN_STRLEN-1);
+		SDL_free(modRxnStrCpy);
+		modRxnStrCpy = findReplaceAllUTF8("eg)","e)",modRxnStr);
+		SDL_strlcpy(modRxnStr,modRxnStrCpy,MAX_RXN_STRLEN-1);
+		SDL_free(modRxnStrCpy);
+		modRxnStrCpy = findReplaceAllUTF8("xg)","x)",modRxnStr);
+		SDL_strlcpy(modRxnStr,modRxnStrCpy,MAX_RXN_STRLEN-1);
+		SDL_free(modRxnStrCpy);
+		modRxnStrCpy = findReplaceAllUTF8("Cg)","C)",modRxnStr);
+		SDL_strlcpy(modRxnStr,modRxnStrCpy,MAX_RXN_STRLEN-1);
+		SDL_free(modRxnStrCpy);
+		modRxnStrCpy = findReplaceAllUTF8("'g)","')",modRxnStr);
+		SDL_strlcpy(modRxnStr,modRxnStrCpy,MAX_RXN_STRLEN-1);
+		SDL_free(modRxnStrCpy);
+		modRxnStrCpy = findReplaceAllUTF8("g')","')",modRxnStr);
 		SDL_strlcpy(modRxnStr,modRxnStrCpy,MAX_RXN_STRLEN-1);
 		SDL_free(modRxnStrCpy);
 		modRxnStrCpy = findReplaceAllUTF8("(a,","(α,",modRxnStr);
@@ -621,6 +654,9 @@ uint8_t parseRxn(reaction *rxn, const char *rxnstring, char *ensdfStrBuf, const 
 		SDL_strlcpy(modRxnStr,modRxnStrCpy,MAX_RXN_STRLEN-1);
 		SDL_free(modRxnStrCpy);
 		modRxnStrCpy = findReplaceAllUTF8(",a",",α",modRxnStr);
+		SDL_strlcpy(modRxnStr,modRxnStrCpy,MAX_RXN_STRLEN-1);
+		SDL_free(modRxnStrCpy);
+		modRxnStrCpy = findReplaceAllUTF8("αg)","α)",modRxnStr);
 		SDL_strlcpy(modRxnStr,modRxnStrCpy,MAX_RXN_STRLEN-1);
 		SDL_free(modRxnStrCpy);
 		modRxnStrCpy = findReplaceAllUTF8("(k-","(K-",modRxnStr);

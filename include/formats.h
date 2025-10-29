@@ -247,7 +247,8 @@ typedef struct
   uint16_t nuclFullInfoShownColumns; //bit-pattern describing which columns are shown in the full level info view (values from level_list_column_enum)
   uint32_t nuclFullInfoLastDispLvl; //the index of the last level to be displayed on the level list (used to determine which Q values are shown in-line)
   uint8_t rxnMenuColumns; //how many columns to use in the reaction menu
-  uint8_t mouseOverRxn, mouseHoldRxn, selectedRxn; //which item in the reaction menu is moused-over/selected, =255 if none
+  uint8_t mouseOverRxn, mouseHoldRxn; //which item in the reaction menu is moused-over, =255 if none
+  uint8_t selectedRxn; //which item in the reaction menu is selected, =0 if none =255 if showing coincident levels
   uint64_t shownElements; //bit pattern describing which UI elements are being shown, values from ui_element_enum
   uint32_t uiAnimPlaying; //bit pattern describing which UI animations are playing
   float timeLeftInUIAnimation[UIANIM_ENUM_LENGTH]; //time left in each UI animation
@@ -321,6 +322,9 @@ typedef struct
   uint16_t selectionInd; //index of nuclide or other item corresponding to this context menu
 }context_menu_state; //struct containing context menu data
 
+#define COINC_FLAG_BITPATTERN_SIZE 16
+#define MAX_COINC_FLAGGED_LVLS (64*COINC_FLAG_BITPATTERN_SIZE)
+
 typedef struct
 {
   drawing_state ds;          //the state information for drawing
@@ -349,11 +353,12 @@ typedef struct
   uint8_t uiState, lastUIState; //modal state of the UI, values from ui_state_enum
   uint16_t chartSelectedNucl; //nucleus selected on the chart, =MAXNUMNUCL if none selected
   uint64_t interactableElement; //bit pattern describing which UI elements are interactable, values from ui_element_enum
+  uint16_t coincLvlFlag; //which level in the selected nuclide (0-indexed) is selected for showing coincident levels, 0 if no level selected (the GS isn't selectable, since everything is coincident with it)
+  uint64_t flaggedCoincLvls[COINC_FLAG_BITPATTERN_SIZE]; //bit-pattern describing which levels in the nuclide are coincident with the selected level
   unsigned int mouseMovedDuringClick : 1; //whether or not the mouse was moved significantly while the mouse button is held down
   unsigned int searchStrUpdated : 1;
   unsigned int kbdModVal : 2; //values from kbd_mod_enum
   unsigned int lastInputType : 2; //0=keyboard, 1=apppad, 2=mouse
-  
   unsigned int quitAppFlag : 1; //0=take no action, 1=quit app
 }app_state; //structure containing all app state data (persistent AND temporary)
 

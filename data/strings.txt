@@ -17,6 +17,7 @@ neutronsep_energy_long|Neutron separation energy
 alphasep_energy_long|Alpha threshold
 atomic_mass|Atomic Mass
 mass_unknown|Mass Unknown
+ground_state|ground state
 element_type|Element type
 elemtype_nonelement|Non-element
 elemtype_nonmetal|Non-metal
@@ -47,11 +48,11 @@ protons_desc|Protons (Z)
 not_natural|Not naturally occurring
 all_levels|All levels/gammas
 back_to_summary|Back to summary
-all_reactions|All Reactions
+all_reactions|All datasets
 menuitem_preferences|Preferences
 menuitem_screenshot|Take a screenshot...
 menuitem_about|About Chart of Nuclides
-about_string_version|Version 0.8.2 – "Differential Equation"
+about_string_version|Version 0.8.3 – "Differential Equation"
 about_string_1|Developed by Jonathan Williams
 about_string_2|Nuclear structure data is sourced from ENSDF, mass data from AME2020, and isotope abundance data from NIST.
 about_string_3|This is an independently developed program not endorsed by the above entities. The accuracy or completeness of any information provided is not guaranteed.
@@ -98,12 +99,14 @@ search_result_halflife|Half-life
 search_result_lifetime|Mean lifetime
 clickaction_goto_level|Go to final level
 clickaction_goto_daughter|Go to daughter nuclide
+clickaction_show_coinc|Show coincident levels
 interface_size|Interface size
 small|Small
 default|Default
 large|Large
 huge|Huge
-reaction_mode|Reaction display mode
-reactionmode_exclude|Only show selected reaction data
-reactionmode_highlight|Highlight levels from selected reaction
+reaction_mode|Dataset display mode
+reactionmode_exclude|Only show selected dataset
+reactionmode_highlight|Highlight levels from selected dataset
 levels_bolded|Bolded levels
+levels_coinc|Coinc. with

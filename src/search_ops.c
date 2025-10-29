@@ -162,8 +162,8 @@ void searchELevel(const ndata *restrict ndat, const app_state *state, search_sta
 					
 					//for single nuclide searches, if a specific reaction is selected,
 					//do not search levels that are not populated in that reaction
-					if((ss->searchInProgress == SEARCHSTATE_SEARCHING_SINGLENUCL)&&(state->ds.selectedRxn != 0)&&(state->ds.reactionModeInd != REACTIONMODE_HIGHLIGHT)){
-						if(!(ndat->levels[k].populatingRxns & ((uint64_t)(1) << (state->ds.selectedRxn-1)))){
+					if((ss->searchInProgress == SEARCHSTATE_SEARCHING_SINGLENUCL)&&(state->ds.selectedRxn != 0)){
+						if(isLvlDisplayed(ndat,state,(uint16_t)j,(uint16_t)(k -ndat->nuclData[j].firstLevel))==0){
 							continue;
 						}
 					}
@@ -257,7 +257,7 @@ void searchELevelDiff(const ndata *restrict ndat, const app_state *state, search
 					//for single nuclide searches, if a specific reaction is selected,
 					//do not search levels that are not populated in that reaction
 					if((ss->searchInProgress == SEARCHSTATE_SEARCHING_SINGLENUCL)&&(state->ds.selectedRxn != 0)){
-						if(!(ndat->levels[k].populatingRxns & ((uint64_t)(1) << (state->ds.selectedRxn-1)))){
+						if(isLvlDisplayed(ndat,state,(uint16_t)j,(uint16_t)(k -ndat->nuclData[j].firstLevel))==0){
 							continue;
 						}
 					}
@@ -355,7 +355,7 @@ void searchEGamma(const ndata *restrict ndat, const app_state *state, search_sta
 					//for single nuclide searches, if a specific reaction is selected,
 					//do not search levels that are not populated in that reaction
 					if((ss->searchInProgress == SEARCHSTATE_SEARCHING_SINGLENUCL)&&(state->ds.selectedRxn != 0)){
-						if(!(ndat->levels[k].populatingRxns & ((uint64_t)(1) << (state->ds.selectedRxn-1)))){
+						if(isLvlDisplayed(ndat,state,(uint16_t)j,(uint16_t)(k -ndat->nuclData[j].firstLevel))==0){
 							continue;
 						}
 					}
@@ -389,12 +389,13 @@ void searchEGamma(const ndata *restrict ndat, const app_state *state, search_sta
 										case VALUETYPE_GREATERTHAN:
 										case VALUETYPE_GREATEROREQUALTHAN:
 										case VALUETYPE_APPROX:
-											; //get around gcc warning
-											float intensityFactor = (float)getRawValFromDB(&ndat->tran[l].intensity)/100.0f;
-											if(intensityFactor > 1.0f){
-												intensityFactor = 1.0f;
+											{//prevent -Wjump-misses-init
+												float intensityFactor = (float)getRawValFromDB(&ndat->tran[l].intensity)/100.0f;
+												if(intensityFactor > 1.0f){
+													intensityFactor = 1.0f;
+												}
+												res.relevance *= intensityFactor;
 											}
-											res.relevance *= intensityFactor;
 											break;
 										default:
 											res.relevance *= 0.01f;
@@ -483,7 +484,7 @@ void searchGammaCascade(const ndata *restrict ndat, const app_state *state, sear
 					//for single nuclide searches, if a specific reaction is selected,
 					//do not search levels that are not populated in that reaction
 					if((ss->searchInProgress == SEARCHSTATE_SEARCHING_SINGLENUCL)&&(state->ds.selectedRxn != 0)){
-						if(!(ndat->levels[j].populatingRxns & ((uint64_t)(1) << (state->ds.selectedRxn-1)))){
+						if(isLvlDisplayed(ndat,state,(uint16_t)i,(uint16_t)(j -ndat->nuclData[i].firstLevel))==0){
 							continue;
 						}
 					}
@@ -638,7 +639,7 @@ void searchHalfLife(const ndata *restrict ndat, const app_state *state, search_s
 					//for single nuclide searches, if a specific reaction is selected,
 					//do not search levels that are not populated in that reaction
 					if((ss->searchInProgress == SEARCHSTATE_SEARCHING_SINGLENUCL)&&(state->ds.selectedRxn != 0)){
-						if(!(ndat->levels[k].populatingRxns & ((uint64_t)(1) << (state->ds.selectedRxn-1)))){
+						if(isLvlDisplayed(ndat,state,(uint16_t)j,(uint16_t)(k -ndat->nuclData[j].firstLevel))==0){
 							continue;
 						}
 					}
