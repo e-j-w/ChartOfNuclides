@@ -280,7 +280,10 @@ void drawDropDownTextButtonFontSize(const ui_theme_rules *restrict uirules, reso
   //these should already fit a 1 tile height button well, with the default font size
   //(remember that the font size is scaled by the UI scale, during font import)
   const float textX = (float)x + (((float)(w*rdat->uiDPIScale - UI_TILE_SIZE*rdat->uiScale)/2.0f)/rdat->uiDPIScale);
-  const float textY = (float)y + ((float)(UI_TILE_SIZE)/2.0f)*rdat->uiScale/rdat->uiDPIScale;
+  float textY = (float)y + ((float)(UI_TILE_SIZE)/2.0f)*rdat->uiScale/rdat->uiDPIScale;
+  if(fontSizeInd == FONTSIZE_NORMAL_BOLD){
+    textY -= 0.5f*rdat->uiScale/rdat->uiDPIScale; //hack to center bolded text
+  }
   //printf("text x: %f, y: %f\n",(double)textX,(double)textY);
   drawTextAlignedSized(rdat,textX,textY,uirules->textColNormal,fontSizeInd,alpha,text,ALIGN_CENTER,(Uint16)(w*rdat->uiScale));
 }
