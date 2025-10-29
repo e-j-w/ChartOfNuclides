@@ -789,8 +789,14 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
       state->uiState = UISTATE_FULLLEVELINFO;
       state->mouseoverElement = UIELEM_ENUM_LENGTH;
     }else if((state->uiState == UISTATE_FULLLEVELINFO)&&(state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_EXPAND]==0.0f)&&(state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_CONTRACT]==0.0f)){
-      uiElemClickAction(dat,state,rdat,0,UIELEM_NUCL_FULLINFOBOX_BACKBUTTON); //go back to the main chart
-      state->mouseholdElement = UIELEM_ENUM_LENGTH;
+      if(state->ds.selectedRxn == 255){
+        //in coincidence display mode, exit it and go back to the full dataset
+        state->ds.selectedRxn = 0;
+        setSelectedNuclOnLevelList(dat,state,rdat,(uint16_t)(dat->ndat.nuclData[state->chartSelectedNucl].N),(uint16_t)(dat->ndat.nuclData[state->chartSelectedNucl].Z),1); //update and re-draw level list
+      }else{
+        uiElemClickAction(dat,state,rdat,0,UIELEM_NUCL_FULLINFOBOX_BACKBUTTON); //go back to the main chart
+        state->mouseholdElement = UIELEM_ENUM_LENGTH;
+      }
     }else if(state->cms.numContextMenuItems > 0){
       startUIAnimation(dat,state,rdat,UIANIM_CONTEXT_MENU_HIDE); //menu will be closed after animation finishes
     }else if(state->ds.windowFullscreenMode){

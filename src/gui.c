@@ -2964,7 +2964,7 @@ void drawNuclFullInfoBox(const app_data *restrict dat, app_state *restrict state
         getLvlEnergyStr(tmpStr,&dat->ndat,(uint32_t)(dat->ndat.nuclData[nuclInd].firstLevel + state->coincLvlFlag),0);
         SDL_snprintf(selStr,64,"%s %s keV level",dat->strings[dat->locStringIDs[LOCSTR_LEVELS_COINC]],tmpStr);
       }
-      drawDropDownTextButton(&dat->rules.themeRules,rdat,state->ds.uiElemPosX[UIELEM_NUCL_FULLINFOBOX_RXNBUTTON],(int16_t)(state->ds.uiElemPosY[UIELEM_NUCL_FULLINFOBOX_RXNBUTTON] - txtYOffset),state->ds.uiElemWidth[UIELEM_NUCL_FULLINFOBOX_RXNBUTTON],getHighlightState(state,UIELEM_NUCL_FULLINFOBOX_RXNBUTTON),txtAlpha,selStr);
+      drawDropDownTextButtonFontSize(&dat->rules.themeRules,rdat,state->ds.uiElemPosX[UIELEM_NUCL_FULLINFOBOX_RXNBUTTON],(int16_t)(state->ds.uiElemPosY[UIELEM_NUCL_FULLINFOBOX_RXNBUTTON] - txtYOffset),state->ds.uiElemWidth[UIELEM_NUCL_FULLINFOBOX_RXNBUTTON],getHighlightState(state,UIELEM_NUCL_FULLINFOBOX_RXNBUTTON),txtAlpha,FONTSIZE_NORMAL_BOLD,selStr);
     }else{
       char rxnStr[32];
       getRxnStr(rxnStr,&dat->ndat,dat->ndat.nuclData[state->chartSelectedNucl].firstRxn + (uint32_t)(state->ds.selectedRxn-1));

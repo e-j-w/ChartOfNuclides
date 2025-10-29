@@ -5550,14 +5550,14 @@ void updateSingleUIElemPosition(const app_data *restrict dat, app_state *restric
 						getLvlEnergyStr(tmpStr,&dat->ndat,(uint32_t)(dat->ndat.nuclData[state->chartSelectedNucl].firstLevel + state->coincLvlFlag),0);
 						SDL_snprintf(selStr,64,"%s %s keV level",dat->strings[dat->locStringIDs[LOCSTR_LEVELS_COINC]],tmpStr);
 					}
-					state->ds.uiElemWidth[UIELEM_NUCL_FULLINFOBOX_RXNBUTTON] = (int16_t)(getTextWidth(rdat,FONTSIZE_NORMAL,selStr)/rdat->uiDPIScale + 70*state->ds.uiUserScale);
+					state->ds.uiElemWidth[UIELEM_NUCL_FULLINFOBOX_RXNBUTTON] = (int16_t)(getTextWidth(rdat,FONTSIZE_NORMAL_BOLD,selStr)/rdat->uiDPIScale + 70*state->ds.uiUserScale);
 				}else{
 					char rxnStr[32];
 					getRxnStr(rxnStr,&dat->ndat,dat->ndat.nuclData[state->chartSelectedNucl].firstRxn + (uint32_t)(state->ds.selectedRxn-1));
 					if(state->ds.reactionModeInd == REACTIONMODE_HIGHLIGHT){
 						char selStr[64];
 						SDL_snprintf(selStr,64,"%s: %s",dat->strings[dat->locStringIDs[LOCSTR_LEVELS_BOLDED]],rxnStr);
-						state->ds.uiElemWidth[UIELEM_NUCL_FULLINFOBOX_RXNBUTTON] = (int16_t)(getTextWidth(rdat,FONTSIZE_NORMAL,selStr)/rdat->uiDPIScale + 70*state->ds.uiUserScale);
+						state->ds.uiElemWidth[UIELEM_NUCL_FULLINFOBOX_RXNBUTTON] = (int16_t)(getTextWidth(rdat,FONTSIZE_NORMAL_BOLD,selStr)/rdat->uiDPIScale + 70*state->ds.uiUserScale);
 					}else{
 						state->ds.uiElemWidth[UIELEM_NUCL_FULLINFOBOX_RXNBUTTON] = (int16_t)(getTextWidth(rdat,FONTSIZE_NORMAL,rxnStr)/rdat->uiDPIScale + 70*state->ds.uiUserScale);
 					}
