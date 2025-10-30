@@ -99,7 +99,7 @@ search_result_halflife|Half-life
 search_result_lifetime|Mean lifetime
 clickaction_goto_level|Go to final level
 clickaction_goto_daughter|Go to daughter nuclide
-clickaction_show_coinc|Show coincident levels
+clickaction_show_coinc|Show feeding/decay
 interface_size|Interface size
 small|Small
 default|Default
@@ -109,4 +109,5 @@ reaction_mode|Dataset display mode
 reactionmode_exclude|Only show selected dataset
 reactionmode_highlight|Highlight levels from selected dataset
 levels_bolded|Bolded levels
-levels_coinc|Coinc. with
+feeding|feeding
+decay|decay

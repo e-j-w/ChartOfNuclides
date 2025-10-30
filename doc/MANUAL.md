@@ -30,7 +30,7 @@ Right clicking on selected text or on the chart will open a menu allowing you to
 
 The level list view (accessed using the 'All Levels/Gammas' button) shows detailed information for all known energy levels of the selected nuclide. The list is scrollable, and levels are shown in ascending order of level energy (in units of [keV](https://en.wikipedia.org/wiki/Electronvolt)). By default all available data is shown, however data from specific datasets (corresponding to different nuclear reactions or decay modes) can be selected using the dropdown menu at the top of the screen.
 
-Right clicking on a specific level energy gives the option to show only levels which are coincident with (feed into or are decay products of) that level.
+Right clicking on a specific level energy gives the option to show only levels which feed into or are decay products of that level.
 
 Right clicking on a specific transition energy gives the option to show the final level of that transition.
 

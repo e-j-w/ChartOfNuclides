@@ -5545,10 +5545,11 @@ void updateSingleUIElemPosition(const app_data *restrict dat, app_state *restric
 					char selStr[64], tmpStr[32];
 					uint8_t eValueType = (uint8_t)((dat->ndat.levels[(uint32_t)(dat->ndat.nuclData[state->chartSelectedNucl].firstLevel + state->coincLvlFlag)].energy.format >> 5U) & 15U);
 					if((eValueType == VALUETYPE_NUMBER)&&(getRawValFromDB(&dat->ndat.levels[(uint32_t)(dat->ndat.nuclData[state->chartSelectedNucl].firstLevel + state->coincLvlFlag)].energy)==0.0)){
-						SDL_snprintf(selStr,64,"%s %s",dat->strings[dat->locStringIDs[LOCSTR_LEVELS_COINC]],dat->strings[dat->locStringIDs[LOCSTR_GROUND_STATE]]);
+						SDL_snprintf(selStr,64,"%s %s",dat->strings[dat->locStringIDs[LOCSTR_GROUND_STATE]],dat->strings[dat->locStringIDs[LOCSTR_FEEDING]]);
+						selStr[0] = (char)SDL_toupper(selStr[0]);
 					}else{
 						getLvlEnergyStr(tmpStr,&dat->ndat,(uint32_t)(dat->ndat.nuclData[state->chartSelectedNucl].firstLevel + state->coincLvlFlag),0);
-						SDL_snprintf(selStr,64,"%s %s keV level",dat->strings[dat->locStringIDs[LOCSTR_LEVELS_COINC]],tmpStr);
+						SDL_snprintf(selStr,64,"%s keV level %s/%s",tmpStr,dat->strings[dat->locStringIDs[LOCSTR_FEEDING]],dat->strings[dat->locStringIDs[LOCSTR_DECAY]]);
 					}
 					state->ds.uiElemWidth[UIELEM_NUCL_FULLINFOBOX_RXNBUTTON] = (int16_t)(getTextWidth(rdat,FONTSIZE_NORMAL_BOLD,selStr)/rdat->uiDPIScale + 70*state->ds.uiUserScale);
 				}else{
