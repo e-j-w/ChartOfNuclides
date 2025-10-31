@@ -6,7 +6,7 @@ A desktop app for browsing isotope and nuclear structure data in the [Chart of N
 
 ## Quick installation
 
-Prebuilt binaries are available for desktop Linux (via Flatpak) and Windows 10+ (experimental). Go to the [releases](https://github.com/e-j-w/ChartOfNuclides/releases) page and follow the installation instructions there.
+Prebuilt binaries are available for desktop Linux (via Flatpak) and Windows 10+ (experimental). The latest release and installation instructions are [here](https://github.com/e-j-w/ChartOfNuclides/releases/latest).
 
 ## Using the program
 

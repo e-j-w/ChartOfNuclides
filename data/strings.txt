@@ -18,7 +18,7 @@ alphasep_energy_long|Alpha threshold
 atomic_mass|Atomic Mass
 mass_unknown|Mass Unknown
 ground_state|ground state
-element_type|Element type
+element_type|Chemistry
 elemtype_nonelement|Non-element
 elemtype_nonmetal|Non-metal
 elemtype_alkali|Alkali metal

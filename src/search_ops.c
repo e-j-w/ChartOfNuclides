@@ -29,11 +29,12 @@ int SDLCALL compareRelevance(const void *a, const void *b){
 	float relB = resB->relevance;
 	//printf("A: val %u rel %f\n",resA->resultVal[0],(double)resA->relevance);
 	//printf("B: val %u rel %f\n",resB->resultVal[0],(double)resB->relevance);
-	if(relA >= relB){
+	if(relA > relB){
 		return -1;
-	}else{
+	}else if(relA < relB){
 		return 1;
 	}
+	return 0;
 }
 
 void sortAndAppendResult(search_state *restrict ss, search_result *restrict res){
@@ -84,7 +85,7 @@ void sortAndAppendResult(search_state *restrict ss, search_result *restrict res)
 	/*for(uint8_t i=0;i<ss->numUpdatedResults;i++){
 		SDL_Log("  Result %u - rel: %f\n",i,(double)ss->updatedResults[i].relevance);
 	}*/
-	qsort(&ss->updatedResults,ss->numUpdatedResults,sizeof(ss->updatedResults[0]),compareRelevance); //SDL_qsort appears to have a bug right now that causes it to sort out of bounds in the array...
+	SDL_qsort(&ss->updatedResults,ss->numUpdatedResults,sizeof(ss->updatedResults[0]),compareRelevance); //SDL_qsort appears to have a bug right now that causes it to sort out of bounds in the array...
 
 	SDL_SignalSemaphore(ss->canUpdateResults); //signal that other threads can now update the results
 }
