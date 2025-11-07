@@ -2474,6 +2474,78 @@ void drawInfoBoxHeader(const app_data *restrict dat, app_state *restrict state, 
   drawSelectableTextAlignedSized(rdat,&state->tss,drawXPos,drawYPos+(10.0f*state->ds.uiUserScale),blackCol8Bit,FONTSIZE_LARGE_BOLD,alpha,tmpStr,ALIGN_LEFT,16384); //draw element label
 }
 
+void drawParentDecayQValStr(const app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat, const float yPos, const Uint8 alpha, const uint16_t nuclInd, const uint8_t decayInd){
+  char nuclStr[32], jpiStr[32], hlStr[32],descStr[64], qValStr[128];
+  uint32_t parentLvlInd = getParentBetaDecayLvlInd(&dat->ndat,nuclInd,decayInd);
+  if(parentLvlInd < MAXNUMLVLS){
+    uint16_t parentNuclInd = getParentBetaDecayNuclInd(&dat->ndat,nuclInd,decayInd);
+    uint8_t dcyModeInd = getParentBetaDecayMode(&dat->ndat,nuclInd,decayInd);
+    //SDL_Log("parentLvlInd: %u, parentNuclInd: %u, dcyModeInd: %u\n",parentLvlInd,parentNuclInd,dcyModeInd);
+    const uint8_t mValInd = (uint8_t)((dat->ndat.levels[parentLvlInd].format >> 5U) & 7U);
+    if(mValInd > 0){
+      if(dat->ndat.nuclData[parentNuclInd].numIsomerMVals > 1){
+        getNuclNameStr(nuclStr,&dat->ndat.nuclData[parentNuclInd],mValInd);
+      }else{
+        getNuclNameStr(nuclStr,&dat->ndat.nuclData[parentNuclInd],0);
+      }
+    }else{
+      getNuclNameStr(nuclStr,&dat->ndat.nuclData[parentNuclInd],255);
+    }
+    getSpinParStr(jpiStr,&dat->ndat,parentLvlInd);
+    getHalfLifeStr(hlStr,dat,parentLvlInd,1,1,state->ds.useLifetimes);
+    if(dcyModeInd == DECAYMODE_EC){
+      if(getRawValFromDB(&dat->ndat.levels[parentLvlInd].energy) > 0.0){
+        valWithErr sumEVal;
+        addValsFromDB(&dat->ndat.nuclData[parentNuclInd].qec,&dat->ndat.levels[parentLvlInd].energy,&sumEVal);
+        getQValStr(descStr,sumEVal,1,0);
+      }else{
+        getQValStr(descStr,dat->ndat.nuclData[parentNuclInd].qec,1,0);
+      }
+      if(state->ds.useLifetimes){
+        SDL_snprintf(qValStr,128,"%s (%s, %s=%s, %s=%s): %s=%s %s",dat->strings[dat->locStringIDs[LOCSTR_PARENTDECAY_LONG]],nuclStr,dat->strings[dat->locStringIDs[LOCSTR_JPI]],jpiStr,dat->strings[dat->locStringIDs[LOCSTR_LIFETIME]],hlStr,dat->strings[dat->locStringIDs[LOCSTR_QEC]],descStr,getValueUnitShortStr(dat->ndat.nuclData[parentNuclInd].qec.unit));
+      }else{
+        SDL_snprintf(qValStr,128,"%s (%s, %s=%s, %s=%s): %s=%s %s",dat->strings[dat->locStringIDs[LOCSTR_PARENTDECAY_LONG]],nuclStr,dat->strings[dat->locStringIDs[LOCSTR_JPI]],jpiStr,dat->strings[dat->locStringIDs[LOCSTR_HALFLIFE]],hlStr,dat->strings[dat->locStringIDs[LOCSTR_QEC]],descStr,getValueUnitShortStr(dat->ndat.nuclData[parentNuclInd].qec.unit));
+      }
+      //SDL_Log("printing: %s\n",qValStr);
+      drawSelectableTextAlignedSized(rdat,&state->tss,state->ds.windowXRes/2.0f,yPos+(0.5f*NUCL_INFOBOX_SMALLLINE_HEIGHT*state->ds.uiUserScale),blackCol8Bit,FONTSIZE_NORMAL_BOLD,alpha,qValStr,ALIGN_CENTER,16384);
+    }else if(dcyModeInd == DECAYMODE_BETAMINUS){
+      if(getRawValFromDB(&dat->ndat.levels[parentLvlInd].energy) > 0.0){
+        valWithErr sumEVal;
+        addValsFromDB(&dat->ndat.nuclData[parentNuclInd].qbeta,&dat->ndat.levels[parentLvlInd].energy,&sumEVal);
+        getQValStr(descStr,sumEVal,1,0);
+      }else{
+        getQValStr(descStr,dat->ndat.nuclData[parentNuclInd].qbeta,1,0);
+        
+      }
+      if(state->ds.useLifetimes){
+        SDL_snprintf(qValStr,128,"%s (%s, %s=%s, %s=%s): %s=%s %s",dat->strings[dat->locStringIDs[LOCSTR_PARENTDECAY_LONG]],nuclStr,dat->strings[dat->locStringIDs[LOCSTR_JPI]],jpiStr,dat->strings[dat->locStringIDs[LOCSTR_LIFETIME]],hlStr,dat->strings[dat->locStringIDs[LOCSTR_QBETAMINUS]],descStr,getValueUnitShortStr(dat->ndat.nuclData[parentNuclInd].qbeta.unit));
+      }else{
+        SDL_snprintf(qValStr,128,"%s (%s, %s=%s, %s=%s): %s=%s %s",dat->strings[dat->locStringIDs[LOCSTR_PARENTDECAY_LONG]],nuclStr,dat->strings[dat->locStringIDs[LOCSTR_JPI]],jpiStr,dat->strings[dat->locStringIDs[LOCSTR_HALFLIFE]],hlStr,dat->strings[dat->locStringIDs[LOCSTR_QBETAMINUS]],descStr,getValueUnitShortStr(dat->ndat.nuclData[parentNuclInd].qbeta.unit));
+      }
+      
+      //SDL_Log("printing: %s\n",qValStr);
+      drawSelectableTextAlignedSized(rdat,&state->tss,state->ds.windowXRes/2.0f,yPos+(0.5f*NUCL_INFOBOX_SMALLLINE_HEIGHT*state->ds.uiUserScale),blackCol8Bit,FONTSIZE_NORMAL_BOLD,alpha,qValStr,ALIGN_CENTER,16384);
+    }else if(dcyModeInd == DECAYMODE_ALPHA){
+      if(getRawValFromDB(&dat->ndat.levels[parentLvlInd].energy) > 0.0){
+        valWithErr sumEVal;
+        addValsFromDB(&dat->ndat.nuclData[parentNuclInd].qalpha,&dat->ndat.levels[parentLvlInd].energy,&sumEVal);
+        getQValStr(descStr,sumEVal,1,0);
+      }else{
+        getQValStr(descStr,dat->ndat.nuclData[parentNuclInd].qalpha,1,0);
+        
+      }
+      if(state->ds.useLifetimes){
+        SDL_snprintf(qValStr,128,"%s (%s, %s=%s, %s=%s): %s=%s %s",dat->strings[dat->locStringIDs[LOCSTR_PARENTDECAY_LONG]],nuclStr,dat->strings[dat->locStringIDs[LOCSTR_JPI]],jpiStr,dat->strings[dat->locStringIDs[LOCSTR_LIFETIME]],hlStr,dat->strings[dat->locStringIDs[LOCSTR_QALPHA]],descStr,getValueUnitShortStr(dat->ndat.nuclData[parentNuclInd].qalpha.unit));
+      }else{
+        SDL_snprintf(qValStr,128,"%s (%s, %s=%s, %s=%s): %s=%s %s",dat->strings[dat->locStringIDs[LOCSTR_PARENTDECAY_LONG]],nuclStr,dat->strings[dat->locStringIDs[LOCSTR_JPI]],jpiStr,dat->strings[dat->locStringIDs[LOCSTR_HALFLIFE]],hlStr,dat->strings[dat->locStringIDs[LOCSTR_QALPHA]],descStr,getValueUnitShortStr(dat->ndat.nuclData[parentNuclInd].qalpha.unit));
+      }
+      
+      //SDL_Log("printing: %s\n",qValStr);
+      drawSelectableTextAlignedSized(rdat,&state->tss,state->ds.windowXRes/2.0f,yPos+(0.5f*NUCL_INFOBOX_SMALLLINE_HEIGHT*state->ds.uiUserScale),blackCol8Bit,FONTSIZE_NORMAL_BOLD,alpha,qValStr,ALIGN_CENTER,16384);
+    }
+  }
+}
+
 void drawNuclFullInfoBox(const app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat, const uint16_t nuclInd){
 
   float txtYOffset = 0.0f;
@@ -2535,33 +2607,67 @@ void drawNuclFullInfoBox(const app_data *restrict dat, app_state *restrict state
   //SDL_Log("drawYPos: %f\n",(double)drawYPos);
   //SDL_Log("Scroll: %f / %f\n",(double)state->ds.nuclFullInfoScrollY,(double)state->ds.nuclFullInfoMaxScrollY);
   float levelStartDrawPos;
-  for(uint32_t lvlInd = dat->ndat.nuclData[nuclInd].firstLevel; lvlInd<(dat->ndat.nuclData[nuclInd].firstLevel+dat->ndat.nuclData[nuclInd].numLevels); lvlInd++){
+  for(uint32_t lvlInd = dat->ndat.nuclData[nuclInd].firstLevel; lvlInd<=(dat->ndat.nuclData[nuclInd].firstLevel+dat->ndat.nuclData[nuclInd].numLevels); lvlInd++){
 
     //draw Q-values in-line
-    if((lvlInd > dat->ndat.nuclData[nuclInd].firstLevel)&&(lvlInd<=state->ds.nuclFullInfoLastDispLvl)){
+    if(lvlInd > dat->ndat.nuclData[nuclInd].firstLevel){
       for(uint8_t i=0; i<QVAL_ENUM_LENGTH; i++){
         uint8_t j = state->ds.fullInfoQValOrder[i];
         if(state->ds.fullInfoQValEntryPos[j] == lvlInd){
+
+          //first, check for whether the specific Q-value in question is being drawn
+          switch(j){
+            case QVAL_SN:
+            case QVAL_SP:
+            case QVAL_SA:
+              if(!(state->ds.useLevelListSeparationEnergies)){
+                continue; //skip drawing this Q-value
+              }
+              break;
+            case QVAL_PARENT_BETA_1:
+            case QVAL_PARENT_BETA_2:
+            case QVAL_PARENT_BETA_3:
+            case QVAL_PARENT_BETA_4:
+              if(!(state->ds.useLevelListParentThresholds)){
+                continue; //skip drawing this Q-value
+              }
+              break;
+            default:
+              break;
+          }
+
           if(((drawYPos + NUCL_INFOBOX_SMALLLINE_HEIGHT*state->ds.uiUserScale) >= NUCL_FULLINFOBOX_LEVELLIST_POS_Y)&&(drawYPos <= state->ds.windowYRes)){
+            
+            
+            
             char descStr[64], qValStr[64];
             switch(j){
               case QVAL_SN:
-                drawXPos = state->ds.windowXRes/2.0f;
                 getQValStr(descStr,dat->ndat.nuclData[nuclInd].sn,1,0);
                 SDL_snprintf(qValStr,64,"%s: %s=%s %s",dat->strings[dat->locStringIDs[LOCSTR_SN_LONG]],dat->strings[dat->locStringIDs[LOCSTR_SN]],descStr,getValueUnitShortStr(dat->ndat.nuclData[nuclInd].sn.unit));
-                drawSelectableTextAlignedSized(rdat,&state->tss,drawXPos,drawYPos+(0.5f*NUCL_INFOBOX_SMALLLINE_HEIGHT*state->ds.uiUserScale),blackCol8Bit,FONTSIZE_NORMAL_BOLD,txtAlpha,qValStr,ALIGN_CENTER,16384);
+                drawSelectableTextAlignedSized(rdat,&state->tss,state->ds.windowXRes/2.0f,drawYPos+(0.5f*NUCL_INFOBOX_SMALLLINE_HEIGHT*state->ds.uiUserScale),blackCol8Bit,FONTSIZE_NORMAL_BOLD,txtAlpha,qValStr,ALIGN_CENTER,16384);
                 break;
               case QVAL_SP:
-                drawXPos = state->ds.windowXRes/2.0f;
                 getQValStr(descStr,dat->ndat.nuclData[nuclInd].sp,1,0);
                 SDL_snprintf(qValStr,64,"%s: %s=%s %s",dat->strings[dat->locStringIDs[LOCSTR_SP_LONG]],dat->strings[dat->locStringIDs[LOCSTR_SP]],descStr,getValueUnitShortStr(dat->ndat.nuclData[nuclInd].sp.unit));
-                drawSelectableTextAlignedSized(rdat,&state->tss,drawXPos,drawYPos+(0.5f*NUCL_INFOBOX_SMALLLINE_HEIGHT*state->ds.uiUserScale),blackCol8Bit,FONTSIZE_NORMAL_BOLD,txtAlpha,qValStr,ALIGN_CENTER,16384);
+                drawSelectableTextAlignedSized(rdat,&state->tss,state->ds.windowXRes/2.0f,drawYPos+(0.5f*NUCL_INFOBOX_SMALLLINE_HEIGHT*state->ds.uiUserScale),blackCol8Bit,FONTSIZE_NORMAL_BOLD,txtAlpha,qValStr,ALIGN_CENTER,16384);
                 break;
               case QVAL_SA:
-                drawXPos = state->ds.windowXRes/2.0f;
                 getQValStr(descStr,dat->ndat.nuclData[nuclInd].qalpha,1,0); 
                 SDL_snprintf(qValStr,64,"%s: %s=%s %s",dat->strings[dat->locStringIDs[LOCSTR_SA_LONG]],dat->strings[dat->locStringIDs[LOCSTR_QALPHA]],descStr,getValueUnitShortStr(dat->ndat.nuclData[nuclInd].qalpha.unit));
-                drawSelectableTextAlignedSized(rdat,&state->tss,drawXPos,drawYPos+(0.5f*NUCL_INFOBOX_SMALLLINE_HEIGHT*state->ds.uiUserScale),blackCol8Bit,FONTSIZE_NORMAL_BOLD,txtAlpha,qValStr,ALIGN_CENTER,16384);
+                drawSelectableTextAlignedSized(rdat,&state->tss,state->ds.windowXRes/2.0f,drawYPos+(0.5f*NUCL_INFOBOX_SMALLLINE_HEIGHT*state->ds.uiUserScale),blackCol8Bit,FONTSIZE_NORMAL_BOLD,txtAlpha,qValStr,ALIGN_CENTER,16384);
+                break;
+              case QVAL_PARENT_BETA_1:
+                drawParentDecayQValStr(dat,state,rdat,drawYPos,txtAlpha,nuclInd,0);
+                break;
+              case QVAL_PARENT_BETA_2:
+                drawParentDecayQValStr(dat,state,rdat,drawYPos,txtAlpha,nuclInd,1);
+                break;
+              case QVAL_PARENT_BETA_3:
+                drawParentDecayQValStr(dat,state,rdat,drawYPos,txtAlpha,nuclInd,2);
+                break;
+              case QVAL_PARENT_BETA_4:
+                drawParentDecayQValStr(dat,state,rdat,drawYPos,txtAlpha,nuclInd,3);
                 break;
               default:
                 break;
@@ -2574,6 +2680,12 @@ void drawNuclFullInfoBox(const app_data *restrict dat, app_state *restrict state
           }
         }
       }
+    }
+
+    //only draw Q-values that are beyond the final level of the nuclide,
+    //do not attempt to draw any additional level info
+    if(lvlInd>=(dat->ndat.nuclData[nuclInd].firstLevel+dat->ndat.nuclData[nuclInd].numLevels)){
+      break;
     }
 
     //if in coincidence display mode, skip levels that are not in coincidence
@@ -2604,9 +2716,14 @@ void drawNuclFullInfoBox(const app_data *restrict dat, app_state *restrict state
     if(((drawYPos + NUCL_INFOBOX_SMALLLINE_HEIGHT*state->ds.uiUserScale*numLines) >= NUCL_FULLINFOBOX_LEVELLIST_POS_Y)&&(drawYPos <= state->ds.windowYRes)){
       
       uint8_t lvlFontInd = FONTSIZE_NORMAL;
+      SDL_Color whiteLvlListCol = whiteCol8Bit;
+      SDL_Color blackLvlListCol = blackCol8Bit;
       if((state->ds.reactionModeInd == REACTIONMODE_HIGHLIGHT)&&(state->ds.selectedRxn > 0)&&(state->ds.selectedRxn < 255)){
         if(dat->ndat.levels[lvlInd].populatingRxns & ((uint64_t)(1) << (state->ds.selectedRxn-1))){
           lvlFontInd = FONTSIZE_NORMAL_BOLD;
+        }else{
+          whiteLvlListCol = lightGrayCol8Bit;
+          blackLvlListCol = darkGrayCol8Bit;
         }
       }else if(state->ds.selectedRxn == 255){
         const uint16_t nuclLvlInd = (uint16_t)(lvlInd - dat->ndat.nuclData[nuclInd].firstLevel);
@@ -2639,9 +2756,9 @@ void drawNuclFullInfoBox(const app_data *restrict dat, app_state *restrict state
         getLvlEnergyStr(tmpStr,&dat->ndat,lvlInd,1);
       }
       if(drawYPos >= (NUCL_FULLINFOBOX_LEVELLIST_POS_Y*state->ds.uiUserScale - 1.0f)){
-        drawSelectableClickableTextAlignedSized(rdat,&state->tss,drawXPos,drawYPos,(hl > 600) ? whiteCol8Bit : blackCol8Bit,lvlFontInd,txtAlpha,tmpStr,ALIGN_LEFT,16384,TXTCLICKACTION_SHOW_COINC,(uint16_t)(lvlInd - dat->ndat.nuclData[nuclInd].firstLevel));
+        drawSelectableClickableTextAlignedSized(rdat,&state->tss,drawXPos,drawYPos,(hl > 600) ? whiteLvlListCol : blackLvlListCol,lvlFontInd,txtAlpha,tmpStr,ALIGN_LEFT,16384,TXTCLICKACTION_SHOW_COINC,(uint16_t)(lvlInd - dat->ndat.nuclData[nuclInd].firstLevel));
       }else{
-        drawTextAlignedSized(rdat,drawXPos,drawYPos,(hl > 600) ? whiteCol8Bit : blackCol8Bit,lvlFontInd,txtAlpha,tmpStr,ALIGN_LEFT,16384);
+        drawTextAlignedSized(rdat,drawXPos,drawYPos,(hl > 600) ? whiteLvlListCol : blackLvlListCol,lvlFontInd,txtAlpha,tmpStr,ALIGN_LEFT,16384);
       }
       //handle special level info
       const uint8_t slInd = (uint8_t)((dat->ndat.levels[lvlInd].format >> 1U) & 15U);
@@ -2656,9 +2773,9 @@ void drawNuclFullInfoBox(const app_data *restrict dat, app_state *restrict state
           getNuclNameStr(mValStr,&dat->ndat.nuclData[nuclInd],0);
         }
         if(drawYPos >= (NUCL_FULLINFOBOX_LEVELLIST_POS_Y*state->ds.uiUserScale - 1.0f)){
-          drawSelectableClickableTextAlignedSized(rdat,&state->tss,drawXPos,drawYPos,(hl > 600) ? whiteCol8Bit : blackCol8Bit,lvlFontInd,txtAlpha,mValStr,ALIGN_LEFT,16384,TXTCLICKACTION_SHOW_COINC,(uint16_t)(lvlInd - dat->ndat.nuclData[nuclInd].firstLevel));
+          drawSelectableClickableTextAlignedSized(rdat,&state->tss,drawXPos,drawYPos,(hl > 600) ? whiteLvlListCol : blackLvlListCol,lvlFontInd,txtAlpha,mValStr,ALIGN_LEFT,16384,TXTCLICKACTION_SHOW_COINC,(uint16_t)(lvlInd - dat->ndat.nuclData[nuclInd].firstLevel));
         }else{
-          drawTextAlignedSized(rdat,drawXPos,drawYPos,(hl > 600) ? whiteCol8Bit : blackCol8Bit,lvlFontInd,txtAlpha,mValStr,ALIGN_LEFT,16384);
+          drawTextAlignedSized(rdat,drawXPos,drawYPos,(hl > 600) ? whiteLvlListCol : blackLvlListCol,lvlFontInd,txtAlpha,mValStr,ALIGN_LEFT,16384);
         }
       }
       if(slInd > 0){
@@ -2667,25 +2784,25 @@ void drawNuclFullInfoBox(const app_data *restrict dat, app_state *restrict state
         SDL_snprintf(slStr,64,"%s",getSpecialLvlStr(dat,slInd));
         //SDL_Log("%s\n",tmpStr);
         if(drawYPos >= (NUCL_FULLINFOBOX_LEVELLIST_POS_Y*state->ds.uiUserScale - 1.0f)){
-          drawSelectableClickableTextAlignedSized(rdat,&state->tss,drawXPos,drawYPos,(hl > 600) ? whiteCol8Bit : blackCol8Bit,lvlFontInd,txtAlpha,slStr,ALIGN_LEFT,16384,TXTCLICKACTION_SHOW_COINC,(uint16_t)(lvlInd - dat->ndat.nuclData[nuclInd].firstLevel));
+          drawSelectableClickableTextAlignedSized(rdat,&state->tss,drawXPos,drawYPos,(hl > 600) ? whiteLvlListCol : blackLvlListCol,lvlFontInd,txtAlpha,slStr,ALIGN_LEFT,16384,TXTCLICKACTION_SHOW_COINC,(uint16_t)(lvlInd - dat->ndat.nuclData[nuclInd].firstLevel));
         }else{
-          drawTextAlignedSized(rdat,drawXPos,drawYPos,(hl > 600) ? whiteCol8Bit : blackCol8Bit,lvlFontInd,txtAlpha,slStr,ALIGN_LEFT,16384);
+          drawTextAlignedSized(rdat,drawXPos,drawYPos,(hl > 600) ? whiteLvlListCol : blackLvlListCol,lvlFontInd,txtAlpha,slStr,ALIGN_LEFT,16384);
         }\
       }
       drawYPos = levelStartDrawPos;
       drawXPos += state->ds.fullInfoColWidth[LLCOLUMN_ELEVEL]*state->ds.uiUserScale;
       getSpinParStr(tmpStr,&dat->ndat,lvlInd);
       if(drawYPos >= (NUCL_FULLINFOBOX_LEVELLIST_POS_Y*state->ds.uiUserScale - 1.0f)){
-        drawSelectableClickableTextAlignedSized(rdat,&state->tss,drawXPos,drawYPos,(hl > 600) ? whiteCol8Bit : blackCol8Bit,lvlFontInd,txtAlpha,tmpStr,ALIGN_LEFT,16384,TXTCLICKACTION_SHOW_COINC,(uint16_t)(lvlInd - dat->ndat.nuclData[nuclInd].firstLevel));
+        drawSelectableClickableTextAlignedSized(rdat,&state->tss,drawXPos,drawYPos,(hl > 600) ? whiteLvlListCol : blackLvlListCol,lvlFontInd,txtAlpha,tmpStr,ALIGN_LEFT,16384,TXTCLICKACTION_SHOW_COINC,(uint16_t)(lvlInd - dat->ndat.nuclData[nuclInd].firstLevel));
       }else{
-        drawTextAlignedSized(rdat,drawXPos,drawYPos,(hl > 600) ? whiteCol8Bit : blackCol8Bit,lvlFontInd,txtAlpha,tmpStr,ALIGN_LEFT,16384);
+        drawTextAlignedSized(rdat,drawXPos,drawYPos,(hl > 600) ? whiteLvlListCol : blackLvlListCol,lvlFontInd,txtAlpha,tmpStr,ALIGN_LEFT,16384);
       }
       drawXPos += state->ds.fullInfoColWidth[LLCOLUMN_JPI]*state->ds.uiUserScale;
       getHalfLifeStr(tmpStr,dat,lvlInd,1,0,state->ds.useLifetimes);
       if(drawYPos >= (NUCL_FULLINFOBOX_LEVELLIST_POS_Y*state->ds.uiUserScale - 1.0f)){
-        drawSelectableClickableTextAlignedSized(rdat,&state->tss,drawXPos,drawYPos,(hl > 600) ? whiteCol8Bit : blackCol8Bit,lvlFontInd,txtAlpha,tmpStr,ALIGN_LEFT,16384,TXTCLICKACTION_SHOW_COINC,(uint16_t)(lvlInd - dat->ndat.nuclData[nuclInd].firstLevel));
+        drawSelectableClickableTextAlignedSized(rdat,&state->tss,drawXPos,drawYPos,(hl > 600) ? whiteLvlListCol : blackLvlListCol,lvlFontInd,txtAlpha,tmpStr,ALIGN_LEFT,16384,TXTCLICKACTION_SHOW_COINC,(uint16_t)(lvlInd - dat->ndat.nuclData[nuclInd].firstLevel));
       }else{
-        drawTextAlignedSized(rdat,drawXPos,drawYPos,(hl > 600) ? whiteCol8Bit : blackCol8Bit,lvlFontInd,txtAlpha,tmpStr,ALIGN_LEFT,16384);
+        drawTextAlignedSized(rdat,drawXPos,drawYPos,(hl > 600) ? whiteLvlListCol : blackLvlListCol,lvlFontInd,txtAlpha,tmpStr,ALIGN_LEFT,16384);
       }
       if(dat->ndat.levels[lvlInd].numDecModes > 0){
         for(int8_t i=0; i<dat->ndat.levels[lvlInd].numDecModes; i++){
@@ -2694,11 +2811,11 @@ void drawNuclFullInfoBox(const app_data *restrict dat, app_state *restrict state
           //SDL_Log("%s\n",tmpStr);
           uint16_t decayModeNucl = getDecayModeDaughterNucl(&dat->ndat,nuclInd,dat->ndat.dcyMode[dat->ndat.levels[lvlInd].firstDecMode + (uint32_t)i].type);
           if((drawYPos >= (NUCL_FULLINFOBOX_LEVELLIST_POS_Y*state->ds.uiUserScale - 1.0f))&&(decayModeNucl < dat->ndat.numNucl)&&(decayModeNucl != nuclInd)){
-            drawSelectableClickableTextAlignedSized(rdat,&state->tss,drawXPos+(2*UI_PADDING_SIZE*state->ds.uiUserScale),drawYPos,(hl > 600) ? whiteCol8Bit : blackCol8Bit,lvlFontInd,txtAlpha,tmpStr,ALIGN_LEFT,16384,TXTCLICKACTION_GOTO_DAUGHTER,decayModeNucl); //draw clickable decay mode label
+            drawSelectableClickableTextAlignedSized(rdat,&state->tss,drawXPos+(2*UI_PADDING_SIZE*state->ds.uiUserScale),drawYPos,(hl > 600) ? whiteLvlListCol : blackLvlListCol,lvlFontInd,txtAlpha,tmpStr,ALIGN_LEFT,16384,TXTCLICKACTION_GOTO_DAUGHTER,decayModeNucl); //draw clickable decay mode label
           }else if(drawYPos >= (NUCL_FULLINFOBOX_LEVELLIST_POS_Y*state->ds.uiUserScale - 1.0f)){
-            drawSelectableTextAlignedSized(rdat,&state->tss,drawXPos+(2*UI_PADDING_SIZE*state->ds.uiUserScale),drawYPos,(hl > 600) ? whiteCol8Bit : blackCol8Bit,lvlFontInd,txtAlpha,tmpStr,ALIGN_LEFT,16384); //draw decay mode label
+            drawSelectableTextAlignedSized(rdat,&state->tss,drawXPos+(2*UI_PADDING_SIZE*state->ds.uiUserScale),drawYPos,(hl > 600) ? whiteLvlListCol : blackLvlListCol,lvlFontInd,txtAlpha,tmpStr,ALIGN_LEFT,16384); //draw decay mode label
           }else{
-            drawTextAlignedSized(rdat,drawXPos+(2*UI_PADDING_SIZE*state->ds.uiUserScale),drawYPos,(hl > 600) ? whiteCol8Bit : blackCol8Bit,lvlFontInd,txtAlpha,tmpStr,ALIGN_LEFT,16384); //draw decay mode label
+            drawTextAlignedSized(rdat,drawXPos+(2*UI_PADDING_SIZE*state->ds.uiUserScale),drawYPos,(hl > 600) ? whiteLvlListCol : blackLvlListCol,lvlFontInd,txtAlpha,tmpStr,ALIGN_LEFT,16384); //draw decay mode label
           }
         }
       }
@@ -2718,42 +2835,42 @@ void drawNuclFullInfoBox(const app_data *restrict dat, app_state *restrict state
           float drawXPosTran = drawXPos;
           getGammaEnergyStr(tmpStr,&dat->ndat,(uint32_t)(dat->ndat.levels[lvlInd].firstTran + i),1);
           if(drawYPos >= (NUCL_FULLINFOBOX_LEVELLIST_POS_Y*state->ds.uiUserScale - 1.0f)){
-            drawSelectableClickableTextAlignedSized(rdat,&state->tss,drawXPosTran,drawYPos,(hl > 600) ? whiteCol8Bit : blackCol8Bit,lvlFontInd,txtAlpha,tmpStr,ALIGN_LEFT,16384,TXTCLICKACTION_GOTO_LEVEL,(uint16_t)(finalLvlInd - dat->ndat.nuclData[nuclInd].firstLevel)); //draw clickable transition energy label
+            drawSelectableClickableTextAlignedSized(rdat,&state->tss,drawXPosTran,drawYPos,(hl > 600) ? whiteLvlListCol : blackLvlListCol,lvlFontInd,txtAlpha,tmpStr,ALIGN_LEFT,16384,TXTCLICKACTION_GOTO_LEVEL,(uint16_t)(finalLvlInd - dat->ndat.nuclData[nuclInd].firstLevel)); //draw clickable transition energy label
           }else{
-            drawTextAlignedSized(rdat,drawXPosTran,drawYPos,(hl > 600) ? whiteCol8Bit : blackCol8Bit,lvlFontInd,txtAlpha,tmpStr,ALIGN_LEFT,16384); //draw transition energy label
+            drawTextAlignedSized(rdat,drawXPosTran,drawYPos,(hl > 600) ? whiteLvlListCol : blackLvlListCol,lvlFontInd,txtAlpha,tmpStr,ALIGN_LEFT,16384); //draw transition energy label
           }
           drawXPosTran += state->ds.fullInfoColWidth[LLCOLUMN_EGAMMA]*state->ds.uiUserScale;
           getGammaIntensityStr(tmpStr,&dat->ndat,(uint32_t)(dat->ndat.levels[lvlInd].firstTran + i),1);
           if(drawYPos >= (NUCL_FULLINFOBOX_LEVELLIST_POS_Y*state->ds.uiUserScale - 1.0f)){
-            drawSelectableClickableTextAlignedSized(rdat,&state->tss,drawXPosTran,drawYPos,(hl > 600) ? whiteCol8Bit : blackCol8Bit,lvlFontInd,txtAlpha,tmpStr,ALIGN_LEFT,16384,TXTCLICKACTION_GOTO_LEVEL,(uint16_t)(finalLvlInd - dat->ndat.nuclData[nuclInd].firstLevel)); //draw clickable transition intensity label
+            drawSelectableClickableTextAlignedSized(rdat,&state->tss,drawXPosTran,drawYPos,(hl > 600) ? whiteLvlListCol : blackLvlListCol,lvlFontInd,txtAlpha,tmpStr,ALIGN_LEFT,16384,TXTCLICKACTION_GOTO_LEVEL,(uint16_t)(finalLvlInd - dat->ndat.nuclData[nuclInd].firstLevel)); //draw clickable transition intensity label
           }else{
-            drawTextAlignedSized(rdat,drawXPosTran,drawYPos,(hl > 600) ? whiteCol8Bit : blackCol8Bit,lvlFontInd,txtAlpha,tmpStr,ALIGN_LEFT,16384); //draw transition intensity label
+            drawTextAlignedSized(rdat,drawXPosTran,drawYPos,(hl > 600) ? whiteLvlListCol : blackLvlListCol,lvlFontInd,txtAlpha,tmpStr,ALIGN_LEFT,16384); //draw transition intensity label
           }
           drawXPosTran += state->ds.fullInfoColWidth[LLCOLUMN_IGAMMA]*state->ds.uiUserScale;
           if(state->ds.nuclFullInfoShownColumns & (1U << LLCOLUMN_MGAMMA)){
             getGammaMultipolarityStr(tmpStr,&dat->ndat,(uint32_t)(dat->ndat.levels[lvlInd].firstTran + i));
             if(drawYPos >= (NUCL_FULLINFOBOX_LEVELLIST_POS_Y*state->ds.uiUserScale - 1.0f)){
-              drawSelectableClickableTextAlignedSized(rdat,&state->tss,drawXPosTran,drawYPos,(hl > 600) ? whiteCol8Bit : blackCol8Bit,lvlFontInd,txtAlpha,tmpStr,ALIGN_LEFT,16384,TXTCLICKACTION_GOTO_LEVEL,(uint16_t)(finalLvlInd - dat->ndat.nuclData[nuclInd].firstLevel)); //draw clickable transition multipolarity label
+              drawSelectableClickableTextAlignedSized(rdat,&state->tss,drawXPosTran,drawYPos,(hl > 600) ? whiteLvlListCol : blackLvlListCol,lvlFontInd,txtAlpha,tmpStr,ALIGN_LEFT,16384,TXTCLICKACTION_GOTO_LEVEL,(uint16_t)(finalLvlInd - dat->ndat.nuclData[nuclInd].firstLevel)); //draw clickable transition multipolarity label
             }else{
-              drawTextAlignedSized(rdat,drawXPosTran,drawYPos,(hl > 600) ? whiteCol8Bit : blackCol8Bit,lvlFontInd,txtAlpha,tmpStr,ALIGN_LEFT,16384); //draw transition multipolarity label
+              drawTextAlignedSized(rdat,drawXPosTran,drawYPos,(hl > 600) ? whiteLvlListCol : blackLvlListCol,lvlFontInd,txtAlpha,tmpStr,ALIGN_LEFT,16384); //draw transition multipolarity label
             }
             drawXPosTran += state->ds.fullInfoColWidth[LLCOLUMN_MGAMMA]*state->ds.uiUserScale;
           }
           if(state->ds.nuclFullInfoShownColumns & (1U << LLCOLUMN_DELTA)){
             getGammaDeltaStr(tmpStr,&dat->ndat,(uint32_t)(dat->ndat.levels[lvlInd].firstTran + i),1);
             if(drawYPos >= (NUCL_FULLINFOBOX_LEVELLIST_POS_Y*state->ds.uiUserScale - 1.0f)){
-              drawSelectableClickableTextAlignedSized(rdat,&state->tss,drawXPosTran,drawYPos,(hl > 600) ? whiteCol8Bit : blackCol8Bit,lvlFontInd,txtAlpha,tmpStr,ALIGN_LEFT,16384,TXTCLICKACTION_GOTO_LEVEL,(uint16_t)(finalLvlInd - dat->ndat.nuclData[nuclInd].firstLevel)); //draw clickable transition mixing ratio label
+              drawSelectableClickableTextAlignedSized(rdat,&state->tss,drawXPosTran,drawYPos,(hl > 600) ? whiteLvlListCol : blackLvlListCol,lvlFontInd,txtAlpha,tmpStr,ALIGN_LEFT,16384,TXTCLICKACTION_GOTO_LEVEL,(uint16_t)(finalLvlInd - dat->ndat.nuclData[nuclInd].firstLevel)); //draw clickable transition mixing ratio label
             }else{
-              drawTextAlignedSized(rdat,drawXPosTran,drawYPos,(hl > 600) ? whiteCol8Bit : blackCol8Bit,lvlFontInd,txtAlpha,tmpStr,ALIGN_LEFT,16384); //draw transition mixing ratio label
+              drawTextAlignedSized(rdat,drawXPosTran,drawYPos,(hl > 600) ? whiteLvlListCol : blackLvlListCol,lvlFontInd,txtAlpha,tmpStr,ALIGN_LEFT,16384); //draw transition mixing ratio label
             }
             drawXPosTran += state->ds.fullInfoColWidth[LLCOLUMN_DELTA]*state->ds.uiUserScale;
           }
           if(state->ds.nuclFullInfoShownColumns & (1U << LLCOLUMN_ICC)){
             getGammaICCStr(tmpStr,&dat->ndat,(uint32_t)(dat->ndat.levels[lvlInd].firstTran + i),1);
             if(drawYPos >= (NUCL_FULLINFOBOX_LEVELLIST_POS_Y*state->ds.uiUserScale - 1.0f)){
-              drawSelectableClickableTextAlignedSized(rdat,&state->tss,drawXPosTran,drawYPos,(hl > 600) ? whiteCol8Bit : blackCol8Bit,lvlFontInd,txtAlpha,tmpStr,ALIGN_LEFT,16384,TXTCLICKACTION_GOTO_LEVEL,(uint16_t)(finalLvlInd - dat->ndat.nuclData[nuclInd].firstLevel)); //draw clickable transition ICC label
+              drawSelectableClickableTextAlignedSized(rdat,&state->tss,drawXPosTran,drawYPos,(hl > 600) ? whiteLvlListCol : blackLvlListCol,lvlFontInd,txtAlpha,tmpStr,ALIGN_LEFT,16384,TXTCLICKACTION_GOTO_LEVEL,(uint16_t)(finalLvlInd - dat->ndat.nuclData[nuclInd].firstLevel)); //draw clickable transition ICC label
             }else{
-              drawTextAlignedSized(rdat,drawXPosTran,drawYPos,(hl > 600) ? whiteCol8Bit : blackCol8Bit,lvlFontInd,txtAlpha,tmpStr,ALIGN_LEFT,16384); //draw transition ICC label
+              drawTextAlignedSized(rdat,drawXPosTran,drawYPos,(hl > 600) ? whiteLvlListCol : blackLvlListCol,lvlFontInd,txtAlpha,tmpStr,ALIGN_LEFT,16384); //draw transition ICC label
             }
             drawXPosTran += state->ds.fullInfoColWidth[LLCOLUMN_ICC]*state->ds.uiUserScale;
           }
@@ -2761,17 +2878,17 @@ void drawNuclFullInfoBox(const app_data *restrict dat, app_state *restrict state
             float drawXPosFL = drawXPosTran;
             getLvlEnergyStr(tmpStr,&dat->ndat,finalLvlInd,0);
             if(drawYPos >= (NUCL_FULLINFOBOX_LEVELLIST_POS_Y*state->ds.uiUserScale - 1.0f)){
-              drawSelectableClickableTextAlignedSized(rdat,&state->tss,drawXPosFL,drawYPos,(hl > 600) ? whiteCol8Bit : blackCol8Bit,lvlFontInd,txtAlpha,tmpStr,ALIGN_LEFT,16384,TXTCLICKACTION_GOTO_LEVEL,(uint16_t)(finalLvlInd - dat->ndat.nuclData[nuclInd].firstLevel)); //draw clickable final level energy label
+              drawSelectableClickableTextAlignedSized(rdat,&state->tss,drawXPosFL,drawYPos,(hl > 600) ? whiteLvlListCol : blackLvlListCol,lvlFontInd,txtAlpha,tmpStr,ALIGN_LEFT,16384,TXTCLICKACTION_GOTO_LEVEL,(uint16_t)(finalLvlInd - dat->ndat.nuclData[nuclInd].firstLevel)); //draw clickable final level energy label
             }else{
-              drawTextAlignedSized(rdat,drawXPosFL,drawYPos,(hl > 600) ? whiteCol8Bit : blackCol8Bit,lvlFontInd,txtAlpha,tmpStr,ALIGN_LEFT,16384); //draw final level energy label
+              drawTextAlignedSized(rdat,drawXPosFL,drawYPos,(hl > 600) ? whiteLvlListCol : blackLvlListCol,lvlFontInd,txtAlpha,tmpStr,ALIGN_LEFT,16384); //draw final level energy label
             }
             if(state->ds.nuclFullInfoShownColumns & (1U << LLCOLUMN_FINALLEVEL_JPI)){
               drawXPosFL += (state->ds.fullInfoColWidth[LLCOLUMN_FINALLEVEL_E]+state->ds.fullInfoColWidth[LLCOLUMN_FINALLEVEL_JPI])*state->ds.uiUserScale;
               getSpinParStr(tmpStr,&dat->ndat,finalLvlInd);
               if(drawYPos >= (NUCL_FULLINFOBOX_LEVELLIST_POS_Y*state->ds.uiUserScale - 1.0f)){
-                drawSelectableClickableTextAlignedSized(rdat,&state->tss,drawXPosFL,drawYPos,(hl > 600) ? whiteCol8Bit : blackCol8Bit,lvlFontInd,txtAlpha,tmpStr,ALIGN_RIGHT,16384,TXTCLICKACTION_GOTO_LEVEL,(uint16_t)(finalLvlInd - dat->ndat.nuclData[nuclInd].firstLevel)); //draw clickable final level spin-parity label
+                drawSelectableClickableTextAlignedSized(rdat,&state->tss,drawXPosFL,drawYPos,(hl > 600) ? whiteLvlListCol : blackLvlListCol,lvlFontInd,txtAlpha,tmpStr,ALIGN_RIGHT,16384,TXTCLICKACTION_GOTO_LEVEL,(uint16_t)(finalLvlInd - dat->ndat.nuclData[nuclInd].firstLevel)); //draw clickable final level spin-parity label
               }else{
-                drawTextAlignedSized(rdat,drawXPosFL,drawYPos,(hl > 600) ? whiteCol8Bit : blackCol8Bit,lvlFontInd,txtAlpha,tmpStr,ALIGN_RIGHT,16384); //draw final level spin-parity label
+                drawTextAlignedSized(rdat,drawXPosFL,drawYPos,(hl > 600) ? whiteLvlListCol : blackLvlListCol,lvlFontInd,txtAlpha,tmpStr,ALIGN_RIGHT,16384); //draw final level spin-parity label
               }
             }
           }
@@ -3253,11 +3370,16 @@ void drawPrefsDialog(const app_data *restrict dat, const app_state *restrict sta
   drawTextAlignedSized(rdat,prefsDialogPanelRect.x+PREFS_DIALOG_HEADERTXT_X*state->ds.uiUserScale,prefsDialogPanelRect.y+PREFS_DIALOG_HEADERTXT_Y*state->ds.uiUserScale,dat->rules.themeRules.textColNormal,FONTSIZE_LARGE_BOLD,alpha8,dat->strings[dat->locStringIDs[LOCSTR_MENUITEM_PREFS]],ALIGN_LEFT,(Uint16)(prefsDialogPanelRect.w));
   drawTextAlignedSized(rdat,prefsDialogPanelRect.x+(PREFS_DIALOG_PREFCOL1_X+UI_TILE_SIZE+2*UI_PADDING_SIZE)*state->ds.uiUserScale,prefsDialogPanelRect.y+(PREFS_DIALOG_PREFCOL1_Y+6.0f+(2*PREFS_DIALOG_PREF_Y_SPACING)+(2*UI_PADDING_SIZE))*state->ds.uiUserScale,dat->rules.themeRules.textColNormal,FONTSIZE_NORMAL,alpha8,dat->strings[dat->locStringIDs[LOCSTR_PREF_SHELLCLOSURE]],ALIGN_LEFT,(Uint16)(prefsDialogPanelRect.w));
   drawTextAlignedSized(rdat,prefsDialogPanelRect.x+(PREFS_DIALOG_PREFCOL1_X+UI_TILE_SIZE+2*UI_PADDING_SIZE)*state->ds.uiUserScale,prefsDialogPanelRect.y+(PREFS_DIALOG_PREFCOL1_Y+6.0f+(3*PREFS_DIALOG_PREF_Y_SPACING)+(2*UI_PADDING_SIZE))*state->ds.uiUserScale,dat->rules.themeRules.textColNormal,FONTSIZE_NORMAL,alpha8,dat->strings[dat->locStringIDs[LOCSTR_PREF_LIFETIME]],ALIGN_LEFT,(Uint16)(prefsDialogPanelRect.w));
-  drawTextAlignedSized(rdat,prefsDialogPanelRect.x+(PREFS_DIALOG_PREFCOL1_X+UI_TILE_SIZE+2*UI_PADDING_SIZE)*state->ds.uiUserScale,prefsDialogPanelRect.y+(PREFS_DIALOG_PREFCOL1_Y+6.0f+(4*PREFS_DIALOG_PREF_Y_SPACING)+(2*UI_PADDING_SIZE))*state->ds.uiUserScale,dat->rules.themeRules.textColNormal,FONTSIZE_NORMAL,alpha8,dat->strings[dat->locStringIDs[LOCSTR_PREF_UIANIM]],ALIGN_LEFT,(Uint16)(prefsDialogPanelRect.w));
+  drawTextAlignedSized(rdat,prefsDialogPanelRect.x+(PREFS_DIALOG_PREFCOL1_X+UI_PADDING_SIZE)*state->ds.uiUserScale,prefsDialogPanelRect.y+(PREFS_DIALOG_PREFCOL1_Y+6.0f+(4*PREFS_DIALOG_PREF_Y_SPACING)+(2*UI_PADDING_SIZE))*state->ds.uiUserScale,dat->rules.themeRules.textColNormal,FONTSIZE_NORMAL,alpha8,dat->strings[dat->locStringIDs[LOCSTR_PREF_LEVELLIST_HEADER]],ALIGN_LEFT,(Uint16)(prefsDialogPanelRect.w));
+  drawTextAlignedSized(rdat,prefsDialogPanelRect.x+(PREFS_DIALOG_PREFCOL1_X+UI_TILE_SIZE+6*UI_PADDING_SIZE)*state->ds.uiUserScale,prefsDialogPanelRect.y+(PREFS_DIALOG_PREFCOL1_Y+6.0f+(5*PREFS_DIALOG_PREF_Y_SPACING)+(2*UI_PADDING_SIZE))*state->ds.uiUserScale,dat->rules.themeRules.textColNormal,FONTSIZE_NORMAL,alpha8,dat->strings[dat->locStringIDs[LOCSTR_PREF_LEVELLIST_SEPARATION]],ALIGN_LEFT,(Uint16)(prefsDialogPanelRect.w));
+  drawTextAlignedSized(rdat,prefsDialogPanelRect.x+(PREFS_DIALOG_PREFCOL1_X+UI_TILE_SIZE+6*UI_PADDING_SIZE)*state->ds.uiUserScale,prefsDialogPanelRect.y+(PREFS_DIALOG_PREFCOL1_Y+6.0f+(6*PREFS_DIALOG_PREF_Y_SPACING)+(2*UI_PADDING_SIZE))*state->ds.uiUserScale,dat->rules.themeRules.textColNormal,FONTSIZE_NORMAL,alpha8,dat->strings[dat->locStringIDs[LOCSTR_PREF_LEVELLIST_THRESHOLD]],ALIGN_LEFT,(Uint16)(prefsDialogPanelRect.w));
+  drawTextAlignedSized(rdat,prefsDialogPanelRect.x+(PREFS_DIALOG_PREFCOL1_X+UI_TILE_SIZE+2*UI_PADDING_SIZE)*state->ds.uiUserScale,prefsDialogPanelRect.y+(PREFS_DIALOG_PREFCOL1_Y+6.0f+(7.5f*PREFS_DIALOG_PREF_Y_SPACING)+(2*UI_PADDING_SIZE))*state->ds.uiUserScale,dat->rules.themeRules.textColNormal,FONTSIZE_NORMAL,alpha8,dat->strings[dat->locStringIDs[LOCSTR_PREF_UIANIM]],ALIGN_LEFT,(Uint16)(prefsDialogPanelRect.w));
   drawTextAlignedSized(rdat,prefsDialogPanelRect.x+(PREFS_DIALOG_PREFCOL1_X+UI_PADDING_SIZE)*state->ds.uiUserScale,prefsDialogPanelRect.y+(PREFS_DIALOG_PREFCOL1_Y-2.0f)*state->ds.uiUserScale,dat->rules.themeRules.textColNormal,FONTSIZE_NORMAL,alpha8,dat->strings[dat->locStringIDs[LOCSTR_PREF_UISCALE]],ALIGN_LEFT,(Uint16)(prefsDialogPanelRect.w));
   drawTextAlignedSized(rdat,prefsDialogPanelRect.x+(PREFS_DIALOG_PREFCOL1_X+UI_PADDING_SIZE)*state->ds.uiUserScale,prefsDialogPanelRect.y+(PREFS_DIALOG_PREFCOL1_Y+2.0f+UI_PADDING_SIZE+PREFS_DIALOG_PREF_Y_SPACING)*state->ds.uiUserScale,dat->rules.themeRules.textColNormal,FONTSIZE_NORMAL,alpha8,dat->strings[dat->locStringIDs[LOCSTR_PREF_REACTIONMODE]],ALIGN_LEFT,(Uint16)(prefsDialogPanelRect.w));
   drawCheckbox(&dat->rules.themeRules,rdat,state->ds.uiElemPosX[UIELEM_PREFS_DIALOG_SHELLCLOSURE_CHECKBOX],(int16_t)(state->ds.uiElemPosY[UIELEM_PREFS_DIALOG_SHELLCLOSURE_CHECKBOX]+yOffset),state->ds.uiElemWidth[UIELEM_PREFS_DIALOG_SHELLCLOSURE_CHECKBOX],getHighlightState(state,UIELEM_PREFS_DIALOG_SHELLCLOSURE_CHECKBOX),alpha,state->ds.drawShellClosures);
   drawCheckbox(&dat->rules.themeRules,rdat,state->ds.uiElemPosX[UIELEM_PREFS_DIALOG_LIFETIME_CHECKBOX],(int16_t)(state->ds.uiElemPosY[UIELEM_PREFS_DIALOG_LIFETIME_CHECKBOX]+yOffset),state->ds.uiElemWidth[UIELEM_PREFS_DIALOG_LIFETIME_CHECKBOX],getHighlightState(state,UIELEM_PREFS_DIALOG_LIFETIME_CHECKBOX),alpha,state->ds.useLifetimes);
+  drawCheckbox(&dat->rules.themeRules,rdat,state->ds.uiElemPosX[UIELEM_PREFS_DIALOG_LEVELLIST_SEPARATION_CHECKBOX],(int16_t)(state->ds.uiElemPosY[UIELEM_PREFS_DIALOG_LEVELLIST_SEPARATION_CHECKBOX]+yOffset),state->ds.uiElemWidth[UIELEM_PREFS_DIALOG_LEVELLIST_SEPARATION_CHECKBOX],getHighlightState(state,UIELEM_PREFS_DIALOG_LEVELLIST_SEPARATION_CHECKBOX),alpha,state->ds.useLevelListSeparationEnergies);
+  drawCheckbox(&dat->rules.themeRules,rdat,state->ds.uiElemPosX[UIELEM_PREFS_DIALOG_LEVELLIST_THRESHOLD_CHECKBOX],(int16_t)(state->ds.uiElemPosY[UIELEM_PREFS_DIALOG_LEVELLIST_THRESHOLD_CHECKBOX]+yOffset),state->ds.uiElemWidth[UIELEM_PREFS_DIALOG_LEVELLIST_THRESHOLD_CHECKBOX],getHighlightState(state,UIELEM_PREFS_DIALOG_LEVELLIST_THRESHOLD_CHECKBOX),alpha,state->ds.useLevelListParentThresholds);
   drawCheckbox(&dat->rules.themeRules,rdat,state->ds.uiElemPosX[UIELEM_PREFS_DIALOG_UIANIM_CHECKBOX],(int16_t)(state->ds.uiElemPosY[UIELEM_PREFS_DIALOG_UIANIM_CHECKBOX]+yOffset),state->ds.uiElemWidth[UIELEM_PREFS_DIALOG_UIANIM_CHECKBOX],getHighlightState(state,UIELEM_PREFS_DIALOG_UIANIM_CHECKBOX),alpha,state->ds.useUIAnimations);
   drawDropDownTextButton(&dat->rules.themeRules,rdat,state->ds.uiElemPosX[UIELEM_PREFS_DIALOG_UISCALE_DROPDOWN],(int16_t)(state->ds.uiElemPosY[UIELEM_PREFS_DIALOG_UISCALE_DROPDOWN]+yOffset),state->ds.uiElemWidth[UIELEM_PREFS_DIALOG_UISCALE_DROPDOWN],getHighlightState(state,UIELEM_PREFS_DIALOG_UISCALE_DROPDOWN),alpha8,dat->strings[getStrIndForUIScale(dat,&state->ds)]);
   drawDropDownTextButton(&dat->rules.themeRules,rdat,state->ds.uiElemPosX[UIELEM_PREFS_DIALOG_REACTIONMODE_DROPDOWN],(int16_t)(state->ds.uiElemPosY[UIELEM_PREFS_DIALOG_REACTIONMODE_DROPDOWN]+yOffset),state->ds.uiElemWidth[UIELEM_PREFS_DIALOG_REACTIONMODE_DROPDOWN],getHighlightState(state,UIELEM_PREFS_DIALOG_REACTIONMODE_DROPDOWN),alpha8,dat->strings[getStrIndForReactionMode(dat,&state->ds)]);

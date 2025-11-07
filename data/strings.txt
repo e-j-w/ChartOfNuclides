@@ -15,6 +15,7 @@ alphasep_energy|S(α)
 protonsep_energy_long|Proton separation energy
 neutronsep_energy_long|Neutron separation energy
 alphasep_energy_long|Alpha threshold
+parentdecay_long|Parent decay threshold
 atomic_mass|Atomic Mass
 mass_unknown|Mass Unknown
 ground_state|ground state
@@ -34,7 +35,7 @@ unknown|Unknown
 level_info_header|Levels and gammas:
 energy_kev|Energy (keV)
 jpi|Jπ
-halflife|t(1/2)
+halflife|t½
 lifetime|τ
 decay_mode|Decay Mode
 energy_gamma|E(γ) (keV)
@@ -52,7 +53,7 @@ all_reactions|All datasets
 menuitem_preferences|Preferences
 menuitem_screenshot|Take a screenshot...
 menuitem_about|About Chart of Nuclides
-about_string_version|Version 0.8.3 – "Differential Equation"
+about_string_version|Version 0.8.4 – "Differential Equation"
 about_string_1|Developed by Jonathan Williams
 about_string_2|Nuclear structure data is sourced from ENSDF, mass data from AME2020, and isotope abundance data from NIST.
 about_string_3|This is an independently developed program not endorsed by the above entities. The accuracy or completeness of any information provided is not guaranteed.
@@ -65,6 +66,9 @@ sl_e6isomer|E6-decaying isomer
 sl_pdecayisomer|Proton-decaying isomer
 pref_shellclosure|Show shell closures on chart
 pref_lifetime|Show lifetimes instead of half-lives
+pref_levellist_header|In level lists:
+pref_levellist_separation|Show separation energies
+pref_levellist_threshold|Show parent decay thresholds
 pref_ui_animations|Show UI animations
 chartview_menu_title|Select color scheme:
 chartview_lifetime|Lifetime

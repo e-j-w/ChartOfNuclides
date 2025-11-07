@@ -245,7 +245,6 @@ typedef struct
   float nuclFullInfoScrollStartY, nuclFullInfoScrollToY, nuclFullInfoScrollY; //full level info view: number of lines scrolled in the y-direction
   uint16_t nuclFullInfoMaxScrollY; //maximum scroll position, in lines
   uint16_t nuclFullInfoShownColumns; //bit-pattern describing which columns are shown in the full level info view (values from level_list_column_enum)
-  uint32_t nuclFullInfoLastDispLvl; //the index of the last level to be displayed on the level list (used to determine which Q values are shown in-line)
   uint8_t rxnMenuColumns; //how many columns to use in the reaction menu
   uint8_t mouseOverRxn, mouseHoldRxn; //which item in the reaction menu is moused-over, =255 if none
   uint8_t selectedRxn; //which item in the reaction menu is selected, =0 if none =255 if showing coincident levels
@@ -272,6 +271,8 @@ typedef struct
   unsigned int zoomInProgress : 1;
   unsigned int zoomFinished : 1;
   unsigned int useLifetimes : 1;
+  unsigned int useLevelListSeparationEnergies : 1;
+  unsigned int useLevelListParentThresholds : 1;
   unsigned int useUIAnimations : 1;
   unsigned int drawShellClosures : 1;
   unsigned int drawPerformanceStats : 1; //0=don't draw, 1=draw

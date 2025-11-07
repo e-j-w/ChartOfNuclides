@@ -67,10 +67,17 @@ void getRxnStr(char strOut[32], const ndata *restrict nd, const uint32_t rxnInd)
 void getAbundanceStr(char strOut[32], const ndata *restrict nd, const uint16_t nuclInd);
 void getSpinParStr(char strOut[32], const ndata *restrict nd, const uint32_t lvlInd);
 
+void addValsFromDB(const valWithErr *restrict valStruct1, const valWithErr *restrict valStruct2, valWithErr *sum);
+
 double getRawDblValFromDB(const dblValWithErr *restrict valStruct);
 double getRawValFromDB(const valWithErr *restrict valStruct);
 double getRawDblErrFromDB(const dblValWithErr *restrict valStruct);
 double getRawErrFromDB(const valWithErr *restrict valStruct);
+
+uint32_t getParentBetaDecayLvlInd(const ndata *restrict nd, const uint16_t nuclInd, const uint8_t decayInd);
+uint16_t getParentBetaDecayNuclInd(const ndata *restrict nd, const uint16_t nuclInd, const uint8_t decayInd);
+uint8_t getParentBetaDecayMode(const ndata *restrict nd, const uint16_t nuclInd, const uint8_t decayInd);
+double getParentBetaDecayQVal(const ndata *restrict nd, const uint16_t nuclInd, const uint8_t decayInd);
 
 uint16_t getDecayModeDaughterNucl(const ndata *restrict nd, const uint16_t parentNucl, const uint8_t dcyMode);
 

@@ -260,6 +260,7 @@ static int parseAppRules(app_data *restrict dat, asset_mapping *restrict stringI
 	dat->locStringIDs[LOCSTR_SP_LONG] = (uint16_t)nameToAssetID("protonsep_energy_long",stringIDmap);
 	dat->locStringIDs[LOCSTR_SN_LONG] = (uint16_t)nameToAssetID("neutronsep_energy_long",stringIDmap);
 	dat->locStringIDs[LOCSTR_SA_LONG] = (uint16_t)nameToAssetID("alphasep_energy_long",stringIDmap);
+	dat->locStringIDs[LOCSTR_PARENTDECAY_LONG] = (uint16_t)nameToAssetID("parentdecay_long",stringIDmap);
 	dat->locStringIDs[LOCSTR_ATOMIC_MASS] = (uint16_t)nameToAssetID("atomic_mass",stringIDmap);
 	dat->locStringIDs[LOCSTR_MASS_UNKNOWN] = (uint16_t)nameToAssetID("mass_unknown",stringIDmap);
 	dat->locStringIDs[LOCSTR_GROUND_STATE] = (uint16_t)nameToAssetID("ground_state",stringIDmap);
@@ -310,6 +311,9 @@ static int parseAppRules(app_data *restrict dat, asset_mapping *restrict stringI
 	dat->locStringIDs[LOCSTR_SL_PDECAYISOMER] = (uint16_t)nameToAssetID("sl_pdecayisomer",stringIDmap);
 	dat->locStringIDs[LOCSTR_PREF_SHELLCLOSURE] = (uint16_t)nameToAssetID("pref_shellclosure",stringIDmap);
 	dat->locStringIDs[LOCSTR_PREF_LIFETIME] = (uint16_t)nameToAssetID("pref_lifetime",stringIDmap);
+	dat->locStringIDs[LOCSTR_PREF_LEVELLIST_HEADER] = (uint16_t)nameToAssetID("pref_levellist_header",stringIDmap);
+	dat->locStringIDs[LOCSTR_PREF_LEVELLIST_SEPARATION] = (uint16_t)nameToAssetID("pref_levellist_separation",stringIDmap);
+	dat->locStringIDs[LOCSTR_PREF_LEVELLIST_THRESHOLD] = (uint16_t)nameToAssetID("pref_levellist_threshold",stringIDmap);
 	dat->locStringIDs[LOCSTR_PREF_UIANIM] = (uint16_t)nameToAssetID("pref_ui_animations",stringIDmap);
 	dat->locStringIDs[LOCSTR_CHARTVIEW_MENUTITLE] = (uint16_t)nameToAssetID("chartview_menu_title",stringIDmap);
 	dat->locStringIDs[LOCSTR_CHARTVIEW_LIFETIME] = (uint16_t)nameToAssetID("chartview_lifetime",stringIDmap);
@@ -670,9 +674,19 @@ uint8_t parseRxn(reaction *rxn, const char *rxnstring, char *ensdfStrBuf, const 
 		SDL_strlcpy(modRxnStr,modRxnStrCpy,MAX_RXN_STRLEN-1);
 		SDL_free(modRxnStrCpy);
 
-		if(SDL_strstr(modRxnStr,"decay")!=NULL){
-			//SDL_Log("Found decay type reaction: %s\n",modRxnStr);
-			rxn->type = REACTIONTYPE_DECAY;
+		//check for specific decay type reactions
+		if(SDL_strstr(modRxnStr," β- decay")!=NULL){
+			//SDL_Log("Found beta/EC decay type reaction: %s\n",modRxnStr);
+			rxn->type = REACTIONTYPE_BETADECAY_EC;
+		}else if(SDL_strstr(modRxnStr," β+ decay")!=NULL){
+			//SDL_Log("Found beta/EC decay type reaction: %s\n",modRxnStr);
+			rxn->type = REACTIONTYPE_BETADECAY_EC;
+		}else if(SDL_strstr(modRxnStr," ε decay")!=NULL){
+			//SDL_Log("Found beta/EC decay type reaction: %s\n",modRxnStr);
+			rxn->type = REACTIONTYPE_BETADECAY_EC;
+		}else if(SDL_strstr(modRxnStr,"decay")!=NULL){
+			//SDL_Log("Found other decay type reaction: %s\n",modRxnStr);
+			rxn->type = REACTIONTYPE_OTHER_DECAY;
 		}
 
 	}
@@ -2064,11 +2078,31 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 					//re-order reactions
 					uint8_t reorderedRxns = 0;
 					reaction tmpRxn;
-					//first, bring decay reactions to the top of the list
+					//first, bring beta/EC decay reactions to the top of the list
 					for(uint8_t i=0; i<nd->nuclData[nd->numNucl].numRxns; i++){
-						if(nd->rxn[nd->nuclData[nd->numNucl].firstRxn + i].type == REACTIONTYPE_DECAY){
+						if(nd->rxn[nd->nuclData[nd->numNucl].firstRxn + i].type == REACTIONTYPE_BETADECAY_EC){
 							if(i!=reorderedRxns){
 								//swap reactions
+								SDL_memcpy(&tmpRxn,&nd->rxn[nd->nuclData[nd->numNucl].firstRxn + reorderedRxns],sizeof(reaction));
+								SDL_memcpy(&nd->rxn[nd->nuclData[nd->numNucl].firstRxn + reorderedRxns],&nd->rxn[nd->nuclData[nd->numNucl].firstRxn + i],sizeof(reaction));
+								SDL_memcpy(&nd->rxn[nd->nuclData[nd->numNucl].firstRxn + i],&tmpRxn,sizeof(reaction));
+								//swap bits in reaction patterns
+								for(uint32_t j=nd->nuclData[nd->numNucl].firstLevel; j<nd->nuclData[nd->numNucl].firstLevel+nd->nuclData[nd->numNucl].numLevels; j++){
+									uint64_t bit1 = (uint64_t)((nd->levels[j].populatingRxns >> i) & (uint64_t)(1));
+									uint64_t bit2 = (uint64_t)((nd->levels[j].populatingRxns >> reorderedRxns) & (uint64_t)(1));
+									nd->levels[j].populatingRxns &= ~((uint64_t)(1) << i); //unset
+									nd->levels[j].populatingRxns &= ~((uint64_t)(1) << reorderedRxns); //unset
+									nd->levels[j].populatingRxns |= (bit1 << reorderedRxns);
+									nd->levels[j].populatingRxns |= (bit2 << i);
+								}
+							}
+							reorderedRxns++;
+						}
+					}
+					//then other decay types
+					for(uint8_t i=reorderedRxns; i<nd->nuclData[nd->numNucl].numRxns; i++){
+						if(nd->rxn[nd->nuclData[nd->numNucl].firstRxn + i].type == REACTIONTYPE_OTHER_DECAY){
+							if(i!=reorderedRxns){
 								SDL_memcpy(&tmpRxn,&nd->rxn[nd->nuclData[nd->numNucl].firstRxn + reorderedRxns],sizeof(reaction));
 								SDL_memcpy(&nd->rxn[nd->nuclData[nd->numNucl].firstRxn + reorderedRxns],&nd->rxn[nd->nuclData[nd->numNucl].firstRxn + i],sizeof(reaction));
 								SDL_memcpy(&nd->rxn[nd->nuclData[nd->numNucl].firstRxn + i],&tmpRxn,sizeof(reaction));

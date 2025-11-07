@@ -132,9 +132,9 @@ static const float uiScales[UISCALE_ENUM_LENGTH] = {1.0f,1.20f,1.60f,1.85f};
 #define ABOUT_BOX_STR4_Y           284.0f //in unscaled pixels
 
 //preferences dialog
-#define PREFS_DIALOG_NUM_UIELEMENTS                  6
+#define PREFS_DIALOG_NUM_UIELEMENTS                  8
 #define PREFS_DIALOG_WIDTH                           520 //in unscaled pixels
-#define PREFS_DIALOG_HEIGHT                          296 //in unscaled pixels
+#define PREFS_DIALOG_HEIGHT                          416 //in unscaled pixels
 #define PREFS_DIALOG_HEADERTXT_X                     (6*UI_PADDING_SIZE)
 #define PREFS_DIALOG_HEADERTXT_Y                     (6*UI_PADDING_SIZE)
 #define PREFS_DIALOG_PREF_Y_SPACING                  36.0f //in unscaled pixels
@@ -220,7 +220,9 @@ static const SDL_FColor whiteTransparentCol = {1.0f,1.0f,1.0f,0.9f};
 static const SDL_FColor txtSelCol = {0.8f,0.8f,1.0f,0.6f};
 
 static const SDL_Color whiteCol8Bit = {255,255,255,255};
+static const SDL_Color lightGrayCol8Bit = {235,235,235,255};
 static const SDL_Color grayCol8Bit = {127,127,127,255};
+static const SDL_Color darkGrayCol8Bit = {80,80,80,255};
 static const SDL_Color blackCol8Bit = {0,0,0,255};
 static const SDL_Color darkGreenTxtCol8Bit = {0,150,0,255};
 static const SDL_Color darkRedTxtCol8Bit = {150,0,0,255};

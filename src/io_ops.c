@@ -116,6 +116,18 @@ static int readConfigFile(FILE *file, app_state *restrict state){
         }else{
           state->ds.useUIAnimations = 0;
         }
+      }else if(strcmp(par,"use_level_list_separation_energies") == 0){
+        if(strcmp(val,"yes") == 0){
+          state->ds.useLevelListSeparationEnergies = 1;
+        }else{
+          state->ds.useLevelListSeparationEnergies = 0;
+        }
+      }else if(strcmp(par,"use_level_list_parent_thresholds") == 0){
+        if(strcmp(val,"yes") == 0){
+          state->ds.useLevelListParentThresholds = 1;
+        }else{
+          state->ds.useLevelListParentThresholds = 0;
+        }
       }else if(strcmp(par,"user_interface_size") == 0){
         int sval = atoi(val);
         if((sval >= 0)&&(sval < UISCALE_ENUM_LENGTH)){
@@ -189,6 +201,16 @@ static int writeConfigFile(FILE *file, const app_rules *restrict rules, const ap
     fprintf(file,"use_lifetimes=yes\n");
   }else{
     fprintf(file,"use_lifetimes=no\n");
+  }
+  if(state->ds.useLevelListSeparationEnergies){
+    fprintf(file,"use_level_list_separation_energies=yes\n");
+  }else{
+    fprintf(file,"use_level_list_separation_energies=no\n");
+  }
+  if(state->ds.useLevelListParentThresholds){
+    fprintf(file,"use_level_list_parent_thresholds=yes\n");
+  }else{
+    fprintf(file,"use_level_list_parent_thresholds=no\n");
   }
   fprintf(file,"chart_display_mode=%u\n",state->chartView);
   if(state->ds.useUIAnimations){

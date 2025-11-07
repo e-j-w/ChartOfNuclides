@@ -66,6 +66,8 @@ void initializeTempState(const app_data *restrict dat, app_state *restrict state
 	state->ds.uiAnimPlaying = 0; //no UI animations playing
 	state->ds.useUIAnimations = 1;
 	state->ds.useLifetimes = 0;
+	state->ds.useLevelListSeparationEnergies = 1;
+	state->ds.useLevelListParentThresholds = 1;
 	state->ds.drawShellClosures = 1;
 	state->ds.chartPosX = 86.0f;
 	state->ds.chartPosY = 52.0f;
@@ -2535,6 +2537,103 @@ void getSpinParStr(char strOut[32], const ndata *restrict nd, const uint32_t lvl
 	}
 }
 
+//adds two valWithErr values together, assuming that they have the same units
+//assumes symmetric errors as well
+void addValsFromDB(const valWithErr *restrict valStruct1, const valWithErr *restrict valStruct2, valWithErr *sum){
+	double val1 = (double)(valStruct1->val);
+	int8_t outExp = 0;
+	if(((valStruct1->format >> 4U) & 1U) != 0){
+		//value in exponent form
+		val1 = val1 * SDL_pow(10.0,(double)(valStruct1->exponent));
+		outExp = valStruct1->exponent;
+	}
+	double val2 = (double)(valStruct2->val);
+	if(((valStruct2->format >> 4U) & 1U) != 0){
+		//value in exponent form
+		val2 = val2 * SDL_pow(10.0,(double)(valStruct2->exponent));
+		if(valStruct2->exponent > outExp){
+			outExp = valStruct2->exponent;
+		}
+	}
+
+	uint8_t numSigFigs = (uint8_t)(valStruct1->format & 15U);
+	double err1 = (double)(valStruct1->err);
+	if(valStruct1->err >= 254){
+		//non-standard error due to systematics/calculations
+		err1 = 0.0;
+	}else{
+		if(numSigFigs > 0){
+			err1 = err1/(SDL_pow(10.0,numSigFigs));
+		}
+		if(((valStruct1->format >> 4U) & 1U) != 0){
+			//value in exponent form
+			err1 = err1 * SDL_pow(10.0,(double)(valStruct1->exponent));
+		}
+	}
+	numSigFigs = (uint8_t)(valStruct2->format & 15U);
+	double err2 = (double)(valStruct2->err);
+	if(valStruct2->err >= 254){
+		//non-standard error due to systematics/calculations
+		err2 = 0.0;
+	}else{
+		if(numSigFigs > 0){
+			err2 = err2/(SDL_pow(10.0,numSigFigs));
+		}
+		if(((valStruct1->format >> 4U) & 1U) != 0){
+			//value in exponent form
+			err2 = err2 * SDL_pow(10.0,(double)(valStruct2->exponent));
+		}
+	}
+	
+	double outVal = val1 + val2;
+	double outErr = SDL_sqrt(err1*err1 + err2*err2);
+	uint8_t outSigFigs = 0;
+
+	if(outExp > 0){
+		for(int8_t i=0; i<outExp; i++){
+			outVal /= 10.0;
+			outErr /= 10.0;
+		}
+	}else if(outExp < 0){
+		for(int8_t i=0; i>outExp; i--){
+			outVal *= 10.0;
+			outErr *= 10.0;
+		}
+	}
+
+	if(outErr >= 20.0){
+		while(outErr >= 20.0){
+			outVal /= 10.0;
+			outErr /= 10.0;
+			outExp++;
+		}
+	}else if(outErr < 2.0){
+		while(outErr < 2.0){
+			outErr *= 10.0;
+			outSigFigs++;
+		}
+	}
+
+	sum->val = (float)outVal;
+	
+	if(valStruct1->err >= 254){
+		sum->err = valStruct1->err; //propagate errors due to systematics/calculations
+	}else if(valStruct2->err >= 254){
+		sum->err = valStruct2->err; //propagate errors due to systematics/calculations
+	}else{
+		sum->err = (uint8_t)outErr;
+	}
+	sum->exponent = outExp;
+	sum->unit = valStruct1->unit;
+	sum->format = 0;
+	if(sum->exponent != 0){
+		sum->format |= (uint16_t)(1U << 4); //exponent flag
+	}
+	sum->format |= (uint16_t)(outSigFigs & 15U);
+
+}
+
+
 double getRawDblValFromDB(const dblValWithErr *restrict valStruct){
 	double val = valStruct->val;
 	if(((valStruct->format >> 4U) & 1U) != 0){
@@ -2551,6 +2650,7 @@ double getRawValFromDB(const valWithErr *restrict valStruct){
 	}
 	return val;
 }
+
 
 double getRawDblErrFromDB(const dblValWithErr *restrict valStruct){
 	if(valStruct->err == 0){
@@ -2582,6 +2682,177 @@ double getRawErrFromDB(const valWithErr *restrict valStruct){
 		err = err * SDL_pow(10.0,(double)(valStruct->exponent));
 	}
 	return err;
+}
+
+//for a given nuclide, find the index of the level which beta decays to feeds that nuclide
+//decayInd specifies which beta decay mode is being considered (in the case of multiple
+//possible modes), these are specified in the order of parent level energy, starting with
+//the beta+/EC parent, then looking at the beta- parent, then looking at the alpha parent
+//returns -1.0 if no decay found (if decayInd is >= the total number of decay modes)
+uint32_t getParentBetaDecayLvlInd(const ndata *restrict nd, const uint16_t nuclInd, const uint8_t decayInd){
+	int16_t daughterN = nd->nuclData[nuclInd].N;
+	int16_t daughterZ = nd->nuclData[nuclInd].Z;
+	uint8_t foundInd = 0;
+	//look at beta+/EC parent
+	uint16_t parentInd = getNuclInd(nd,(int16_t)(daughterN-1),(int16_t)(daughterZ+1));
+	if(getRawValFromDB(&nd->nuclData[parentInd].qec) > 0.0){
+		//decay is energetically possible
+		for(uint32_t lvlInd = nd->nuclData[parentInd].firstLevel; lvlInd<(nd->nuclData[parentInd].firstLevel+nd->nuclData[parentInd].numLevels); lvlInd++){
+			for(int8_t i=0; i<nd->levels[lvlInd].numDecModes; i++){
+				uint32_t dcyModeInd = nd->levels[lvlInd].firstDecMode + (uint32_t)i;
+				//permit all slow decay modes (some decay branches haven't been measured yet, 
+				//so we can presume that any level that meets one of these conditions can beta decay)
+				if((nd->dcyMode[dcyModeInd].type == DECAYMODE_EC)||(nd->dcyMode[dcyModeInd].type == DECAYMODE_ECANDBETAPLUS)||(nd->dcyMode[dcyModeInd].type == DECAYMODE_BETAPLUS)||(nd->dcyMode[dcyModeInd].type == DECAYMODE_BETAMINUS)||(nd->dcyMode[dcyModeInd].type == DECAYMODE_ALPHA)){
+					foundInd++;
+					if((foundInd-1) == decayInd){
+						//only consider non-variable or non-limit level energies
+						uint8_t lvlEValueType = (uint8_t)((nd->levels[lvlInd].energy.format >> 5U) & 15U);
+						if((lvlEValueType == VALUETYPE_NUMBER)||(lvlEValueType == VALUETYPE_ASYMERROR)||(lvlEValueType == VALUETYPE_APPROX)){
+							return lvlInd;
+						}
+					}
+				}
+			}
+		}
+	}
+	//look at beta- parent
+	parentInd = getNuclInd(nd,(int16_t)(daughterN+1),(int16_t)(daughterZ-1));
+	if(getRawValFromDB(&nd->nuclData[parentInd].qbeta) > 0.0){
+		//decay is energetically possible
+		//SDL_Log("qbeta: %f\n",getRawValFromDB(&nd->nuclData[parentInd].qbeta));
+		for(uint32_t lvlInd = nd->nuclData[parentInd].firstLevel; lvlInd<(nd->nuclData[parentInd].firstLevel+nd->nuclData[parentInd].numLevels); lvlInd++){
+			for(int8_t i=0; i<nd->levels[lvlInd].numDecModes; i++){
+				uint32_t dcyModeInd = nd->levels[lvlInd].firstDecMode + (uint32_t)i;
+				//permit all slow decay modes (some decay branches haven't been measured yet, 
+				//so we can presume that any level that meets one of these conditions can beta decay)
+				if((nd->dcyMode[dcyModeInd].type == DECAYMODE_EC)||(nd->dcyMode[dcyModeInd].type == DECAYMODE_ECANDBETAPLUS)||(nd->dcyMode[dcyModeInd].type == DECAYMODE_BETAPLUS)||(nd->dcyMode[dcyModeInd].type == DECAYMODE_BETAMINUS)||(nd->dcyMode[dcyModeInd].type == DECAYMODE_ALPHA)){
+					foundInd++;
+					if((foundInd-1) == decayInd){
+						//only consider non-variable or non-limit level energies
+						uint8_t lvlEValueType = (uint8_t)((nd->levels[lvlInd].energy.format >> 5U) & 15U);
+						if((lvlEValueType == VALUETYPE_NUMBER)||(lvlEValueType == VALUETYPE_ASYMERROR)||(lvlEValueType == VALUETYPE_APPROX)){
+							return lvlInd;
+						}
+					}
+				}
+			}
+		}
+	}
+	//look at alpha parent
+	parentInd = getNuclInd(nd,(int16_t)(daughterN+2),(int16_t)(daughterZ+2));
+	if(getRawValFromDB(&nd->nuclData[parentInd].qalpha) > 0.0){
+		//decay is energetically possible
+		//SDL_Log("qbeta: %f\n",getRawValFromDB(&nd->nuclData[parentInd].qbeta));
+		for(uint32_t lvlInd = nd->nuclData[parentInd].firstLevel; lvlInd<(nd->nuclData[parentInd].firstLevel+nd->nuclData[parentInd].numLevels); lvlInd++){
+			for(int8_t i=0; i<nd->levels[lvlInd].numDecModes; i++){
+				uint32_t dcyModeInd = nd->levels[lvlInd].firstDecMode + (uint32_t)i;
+				//alpha decay is generally slower than beta, due to the large Coulomb barrier,
+				//so only look at levels with confirmed or speculative alpha decay branches
+				if(nd->dcyMode[dcyModeInd].type == DECAYMODE_ALPHA){
+					foundInd++;
+					if((foundInd-1) == decayInd){
+						//only consider non-variable or non-limit level energies
+						uint8_t lvlEValueType = (uint8_t)((nd->levels[lvlInd].energy.format >> 5U) & 15U);
+						if((lvlEValueType == VALUETYPE_NUMBER)||(lvlEValueType == VALUETYPE_ASYMERROR)||(lvlEValueType == VALUETYPE_APPROX)){
+							return lvlInd;
+						}
+					}
+				}
+			}
+		}
+	}
+	return MAXNUMLVLS;
+}
+
+uint16_t getParentBetaDecayNuclInd(const ndata *restrict nd, const uint16_t nuclInd, const uint8_t decayInd){
+	uint32_t lvlInd = getParentBetaDecayLvlInd(nd,nuclInd,decayInd);
+	//SDL_Log("decayInd: %u, lvlInd: %u\n",decayInd,lvlInd);
+	if(lvlInd < MAXNUMLVLS){
+		//check which nuclide the level belongs to
+		uint16_t parentInd = getNuclInd(nd,(int16_t)(nd->nuclData[nuclInd].N-1),(int16_t)(nd->nuclData[nuclInd].Z+1));
+		if((((int32_t)lvlInd - (int32_t)(nd->nuclData[parentInd].firstLevel)) >= 0) && (((int32_t)lvlInd - (int32_t)(nd->nuclData[parentInd].firstLevel)) < (int32_t)(nd->nuclData[parentInd].numLevels))){
+			//level belongs to beta+/EC parent
+			return parentInd;
+		}
+		parentInd = getNuclInd(nd,(int16_t)(nd->nuclData[nuclInd].N+1),(int16_t)(nd->nuclData[nuclInd].Z-1));
+		if((((int32_t)lvlInd - (int32_t)(nd->nuclData[parentInd].firstLevel)) >= 0) && (((int32_t)lvlInd - (int32_t)(nd->nuclData[parentInd].firstLevel)) < (int32_t)(nd->nuclData[parentInd].numLevels))){
+			//level belongs to beta- parent
+			return parentInd;
+		}
+		parentInd = getNuclInd(nd,(int16_t)(nd->nuclData[nuclInd].N+2),(int16_t)(nd->nuclData[nuclInd].Z+2));
+		if((((int32_t)lvlInd - (int32_t)(nd->nuclData[parentInd].firstLevel)) >= 0) && (((int32_t)lvlInd - (int32_t)(nd->nuclData[parentInd].firstLevel)) < (int32_t)(nd->nuclData[parentInd].numLevels))){
+			//level belongs to alpha parent
+			return parentInd;
+		}
+	}
+	return MAXNUMNUCL;
+}
+
+uint8_t getParentBetaDecayMode(const ndata *restrict nd, const uint16_t nuclInd, const uint8_t decayInd){
+	uint32_t lvlInd = getParentBetaDecayLvlInd(nd,nuclInd,decayInd);
+	if(lvlInd < MAXNUMLVLS){
+		//check which nuclide the level belongs to
+		uint16_t parentInd = getNuclInd(nd,(int16_t)(nd->nuclData[nuclInd].N-1),(int16_t)(nd->nuclData[nuclInd].Z+1));
+		if((((int32_t)lvlInd - (int32_t)(nd->nuclData[parentInd].firstLevel)) >= 0) && (((int32_t)lvlInd - (int32_t)(nd->nuclData[parentInd].firstLevel)) < (int32_t)(nd->nuclData[parentInd].numLevels))){
+			//level belongs to beta+/EC parent
+			return DECAYMODE_EC;
+		}
+		parentInd = getNuclInd(nd,(int16_t)(nd->nuclData[nuclInd].N+1),(int16_t)(nd->nuclData[nuclInd].Z-1));
+		if((((int32_t)lvlInd - (int32_t)(nd->nuclData[parentInd].firstLevel)) >= 0) && (((int32_t)lvlInd - (int32_t)(nd->nuclData[parentInd].firstLevel)) < (int32_t)(nd->nuclData[parentInd].numLevels))){
+			//level belongs to beta- parent
+			return DECAYMODE_BETAMINUS;
+		}
+		parentInd = getNuclInd(nd,(int16_t)(nd->nuclData[nuclInd].N+2),(int16_t)(nd->nuclData[nuclInd].Z+2));
+		if((((int32_t)lvlInd - (int32_t)(nd->nuclData[parentInd].firstLevel)) >= 0) && (((int32_t)lvlInd - (int32_t)(nd->nuclData[parentInd].firstLevel)) < (int32_t)(nd->nuclData[parentInd].numLevels))){
+			//level belongs to alpha parent
+			return DECAYMODE_ALPHA;
+		}
+	}
+	return DECAYMODE_ENUM_LENGTH;
+}
+
+//for a given nuclide, gives the Q value of the beta decay which feeds that nuclide
+//decayInd specifies which beta decay mode is being considered (in the case of multiple
+//possible modes), these are specified in the order of parent level energy, starting with
+//the beta+/EC parent, then looking at the beta- parent, then looking at the alpha parent
+//returns -1.0 if no decay found (if decayInd is >= the total number of decay modes)
+double getParentBetaDecayQVal(const ndata *restrict nd, const uint16_t nuclInd, const uint8_t decayInd){
+	
+	uint32_t lvlInd = getParentBetaDecayLvlInd(nd,nuclInd,decayInd);
+	//SDL_Log("decayInd: %u, lvlInd: %u\n",decayInd,lvlInd);
+	if(lvlInd < MAXNUMLVLS){
+		//check which nuclide the level belongs to
+		uint16_t parentInd = getParentBetaDecayNuclInd(nd,nuclInd,decayInd);
+		//SDL_Log("parentInd: %u\n",parentInd);
+		if((nd->nuclData[nuclInd].N-1) == nd->nuclData[parentInd].N){
+			//level belongs to beta+/EC parent
+			//only consider non-variable or non-limit level energies
+			uint8_t lvlEValueType = (uint8_t)((nd->levels[lvlInd].energy.format >> 5U) & 15U);
+			if((lvlEValueType == VALUETYPE_NUMBER)||(lvlEValueType == VALUETYPE_ASYMERROR)||(lvlEValueType == VALUETYPE_APPROX)){
+				double qValEC = getRawValFromDB(&nd->nuclData[parentInd].qec) + getRawValFromDB(&nd->levels[lvlInd].energy);
+				return qValEC;
+			}
+		}
+		if((nd->nuclData[nuclInd].N+1) == nd->nuclData[parentInd].N){
+			//level belongs to beta- parent
+			//only consider non-variable or non-limit level energies
+			uint8_t lvlEValueType = (uint8_t)((nd->levels[lvlInd].energy.format >> 5U) & 15U);
+			if((lvlEValueType == VALUETYPE_NUMBER)||(lvlEValueType == VALUETYPE_ASYMERROR)||(lvlEValueType == VALUETYPE_APPROX)){
+				double qValBeta = getRawValFromDB(&nd->nuclData[parentInd].qbeta) + getRawValFromDB(&nd->levels[lvlInd].energy);
+				return qValBeta;
+			}
+		}
+		if(((nd->nuclData[nuclInd].N+2) == nd->nuclData[parentInd].N)&&((nd->nuclData[nuclInd].Z+2) == nd->nuclData[parentInd].Z)){
+			//level belongs to alpha parent
+			//only consider non-variable or non-limit level energies
+			uint8_t lvlEValueType = (uint8_t)((nd->levels[lvlInd].energy.format >> 5U) & 15U);
+			if((lvlEValueType == VALUETYPE_NUMBER)||(lvlEValueType == VALUETYPE_ASYMERROR)||(lvlEValueType == VALUETYPE_APPROX)){
+				double qValAlpha = getRawValFromDB(&nd->nuclData[parentInd].qalpha) + getRawValFromDB(&nd->levels[lvlInd].energy);
+				return qValAlpha;
+			}
+		}
+	}
+	return -1.0;
 }
 
 
@@ -3159,20 +3430,22 @@ void setCoincLvlFlags(const ndata *restrict nd, app_state *restrict state, const
 //checks whether a level is displayed in the level list,
 //based on the current app state
 uint8_t isLvlDisplayed(const ndata *restrict nd, const app_state *restrict state, const uint16_t nuclInd, const uint16_t nuclLvlInd){
-	if(state->ds.selectedRxn == 0){
-		return 1;
-	}else if(state->ds.selectedRxn == 255){
-		//coincidence display mode
-		if(nuclLvlInd < MAX_COINC_FLAGGED_LVLS){
-			const uint32_t bpInd = nuclLvlInd/64; //bit-pattern index (maximum int size is 64 bits)
-			if(state->flaggedCoincLvls[bpInd] & (uint64_t)((uint64_t)(1) << (nuclLvlInd - (bpInd*64)))){
-				return 1;
+	if(nuclLvlInd < nd->nuclData[nuclInd].numLevels){
+		if(state->ds.selectedRxn == 0){
+			return 1;
+		}else if(state->ds.selectedRxn == 255){
+			//coincidence display mode
+			if(nuclLvlInd < MAX_COINC_FLAGGED_LVLS){
+				const uint32_t bpInd = nuclLvlInd/64; //bit-pattern index (maximum int size is 64 bits)
+				if(state->flaggedCoincLvls[bpInd] & (uint64_t)((uint64_t)(1) << (nuclLvlInd - (bpInd*64)))){
+					return 1;
+				}
 			}
+		}else if(state->ds.reactionModeInd == REACTIONMODE_HIGHLIGHT){
+			return 1;
+		}else if(nd->levels[nd->nuclData[nuclInd].firstLevel + (uint32_t)nuclLvlInd].populatingRxns & ((uint64_t)(1) << (state->ds.selectedRxn-1))){
+			return 1;
 		}
-	}else if(state->ds.reactionModeInd == REACTIONMODE_HIGHLIGHT){
-		return 1;
-	}else if(nd->levels[nd->nuclData[nuclInd].firstLevel + (uint32_t)nuclLvlInd].populatingRxns & ((uint64_t)(1) << (state->ds.selectedRxn-1))){
-		return 1;
 	}
 	return 0;
 }
@@ -3182,27 +3455,36 @@ uint16_t getNumScreenLvlDispLines(const drawing_state *restrict ds){
 }
 uint16_t getNumTotalLvlDispLines(const ndata *restrict nd, const app_state *restrict state){
 	uint16_t numLines = 0;
-	for(uint32_t lvlInd = nd->nuclData[state->chartSelectedNucl].firstLevel; lvlInd<(nd->nuclData[state->chartSelectedNucl].firstLevel + nd->nuclData[state->chartSelectedNucl].numLevels); lvlInd++){
+	for(uint32_t lvlInd = nd->nuclData[state->chartSelectedNucl].firstLevel; lvlInd<=(nd->nuclData[state->chartSelectedNucl].firstLevel + nd->nuclData[state->chartSelectedNucl].numLevels); lvlInd++){
 		
 		if(isLvlDisplayed(nd,state,state->chartSelectedNucl,(uint16_t)(lvlInd - nd->nuclData[state->chartSelectedNucl].firstLevel))){
 			numLines += getNumDispLinesForLvl(nd,lvlInd);
 		}
 
 		//account for Q-values
-		if(lvlInd<=state->ds.nuclFullInfoLastDispLvl){
-			if(lvlInd>nd->nuclData[state->chartSelectedNucl].firstLevel){
-				for(int i=0; i<QVAL_ENUM_LENGTH; i++){
-					if(state->ds.fullInfoQValEntryPos[i] == lvlInd){
-						switch(i){
-							case QVAL_SN:
-							case QVAL_SP:
-							case QVAL_SA:
+		if(lvlInd>nd->nuclData[state->chartSelectedNucl].firstLevel){
+			for(int i=0; i<QVAL_ENUM_LENGTH; i++){
+				if(state->ds.fullInfoQValEntryPos[i] == lvlInd){
+					switch(i){
+						case QVAL_SN:
+						case QVAL_SP:
+						case QVAL_SA:
+							if(state->ds.useLevelListSeparationEnergies){
 								//SDL_Log("getNumTotalLvlDispLines - adding line for Q-value: %i\n",i);
 								numLines++;
-								break;
-							default:
-								break;
-						}
+							}
+							break;
+						case QVAL_PARENT_BETA_1:
+						case QVAL_PARENT_BETA_2:
+						case QVAL_PARENT_BETA_3:
+						case QVAL_PARENT_BETA_4:
+							if(state->ds.useLevelListParentThresholds){
+								//SDL_Log("getNumTotalLvlDispLines - adding line for Q-value: %i\n",i);
+								numLines++;
+							}
+							break;
+						default:
+							break;
 					}
 				}
 			}
@@ -3219,23 +3501,32 @@ uint16_t getNumDispLinesUpToLvl(const ndata *restrict nd, const app_state *restr
 		}
 	}
 
-	for(uint32_t i = nd->nuclData[state->chartSelectedNucl].firstLevel; i<(nd->nuclData[state->chartSelectedNucl].firstLevel + (uint32_t)nuclLevel + 1); i++){
+	for(uint32_t i = nd->nuclData[state->chartSelectedNucl].firstLevel; i<=(nd->nuclData[state->chartSelectedNucl].firstLevel + (uint32_t)nuclLevel); i++){
 		//account for Q-values
 		//different loop condition is neccessary for the case when nuclLevel has a Q-value shown directly above it
-		if(i<=state->ds.nuclFullInfoLastDispLvl){
-			if(i>nd->nuclData[state->chartSelectedNucl].firstLevel){
-				for(int j=0; j<QVAL_ENUM_LENGTH; j++){
-					if(state->ds.fullInfoQValEntryPos[j] == i){
-						switch(j){
-							case QVAL_SN:
-							case QVAL_SP:
-							case QVAL_SA:
+		if(i>nd->nuclData[state->chartSelectedNucl].firstLevel){
+			for(int j=0; j<QVAL_ENUM_LENGTH; j++){
+				if(state->ds.fullInfoQValEntryPos[j] == i){
+					switch(j){
+						case QVAL_SN:
+						case QVAL_SP:
+						case QVAL_SA:
+							if(state->ds.useLevelListSeparationEnergies){
 								//SDL_Log("getNumDispLinesUpToLvl - adding line for Q-value: %i\n",j);
 								numLines++;
-								break;
-							default:
-								break;
-						}
+							}
+							break;
+						case QVAL_PARENT_BETA_1:
+						case QVAL_PARENT_BETA_2:
+						case QVAL_PARENT_BETA_3:
+						case QVAL_PARENT_BETA_4:
+							if(state->ds.useLevelListParentThresholds){
+								//SDL_Log("getNumDispLinesUpToLvl - adding line for Q-value: %i\n",j);
+								numLines++;
+							}
+							break;
+						default:
+							break;
 					}
 				}
 			}
@@ -3342,6 +3633,8 @@ void changeUIState(const app_data *restrict dat, app_state *restrict state, reso
 			state->interactableElement |= ((uint64_t)(1) << UIELEM_PREFS_DIALOG_CLOSEBUTTON);
 			state->interactableElement |= ((uint64_t)(1) << UIELEM_PREFS_DIALOG_SHELLCLOSURE_CHECKBOX);
 			state->interactableElement |= ((uint64_t)(1) << UIELEM_PREFS_DIALOG_LIFETIME_CHECKBOX);
+			state->interactableElement |= ((uint64_t)(1) << UIELEM_PREFS_DIALOG_LEVELLIST_SEPARATION_CHECKBOX);
+			state->interactableElement |= ((uint64_t)(1) << UIELEM_PREFS_DIALOG_LEVELLIST_THRESHOLD_CHECKBOX);
 			state->interactableElement |= ((uint64_t)(1) << UIELEM_PREFS_DIALOG_UIANIM_CHECKBOX);
 			state->interactableElement |= ((uint64_t)(1) << UIELEM_PREFS_DIALOG_UISCALE_DROPDOWN);
 			state->interactableElement |= ((uint64_t)(1) << UIELEM_PREFS_DIALOG_REACTIONMODE_DROPDOWN);
@@ -3625,51 +3918,67 @@ void setFullLevelInfoDimensions(const app_data *restrict dat, app_state *restric
 	state->ds.fullInfoColWidth[LLCOLUMN_FINALLEVEL_E] = NUCL_FULLINFOBOX_FINALLEVEL_E_COL_MIN_WIDTH;
 	state->ds.fullInfoColWidth[LLCOLUMN_FINALLEVEL_JPI] = NUCL_FULLINFOBOX_FINALLEVEL_JPI_COL_MIN_WIDTH;
 
-	//determine last visible level
-	for(uint16_t nuclLvlInd = 0; nuclLvlInd<dat->ndat.nuclData[selNucl].numLevels; nuclLvlInd++){
-		if(isLvlDisplayed(&dat->ndat,state,selNucl,nuclLvlInd)==1){
-			//SDL_Log("Level %u is displayed.\n",nuclLvlInd);
-			state->ds.nuclFullInfoLastDispLvl = dat->ndat.nuclData[selNucl].firstLevel + (uint32_t)nuclLvlInd;
-		}
+	//set default position for separation energy values in level list
+	//(either the beginning of end of the list, depending on the Q-value sign) 
+	for(int i=0; i<QVAL_ENUM_LENGTH; i++){
+		state->ds.fullInfoQValEntryPos[i] = dat->ndat.nuclData[selNucl].firstLevel+dat->ndat.nuclData[selNucl].numLevels;
 	}
-	//SDL_Log("Last visible level: %u (nucl index %u, rxn %u)\n",state->ds.nuclFullInfoLastDispLvl,(uint32_t)(state->ds.nuclFullInfoLastDispLvl - dat->ndat.nuclData[selNucl].firstLevel),state->ds.selectedRxn);
-
-	SDL_memset(state->ds.fullInfoQValEntryPos,0,sizeof(state->ds.fullInfoQValEntryPos));
+	if(getRawValFromDB(&dat->ndat.nuclData[selNucl].qalpha) >= 0.0){
+		state->ds.fullInfoQValEntryPos[QVAL_SA] = 0;
+	}
+	if(getRawValFromDB(&dat->ndat.nuclData[selNucl].sn) <= 0.0){
+		state->ds.fullInfoQValEntryPos[QVAL_SN] = 0;
+	}
+	if(getRawValFromDB(&dat->ndat.nuclData[selNucl].sp) <= 0.0){
+		state->ds.fullInfoQValEntryPos[QVAL_SP] = 0;
+	}
 	SDL_memset(state->ds.fullInfoQValOrder,0,sizeof(state->ds.fullInfoQValOrder));
 
-	for(uint32_t lvlInd = dat->ndat.nuclData[selNucl].firstLevel; lvlInd<(dat->ndat.nuclData[selNucl].firstLevel+dat->ndat.nuclData[selNucl].numLevels); lvlInd++){
-		
-		//check for q-val positions, and order them properly so that lower values will always be drawn first
-		//should replace this block with an actual proper sort algorithm at some point
-		if(getRawValFromDB(&dat->ndat.nuclData[selNucl].sn) < getRawValFromDB(&dat->ndat.nuclData[selNucl].sp)){
-			if(getRawValFromDB(&dat->ndat.nuclData[selNucl].sn) < (getRawValFromDB(&dat->ndat.nuclData[selNucl].qalpha)*-1.0)){
-				state->ds.fullInfoQValOrder[0] = QVAL_SN;
-				if(getRawValFromDB(&dat->ndat.nuclData[selNucl].sp) < (getRawValFromDB(&dat->ndat.nuclData[selNucl].qalpha)*-1.0)){
-					state->ds.fullInfoQValOrder[1] = QVAL_SP;
-					state->ds.fullInfoQValOrder[2] = QVAL_SA;
-				}else{
-					state->ds.fullInfoQValOrder[2] = QVAL_SP;
-					state->ds.fullInfoQValOrder[1] = QVAL_SA;
-				}
-			}else{
-				state->ds.fullInfoQValOrder[0] = QVAL_SA;
-				state->ds.fullInfoQValOrder[1] = QVAL_SN;
-				state->ds.fullInfoQValOrder[2] = QVAL_SP;
-			}
-		}else if(getRawValFromDB(&dat->ndat.nuclData[selNucl].sp) < (getRawValFromDB(&dat->ndat.nuclData[selNucl].qalpha)*-1.0)){
-			state->ds.fullInfoQValOrder[0] = QVAL_SP;
-			if(getRawValFromDB(&dat->ndat.nuclData[selNucl].sn) < (getRawValFromDB(&dat->ndat.nuclData[selNucl].qalpha)*-1.0)){
-				state->ds.fullInfoQValOrder[1] = QVAL_SN;
+	double parentBetaQVal[4];
+	for(uint8_t i=0; i<4; i++){
+		parentBetaQVal[i] = getParentBetaDecayQVal(&dat->ndat,selNucl,i);
+		if(parentBetaQVal[i] < 0.0){
+			state->ds.fullInfoQValEntryPos[QVAL_PARENT_BETA_1+i] = 0;
+		}
+	}
+
+	//check for q-val positions, and order them properly so that lower values will always be drawn first
+	//should replace this block with an actual proper sort algorithm at some point
+	if(getRawValFromDB(&dat->ndat.nuclData[selNucl].sn) < getRawValFromDB(&dat->ndat.nuclData[selNucl].sp)){
+		if(getRawValFromDB(&dat->ndat.nuclData[selNucl].sn) < (getRawValFromDB(&dat->ndat.nuclData[selNucl].qalpha)*-1.0)){
+			state->ds.fullInfoQValOrder[0] = QVAL_SN;
+			if(getRawValFromDB(&dat->ndat.nuclData[selNucl].sp) < (getRawValFromDB(&dat->ndat.nuclData[selNucl].qalpha)*-1.0)){
+				state->ds.fullInfoQValOrder[1] = QVAL_SP;
 				state->ds.fullInfoQValOrder[2] = QVAL_SA;
 			}else{
+				state->ds.fullInfoQValOrder[2] = QVAL_SP;
 				state->ds.fullInfoQValOrder[1] = QVAL_SA;
-				state->ds.fullInfoQValOrder[2] = QVAL_SN;
 			}
 		}else{
 			state->ds.fullInfoQValOrder[0] = QVAL_SA;
-			state->ds.fullInfoQValOrder[1] = QVAL_SP;
+			state->ds.fullInfoQValOrder[1] = QVAL_SN;
+			state->ds.fullInfoQValOrder[2] = QVAL_SP;
+		}
+	}else if(getRawValFromDB(&dat->ndat.nuclData[selNucl].sp) < (getRawValFromDB(&dat->ndat.nuclData[selNucl].qalpha)*-1.0)){
+		state->ds.fullInfoQValOrder[0] = QVAL_SP;
+		if(getRawValFromDB(&dat->ndat.nuclData[selNucl].sn) < (getRawValFromDB(&dat->ndat.nuclData[selNucl].qalpha)*-1.0)){
+			state->ds.fullInfoQValOrder[1] = QVAL_SN;
+			state->ds.fullInfoQValOrder[2] = QVAL_SA;
+		}else{
+			state->ds.fullInfoQValOrder[1] = QVAL_SA;
 			state->ds.fullInfoQValOrder[2] = QVAL_SN;
 		}
+	}else{
+		state->ds.fullInfoQValOrder[0] = QVAL_SA;
+		state->ds.fullInfoQValOrder[1] = QVAL_SP;
+		state->ds.fullInfoQValOrder[2] = QVAL_SN;
+	}
+	state->ds.fullInfoQValOrder[3] = QVAL_PARENT_BETA_1;
+	state->ds.fullInfoQValOrder[4] = QVAL_PARENT_BETA_2;
+	state->ds.fullInfoQValOrder[5] = QVAL_PARENT_BETA_3;
+	state->ds.fullInfoQValOrder[6] = QVAL_PARENT_BETA_4;
+
+	for(uint32_t lvlInd = dat->ndat.nuclData[selNucl].firstLevel; lvlInd<(dat->ndat.nuclData[selNucl].firstLevel+dat->ndat.nuclData[selNucl].numLevels); lvlInd++){
 		if(lvlInd > dat->ndat.nuclData[selNucl].firstLevel){
 			for(int i=0; i<QVAL_ENUM_LENGTH; i++){
 				switch(i){
@@ -3710,6 +4019,71 @@ void setFullLevelInfoDimensions(const app_data *restrict dat, app_state *restric
 								if((enValueType == VALUETYPE_NUMBER)||(enValueType == VALUETYPE_ASYMERROR)||(enValueType == VALUETYPE_APPROX)){
 									if((enValueType2 == VALUETYPE_NUMBER)||(enValueType2 == VALUETYPE_ASYMERROR)||(enValueType2 == VALUETYPE_APPROX)){
 										state->ds.fullInfoQValEntryPos[i] = lvlInd;
+									}
+								}
+							}
+						}
+						break;
+					case QVAL_PARENT_BETA_1:
+						if(parentBetaQVal[0] >= 0.0){
+							if(parentBetaQVal[0] > getRawValFromDB(&dat->ndat.levels[lvlInd-1].energy)){
+								if(parentBetaQVal[0] <= getRawValFromDB(&dat->ndat.levels[lvlInd].energy)){
+									uint8_t enValueType = (uint8_t)((dat->ndat.levels[lvlInd-1].energy.format >> 5U) & 15U);
+									uint8_t enValueType2 = (uint8_t)((dat->ndat.levels[lvlInd].energy.format >> 5U) & 15U);
+									//only consider non-variable or non-limit energies
+									if((enValueType == VALUETYPE_NUMBER)||(enValueType == VALUETYPE_ASYMERROR)||(enValueType == VALUETYPE_APPROX)){
+										if((enValueType2 == VALUETYPE_NUMBER)||(enValueType2 == VALUETYPE_ASYMERROR)||(enValueType2 == VALUETYPE_APPROX)){
+											//SDL_Log("Parent beta qVal 0: %f, level index in daughter: %u\n",parentBetaQVal[0],lvlInd);
+											state->ds.fullInfoQValEntryPos[i] = lvlInd;
+										}
+									}
+								}
+							}
+						}
+						break;
+					case QVAL_PARENT_BETA_2:
+						if(parentBetaQVal[1] >= 0.0){
+							if(parentBetaQVal[1] > getRawValFromDB(&dat->ndat.levels[lvlInd-1].energy)){
+								if(parentBetaQVal[1] <= getRawValFromDB(&dat->ndat.levels[lvlInd].energy)){
+									uint8_t enValueType = (uint8_t)((dat->ndat.levels[lvlInd-1].energy.format >> 5U) & 15U);
+									uint8_t enValueType2 = (uint8_t)((dat->ndat.levels[lvlInd].energy.format >> 5U) & 15U);
+									//only consider non-variable or non-limit energies
+									if((enValueType == VALUETYPE_NUMBER)||(enValueType == VALUETYPE_ASYMERROR)||(enValueType == VALUETYPE_APPROX)){
+										if((enValueType2 == VALUETYPE_NUMBER)||(enValueType2 == VALUETYPE_ASYMERROR)||(enValueType2 == VALUETYPE_APPROX)){
+											state->ds.fullInfoQValEntryPos[i] = lvlInd;
+										}
+									}
+								}
+							}
+						}
+						break;
+					case QVAL_PARENT_BETA_3:
+						if(parentBetaQVal[2] >= 0.0){
+							if(parentBetaQVal[2] > getRawValFromDB(&dat->ndat.levels[lvlInd-1].energy)){
+								if(parentBetaQVal[2] <= getRawValFromDB(&dat->ndat.levels[lvlInd].energy)){
+									uint8_t enValueType = (uint8_t)((dat->ndat.levels[lvlInd-1].energy.format >> 5U) & 15U);
+									uint8_t enValueType2 = (uint8_t)((dat->ndat.levels[lvlInd].energy.format >> 5U) & 15U);
+									//only consider non-variable or non-limit energies
+									if((enValueType == VALUETYPE_NUMBER)||(enValueType == VALUETYPE_ASYMERROR)||(enValueType == VALUETYPE_APPROX)){
+										if((enValueType2 == VALUETYPE_NUMBER)||(enValueType2 == VALUETYPE_ASYMERROR)||(enValueType2 == VALUETYPE_APPROX)){
+											state->ds.fullInfoQValEntryPos[i] = lvlInd;
+										}
+									}
+								}
+							}
+						}
+						break;
+					case QVAL_PARENT_BETA_4:
+						if(parentBetaQVal[3] >= 0.0){
+							if(parentBetaQVal[3] > getRawValFromDB(&dat->ndat.levels[lvlInd-1].energy)){
+								if(parentBetaQVal[3] <= getRawValFromDB(&dat->ndat.levels[lvlInd].energy)){
+									uint8_t enValueType = (uint8_t)((dat->ndat.levels[lvlInd-1].energy.format >> 5U) & 15U);
+									uint8_t enValueType2 = (uint8_t)((dat->ndat.levels[lvlInd].energy.format >> 5U) & 15U);
+									//only consider non-variable or non-limit energies
+									if((enValueType == VALUETYPE_NUMBER)||(enValueType == VALUETYPE_ASYMERROR)||(enValueType == VALUETYPE_APPROX)){
+										if((enValueType2 == VALUETYPE_NUMBER)||(enValueType2 == VALUETYPE_ASYMERROR)||(enValueType2 == VALUETYPE_APPROX)){
+											state->ds.fullInfoQValEntryPos[i] = lvlInd;
+										}
 									}
 								}
 							}
@@ -4632,6 +5006,22 @@ void uiElemClickAction(app_data *restrict dat, app_state *restrict state, resour
 			state->ds.forceRedraw = 1;
 			state->clickedUIElem = UIELEM_ENUM_LENGTH; //'unclick' the button
 			break;
+		case UIELEM_PREFS_DIALOG_LEVELLIST_SEPARATION_CHECKBOX:
+			state->ds.useLevelListSeparationEnergies = !(state->ds.useLevelListSeparationEnergies);
+			state->ds.forceRedraw = 1;
+			state->clickedUIElem = UIELEM_ENUM_LENGTH; //'unclick' the button
+			if(state->ds.shownElements & ((uint64_t)(1) << UIELEM_NUCL_FULLINFOBOX)){
+				setSelectedNuclOnLevelList(dat,state,rdat,(uint16_t)(dat->ndat.nuclData[state->chartSelectedNucl].N),(uint16_t)(dat->ndat.nuclData[state->chartSelectedNucl].Z),1);
+			}
+			break;
+		case UIELEM_PREFS_DIALOG_LEVELLIST_THRESHOLD_CHECKBOX:
+			state->ds.useLevelListParentThresholds = !(state->ds.useLevelListParentThresholds);
+			state->ds.forceRedraw = 1;
+			state->clickedUIElem = UIELEM_ENUM_LENGTH; //'unclick' the button
+			if(state->ds.shownElements & ((uint64_t)(1) << UIELEM_NUCL_FULLINFOBOX)){
+				setSelectedNuclOnLevelList(dat,state,rdat,(uint16_t)(dat->ndat.nuclData[state->chartSelectedNucl].N),(uint16_t)(dat->ndat.nuclData[state->chartSelectedNucl].Z),1);
+			}
+			break;
 		case UIELEM_PREFS_DIALOG_UIANIM_CHECKBOX:
 			state->ds.useUIAnimations = !(state->ds.useUIAnimations);
 			state->ds.forceRedraw = 1;
@@ -5395,6 +5785,8 @@ void updateSingleUIElemPosition(const app_data *restrict dat, app_state *restric
 			updateSingleUIElemPosition(dat,state,rdat,UIELEM_PREFS_DIALOG_CLOSEBUTTON);
 			updateSingleUIElemPosition(dat,state,rdat,UIELEM_PREFS_DIALOG_SHELLCLOSURE_CHECKBOX);
 			updateSingleUIElemPosition(dat,state,rdat,UIELEM_PREFS_DIALOG_LIFETIME_CHECKBOX);
+			updateSingleUIElemPosition(dat,state,rdat,UIELEM_PREFS_DIALOG_LEVELLIST_SEPARATION_CHECKBOX);
+			updateSingleUIElemPosition(dat,state,rdat,UIELEM_PREFS_DIALOG_LEVELLIST_THRESHOLD_CHECKBOX);
 			updateSingleUIElemPosition(dat,state,rdat,UIELEM_PREFS_DIALOG_UIANIM_CHECKBOX);
 			updateSingleUIElemPosition(dat,state,rdat,UIELEM_PREFS_DIALOG_UISCALE_DROPDOWN);
 			updateSingleUIElemPosition(dat,state,rdat,UIELEM_PREFS_DIALOG_REACTIONMODE_DROPDOWN);
@@ -5427,11 +5819,25 @@ void updateSingleUIElemPosition(const app_data *restrict dat, app_state *restric
 			state->ds.uiElemPosY[UIELEM_PREFS_DIALOG_LIFETIME_CHECKBOX] = state->ds.uiElemPosY[UIELEM_PREFS_DIALOG] + (int16_t)((PREFS_DIALOG_PREFCOL1_Y + 3*PREFS_DIALOG_PREF_Y_SPACING + 2*UI_PADDING_SIZE)*state->ds.uiUserScale);
 			state->ds.uiElemExtPlusX[UIELEM_PREFS_DIALOG_LIFETIME_CHECKBOX] = (uint16_t)(2*UI_PADDING_SIZE*state->ds.uiUserScale) + (uint16_t)(getTextWidth(rdat,FONTSIZE_NORMAL,dat->strings[dat->locStringIDs[LOCSTR_PREF_LIFETIME]])/rdat->uiDPIScale); //so that checkbox can be toggled by clicking on adjacent text
 			break;
+		case UIELEM_PREFS_DIALOG_LEVELLIST_SEPARATION_CHECKBOX:
+			state->ds.uiElemWidth[UIELEM_PREFS_DIALOG_LEVELLIST_SEPARATION_CHECKBOX] = (int16_t)(UI_TILE_SIZE*state->ds.uiUserScale);
+			state->ds.uiElemHeight[UIELEM_PREFS_DIALOG_LEVELLIST_SEPARATION_CHECKBOX] = state->ds.uiElemWidth[UIELEM_PREFS_DIALOG_LEVELLIST_SEPARATION_CHECKBOX];
+			state->ds.uiElemPosX[UIELEM_PREFS_DIALOG_LEVELLIST_SEPARATION_CHECKBOX] = state->ds.uiElemPosX[UIELEM_PREFS_DIALOG] + (int16_t)((PREFS_DIALOG_PREFCOL1_X + 4*UI_PADDING_SIZE)*state->ds.uiUserScale);
+			state->ds.uiElemPosY[UIELEM_PREFS_DIALOG_LEVELLIST_SEPARATION_CHECKBOX] = state->ds.uiElemPosY[UIELEM_PREFS_DIALOG] + (int16_t)((PREFS_DIALOG_PREFCOL1_Y + 5*PREFS_DIALOG_PREF_Y_SPACING + 2*UI_PADDING_SIZE)*state->ds.uiUserScale);
+			state->ds.uiElemExtPlusX[UIELEM_PREFS_DIALOG_LEVELLIST_SEPARATION_CHECKBOX] = (uint16_t)(2*UI_PADDING_SIZE*state->ds.uiUserScale) + (uint16_t)(getTextWidth(rdat,FONTSIZE_NORMAL,dat->strings[dat->locStringIDs[LOCSTR_PREF_LEVELLIST_SEPARATION]])/rdat->uiDPIScale); //so that checkbox can be toggled by clicking on adjacent text
+			break;
+		case UIELEM_PREFS_DIALOG_LEVELLIST_THRESHOLD_CHECKBOX:
+			state->ds.uiElemWidth[UIELEM_PREFS_DIALOG_LEVELLIST_THRESHOLD_CHECKBOX] = (int16_t)(UI_TILE_SIZE*state->ds.uiUserScale);
+			state->ds.uiElemHeight[UIELEM_PREFS_DIALOG_LEVELLIST_THRESHOLD_CHECKBOX] = state->ds.uiElemWidth[UIELEM_PREFS_DIALOG_LEVELLIST_THRESHOLD_CHECKBOX];
+			state->ds.uiElemPosX[UIELEM_PREFS_DIALOG_LEVELLIST_THRESHOLD_CHECKBOX] = state->ds.uiElemPosX[UIELEM_PREFS_DIALOG] + (int16_t)((PREFS_DIALOG_PREFCOL1_X + 4*UI_PADDING_SIZE)*state->ds.uiUserScale);
+			state->ds.uiElemPosY[UIELEM_PREFS_DIALOG_LEVELLIST_THRESHOLD_CHECKBOX] = state->ds.uiElemPosY[UIELEM_PREFS_DIALOG] + (int16_t)((PREFS_DIALOG_PREFCOL1_Y + 6*PREFS_DIALOG_PREF_Y_SPACING + 2*UI_PADDING_SIZE)*state->ds.uiUserScale);
+			state->ds.uiElemExtPlusX[UIELEM_PREFS_DIALOG_LEVELLIST_THRESHOLD_CHECKBOX] = (uint16_t)(2*UI_PADDING_SIZE*state->ds.uiUserScale) + (uint16_t)(getTextWidth(rdat,FONTSIZE_NORMAL,dat->strings[dat->locStringIDs[LOCSTR_PREF_LEVELLIST_THRESHOLD]])/rdat->uiDPIScale); //so that checkbox can be toggled by clicking on adjacent text
+			break;
 		case UIELEM_PREFS_DIALOG_UIANIM_CHECKBOX:
 			state->ds.uiElemWidth[UIELEM_PREFS_DIALOG_UIANIM_CHECKBOX] = (int16_t)(UI_TILE_SIZE*state->ds.uiUserScale);
 			state->ds.uiElemHeight[UIELEM_PREFS_DIALOG_UIANIM_CHECKBOX] = state->ds.uiElemWidth[UIELEM_PREFS_DIALOG_UIANIM_CHECKBOX];
 			state->ds.uiElemPosX[UIELEM_PREFS_DIALOG_UIANIM_CHECKBOX] = state->ds.uiElemPosX[UIELEM_PREFS_DIALOG] + (int16_t)(PREFS_DIALOG_PREFCOL1_X*state->ds.uiUserScale);
-			state->ds.uiElemPosY[UIELEM_PREFS_DIALOG_UIANIM_CHECKBOX] = state->ds.uiElemPosY[UIELEM_PREFS_DIALOG] + (int16_t)((PREFS_DIALOG_PREFCOL1_Y + 4*PREFS_DIALOG_PREF_Y_SPACING + 2*UI_PADDING_SIZE)*state->ds.uiUserScale);
+			state->ds.uiElemPosY[UIELEM_PREFS_DIALOG_UIANIM_CHECKBOX] = state->ds.uiElemPosY[UIELEM_PREFS_DIALOG] + (int16_t)((PREFS_DIALOG_PREFCOL1_Y + 7.5f*PREFS_DIALOG_PREF_Y_SPACING + 2*UI_PADDING_SIZE)*state->ds.uiUserScale);
 			state->ds.uiElemExtPlusX[UIELEM_PREFS_DIALOG_UIANIM_CHECKBOX] = (uint16_t)(2*UI_PADDING_SIZE*state->ds.uiUserScale) + (uint16_t)(getTextWidth(rdat,FONTSIZE_NORMAL,dat->strings[dat->locStringIDs[LOCSTR_PREF_UIANIM]])/rdat->uiDPIScale); //so that checkbox can be toggled by clicking on adjacent text
 			break;
 		case UIELEM_PREFS_DIALOG_UISCALE_DROPDOWN:

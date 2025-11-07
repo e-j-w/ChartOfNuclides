@@ -640,7 +640,7 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
   }
 
   if(state->inputFlags & (1U << INPUT_CYCLELEFT)){
-    if(state->ds.shownElements & ((uint64_t)(1) << UIELEM_CHARTOFNUCLIDES)){
+    if((state->uiState == UISTATE_CHARTONLY)||(state->uiState == UISTATE_INFOBOX)){
       if(state->chartView == 0){
         state->chartView = (uint8_t)(CHARTVIEW_ENUM_LENGTH - 1);
       }else{
@@ -659,7 +659,7 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
       setSelectedNuclOnLevelList(dat,state,rdat,(uint16_t)(dat->ndat.nuclData[state->chartSelectedNucl].N),(uint16_t)(dat->ndat.nuclData[state->chartSelectedNucl].Z),1);
     }
   }else if(state->inputFlags & (1U << INPUT_CYCLERIGHT)){
-    if(state->ds.shownElements & ((uint64_t)(1) << UIELEM_CHARTOFNUCLIDES)){
+    if((state->uiState == UISTATE_CHARTONLY)||(state->uiState == UISTATE_INFOBOX)){
       if(state->chartView == (uint8_t)(CHARTVIEW_ENUM_LENGTH - 1)){
         state->chartView = 0;
       }else{
