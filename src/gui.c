@@ -2612,11 +2612,10 @@ void drawNuclFullInfoBox(const app_data *restrict dat, app_state *restrict state
     //draw Q-values in-line
     if(lvlInd > dat->ndat.nuclData[nuclInd].firstLevel){
       for(uint8_t i=0; i<QVAL_ENUM_LENGTH; i++){
-        uint8_t j = state->ds.fullInfoQValOrder[i];
-        if(state->ds.fullInfoQValEntryPos[j] == lvlInd){
+        if(state->ds.fullInfoQVal[i].levelListEntryPos == lvlInd){
 
           //first, check for whether the specific Q-value in question is being drawn
-          switch(j){
+          switch(state->ds.fullInfoQVal[i].qValType){
             case QVAL_SN:
             case QVAL_SP:
             case QVAL_SA:
@@ -2641,7 +2640,7 @@ void drawNuclFullInfoBox(const app_data *restrict dat, app_state *restrict state
             
             
             char descStr[64], qValStr[64];
-            switch(j){
+            switch(state->ds.fullInfoQVal[i].qValType){
               case QVAL_SN:
                 getQValStr(descStr,dat->ndat.nuclData[nuclInd].sn,1,0);
                 SDL_snprintf(qValStr,64,"%s: %s=%s %s",dat->strings[dat->locStringIDs[LOCSTR_SN_LONG]],dat->strings[dat->locStringIDs[LOCSTR_SN]],descStr,getValueUnitShortStr(dat->ndat.nuclData[nuclInd].sn.unit));

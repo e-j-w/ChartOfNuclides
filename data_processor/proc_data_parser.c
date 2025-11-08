@@ -2863,7 +2863,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 										double eDiff = fabs(getRawValFromDB(&nd->levels[lvlInd].energy) - getRawValFromDB(&nd->levels[nd->numLvls-1].energy));
 										if(eDiff < minEDiff){
 											minEDiff = eDiff;
-											nd->tran[tranInd].finalLvlOffset = (uint8_t)((nd->numLvls-1) - lvlInd);
+											nd->tran[tranInd].finalLvlOffset = (uint16_t)((nd->numLvls-1) - lvlInd);
 										}
 										//SDL_Log("finalLvlOffset 1: %u\n",nd->tran[tranInd].finalLvlOffset);
 										if(lvlInd == 0){
@@ -2912,7 +2912,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 									if(eDiff <= fudgeFactor){
 										if(eDiff < minEDiff){
 											minEDiff = eDiff;
-											nd->tran[tranInd].finalLvlOffset = (uint8_t)((nd->numLvls-1) - lvlInd);
+											nd->tran[tranInd].finalLvlOffset = (uint16_t)((nd->numLvls-1) - lvlInd);
 										}
 										//SDL_Log("finalLvlOffset 2: %u\n",nd->tran[tranInd].finalLvlOffset);
 									}
@@ -2933,7 +2933,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 											double eDiff = fabs(getRawValFromDB(&nd->levels[lvlInd].energy) - (getRawValFromDB(&nd->levels[nd->numLvls-1].energy) - getRawValFromDB(&nd->tran[tranInd].energy)));
 											if(eDiff < minEDiff){
 												minEDiff = eDiff;
-												nd->tran[tranInd].finalLvlOffset = (uint8_t)((nd->numLvls-1) - lvlInd);
+												nd->tran[tranInd].finalLvlOffset = (uint16_t)((nd->numLvls-1) - lvlInd);
 											}
 											//SDL_Log("finalLvlOffset 3: %u\n",nd->tran[tranInd].finalLvlOffset);
 											if(lvlInd == 0){

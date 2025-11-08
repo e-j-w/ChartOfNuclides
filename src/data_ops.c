@@ -2704,6 +2704,7 @@ uint32_t getParentBetaDecayLvlInd(const ndata *restrict nd, const uint16_t nuclI
 				//so we can presume that any level that meets one of these conditions can beta decay)
 				if((nd->dcyMode[dcyModeInd].type == DECAYMODE_EC)||(nd->dcyMode[dcyModeInd].type == DECAYMODE_ECANDBETAPLUS)||(nd->dcyMode[dcyModeInd].type == DECAYMODE_BETAPLUS)||(nd->dcyMode[dcyModeInd].type == DECAYMODE_BETAMINUS)||(nd->dcyMode[dcyModeInd].type == DECAYMODE_ALPHA)){
 					foundInd++;
+					//SDL_Log("foundInd %u, lvlInd %u, dcyModeInd %u\n",foundInd,lvlInd,dcyModeInd);
 					if((foundInd-1) == decayInd){
 						//only consider non-variable or non-limit level energies
 						uint8_t lvlEValueType = (uint8_t)((nd->levels[lvlInd].energy.format >> 5U) & 15U);
@@ -2711,6 +2712,7 @@ uint32_t getParentBetaDecayLvlInd(const ndata *restrict nd, const uint16_t nuclI
 							return lvlInd;
 						}
 					}
+					break; //skip the rest of the decay modes (avoid double counting levels, save CPU)
 				}
 			}
 		}
@@ -2734,6 +2736,7 @@ uint32_t getParentBetaDecayLvlInd(const ndata *restrict nd, const uint16_t nuclI
 							return lvlInd;
 						}
 					}
+					break; //skip the rest of the decay modes (avoid double counting levels, save CPU)
 				}
 			}
 		}
@@ -2757,6 +2760,7 @@ uint32_t getParentBetaDecayLvlInd(const ndata *restrict nd, const uint16_t nuclI
 							return lvlInd;
 						}
 					}
+					break; //skip the rest of the decay modes (avoid double counting levels, save CPU)
 				}
 			}
 		}
@@ -3464,8 +3468,8 @@ uint16_t getNumTotalLvlDispLines(const ndata *restrict nd, const app_state *rest
 		//account for Q-values
 		if(lvlInd>nd->nuclData[state->chartSelectedNucl].firstLevel){
 			for(int i=0; i<QVAL_ENUM_LENGTH; i++){
-				if(state->ds.fullInfoQValEntryPos[i] == lvlInd){
-					switch(i){
+				if(state->ds.fullInfoQVal[i].levelListEntryPos == lvlInd){
+					switch(state->ds.fullInfoQVal[i].qValType){
 						case QVAL_SN:
 						case QVAL_SP:
 						case QVAL_SA:
@@ -3506,8 +3510,8 @@ uint16_t getNumDispLinesUpToLvl(const ndata *restrict nd, const app_state *restr
 		//different loop condition is neccessary for the case when nuclLevel has a Q-value shown directly above it
 		if(i>nd->nuclData[state->chartSelectedNucl].firstLevel){
 			for(int j=0; j<QVAL_ENUM_LENGTH; j++){
-				if(state->ds.fullInfoQValEntryPos[j] == i){
-					switch(j){
+				if(state->ds.fullInfoQVal[j].levelListEntryPos == i){
+					switch(state->ds.fullInfoQVal[j].qValType){
 						case QVAL_SN:
 						case QVAL_SP:
 						case QVAL_SA:
@@ -3898,6 +3902,21 @@ uint16_t getNearestNuclInd(const app_data *restrict dat, const int16_t N, const 
 	return nuclInd;
 }
 
+int SDLCALL compareQvals(const void *a, const void *b){
+	nuclide_qval *valA = ((nuclide_qval*)(intptr_t)(a)); //get the q-value (double cast to avoid warning)
+	nuclide_qval *valB = ((nuclide_qval*)(intptr_t)(b)); //get the q-value (double cast to avoid warning)
+	double qA = valA->value;
+	double qB = valB->value;
+	//printf("A: val %u rel %f\n",resA->resultVal[0],(double)resA->relevance);
+	//printf("B: val %u rel %f\n",resB->resultVal[0],(double)resB->relevance);
+	if(qA > qB){
+		return 1;
+	}else if(qA < qB){
+		return -1;
+	}
+	return 0;
+}
+
 void setFullLevelInfoDimensions(const app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat, const uint16_t selNucl){
 	
 	//SDL_Log("Updating full level info dimensions for nuclide: %u.\n",selNucl);
@@ -3920,180 +3939,66 @@ void setFullLevelInfoDimensions(const app_data *restrict dat, app_state *restric
 
 	//set default position for separation energy values in level list
 	//(either the beginning of end of the list, depending on the Q-value sign) 
-	for(int i=0; i<QVAL_ENUM_LENGTH; i++){
-		state->ds.fullInfoQValEntryPos[i] = dat->ndat.nuclData[selNucl].firstLevel+dat->ndat.nuclData[selNucl].numLevels;
-	}
-	if(getRawValFromDB(&dat->ndat.nuclData[selNucl].qalpha) >= 0.0){
-		state->ds.fullInfoQValEntryPos[QVAL_SA] = 0;
-	}
-	if(getRawValFromDB(&dat->ndat.nuclData[selNucl].sn) <= 0.0){
-		state->ds.fullInfoQValEntryPos[QVAL_SN] = 0;
-	}
-	if(getRawValFromDB(&dat->ndat.nuclData[selNucl].sp) <= 0.0){
-		state->ds.fullInfoQValEntryPos[QVAL_SP] = 0;
-	}
-	SDL_memset(state->ds.fullInfoQValOrder,0,sizeof(state->ds.fullInfoQValOrder));
-
-	double parentBetaQVal[4];
-	for(uint8_t i=0; i<4; i++){
-		parentBetaQVal[i] = getParentBetaDecayQVal(&dat->ndat,selNucl,i);
-		if(parentBetaQVal[i] < 0.0){
-			state->ds.fullInfoQValEntryPos[QVAL_PARENT_BETA_1+i] = 0;
+	for(uint8_t i=0; i<QVAL_ENUM_LENGTH; i++){
+		state->ds.fullInfoQVal[i].qValType = i;
+		switch(i){
+			case QVAL_SN:
+				state->ds.fullInfoQVal[i].value = getRawValFromDB(&dat->ndat.nuclData[selNucl].sn);
+				state->ds.fullInfoQVal[i].levelListEntryPos = dat->ndat.nuclData[selNucl].firstLevel+dat->ndat.nuclData[selNucl].numLevels;
+				break;
+			case QVAL_SP:
+				state->ds.fullInfoQVal[i].value = getRawValFromDB(&dat->ndat.nuclData[selNucl].sp);
+				state->ds.fullInfoQVal[i].levelListEntryPos = dat->ndat.nuclData[selNucl].firstLevel+dat->ndat.nuclData[selNucl].numLevels;
+				break;
+			case QVAL_SA:
+				state->ds.fullInfoQVal[i].value = getRawValFromDB(&dat->ndat.nuclData[selNucl].qalpha)*-1.0;
+				state->ds.fullInfoQVal[i].levelListEntryPos = dat->ndat.nuclData[selNucl].firstLevel+dat->ndat.nuclData[selNucl].numLevels;
+				break;
+			case QVAL_PARENT_BETA_1:
+			case QVAL_PARENT_BETA_2:
+			case QVAL_PARENT_BETA_3:
+			case QVAL_PARENT_BETA_4:
+				state->ds.fullInfoQVal[i].value = getParentBetaDecayQVal(&dat->ndat,selNucl,i-QVAL_PARENT_BETA_1);
+				state->ds.fullInfoQVal[i].levelListEntryPos = dat->ndat.nuclData[selNucl].firstLevel+dat->ndat.nuclData[selNucl].numLevels;
+				break;
+			default:
+				break;
+		}
+		if(state->ds.fullInfoQVal[i].value <= 0.0){
+			state->ds.fullInfoQVal[i].levelListEntryPos = 0;
 		}
 	}
-
-	//check for q-val positions, and order them properly so that lower values will always be drawn first
-	//should replace this block with an actual proper sort algorithm at some point
-	if(getRawValFromDB(&dat->ndat.nuclData[selNucl].sn) < getRawValFromDB(&dat->ndat.nuclData[selNucl].sp)){
-		if(getRawValFromDB(&dat->ndat.nuclData[selNucl].sn) < (getRawValFromDB(&dat->ndat.nuclData[selNucl].qalpha)*-1.0)){
-			state->ds.fullInfoQValOrder[0] = QVAL_SN;
-			if(getRawValFromDB(&dat->ndat.nuclData[selNucl].sp) < (getRawValFromDB(&dat->ndat.nuclData[selNucl].qalpha)*-1.0)){
-				state->ds.fullInfoQValOrder[1] = QVAL_SP;
-				state->ds.fullInfoQValOrder[2] = QVAL_SA;
-			}else{
-				state->ds.fullInfoQValOrder[2] = QVAL_SP;
-				state->ds.fullInfoQValOrder[1] = QVAL_SA;
-			}
-		}else{
-			state->ds.fullInfoQValOrder[0] = QVAL_SA;
-			state->ds.fullInfoQValOrder[1] = QVAL_SN;
-			state->ds.fullInfoQValOrder[2] = QVAL_SP;
-		}
-	}else if(getRawValFromDB(&dat->ndat.nuclData[selNucl].sp) < (getRawValFromDB(&dat->ndat.nuclData[selNucl].qalpha)*-1.0)){
-		state->ds.fullInfoQValOrder[0] = QVAL_SP;
-		if(getRawValFromDB(&dat->ndat.nuclData[selNucl].sn) < (getRawValFromDB(&dat->ndat.nuclData[selNucl].qalpha)*-1.0)){
-			state->ds.fullInfoQValOrder[1] = QVAL_SN;
-			state->ds.fullInfoQValOrder[2] = QVAL_SA;
-		}else{
-			state->ds.fullInfoQValOrder[1] = QVAL_SA;
-			state->ds.fullInfoQValOrder[2] = QVAL_SN;
-		}
-	}else{
-		state->ds.fullInfoQValOrder[0] = QVAL_SA;
-		state->ds.fullInfoQValOrder[1] = QVAL_SP;
-		state->ds.fullInfoQValOrder[2] = QVAL_SN;
-	}
-	state->ds.fullInfoQValOrder[3] = QVAL_PARENT_BETA_1;
-	state->ds.fullInfoQValOrder[4] = QVAL_PARENT_BETA_2;
-	state->ds.fullInfoQValOrder[5] = QVAL_PARENT_BETA_3;
-	state->ds.fullInfoQValOrder[6] = QVAL_PARENT_BETA_4;
 
 	for(uint32_t lvlInd = dat->ndat.nuclData[selNucl].firstLevel; lvlInd<(dat->ndat.nuclData[selNucl].firstLevel+dat->ndat.nuclData[selNucl].numLevels); lvlInd++){
 		if(lvlInd > dat->ndat.nuclData[selNucl].firstLevel){
 			for(int i=0; i<QVAL_ENUM_LENGTH; i++){
-				switch(i){
-					case QVAL_SN:
-						if(getRawValFromDB(&dat->ndat.nuclData[selNucl].sn) > getRawValFromDB(&dat->ndat.levels[lvlInd-1].energy)){
-							if(getRawValFromDB(&dat->ndat.nuclData[selNucl].sn) <= getRawValFromDB(&dat->ndat.levels[lvlInd].energy)){
-								uint8_t enValueType = (uint8_t)((dat->ndat.levels[lvlInd-1].energy.format >> 5U) & 15U);
-								uint8_t enValueType2 = (uint8_t)((dat->ndat.levels[lvlInd].energy.format >> 5U) & 15U);
-								//only consider non-variable or non-limit energies
-								if((enValueType == VALUETYPE_NUMBER)||(enValueType == VALUETYPE_ASYMERROR)||(enValueType == VALUETYPE_APPROX)){
-									if((enValueType2 == VALUETYPE_NUMBER)||(enValueType2 == VALUETYPE_ASYMERROR)||(enValueType2 == VALUETYPE_APPROX)){
-										state->ds.fullInfoQValEntryPos[i] = lvlInd;
-									}
-								}
+				if(state->ds.fullInfoQVal[i].value > getRawValFromDB(&dat->ndat.levels[lvlInd-1].energy)){
+					if(state->ds.fullInfoQVal[i].value <= getRawValFromDB(&dat->ndat.levels[lvlInd].energy)){
+						uint8_t enValueType = (uint8_t)((dat->ndat.levels[lvlInd-1].energy.format >> 5U) & 15U);
+						uint8_t enValueType2 = (uint8_t)((dat->ndat.levels[lvlInd].energy.format >> 5U) & 15U);
+						//only consider non-variable or non-limit energies
+						if((enValueType == VALUETYPE_NUMBER)||(enValueType == VALUETYPE_ASYMERROR)||(enValueType == VALUETYPE_APPROX)){
+							if((enValueType2 == VALUETYPE_NUMBER)||(enValueType2 == VALUETYPE_ASYMERROR)||(enValueType2 == VALUETYPE_APPROX)){
+								state->ds.fullInfoQVal[i].levelListEntryPos = lvlInd;
 							}
 						}
-						break;
-					case QVAL_SP:
-						if(getRawValFromDB(&dat->ndat.nuclData[selNucl].sp) > getRawValFromDB(&dat->ndat.levels[lvlInd-1].energy)){
-							if(getRawValFromDB(&dat->ndat.nuclData[selNucl].sp) <= getRawValFromDB(&dat->ndat.levels[lvlInd].energy)){
-								uint8_t enValueType = (uint8_t)((dat->ndat.levels[lvlInd-1].energy.format >> 5U) & 15U);
-								uint8_t enValueType2 = (uint8_t)((dat->ndat.levels[lvlInd].energy.format >> 5U) & 15U);
-								//only consider non-variable or non-limit energies
-								if((enValueType == VALUETYPE_NUMBER)||(enValueType == VALUETYPE_ASYMERROR)||(enValueType == VALUETYPE_APPROX)){
-									if((enValueType2 == VALUETYPE_NUMBER)||(enValueType2 == VALUETYPE_ASYMERROR)||(enValueType2 == VALUETYPE_APPROX)){
-										state->ds.fullInfoQValEntryPos[i] = lvlInd;
-									}
-								}
-							}
-						}
-						break;
-					case QVAL_SA:
-						if((getRawValFromDB(&dat->ndat.nuclData[selNucl].qalpha)*-1.0) > getRawValFromDB(&dat->ndat.levels[lvlInd-1].energy)){
-							if((getRawValFromDB(&dat->ndat.nuclData[selNucl].qalpha)*-1.0) <= getRawValFromDB(&dat->ndat.levels[lvlInd].energy)){
-								uint8_t enValueType = (uint8_t)((dat->ndat.levels[lvlInd-1].energy.format >> 5U) & 15U);
-								uint8_t enValueType2 = (uint8_t)((dat->ndat.levels[lvlInd].energy.format >> 5U) & 15U);
-								//only consider non-variable or non-limit energies
-								if((enValueType == VALUETYPE_NUMBER)||(enValueType == VALUETYPE_ASYMERROR)||(enValueType == VALUETYPE_APPROX)){
-									if((enValueType2 == VALUETYPE_NUMBER)||(enValueType2 == VALUETYPE_ASYMERROR)||(enValueType2 == VALUETYPE_APPROX)){
-										state->ds.fullInfoQValEntryPos[i] = lvlInd;
-									}
-								}
-							}
-						}
-						break;
-					case QVAL_PARENT_BETA_1:
-						if(parentBetaQVal[0] >= 0.0){
-							if(parentBetaQVal[0] > getRawValFromDB(&dat->ndat.levels[lvlInd-1].energy)){
-								if(parentBetaQVal[0] <= getRawValFromDB(&dat->ndat.levels[lvlInd].energy)){
-									uint8_t enValueType = (uint8_t)((dat->ndat.levels[lvlInd-1].energy.format >> 5U) & 15U);
-									uint8_t enValueType2 = (uint8_t)((dat->ndat.levels[lvlInd].energy.format >> 5U) & 15U);
-									//only consider non-variable or non-limit energies
-									if((enValueType == VALUETYPE_NUMBER)||(enValueType == VALUETYPE_ASYMERROR)||(enValueType == VALUETYPE_APPROX)){
-										if((enValueType2 == VALUETYPE_NUMBER)||(enValueType2 == VALUETYPE_ASYMERROR)||(enValueType2 == VALUETYPE_APPROX)){
-											//SDL_Log("Parent beta qVal 0: %f, level index in daughter: %u\n",parentBetaQVal[0],lvlInd);
-											state->ds.fullInfoQValEntryPos[i] = lvlInd;
-										}
-									}
-								}
-							}
-						}
-						break;
-					case QVAL_PARENT_BETA_2:
-						if(parentBetaQVal[1] >= 0.0){
-							if(parentBetaQVal[1] > getRawValFromDB(&dat->ndat.levels[lvlInd-1].energy)){
-								if(parentBetaQVal[1] <= getRawValFromDB(&dat->ndat.levels[lvlInd].energy)){
-									uint8_t enValueType = (uint8_t)((dat->ndat.levels[lvlInd-1].energy.format >> 5U) & 15U);
-									uint8_t enValueType2 = (uint8_t)((dat->ndat.levels[lvlInd].energy.format >> 5U) & 15U);
-									//only consider non-variable or non-limit energies
-									if((enValueType == VALUETYPE_NUMBER)||(enValueType == VALUETYPE_ASYMERROR)||(enValueType == VALUETYPE_APPROX)){
-										if((enValueType2 == VALUETYPE_NUMBER)||(enValueType2 == VALUETYPE_ASYMERROR)||(enValueType2 == VALUETYPE_APPROX)){
-											state->ds.fullInfoQValEntryPos[i] = lvlInd;
-										}
-									}
-								}
-							}
-						}
-						break;
-					case QVAL_PARENT_BETA_3:
-						if(parentBetaQVal[2] >= 0.0){
-							if(parentBetaQVal[2] > getRawValFromDB(&dat->ndat.levels[lvlInd-1].energy)){
-								if(parentBetaQVal[2] <= getRawValFromDB(&dat->ndat.levels[lvlInd].energy)){
-									uint8_t enValueType = (uint8_t)((dat->ndat.levels[lvlInd-1].energy.format >> 5U) & 15U);
-									uint8_t enValueType2 = (uint8_t)((dat->ndat.levels[lvlInd].energy.format >> 5U) & 15U);
-									//only consider non-variable or non-limit energies
-									if((enValueType == VALUETYPE_NUMBER)||(enValueType == VALUETYPE_ASYMERROR)||(enValueType == VALUETYPE_APPROX)){
-										if((enValueType2 == VALUETYPE_NUMBER)||(enValueType2 == VALUETYPE_ASYMERROR)||(enValueType2 == VALUETYPE_APPROX)){
-											state->ds.fullInfoQValEntryPos[i] = lvlInd;
-										}
-									}
-								}
-							}
-						}
-						break;
-					case QVAL_PARENT_BETA_4:
-						if(parentBetaQVal[3] >= 0.0){
-							if(parentBetaQVal[3] > getRawValFromDB(&dat->ndat.levels[lvlInd-1].energy)){
-								if(parentBetaQVal[3] <= getRawValFromDB(&dat->ndat.levels[lvlInd].energy)){
-									uint8_t enValueType = (uint8_t)((dat->ndat.levels[lvlInd-1].energy.format >> 5U) & 15U);
-									uint8_t enValueType2 = (uint8_t)((dat->ndat.levels[lvlInd].energy.format >> 5U) & 15U);
-									//only consider non-variable or non-limit energies
-									if((enValueType == VALUETYPE_NUMBER)||(enValueType == VALUETYPE_ASYMERROR)||(enValueType == VALUETYPE_APPROX)){
-										if((enValueType2 == VALUETYPE_NUMBER)||(enValueType2 == VALUETYPE_ASYMERROR)||(enValueType2 == VALUETYPE_APPROX)){
-											state->ds.fullInfoQValEntryPos[i] = lvlInd;
-										}
-									}
-								}
-							}
-						}
-						break;
-					default:
-						break;
+					}
 				}
 			}
 		}
+
+		/*SDL_Log("Before sort:\n");
+		for(int i=0; i<QVAL_ENUM_LENGTH; i++){
+			SDL_Log("Qval %u, value: %f\n",state->ds.fullInfoQVal[i].qValType,state->ds.fullInfoQVal[i].value);
+		}*/
+
+		//order Q-values properly so that lower values will always be drawn first
+		SDL_qsort(&state->ds.fullInfoQVal,QVAL_ENUM_LENGTH,sizeof(state->ds.fullInfoQVal[0]),compareQvals);
+
+		/*SDL_Log("After sort:\n");
+		for(int i=0; i<QVAL_ENUM_LENGTH; i++){
+			SDL_Log("Qval %u, value: %f\n",state->ds.fullInfoQVal[i].qValType,state->ds.fullInfoQVal[i].value);
+		}*/
 		
 		getLvlEnergyStr(tmpStr,&dat->ndat,lvlInd,1);
 		tmpWidth = getTextWidthScaleIndependent(rdat,FONTSIZE_NORMAL,tmpStr) + 2*UI_PADDING_SIZE;

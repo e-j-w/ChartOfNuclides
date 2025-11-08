@@ -133,7 +133,7 @@ typedef struct
   valWithErr delta; //mixing ratio
   uint8_t numMultipoles; //only uses the first couple bits
   uint8_t multipole[MAXMULTPERLEVEL]; //bit 0: E (unset) or M (set), bits 1-4: multipole order, bits 5-6: values from tentative_mult_enum, bit 7: if set, bit 0 corresponds to quadrupole/dipole
-  uint8_t finalLvlOffset; //offset of the index of the final level from the initial level
+  uint16_t finalLvlOffset; //offset of the index of the final level from the initial level (some nuclides eg. 146Nd have decays spanning more than 256 levels, so uint8_t can't be used here)
 }transition; //a transition between levels
 
 typedef struct
@@ -210,6 +210,13 @@ typedef struct
 
 typedef struct
 {
+  uint8_t qValType;            //values from qval_enum
+  uint32_t levelListEntryPos;  //positions to show Q values in-line with the level list
+  double value;                 //Q-value in keV
+}nuclide_qval;
+
+typedef struct
+{
   SDL_FColor bgCol; //background colors
   SDL_Color textColNormal, textColInactive; //colors for text (cannot be floating point as this is not supported by SDL_ttf)
   SDL_FColor modNormalCol, modMouseOverCol, modSelectedCol, modSelectedAndMouseOverCol; //color modulations for UI elements in different states
@@ -240,8 +247,7 @@ typedef struct
   float infoBoxWidth, infoBoxEColOffset, infoBoxJpiColOffset, infoBoxHlColOffset, infoBoxDcyModeColOffset;
   float infoBoxCurrentX, infoBoxCurrentY, infoBoxCurrentDispWidth, infoBoxCurrentDispHeight, infoBoxPrevX, infoBoxPrevY, infoBoxPrevDispWidth, infoBoxPrevDispHeight;
   float fullInfoColWidth[LLCOLUMN_ENUM_LENGTH];
-  uint32_t fullInfoQValEntryPos[QVAL_ENUM_LENGTH]; //positions to show Q values in-line with the level list
-  uint8_t fullInfoQValOrder[QVAL_ENUM_LENGTH]; //specifies the order in which to display Q values
+  nuclide_qval fullInfoQVal[QVAL_ENUM_LENGTH]; //arranged in the order in which to display Q values
   float nuclFullInfoScrollStartY, nuclFullInfoScrollToY, nuclFullInfoScrollY; //full level info view: number of lines scrolled in the y-direction
   uint16_t nuclFullInfoMaxScrollY; //maximum scroll position, in lines
   uint16_t nuclFullInfoShownColumns; //bit-pattern describing which columns are shown in the full level info view (values from level_list_column_enum)
