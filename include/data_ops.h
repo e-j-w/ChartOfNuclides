@@ -29,7 +29,7 @@ void initializeTempState(const app_data *restrict dat, app_state *restrict state
 
 void takeScreenshot(resource_data *restrict rdat);
 
-void clearSelectionStrs(const drawing_state *restrict ds, text_selection_state *restrict tss, const uint8_t modifiableAfter);
+void clearSelectionStrs(const drawing_state *restrict ds, text_selection_state *restrict tss, const uint8_t modifiableAfter, const uint8_t preservePos);
 
 void startUIAnimation(const app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat, const uint8_t uiAnim);
 void stopUIAnimation(const app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat, const uint8_t uiAnim);

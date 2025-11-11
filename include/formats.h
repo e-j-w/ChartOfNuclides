@@ -251,6 +251,7 @@ typedef struct
   float nuclFullInfoScrollStartY, nuclFullInfoScrollToY, nuclFullInfoScrollY; //full level info view: number of lines scrolled in the y-direction
   uint16_t nuclFullInfoMaxScrollY; //maximum scroll position, in lines
   uint16_t nuclFullInfoShownColumns; //bit-pattern describing which columns are shown in the full level info view (values from level_list_column_enum)
+  uint32_t nuclFullInfoSelStrMetadata;
   uint8_t rxnMenuColumns; //how many columns to use in the reaction menu
   uint8_t mouseOverRxn, mouseHoldRxn; //which item in the reaction menu is moused-over, =255 if none
   uint8_t selectedRxn; //which item in the reaction menu is selected, =0 if none =255 if showing coincident levels
@@ -311,6 +312,7 @@ typedef struct
   SDL_FRect selectableStrRect[MAX_SELECTABLE_STRS]; //position and size of selectable text
   char selectableStrTxt[MAX_SELECTABLE_STRS][MAX_SELECTABLE_STR_LEN]; //the actual strings that are selectable
   uint8_t selectableStrProp[MAX_SELECTABLE_STRS]; //bits 0-2: font size of each selectable string (from font_size_enum), bit 3: whether string is clickable, bit 4: click action (from text_click_action_enum)
+  uint32_t selectableStrMetadata[MAX_SELECTABLE_STRS]; //extra data for each string (eg. level in the level list)
   uint16_t selectableStrClickPar[MAX_SELECTABLE_STRS];
   uint16_t numSelStrs;
   uint16_t selectedStr; //65535 if nothing selected

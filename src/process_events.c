@@ -53,6 +53,11 @@ void setSelTxtPrimarySelection(const text_selection_state *restrict tss){
 
 void fcScrollAction(app_state *restrict state, const float deltaVal){
   //SDL_Log("scroll delta: %f\n",(double)deltaVal);
+  if((state->ds.nuclFullInfoScrollY <= 0.0f)&&(deltaVal >= 0.0f)){
+    return;
+  }else if((state->ds.nuclFullInfoScrollY >= state->ds.nuclFullInfoMaxScrollY)&&(deltaVal <= 0.0f)){
+    return;
+  }
   const float screenNumLines = (float)(getNumScreenLvlDispLines(&state->ds));
   state->ds.nuclFullInfoScrollStartY = state->ds.nuclFullInfoScrollY;
   if(deltaVal <= -500.0f){
@@ -73,7 +78,7 @@ void fcScrollAction(app_state *restrict state, const float deltaVal){
   state->ds.timeSinceFCScollStart = 0.0f;
   state->ds.fcScrollInProgress = 1;
   state->ds.fcScrollFinished = 0;
-  clearSelectionStrs(&state->ds,&state->tss,0); //selection string positions are changed on scroll
+  clearSelectionStrs(&state->ds,&state->tss,0,1); //selection string positions are changed on scroll
   //SDL_Log("scroll pos: %f, scroll to: %f\n",(double)state->ds.nuclFullInfoScrollY,(double)state->ds.nuclFullInfoScrollToY);
 }
 
@@ -499,13 +504,17 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
   }else if(state->uiState == UISTATE_FULLLEVELINFO){
 
     if(up && !down){
-      fcScrollAction(state,0.25f);
+      fcScrollAction(state,0.15f);
     }else if(down && !up){
-      fcScrollAction(state,-0.25f);
+      fcScrollAction(state,-0.15f);
     }else if(state->inputFlags & (1U << INPUT_PAGEUP)){
-      fcScrollAction(state,1.0f);
+      if(state->ds.fcScrollInProgress==0){
+        fcScrollAction(state,1.0f);
+      }
     }else if(state->inputFlags & (1U << INPUT_PAGEDOWN)){
-      fcScrollAction(state,-1.0f);
+      if(state->ds.fcScrollInProgress==0){
+        fcScrollAction(state,-1.0f);
+      }
     }else if(state->inputFlags & (1U << INPUT_SCROLLSTART)){
       fcScrollAction(state,1000.0f);
     }else if(state->inputFlags & (1U << INPUT_SCROLLEND)){
@@ -920,6 +929,12 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
                       state->tss.selStartPos = (uint8_t)(getNumTextCharsUnderWidth(rdat,(uint16_t)(cursorRelPos),state->tss.selectableStrTxt[i],0,state->tss.selectableStrProp[i] & 7U));
                       state->tss.selEndPos = state->tss.selStartPos;
                     }
+                    if(state->uiState == UISTATE_FULLLEVELINFO){
+                      //determine selected string's level, column, row from metadata
+                      state->ds.nuclFullInfoSelStrMetadata = state->tss.selectableStrMetadata[state->tss.selectedStr];
+                      //SDL_Log("Selected string level: %u, col: %u, row: %u\n",(uint16_t)(state->tss.selectableStrMetadata[state->tss.selectedStr] & 65535U),(uint8_t)((uint32_t)(state->tss.selectableStrMetadata[state->tss.selectedStr] >> 16) & 255U),(uint8_t)((uint32_t)(state->tss.selectableStrMetadata[state->tss.selectedStr] >> 24) & 255U));
+                      //SDL_Log("selected string: %s, start pos: %u, end pos: %u\n",state->tss.selectableStrTxt[state->tss.selectedStr],state->tss.selStartPos,state->tss.selEndPos);
+                    }
                     //SDL_Log("start drag on selectable text at character %u\n",state->tss.selStartPos);
                   }
                 }
@@ -1094,7 +1109,7 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
       if(state->ds.chartDragInProgress){
         //SDL_Log("Mouse released.\n");
         state->ds.chartDragFinished = 1;
-        clearSelectionStrs(&state->ds,&state->tss,1); //allow strings on the chart to be selectable
+        clearSelectionStrs(&state->ds,&state->tss,1,0); //allow strings on the chart to be selectable
       }
       if((state->ds.textDragInProgress == TXTDRAGSTATE_DRAG_OVER_TXT)||(state->ds.textDragInProgress == TXTDRAGSTATE_DRAG_NOT_OVER_TXT)){
         if(state->mouseXPx >= 0.0f){ //only update the selection position if the mouse is still in the window
@@ -1103,6 +1118,7 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
             cursorRelPos = 0.0f;
           }
           state->tss.selEndPos = (uint8_t)(getNumTextCharsUnderWidth(rdat,(uint16_t)(cursorRelPos),state->tss.selectableStrTxt[state->tss.selectedStr],0,state->tss.selectableStrProp[state->tss.selectedStr] & 7U));
+          //SDL_Log("start pos: %u, end pos: %u\n",state->tss.selStartPos,state->tss.selEndPos);
         }
         setSelTxtPrimarySelection(&state->tss); //support primary selection on Linux
         state->ds.textDragFinished = 1;
@@ -1240,7 +1256,7 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
       }
       //SDL_Log("scale: %0.2f\n",(double)state->ds.chartZoomScale);
     }else if((state->uiState == UISTATE_FULLLEVELINFO)||(state->uiState == UISTATE_FULLLEVELINFOWITHMENU)){
-      fcScrollAction(state,state->zoomDeltaVal*0.55f);
+      fcScrollAction(state,state->zoomDeltaVal*0.4f);
     }
     
   }

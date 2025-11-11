@@ -79,8 +79,9 @@ void initializeTempState(const app_data *restrict dat, app_state *restrict state
 	state->ds.infoBoxJpiColOffset = NUCL_INFOBOX_JPI_COL_MIN_OFFSET;
 	state->ds.infoBoxHlColOffset = NUCL_INFOBOX_HALFLIFE_COL_MIN_OFFSET;
 	state->ds.infoBoxDcyModeColOffset = NUCL_INFOBOX_DECAYMODE_COL_MIN_OFFSET;
-	state->ds.mouseOverRxn = 255;
-	state->ds.mouseHoldRxn = 255;
+	state->ds.nuclFullInfoSelStrMetadata = 4294967295U;
+	state->ds.mouseOverRxn = 255U;
+	state->ds.mouseHoldRxn = 255U;
 	state->ds.selectedRxn = 0;
 	state->ds.totalPanTime = CHART_KEY_PAN_TIME;
 	state->ds.zoomFinished = 0;
@@ -100,7 +101,7 @@ void initializeTempState(const app_data *restrict dat, app_state *restrict state
 	state->ss.numResults = 0;
 	state->ss.searchInProgress = SEARCHSTATE_NOTSEARCHING;
 	state->ss.canUpdateResults = SDL_CreateSemaphore(1);
-	clearSelectionStrs(&state->ds,&state->tss,0);
+	clearSelectionStrs(&state->ds,&state->tss,0,0);
 	SDL_memset(state->ds.uiElemExtPlusX,0,sizeof(state->ds.uiElemExtPlusX));
 	SDL_memset(state->ds.uiElemExtPlusY,0,sizeof(state->ds.uiElemExtPlusY));
 	SDL_memset(state->ds.uiElemExtMinusX,0,sizeof(state->ds.uiElemExtMinusX));
@@ -193,9 +194,11 @@ void takeScreenshot(resource_data *restrict rdat){
 }
 
 //resets the text selection state, should be called on frames where selectable text changes position
-void clearSelectionStrs(const drawing_state *restrict ds, text_selection_state *restrict tss, const uint8_t modifiableAfter){
-	tss->selStartPos = 0;
-	tss->selEndPos = 0;
+void clearSelectionStrs(const drawing_state *restrict ds, text_selection_state *restrict tss, const uint8_t modifiableAfter, const uint8_t preservePos){
+	if(preservePos == 0){
+		tss->selStartPos = 0;
+		tss->selEndPos = 0;
+	}
 	tss->selectedStr = 65535; //no string selected
 	tss->numSelStrs = 0; //no selectable strings defined
 	if(ds->shownElements & ((uint64_t)(1) << UIELEM_PREFS_DIALOG)){
@@ -331,7 +334,7 @@ void stopUIAnimation(const app_data *restrict dat, app_state *restrict state, re
 			//SDL_Log("UI state: %u\n",state->uiState);
       break;
 		case UIANIM_NUCLINFOBOX_SHOW:
-			clearSelectionStrs(&state->ds,&state->tss,1); //allow strings on the info box to be selectable
+			clearSelectionStrs(&state->ds,&state->tss,1,0); //allow strings on the info box to be selectable
 			break;
 		case UIANIM_NUCLINFOBOX_HIDE:
 			state->ds.shownElements &= (~((uint64_t)(1) << UIELEM_NUCL_INFOBOX)); //close the info box
@@ -346,16 +349,16 @@ void stopUIAnimation(const app_data *restrict dat, app_state *restrict state, re
 			changeUIState(dat,state,rdat,UISTATE_FULLLEVELINFO); //update UI state now that the full info box is visible
 			break;
 		case UIANIM_NUCLINFOBOX_CONTRACT:
-			clearSelectionStrs(&state->ds,&state->tss,1); //allow strings on the info box to be selectable
+			clearSelectionStrs(&state->ds,&state->tss,1,0); //allow strings on the info box to be selectable
 			break;
 		case UIANIM_NUCLINFOBOX_MORPH:
-			clearSelectionStrs(&state->ds,&state->tss,1); //allow strings on the info box to be selectable
+			clearSelectionStrs(&state->ds,&state->tss,1,0); //allow strings on the info box to be selectable
 			break;
 		case UIANIM_NUCLINFOBOX_TXTFADEIN:
 			if(state->uiState == UISTATE_FULLLEVELINFOWITHMENU){
-				clearSelectionStrs(&state->ds,&state->tss,0); //strings on full level list are no longer selectable
+				clearSelectionStrs(&state->ds,&state->tss,0,0); //strings on full level list are no longer selectable
 			}else{
-				clearSelectionStrs(&state->ds,&state->tss,1); //allow strings on the full info box to be selectable
+				clearSelectionStrs(&state->ds,&state->tss,1,0); //allow strings on the full info box to be selectable
 			}
 			break;
 		case UIANIM_NUCLINFOBOX_TXTFADEOUT:
@@ -364,7 +367,7 @@ void stopUIAnimation(const app_data *restrict dat, app_state *restrict state, re
 			state->ds.shownElements |= ((uint64_t)(1) << UIELEM_CHARTOFNUCLIDES); //show the chart
 			startUIAnimation(dat,state,rdat,UIANIM_NUCLINFOBOX_CONTRACT);
 			changeUIState(dat,state,rdat,UISTATE_INFOBOX); //update UI state now that the regular info box is visible
-			clearSelectionStrs(&state->ds,&state->tss,0); //strings on full level list are no longer selectable
+			clearSelectionStrs(&state->ds,&state->tss,0,0); //strings on full level list are no longer selectable
 			break;
 		case UIANIM_CONTEXT_MENU_HIDE:
 			state->cms.numContextMenuItems = 0; //prevent further interactions with the context menu
@@ -440,7 +443,7 @@ void updateDrawingState(const app_data *restrict dat, app_state *restrict state,
 			state->ds.chartPosY = state->ds.chartZoomToY;
 			state->ds.zoomFinished = 1;
 			state->mouseholdElement = UIELEM_ENUM_LENGTH; //remove highlight from zoom buttons
-			clearSelectionStrs(&state->ds,&state->tss,1); //allow strings on the chart to be selectable
+			clearSelectionStrs(&state->ds,&state->tss,1,0); //allow strings on the chart to be selectable
 		}
 		//SDL_Log("zoom scale: %0.4f\n",(double)state->ds.chartZoomScale);
 	}
@@ -464,7 +467,7 @@ void updateDrawingState(const app_data *restrict dat, app_state *restrict state,
 			state->ds.chartPosX = state->ds.chartPanToX;
 			state->ds.chartPosY = state->ds.chartPanToY;
 			state->ds.panFinished = 1;
-			clearSelectionStrs(&state->ds,&state->tss,1); //allow strings on the chart to be selectable
+			clearSelectionStrs(&state->ds,&state->tss,1,0); //allow strings on the chart to be selectable
 		}
 		//SDL_Log("pan t: %0.3f\n",(double)state->ds.timeSincePanStart);
 	}
@@ -474,7 +477,7 @@ void updateDrawingState(const app_data *restrict dat, app_state *restrict state,
 		if(state->ds.timeSinceFCScollStart >= NUCL_FULLINFOBOX_SCROLL_TIME){
 			state->ds.nuclFullInfoScrollY = state->ds.nuclFullInfoScrollToY;
 			state->ds.fcScrollFinished = 1;
-			clearSelectionStrs(&state->ds,&state->tss,1); //now that scroll is finished, allow selection strings to be regenerated
+			clearSelectionStrs(&state->ds,&state->tss,1,1); //now that scroll is finished, allow selection strings to be regenerated
 		}
 		//SDL_Log("scroll t: %0.3f, pos: %f\n",(double)state->ds.timeSinceFCScollStart,(double)state->ds.nuclFullInfoScrollY);
 	}
@@ -3699,9 +3702,9 @@ void changeUIState(const app_data *restrict dat, app_state *restrict state, reso
 				state->interactableElement |= ((uint64_t)(1) << UIELEM_SEARCH_MENU);
 			}
 			if(state->uiState == UISTATE_FULLLEVELINFOWITHMENU){
-				clearSelectionStrs(&state->ds,&state->tss,0); //strings on full level list are no longer selectable
+				clearSelectionStrs(&state->ds,&state->tss,0,0); //strings on full level list are no longer selectable
 			}else{
-				clearSelectionStrs(&state->ds,&state->tss,1); //allow strings on the full info box to be selectable
+				clearSelectionStrs(&state->ds,&state->tss,1,0); //allow strings on the full info box to be selectable
 			}
 			updateSingleUIElemPosition(dat,state,rdat,UIELEM_SEARCH_BUTTON); //update search button position, if moving here from the mini info box
 			updateSingleUIElemPosition(dat,state,rdat,UIELEM_SEARCH_MENU);
@@ -3710,6 +3713,7 @@ void changeUIState(const app_data *restrict dat, app_state *restrict state, reso
 			updateSingleUIElemPosition(dat,state,rdat,UIELEM_SEARCH_RESULT_2);
 			updateSingleUIElemPosition(dat,state,rdat,UIELEM_SEARCH_RESULT_3);
 			updateSingleUIElemPosition(dat,state,rdat,UIELEM_SEARCH_RESULT_4);
+			state->ds.nuclFullInfoSelStrMetadata = 4294967295U;
 			break;
 		case UISTATE_INFOBOX:
 			state->interactableElement |= ((uint64_t)(1) << UIELEM_MENU_BUTTON);
@@ -3724,7 +3728,7 @@ void changeUIState(const app_data *restrict dat, app_state *restrict state, reso
 			if(state->ds.chartZoomToScale < MAX_CHART_ZOOM_SCALE){
 				state->interactableElement |= ((uint64_t)(1) << UIELEM_ZOOMIN_BUTTON);
 			}
-			clearSelectionStrs(&state->ds,&state->tss,1); //allow strings on the info box to be selectable
+			clearSelectionStrs(&state->ds,&state->tss,1,0); //allow strings on the info box to be selectable
 			updateSingleUIElemPosition(dat,state,rdat,UIELEM_SEARCH_BUTTON); //update search button position, if moving here from the full info box
 			updateSingleUIElemPosition(dat,state,rdat,UIELEM_SEARCH_MENU);
 			updateSingleUIElemPosition(dat,state,rdat,UIELEM_SEARCH_ENTRYBOX);
@@ -3774,7 +3778,7 @@ void changeUIState(const app_data *restrict dat, app_state *restrict state, reso
 				state->interactableElement |= ((uint64_t)(1) << UIELEM_SEARCH_ENTRYBOX);
 				state->interactableElement |= ((uint64_t)(1) << UIELEM_SEARCH_MENU);
 			}
-			clearSelectionStrs(&state->ds,&state->tss,0); //strings on the info box are no longer selectable
+			clearSelectionStrs(&state->ds,&state->tss,0,0); //strings on the info box are no longer selectable
 			break;
     case UISTATE_CHARTONLY:
     default:
@@ -3787,7 +3791,7 @@ void changeUIState(const app_data *restrict dat, app_state *restrict state, reso
 			if(state->ds.chartZoomToScale < MAX_CHART_ZOOM_SCALE){
 				state->interactableElement |= ((uint64_t)(1) << UIELEM_ZOOMIN_BUTTON);
 			}
-			clearSelectionStrs(&state->ds,&state->tss,0); //strings on the info box are no longer selectable
+			clearSelectionStrs(&state->ds,&state->tss,0,0); //strings on the info box are no longer selectable
       break;
   }
 	//SDL_Log("Mouseover element: %u\n",state->mouseoverElement);
@@ -4201,6 +4205,7 @@ void setSelectedNuclOnLevelList(const app_data *restrict dat, app_state *restric
 		state->ds.fcNuclChangeInProgress = 1;
 		state->ds.fcNuclChangeFinished = 0;
 		state->ds.mouseOverRxn = 255;
+		clearSelectionStrs(&state->ds,&state->tss,0,0); //strings on full level list are not selectable during the animation
 		startUIAnimation(dat,state,rdat,UIANIM_NUCLINFOBOX_TXTFADEIN);
 
 		//also pan the chart 'behind the scenes'
@@ -4219,7 +4224,7 @@ void setSelectedNuclOnChart(const app_data *restrict dat, app_state *restrict st
 	if((selNucl < MAXNUMNUCL)&&(selNucl != state->chartSelectedNucl)){
 		state->chartSelectedNucl = selNucl;
 		setInfoBoxDimensions(dat,state,rdat,selNucl);
-		clearSelectionStrs(&state->ds,&state->tss,1); //allow strings on the info box to be selectable
+		clearSelectionStrs(&state->ds,&state->tss,1,0); //allow strings on the info box to be selectable
 		if(!(state->ds.shownElements & ((uint64_t)(1) << UIELEM_NUCL_INFOBOX))){
 			state->ds.shownElements |= ((uint64_t)(1) << UIELEM_NUCL_INFOBOX);
 			changeUIState(dat,state,rdat,UISTATE_INFOBOX); //make info box interactable
@@ -4296,7 +4301,7 @@ void uiElemHoldAction(const app_data *restrict dat, app_state *restrict state, c
 				}else if(state->ds.nuclFullInfoScrollY > state->ds.nuclFullInfoMaxScrollY){
 					state->ds.nuclFullInfoScrollY = state->ds.nuclFullInfoMaxScrollY;
 				}
-				clearSelectionStrs(&state->ds,&state->tss,1); //selection string positions are changed on scroll
+				clearSelectionStrs(&state->ds,&state->tss,1,1); //selection string positions are changed on scroll
 			}
 			break;
 		default:
@@ -5949,7 +5954,7 @@ void updateUIElemPositions(const app_data *restrict dat, app_state *restrict sta
   for(uint8_t i=0; i<UIELEM_ENUM_LENGTH; i++){
     updateSingleUIElemPosition(dat,state,rdat,i);
   }
-	clearSelectionStrs(&state->ds,&state->tss,1); //update selection strings if needed
+	clearSelectionStrs(&state->ds,&state->tss,1,0); //update selection strings if needed
 }
 
 //removes all selectable string data where the strings intersect with the provided rect

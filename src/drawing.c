@@ -472,7 +472,7 @@ SDL_FRect drawTextAlignedSized(resource_data *restrict rdat, const float xPos, c
   return drawRect;
 }
 
-SDL_FRect drawSelectableClickableTextAlignedSized(resource_data *restrict rdat, text_selection_state *restrict tss, const float xPos, const float yPos, const SDL_Color textColor, const uint8_t fontSizeInd, const Uint8 alpha, const char *txt, const uint8_t alignment, const Uint16 maxWidth, const uint8_t clickAction, const uint16_t clickPar){
+SDL_FRect drawSelectableClickableTextAlignedSized(resource_data *restrict rdat, text_selection_state *restrict tss, const float xPos, const float yPos, const SDL_Color textColor, const uint8_t fontSizeInd, const Uint8 alpha, const char *txt, const uint8_t alignment, const Uint16 maxWidth, const uint8_t clickAction, const uint16_t clickPar, const uint32_t metadata){
   
   SDL_FRect rect = drawTextAlignedSized(rdat,xPos,yPos,textColor,fontSizeInd,alpha,txt,alignment,maxWidth);
 
@@ -483,6 +483,7 @@ SDL_FRect drawSelectableClickableTextAlignedSized(resource_data *restrict rdat, 
       //SDL_Log("  Rect: %0.3f %0.3f %0.3f %0.3f\n",(double)rect.x,(double)rect.y,(double)rect.w,(double)rect.h);
       tss->selectableStrRect[tss->numSelStrs] = rect;
       tss->selectableStrProp[tss->numSelStrs] = (uint8_t)(fontSizeInd & 7U);
+      tss->selectableStrMetadata[tss->numSelStrs] = metadata;
       if(clickAction < TXTCLICKACTION_ENUM_LENGTH){
         tss->selectableStrProp[tss->numSelStrs] |= (uint8_t)(1U << 3U); //set bit specifying string is clickable
         tss->selectableStrProp[tss->numSelStrs] |= (uint8_t)(clickAction << 4U);
@@ -499,8 +500,11 @@ SDL_FRect drawSelectableClickableTextAlignedSized(resource_data *restrict rdat, 
 
 //draw text which will be marked selectable
 //checkOverlap: if true, will check all existing selection strings and prevent any overlapping text from being selectable
+SDL_FRect drawSelectableTextAlignedSizedWithMetadata(resource_data *restrict rdat, text_selection_state *restrict tss, const float xPos, const float yPos, const SDL_Color textColor, const uint8_t fontSizeInd, const Uint8 alpha, const char *txt, const uint8_t alignment, const Uint16 maxWidth, const uint32_t metadata){
+  return drawSelectableClickableTextAlignedSized(rdat,tss,xPos,yPos,textColor,fontSizeInd,alpha,txt,alignment,maxWidth,TXTCLICKACTION_ENUM_LENGTH,0,metadata);
+}
 SDL_FRect drawSelectableTextAlignedSized(resource_data *restrict rdat, text_selection_state *restrict tss, const float xPos, const float yPos, const SDL_Color textColor, const uint8_t fontSizeInd, const Uint8 alpha, const char *txt, const uint8_t alignment, const Uint16 maxWidth){
-  return drawSelectableClickableTextAlignedSized(rdat,tss,xPos,yPos,textColor,fontSizeInd,alpha,txt,alignment,maxWidth,TXTCLICKACTION_ENUM_LENGTH,0);
+  return drawSelectableClickableTextAlignedSized(rdat,tss,xPos,yPos,textColor,fontSizeInd,alpha,txt,alignment,maxWidth,TXTCLICKACTION_ENUM_LENGTH,0,4294967295U);
 }
 
 void drawTextAligned(resource_data *restrict rdat, const float xPos, const float yPos, const SDL_Color textColor, const uint8_t fontSizeInd, const char *txt, const uint8_t alignment){
