@@ -2456,7 +2456,7 @@ uint8_t getHighlightState(const app_state *restrict state, const uint8_t uiElem)
   }
 }
 
-void drawInfoBoxHeader(const app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat, const float x, const float y, const Uint8 alpha, const uint16_t nuclInd){
+void drawInfoBoxHeader(const app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat, const float x, const float y, const Uint8 alpha, const uint16_t nuclInd, const uint32_t selMetadata){
   char tmpStr[32], nuclStr[32];
   float drawXPos = (float)(x + (PANEL_EDGE_SIZE + 3*UI_PADDING_SIZE)*state->ds.uiUserScale);
   float drawYPos = (float)(y + (PANEL_EDGE_SIZE + 1.5f*UI_PADDING_SIZE)*state->ds.uiUserScale);
@@ -2471,7 +2471,7 @@ void drawInfoBoxHeader(const app_data *restrict dat, app_state *restrict state, 
   }else{
     SDL_snprintf(tmpStr,32,"%s (%s-%u)",nuclStr,getFullElemStr((uint8_t)dat->ndat.nuclData[nuclInd].Z,(uint8_t)dat->ndat.nuclData[nuclInd].N),nucA);
   }
-  drawSelectableTextAlignedSized(rdat,&state->tss,drawXPos,drawYPos+(10.0f*state->ds.uiUserScale),blackCol8Bit,FONTSIZE_LARGE_BOLD,alpha,tmpStr,ALIGN_LEFT,16384); //draw element label
+  drawSelectableTextAlignedSizedWithMetadata(rdat,&state->tss,drawXPos,drawYPos+(10.0f*state->ds.uiUserScale),blackCol8Bit,FONTSIZE_LARGE_BOLD,alpha,tmpStr,ALIGN_LEFT,16384,selMetadata); //draw element label
 }
 
 void drawParentDecayQValStr(const app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat, const float yPos, const Uint8 alpha, const uint16_t nuclInd, const uint8_t decayInd, const uint32_t selMetadata){
@@ -2507,7 +2507,11 @@ void drawParentDecayQValStr(const app_data *restrict dat, app_state *restrict st
         SDL_snprintf(qValStr,128,"%s (%s, %s=%s, %s=%s): %s=%s %s",dat->strings[dat->locStringIDs[LOCSTR_PARENTDECAY_LONG]],nuclStr,dat->strings[dat->locStringIDs[LOCSTR_JPI]],jpiStr,dat->strings[dat->locStringIDs[LOCSTR_HALFLIFE]],hlStr,dat->strings[dat->locStringIDs[LOCSTR_QEC]],descStr,getValueUnitShortStr(dat->ndat.nuclData[parentNuclInd].qec.unit));
       }
       //SDL_Log("printing: %s\n",qValStr);
-      drawSelectableTextAlignedSizedWithMetadata(rdat,&state->tss,state->ds.windowXRes/2.0f,yPos+(0.5f*NUCL_INFOBOX_SMALLLINE_HEIGHT*state->ds.uiUserScale),blackCol8Bit,FONTSIZE_NORMAL_BOLD,alpha,qValStr,ALIGN_CENTER,16384,selMetadata);
+      if(yPos >= (NUCL_FULLINFOBOX_LEVELLIST_POS_Y*state->ds.uiUserScale - 1.0f)){
+        drawSelectableTextAlignedSizedWithMetadata(rdat,&state->tss,state->ds.windowXRes/2.0f,yPos+(0.5f*NUCL_INFOBOX_SMALLLINE_HEIGHT*state->ds.uiUserScale),blackCol8Bit,FONTSIZE_NORMAL_BOLD,alpha,qValStr,ALIGN_CENTER,16384,selMetadata);
+      }else{
+        drawTextAlignedSized(rdat,state->ds.windowXRes/2.0f,yPos+(0.5f*NUCL_INFOBOX_SMALLLINE_HEIGHT*state->ds.uiUserScale),blackCol8Bit,FONTSIZE_NORMAL_BOLD,alpha,qValStr,ALIGN_CENTER,16384);
+      }
     }else if(dcyModeInd == DECAYMODE_BETAMINUS){
       if(getRawValFromDB(&dat->ndat.levels[parentLvlInd].energy) > 0.0){
         valWithErr sumEVal;
@@ -2522,9 +2526,12 @@ void drawParentDecayQValStr(const app_data *restrict dat, app_state *restrict st
       }else{
         SDL_snprintf(qValStr,128,"%s (%s, %s=%s, %s=%s): %s=%s %s",dat->strings[dat->locStringIDs[LOCSTR_PARENTDECAY_LONG]],nuclStr,dat->strings[dat->locStringIDs[LOCSTR_JPI]],jpiStr,dat->strings[dat->locStringIDs[LOCSTR_HALFLIFE]],hlStr,dat->strings[dat->locStringIDs[LOCSTR_QBETAMINUS]],descStr,getValueUnitShortStr(dat->ndat.nuclData[parentNuclInd].qbeta.unit));
       }
-      
       //SDL_Log("printing: %s\n",qValStr);
-      drawSelectableTextAlignedSizedWithMetadata(rdat,&state->tss,state->ds.windowXRes/2.0f,yPos+(0.5f*NUCL_INFOBOX_SMALLLINE_HEIGHT*state->ds.uiUserScale),blackCol8Bit,FONTSIZE_NORMAL_BOLD,alpha,qValStr,ALIGN_CENTER,16384,selMetadata);
+      if(yPos >= (NUCL_FULLINFOBOX_LEVELLIST_POS_Y*state->ds.uiUserScale - 1.0f)){
+        drawSelectableTextAlignedSizedWithMetadata(rdat,&state->tss,state->ds.windowXRes/2.0f,yPos+(0.5f*NUCL_INFOBOX_SMALLLINE_HEIGHT*state->ds.uiUserScale),blackCol8Bit,FONTSIZE_NORMAL_BOLD,alpha,qValStr,ALIGN_CENTER,16384,selMetadata);
+      }else{
+        drawTextAlignedSized(rdat,state->ds.windowXRes/2.0f,yPos+(0.5f*NUCL_INFOBOX_SMALLLINE_HEIGHT*state->ds.uiUserScale),blackCol8Bit,FONTSIZE_NORMAL_BOLD,alpha,qValStr,ALIGN_CENTER,16384);
+      }
     }else if(dcyModeInd == DECAYMODE_ALPHA){
       if(getRawValFromDB(&dat->ndat.levels[parentLvlInd].energy) > 0.0){
         valWithErr sumEVal;
@@ -2539,9 +2546,12 @@ void drawParentDecayQValStr(const app_data *restrict dat, app_state *restrict st
       }else{
         SDL_snprintf(qValStr,128,"%s (%s, %s=%s, %s=%s): %s=%s %s",dat->strings[dat->locStringIDs[LOCSTR_PARENTDECAY_LONG]],nuclStr,dat->strings[dat->locStringIDs[LOCSTR_JPI]],jpiStr,dat->strings[dat->locStringIDs[LOCSTR_HALFLIFE]],hlStr,dat->strings[dat->locStringIDs[LOCSTR_QALPHA]],descStr,getValueUnitShortStr(dat->ndat.nuclData[parentNuclInd].qalpha.unit));
       }
-      
       //SDL_Log("printing: %s\n",qValStr);
-      drawSelectableTextAlignedSizedWithMetadata(rdat,&state->tss,state->ds.windowXRes/2.0f,yPos+(0.5f*NUCL_INFOBOX_SMALLLINE_HEIGHT*state->ds.uiUserScale),blackCol8Bit,FONTSIZE_NORMAL_BOLD,alpha,qValStr,ALIGN_CENTER,16384,selMetadata);
+      if(yPos >= (NUCL_FULLINFOBOX_LEVELLIST_POS_Y*state->ds.uiUserScale - 1.0f)){
+        drawSelectableTextAlignedSizedWithMetadata(rdat,&state->tss,state->ds.windowXRes/2.0f,yPos+(0.5f*NUCL_INFOBOX_SMALLLINE_HEIGHT*state->ds.uiUserScale),blackCol8Bit,FONTSIZE_NORMAL_BOLD,alpha,qValStr,ALIGN_CENTER,16384,selMetadata);
+      }else{
+        drawTextAlignedSized(rdat,state->ds.windowXRes/2.0f,yPos+(0.5f*NUCL_INFOBOX_SMALLLINE_HEIGHT*state->ds.uiUserScale),blackCol8Bit,FONTSIZE_NORMAL_BOLD,alpha,qValStr,ALIGN_CENTER,16384);
+      }
     }
   }
 }
@@ -2556,6 +2566,13 @@ void drawNuclFullInfoBox(const app_data *restrict dat, app_state *restrict state
   }else if(state->ds.uiAnimPlaying & (1U << UIANIM_NUCLINFOBOX_TXTFADEIN)){
     txtYOffset = (80.0f*state->ds.uiUserScale*juice_smoothStart2(state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_TXTFADEIN]/UI_ANIM_LENGTH));
     txtAlpha = (uint8_t)(255.0f*juice_smoothStart2(1.0f - state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_TXTFADEIN]/UI_ANIM_LENGTH));
+  }
+
+  if(state->ds.fcScrollInProgress){
+    //force selection strings to be updated mid-scroll
+    //this allows for the text selection box to update smoothly
+    //while using the mouse wheel or scrollbar 
+    clearSelectionStrs(&state->ds,&state->tss,1,1);
   }
   
   //level and gamma data
@@ -2638,7 +2655,7 @@ void drawNuclFullInfoBox(const app_data *restrict dat, app_state *restrict state
           if(((drawYPos + NUCL_INFOBOX_SMALLLINE_HEIGHT*state->ds.uiUserScale) >= NUCL_FULLINFOBOX_LEVELLIST_POS_Y)&&(drawYPos <= state->ds.windowYRes)){
 
             uint32_t strMetadata = (lvlInd - dat->ndat.nuclData[nuclInd].firstLevel) & 65535U; //16 lower bits give level index
-            strMetadata |= (uint32_t)((uint32_t)(255U) << 16); //bits 16-23 give column
+            strMetadata |= (uint32_t)((uint32_t)(255U) << 16); //bits 16-23 give column (use dummy value of 255 for Q-values)
             strMetadata |= (uint32_t)((uint32_t)i << 24); //bits 24-31 give row
             if((state->tss.selStrsModifiable)&&(strMetadata == state->ds.nuclFullInfoSelStrMetadata)){state->tss.selectedStr = state->tss.numSelStrs;}
             
@@ -2648,17 +2665,29 @@ void drawNuclFullInfoBox(const app_data *restrict dat, app_state *restrict state
               default:
                 getQValStr(descStr,dat->ndat.nuclData[nuclInd].sn,1,0);
                 SDL_snprintf(qValStr,64,"%s: %s=%s %s",dat->strings[dat->locStringIDs[LOCSTR_SN_LONG]],dat->strings[dat->locStringIDs[LOCSTR_SN]],descStr,getValueUnitShortStr(dat->ndat.nuclData[nuclInd].sn.unit));
-                drawSelectableTextAlignedSizedWithMetadata(rdat,&state->tss,state->ds.windowXRes/2.0f,drawYPos+(0.5f*NUCL_INFOBOX_SMALLLINE_HEIGHT*state->ds.uiUserScale),blackCol8Bit,FONTSIZE_NORMAL_BOLD,txtAlpha,qValStr,ALIGN_CENTER,16384,strMetadata);
+                if(drawYPos >= (NUCL_FULLINFOBOX_LEVELLIST_POS_Y*state->ds.uiUserScale - 1.0f)){
+                  drawSelectableTextAlignedSizedWithMetadata(rdat,&state->tss,state->ds.windowXRes/2.0f,drawYPos+(0.5f*NUCL_INFOBOX_SMALLLINE_HEIGHT*state->ds.uiUserScale),blackCol8Bit,FONTSIZE_NORMAL_BOLD,txtAlpha,qValStr,ALIGN_CENTER,16384,strMetadata);
+                }else{
+                  drawTextAlignedSized(rdat,state->ds.windowXRes/2.0f,drawYPos+(0.5f*NUCL_INFOBOX_SMALLLINE_HEIGHT*state->ds.uiUserScale),blackCol8Bit,FONTSIZE_NORMAL_BOLD,txtAlpha,qValStr,ALIGN_CENTER,16384);
+                }
                 break;
               case QVAL_SP:
                 getQValStr(descStr,dat->ndat.nuclData[nuclInd].sp,1,0);
                 SDL_snprintf(qValStr,64,"%s: %s=%s %s",dat->strings[dat->locStringIDs[LOCSTR_SP_LONG]],dat->strings[dat->locStringIDs[LOCSTR_SP]],descStr,getValueUnitShortStr(dat->ndat.nuclData[nuclInd].sp.unit));
-                drawSelectableTextAlignedSizedWithMetadata(rdat,&state->tss,state->ds.windowXRes/2.0f,drawYPos+(0.5f*NUCL_INFOBOX_SMALLLINE_HEIGHT*state->ds.uiUserScale),blackCol8Bit,FONTSIZE_NORMAL_BOLD,txtAlpha,qValStr,ALIGN_CENTER,16384,strMetadata);
+                if(drawYPos >= (NUCL_FULLINFOBOX_LEVELLIST_POS_Y*state->ds.uiUserScale - 1.0f)){
+                  drawSelectableTextAlignedSizedWithMetadata(rdat,&state->tss,state->ds.windowXRes/2.0f,drawYPos+(0.5f*NUCL_INFOBOX_SMALLLINE_HEIGHT*state->ds.uiUserScale),blackCol8Bit,FONTSIZE_NORMAL_BOLD,txtAlpha,qValStr,ALIGN_CENTER,16384,strMetadata);
+                }else{
+                  drawTextAlignedSized(rdat,state->ds.windowXRes/2.0f,drawYPos+(0.5f*NUCL_INFOBOX_SMALLLINE_HEIGHT*state->ds.uiUserScale),blackCol8Bit,FONTSIZE_NORMAL_BOLD,txtAlpha,qValStr,ALIGN_CENTER,16384);
+                }
                 break;
               case QVAL_SA:
                 getQValStr(descStr,dat->ndat.nuclData[nuclInd].qalpha,1,0); 
                 SDL_snprintf(qValStr,64,"%s: %s=%s %s",dat->strings[dat->locStringIDs[LOCSTR_SA_LONG]],dat->strings[dat->locStringIDs[LOCSTR_QALPHA]],descStr,getValueUnitShortStr(dat->ndat.nuclData[nuclInd].qalpha.unit));
-                drawSelectableTextAlignedSizedWithMetadata(rdat,&state->tss,state->ds.windowXRes/2.0f,drawYPos+(0.5f*NUCL_INFOBOX_SMALLLINE_HEIGHT*state->ds.uiUserScale),blackCol8Bit,FONTSIZE_NORMAL_BOLD,txtAlpha,qValStr,ALIGN_CENTER,16384,strMetadata);
+                if(drawYPos >= (NUCL_FULLINFOBOX_LEVELLIST_POS_Y*state->ds.uiUserScale - 1.0f)){
+                  drawSelectableTextAlignedSizedWithMetadata(rdat,&state->tss,state->ds.windowXRes/2.0f,drawYPos+(0.5f*NUCL_INFOBOX_SMALLLINE_HEIGHT*state->ds.uiUserScale),blackCol8Bit,FONTSIZE_NORMAL_BOLD,txtAlpha,qValStr,ALIGN_CENTER,16384,strMetadata);
+                }else{
+                  drawTextAlignedSized(rdat,state->ds.windowXRes/2.0f,drawYPos+(0.5f*NUCL_INFOBOX_SMALLLINE_HEIGHT*state->ds.uiUserScale),blackCol8Bit,FONTSIZE_NORMAL_BOLD,txtAlpha,qValStr,ALIGN_CENTER,16384);
+                }
                 break;
               case QVAL_PARENT_BETA_1:
                 drawParentDecayQValStr(dat,state,rdat,drawYPos,txtAlpha,nuclInd,0,strMetadata);
@@ -2996,129 +3025,171 @@ void drawNuclFullInfoBox(const app_data *restrict dat, app_state *restrict state
   drawLine(rdat,0.0f,rect.y+rect.h,state->ds.windowXRes,rect.y+rect.h,NUCL_FULLINFOBOX_DIVIDER_LINE_THICKNESS*state->ds.uiUserScale,dividerLineCol,dividerLineCol);
 
   //header
+  const uint32_t headerStrMetadata = (uint32_t)((uint32_t)(254U) << 16); //bits 16-23: use dummy value of 254 for header text strings
   char descStr[64];
-  drawInfoBoxHeader(dat,state,rdat,0.0f,NUCL_FULLINFOBOX_HEADER_POS_Y*state->ds.uiUserScale,255,nuclInd);
+  if((state->tss.selStrsModifiable)&&(headerStrMetadata == state->ds.nuclFullInfoSelStrMetadata)){state->tss.selectedStr = state->tss.numSelStrs;}
+  drawInfoBoxHeader(dat,state,rdat,0.0f,NUCL_FULLINFOBOX_HEADER_POS_Y*state->ds.uiUserScale,255,nuclInd,headerStrMetadata);
   //proton and neutron numbers, abundance
   drawYPos = NUCL_FULLINFOBOX_NZVALS_POS_Y*state->ds.uiUserScale + txtYOffset;
+  uint32_t strMetadata = headerStrMetadata | (uint32_t)((uint32_t)(1) << 24); //each string should have a unique metadata value, if we want selection to persist after scrolling
+  if((state->tss.selStrsModifiable)&&(strMetadata == state->ds.nuclFullInfoSelStrMetadata)){state->tss.selectedStr = state->tss.numSelStrs;}
   SDL_snprintf(descStr,64,"%s: %3i, %s: %3i",dat->strings[dat->locStringIDs[LOCSTR_PROTONSDESC]],dat->ndat.nuclData[nuclInd].Z,dat->strings[dat->locStringIDs[LOCSTR_NEUTRONSDESC]],dat->ndat.nuclData[nuclInd].N);
-  drawSelectableTextAlignedSized(rdat,&state->tss,NUCL_FULLINFOBOX_NZVALS_POS_X*state->ds.uiUserScale,drawYPos,blackCol8Bit,FONTSIZE_SMALL,txtAlpha,descStr,ALIGN_LEFT,16384);
+  drawSelectableTextAlignedSizedWithMetadata(rdat,&state->tss,NUCL_FULLINFOBOX_NZVALS_POS_X*state->ds.uiUserScale,drawYPos,blackCol8Bit,FONTSIZE_SMALL,txtAlpha,descStr,ALIGN_LEFT,16384,strMetadata);
   drawYPos += 18.0f*state->ds.uiUserScale;
+  strMetadata = headerStrMetadata | (uint32_t)((uint32_t)(2) << 24); //each string should have a unique metadata value, if we want selection to persist after scrolling
+  if((state->tss.selStrsModifiable)&&(strMetadata == state->ds.nuclFullInfoSelStrMetadata)){state->tss.selectedStr = state->tss.numSelStrs;}
   if(dat->ndat.nuclData[nuclInd].abundance.val > 0.0f){
     getAbundanceStr(tmpStr,&dat->ndat,nuclInd);
     SDL_snprintf(descStr,64,"%s of %s on Earth",tmpStr,getFullElemStr((uint8_t)dat->ndat.nuclData[nuclInd].Z,255));
-    drawSelectableTextAlignedSized(rdat,&state->tss,NUCL_FULLINFOBOX_NZVALS_POS_X*state->ds.uiUserScale,drawYPos,blackCol8Bit,FONTSIZE_SMALL,txtAlpha,descStr,ALIGN_LEFT,16384);
+    drawSelectableTextAlignedSizedWithMetadata(rdat,&state->tss,NUCL_FULLINFOBOX_NZVALS_POS_X*state->ds.uiUserScale,drawYPos,blackCol8Bit,FONTSIZE_SMALL,txtAlpha,descStr,ALIGN_LEFT,16384,strMetadata);
   }else{
-    drawSelectableTextAlignedSized(rdat,&state->tss,NUCL_FULLINFOBOX_NZVALS_POS_X*state->ds.uiUserScale,drawYPos,blackCol8Bit,FONTSIZE_SMALL,txtAlpha,dat->strings[dat->locStringIDs[LOCSTR_NOTNATURAL]],ALIGN_LEFT,16384);
+    drawSelectableTextAlignedSizedWithMetadata(rdat,&state->tss,NUCL_FULLINFOBOX_NZVALS_POS_X*state->ds.uiUserScale,drawYPos,blackCol8Bit,FONTSIZE_SMALL,txtAlpha,dat->strings[dat->locStringIDs[LOCSTR_NOTNATURAL]],ALIGN_LEFT,16384,strMetadata);
   }
   drawYPos += 18.0f*state->ds.uiUserScale;
+  strMetadata = headerStrMetadata | (uint32_t)((uint32_t)(3) << 24); //each string should have a unique metadata value, if we want selection to persist after scrolling
+  if((state->tss.selStrsModifiable)&&(strMetadata == state->ds.nuclFullInfoSelStrMetadata)){state->tss.selectedStr = state->tss.numSelStrs;}
   SDL_snprintf(descStr,64,"%s: %s",dat->strings[dat->locStringIDs[LOCSTR_ELEM_TYPE]],getElementFamilyStr(dat,dat->ndat.nuclData[nuclInd].Z));
-  drawSelectableTextAlignedSized(rdat,&state->tss,NUCL_FULLINFOBOX_NZVALS_POS_X*state->ds.uiUserScale,drawYPos,blackCol8Bit,FONTSIZE_SMALL,txtAlpha,descStr,ALIGN_LEFT,16384);
+  drawSelectableTextAlignedSizedWithMetadata(rdat,&state->tss,NUCL_FULLINFOBOX_NZVALS_POS_X*state->ds.uiUserScale,drawYPos,blackCol8Bit,FONTSIZE_SMALL,txtAlpha,descStr,ALIGN_LEFT,16384,strMetadata);
   
   //Q-values and masses
   char massStr[48]; //need a longer string, some masses have many decimal places!
   drawXPos = state->ds.windowXRes - NUCL_FULLINFOBOX_QVAL_POS_XR*state->ds.uiUserScale;
   drawYPos = NUCL_FULLINFOBOX_QVAL_POS_Y*state->ds.uiUserScale + txtYOffset;
+  strMetadata = headerStrMetadata | (uint32_t)((uint32_t)(4) << 24); //each string should have a unique metadata value, if we want selection to persist after scrolling
+  if((state->tss.selStrsModifiable)&&(strMetadata == state->ds.nuclFullInfoSelStrMetadata)){state->tss.selectedStr = state->tss.numSelStrs;}
   if(dat->ndat.nuclData[nuclInd].massAMU.val != 0.0){
     getMassValStr(descStr,dat->ndat.nuclData[nuclInd].massAMU,1);
     SDL_snprintf(massStr,48,"%s: %s %s",dat->strings[dat->locStringIDs[LOCSTR_ATOMIC_MASS]],descStr,getValueUnitShortStr(VALUE_UNIT_AMU));
   }else{
     SDL_snprintf(massStr,48,"%s",dat->strings[dat->locStringIDs[LOCSTR_MASS_UNKNOWN]]);
   }
-  drawSelectableTextAlignedSized(rdat,&state->tss,drawXPos,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,massStr,ALIGN_RIGHT,16384);
+  drawSelectableTextAlignedSizedWithMetadata(rdat,&state->tss,drawXPos,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,massStr,ALIGN_RIGHT,16384,strMetadata);
   drawYPos += 20.0f*state->ds.uiUserScale;
   if(dat->ndat.nuclData[nuclInd].qalpha.val != 0.0f){
+    strMetadata = headerStrMetadata | (uint32_t)((uint32_t)(5) << 24); //each string should have a unique metadata value, if we want selection to persist after scrolling
+    if((state->tss.selStrsModifiable)&&(strMetadata == state->ds.nuclFullInfoSelStrMetadata)){state->tss.selectedStr = state->tss.numSelStrs;}
     getQValStr(descStr,dat->ndat.nuclData[nuclInd].qalpha,1,0);
     SDL_snprintf(tmpStr,32,"%s=%s %s",dat->strings[dat->locStringIDs[LOCSTR_QALPHA]],descStr,getValueUnitShortStr(dat->ndat.nuclData[nuclInd].qalpha.unit));
     if(dat->ndat.nuclData[nuclInd].qalpha.val > 0.0f){
-      rect = drawSelectableTextAlignedSized(rdat,&state->tss,drawXPos,drawYPos,darkGreenTxtCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_RIGHT,16384);
+      rect = drawSelectableTextAlignedSizedWithMetadata(rdat,&state->tss,drawXPos,drawYPos,darkGreenTxtCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_RIGHT,16384,strMetadata);
     }else{
-      rect = drawSelectableTextAlignedSized(rdat,&state->tss,drawXPos,drawYPos,darkRedTxtCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_RIGHT,16384);
+      rect = drawSelectableTextAlignedSizedWithMetadata(rdat,&state->tss,drawXPos,drawYPos,darkRedTxtCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_RIGHT,16384,strMetadata);
     }
     drawXPos -= rect.w + 4*UI_PADDING_SIZE*state->ds.uiUserScale;
   }
   if(dat->ndat.nuclData[nuclInd].sp.val != 0.0f){
+    strMetadata = headerStrMetadata | (uint32_t)((uint32_t)(6) << 24); //each string should have a unique metadata value, if we want selection to persist after scrolling
+    if((state->tss.selStrsModifiable)&&(strMetadata == state->ds.nuclFullInfoSelStrMetadata)){state->tss.selectedStr = state->tss.numSelStrs;}
     getQValStr(descStr,dat->ndat.nuclData[nuclInd].sp,1,1); //Q(p), not S(p)
     SDL_snprintf(tmpStr,32,"%s=%s %s",dat->strings[dat->locStringIDs[LOCSTR_QP]],descStr,getValueUnitShortStr(dat->ndat.nuclData[nuclInd].sp.unit));
     if(dat->ndat.nuclData[nuclInd].sp.val < 0.0f){
-      rect = drawSelectableTextAlignedSized(rdat,&state->tss,drawXPos,drawYPos,darkGreenTxtCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_RIGHT,16384);
+      rect = drawSelectableTextAlignedSizedWithMetadata(rdat,&state->tss,drawXPos,drawYPos,darkGreenTxtCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_RIGHT,16384,strMetadata);
     }else{
-      rect = drawSelectableTextAlignedSized(rdat,&state->tss,drawXPos,drawYPos,darkRedTxtCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_RIGHT,16384);
+      rect = drawSelectableTextAlignedSizedWithMetadata(rdat,&state->tss,drawXPos,drawYPos,darkRedTxtCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_RIGHT,16384,strMetadata);
     }
     drawXPos -= rect.w + 4*UI_PADDING_SIZE*state->ds.uiUserScale;
   }
   if(dat->ndat.nuclData[nuclInd].sn.val != 0.0f){
+    strMetadata = headerStrMetadata | (uint32_t)((uint32_t)(7) << 24); //each string should have a unique metadata value, if we want selection to persist after scrolling
+    if((state->tss.selStrsModifiable)&&(strMetadata == state->ds.nuclFullInfoSelStrMetadata)){state->tss.selectedStr = state->tss.numSelStrs;}
     getQValStr(descStr,dat->ndat.nuclData[nuclInd].sn,1,1); //Q(n), not S(n)
     SDL_snprintf(tmpStr,32,"%s=%s %s",dat->strings[dat->locStringIDs[LOCSTR_QN]],descStr,getValueUnitShortStr(dat->ndat.nuclData[nuclInd].sn.unit));
     if(dat->ndat.nuclData[nuclInd].sn.val < 0.0f){
-      drawSelectableTextAlignedSized(rdat,&state->tss,drawXPos,drawYPos,darkGreenTxtCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_RIGHT,16384);
+      drawSelectableTextAlignedSizedWithMetadata(rdat,&state->tss,drawXPos,drawYPos,darkGreenTxtCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_RIGHT,16384,strMetadata);
     }else{
-      drawSelectableTextAlignedSized(rdat,&state->tss,drawXPos,drawYPos,darkRedTxtCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_RIGHT,16384);
+      drawSelectableTextAlignedSizedWithMetadata(rdat,&state->tss,drawXPos,drawYPos,darkRedTxtCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_RIGHT,16384,strMetadata);
     }
   }
   drawXPos = state->ds.windowXRes - NUCL_FULLINFOBOX_QVAL_POS_XR*state->ds.uiUserScale;
   drawYPos += 20.0f*state->ds.uiUserScale;
   if(dat->ndat.nuclData[nuclInd].qec.val != 0.0f){
+    strMetadata = headerStrMetadata | (uint32_t)((uint32_t)(8) << 24); //each string should have a unique metadata value, if we want selection to persist after scrolling
+    if((state->tss.selStrsModifiable)&&(strMetadata == state->ds.nuclFullInfoSelStrMetadata)){state->tss.selectedStr = state->tss.numSelStrs;}
     getQValStr(descStr,dat->ndat.nuclData[nuclInd].qec,1,0);
     SDL_snprintf(tmpStr,32,"%s=%s %s",dat->strings[dat->locStringIDs[LOCSTR_QEC]],descStr,getValueUnitShortStr(dat->ndat.nuclData[nuclInd].qec.unit));
     if(dat->ndat.nuclData[nuclInd].qec.val > 0.0f){
-      rect = drawSelectableTextAlignedSized(rdat,&state->tss,drawXPos,drawYPos,darkGreenTxtCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_RIGHT,16384);
+      rect = drawSelectableTextAlignedSizedWithMetadata(rdat,&state->tss,drawXPos,drawYPos,darkGreenTxtCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_RIGHT,16384,strMetadata);
     }else{
-      rect = drawSelectableTextAlignedSized(rdat,&state->tss,drawXPos,drawYPos,darkRedTxtCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_RIGHT,16384);
+      rect = drawSelectableTextAlignedSizedWithMetadata(rdat,&state->tss,drawXPos,drawYPos,darkRedTxtCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_RIGHT,16384,strMetadata);
     }
     drawXPos -= rect.w + 4*UI_PADDING_SIZE*state->ds.uiUserScale;
   }
   if(dat->ndat.nuclData[nuclInd].qbetaplus.val != 0.0f){
+    strMetadata = headerStrMetadata | (uint32_t)((uint32_t)(9) << 24); //each string should have a unique metadata value, if we want selection to persist after scrolling
+    if((state->tss.selStrsModifiable)&&(strMetadata == state->ds.nuclFullInfoSelStrMetadata)){state->tss.selectedStr = state->tss.numSelStrs;}
     getQValStr(descStr,dat->ndat.nuclData[nuclInd].qbetaplus,1,0);
     SDL_snprintf(tmpStr,32,"%s=%s %s",dat->strings[dat->locStringIDs[LOCSTR_QBETAPLUS]],descStr,getValueUnitShortStr(dat->ndat.nuclData[nuclInd].qbetaplus.unit));
     if(dat->ndat.nuclData[nuclInd].qbetaplus.val > 0.0f){
-      rect = drawSelectableTextAlignedSized(rdat,&state->tss,drawXPos,drawYPos,darkGreenTxtCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_RIGHT,16384);
+      rect = drawSelectableTextAlignedSizedWithMetadata(rdat,&state->tss,drawXPos,drawYPos,darkGreenTxtCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_RIGHT,16384,strMetadata);
     }else{
-      rect = drawSelectableTextAlignedSized(rdat,&state->tss,drawXPos,drawYPos,darkRedTxtCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_RIGHT,16384);
+      rect = drawSelectableTextAlignedSizedWithMetadata(rdat,&state->tss,drawXPos,drawYPos,darkRedTxtCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_RIGHT,16384,strMetadata);
     }
     drawXPos -= rect.w + 4*UI_PADDING_SIZE*state->ds.uiUserScale;
   }
   if(dat->ndat.nuclData[nuclInd].qbeta.val != 0.0f){
+    strMetadata = headerStrMetadata | (uint32_t)((uint32_t)(10) << 24); //each string should have a unique metadata value, if we want selection to persist after scrolling
+    if((state->tss.selStrsModifiable)&&(strMetadata == state->ds.nuclFullInfoSelStrMetadata)){state->tss.selectedStr = state->tss.numSelStrs;}
     getQValStr(descStr,dat->ndat.nuclData[nuclInd].qbeta,1,0);
     SDL_snprintf(tmpStr,32,"%s=%s %s",dat->strings[dat->locStringIDs[LOCSTR_QBETAMINUS]],descStr,getValueUnitShortStr(dat->ndat.nuclData[nuclInd].qbeta.unit));
     if(dat->ndat.nuclData[nuclInd].qbeta.val > 0.0f){
-      drawSelectableTextAlignedSized(rdat,&state->tss,drawXPos,drawYPos,darkGreenTxtCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_RIGHT,16384);
+      drawSelectableTextAlignedSizedWithMetadata(rdat,&state->tss,drawXPos,drawYPos,darkGreenTxtCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_RIGHT,16384,strMetadata);
     }else{
-      drawSelectableTextAlignedSized(rdat,&state->tss,drawXPos,drawYPos,darkRedTxtCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_RIGHT,16384);
+      drawSelectableTextAlignedSizedWithMetadata(rdat,&state->tss,drawXPos,drawYPos,darkRedTxtCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_RIGHT,16384,strMetadata);
     }
   }
 
   //draw column title strings
   drawXPos = origDrawXPos;
   drawYPos = (NUCL_FULLINFOBOX_LEVELLIST_HEADER_POS_Y - 2.0f)*state->ds.uiUserScale + txtYOffset;
-  drawSelectableTextAlignedSized(rdat,&state->tss,drawXPos - 2*UI_PADDING_SIZE*state->ds.uiUserScale,drawYPos,blackCol8Bit,FONTSIZE_NORMAL_BOLD,txtAlpha,dat->strings[dat->locStringIDs[LOCSTR_LEVELINFO_HEADER]],ALIGN_LEFT,16384);
+  strMetadata = headerStrMetadata | (uint32_t)((uint32_t)(11) << 24); //each string should have a unique metadata value, if we want selection to persist after scrolling
+  if((state->tss.selStrsModifiable)&&(strMetadata == state->ds.nuclFullInfoSelStrMetadata)){state->tss.selectedStr = state->tss.numSelStrs;}
+  drawSelectableTextAlignedSizedWithMetadata(rdat,&state->tss,drawXPos - 2*UI_PADDING_SIZE*state->ds.uiUserScale,drawYPos,blackCol8Bit,FONTSIZE_NORMAL_BOLD,txtAlpha,dat->strings[dat->locStringIDs[LOCSTR_LEVELINFO_HEADER]],ALIGN_LEFT,16384,strMetadata);
   drawYPos += (NUCL_INFOBOX_SMALLLINE_HEIGHT + UI_PADDING_SIZE)*state->ds.uiUserScale;
-  drawSelectableTextAlignedSized(rdat,&state->tss,drawXPos,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,dat->strings[dat->locStringIDs[LOCSTR_ENERGY_KEV]],ALIGN_LEFT,16384);
+  strMetadata = headerStrMetadata | (uint32_t)((uint32_t)(12) << 24); //each string should have a unique metadata value, if we want selection to persist after scrolling
+  if((state->tss.selStrsModifiable)&&(strMetadata == state->ds.nuclFullInfoSelStrMetadata)){state->tss.selectedStr = state->tss.numSelStrs;}
+  drawSelectableTextAlignedSizedWithMetadata(rdat,&state->tss,drawXPos,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,dat->strings[dat->locStringIDs[LOCSTR_ENERGY_KEV]],ALIGN_LEFT,16384,strMetadata);
   drawXPos += state->ds.fullInfoColWidth[LLCOLUMN_ELEVEL]*state->ds.uiUserScale;
-  drawSelectableTextAlignedSized(rdat,&state->tss,drawXPos,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,dat->strings[dat->locStringIDs[LOCSTR_JPI]],ALIGN_LEFT,16384);
+  strMetadata = headerStrMetadata | (uint32_t)((uint32_t)(13) << 24); //each string should have a unique metadata value, if we want selection to persist after scrolling
+  if((state->tss.selStrsModifiable)&&(strMetadata == state->ds.nuclFullInfoSelStrMetadata)){state->tss.selectedStr = state->tss.numSelStrs;}
+  drawSelectableTextAlignedSizedWithMetadata(rdat,&state->tss,drawXPos,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,dat->strings[dat->locStringIDs[LOCSTR_JPI]],ALIGN_LEFT,16384,strMetadata);
   drawXPos += state->ds.fullInfoColWidth[LLCOLUMN_JPI]*state->ds.uiUserScale;
+  strMetadata = headerStrMetadata | (uint32_t)((uint32_t)(14) << 24); //each string should have a unique metadata value, if we want selection to persist after scrolling
+  if((state->tss.selStrsModifiable)&&(strMetadata == state->ds.nuclFullInfoSelStrMetadata)){state->tss.selectedStr = state->tss.numSelStrs;}
   if(state->ds.useLifetimes){
-    drawSelectableTextAlignedSized(rdat,&state->tss,drawXPos,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,dat->strings[dat->locStringIDs[LOCSTR_LIFETIME]],ALIGN_LEFT,16384);
+    drawSelectableTextAlignedSizedWithMetadata(rdat,&state->tss,drawXPos,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,dat->strings[dat->locStringIDs[LOCSTR_LIFETIME]],ALIGN_LEFT,16384,strMetadata);
   }else{
-    drawSelectableTextAlignedSized(rdat,&state->tss,drawXPos,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,dat->strings[dat->locStringIDs[LOCSTR_HALFLIFE]],ALIGN_LEFT,16384);
+    drawSelectableTextAlignedSizedWithMetadata(rdat,&state->tss,drawXPos,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,dat->strings[dat->locStringIDs[LOCSTR_HALFLIFE]],ALIGN_LEFT,16384,strMetadata);
   }
   drawXPos += state->ds.fullInfoColWidth[LLCOLUMN_HALFLIFE]*state->ds.uiUserScale;
-  drawSelectableTextAlignedSized(rdat,&state->tss,drawXPos,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,dat->strings[dat->locStringIDs[LOCSTR_ENERGY_GAMMA]],ALIGN_LEFT,16384);
+  strMetadata = headerStrMetadata | (uint32_t)((uint32_t)(15) << 24); //each string should have a unique metadata value, if we want selection to persist after scrolling
+  if((state->tss.selStrsModifiable)&&(strMetadata == state->ds.nuclFullInfoSelStrMetadata)){state->tss.selectedStr = state->tss.numSelStrs;}
+  drawSelectableTextAlignedSizedWithMetadata(rdat,&state->tss,drawXPos,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,dat->strings[dat->locStringIDs[LOCSTR_ENERGY_GAMMA]],ALIGN_LEFT,16384,strMetadata);
   drawXPos += state->ds.fullInfoColWidth[LLCOLUMN_EGAMMA]*state->ds.uiUserScale;
-  drawSelectableTextAlignedSized(rdat,&state->tss,drawXPos,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,dat->strings[dat->locStringIDs[LOCSTR_INTENSITY_GAMMA]],ALIGN_LEFT,16384);
+  strMetadata = headerStrMetadata | (uint32_t)((uint32_t)(16) << 24); //each string should have a unique metadata value, if we want selection to persist after scrolling
+  if((state->tss.selStrsModifiable)&&(strMetadata == state->ds.nuclFullInfoSelStrMetadata)){state->tss.selectedStr = state->tss.numSelStrs;}
+  drawSelectableTextAlignedSizedWithMetadata(rdat,&state->tss,drawXPos,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,dat->strings[dat->locStringIDs[LOCSTR_INTENSITY_GAMMA]],ALIGN_LEFT,16384,strMetadata);
   drawXPos += state->ds.fullInfoColWidth[LLCOLUMN_IGAMMA]*state->ds.uiUserScale;
   if(state->ds.nuclFullInfoShownColumns & (1U << LLCOLUMN_MGAMMA)){
-    drawSelectableTextAlignedSized(rdat,&state->tss,drawXPos,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,dat->strings[dat->locStringIDs[LOCSTR_MULTIPOLARITY_GAMMA]],ALIGN_LEFT,16384);
+    strMetadata = headerStrMetadata | (uint32_t)((uint32_t)(17) << 24); //each string should have a unique metadata value, if we want selection to persist after scrolling
+    if((state->tss.selStrsModifiable)&&(strMetadata == state->ds.nuclFullInfoSelStrMetadata)){state->tss.selectedStr = state->tss.numSelStrs;}
+    drawSelectableTextAlignedSizedWithMetadata(rdat,&state->tss,drawXPos,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,dat->strings[dat->locStringIDs[LOCSTR_MULTIPOLARITY_GAMMA]],ALIGN_LEFT,16384,strMetadata);
     drawXPos += state->ds.fullInfoColWidth[LLCOLUMN_MGAMMA]*state->ds.uiUserScale;
   }
   if(state->ds.nuclFullInfoShownColumns & (1U << LLCOLUMN_DELTA)){
-    drawSelectableTextAlignedSized(rdat,&state->tss,drawXPos,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,dat->strings[dat->locStringIDs[LOCSTR_MIXING_GAMMA]],ALIGN_LEFT,16384);
+    strMetadata = headerStrMetadata | (uint32_t)((uint32_t)(18) << 24); //each string should have a unique metadata value, if we want selection to persist after scrolling
+    if((state->tss.selStrsModifiable)&&(strMetadata == state->ds.nuclFullInfoSelStrMetadata)){state->tss.selectedStr = state->tss.numSelStrs;}
+    drawSelectableTextAlignedSizedWithMetadata(rdat,&state->tss,drawXPos,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,dat->strings[dat->locStringIDs[LOCSTR_MIXING_GAMMA]],ALIGN_LEFT,16384,strMetadata);
     drawXPos += state->ds.fullInfoColWidth[LLCOLUMN_DELTA]*state->ds.uiUserScale;
   }
   if(state->ds.nuclFullInfoShownColumns & (1U << LLCOLUMN_ICC)){
-    drawSelectableTextAlignedSized(rdat,&state->tss,drawXPos,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,dat->strings[dat->locStringIDs[LOCSTR_ICC_GAMMA]],ALIGN_LEFT,16384);
+    strMetadata = headerStrMetadata | (uint32_t)((uint32_t)(19) << 24); //each string should have a unique metadata value, if we want selection to persist after scrolling
+    if((state->tss.selStrsModifiable)&&(strMetadata == state->ds.nuclFullInfoSelStrMetadata)){state->tss.selectedStr = state->tss.numSelStrs;}
+    drawSelectableTextAlignedSizedWithMetadata(rdat,&state->tss,drawXPos,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,dat->strings[dat->locStringIDs[LOCSTR_ICC_GAMMA]],ALIGN_LEFT,16384,strMetadata);
     drawXPos += state->ds.fullInfoColWidth[LLCOLUMN_ICC]*state->ds.uiUserScale;
   }
-  drawSelectableTextAlignedSized(rdat,&state->tss,drawXPos,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,dat->strings[dat->locStringIDs[LOCSTR_FINALLEVEL]],ALIGN_LEFT,16384);
+  strMetadata = headerStrMetadata | (uint32_t)((uint32_t)(20) << 24); //each string should have a unique metadata value, if we want selection to persist after scrolling
+  if((state->tss.selStrsModifiable)&&(strMetadata == state->ds.nuclFullInfoSelStrMetadata)){state->tss.selectedStr = state->tss.numSelStrs;}
+  drawSelectableTextAlignedSizedWithMetadata(rdat,&state->tss,drawXPos,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,dat->strings[dat->locStringIDs[LOCSTR_FINALLEVEL]],ALIGN_LEFT,16384,strMetadata);
 
   //draw buttons
   if(rdat->ssdat.takingScreenshot != 1){
@@ -3298,7 +3369,7 @@ void drawNuclInfoBox(const app_data *restrict dat, app_state *restrict state, re
   }
 
   //header
-  drawInfoBoxHeader(dat,state,rdat,infoBoxPanelRect.x,infoBoxPanelRect.y,255,nuclInd);
+  drawInfoBoxHeader(dat,state,rdat,infoBoxPanelRect.x,infoBoxPanelRect.y,255,nuclInd,STR_METADATA_UNUSED);
 
   //draw buttons
   if(rdat->ssdat.takingScreenshot != 1){

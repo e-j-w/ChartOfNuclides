@@ -22,6 +22,8 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "formats.h"
 
+#define STR_METADATA_UNUSED 4294967295U
+
 #define HALFPI 1.5708f
 
 //function prototypes

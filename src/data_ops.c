@@ -79,7 +79,7 @@ void initializeTempState(const app_data *restrict dat, app_state *restrict state
 	state->ds.infoBoxJpiColOffset = NUCL_INFOBOX_JPI_COL_MIN_OFFSET;
 	state->ds.infoBoxHlColOffset = NUCL_INFOBOX_HALFLIFE_COL_MIN_OFFSET;
 	state->ds.infoBoxDcyModeColOffset = NUCL_INFOBOX_DECAYMODE_COL_MIN_OFFSET;
-	state->ds.nuclFullInfoSelStrMetadata = 4294967295U;
+	state->ds.nuclFullInfoSelStrMetadata = STR_METADATA_UNUSED;
 	state->ds.mouseOverRxn = 255U;
 	state->ds.mouseHoldRxn = 255U;
 	state->ds.selectedRxn = 0;
@@ -3713,7 +3713,7 @@ void changeUIState(const app_data *restrict dat, app_state *restrict state, reso
 			updateSingleUIElemPosition(dat,state,rdat,UIELEM_SEARCH_RESULT_2);
 			updateSingleUIElemPosition(dat,state,rdat,UIELEM_SEARCH_RESULT_3);
 			updateSingleUIElemPosition(dat,state,rdat,UIELEM_SEARCH_RESULT_4);
-			state->ds.nuclFullInfoSelStrMetadata = 4294967295U;
+			state->ds.nuclFullInfoSelStrMetadata = STR_METADATA_UNUSED;
 			break;
 		case UISTATE_INFOBOX:
 			state->interactableElement |= ((uint64_t)(1) << UIELEM_MENU_BUTTON);

@@ -504,7 +504,7 @@ SDL_FRect drawSelectableTextAlignedSizedWithMetadata(resource_data *restrict rda
   return drawSelectableClickableTextAlignedSized(rdat,tss,xPos,yPos,textColor,fontSizeInd,alpha,txt,alignment,maxWidth,TXTCLICKACTION_ENUM_LENGTH,0,metadata);
 }
 SDL_FRect drawSelectableTextAlignedSized(resource_data *restrict rdat, text_selection_state *restrict tss, const float xPos, const float yPos, const SDL_Color textColor, const uint8_t fontSizeInd, const Uint8 alpha, const char *txt, const uint8_t alignment, const Uint16 maxWidth){
-  return drawSelectableClickableTextAlignedSized(rdat,tss,xPos,yPos,textColor,fontSizeInd,alpha,txt,alignment,maxWidth,TXTCLICKACTION_ENUM_LENGTH,0,4294967295U);
+  return drawSelectableClickableTextAlignedSized(rdat,tss,xPos,yPos,textColor,fontSizeInd,alpha,txt,alignment,maxWidth,TXTCLICKACTION_ENUM_LENGTH,0,STR_METADATA_UNUSED);
 }
 
 void drawTextAligned(resource_data *restrict rdat, const float xPos, const float yPos, const SDL_Color textColor, const uint8_t fontSizeInd, const char *txt, const uint8_t alignment){

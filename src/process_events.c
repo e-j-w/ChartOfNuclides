@@ -78,7 +78,7 @@ void fcScrollAction(app_state *restrict state, const float deltaVal){
   state->ds.timeSinceFCScollStart = 0.0f;
   state->ds.fcScrollInProgress = 1;
   state->ds.fcScrollFinished = 0;
-  clearSelectionStrs(&state->ds,&state->tss,0,1); //selection string positions are changed on scroll
+  clearSelectionStrs(&state->ds,&state->tss,1,1); //selection string positions are changed on scroll
   //SDL_Log("scroll pos: %f, scroll to: %f\n",(double)state->ds.nuclFullInfoScrollY,(double)state->ds.nuclFullInfoScrollToY);
 }
 
