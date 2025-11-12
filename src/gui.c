@@ -2508,6 +2508,7 @@ void drawParentDecayQValStr(const app_data *restrict dat, app_state *restrict st
       }
       //SDL_Log("printing: %s\n",qValStr);
       if(yPos >= (NUCL_FULLINFOBOX_LEVELLIST_POS_Y*state->ds.uiUserScale - 1.0f)){
+        if((state->tss.selStrsModifiable)&&(selMetadata == state->ds.nuclFullInfoSelStrMetadata)){state->tss.selectedStr = state->tss.numSelStrs;}
         drawSelectableTextAlignedSizedWithMetadata(rdat,&state->tss,state->ds.windowXRes/2.0f,yPos+(0.5f*NUCL_INFOBOX_SMALLLINE_HEIGHT*state->ds.uiUserScale),blackCol8Bit,FONTSIZE_NORMAL_BOLD,alpha,qValStr,ALIGN_CENTER,16384,selMetadata);
       }else{
         drawTextAlignedSized(rdat,state->ds.windowXRes/2.0f,yPos+(0.5f*NUCL_INFOBOX_SMALLLINE_HEIGHT*state->ds.uiUserScale),blackCol8Bit,FONTSIZE_NORMAL_BOLD,alpha,qValStr,ALIGN_CENTER,16384);
@@ -2528,6 +2529,7 @@ void drawParentDecayQValStr(const app_data *restrict dat, app_state *restrict st
       }
       //SDL_Log("printing: %s\n",qValStr);
       if(yPos >= (NUCL_FULLINFOBOX_LEVELLIST_POS_Y*state->ds.uiUserScale - 1.0f)){
+        if((state->tss.selStrsModifiable)&&(selMetadata == state->ds.nuclFullInfoSelStrMetadata)){state->tss.selectedStr = state->tss.numSelStrs;}
         drawSelectableTextAlignedSizedWithMetadata(rdat,&state->tss,state->ds.windowXRes/2.0f,yPos+(0.5f*NUCL_INFOBOX_SMALLLINE_HEIGHT*state->ds.uiUserScale),blackCol8Bit,FONTSIZE_NORMAL_BOLD,alpha,qValStr,ALIGN_CENTER,16384,selMetadata);
       }else{
         drawTextAlignedSized(rdat,state->ds.windowXRes/2.0f,yPos+(0.5f*NUCL_INFOBOX_SMALLLINE_HEIGHT*state->ds.uiUserScale),blackCol8Bit,FONTSIZE_NORMAL_BOLD,alpha,qValStr,ALIGN_CENTER,16384);
@@ -2548,6 +2550,7 @@ void drawParentDecayQValStr(const app_data *restrict dat, app_state *restrict st
       }
       //SDL_Log("printing: %s\n",qValStr);
       if(yPos >= (NUCL_FULLINFOBOX_LEVELLIST_POS_Y*state->ds.uiUserScale - 1.0f)){
+        if((state->tss.selStrsModifiable)&&(selMetadata == state->ds.nuclFullInfoSelStrMetadata)){state->tss.selectedStr = state->tss.numSelStrs;}
         drawSelectableTextAlignedSizedWithMetadata(rdat,&state->tss,state->ds.windowXRes/2.0f,yPos+(0.5f*NUCL_INFOBOX_SMALLLINE_HEIGHT*state->ds.uiUserScale),blackCol8Bit,FONTSIZE_NORMAL_BOLD,alpha,qValStr,ALIGN_CENTER,16384,selMetadata);
       }else{
         drawTextAlignedSized(rdat,state->ds.windowXRes/2.0f,yPos+(0.5f*NUCL_INFOBOX_SMALLLINE_HEIGHT*state->ds.uiUserScale),blackCol8Bit,FONTSIZE_NORMAL_BOLD,alpha,qValStr,ALIGN_CENTER,16384);
@@ -2657,7 +2660,6 @@ void drawNuclFullInfoBox(const app_data *restrict dat, app_state *restrict state
             uint32_t strMetadata = (lvlInd - dat->ndat.nuclData[nuclInd].firstLevel) & 65535U; //16 lower bits give level index
             strMetadata |= (uint32_t)((uint32_t)(255U) << 16); //bits 16-23 give column (use dummy value of 255 for Q-values)
             strMetadata |= (uint32_t)((uint32_t)i << 24); //bits 24-31 give row
-            if((state->tss.selStrsModifiable)&&(strMetadata == state->ds.nuclFullInfoSelStrMetadata)){state->tss.selectedStr = state->tss.numSelStrs;}
             
             char descStr[64], qValStr[64];
             switch(state->ds.fullInfoQVal[i].qValType){
@@ -2666,6 +2668,7 @@ void drawNuclFullInfoBox(const app_data *restrict dat, app_state *restrict state
                 getQValStr(descStr,dat->ndat.nuclData[nuclInd].sn,1,0);
                 SDL_snprintf(qValStr,64,"%s: %s=%s %s",dat->strings[dat->locStringIDs[LOCSTR_SN_LONG]],dat->strings[dat->locStringIDs[LOCSTR_SN]],descStr,getValueUnitShortStr(dat->ndat.nuclData[nuclInd].sn.unit));
                 if(drawYPos >= (NUCL_FULLINFOBOX_LEVELLIST_POS_Y*state->ds.uiUserScale - 1.0f)){
+                  if((state->tss.selStrsModifiable)&&(strMetadata == state->ds.nuclFullInfoSelStrMetadata)){state->tss.selectedStr = state->tss.numSelStrs;}
                   drawSelectableTextAlignedSizedWithMetadata(rdat,&state->tss,state->ds.windowXRes/2.0f,drawYPos+(0.5f*NUCL_INFOBOX_SMALLLINE_HEIGHT*state->ds.uiUserScale),blackCol8Bit,FONTSIZE_NORMAL_BOLD,txtAlpha,qValStr,ALIGN_CENTER,16384,strMetadata);
                 }else{
                   drawTextAlignedSized(rdat,state->ds.windowXRes/2.0f,drawYPos+(0.5f*NUCL_INFOBOX_SMALLLINE_HEIGHT*state->ds.uiUserScale),blackCol8Bit,FONTSIZE_NORMAL_BOLD,txtAlpha,qValStr,ALIGN_CENTER,16384);
@@ -2675,6 +2678,7 @@ void drawNuclFullInfoBox(const app_data *restrict dat, app_state *restrict state
                 getQValStr(descStr,dat->ndat.nuclData[nuclInd].sp,1,0);
                 SDL_snprintf(qValStr,64,"%s: %s=%s %s",dat->strings[dat->locStringIDs[LOCSTR_SP_LONG]],dat->strings[dat->locStringIDs[LOCSTR_SP]],descStr,getValueUnitShortStr(dat->ndat.nuclData[nuclInd].sp.unit));
                 if(drawYPos >= (NUCL_FULLINFOBOX_LEVELLIST_POS_Y*state->ds.uiUserScale - 1.0f)){
+                  if((state->tss.selStrsModifiable)&&(strMetadata == state->ds.nuclFullInfoSelStrMetadata)){state->tss.selectedStr = state->tss.numSelStrs;}
                   drawSelectableTextAlignedSizedWithMetadata(rdat,&state->tss,state->ds.windowXRes/2.0f,drawYPos+(0.5f*NUCL_INFOBOX_SMALLLINE_HEIGHT*state->ds.uiUserScale),blackCol8Bit,FONTSIZE_NORMAL_BOLD,txtAlpha,qValStr,ALIGN_CENTER,16384,strMetadata);
                 }else{
                   drawTextAlignedSized(rdat,state->ds.windowXRes/2.0f,drawYPos+(0.5f*NUCL_INFOBOX_SMALLLINE_HEIGHT*state->ds.uiUserScale),blackCol8Bit,FONTSIZE_NORMAL_BOLD,txtAlpha,qValStr,ALIGN_CENTER,16384);
@@ -2684,6 +2688,7 @@ void drawNuclFullInfoBox(const app_data *restrict dat, app_state *restrict state
                 getQValStr(descStr,dat->ndat.nuclData[nuclInd].qalpha,1,0); 
                 SDL_snprintf(qValStr,64,"%s: %s=%s %s",dat->strings[dat->locStringIDs[LOCSTR_SA_LONG]],dat->strings[dat->locStringIDs[LOCSTR_QALPHA]],descStr,getValueUnitShortStr(dat->ndat.nuclData[nuclInd].qalpha.unit));
                 if(drawYPos >= (NUCL_FULLINFOBOX_LEVELLIST_POS_Y*state->ds.uiUserScale - 1.0f)){
+                  if((state->tss.selStrsModifiable)&&(strMetadata == state->ds.nuclFullInfoSelStrMetadata)){state->tss.selectedStr = state->tss.numSelStrs;}
                   drawSelectableTextAlignedSizedWithMetadata(rdat,&state->tss,state->ds.windowXRes/2.0f,drawYPos+(0.5f*NUCL_INFOBOX_SMALLLINE_HEIGHT*state->ds.uiUserScale),blackCol8Bit,FONTSIZE_NORMAL_BOLD,txtAlpha,qValStr,ALIGN_CENTER,16384,strMetadata);
                 }else{
                   drawTextAlignedSized(rdat,state->ds.windowXRes/2.0f,drawYPos+(0.5f*NUCL_INFOBOX_SMALLLINE_HEIGHT*state->ds.uiUserScale),blackCol8Bit,FONTSIZE_NORMAL_BOLD,txtAlpha,qValStr,ALIGN_CENTER,16384);
