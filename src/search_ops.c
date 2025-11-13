@@ -406,6 +406,73 @@ void searchEGamma(const ndata *restrict ndat, const app_state *state, search_sta
 									res.resultVal[0] = (uint32_t)j; //nuclide index
 									res.resultVal[1] = (uint32_t)l; //transition index
 									res.resultVal[2] = (uint32_t)k; //level index
+									res.resultVal[3] = 0; //normal gamma energy result
+									//SDL_Log("Found transition %u\n",res.resultVal[1]);
+									sortAndAppendResult(ss,&res);
+								}else if((rawEVal > 1022.0)&&((((rawEVal - 511.0) - errBound) <= eSearch)&&(((rawEVal - 511.0) + errBound) >= eSearch))){
+									//energy matches query
+									search_result res;
+									res.relevance = 0.4f; //base value
+									res.relevance += proximityFactor;
+									res.relevance -= (float)(rawErrVal/rawEVal); //weight by size of error bars
+									res.relevance /= (3.0f + (float)fabs(0.1*(eSearch - (rawEVal - 511.0)))); //weight by distance from value
+									//SDL_Log("proximity factor: %f\n",(double)proximityFactor);
+									uint8_t intensityType = (uint8_t)((ndat->tran[l].energy.format >> 5U) & 15U);
+									switch(intensityType){
+										case VALUETYPE_NUMBER:
+										case VALUETYPE_GREATERTHAN:
+										case VALUETYPE_GREATEROREQUALTHAN:
+										case VALUETYPE_APPROX:
+											{//prevent -Wjump-misses-init
+												float intensityFactor = (float)getRawValFromDB(&ndat->tran[l].intensity)/100.0f;
+												if(intensityFactor > 1.0f){
+													intensityFactor = 1.0f;
+												}
+												res.relevance *= intensityFactor;
+											}
+											break;
+										default:
+											res.relevance *= 0.01f;
+											break;
+									}
+									res.resultType = SEARCHAGENT_EGAMMA;
+									res.resultVal[0] = (uint32_t)j; //nuclide index
+									res.resultVal[1] = (uint32_t)l; //transition index
+									res.resultVal[2] = (uint32_t)k; //level index
+									res.resultVal[3] = 511; //flag as a single escape peak
+									//SDL_Log("Found transition %u\n",res.resultVal[1]);
+									sortAndAppendResult(ss,&res);
+								}else if((rawEVal > 1022.0)&&((((rawEVal - 1022.0) - errBound) <= eSearch)&&(((rawEVal - 1022.0) + errBound) >= eSearch))){
+									//energy matches query
+									search_result res;
+									res.relevance = 0.4f; //base value
+									res.relevance += proximityFactor;
+									res.relevance -= (float)(rawErrVal/rawEVal); //weight by size of error bars
+									res.relevance /= (4.0f + (float)fabs(0.1*(eSearch - (rawEVal - 1022.0)))); //weight by distance from value
+									//SDL_Log("proximity factor: %f\n",(double)proximityFactor);
+									uint8_t intensityType = (uint8_t)((ndat->tran[l].energy.format >> 5U) & 15U);
+									switch(intensityType){
+										case VALUETYPE_NUMBER:
+										case VALUETYPE_GREATERTHAN:
+										case VALUETYPE_GREATEROREQUALTHAN:
+										case VALUETYPE_APPROX:
+											{//prevent -Wjump-misses-init
+												float intensityFactor = (float)getRawValFromDB(&ndat->tran[l].intensity)/100.0f;
+												if(intensityFactor > 1.0f){
+													intensityFactor = 1.0f;
+												}
+												res.relevance *= intensityFactor;
+											}
+											break;
+										default:
+											res.relevance *= 0.01f;
+											break;
+									}
+									res.resultType = SEARCHAGENT_EGAMMA;
+									res.resultVal[0] = (uint32_t)j; //nuclide index
+									res.resultVal[1] = (uint32_t)l; //transition index
+									res.resultVal[2] = (uint32_t)k; //level index
+									res.resultVal[3] = 1022; //flag as a double escape peak
 									//SDL_Log("Found transition %u\n",res.resultVal[1]);
 									sortAndAppendResult(ss,&res);
 								}
@@ -841,7 +908,7 @@ void searchSpecialStrings(search_state *restrict ss){
 		if((SDL_strncmp(tmpStr,"lev",3)==0)||(SDL_strcmp(tmpStr,"lvl")==0)||(SDL_strcmp(tmpStr,"state")==0)){
 			ss->boostedResultType = SEARCHAGENT_ELEVEL;
 			return;
-		}else if((SDL_strcmp(tmpStr,"gamma")==0)||(SDL_strncmp(tmpStr,"tran",4)==0)){
+		}else if((SDL_strcmp(tmpStr,"gam")==0)||(SDL_strncmp(tmpStr,"tran",4)==0)){
 			ss->boostedResultType = SEARCHAGENT_EGAMMA;
 			return;
 		}else if(SDL_strncmp(tmpStr,"casc",4)==0){

@@ -3783,11 +3783,23 @@ void drawSearchMenu(const app_data *restrict dat, const app_state *restrict stat
         case SEARCHAGENT_EGAMMA:
           if((state->uiState == UISTATE_FULLLEVELINFOWITHMENU)||(state->uiState == UISTATE_FULLLEVELINFO)){
             getGammaEnergyStr(eStr2,&dat->ndat,state->ss.results[i].resultVal[1],1);
-            SDL_snprintf(tmpStr,64,"%s keV",eStr2);
+            if(state->ss.results[i].resultVal[3] == 511){
+              SDL_snprintf(tmpStr,64,"%s keV (%s)",eStr2,dat->strings[dat->locStringIDs[LOCSTR_SINGLE_ESCAPE]]);
+            }else if(state->ss.results[i].resultVal[3] == 1022){
+              SDL_snprintf(tmpStr,64,"%s keV (%s)",eStr2,dat->strings[dat->locStringIDs[LOCSTR_DOUBLE_ESCAPE]]);
+            }else{
+              SDL_snprintf(tmpStr,64,"%s keV",eStr2);
+            }
           }else{
             getNuclNameStr(eStr,&dat->ndat.nuclData[state->ss.results[i].resultVal[0]],255);
             getGammaEnergyStr(eStr2,&dat->ndat,state->ss.results[i].resultVal[1],1);
-            SDL_snprintf(tmpStr,64,"%s – %s keV",eStr,eStr2);
+            if(state->ss.results[i].resultVal[3] == 511){
+              SDL_snprintf(tmpStr,64,"%s – %s keV (%s)",eStr,eStr2,dat->strings[dat->locStringIDs[LOCSTR_SINGLE_ESCAPE]]);
+            }else if(state->ss.results[i].resultVal[3] == 1022){
+              SDL_snprintf(tmpStr,64,"%s – %s keV (%s)",eStr,eStr2,dat->strings[dat->locStringIDs[LOCSTR_DOUBLE_ESCAPE]]);
+            }else{
+              SDL_snprintf(tmpStr,64,"%s – %s keV",eStr,eStr2);
+            }
           }
           drawTextAlignedSized(rdat,drawRect.x+12.0f*state->ds.uiUserScale,drawRect.y+(16.0f*state->ds.uiUserScale),blackCol8Bit,FONTSIZE_LARGE,alpha8,tmpStr,ALIGN_LEFT,16384); //draw element and gamma label
           getLvlEnergyStr(eStr2,&dat->ndat,state->ss.results[i].resultVal[2],1);
