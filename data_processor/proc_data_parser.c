@@ -346,6 +346,8 @@ static int parseAppRules(app_data *restrict dat, asset_mapping *restrict stringI
 	dat->locStringIDs[LOCSTR_SEARCHRES_GAMMACASCADE] = (uint16_t)nameToAssetID("search_result_gammacascade",stringIDmap);
 	dat->locStringIDs[LOCSTR_SEARCHRES_HALFLIFE] = (uint16_t)nameToAssetID("search_result_halflife",stringIDmap);
 	dat->locStringIDs[LOCSTR_SEARCHRES_LIFETIME] = (uint16_t)nameToAssetID("search_result_lifetime",stringIDmap);
+	dat->locStringIDs[LOCSTR_SINGLE_ESCAPE] = (uint16_t)nameToAssetID("single_escape",stringIDmap);
+	dat->locStringIDs[LOCSTR_DOUBLE_ESCAPE] = (uint16_t)nameToAssetID("double_escape",stringIDmap);
 	dat->locStringIDs[LOCSTR_CLICKACTION_GOTOLEVEL] = (uint16_t)nameToAssetID("clickaction_goto_level",stringIDmap);
 	dat->locStringIDs[LOCSTR_CLICKACTION_GOTODAUGHTER] = (uint16_t)nameToAssetID("clickaction_goto_daughter",stringIDmap);
 	dat->locStringIDs[LOCSTR_CLICKACTION_SHOWCOINC] = (uint16_t)nameToAssetID("clickaction_show_coinc",stringIDmap);
