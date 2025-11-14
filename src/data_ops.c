@@ -257,7 +257,7 @@ void stopUIAnimation(const app_data *restrict dat, app_state *restrict state, re
 						if(!(state->ds.shownElements & ((uint64_t)(1) << UIELEM_SEARCH_MENU))){
 							if(!(state->ds.shownElements & ((uint64_t)(1) << UIELEM_RXN_MENU))){
 								if(state->ds.shownElements & ((uint64_t)(1) << UIELEM_NUCL_FULLINFOBOX)){
-									if((state->mouseoverElement != UIELEM_NUCL_FULLINFOBOX_BACKBUTTON)||(state->lastOpenedMenu != UIELEM_NUCL_FULLINFOBOX_BACKBUTTON)||(state->lastInputType != INPUT_TYPE_KEYBOARD)){
+									if((state->mouseoverElement != UIELEM_NUCL_FULLINFOBOX_BACKBUTTON)||(state->lastOpenedMenu != UIELEM_NUCL_FULLINFOBOX_BACKBUTTON)||(state->lastInputType == INPUT_TYPE_MOUSE)){
 										changeUIState(dat,state,rdat,UISTATE_FULLLEVELINFO);
 									}
 								}else if(state->ds.shownElements & ((uint64_t)(1) << UIELEM_NUCL_INFOBOX)){
@@ -292,7 +292,7 @@ void stopUIAnimation(const app_data *restrict dat, app_state *restrict state, re
 					if(state->ds.shownElements & ((uint64_t)(1) << UIELEM_NUCL_INFOBOX)){
 						changeUIState(dat,state,rdat,UISTATE_INFOBOX);
 					}else if(state->ds.shownElements & ((uint64_t)(1) << UIELEM_NUCL_FULLINFOBOX)){
-						if((state->mouseoverElement != UIELEM_NUCL_FULLINFOBOX_RXNBUTTON)||(state->lastOpenedMenu != UIELEM_RXN_MENU)||(state->lastInputType != INPUT_TYPE_KEYBOARD)){
+						if((state->mouseoverElement != UIELEM_NUCL_FULLINFOBOX_RXNBUTTON)||(state->lastOpenedMenu != UIELEM_RXN_MENU)||(state->lastInputType == INPUT_TYPE_MOUSE)){
 							changeUIState(dat,state,rdat,UISTATE_FULLLEVELINFO);
 						}
 					}else{
@@ -313,8 +313,8 @@ void stopUIAnimation(const app_data *restrict dat, app_state *restrict state, re
 			state->ds.shownElements &= (~((uint64_t)(1) << UIELEM_RXN_MENU)); //close the menu
 			if(!(state->ds.shownElements & ((uint64_t)(1) << UIELEM_PRIMARY_MENU))){
 				if(!(state->ds.shownElements & ((uint64_t)(1) << UIELEM_CHARTOFNUCLIDES))){ //in case the menu was hidden by going back to the main chart
-					if((state->mouseoverElement != UIELEM_NUCL_FULLINFOBOX_BACKBUTTON)||(state->lastOpenedMenu != UIELEM_NUCL_FULLINFOBOX_BACKBUTTON)||(state->lastInputType != INPUT_TYPE_KEYBOARD)){
-						if((state->mouseoverElement != UIELEM_SEARCH_BUTTON)||(state->lastOpenedMenu != UIELEM_SEARCH_MENU)||(state->lastInputType != INPUT_TYPE_KEYBOARD)){
+					if((state->mouseoverElement != UIELEM_NUCL_FULLINFOBOX_BACKBUTTON)||(state->lastOpenedMenu != UIELEM_NUCL_FULLINFOBOX_BACKBUTTON)||(state->lastInputType == INPUT_TYPE_MOUSE)){
+						if((state->mouseoverElement != UIELEM_SEARCH_BUTTON)||(state->lastOpenedMenu != UIELEM_SEARCH_MENU)||(state->lastInputType == INPUT_TYPE_MOUSE)){
 							changeUIState(dat,state,rdat,UISTATE_FULLLEVELINFO);
 						}
 					}

@@ -1338,11 +1338,11 @@ void processSingleEvent(app_data *restrict dat, app_state *restrict state, resou
             state->inputFlags |= (1U << INPUT_MENU);
           }
           break;
-        case SDL_GAMEPAD_BUTTON_EAST:
+        case SDL_GAMEPAD_BUTTON_SOUTH:
           state->inputFlags |= (1U << INPUT_SELECT);
           break;
         case SDL_GAMEPAD_BUTTON_BACK:
-        case SDL_GAMEPAD_BUTTON_SOUTH:
+        case SDL_GAMEPAD_BUTTON_EAST:
           if(state->uiState != UISTATE_CHARTONLY){
             state->inputFlags |= (1U << INPUT_BACK);
           }
