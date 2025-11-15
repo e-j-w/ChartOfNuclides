@@ -60,13 +60,13 @@ static int parseAppRules(app_data *restrict dat, asset_mapping *restrict stringI
             SDL_strlcpy(str2,tok,255);
             tok = SDL_strtok_r(str2,",",&saveptr);
             if(tok!=NULL){
-              dat->rules.themeRules.bgCol.r = (float)atof(tok);
+              dat->rules.themeRules.bgCol.r = (float)SDL_atof(tok);
               tok = SDL_strtok_r(NULL,",",&saveptr);
               if(tok!=NULL){
-                dat->rules.themeRules.bgCol.g = (float)atof(tok);
+                dat->rules.themeRules.bgCol.g = (float)SDL_atof(tok);
                 tok = SDL_strtok_r(NULL,",",&saveptr);
                 if(tok!=NULL){
-                  dat->rules.themeRules.bgCol.b = (float)atof(tok);
+                  dat->rules.themeRules.bgCol.b = (float)SDL_atof(tok);
                   dat->rules.themeRules.bgCol.a = 1.0f;
                 }else{
                   SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"could not white_bg_col color string in file: %s.\n",filePath);
@@ -135,13 +135,13 @@ static int parseAppRules(app_data *restrict dat, asset_mapping *restrict stringI
             SDL_strlcpy(str2,tok,255);
             tok = SDL_strtok_r(str2,",",&saveptr);
             if(tok!=NULL){
-              dat->rules.themeRules.modNormalCol.r = (float)atof(tok);
+              dat->rules.themeRules.modNormalCol.r = (float)SDL_atof(tok);
               tok = SDL_strtok_r(NULL,",",&saveptr);
               if(tok!=NULL){
-                dat->rules.themeRules.modNormalCol.g = (float)atof(tok);
+                dat->rules.themeRules.modNormalCol.g = (float)SDL_atof(tok);
                 tok = SDL_strtok_r(NULL,",",&saveptr);
                 if(tok!=NULL){
-                  dat->rules.themeRules.modNormalCol.b = (float)atof(tok);
+                  dat->rules.themeRules.modNormalCol.b = (float)SDL_atof(tok);
                   dat->rules.themeRules.modNormalCol.a = 1.0f;
                 }else{
                   SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"could not parse mod_col_normal color string in file: %s.\n",filePath);
@@ -160,13 +160,13 @@ static int parseAppRules(app_data *restrict dat, asset_mapping *restrict stringI
             SDL_strlcpy(str2,tok,255);
             tok = SDL_strtok_r(str2,",",&saveptr);
             if(tok!=NULL){
-              dat->rules.themeRules.modMouseOverCol.r = (float)atof(tok);
+              dat->rules.themeRules.modMouseOverCol.r = (float)SDL_atof(tok);
               tok = SDL_strtok_r(NULL,",",&saveptr);
               if(tok!=NULL){
-                dat->rules.themeRules.modMouseOverCol.g = (float)atof(tok);
+                dat->rules.themeRules.modMouseOverCol.g = (float)SDL_atof(tok);
                 tok = SDL_strtok_r(NULL,",",&saveptr);
                 if(tok!=NULL){
-                  dat->rules.themeRules.modMouseOverCol.b = (float)atof(tok);
+                  dat->rules.themeRules.modMouseOverCol.b = (float)SDL_atof(tok);
                   dat->rules.themeRules.modMouseOverCol.a = 1.0f;
                 }else{
                   SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"could not parse mod_col_mouseover color string in file: %s.\n",filePath);
@@ -185,13 +185,13 @@ static int parseAppRules(app_data *restrict dat, asset_mapping *restrict stringI
             SDL_strlcpy(str2,tok,255);
             tok = SDL_strtok_r(str2,",",&saveptr);
             if(tok!=NULL){
-              dat->rules.themeRules.modSelectedCol.r = (float)atof(tok);
+              dat->rules.themeRules.modSelectedCol.r = (float)SDL_atof(tok);
               tok = SDL_strtok_r(NULL,",",&saveptr);
               if(tok!=NULL){
-                dat->rules.themeRules.modSelectedCol.g = (float)atof(tok);
+                dat->rules.themeRules.modSelectedCol.g = (float)SDL_atof(tok);
                 tok = SDL_strtok_r(NULL,",",&saveptr);
                 if(tok!=NULL){
-                  dat->rules.themeRules.modSelectedCol.b = (float)atof(tok);
+                  dat->rules.themeRules.modSelectedCol.b = (float)SDL_atof(tok);
                   dat->rules.themeRules.modSelectedCol.a = 1.0f;
                 }else{
                   SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"could not parse mod_col_selected color string in file: %s.\n",filePath);
@@ -210,13 +210,13 @@ static int parseAppRules(app_data *restrict dat, asset_mapping *restrict stringI
             SDL_strlcpy(str2,tok,255);
             tok = SDL_strtok_r(str2,",",&saveptr);
             if(tok!=NULL){
-              dat->rules.themeRules.modSelectedAndMouseOverCol.r = (float)atof(tok);
+              dat->rules.themeRules.modSelectedAndMouseOverCol.r = (float)SDL_atof(tok);
               tok = SDL_strtok_r(NULL,",",&saveptr);
               if(tok!=NULL){
-                dat->rules.themeRules.modSelectedAndMouseOverCol.g = (float)atof(tok);
+                dat->rules.themeRules.modSelectedAndMouseOverCol.g = (float)SDL_atof(tok);
                 tok = SDL_strtok_r(NULL,",",&saveptr);
                 if(tok!=NULL){
-                  dat->rules.themeRules.modSelectedAndMouseOverCol.b = (float)atof(tok);
+                  dat->rules.themeRules.modSelectedAndMouseOverCol.b = (float)SDL_atof(tok);
                   dat->rules.themeRules.modSelectedAndMouseOverCol.a = 1.0f;
                 }else{
                   SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"could not parse mod_col_selected_and_mouseover color string in file: %s.\n",filePath);
@@ -446,7 +446,7 @@ void getENSDFNuclStrNZ(int16_t *N, int16_t *Z, const char *nuclStr){
 	SDL_strlcpy(str,nuclStr,255); //copy the nucleus name
 	tok=SDL_strtok_r(str,"ABCDEFGHIJKLMNOPQRSTUVWXYZ",&saveptr);
 	if(tok!=NULL){
-		A=(int16_t)atoi(tok);
+		A=(int16_t)SDL_atoi(tok);
 	}
 	
 	//get proton number
@@ -759,7 +759,7 @@ void parseLevelE(valWithErr * levelEVal, const nucl *nuclideData, const char * e
 		if(tok != NULL){
 			tok = SDL_strtok_r(NULL,"",&saveptr); //get the rest of the string
 			if(tok != NULL){
-				levelE = (float)atof(tok);
+				levelE = (float)SDL_atof(tok);
 				levelEVal->format = 0; //default
 				if(SDL_strncmp(estring,"SP",2)==0){
 					levelE += nuclideData->sp.val;
@@ -785,7 +785,7 @@ void parseLevelE(valWithErr * levelEVal, const nucl *nuclideData, const char * e
 		if(tok != NULL){
 			tok = SDL_strtok_r(NULL,"",&saveptr); //get the rest of the string
 			if(tok != NULL){
-				levelE = (float)atof(tok);
+				levelE = (float)SDL_atof(tok);
 				levelEVal->format = 0; //default
 				levelEVal->format |= (uint16_t)(VALUETYPE_PLUSX << 5);
 			}else{
@@ -804,7 +804,7 @@ void parseLevelE(valWithErr * levelEVal, const nucl *nuclideData, const char * e
 		//SDL_Log("number+X eVal: %s\n",eVal);
 		tok = SDL_strtok_r(eVal,"+",&saveptr);
 		if(tok != NULL){
-			levelE = (float)atof(tok);
+			levelE = (float)SDL_atof(tok);
 			tok = SDL_strtok_r(NULL,"",&saveptr); //get the rest of the string
 			if(tok != NULL){
 				levelEVal->format = 0; //default
@@ -818,7 +818,7 @@ void parseLevelE(valWithErr * levelEVal, const nucl *nuclideData, const char * e
 	}else{
 		//normal level energy
 		//SDL_Log("normal eVal: %s (length %u)\n",eVal,levEStrLen);
-		levelE = (float)atof(eVal);
+		levelE = (float)SDL_atof(eVal);
 		levelEVal->format = 0; //default
 		//SDL_Log("Found level at %f keV from string: %s\n",(double)levelE,eVal);
 	}
@@ -848,7 +848,7 @@ void parseLevelE(valWithErr * levelEVal, const nucl *nuclideData, const char * e
 					if(tok!=NULL){
 						//SDL_Log("energy in exponent form: %s\n",eVal);
 						//value was in exponent format
-						levelEVal->exponent = (int8_t)atoi(tok);
+						levelEVal->exponent = (int8_t)SDL_atoi(tok);
 						levelE = levelE / powf(10.0f,(float)(levelEVal->exponent));
 						levelEVal->format |= (uint16_t)(1U << 4); //exponent flag
 					}
@@ -864,7 +864,7 @@ void parseLevelE(valWithErr * levelEVal, const nucl *nuclideData, const char * e
 					if(tok!=NULL){
 						//SDL_Log("%s\n",tok);
 						//value was in exponent format
-						levelEVal->exponent = (int8_t)atoi(tok);
+						levelEVal->exponent = (int8_t)SDL_atoi(tok);
 						levelE = levelE / powf(10.0f,(float)(levelEVal->exponent));
 						levelEVal->format |= (uint16_t)(1U << 4); //exponent flag
 					}
@@ -874,7 +874,7 @@ void parseLevelE(valWithErr * levelEVal, const nucl *nuclideData, const char * e
 		if((levelE==0.0f)&&((levelEVal->format & 15U) == 0)){
 			levelEVal->format |= 1U; //always include at least one decimal place for ground states, for aesthetic purposes
 		}
-		uint8_t levelEerr = (uint8_t)atoi(errstring);
+		uint8_t levelEerr = (uint8_t)SDL_atoi(errstring);
 
 		//assign level energy values
 		levelEVal->val=levelE;
@@ -920,7 +920,7 @@ void parseHalfLife(level * lev, const char * hlstring){
   hlErrVal[6] = '\0'; //terminate string
 
 	lev->halfLife.val = -1.0f;
-	lev->halfLife.err = (uint8_t)atoi(hlErrVal);
+	lev->halfLife.err = (uint8_t)SDL_atoi(hlErrVal);
   lev->halfLife.format = 0;
   lev->halfLife.unit=VALUE_UNIT_NOVAL;
 
@@ -936,7 +936,7 @@ void parseHalfLife(level * lev, const char * hlstring){
 		lev->halfLife.val = 1.0E20f;
 		lev->halfLife.unit = VALUE_UNIT_STABLE;
 	}else{
-		lev->halfLife.val = (float)atof(hlVal);
+		lev->halfLife.val = (float)SDL_atof(hlVal);
     tok = SDL_strtok_r(hlVal,".",&saveptr);
     if(tok!=NULL){
       //SDL_Log("%s\n",tok);
@@ -950,7 +950,7 @@ void parseHalfLife(level * lev, const char * hlstring){
         tok = SDL_strtok_r(NULL,"",&saveptr); //get the rest of the string (the part after the exponent, if it exists)
         if(tok!=NULL){
           //value was in exponent format
-					lev->halfLife.exponent = (int8_t)atoi(tok);
+					lev->halfLife.exponent = (int8_t)SDL_atoi(tok);
 					//SDL_Log("%s, parsed to %i\n",tok,lev->halfLife.exponent);
 					lev->halfLife.val = lev->halfLife.val / powf(10.0f,(float)(lev->halfLife.exponent));
           lev->halfLife.format |= (uint16_t)(1U << 4); //exponent flag
@@ -961,7 +961,7 @@ void parseHalfLife(level * lev, const char * hlstring){
           tok = SDL_strtok_r(NULL,"",&saveptr); //get the rest of the string (the part after the exponent, if it exists)
           if(tok!=NULL){
             //value was in exponent format
-            lev->halfLife.exponent = (int8_t)atoi(tok);
+            lev->halfLife.exponent = (int8_t)SDL_atoi(tok);
 						//SDL_Log("%s, parsed to %i\n",tok,lev->halfLife.exponent);
 						lev->halfLife.val = lev->halfLife.val / powf(10.0f,(float)(lev->halfLife.exponent));
 						lev->halfLife.format |= (uint16_t)(1U << 4); //exponent flag
@@ -1012,10 +1012,10 @@ void parseHalfLife(level * lev, const char * hlstring){
 			//SDL_Log("err: %s\n",hlErrVal);
 			tok = SDL_strtok_r(hlErrVal, "-",&saveptr);
 			if(tok != NULL){
-				lev->halfLife.err = (uint8_t)atoi(tok); //positive error
+				lev->halfLife.err = (uint8_t)SDL_atoi(tok); //positive error
 				tok = SDL_strtok_r(NULL, "",&saveptr); //get rest of the string
 				if(tok!=NULL){
-					uint16_t negErr = ((uint16_t)atoi(tok) & 127U); //negative error
+					uint16_t negErr = ((uint16_t)SDL_atoi(tok) & 127U); //negative error
 					//SDL_Log("neg err: %u\n",negErr);
 					lev->halfLife.format |= (uint16_t)(VALUETYPE_ASYMERROR << 5);
 					lev->halfLife.format |= (uint16_t)(negErr << 9);
@@ -1556,13 +1556,13 @@ void parseSpinPar(ndata *nd, level * lev, sp_var_data * varDat, char * spstring)
 					if(atoi(tok) >= 255){
 						SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,"high spin value: %i/2\n",atoi(tok));
 					}
-					nd->spv[nd->numSpinParVals].spinVal=(uint8_t)atoi(tok);
+					nd->spv[nd->numSpinParVals].spinVal=(uint8_t)SDL_atoi(tok);
 					//SDL_Log("Spin detected: %u/2\n",nd->spv[nd->numSpinParVals].spinVal);
 				}else{
 					if(atoi(tmpstr2) >= 255){
 						SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,"high spin value: %i\n",atoi(tmpstr2));
 					}
-					nd->spv[nd->numSpinParVals].spinVal=(uint8_t)atoi(tmpstr2);
+					nd->spv[nd->numSpinParVals].spinVal=(uint8_t)SDL_atoi(tmpstr2);
 					//SDL_Log("Spin detected: %u\n",nd->spv[nd->numSpinParVals].spinVal);
 				}
 			}
@@ -1786,7 +1786,7 @@ uint8_t parseDcyModeSubstr(ndata *nd, const uint16_t dcyModeInd, const char *sub
 					SDL_strlcpy(valueCpy,tok2,15);
 					SDL_strlcpy(valBuff,valueCpy,16);
 					//SDL_Log("%s\n",tok2);
-					float probVal = (float)atof(tok2);
+					float probVal = (float)SDL_atof(tok2);
 
 					if(probVal >= 0.0f){
 						//get the number of sig figs in the decay probability
@@ -1813,7 +1813,7 @@ uint8_t parseDcyModeSubstr(ndata *nd, const uint16_t dcyModeInd, const char *sub
 										if(tok2!=NULL){
 											//SDL_Log("decay probability in exponent form: %s\n",valueCpy);
 											//value was in exponent format
-											nd->dcyMode[dcyModeInd].prob.exponent = (int8_t)atoi(tok2);
+											nd->dcyMode[dcyModeInd].prob.exponent = (int8_t)SDL_atoi(tok2);
 											probVal = probVal / powf(10.0f,(float)(nd->dcyMode[dcyModeInd].prob.exponent));
 											nd->dcyMode[dcyModeInd].prob.format |= (uint16_t)(1U << 4); //exponent flag
 										}
@@ -1827,7 +1827,7 @@ uint8_t parseDcyModeSubstr(ndata *nd, const uint16_t dcyModeInd, const char *sub
 									if(tok2!=NULL){
 										//SDL_Log("%s\n",tok2);
 										//value was in exponent format
-										nd->dcyMode[dcyModeInd].prob.exponent = (int8_t)atoi(tok2);
+										nd->dcyMode[dcyModeInd].prob.exponent = (int8_t)SDL_atoi(tok2);
 										probVal = probVal / powf(10.0f,(float)(nd->dcyMode[dcyModeInd].prob.exponent));
 										nd->dcyMode[dcyModeInd].prob.format |= (uint16_t)(1U << 4); //exponent flag
 									}
@@ -1855,17 +1855,17 @@ uint8_t parseDcyModeSubstr(ndata *nd, const uint16_t dcyModeInd, const char *sub
 							tok2 = SDL_strtok_r(errBuff, "-",&saveptr);
 							if(tok2 != NULL){
 								//SDL_Log("pos err: %s\n",tok2);
-								nd->dcyMode[dcyModeInd].prob.err = (uint8_t)atoi(tok2); //positive error
+								nd->dcyMode[dcyModeInd].prob.err = (uint8_t)SDL_atoi(tok2); //positive error
 								tok2 = SDL_strtok_r(NULL, "",&saveptr); //get rest of the string
 								if(tok2 != NULL){
-									uint16_t negErr = ((uint16_t)atoi(tok2) & 127U); //negative error
+									uint16_t negErr = ((uint16_t)SDL_atoi(tok2) & 127U); //negative error
 									//SDL_Log("neg err: %u\n",negErr);
 									nd->dcyMode[dcyModeInd].prob.format |= (uint16_t)(VALUETYPE_ASYMERROR << 5);
 									nd->dcyMode[dcyModeInd].prob.format |= (uint16_t)(negErr << 9);
 								}
 							}
 						}else{
-							nd->dcyMode[dcyModeInd].prob.err = (uint8_t)atoi(errBuff);
+							nd->dcyMode[dcyModeInd].prob.err = (uint8_t)SDL_atoi(errBuff);
 							//SDL_Log("err: %u\n",nd->dcyMode[dcyModeInd].prob.err);
 						}
 					}
@@ -1875,7 +1875,7 @@ uint8_t parseDcyModeSubstr(ndata *nd, const uint16_t dcyModeInd, const char *sub
 					//where '12.5' was put into errBuff
 					char valueCpy[16];
 					SDL_strlcpy(valueCpy,errBuff,16);
-					float probVal = (float)atof(errBuff);
+					float probVal = (float)SDL_atof(errBuff);
 					
 					//count sig figs
 					tok2 = SDL_strtok_r(errBuff,".",&saveptr);
@@ -1900,7 +1900,7 @@ uint8_t parseDcyModeSubstr(ndata *nd, const uint16_t dcyModeInd, const char *sub
 									if(tok2!=NULL){
 										//SDL_Log("decay probability in exponent form: %s\n",valueCpy);
 										//value was in exponent format
-										nd->dcyMode[dcyModeInd].prob.exponent = (int8_t)atoi(tok2);
+										nd->dcyMode[dcyModeInd].prob.exponent = (int8_t)SDL_atoi(tok2);
 										probVal = probVal / powf(10.0f,(float)(nd->dcyMode[dcyModeInd].prob.exponent));
 										nd->dcyMode[dcyModeInd].prob.format |= (uint16_t)(1U << 4); //exponent flag
 									}
@@ -1914,7 +1914,7 @@ uint8_t parseDcyModeSubstr(ndata *nd, const uint16_t dcyModeInd, const char *sub
 								if(tok2!=NULL){
 									//SDL_Log("%s\n",tok2);
 									//value was in exponent format
-									nd->dcyMode[dcyModeInd].prob.exponent = (int8_t)atoi(tok2);
+									nd->dcyMode[dcyModeInd].prob.exponent = (int8_t)SDL_atoi(tok2);
 									probVal = probVal / powf(10.0f,(float)(nd->dcyMode[dcyModeInd].prob.exponent));
 									nd->dcyMode[dcyModeInd].prob.format |= (uint16_t)(1U << 4); //exponent flag
 								}
@@ -2739,7 +2739,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 								if(tok != NULL){
 									tok = SDL_strtok_r(NULL,"",&saveptr); //get the rest of the string
 									if(tok != NULL){
-										gammaE = (float)atof(tok);
+										gammaE = (float)SDL_atof(tok);
 										nd->tran[tranInd].energy.format = 0; //default
 										nd->tran[tranInd].energy.format |= (uint16_t)(VALUETYPE_PLUSX << 5U);
 									}
@@ -2752,7 +2752,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 								//SDL_Log("number+X ebuff: %s\n",ebuff);
 								tok = SDL_strtok_r(ebuff,"+",&saveptr);
 								if(tok != NULL){
-									gammaE = (float)atof(tok);
+									gammaE = (float)SDL_atof(tok);
 									tok = SDL_strtok_r(NULL,"",&saveptr); //get the rest of the string
 									if(tok != NULL){
 										nd->tran[tranInd].energy.format = 0; //default
@@ -2766,7 +2766,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 							}else{
 								//normal gamma energy
 								//SDL_Log("normal ebuff: %s (length %u)\n",ebuff,gamEStrLen);
-								gammaE = (float)atof(ebuff);
+								gammaE = (float)SDL_atof(ebuff);
 								nd->tran[tranInd].energy.format = 0; //default
 								nd->tran[tranInd].energy.format |= (uint16_t)(tentativeE << 9U); //tentative bit
 								//SDL_Log("Found gamma at %f keV from string: %s\n",(double)gammaE,ebuff);
@@ -2796,7 +2796,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 										if(tok!=NULL){
 											//SDL_Log("energy in exponent form: %s\n",ebuff);
 											//value was in exponent format
-											nd->tran[tranInd].energy.exponent = (int8_t)atoi(tok);
+											nd->tran[tranInd].energy.exponent = (int8_t)SDL_atoi(tok);
 											gammaE = gammaE / powf(10.0f,(float)(nd->tran[tranInd].energy.exponent));
 											nd->tran[tranInd].energy.format |= (uint16_t)(1U << 4U); //exponent flag
 										}
@@ -2813,7 +2813,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 									if(tok!=NULL){
 										//SDL_Log("%s\n",tok);
 										//value was in exponent format
-										nd->tran[tranInd].energy.exponent = (int8_t)atoi(tok);
+										nd->tran[tranInd].energy.exponent = (int8_t)SDL_atoi(tok);
 										gammaE = gammaE / powf(10.0f,(float)(nd->tran[tranInd].energy.exponent));
 										nd->tran[tranInd].energy.format |= (uint16_t)(1U << 4U); //exponent flag
 									}
@@ -2836,7 +2836,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 							}else if(SDL_strcmp(eeBuff,"?")==0){
 								nd->tran[tranInd].energy.format |= (uint16_t)(VALUETYPE_UNKNOWN << 5U);
 							}else{
-								nd->tran[tranInd].energy.err=(uint8_t)atoi(eeBuff);
+								nd->tran[tranInd].energy.err=(uint8_t)SDL_atoi(eeBuff);
 							}
 							if(nd->tran[tranInd].energy.unit != VALUE_UNIT_NOVAL){
 								nd->tran[tranInd].energy.unit=VALUE_UNIT_KEV;
@@ -2947,7 +2947,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 							}
 							
 							//gamma intensity
-							float gammaI = (float)atof(iBuff);
+							float gammaI = (float)SDL_atof(iBuff);
 							//get the number of sig figs
 							nd->tran[tranInd].intensity.format = 0; //default
 							//SDL_Log("ebuff: %s\n",ebuff);
@@ -2973,7 +2973,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 									if(tok!=NULL){
 										//SDL_Log("energy in exponent form: %s\n",ebuff);
 										//value was in exponent format
-										nd->tran[tranInd].intensity.exponent = (int8_t)atoi(tok);
+										nd->tran[tranInd].intensity.exponent = (int8_t)SDL_atoi(tok);
 										gammaI = gammaI / powf(10.0f,(float)(nd->tran[tranInd].intensity.exponent));
 										nd->tran[tranInd].intensity.format |= (uint16_t)(1U << 4); //exponent flag
 									}
@@ -2999,12 +2999,12 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 								}else if(SDL_strcmp(tok,"?")==0){
 									nd->tran[tranInd].intensity.format |= (uint16_t)(VALUETYPE_UNKNOWN << 5);
 								}else{
-									nd->tran[tranInd].intensity.err=(uint8_t)atoi(ieBuff);
+									nd->tran[tranInd].intensity.err=(uint8_t)SDL_atoi(ieBuff);
 								}
 							}
 							
 							//gamma conversion coeff
-							float gammaICC = (float)atof(iccBuff);
+							float gammaICC = (float)SDL_atof(iccBuff);
 							//get the number of sig figs
 							nd->tran[tranInd].icc.format = 0; //default
 							//SDL_Log("iccBuff: %s\n",iccBuff);
@@ -3034,7 +3034,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 									tok = SDL_strtok_r(NULL,"",&saveptr); //get the remaining part of the string (only get past here if the value was expressed in exponent form)
 									if(tok!=NULL){
 										//value was in exponent format
-										nd->tran[tranInd].icc.exponent = (int8_t)atoi(tok);
+										nd->tran[tranInd].icc.exponent = (int8_t)SDL_atoi(tok);
 										gammaICC = gammaICC / powf(10.0f,(float)(nd->tran[tranInd].icc.exponent));
 										if(nd->tran[tranInd].icc.format > 15U){
 											nd->tran[tranInd].icc.format = 15U; //only 4 bits available for precision
@@ -3097,7 +3097,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 								}else if(SDL_strcmp(tok,"?")==0){
 									nd->tran[tranInd].icc.format |= (uint16_t)(VALUETYPE_UNKNOWN << 5);
 								}else{
-									nd->tran[tranInd].icc.err=(uint8_t)atoi(icceBuff);
+									nd->tran[tranInd].icc.err=(uint8_t)SDL_atoi(icceBuff);
 								}
 							}
 							
@@ -3172,7 +3172,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 							}
 
 							//gamma mixing ratio
-							float gammaDelta = (float)atof(deltaBuff);
+							float gammaDelta = (float)SDL_atof(deltaBuff);
 							//get the number of sig figs
 							nd->tran[tranInd].delta.format = 0; //default
 							//SDL_Log("deltaBuff: %s\n",deltaBuff);
@@ -3202,7 +3202,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 									tok = SDL_strtok_r(NULL,"",&saveptr); //get the remaining part of the string (only get past here if the value was expressed in exponent form)
 									if(tok!=NULL){
 										//value was in exponent format
-										nd->tran[tranInd].delta.exponent = (int8_t)atoi(tok);
+										nd->tran[tranInd].delta.exponent = (int8_t)SDL_atoi(tok);
 										gammaDelta = gammaDelta / powf(10.0f,(float)(nd->tran[tranInd].delta.exponent));
 										if(nd->tran[tranInd].delta.format > 15U){
 											nd->tran[tranInd].delta.format = 15U; //only 4 bits available for precision
@@ -3254,10 +3254,10 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 										//SDL_Log("aysmmetric err: %s\n",deltaeBuff);
 										tok = SDL_strtok_r(deltaeBuff, "-",&saveptr);
 										if(tok != NULL){
-											nd->tran[tranInd].delta.err = (uint8_t)atoi(tok); //positive error
+											nd->tran[tranInd].delta.err = (uint8_t)SDL_atoi(tok); //positive error
 											tok = SDL_strtok_r(NULL, "",&saveptr); //get rest of the string
 											if(tok!=NULL){
-												uint16_t negErr = ((uint16_t)atoi(tok) & 127U); //negative error
+												uint16_t negErr = ((uint16_t)SDL_atoi(tok) & 127U); //negative error
 												//SDL_Log("neg err: %u\n",negErr);
 												nd->tran[tranInd].delta.format |= (uint16_t)(VALUETYPE_ASYMERROR << 5);
 												nd->tran[tranInd].delta.format |= (uint16_t)(negErr << 9);
@@ -3268,17 +3268,17 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 										//SDL_Log("aysmmetric err: %s\n",deltaeBuff);
 										tok = SDL_strtok_r(deltaeBuff, "+",&saveptr);
 										if((tok != NULL)&&(SDL_strlen(tok)>1)){
-											uint16_t negErr = ((uint16_t)atoi(tok+1) & 127U); //negative error
+											uint16_t negErr = ((uint16_t)SDL_atoi(tok+1) & 127U); //negative error
 											//SDL_Log("neg err: %u\n",negErr);
 											nd->tran[tranInd].delta.format |= (uint16_t)(VALUETYPE_ASYMERROR << 5);
 											nd->tran[tranInd].delta.format |= (uint16_t)(negErr << 9);
 											tok = SDL_strtok_r(NULL, "",&saveptr); //get rest of the string
 											if(tok!=NULL){
-												nd->tran[tranInd].delta.err = (uint8_t)atoi(tok); //positive error
+												nd->tran[tranInd].delta.err = (uint8_t)SDL_atoi(tok); //positive error
 											}
 										}
 									}else{
-										nd->tran[tranInd].delta.err=(uint8_t)atoi(deltaeBuff);
+										nd->tran[tranInd].delta.err=(uint8_t)SDL_atoi(deltaeBuff);
 									}
 								}
 							}
@@ -3316,7 +3316,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 										if(tok!=NULL){
 											SDL_strlcpy(tval,tok,80);
 											//SDL_Log("tval: %s\n",tval);
-											nd->tran[tranInd].icc.val = (float)atof(tval);
+											nd->tran[tranInd].icc.val = (float)SDL_atof(tval);
 											//flag that the nuclide has ICC data
 											nd->nuclData[nd->numNucl].flags |= (1U << 2);
 											//check for presence of exponent
@@ -3350,7 +3350,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 													if(tok2!=NULL){
 														//SDL_Log("ICC in exponent form: %s\n",line);
 														//value was in exponent format
-														nd->tran[tranInd].icc.exponent = (int8_t)atoi(tok2);
+														nd->tran[tranInd].icc.exponent = (int8_t)SDL_atoi(tok2);
 														nd->tran[tranInd].icc.val = nd->tran[tranInd].icc.val / powf(10.0f,(float)(nd->tran[tranInd].icc.exponent));
 														nd->tran[tranInd].icc.format |= (uint16_t)(1U << 4); //exponent flag
 													}else if(hasExp){
@@ -3392,10 +3392,76 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 												SDL_strlcpy(tval,tok,80);
 												//SDL_Log("tok: %s\n",tok);
 												if((tval[0]=='I')&&(SDL_strlen(tval) > 1)){
-													nd->tran[tranInd].icc.err = (uint8_t)atoi(&tval[1]);
+													nd->tran[tranInd].icc.err = (uint8_t)SDL_atoi(&tval[1]);
 												}else if(SDL_isdigit(tval[0])){
-													nd->tran[tranInd].icc.err = (uint8_t)atoi(tval);
+													nd->tran[tranInd].icc.err = (uint8_t)SDL_atoi(tval);
 												}
+											}
+										}
+									}
+								}else if(SDL_strcmp(tval,"FL")==0){
+									//SDL_Log("Found final level specified in line: %s\n",line);
+									tok = SDL_strtok_r(NULL," $={},",&saveptr);
+									if(tok!=NULL){
+										SDL_strlcpy(tval,tok,80);
+										//SDL_Log("tval: %s\n",tval);
+										uint32_t tlen = (uint32_t)SDL_strlen(tval);
+										uint8_t finalLvlType = VALUETYPE_NUMBER;
+										uint8_t finalLvlVar = 0;
+										double finalLvlE = SDL_atof(tval);
+										if((tlen>0)&&(SDL_isalpha(tval[0]))){
+											if((tlen>1)&&(tval[1] == '+')){
+												finalLvlType = VALUETYPE_PLUSX;
+											}else{
+												finalLvlType = VALUETYPE_X;
+											}
+											finalLvlVar = (uint8_t)tval[0];
+										}else if((tlen < 80)&&(SDL_isalpha(tval[tlen-1]))){
+											if((tlen>1)&&(tval[tlen-2] == '+')){
+												finalLvlType = VALUETYPE_PLUSX;
+											}else{
+												finalLvlType = VALUETYPE_X;
+											}
+											finalLvlVar = (uint8_t)tval[tlen-1];
+											//SDL_Log("variable: %c\n",finalLvlVar);
+										}
+										
+										for(uint32_t lvlInd = (nd->numLvls-2); lvlInd >= nd->nuclData[nd->numNucl].firstLevel; lvlInd--){
+											//SDL_Log("Fudge factor: %f\n",fudgeFactor);
+
+											uint8_t lvlEValueType = (uint8_t)((nd->levels[lvlInd].energy.format >> 5U) & 15U);
+
+											if(finalLvlType == lvlEValueType){
+												if(finalLvlType == VALUETYPE_NUMBER){
+													double eDiff = fabs(getRawValFromDB(&nd->levels[lvlInd].energy) - finalLvlE);
+													if(eDiff <= 0.01){
+														nd->tran[tranInd].finalLvlOffset = (uint16_t)((nd->numLvls-1) - lvlInd);
+														//SDL_Log("finalLvlOffset: %u\n",nd->tran[tranInd].finalLvlOffset);
+													}
+													
+												}else if(finalLvlType == VALUETYPE_PLUSX){
+													uint8_t lvlVariable = (uint8_t)((nd->levels[lvlInd].energy.format >> 9U) & 127U);
+													if(finalLvlVar == lvlVariable){
+														double eDiff = fabs(getRawValFromDB(&nd->levels[lvlInd].energy) - finalLvlE);
+														if(eDiff <= 0.01){
+															nd->tran[tranInd].finalLvlOffset = (uint16_t)((nd->numLvls-1) - lvlInd);
+															//SDL_Log("finalLvlOffset: %u\n",nd->tran[tranInd].finalLvlOffset);
+														}
+													}
+												}else if(finalLvlType == VALUETYPE_X){
+													uint8_t lvlVariable = (uint8_t)((nd->levels[lvlInd].energy.format >> 9U) & 127U);
+													if(finalLvlVar == lvlVariable){
+														nd->tran[tranInd].finalLvlOffset = (uint16_t)((nd->numLvls-1) - lvlInd);
+														//SDL_Log("finalLvlOffset: %u\n",nd->tran[tranInd].finalLvlOffset);
+													}
+												}else{
+													SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,"Unimplemented final level parsing for line: %s\n",line);
+												}
+												
+											}
+											
+											if(lvlInd == 0){
+												break; //handle rare integer overflow case
 											}
 										}
 									}
@@ -3425,13 +3491,13 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 							memcpy(qbErrBuff, &line[19], 2);
 							qbErrBuff[2] = '\0';
 
-							nd->nuclData[nd->numNucl].qbeta.val = (float)atof(qbBuff);
+							nd->nuclData[nd->numNucl].qbeta.val = (float)SDL_atof(qbBuff);
 							if(SDL_strcmp(qbErrBuff,"SY")==0){
 								nd->nuclData[nd->numNucl].qbeta.err = 255; //systematic
 							}else if(SDL_strcmp(qbErrBuff,"CA")==0){
 								nd->nuclData[nd->numNucl].qbeta.err = 254; //calculated
 							}else{
-								nd->nuclData[nd->numNucl].qbeta.err = (uint8_t)atoi(qbErrBuff);
+								nd->nuclData[nd->numNucl].qbeta.err = (uint8_t)SDL_atoi(qbErrBuff);
 							}
 							nd->nuclData[nd->numNucl].qbeta.unit = VALUE_UNIT_KEV;
 
@@ -3457,7 +3523,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 									tok = SDL_strtok_r(NULL,"",&saveptr); //get the rest of the string (the part after the exponent, if it exists)
 									if(tok!=NULL){
 										//value was in exponent format
-										nd->nuclData[nd->numNucl].qbeta.exponent = (int8_t)atoi(tok);
+										nd->nuclData[nd->numNucl].qbeta.exponent = (int8_t)SDL_atoi(tok);
 										//SDL_Log("%s, parsed to %i\n",tok,nd->nuclData[nd->numNucl].qbeta.exponent);
 										nd->nuclData[nd->numNucl].qbeta.val = nd->nuclData[nd->numNucl].qbeta.val / powf(10.0f,(float)(nd->nuclData[nd->numNucl].qbeta.exponent));
 										nd->nuclData[nd->numNucl].qbeta.format |= (uint16_t)(1U << 4); //exponent flag
@@ -3468,7 +3534,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 										tok = SDL_strtok_r(NULL,"",&saveptr); //get the rest of the string (the part after the exponent, if it exists)
 										if(tok!=NULL){
 											//value was in exponent format
-											nd->nuclData[nd->numNucl].qbeta.exponent = (int8_t)atoi(tok);
+											nd->nuclData[nd->numNucl].qbeta.exponent = (int8_t)SDL_atoi(tok);
 											//SDL_Log("%s, parsed to %i\n",tok,nd->nuclData[nd->numNucl].qbeta.exponent);
 											nd->nuclData[nd->numNucl].qbeta.val = nd->nuclData[nd->numNucl].qbeta.val / powf(10.0f,(float)(nd->nuclData[nd->numNucl].qbeta.exponent));
 											nd->nuclData[nd->numNucl].qbeta.format |= (uint16_t)(1U << 4); //exponent flag
@@ -3491,13 +3557,13 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 							memcpy(nsErrBuff, &line[29], 2);
 							nsErrBuff[2] = '\0';
 
-							nd->nuclData[nd->numNucl].sn.val = (float)atof(nsBuff);
+							nd->nuclData[nd->numNucl].sn.val = (float)SDL_atof(nsBuff);
 							if(SDL_strcmp(nsErrBuff,"SY")==0){
 								nd->nuclData[nd->numNucl].sn.err = 255; //systematic
 							}else if(SDL_strcmp(nsErrBuff,"CA")==0){
 								nd->nuclData[nd->numNucl].sn.err = 254; //calculated
 							}else{
-								nd->nuclData[nd->numNucl].sn.err = (uint8_t)atoi(nsErrBuff);
+								nd->nuclData[nd->numNucl].sn.err = (uint8_t)SDL_atoi(nsErrBuff);
 							}
 							nd->nuclData[nd->numNucl].sn.unit = VALUE_UNIT_KEV;
 
@@ -3528,7 +3594,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 									tok = SDL_strtok_r(NULL,"",&saveptr); //get the rest of the string (the part after the exponent, if it exists)
 									if(tok!=NULL){
 										//value was in exponent format
-										nd->nuclData[nd->numNucl].sn.exponent = (int8_t)atoi(tok);
+										nd->nuclData[nd->numNucl].sn.exponent = (int8_t)SDL_atoi(tok);
 										//SDL_Log("%s, parsed to %i\n",tok,nd->nuclData[nd->numNucl].sn.exponent);
 										nd->nuclData[nd->numNucl].sn.val = nd->nuclData[nd->numNucl].sn.val / powf(10.0f,(float)(nd->nuclData[nd->numNucl].sn.exponent));
 										nd->nuclData[nd->numNucl].sn.format |= (uint16_t)(1U << 4); //exponent flag
@@ -3539,7 +3605,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 										tok = SDL_strtok_r(NULL,"",&saveptr); //get the rest of the string (the part after the exponent, if it exists)
 										if(tok!=NULL){
 											//value was in exponent format
-											nd->nuclData[nd->numNucl].sn.exponent = (int8_t)atoi(tok);
+											nd->nuclData[nd->numNucl].sn.exponent = (int8_t)SDL_atoi(tok);
 											//SDL_Log("%s, parsed to %i\n",tok,nd->nuclData[nd->numNucl].sn.exponent);
 											nd->nuclData[nd->numNucl].sn.val = nd->nuclData[nd->numNucl].sn.val / powf(10.0f,(float)(nd->nuclData[nd->numNucl].sn.exponent));
 											if(badExpFlag == 0){
@@ -3573,13 +3639,13 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 							memcpy(psErrBuff, &line[39], 2);
 							psErrBuff[2] = '\0';
 
-							nd->nuclData[nd->numNucl].sp.val = (float)atof(psBuff);
+							nd->nuclData[nd->numNucl].sp.val = (float)SDL_atof(psBuff);
 							if(SDL_strcmp(psErrBuff,"SY")==0){
 								nd->nuclData[nd->numNucl].sp.err = 255; //systematic
 							}else if(SDL_strcmp(psErrBuff,"CA")==0){
 								nd->nuclData[nd->numNucl].sp.err = 254; //calculated
 							}else{
-								nd->nuclData[nd->numNucl].sp.err = (uint8_t)atoi(psErrBuff);
+								nd->nuclData[nd->numNucl].sp.err = (uint8_t)SDL_atoi(psErrBuff);
 							}
 							nd->nuclData[nd->numNucl].sp.unit = VALUE_UNIT_KEV;
 
@@ -3612,7 +3678,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 									tok = SDL_strtok_r(NULL,"",&saveptr); //get the rest of the string (the part after the exponent, if it exists)
 									if(tok!=NULL){
 										//value was in exponent format
-										nd->nuclData[nd->numNucl].sp.exponent = (int8_t)atoi(tok);
+										nd->nuclData[nd->numNucl].sp.exponent = (int8_t)SDL_atoi(tok);
 										//SDL_Log("%s, parsed to %i\n",tok,nd->nuclData[nd->numNucl].sp.exponent);
 										nd->nuclData[nd->numNucl].sp.val = nd->nuclData[nd->numNucl].sp.val / powf(10.0f,(float)(nd->nuclData[nd->numNucl].sp.exponent));
 										nd->nuclData[nd->numNucl].sp.format |= (uint16_t)(1U << 4); //exponent flag
@@ -3623,7 +3689,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 										tok = SDL_strtok_r(NULL,"",&saveptr); //get the rest of the string (the part after the exponent, if it exists)
 										if(tok!=NULL){
 											//value was in exponent format
-											nd->nuclData[nd->numNucl].sp.exponent = (int8_t)atoi(tok);
+											nd->nuclData[nd->numNucl].sp.exponent = (int8_t)SDL_atoi(tok);
 											//SDL_Log("%s, parsed to %i\n",tok,nd->nuclData[nd->numNucl].sp.exponent);
 											nd->nuclData[nd->numNucl].sp.val = nd->nuclData[nd->numNucl].sp.val / powf(10.0f,(float)(nd->nuclData[nd->numNucl].sp.exponent));
 											nd->nuclData[nd->numNucl].sp.format |= (uint16_t)(1U << 4); //exponent flag
@@ -3646,13 +3712,13 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 							memcpy(qaErrBuff, &line[49], 2);
 							qaErrBuff[2] = '\0';
 							
-							nd->nuclData[nd->numNucl].qalpha.val = (float)atof(qaBuff);
+							nd->nuclData[nd->numNucl].qalpha.val = (float)SDL_atof(qaBuff);
 							if(SDL_strcmp(qaErrBuff,"SY")==0){
 								nd->nuclData[nd->numNucl].qalpha.err = 255; //systematic
 							}else if(SDL_strcmp(qaErrBuff,"CA")==0){
 								nd->nuclData[nd->numNucl].qalpha.err = 254; //calculated
 							}else{
-								nd->nuclData[nd->numNucl].qalpha.err = (uint8_t)atoi(qaErrBuff);
+								nd->nuclData[nd->numNucl].qalpha.err = (uint8_t)SDL_atoi(qaErrBuff);
 							}
 							nd->nuclData[nd->numNucl].qalpha.unit = VALUE_UNIT_KEV;
 
@@ -3696,7 +3762,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 									tok = SDL_strtok_r(NULL,"",&saveptr); //get the rest of the string (the part after the exponent, if it exists)
 									if(tok!=NULL){
 										//value was in exponent format
-										nd->nuclData[nd->numNucl].qalpha.exponent = (int8_t)atoi(tok);
+										nd->nuclData[nd->numNucl].qalpha.exponent = (int8_t)SDL_atoi(tok);
 										//SDL_Log("%s, parsed to %i\n",tok,nd->nuclData[nd->numNucl].qalpha.exponent);
 										nd->nuclData[nd->numNucl].qalpha.val = nd->nuclData[nd->numNucl].qalpha.val / powf(10.0f,(float)(nd->nuclData[nd->numNucl].qalpha.exponent));
 										nd->nuclData[nd->numNucl].qalpha.format |= (uint16_t)(1U << 4); //exponent flag
@@ -3707,7 +3773,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 										tok = SDL_strtok_r(NULL,"",&saveptr); //get the rest of the string (the part after the exponent, if it exists)
 										if(tok!=NULL){
 											//value was in exponent format
-											nd->nuclData[nd->numNucl].qalpha.exponent = (int8_t)atoi(tok);
+											nd->nuclData[nd->numNucl].qalpha.exponent = (int8_t)SDL_atoi(tok);
 											//SDL_Log("%s, parsed to %i\n",tok,nd->nuclData[nd->numNucl].qalpha.exponent);
 											nd->nuclData[nd->numNucl].qalpha.val = nd->nuclData[nd->numNucl].qalpha.val / powf(10.0f,(float)(nd->nuclData[nd->numNucl].qalpha.exponent));
 											nd->nuclData[nd->numNucl].qalpha.format |= (uint16_t)(1U << 4); //exponent flag
@@ -3732,7 +3798,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 									if(tok!=NULL){
 										SDL_strlcpy(tval,tok,80);
 										//SDL_Log("tval: %s\n",tval);
-										nd->nuclData[nd->numNucl].sn.val = (float)atof(tval);
+										nd->nuclData[nd->numNucl].sn.val = (float)SDL_atof(tval);
 										char *saveptr2 = NULL;
 										char *tok2 = SDL_strtok_r(tval,".",&saveptr2);
 										if(tok2!=NULL){
@@ -3747,9 +3813,9 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 											SDL_strlcpy(tval,tok,80);
 											//SDL_Log("tok: %s\n",tok);
 											if((tval[0]=='I')&&(SDL_strlen(tval) > 1)){
-												nd->nuclData[nd->numNucl].sn.err = (uint8_t)atoi(&tval[1]);
+												nd->nuclData[nd->numNucl].sn.err = (uint8_t)SDL_atoi(&tval[1]);
 											}else if(SDL_isdigit(tval[0])){
-												nd->nuclData[nd->numNucl].sn.err = (uint8_t)atoi(tval);
+												nd->nuclData[nd->numNucl].sn.err = (uint8_t)SDL_atoi(tval);
 											}
 										}
 									}
@@ -3760,7 +3826,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 									if(tok!=NULL){
 										SDL_strlcpy(tval,tok,80);
 										//SDL_Log("tval: %s\n",tval);
-										nd->nuclData[nd->numNucl].sp.val = (float)atof(tval);
+										nd->nuclData[nd->numNucl].sp.val = (float)SDL_atof(tval);
 										char *saveptr2 = NULL;
 										char *tok2 = SDL_strtok_r(tval,".",&saveptr2);
 										if(tok2!=NULL){
@@ -3775,9 +3841,9 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 											SDL_strlcpy(tval,tok,80);
 											//SDL_Log("tok: %s\n",tok);
 											if((tval[0]=='I')&&(SDL_strlen(tval) > 1)){
-												nd->nuclData[nd->numNucl].sp.err = (uint8_t)atoi(&tval[1]);
+												nd->nuclData[nd->numNucl].sp.err = (uint8_t)SDL_atoi(&tval[1]);
 											}else if(SDL_isdigit(tval[0])){
-												nd->nuclData[nd->numNucl].sp.err = (uint8_t)atoi(tval);
+												nd->nuclData[nd->numNucl].sp.err = (uint8_t)SDL_atoi(tval);
 											}
 										}
 									}
@@ -3788,7 +3854,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 									if(tok!=NULL){
 										SDL_strlcpy(tval,tok,80);
 										//SDL_Log("tval: %s\n",tval);
-										nd->nuclData[nd->numNucl].qbeta.val = (float)atof(tval);
+										nd->nuclData[nd->numNucl].qbeta.val = (float)SDL_atof(tval);
 										char *saveptr2 = NULL;
 										char *tok2 = SDL_strtok_r(tval,".",&saveptr2);
 										if(tok2!=NULL){
@@ -3803,9 +3869,9 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 											SDL_strlcpy(tval,tok,80);
 											//SDL_Log("tok: %s\n",tok);
 											if((tval[0]=='I')&&(SDL_strlen(tval) > 1)){
-												nd->nuclData[nd->numNucl].qbeta.err = (uint8_t)atoi(&tval[1]);
+												nd->nuclData[nd->numNucl].qbeta.err = (uint8_t)SDL_atoi(&tval[1]);
 											}else if(SDL_isdigit(tval[0])){
-												nd->nuclData[nd->numNucl].qbeta.err = (uint8_t)atoi(tval);
+												nd->nuclData[nd->numNucl].qbeta.err = (uint8_t)SDL_atoi(tval);
 											}
 										}
 									}
@@ -3816,7 +3882,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 									if(tok!=NULL){
 										SDL_strlcpy(tval,tok,80);
 										//SDL_Log("tval: %s\n",tval);
-										nd->nuclData[nd->numNucl].qalpha.val = (float)atof(tval);
+										nd->nuclData[nd->numNucl].qalpha.val = (float)SDL_atof(tval);
 										char *saveptr2 = NULL;
 										char *tok2 = SDL_strtok_r(tval,".",&saveptr2);
 										if(tok2!=NULL){
@@ -3831,9 +3897,9 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 											SDL_strlcpy(tval,tok,80);
 											//SDL_Log("tok: %s\n",tok);
 											if((tval[0]=='I')&&(SDL_strlen(tval) > 1)){
-												nd->nuclData[nd->numNucl].qalpha.err = (uint8_t)atoi(&tval[1]);
+												nd->nuclData[nd->numNucl].qalpha.err = (uint8_t)SDL_atoi(&tval[1]);
 											}else if(SDL_isdigit(tval[0])){
-												nd->nuclData[nd->numNucl].qalpha.err = (uint8_t)atoi(tval);
+												nd->nuclData[nd->numNucl].qalpha.err = (uint8_t)SDL_atoi(tval);
 											}
 										}
 									}
@@ -3914,9 +3980,9 @@ int parseAbundanceData(const char * filePath, ndata * nd){
 
 			if(tokPos == 1){
 				if(SDL_strcmp(val[0],"Atomic Number ")==0){
-					Z = (int16_t)atoi(val[1]);
+					Z = (int16_t)SDL_atoi(val[1]);
 				}else if(SDL_strcmp(val[0],"Mass Number ")==0){
-					A = (int16_t)atoi(val[1]);
+					A = (int16_t)SDL_atoi(val[1]);
 					N = (int16_t)(A - Z);
 				}else if(SDL_strcmp(val[0],"Isotopic Composition ")==0){
 					uint16_t nuclInd = getNuclInd(nd,N,Z);
@@ -3931,7 +3997,7 @@ int parseAbundanceData(const char * filePath, ndata * nd){
 							}
 							tok=SDL_strtok_r(NULL,")",&saveptr);
 							if(tok!=NULL){
-								nd->nuclData[nuclInd].abundance.err = (uint8_t)atoi(tok);
+								nd->nuclData[nuclInd].abundance.err = (uint8_t)SDL_atoi(tok);
 								nd->nuclData[nuclInd].abundance.unit = VALUE_UNIT_PERCENT;
 								//SDL_Log("Abundance for N,Z = [%i %i]: %.*f %u\n",N,Z,nd->nuclData[nuclInd].abundance.format,(double)nd->nuclData[nuclInd].abundance.val,nd->nuclData[nuclInd].abundance.err);
 							}else{
