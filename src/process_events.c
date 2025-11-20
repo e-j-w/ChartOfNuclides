@@ -970,6 +970,63 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
         setupStrClickActionContextMenu(dat,state,rdat,clickedSelStr);
         rightClick = 0; //unset
       }
+
+      //handle mouseover in the full level list
+      //by default, there is no moused-over row or column
+      state->ds.nuclFullInfoMouseOverCol = 255U;
+      state->ds.nuclFullInfoMouseOverNuclLvl = 65535U;
+      if(state->uiState == UISTATE_FULLLEVELINFO){
+        if(state->mouseYPx > (NUCL_FULLINFOBOX_LEVELLIST_POS_Y*state->ds.uiUserScale)){
+          if(state->mouseXPx >= state->ds.fullInfoFirstColXPos){
+            //figure out which column the mouse is in
+            float totalWidth = state->ds.fullInfoFirstColXPos;
+            for(uint8_t i=0; i<LLCOLUMN_ENUM_LENGTH; i++){
+              if(state->ds.nuclFullInfoShownColumns & (1U << i)){
+                if((state->mouseXPx >= totalWidth)&&(state->mouseXPx < (totalWidth+state->ds.fullInfoColWidth[i]*state->ds.uiUserScale))){
+                  state->ds.nuclFullInfoMouseOverCol = i;
+                  break;
+                }
+                totalWidth += state->ds.fullInfoColWidth[i]*state->ds.uiUserScale;
+              }
+            }
+            if(state->ds.nuclFullInfoMouseOverCol != 255U){
+              //figure out which level the mouse is over
+
+              float mouseRow = (float)((state->mouseYPx - NUCL_FULLINFOBOX_LEVELLIST_POS_Y*state->ds.uiUserScale)/(NUCL_INFOBOX_SMALLLINE_HEIGHT*state->ds.uiUserScale) + state->ds.nuclFullInfoScrollY);
+              for(uint16_t nuclLvlInd = 0; nuclLvlInd<dat->ndat.nuclData[state->chartSelectedNucl].numLevels; nuclLvlInd++){
+                if(mouseRow >= getNumDispLinesUpToLvl(&dat->ndat,state,nuclLvlInd)){
+                  if(mouseRow < getNumDispLinesUpToLvl(&dat->ndat,state,nuclLvlInd+1)){
+                    //make sure to account for Q-values by only counting lines from the level itself
+                    if(mouseRow < (getNumDispLinesUpToLvl(&dat->ndat,state,nuclLvlInd) + getNumDispLinesForLvl(&dat->ndat,dat->ndat.nuclData[state->chartSelectedNucl].firstLevel + nuclLvlInd))){
+                      state->ds.nuclFullInfoMouseOverNuclLvl = nuclLvlInd;
+                    } //else the user right-clicked on a Q-value
+                    break;
+                  }
+                }
+              }
+              if(state->ds.nuclFullInfoMouseOverNuclLvl != 65535U){
+                SDL_Log("Right click on lvl: %u (row: %.2f), col %u\n",state->ds.nuclFullInfoMouseOverNuclLvl,(double)mouseRow,state->ds.nuclFullInfoMouseOverCol);
+                //TO-DO: replace selection string context items (besides copy) with context items specific to the specific
+                //level in the level list
+                switch(state->ds.nuclFullInfoMouseOverCol){
+                  case LLCOLUMN_ELEVEL:
+                  case LLCOLUMN_JPI:
+                  case LLCOLUMN_HALFLIFE:
+                  case LLCOLUMN_EGAMMA:
+                  case LLCOLUMN_IGAMMA:
+                  case LLCOLUMN_MGAMMA:
+                  case LLCOLUMN_DELTA:
+                  case LLCOLUMN_ICC:
+                  case LLCOLUMN_FINALLEVEL_E:
+                  case LLCOLUMN_FINALLEVEL_JPI:
+                  default:
+                    break;
+                }
+              }
+            }
+          }
+        }
+      }
       
       if(rightClick){
         if(state->cms.numContextMenuItems > 0){

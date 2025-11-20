@@ -246,12 +246,15 @@ typedef struct
   float infoBoxTableHeight; //the height in unscaled pixels needed to show the info box ground and isomeric state info
   float infoBoxWidth, infoBoxEColOffset, infoBoxJpiColOffset, infoBoxHlColOffset, infoBoxDcyModeColOffset;
   float infoBoxCurrentX, infoBoxCurrentY, infoBoxCurrentDispWidth, infoBoxCurrentDispHeight, infoBoxPrevX, infoBoxPrevY, infoBoxPrevDispWidth, infoBoxPrevDispHeight;
+  float fullInfoFirstColXPos;
   float fullInfoColWidth[LLCOLUMN_ENUM_LENGTH];
   nuclide_qval fullInfoQVal[QVAL_ENUM_LENGTH]; //arranged in the order in which to display Q values
   float nuclFullInfoScrollStartY, nuclFullInfoScrollToY, nuclFullInfoScrollY; //full level info view: number of lines scrolled in the y-direction
   uint16_t nuclFullInfoMaxScrollY; //maximum scroll position, in lines
   uint16_t nuclFullInfoShownColumns; //bit-pattern describing which columns are shown in the full level info view (values from level_list_column_enum)
   uint32_t nuclFullInfoSelStrMetadata;
+  uint8_t nuclFullInfoMouseOverCol;
+  uint16_t nuclFullInfoMouseOverNuclLvl;
   uint8_t rxnMenuColumns; //how many columns to use in the reaction menu
   uint8_t mouseOverRxn, mouseHoldRxn; //which item in the reaction menu is moused-over, =255 if none
   uint8_t selectedRxn; //which item in the reaction menu is selected, =0 if none =255 if showing coincident levels

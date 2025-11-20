@@ -527,61 +527,57 @@ void updateDrawingState(const app_data *restrict dat, app_state *restrict state,
 
 }
 
+void showContextMenu(const app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat){
+	state->cms.mouseOverContextItem = 255;
+	state->cms.clickedContextItem = 255;
+	updateSingleUIElemPosition(dat,state,rdat,UIELEM_CONTEXT_MENU);
+	//const SDL_FRect conMenuRect = {(float)state->ds.uiElemPosX[UIELEM_CONTEXT_MENU], (float)state->ds.uiElemPosY[UIELEM_CONTEXT_MENU], (float)state->ds.uiElemWidth[UIELEM_CONTEXT_MENU], (float)state->ds.uiElemHeight[UIELEM_CONTEXT_MENU]};
+	//removeSelectableStringsInRect(&state->tss, conMenuRect);
+	startUIAnimation(dat,state,rdat,UIANIM_CONTEXT_MENU_SHOW);
+}
+
+void appendContextMenuItem(app_state *restrict state, const uint8_t contextItem){
+	if(state->cms.numContextMenuItems < 255U){
+		state->cms.contextMenuItems[state->cms.numContextMenuItems] = contextItem;
+		state->cms.numContextMenuItems = (uint8_t)(state->cms.numContextMenuItems + 1);
+	}
+}
+
 void setupNuclideContextMenu(const app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat, const uint16_t nuclInd){
   char nuclStr[32];
   getNuclNameStr(nuclStr,&dat->ndat.nuclData[nuclInd],255);
 	SDL_strlcpy(state->cms.headerText,nuclStr,32);
 	state->cms.selectionInd = nuclInd;
 	state->cms.useHeaderText = 1;
-	state->cms.numContextMenuItems = 3;
-	state->cms.contextMenuItems[0] = CONTEXTITEM_NUCLNAME;
-	state->cms.contextMenuItems[1] = CONTEXTITEM_NUCLINFO;
-	state->cms.contextMenuItems[2] = CONTEXTITEM_CHART_PROPERTY;
-	state->cms.mouseOverContextItem = 255;
-	state->cms.clickedContextItem = 255;
-	updateSingleUIElemPosition(dat,state,rdat,UIELEM_CONTEXT_MENU);
-	//const SDL_FRect conMenuRect = {(float)state->ds.uiElemPosX[UIELEM_CONTEXT_MENU], (float)state->ds.uiElemPosY[UIELEM_CONTEXT_MENU], (float)state->ds.uiElemWidth[UIELEM_CONTEXT_MENU], (float)state->ds.uiElemHeight[UIELEM_CONTEXT_MENU]};
-	//removeSelectableStringsInRect(&state->tss, conMenuRect);
-	startUIAnimation(dat,state,rdat,UIANIM_CONTEXT_MENU_SHOW);
+	state->cms.numContextMenuItems = 0;
+	appendContextMenuItem(state,CONTEXTITEM_NUCLNAME);
+	appendContextMenuItem(state,CONTEXTITEM_NUCLINFO);
+	appendContextMenuItem(state,CONTEXTITEM_CHART_PROPERTY);
+	showContextMenu(dat,state,rdat);
 }
 
 void setupStrClickActionOrCopyContextMenu(const app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat, const uint16_t clickedStrInd){
   state->cms.useHeaderText = 0;
 	state->cms.selectionInd = clickedStrInd;
-	state->cms.numContextMenuItems = 2;
-	state->cms.contextMenuItems[0] = CONTEXTITEM_COPY;
-	state->cms.contextMenuItems[1] = CONTEXTITEM_STRCLICKACTION;
-	state->cms.mouseOverContextItem = 255;
-	state->cms.clickedContextItem = 255;
-	updateSingleUIElemPosition(dat,state,rdat,UIELEM_CONTEXT_MENU);
-	//const SDL_FRect conMenuRect = {(float)state->ds.uiElemPosX[UIELEM_CONTEXT_MENU], (float)state->ds.uiElemPosY[UIELEM_CONTEXT_MENU], (float)state->ds.uiElemWidth[UIELEM_CONTEXT_MENU], (float)state->ds.uiElemHeight[UIELEM_CONTEXT_MENU]};
-	//removeSelectableStringsInRect(&state->tss, conMenuRect);
-	startUIAnimation(dat,state,rdat,UIANIM_CONTEXT_MENU_SHOW);
+	state->cms.numContextMenuItems = 0;
+	appendContextMenuItem(state,CONTEXTITEM_COPY);
+	appendContextMenuItem(state,CONTEXTITEM_STRCLICKACTION);
+	showContextMenu(dat,state,rdat);
 }
 
 void setupStrClickActionContextMenu(const app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat, const uint16_t clickedStrInd){
   state->cms.useHeaderText = 0;
 	state->cms.selectionInd = clickedStrInd;
 	state->cms.numContextMenuItems = 1;
-	state->cms.contextMenuItems[0] = CONTEXTITEM_STRCLICKACTION;
-	state->cms.mouseOverContextItem = 255;
-	state->cms.clickedContextItem = 255;
-	updateSingleUIElemPosition(dat,state,rdat,UIELEM_CONTEXT_MENU);
-	//const SDL_FRect conMenuRect = {(float)state->ds.uiElemPosX[UIELEM_CONTEXT_MENU], (float)state->ds.uiElemPosY[UIELEM_CONTEXT_MENU], (float)state->ds.uiElemWidth[UIELEM_CONTEXT_MENU], (float)state->ds.uiElemHeight[UIELEM_CONTEXT_MENU]};
-	//removeSelectableStringsInRect(&state->tss, conMenuRect);
-	startUIAnimation(dat,state,rdat,UIANIM_CONTEXT_MENU_SHOW);
+	appendContextMenuItem(state,CONTEXTITEM_STRCLICKACTION);
+	showContextMenu(dat,state,rdat);
 }
 
 void setupCopyContextMenu(const app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat){
   state->cms.useHeaderText = 0;
-	state->cms.numContextMenuItems = 1;
-	state->cms.contextMenuItems[0] = CONTEXTITEM_COPY;
-	state->cms.mouseOverContextItem = 255;
-	state->cms.clickedContextItem = 255;
-	updateSingleUIElemPosition(dat,state,rdat,UIELEM_CONTEXT_MENU);
-	//const SDL_FRect conMenuRect = {(float)state->ds.uiElemPosX[UIELEM_CONTEXT_MENU], (float)state->ds.uiElemPosY[UIELEM_CONTEXT_MENU], (float)state->ds.uiElemWidth[UIELEM_CONTEXT_MENU], (float)state->ds.uiElemHeight[UIELEM_CONTEXT_MENU]};
-	//removeSelectableStringsInRect(&state->tss, conMenuRect);
-	startUIAnimation(dat,state,rdat,UIANIM_CONTEXT_MENU_SHOW);
+	state->cms.numContextMenuItems = 0;
+	appendContextMenuItem(state,CONTEXTITEM_COPY);
+	showContextMenu(dat,state,rdat);
 }
 
 //gets strings that denote 'special' levels in certain nuclides

@@ -2619,10 +2619,10 @@ void drawNuclFullInfoBox(const app_data *restrict dat, app_state *restrict state
       }
     }
   }
-  float origDrawXPos = (state->ds.windowXRes - allColWidth)/2.0f;
-  float drawXPos = origDrawXPos;
+  state->ds.fullInfoFirstColXPos = (state->ds.windowXRes - allColWidth)/2.0f;
+  float drawXPos = state->ds.fullInfoFirstColXPos;
   float drawYPos = (NUCL_FULLINFOBOX_LEVELLIST_POS_Y - NUCL_INFOBOX_SMALLLINE_HEIGHT*state->ds.nuclFullInfoScrollY)*state->ds.uiUserScale + txtYOffset;
-  rect.x = origDrawXPos - 2*UI_PADDING_SIZE*state->ds.uiUserScale;
+  rect.x = state->ds.fullInfoFirstColXPos - 2*UI_PADDING_SIZE*state->ds.uiUserScale;
   rect.w = allColWidth + 4*UI_PADDING_SIZE*state->ds.uiUserScale;
   //SDL_Log("drawYPos: %f\n",(double)drawYPos);
   //SDL_Log("Scroll: %f / %f\n",(double)state->ds.nuclFullInfoScrollY,(double)state->ds.nuclFullInfoMaxScrollY);
@@ -2746,7 +2746,7 @@ void drawNuclFullInfoBox(const app_data *restrict dat, app_state *restrict state
       }
     }
 
-    drawXPos = origDrawXPos;
+    drawXPos = state->ds.fullInfoFirstColXPos;
     uint16_t numLines = getNumDispLinesForLvl(&dat->ndat,lvlInd);
     if(((drawYPos + NUCL_INFOBOX_SMALLLINE_HEIGHT*state->ds.uiUserScale*numLines) >= NUCL_FULLINFOBOX_LEVELLIST_POS_Y)&&(drawYPos <= state->ds.windowYRes)){
       
@@ -3144,7 +3144,7 @@ void drawNuclFullInfoBox(const app_data *restrict dat, app_state *restrict state
   }
 
   //draw column title strings
-  drawXPos = origDrawXPos;
+  drawXPos = state->ds.fullInfoFirstColXPos;
   drawYPos = (NUCL_FULLINFOBOX_LEVELLIST_HEADER_POS_Y - 2.0f)*state->ds.uiUserScale + txtYOffset;
   strMetadata = headerStrMetadata | (uint32_t)((uint32_t)(11) << 24); //each string should have a unique metadata value, if we want selection to persist after scrolling
   if((state->tss.selStrsModifiable)&&(strMetadata == state->ds.nuclFullInfoSelStrMetadata)){state->tss.selectedStr = state->tss.numSelStrs;}

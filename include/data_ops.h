@@ -37,6 +37,8 @@ void updateUIAnimationTimes(const app_data *restrict dat, app_state *restrict st
 
 void updateDrawingState(const app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat, const float deltaTime);
 
+void showContextMenu(const app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat);
+void appendContextMenuItem(app_state *restrict state, const uint8_t contextItem);
 void setupNuclideContextMenu(const app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat, const uint16_t nuclInd);
 void setupStrClickActionOrCopyContextMenu(const app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat, const uint16_t clickedStrInd);
 void setupStrClickActionContextMenu(const app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat, const uint16_t clickedStrInd);
