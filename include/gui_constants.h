@@ -112,7 +112,7 @@ static const float uiScales[UISCALE_ENUM_LENGTH] = {1.0f,1.20f,1.60f,1.85f};
 
 //context menu
 #define CONTEXT_MENU_HEADER_HEIGHT   32  //in unscaled pixels
-#define CONTEXT_MENU_WIDTH           190 //in unscaled pixels
+#define CONTEXT_MENU_WIDTH           210 //in unscaled pixels
 #define CONTEXT_MENU_ITEM_SPACING    28  //in unscaled pixels
 
 //zoom buttons
@@ -203,6 +203,7 @@ static const float uiScales[UISCALE_ENUM_LENGTH] = {1.0f,1.20f,1.60f,1.85f};
 #define NUCL_FULLINFOBOX_SCROLLBAR_POS_XR               (4*UI_PADDING_SIZE)
 #define NUCL_FULLINFOBOX_ONECOL_DISPLAY_PADDING         (3*UI_PADDING_SIZE)
 #define NUCL_FULLINFOBOX_ALLCOL_DISPLAY_PADDING         (UI_TILE_SIZE)
+#define NUCL_FULLINFOBOX_COL_MOUSEOVER_OFFSET           8.0f //in unscaled pixels
 
 //performance overlay
 #define PERF_OVERLAY_BUTTON_X_ANCHOR  (CHART_AXIS_DEPTH+16)
@@ -218,6 +219,8 @@ static const SDL_FColor redCol = {1.0f,0.0f,0.0f,1.0f};
 static const SDL_FColor whiteCol = {1.0f,1.0f,1.0f,1.0f};
 static const SDL_FColor whiteTransparentCol = {1.0f,1.0f,1.0f,0.9f};
 static const SDL_FColor txtSelCol = {0.8f,0.8f,1.0f,0.6f};
+static const SDL_FColor listHighlightColDark = {0.2f,0.2f,0.2f,0.1f};
+static const SDL_FColor listHighlightColLight = {0.8f,0.8f,0.8f,0.4f};
 
 static const SDL_Color whiteCol8Bit = {255,255,255,255};
 static const SDL_Color lightGrayCol8Bit = {235,235,235,255};

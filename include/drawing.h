@@ -56,7 +56,6 @@ float getTextWidth(resource_data *restrict rdat, const uint8_t fontSizeInd, cons
 float getTextHeightScaleIndependent(resource_data *restrict rdat, const uint8_t fontSizeInd, const char *str);
 float getTextWidthScaleIndependent(resource_data *restrict rdat, const uint8_t fontSizeInd, const char *str);
 
-SDL_FRect drawSelectableClickableTextAlignedSized(resource_data *restrict rdat, text_selection_state *restrict tss, const float xPos, const float yPos, const SDL_Color textColor, const uint8_t fontSizeInd, const Uint8 alpha, const char *txt, const uint8_t alignment, const Uint16 maxWidth, const uint8_t clickAction, const uint16_t clickPar, const uint32_t metadata);
 SDL_FRect drawSelectableTextAlignedSizedWithMetadata(resource_data *restrict rdat, text_selection_state *restrict tss, const float xPos, const float yPos, const SDL_Color textColor, const uint8_t fontSizeInd, const Uint8 alpha, const char *txt, const uint8_t alignment, const Uint16 maxWidth, const uint32_t metadata);
 SDL_FRect drawSelectableTextAlignedSized(resource_data *restrict rdat, text_selection_state *restrict tss, const float xPos, const float yPos, const SDL_Color textColor, const uint8_t fontSizeInd, const Uint8 alpha, const char *txt, const uint8_t alignment, const Uint16 maxWidth);
 SDL_FRect drawTextAlignedSized(resource_data *restrict rdat, const float xPos, const float yPos, const SDL_Color textColor, const uint8_t fontSizeInd, const Uint8 alpha, const char *txt, const uint8_t alignment, const Uint16 maxWidth);

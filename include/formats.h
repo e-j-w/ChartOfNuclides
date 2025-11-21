@@ -253,11 +253,13 @@ typedef struct
   uint16_t nuclFullInfoMaxScrollY; //maximum scroll position, in lines
   uint16_t nuclFullInfoShownColumns; //bit-pattern describing which columns are shown in the full level info view (values from level_list_column_enum)
   uint32_t nuclFullInfoSelStrMetadata;
-  uint8_t nuclFullInfoMouseOverCol;
+  uint8_t nuclFullInfoMouseOverCol, nuclFullInfoMouseOverLvlRow;
   uint16_t nuclFullInfoMouseOverNuclLvl;
+  uint8_t nuclFullInfoRightClickCol, nuclFullInfoRightClickLvlRow;
+  uint16_t nuclFullInfoRightClickNuclLvl;
   uint8_t rxnMenuColumns; //how many columns to use in the reaction menu
   uint8_t mouseOverRxn, mouseHoldRxn; //which item in the reaction menu is moused-over, =255 if none
-  uint8_t selectedRxn; //which item in the reaction menu is selected, =0 if none =255 if showing coincident levels
+  uint8_t selectedRxn; //which item in the reaction menu is selected, =0 if none, =255 if showing coincident levels
   uint64_t shownElements; //bit pattern describing which UI elements are being shown, values from ui_element_enum
   uint32_t uiAnimPlaying; //bit pattern describing which UI animations are playing
   float timeLeftInUIAnimation[UIANIM_ENUM_LENGTH]; //time left in each UI animation
@@ -316,7 +318,6 @@ typedef struct
   char selectableStrTxt[MAX_SELECTABLE_STRS][MAX_SELECTABLE_STR_LEN]; //the actual strings that are selectable
   uint8_t selectableStrProp[MAX_SELECTABLE_STRS]; //bits 0-2: font size of each selectable string (from font_size_enum), bit 3: whether string is clickable, bit 4: click action (from text_click_action_enum)
   uint32_t selectableStrMetadata[MAX_SELECTABLE_STRS]; //extra data for each string (eg. level in the level list)
-  uint16_t selectableStrClickPar[MAX_SELECTABLE_STRS];
   uint16_t numSelStrs;
   uint16_t selectedStr; //65535 if nothing selected
   uint8_t selStartPos, selEndPos; //which character indices correspond to the start and end of the selected text
@@ -331,7 +332,7 @@ typedef struct
   uint8_t contextMenuItems[MAX_CONTEXT_MENU_ITEMS]; //values from context_menu_item_enum
   uint8_t mouseOverContextItem; //255 if none moused over
   uint8_t clickedContextItem; //255 if none clicked on
-  uint16_t selectionInd; //index of nuclide or other item corresponding to this context menu
+  uint16_t selectionInd, selectionInd2; //indices of nuclide/level or other items corresponding to this context menu
 }context_menu_state; //struct containing context menu data
 
 #define COINC_FLAG_BITPATTERN_SIZE 16

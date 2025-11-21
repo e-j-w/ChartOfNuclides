@@ -868,7 +868,6 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
     }
 
     //handle selectable text strings
-    uint16_t clickedSelStr = MAX_SELECTABLE_STRS;
     if((state->ds.textDragInProgress == TXTDRAGSTATE_DRAG_OVER_TXT)||(state->ds.textDragInProgress == TXTDRAGSTATE_DRAG_NOT_OVER_TXT)){
       //update text selection drag state
       if(state->mouseXPx >= 0.0f){ //only update the selection position if the mouse is still in the window
@@ -900,10 +899,6 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
         for(uint16_t i=0; i<state->tss.numSelStrs; i++){
           if((state->mouseXPx >= state->tss.selectableStrRect[i].x)&&(state->mouseXPx < (state->tss.selectableStrRect[i].x + state->tss.selectableStrRect[i].w))){
             if((state->mouseYPx >= state->tss.selectableStrRect[i].y)&&(state->mouseYPx < (state->tss.selectableStrRect[i].y + state->tss.selectableStrRect[i].h))){
-              if((state->tss.selectableStrProp[i] & (uint8_t)(1U << 3U))&&(rightClick)){
-                //if the string is clickable, and has been right clicked...
-                clickedSelStr = i;
-              }
               //if(state->mouseMovedDuringClick == 0){
                 //mouse is over selectable text
                 //SDL_Log("Mouse over selectable string %u.\n",i);
@@ -946,6 +941,51 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
       }
     }
 
+    //handle mouseover in the full level list
+    //by default, there is no moused-over row or column
+    state->ds.nuclFullInfoMouseOverCol = 255U;
+    state->ds.nuclFullInfoMouseOverLvlRow = 255U;
+    state->ds.nuclFullInfoMouseOverNuclLvl = 65535U;
+    if(state->uiState == UISTATE_FULLLEVELINFO){
+      if(state->mouseYPx > (NUCL_FULLINFOBOX_LEVELLIST_POS_Y*state->ds.uiUserScale)){
+        //figure out which column the mouse is in
+        float totalWidth = state->ds.fullInfoFirstColXPos - (NUCL_FULLINFOBOX_COL_MOUSEOVER_OFFSET*state->ds.uiUserScale);
+        if(state->mouseXPx >= totalWidth){
+          for(uint8_t i=0; i<LLCOLUMN_ENUM_LENGTH; i++){
+            if(state->ds.nuclFullInfoShownColumns & (1U << i)){
+              float nextColMouseOverWidth = state->ds.fullInfoColWidth[i]*state->ds.uiUserScale;
+              if(i==LLCOLUMN_FINALLEVEL_JPI){
+                //pad mouseover zone for column with right-justified text 
+                nextColMouseOverWidth += (2.0f*NUCL_FULLINFOBOX_COL_MOUSEOVER_OFFSET*state->ds.uiUserScale);
+              }
+              if((state->mouseXPx >= totalWidth)&&(state->mouseXPx < (totalWidth+nextColMouseOverWidth))){
+                state->ds.nuclFullInfoMouseOverCol = i;
+                break;
+              }
+              totalWidth += nextColMouseOverWidth;
+            }
+          }
+          if(state->ds.nuclFullInfoMouseOverCol != 255U){
+            //figure out which level the mouse is over
+            float mouseRow = (float)((state->mouseYPx - NUCL_FULLINFOBOX_LEVELLIST_POS_Y*state->ds.uiUserScale)/(NUCL_INFOBOX_SMALLLINE_HEIGHT*state->ds.uiUserScale) + state->ds.nuclFullInfoScrollY);
+            for(uint16_t nuclLvlInd = 0; nuclLvlInd<dat->ndat.nuclData[state->chartSelectedNucl].numLevels; nuclLvlInd++){
+              if(mouseRow >= getNumDispLinesUpToLvl(&dat->ndat,state,nuclLvlInd)){
+                if(mouseRow < getNumDispLinesUpToLvl(&dat->ndat,state,nuclLvlInd+1)){
+                  //make sure to account for Q-values by only counting lines from the level itself
+                  if(mouseRow < (getNumDispLinesUpToLvl(&dat->ndat,state,nuclLvlInd) + getNumDispLinesForLvl(&dat->ndat,dat->ndat.nuclData[state->chartSelectedNucl].firstLevel + nuclLvlInd))){
+                    state->ds.nuclFullInfoMouseOverNuclLvl = nuclLvlInd;
+                    state->ds.nuclFullInfoMouseOverLvlRow = (uint8_t)(mouseRow - getNumDispLinesUpToLvl(&dat->ndat,state,nuclLvlInd));
+                    break;
+                  } //else the user right-clicked on a Q-value
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+    //SDL_Log("Mouse over level: %u\n",state->ds.nuclFullInfoMouseOverNuclLvl);
+
     if(rightClick){
       //check for clickable strings
 
@@ -955,77 +995,61 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
         if((state->mouseRightClickPosYPx >= selRect.y)&&(state->mouseRightClickPosYPx < (selRect.y + selRect.h))){
           //right clicked on selected text
           //SDL_Log("Right click on selected text.\n");
-          if(state->tss.selectedStr != clickedSelStr){
-            setupCopyContextMenu(dat,state,rdat);
-          }else{
-            setupStrClickActionOrCopyContextMenu(dat,state,rdat,clickedSelStr);
-          }
+          setupCopyContextMenu(dat,state,rdat);
           rightClick = 0; //unset
         }
       }
 
-      if((rightClick)&&(clickedSelStr != MAX_SELECTABLE_STRS)){
-        //right clicked on unselected but clickable text
-        //SDL_Log("Right click on clickable text.\n");
-        setupStrClickActionContextMenu(dat,state,rdat,clickedSelStr);
-        rightClick = 0; //unset
-      }
-
       //handle mouseover in the full level list
       //by default, there is no moused-over row or column
-      state->ds.nuclFullInfoMouseOverCol = 255U;
-      state->ds.nuclFullInfoMouseOverNuclLvl = 65535U;
-      if(state->uiState == UISTATE_FULLLEVELINFO){
-        if(state->mouseYPx > (NUCL_FULLINFOBOX_LEVELLIST_POS_Y*state->ds.uiUserScale)){
-          if(state->mouseXPx >= state->ds.fullInfoFirstColXPos){
-            //figure out which column the mouse is in
-            float totalWidth = state->ds.fullInfoFirstColXPos;
-            for(uint8_t i=0; i<LLCOLUMN_ENUM_LENGTH; i++){
-              if(state->ds.nuclFullInfoShownColumns & (1U << i)){
-                if((state->mouseXPx >= totalWidth)&&(state->mouseXPx < (totalWidth+state->ds.fullInfoColWidth[i]*state->ds.uiUserScale))){
-                  state->ds.nuclFullInfoMouseOverCol = i;
-                  break;
-                }
-                totalWidth += state->ds.fullInfoColWidth[i]*state->ds.uiUserScale;
-              }
-            }
-            if(state->ds.nuclFullInfoMouseOverCol != 255U){
-              //figure out which level the mouse is over
-
-              float mouseRow = (float)((state->mouseYPx - NUCL_FULLINFOBOX_LEVELLIST_POS_Y*state->ds.uiUserScale)/(NUCL_INFOBOX_SMALLLINE_HEIGHT*state->ds.uiUserScale) + state->ds.nuclFullInfoScrollY);
-              for(uint16_t nuclLvlInd = 0; nuclLvlInd<dat->ndat.nuclData[state->chartSelectedNucl].numLevels; nuclLvlInd++){
-                if(mouseRow >= getNumDispLinesUpToLvl(&dat->ndat,state,nuclLvlInd)){
-                  if(mouseRow < getNumDispLinesUpToLvl(&dat->ndat,state,nuclLvlInd+1)){
-                    //make sure to account for Q-values by only counting lines from the level itself
-                    if(mouseRow < (getNumDispLinesUpToLvl(&dat->ndat,state,nuclLvlInd) + getNumDispLinesForLvl(&dat->ndat,dat->ndat.nuclData[state->chartSelectedNucl].firstLevel + nuclLvlInd))){
-                      state->ds.nuclFullInfoMouseOverNuclLvl = nuclLvlInd;
-                    } //else the user right-clicked on a Q-value
-                    break;
-                  }
-                }
-              }
-              if(state->ds.nuclFullInfoMouseOverNuclLvl != 65535U){
-                SDL_Log("Right click on lvl: %u (row: %.2f), col %u\n",state->ds.nuclFullInfoMouseOverNuclLvl,(double)mouseRow,state->ds.nuclFullInfoMouseOverCol);
-                //TO-DO: replace selection string context items (besides copy) with context items specific to the specific
-                //level in the level list
-                switch(state->ds.nuclFullInfoMouseOverCol){
-                  case LLCOLUMN_ELEVEL:
-                  case LLCOLUMN_JPI:
-                  case LLCOLUMN_HALFLIFE:
-                  case LLCOLUMN_EGAMMA:
-                  case LLCOLUMN_IGAMMA:
-                  case LLCOLUMN_MGAMMA:
-                  case LLCOLUMN_DELTA:
-                  case LLCOLUMN_ICC:
-                  case LLCOLUMN_FINALLEVEL_E:
-                  case LLCOLUMN_FINALLEVEL_JPI:
-                  default:
-                    break;
+      state->ds.nuclFullInfoRightClickCol = state->ds.nuclFullInfoMouseOverCol;
+      state->ds.nuclFullInfoRightClickLvlRow = state->ds.nuclFullInfoMouseOverLvlRow;
+      state->ds.nuclFullInfoRightClickNuclLvl = state->ds.nuclFullInfoMouseOverNuclLvl;
+      if(state->ds.nuclFullInfoRightClickNuclLvl != 65535U){
+        //SDL_Log("Right click on lvl: %u (row: %u), col %u\n",state->ds.nuclFullInfoRightClickNuclLvl,state->ds.nuclFullInfoRightClickLvlRow,state->ds.nuclFullInfoRightClickCol);
+        //TO-DO: replace selection string context items (besides copy) with context items specific to the specific
+        //level in the level list
+        switch(state->ds.nuclFullInfoRightClickCol){
+          case LLCOLUMN_ELEVEL:
+          case LLCOLUMN_JPI:
+            state->cms.selectionInd = state->ds.nuclFullInfoRightClickNuclLvl;
+            appendContextMenuItem(state,CONTEXTITEM_SHOW_COINC);
+            showContextMenu(dat,state,rdat);
+            break;
+          case LLCOLUMN_HALFLIFE:
+            state->cms.selectionInd = state->ds.nuclFullInfoRightClickNuclLvl; //nuclide level index
+            appendContextMenuItem(state,CONTEXTITEM_SHOW_COINC);
+            if(state->ds.nuclFullInfoRightClickLvlRow > 0){
+              if((dat->ndat.levels[state->ds.nuclFullInfoRightClickNuclLvl].numDecModes > 0)&&(dat->ndat.levels[state->ds.nuclFullInfoRightClickNuclLvl].numDecModes <= state->ds.nuclFullInfoRightClickLvlRow)){
+                //right-clicked on a decay mode
+                uint16_t decayModeNucl = getDecayModeDaughterNucl(&dat->ndat,state->chartSelectedNucl,dat->ndat.dcyMode[dat->ndat.levels[dat->ndat.nuclData[state->chartSelectedNucl].firstLevel + state->cms.selectionInd].firstDecMode + (uint32_t)(state->ds.nuclFullInfoRightClickLvlRow - 1)].type);
+                if(decayModeNucl != state->chartSelectedNucl){
+                  state->cms.selectionInd2 = decayModeNucl; //daughter nuclide
+                  appendContextMenuItem(state,CONTEXTITEM_GOTO_DAUGHTER);
                 }
               }
             }
-          }
+            showContextMenu(dat,state,rdat);
+            break;
+          case LLCOLUMN_EGAMMA:
+          case LLCOLUMN_IGAMMA:
+          case LLCOLUMN_MGAMMA:
+          case LLCOLUMN_DELTA:
+          case LLCOLUMN_ICC:
+          case LLCOLUMN_FINALLEVEL_E:
+          case LLCOLUMN_FINALLEVEL_JPI:
+            if(state->ds.nuclFullInfoRightClickLvlRow < dat->ndat.levels[dat->ndat.nuclData[state->chartSelectedNucl].firstLevel + state->ds.nuclFullInfoRightClickNuclLvl].numTran){
+              uint32_t finalLvlInd = getFinalLvlInd(&dat->ndat,(uint32_t)(dat->ndat.nuclData[state->chartSelectedNucl].firstLevel + state->ds.nuclFullInfoRightClickNuclLvl),(uint32_t)(dat->ndat.levels[dat->ndat.nuclData[state->chartSelectedNucl].firstLevel + state->ds.nuclFullInfoRightClickNuclLvl].firstTran + state->ds.nuclFullInfoRightClickLvlRow));
+              state->cms.selectionInd = (uint16_t)(finalLvlInd - dat->ndat.nuclData[state->chartSelectedNucl].firstLevel);
+              //SDL_Log("Going to level: %u (%u %u)\n",state->cms.selectionInd, finalLvlInd, dat->ndat.nuclData[state->chartSelectedNucl].firstLevel);
+              appendContextMenuItem(state,CONTEXTITEM_GOTO_LEVEL);
+              showContextMenu(dat,state,rdat);
+            }
+            break;
+          default:
+            break;
         }
+        rightClick = 0; //unset
       }
       
       if(rightClick){

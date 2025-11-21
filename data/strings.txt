@@ -53,7 +53,7 @@ all_reactions|All datasets
 menuitem_preferences|Preferences
 menuitem_screenshot|Take a screenshot...
 menuitem_about|About Chart of Nuclides
-about_string_version|Version 0.8.4 – "Differential Equation"
+about_string_version|Version 0.9.0 – "Differential Equation"
 about_string_1|Developed by Jonathan Williams
 about_string_2|Nuclear structure data is sourced from ENSDF, mass data from AME2020, and isotope abundance data from NIST.
 about_string_3|This is an independently developed program not endorsed by the above entities. The accuracy or completeness of any information provided is not guaranteed.
@@ -105,7 +105,7 @@ single_escape|single-escape
 double_escape|double-escape
 clickaction_goto_level|Go to final level
 clickaction_goto_daughter|Go to daughter nuclide
-clickaction_show_coinc|Show feeding/decay
+clickaction_show_coinc|Show level feeding/decay
 interface_size|Interface size
 small|Small
 default|Default

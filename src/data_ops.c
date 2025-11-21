@@ -556,23 +556,6 @@ void setupNuclideContextMenu(const app_data *restrict dat, app_state *restrict s
 	showContextMenu(dat,state,rdat);
 }
 
-void setupStrClickActionOrCopyContextMenu(const app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat, const uint16_t clickedStrInd){
-  state->cms.useHeaderText = 0;
-	state->cms.selectionInd = clickedStrInd;
-	state->cms.numContextMenuItems = 0;
-	appendContextMenuItem(state,CONTEXTITEM_COPY);
-	appendContextMenuItem(state,CONTEXTITEM_STRCLICKACTION);
-	showContextMenu(dat,state,rdat);
-}
-
-void setupStrClickActionContextMenu(const app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat, const uint16_t clickedStrInd){
-  state->cms.useHeaderText = 0;
-	state->cms.selectionInd = clickedStrInd;
-	state->cms.numContextMenuItems = 1;
-	appendContextMenuItem(state,CONTEXTITEM_STRCLICKACTION);
-	showContextMenu(dat,state,rdat);
-}
-
 void setupCopyContextMenu(const app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat){
   state->cms.useHeaderText = 0;
 	state->cms.numContextMenuItems = 0;
@@ -4566,38 +4549,32 @@ void contextMenuClickAction(app_data *restrict dat, app_state *restrict state, r
 				//SDL_Log("Copied text to clipboard: %s\n",SDL_GetClipboardText());
 			}
 			break;
-		case CONTEXTITEM_STRCLICKACTION:
-			switch((state->tss.selectableStrProp[state->cms.selectionInd] >> 4U) & 15U){
-				case TXTCLICKACTION_GOTO_LEVEL:
-					//scroll to the specified level
-					state->ds.nuclFullInfoScrollStartY = state->ds.nuclFullInfoScrollY;
-					if(isLvlDisplayed(&dat->ndat,state,state->chartSelectedNucl,state->tss.selectableStrClickPar[state->cms.selectionInd]) == 0){
-						//the current display mode or reaction selection doesn't include the final level,
-						//so go back to showing the full data before scrolling to the final level
-						state->ds.selectedRxn = 0;
-						setSelectedNuclOnLevelList(dat,state,rdat,(uint16_t)(dat->ndat.nuclData[state->chartSelectedNucl].N),(uint16_t)(dat->ndat.nuclData[state->chartSelectedNucl].Z),1); //update and re-draw level list
-					}
-					//scroll to the final level
-					state->ds.nuclFullInfoScrollToY = getNumDispLinesUpToLvl(&dat->ndat,state,state->tss.selectableStrClickPar[state->cms.selectionInd]); //scroll to the level of interest
-					state->ds.timeSinceFCScollStart = 0.0f;
-					state->ds.fcScrollInProgress = 1;
-					state->ds.fcScrollFinished = 0;
-					//SDL_Log("Scrolling to: %f\n",(double)state->ds.nuclFullInfoScrollToY);
-					break;
-				case TXTCLICKACTION_GOTO_DAUGHTER:
-					//go to the specified nuclide
-					setSelectedNuclOnLevelList(dat,state,rdat,(uint16_t)(dat->ndat.nuclData[state->tss.selectableStrClickPar[state->cms.selectionInd]].N),(uint16_t)(dat->ndat.nuclData[state->tss.selectableStrClickPar[state->cms.selectionInd]].Z),0);
-					break;
-				case TXTCLICKACTION_SHOW_COINC:
-					if(state->chartSelectedNucl < MAXNUMNUCL){
-						state->coincLvlFlag = state->tss.selectableStrClickPar[state->cms.selectionInd];
-						setCoincLvlFlags(&dat->ndat,state,state->chartSelectedNucl,state->tss.selectableStrClickPar[state->cms.selectionInd]);
-						state->ds.selectedRxn = 255; //coincident level display mode
-						setSelectedNuclOnLevelList(dat,state,rdat,(uint16_t)(dat->ndat.nuclData[state->chartSelectedNucl].N),(uint16_t)(dat->ndat.nuclData[state->chartSelectedNucl].Z),1); //update and re-draw level list
-					}
-					break;
-				default:
-					break;
+		case CONTEXTITEM_GOTO_LEVEL:
+			//scroll to the specified level
+			state->ds.nuclFullInfoScrollStartY = state->ds.nuclFullInfoScrollY;
+			if(isLvlDisplayed(&dat->ndat,state,state->chartSelectedNucl,state->cms.selectionInd) == 0){
+				//the current display mode or reaction selection doesn't include the final level,
+				//so go back to showing the full data before scrolling to the final level
+				state->ds.selectedRxn = 0;
+				setSelectedNuclOnLevelList(dat,state,rdat,(uint16_t)(dat->ndat.nuclData[state->chartSelectedNucl].N),(uint16_t)(dat->ndat.nuclData[state->chartSelectedNucl].Z),1); //update and re-draw level list
+			}
+			//scroll to the final level
+			state->ds.nuclFullInfoScrollToY = getNumDispLinesUpToLvl(&dat->ndat,state,state->cms.selectionInd); //scroll to the level of interest
+			state->ds.timeSinceFCScollStart = 0.0f;
+			state->ds.fcScrollInProgress = 1;
+			state->ds.fcScrollFinished = 0;
+			//SDL_Log("Scrolling to: %f\n",(double)state->ds.nuclFullInfoScrollToY);
+			break;
+		case CONTEXTITEM_GOTO_DAUGHTER:
+			//go to the specified nuclide
+			setSelectedNuclOnLevelList(dat,state,rdat,(uint16_t)(dat->ndat.nuclData[state->cms.selectionInd2].N),(uint16_t)(dat->ndat.nuclData[state->cms.selectionInd2].Z),0);
+			break;
+		case CONTEXTITEM_SHOW_COINC:
+			if(state->chartSelectedNucl < MAXNUMNUCL){
+				state->coincLvlFlag = state->cms.selectionInd;
+				setCoincLvlFlags(&dat->ndat,state,state->chartSelectedNucl,state->cms.selectionInd);
+				state->ds.selectedRxn = 255; //coincident level display mode
+				setSelectedNuclOnLevelList(dat,state,rdat,(uint16_t)(dat->ndat.nuclData[state->chartSelectedNucl].N),(uint16_t)(dat->ndat.nuclData[state->chartSelectedNucl].Z),1); //update and re-draw level list
 			}
 			break;
 		case CONTEXTITEM_ENUM_LENGTH:
@@ -5410,6 +5387,22 @@ uint16_t getNumTextCharsUnderWidth(resource_data *restrict rdat, const uint16_t 
 	}
 	//SDL_Log("tmpTxt: %s, txtDrawLen: %u\n",tmpTxt, txtDrawLen);
 	return txtDrawLen;
+}
+
+//column takes values from level_list_column_enum
+//assumes values in level_list_column_enum are defined in left to right order
+float getFullInfoColumnXPos(const app_state *restrict state, const uint8_t column){
+	if(column >= LLCOLUMN_ENUM_LENGTH){
+		SDL_Log("getFullInfoColumnXPos: invalid column (%u)!\n",column);
+		return 0.0f;
+	}
+  float xPos = state->ds.fullInfoFirstColXPos;
+  for(uint8_t i=0; i<column; i++){
+    if(state->ds.nuclFullInfoShownColumns & (1U << i)){
+      xPos += state->ds.fullInfoColWidth[i]*state->ds.uiUserScale;
+    }
+  }
+	return xPos;
 }
 
 uint8_t getRxnMenuNumRxnsPerColumn(const app_data *restrict dat, const app_state *restrict state){

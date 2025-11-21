@@ -40,8 +40,6 @@ void updateDrawingState(const app_data *restrict dat, app_state *restrict state,
 void showContextMenu(const app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat);
 void appendContextMenuItem(app_state *restrict state, const uint8_t contextItem);
 void setupNuclideContextMenu(const app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat, const uint16_t nuclInd);
-void setupStrClickActionOrCopyContextMenu(const app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat, const uint16_t clickedStrInd);
-void setupStrClickActionContextMenu(const app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat, const uint16_t clickedStrInd);
 void setupCopyContextMenu(const app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat);
 
 const char* getSpecialLvlStr(const app_data *restrict dat, const uint8_t specialLvlInd);
@@ -142,6 +140,8 @@ void uiElemMouseoverAction(const app_state *restrict state, resource_data *restr
 void uiElemClickAction(app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat, const uint8_t doubleClick, const uint8_t uiElemID);
 
 uint16_t getNumTextCharsUnderWidth(resource_data *restrict rdat, const uint16_t widthPx, const char *text, const uint16_t txtStartChar, const uint8_t fontSizeInd);
+
+float getFullInfoColumnXPos(const app_state *restrict state, const uint8_t column);
 
 uint8_t getRxnMenuNumRxnsPerColumn(const app_data *restrict dat, const app_state *restrict state);
 SDL_FRect getRxnMenuButtonRect(const drawing_state *restrict ds, const uint8_t numRxnPerCol, const uint8_t menuItem);
