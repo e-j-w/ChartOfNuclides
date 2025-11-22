@@ -351,6 +351,7 @@ static int parseAppRules(app_data *restrict dat, asset_mapping *restrict stringI
 	dat->locStringIDs[LOCSTR_CLICKACTION_GOTOLEVEL] = (uint16_t)nameToAssetID("clickaction_goto_level",stringIDmap);
 	dat->locStringIDs[LOCSTR_CLICKACTION_GOTODAUGHTER] = (uint16_t)nameToAssetID("clickaction_goto_daughter",stringIDmap);
 	dat->locStringIDs[LOCSTR_CLICKACTION_SHOWCOINC] = (uint16_t)nameToAssetID("clickaction_show_coinc",stringIDmap);
+	dat->locStringIDs[LOCSTR_CLICKACTION_SHOWSAMEJPI] = (uint16_t)nameToAssetID("clickaction_show_same_jpi",stringIDmap);
 	dat->locStringIDs[LOCSTR_PREF_UISCALE] = (uint16_t)nameToAssetID("interface_size",stringIDmap);
 	dat->locStringIDs[LOCSTR_SMALL] = (uint16_t)nameToAssetID("small",stringIDmap);
 	dat->locStringIDs[LOCSTR_LARGE] = (uint16_t)nameToAssetID("large",stringIDmap);
@@ -362,6 +363,7 @@ static int parseAppRules(app_data *restrict dat, asset_mapping *restrict stringI
 	dat->locStringIDs[LOCSTR_LEVELS_BOLDED] = (uint16_t)nameToAssetID("levels_bolded",stringIDmap);
 	dat->locStringIDs[LOCSTR_FEEDING] = (uint16_t)nameToAssetID("feeding",stringIDmap);
 	dat->locStringIDs[LOCSTR_DECAY] = (uint16_t)nameToAssetID("decay",stringIDmap);
+	dat->locStringIDs[LOCSTR_SAME_JPI_AS] = (uint16_t)nameToAssetID("same_jpi_as",stringIDmap);
 
   return 0; //success
 

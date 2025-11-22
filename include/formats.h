@@ -259,7 +259,7 @@ typedef struct
   uint16_t nuclFullInfoRightClickNuclLvl;
   uint8_t rxnMenuColumns; //how many columns to use in the reaction menu
   uint8_t mouseOverRxn, mouseHoldRxn; //which item in the reaction menu is moused-over, =255 if none
-  uint8_t selectedRxn; //which item in the reaction menu is selected, =0 if none, =255 if showing coincident levels
+  uint8_t selectedRxn; //which item in the reaction menu is selected, =0 if none, =255 if showing coincident levels, =254 if showing same Jpi levels 
   uint64_t shownElements; //bit pattern describing which UI elements are being shown, values from ui_element_enum
   uint32_t uiAnimPlaying; //bit pattern describing which UI animations are playing
   float timeLeftInUIAnimation[UIANIM_ENUM_LENGTH]; //time left in each UI animation

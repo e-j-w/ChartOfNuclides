@@ -3349,6 +3349,60 @@ uint16_t getNuclInd(const ndata *restrict nd, const int16_t N, const int16_t Z){
 	return MAXNUMNUCL;
 }
 
+//flags levels which have the same Jpi as the specified level
+void setSameJpiLvlFlags(const ndata *restrict nd, app_state *restrict state, const uint16_t nuclInd, const uint16_t nuclLevel){
+	
+	const uint32_t lvlInd = nd->nuclData[nuclInd].firstLevel + (uint32_t)nuclLevel;
+	SDL_memset(state->flaggedCoincLvls,0,sizeof(state->flaggedCoincLvls));
+	
+	//flag the level of interest
+	if(nuclLevel < MAX_COINC_FLAGGED_LVLS){
+		uint32_t bpInd = (uint32_t)(nuclLevel)/64;
+		state->flaggedCoincLvls[bpInd] |= (uint64_t)((uint64_t)(1) << ((uint32_t)nuclLevel - (bpInd*64)));
+		//SDL_Log("Flagged level %u.\n",nuclLevel);
+	}else{
+		SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,"setSameJpiLvlFlags - couldn't flag level with index: %u\n",nuclLevel);
+	}
+
+	//first find anything that decays to the flagged level of interest
+	//(or to any other level that was already flagged as decaying to the level of interest)
+	for(uint32_t i=0; i<nd->levels[lvlInd].numSpinParVals; i++){
+		spinparval spv1 = nd->spv[nd->levels[lvlInd].firstSpinParVal + i];
+		if((spv1.format & 1U) == 0){
+			//non-variable spin
+			for(uint32_t j = nd->nuclData[nuclInd].firstLevel; j < (nd->nuclData[nuclInd].firstLevel + (uint32_t)nd->nuclData[nuclInd].numLevels); j++){
+				uint8_t flaggedLvl = 0;
+				if(j != lvlInd){
+					for(uint32_t k=0; k<nd->levels[j].numSpinParVals; k++){
+						spinparval spv2 = nd->spv[nd->levels[j].firstSpinParVal + k];
+						if((spv2.format & 1U) == 0){
+							//non-variable spin
+							if(spv1.spinVal == spv2.spinVal){
+								if(spv1.parVal == spv2.parVal){
+									uint32_t lvlOffset = (uint32_t)(j - nd->nuclData[nuclInd].firstLevel);
+									if(lvlOffset < MAX_COINC_FLAGGED_LVLS){
+										uint32_t bpInd = lvlOffset/64;
+										state->flaggedCoincLvls[bpInd] |= (uint64_t)((uint64_t)(1) << (lvlOffset - (bpInd*64)));
+										flaggedLvl = 1;
+										//SDL_Log("Flagged level %u.\n",lvlOffset);
+										break; //go to next level
+									}else{
+										SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,"setSameJpiLvlFlags - couldn't flag level with index: %u\n",lvlOffset);
+									}
+								}
+							}
+						}
+						if(flaggedLvl != 0){
+							break; //go to next level
+						}
+					}
+				}
+			}
+		}
+	}
+
+}
+
 //flags levels which decay to or are decay products of the specified level
 void setCoincLvlFlags(const ndata *restrict nd, app_state *restrict state, const uint16_t nuclInd, const uint16_t nuclLevel){
 	
@@ -3419,8 +3473,8 @@ uint8_t isLvlDisplayed(const ndata *restrict nd, const app_state *restrict state
 	if(nuclLvlInd < nd->nuclData[nuclInd].numLevels){
 		if(state->ds.selectedRxn == 0){
 			return 1;
-		}else if(state->ds.selectedRxn == 255){
-			//coincidence display mode
+		}else if(state->ds.selectedRxn >= 254){
+			//coincidence or same Jpi display mode
 			if(nuclLvlInd < MAX_COINC_FLAGGED_LVLS){
 				const uint32_t bpInd = nuclLvlInd/64; //bit-pattern index (maximum int size is 64 bits)
 				if(state->flaggedCoincLvls[bpInd] & (uint64_t)((uint64_t)(1) << (nuclLvlInd - (bpInd*64)))){
@@ -4574,6 +4628,14 @@ void contextMenuClickAction(app_data *restrict dat, app_state *restrict state, r
 				state->coincLvlFlag = state->cms.selectionInd;
 				setCoincLvlFlags(&dat->ndat,state,state->chartSelectedNucl,state->cms.selectionInd);
 				state->ds.selectedRxn = 255; //coincident level display mode
+				setSelectedNuclOnLevelList(dat,state,rdat,(uint16_t)(dat->ndat.nuclData[state->chartSelectedNucl].N),(uint16_t)(dat->ndat.nuclData[state->chartSelectedNucl].Z),1); //update and re-draw level list
+			}
+			break;
+		case CONTEXTITEM_SHOW_SAME_JPI:
+			if(state->chartSelectedNucl < MAXNUMNUCL){
+				state->coincLvlFlag = state->cms.selectionInd;
+				setSameJpiLvlFlags(&dat->ndat,state,state->chartSelectedNucl,state->cms.selectionInd);
+				state->ds.selectedRxn = 254; //same Jpi display mode
 				setSelectedNuclOnLevelList(dat,state,rdat,(uint16_t)(dat->ndat.nuclData[state->chartSelectedNucl].N),(uint16_t)(dat->ndat.nuclData[state->chartSelectedNucl].Z),1); //update and re-draw level list
 			}
 			break;
@@ -5855,6 +5917,18 @@ void updateSingleUIElemPosition(const app_data *restrict dat, app_state *restric
 					}else{
 						getLvlEnergyStr(tmpStr,&dat->ndat,(uint32_t)(dat->ndat.nuclData[state->chartSelectedNucl].firstLevel + state->coincLvlFlag),0);
 						SDL_snprintf(selStr,64,"%s keV level %s/%s",tmpStr,dat->strings[dat->locStringIDs[LOCSTR_FEEDING]],dat->strings[dat->locStringIDs[LOCSTR_DECAY]]);
+					}
+					state->ds.uiElemWidth[UIELEM_NUCL_FULLINFOBOX_RXNBUTTON] = (int16_t)(getTextWidth(rdat,FONTSIZE_NORMAL_BOLD,selStr)/rdat->uiDPIScale + 70*state->ds.uiUserScale);
+				}else if(state->ds.selectedRxn == 254){
+					//same Jpi mode
+					char selStr[64], tmpStr[32];
+					uint8_t eValueType = (uint8_t)((dat->ndat.levels[(uint32_t)(dat->ndat.nuclData[state->chartSelectedNucl].firstLevel + state->coincLvlFlag)].energy.format >> 5U) & 15U);
+					if((eValueType == VALUETYPE_NUMBER)&&(getRawValFromDB(&dat->ndat.levels[(uint32_t)(dat->ndat.nuclData[state->chartSelectedNucl].firstLevel + state->coincLvlFlag)].energy)==0.0)){
+						SDL_snprintf(selStr,64,"%s %s",dat->strings[dat->locStringIDs[LOCSTR_SAME_JPI_AS]], dat->strings[dat->locStringIDs[LOCSTR_GROUND_STATE]]);
+						selStr[0] = (char)SDL_toupper(selStr[0]);
+					}else{
+						getLvlEnergyStr(tmpStr,&dat->ndat,(uint32_t)(dat->ndat.nuclData[state->chartSelectedNucl].firstLevel + state->coincLvlFlag),0);
+						SDL_snprintf(selStr,64,"%s %s keV level",dat->strings[dat->locStringIDs[LOCSTR_SAME_JPI_AS]],tmpStr);
 					}
 					state->ds.uiElemWidth[UIELEM_NUCL_FULLINFOBOX_RXNBUTTON] = (int16_t)(getTextWidth(rdat,FONTSIZE_NORMAL_BOLD,selStr)/rdat->uiDPIScale + 70*state->ds.uiUserScale);
 				}else{

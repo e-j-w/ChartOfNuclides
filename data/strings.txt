@@ -106,6 +106,7 @@ double_escape|double-escape
 clickaction_goto_level|Go to final level
 clickaction_goto_daughter|Go to daughter nuclide
 clickaction_show_coinc|Show level feeding/decay
+clickaction_show_same_jpi|Show same Jπ levels
 interface_size|Interface size
 small|Small
 default|Default
@@ -117,3 +118,4 @@ reactionmode_highlight|Highlight levels from selected dataset
 levels_bolded|Bolded levels
 feeding|feeding
 decay|decay
+same_jpi_as|Same Jπ as the

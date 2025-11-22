@@ -658,10 +658,10 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
     }else if(state->uiState == UISTATE_FULLLEVELINFO){
       if(state->ds.selectedRxn == 0){
         state->ds.selectedRxn = dat->ndat.nuclData[state->chartSelectedNucl].numRxns;
-      }else if(state->ds.selectedRxn < 255){
+      }else if(state->ds.selectedRxn < 254){
         state->ds.selectedRxn--;
-      }else if(state->ds.selectedRxn == 255){
-        //leave coincidence display mode
+      }else if(state->ds.selectedRxn >= 254){
+        //leave coincidence or same Jpi display mode
         state->ds.selectedRxn = 0;
       }
       //SDL_Log("Changed selected reaction to %u.\n",state->ds.selectedRxn);
@@ -677,8 +677,8 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
     }else if(state->uiState == UISTATE_FULLLEVELINFO){
       if(state->ds.selectedRxn == dat->ndat.nuclData[state->chartSelectedNucl].numRxns){
         state->ds.selectedRxn = 0;
-      }else if(state->ds.selectedRxn == 255){
-        //leave coincidence display mode
+      }else if(state->ds.selectedRxn >= 254){
+        //leave coincidence or same Jpi display mode
         state->ds.selectedRxn = 0;
       }else{
         state->ds.selectedRxn++;
@@ -798,8 +798,8 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
       state->uiState = UISTATE_FULLLEVELINFO;
       state->mouseoverElement = UIELEM_ENUM_LENGTH;
     }else if((state->uiState == UISTATE_FULLLEVELINFO)&&(state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_EXPAND]==0.0f)&&(state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_CONTRACT]==0.0f)){
-      if(state->ds.selectedRxn == 255){
-        //in coincidence display mode, exit it and go back to the full dataset
+      if(state->ds.selectedRxn >= 254){
+        //in coincidence or same Jpi display mode, exit it and go back to the full dataset
         state->ds.selectedRxn = 0;
         setSelectedNuclOnLevelList(dat,state,rdat,(uint16_t)(dat->ndat.nuclData[state->chartSelectedNucl].N),(uint16_t)(dat->ndat.nuclData[state->chartSelectedNucl].Z),1); //update and re-draw level list
       }else{
@@ -1005,6 +1005,7 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
       state->ds.nuclFullInfoRightClickCol = state->ds.nuclFullInfoMouseOverCol;
       state->ds.nuclFullInfoRightClickLvlRow = state->ds.nuclFullInfoMouseOverLvlRow;
       state->ds.nuclFullInfoRightClickNuclLvl = state->ds.nuclFullInfoMouseOverNuclLvl;
+      uint32_t rightClickLvlInd = (uint32_t)(dat->ndat.nuclData[state->chartSelectedNucl].firstLevel + state->ds.nuclFullInfoRightClickNuclLvl);
       if(state->ds.nuclFullInfoRightClickNuclLvl != 65535U){
         //SDL_Log("Right click on lvl: %u (row: %u), col %u\n",state->ds.nuclFullInfoRightClickNuclLvl,state->ds.nuclFullInfoRightClickLvlRow,state->ds.nuclFullInfoRightClickCol);
         //TO-DO: replace selection string context items (besides copy) with context items specific to the specific
@@ -1014,15 +1015,35 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
           case LLCOLUMN_JPI:
             state->cms.selectionInd = state->ds.nuclFullInfoRightClickNuclLvl;
             appendContextMenuItem(state,CONTEXTITEM_SHOW_COINC);
+            if(dat->ndat.levels[rightClickLvlInd].numSpinParVals > 0){
+              for(uint32_t i=0; i<dat->ndat.levels[rightClickLvlInd].numSpinParVals; i++){
+                spinparval spv1 = dat->ndat.spv[dat->ndat.levels[rightClickLvlInd].firstSpinParVal + i];
+                if((spv1.format & 1U) == 0){
+                  //at least one non-variable spin-parity value for this level
+                  appendContextMenuItem(state,CONTEXTITEM_SHOW_SAME_JPI);
+                  break;
+                }
+              }
+            }
             showContextMenu(dat,state,rdat);
             break;
           case LLCOLUMN_HALFLIFE:
             state->cms.selectionInd = state->ds.nuclFullInfoRightClickNuclLvl; //nuclide level index
             appendContextMenuItem(state,CONTEXTITEM_SHOW_COINC);
+            if(dat->ndat.levels[rightClickLvlInd].numSpinParVals > 0){
+              for(uint32_t i=0; i<dat->ndat.levels[rightClickLvlInd].numSpinParVals; i++){
+                spinparval spv1 = dat->ndat.spv[dat->ndat.levels[rightClickLvlInd].firstSpinParVal + i];
+                if((spv1.format & 1U) == 0){
+                  //at least one non-variable spin-parity value for this level
+                  appendContextMenuItem(state,CONTEXTITEM_SHOW_SAME_JPI);
+                  break;
+                }
+              }
+            }
             if(state->ds.nuclFullInfoRightClickLvlRow > 0){
-              if((dat->ndat.levels[state->ds.nuclFullInfoRightClickNuclLvl].numDecModes > 0)&&(dat->ndat.levels[state->ds.nuclFullInfoRightClickNuclLvl].numDecModes <= state->ds.nuclFullInfoRightClickLvlRow)){
+              if((dat->ndat.levels[rightClickLvlInd].numDecModes > 0)&&(dat->ndat.levels[rightClickLvlInd].numDecModes >= state->ds.nuclFullInfoRightClickLvlRow)){
                 //right-clicked on a decay mode
-                uint16_t decayModeNucl = getDecayModeDaughterNucl(&dat->ndat,state->chartSelectedNucl,dat->ndat.dcyMode[dat->ndat.levels[dat->ndat.nuclData[state->chartSelectedNucl].firstLevel + state->cms.selectionInd].firstDecMode + (uint32_t)(state->ds.nuclFullInfoRightClickLvlRow - 1)].type);
+                uint16_t decayModeNucl = getDecayModeDaughterNucl(&dat->ndat,state->chartSelectedNucl,dat->ndat.dcyMode[dat->ndat.levels[rightClickLvlInd].firstDecMode + (uint32_t)(state->ds.nuclFullInfoRightClickLvlRow - 1)].type);
                 if(decayModeNucl != state->chartSelectedNucl){
                   state->cms.selectionInd2 = decayModeNucl; //daughter nuclide
                   appendContextMenuItem(state,CONTEXTITEM_GOTO_DAUGHTER);
@@ -1038,8 +1059,8 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
           case LLCOLUMN_ICC:
           case LLCOLUMN_FINALLEVEL_E:
           case LLCOLUMN_FINALLEVEL_JPI:
-            if(state->ds.nuclFullInfoRightClickLvlRow < dat->ndat.levels[dat->ndat.nuclData[state->chartSelectedNucl].firstLevel + state->ds.nuclFullInfoRightClickNuclLvl].numTran){
-              uint32_t finalLvlInd = getFinalLvlInd(&dat->ndat,(uint32_t)(dat->ndat.nuclData[state->chartSelectedNucl].firstLevel + state->ds.nuclFullInfoRightClickNuclLvl),(uint32_t)(dat->ndat.levels[dat->ndat.nuclData[state->chartSelectedNucl].firstLevel + state->ds.nuclFullInfoRightClickNuclLvl].firstTran + state->ds.nuclFullInfoRightClickLvlRow));
+            if(state->ds.nuclFullInfoRightClickLvlRow < dat->ndat.levels[rightClickLvlInd].numTran){
+              uint32_t finalLvlInd = getFinalLvlInd(&dat->ndat,rightClickLvlInd,(uint32_t)(dat->ndat.levels[rightClickLvlInd].firstTran + state->ds.nuclFullInfoRightClickLvlRow));
               state->cms.selectionInd = (uint16_t)(finalLvlInd - dat->ndat.nuclData[state->chartSelectedNucl].firstLevel);
               //SDL_Log("Going to level: %u (%u %u)\n",state->cms.selectionInd, finalLvlInd, dat->ndat.nuclData[state->chartSelectedNucl].firstLevel);
               appendContextMenuItem(state,CONTEXTITEM_GOTO_LEVEL);

@@ -2727,9 +2727,9 @@ void drawNuclFullInfoBox(const app_data *restrict dat, app_state *restrict state
       break;
     }
 
-    //if in coincidence display mode, skip levels that are not in coincidence
-    if(state->ds.selectedRxn == 255){
-      //coincidence display mode
+    //if in coincidence or same Jpi display mode, skip levels that are not in coincidence
+    if(state->ds.selectedRxn >= 254){
+      //coincidence or same Jpi display mode
       const uint16_t nuclLvlInd = (uint16_t)(lvlInd - dat->ndat.nuclData[nuclInd].firstLevel);
       if(nuclLvlInd < MAX_COINC_FLAGGED_LVLS){
         const uint32_t bpInd = nuclLvlInd/64; //bit-pattern index (maximum int size is 64 bits)
@@ -2743,7 +2743,7 @@ void drawNuclFullInfoBox(const app_data *restrict dat, app_state *restrict state
     //skip all levels which are not part of the selected reaction
     //SDL_Log("Lvl %u populating rxns: %lu\n",lvlInd,dat->ndat.levels[lvlInd].populatingRxns);
     if(state->ds.reactionModeInd != REACTIONMODE_HIGHLIGHT){
-      if((state->ds.selectedRxn > 0)&&(state->ds.selectedRxn < 255)){
+      if((state->ds.selectedRxn > 0)&&(state->ds.selectedRxn < 254)){
         if(!(dat->ndat.levels[lvlInd].populatingRxns & ((uint64_t)(1) << (state->ds.selectedRxn-1)))){
           continue;
         }
@@ -2757,14 +2757,15 @@ void drawNuclFullInfoBox(const app_data *restrict dat, app_state *restrict state
       uint8_t lvlFontInd = FONTSIZE_NORMAL;
       SDL_Color whiteLvlListCol = whiteCol8Bit;
       SDL_Color blackLvlListCol = blackCol8Bit;
-      if((state->ds.reactionModeInd == REACTIONMODE_HIGHLIGHT)&&(state->ds.selectedRxn > 0)&&(state->ds.selectedRxn < 255)){
+      if((state->ds.reactionModeInd == REACTIONMODE_HIGHLIGHT)&&(state->ds.selectedRxn > 0)&&(state->ds.selectedRxn < 254)){
         if(dat->ndat.levels[lvlInd].populatingRxns & ((uint64_t)(1) << (state->ds.selectedRxn-1))){
           lvlFontInd = FONTSIZE_NORMAL_BOLD;
         }else{
           whiteLvlListCol = lightGrayCol8Bit;
           blackLvlListCol = darkGrayCol8Bit;
         }
-      }else if(state->ds.selectedRxn == 255){
+      }else if(state->ds.selectedRxn >= 254){
+        //highlight level of interest
         const uint16_t nuclLvlInd = (uint16_t)(lvlInd - dat->ndat.nuclData[nuclInd].firstLevel);
         if(nuclLvlInd == state->coincLvlFlag){
           lvlFontInd = FONTSIZE_NORMAL_BOLD;
@@ -2914,6 +2915,16 @@ void drawNuclFullInfoBox(const app_data *restrict dat, app_state *restrict state
       }
       drawYPos = levelStartDrawPos;
       drawXPos += state->ds.fullInfoColWidth[LLCOLUMN_ELEVEL]*state->ds.uiUserScale;
+      if(state->ds.selectedRxn == 254){
+        //same Jpi display mode, highlight Jpi values which are the same as the selected level
+        const uint16_t nuclLvlInd = (uint16_t)(lvlInd - dat->ndat.nuclData[nuclInd].firstLevel);
+        if(nuclLvlInd < MAX_COINC_FLAGGED_LVLS){
+          const uint32_t bpInd = nuclLvlInd/64; //bit-pattern index (maximum int size is 64 bits)
+          if(state->flaggedCoincLvls[bpInd] & (uint64_t)((uint64_t)(1) << (nuclLvlInd - (bpInd*64)))){
+            lvlFontInd = FONTSIZE_NORMAL_BOLD;
+          }
+        }
+      }
       getSpinParStr(tmpStr,&dat->ndat,lvlInd);
       if(drawYPos >= (NUCL_FULLINFOBOX_LEVELLIST_POS_Y*state->ds.uiUserScale - 1.0f)){
         uint32_t strMetadata = (lvlInd - dat->ndat.nuclData[nuclInd].firstLevel) & 65535U; //16 lower bits give level index
@@ -2922,6 +2933,9 @@ void drawNuclFullInfoBox(const app_data *restrict dat, app_state *restrict state
         drawSelectableTextAlignedSizedWithMetadata(rdat,&state->tss,drawXPos,drawYPos,(hl > 600) ? whiteLvlListCol : blackLvlListCol,lvlFontInd,txtAlpha,tmpStr,ALIGN_LEFT,16384,strMetadata);
       }else{
         drawTextAlignedSized(rdat,drawXPos,drawYPos,(hl > 600) ? whiteLvlListCol : blackLvlListCol,lvlFontInd,txtAlpha,tmpStr,ALIGN_LEFT,16384);
+      }
+      if(state->ds.selectedRxn == 254){
+        lvlFontInd = FONTSIZE_NORMAL; //reset
       }
       drawXPos += state->ds.fullInfoColWidth[LLCOLUMN_JPI]*state->ds.uiUserScale;
       getHalfLifeStr(tmpStr,dat,lvlInd,1,0,state->ds.useLifetimes);
@@ -2965,7 +2979,7 @@ void drawNuclFullInfoBox(const app_data *restrict dat, app_state *restrict state
             lvlFontInd = FONTSIZE_NORMAL;
             const uint16_t nuclFinalInd = (uint16_t)(finalLvlInd - dat->ndat.nuclData[nuclInd].firstLevel);
             if(nuclFinalInd == state->coincLvlFlag){
-              //bold transitions which go to the selected level
+              //bold transitions which are coincident with the selected level
               lvlFontInd = FONTSIZE_NORMAL_BOLD;
             }
           }
@@ -3290,6 +3304,18 @@ void drawNuclFullInfoBox(const app_data *restrict dat, app_state *restrict state
       }else{
         getLvlEnergyStr(tmpStr,&dat->ndat,(uint32_t)(dat->ndat.nuclData[nuclInd].firstLevel + state->coincLvlFlag),0);
         SDL_snprintf(selStr,64,"%s keV level %s/%s",tmpStr,dat->strings[dat->locStringIDs[LOCSTR_FEEDING]],dat->strings[dat->locStringIDs[LOCSTR_DECAY]]);
+      }
+      drawDropDownTextButtonFontSize(&dat->rules.themeRules,rdat,state->ds.uiElemPosX[UIELEM_NUCL_FULLINFOBOX_RXNBUTTON],(int16_t)(state->ds.uiElemPosY[UIELEM_NUCL_FULLINFOBOX_RXNBUTTON] - txtYOffset),state->ds.uiElemWidth[UIELEM_NUCL_FULLINFOBOX_RXNBUTTON],getHighlightState(state,UIELEM_NUCL_FULLINFOBOX_RXNBUTTON),txtAlpha,FONTSIZE_NORMAL_BOLD,selStr);
+    }else if(state->ds.selectedRxn == 254){
+      //same Jpi levels mode
+      char selStr[64];
+      uint8_t eValueType = (uint8_t)((dat->ndat.levels[(uint32_t)(dat->ndat.nuclData[nuclInd].firstLevel + state->coincLvlFlag)].energy.format >> 5U) & 15U);
+      if((eValueType == VALUETYPE_NUMBER)&&(getRawValFromDB(&dat->ndat.levels[(uint32_t)(dat->ndat.nuclData[nuclInd].firstLevel + state->coincLvlFlag)].energy)==0.0)){
+        SDL_snprintf(selStr,64,"%s %s",dat->strings[dat->locStringIDs[LOCSTR_SAME_JPI_AS]],dat->strings[dat->locStringIDs[LOCSTR_GROUND_STATE]]);
+        selStr[0] = (char)SDL_toupper(selStr[0]);
+      }else{
+        getLvlEnergyStr(tmpStr,&dat->ndat,(uint32_t)(dat->ndat.nuclData[nuclInd].firstLevel + state->coincLvlFlag),0);
+        SDL_snprintf(selStr,64,"%s %s keV level",dat->strings[dat->locStringIDs[LOCSTR_SAME_JPI_AS]],tmpStr);
       }
       drawDropDownTextButtonFontSize(&dat->rules.themeRules,rdat,state->ds.uiElemPosX[UIELEM_NUCL_FULLINFOBOX_RXNBUTTON],(int16_t)(state->ds.uiElemPosY[UIELEM_NUCL_FULLINFOBOX_RXNBUTTON] - txtYOffset),state->ds.uiElemWidth[UIELEM_NUCL_FULLINFOBOX_RXNBUTTON],getHighlightState(state,UIELEM_NUCL_FULLINFOBOX_RXNBUTTON),txtAlpha,FONTSIZE_NORMAL_BOLD,selStr);
     }else{
@@ -4297,6 +4323,9 @@ void drawContextMenu(const app_data *restrict dat, const app_state *restrict sta
         break;
       case CONTEXTITEM_SHOW_COINC:
         drawTextAlignedSized(rdat,drawRect.x,drawRect.y + (0.4f + (float)i)*CONTEXT_MENU_ITEM_SPACING*state->ds.uiUserScale,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,dat->strings[dat->locStringIDs[LOCSTR_CLICKACTION_SHOWCOINC]],ALIGN_LEFT,(Uint16)(drawRect.w - (PANEL_EDGE_SIZE + 6*UI_PADDING_SIZE)*state->ds.uiUserScale));
+        break;
+      case CONTEXTITEM_SHOW_SAME_JPI:
+        drawTextAlignedSized(rdat,drawRect.x,drawRect.y + (0.4f + (float)i)*CONTEXT_MENU_ITEM_SPACING*state->ds.uiUserScale,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,dat->strings[dat->locStringIDs[LOCSTR_CLICKACTION_SHOWSAMEJPI]],ALIGN_LEFT,(Uint16)(drawRect.w - (PANEL_EDGE_SIZE + 6*UI_PADDING_SIZE)*state->ds.uiUserScale));
         break;
       default:
         break;
