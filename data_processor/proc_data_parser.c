@@ -2193,27 +2193,33 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 						nd->nuclData[nd->numNucl].flags = OBSFLAG_TENTATIVE;
 					}else{
 						nd->nuclData[nd->numNucl].flags = OBSFLAG_OBSERVED;
-						if(nd->nuclData[nd->numNucl].N > nd->maxNforZ[nd->nuclData[nd->numNucl].Z]){
-							nd->maxNforZ[nd->nuclData[nd->numNucl].Z] = (uint16_t)nd->nuclData[nd->numNucl].N;
-						}
-						if(nd->nuclData[nd->numNucl].N < nd->minNforZ[nd->nuclData[nd->numNucl].Z]){
-							if(nd->nuclData[nd->numNucl].N >= 0){
-								nd->minNforZ[nd->nuclData[nd->numNucl].Z] = (uint16_t)nd->nuclData[nd->numNucl].N;
+						int16_t nuclZ = nd->nuclData[nd->numNucl].Z;
+						int16_t nuclN = nd->nuclData[nd->numNucl].N;
+						if((nuclZ >= 0)&&(nuclZ < MAX_PROTON_NUM)){
+							if(nuclN > nd->maxNforZ[nuclZ]){
+								nd->maxNforZ[nuclZ] = (uint16_t)nuclN;
+							}
+							if(nuclN < nd->minNforZ[nuclZ]){
+								if(nuclN >= 0){
+									nd->minNforZ[nuclZ] = (uint16_t)nuclN;
+								}
 							}
 						}
-						if(nd->nuclData[nd->numNucl].Z > nd->maxZforN[nd->nuclData[nd->numNucl].N]){
-							nd->maxZforN[nd->nuclData[nd->numNucl].N] = (uint16_t)nd->nuclData[nd->numNucl].Z;
-						}
-						if(nd->nuclData[nd->numNucl].Z < nd->minZforN[nd->nuclData[nd->numNucl].N]){
-							if(nd->nuclData[nd->numNucl].Z >= 0){
-								nd->minZforN[nd->nuclData[nd->numNucl].N] = (uint16_t)nd->nuclData[nd->numNucl].Z;
+						if((nuclN >= 0)&&(nuclN < MAX_NEUTRON_NUM)){
+							if(nuclZ > nd->maxZforN[nuclN]){
+								nd->maxZforN[nuclN] = (uint16_t)nuclZ;
+							}
+							if(nuclZ < nd->minZforN[nuclN]){
+								if(nuclZ >= 0){
+									nd->minZforN[nuclN] = (uint16_t)nuclZ;
+								}
 							}
 						}
-						if(nd->nuclData[nd->numNucl].N > nd->maxN){
-							nd->maxN = (uint16_t)nd->nuclData[nd->numNucl].N;
+						if(nuclN > nd->maxN){
+							nd->maxN = (uint16_t)nuclN;
 						}
-						if(nd->nuclData[nd->numNucl].Z > nd->maxZ){
-							nd->maxZ = (uint16_t)nd->nuclData[nd->numNucl].Z;
+						if(nuclZ > nd->maxZ){
+							nd->maxZ = (uint16_t)nuclZ;
 						}
 					}
 				}
