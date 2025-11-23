@@ -2583,17 +2583,22 @@ void addValsFromDB(const valWithErr *restrict valStruct1, const valWithErr *rest
 		}
 	}
 
-	if(outErr >= 20.0){
-		while(outErr >= 20.0){
-			outVal /= 10.0;
-			outErr /= 10.0;
-			outExp++;
+	if(outErr > 0.0){
+		if(outErr >= 20.0){
+			while(outErr >= 20.0){
+				outVal /= 10.0;
+				outErr /= 10.0;
+				outExp++;
+			}
+		}else if(outErr < 2.0){
+			while(outErr < 2.0){
+				SDL_Log("outErr: %f\n",outErr);
+				outErr *= 10.0;
+				outSigFigs++;
+			}
 		}
-	}else if(outErr < 2.0){
-		while(outErr < 2.0){
-			outErr *= 10.0;
-			outSigFigs++;
-		}
+	}else{
+		outErr = 0.0;
 	}
 
 	sum->val = (float)outVal;
@@ -5472,11 +5477,13 @@ uint8_t getRxnMenuNumRxnsPerColumn(const app_data *restrict dat, const app_state
 }
 
 SDL_FRect getRxnMenuButtonRect(const drawing_state *restrict ds, const uint8_t numRxnPerCol, const uint8_t menuItem){
-	SDL_FRect rect;
-	rect.x = (float)ds->uiElemPosX[UIELEM_RXN_MENU] + (float)(2.0f*PANEL_EDGE_SIZE + RXN_MENU_COLUMN_WIDTH*((menuItem)/numRxnPerCol))*ds->uiUserScale;
-	rect.y = (float)ds->uiElemPosY[UIELEM_RXN_MENU] + (PANEL_EDGE_SIZE + 0.5f*UI_PADDING_SIZE + ((float)((menuItem)%numRxnPerCol) + 0.1f)*RXN_MENU_ITEM_SPACING)*ds->uiUserScale;
-	rect.w = RXN_MENU_COLUMN_WIDTH*ds->uiUserScale;
-	rect.h = RXN_MENU_ITEM_SPACING*ds->uiUserScale;
+	SDL_FRect rect = {0.0f, 0.0f, 0.0f, 0.0f};
+	if(numRxnPerCol > 0){
+		rect.x = (float)ds->uiElemPosX[UIELEM_RXN_MENU] + (float)(2.0f*PANEL_EDGE_SIZE + (float)(RXN_MENU_COLUMN_WIDTH*((menuItem)/numRxnPerCol)))*ds->uiUserScale;
+		rect.y = (float)ds->uiElemPosY[UIELEM_RXN_MENU] + (PANEL_EDGE_SIZE + 0.5f*UI_PADDING_SIZE + ((float)((menuItem)%numRxnPerCol) + 0.1f)*RXN_MENU_ITEM_SPACING)*ds->uiUserScale;
+		rect.w = RXN_MENU_COLUMN_WIDTH*ds->uiUserScale;
+		rect.h = RXN_MENU_ITEM_SPACING*ds->uiUserScale;
+	}
 	return rect;
 }
 
@@ -5645,12 +5652,15 @@ void updateSingleUIElemPosition(const app_data *restrict dat, app_state *restric
 				state->ds.uiElemPosY[uiElemInd] = (int16_t)(CHARTVIEW_MENU_POS_Y*state->ds.uiUserScale);
 				float cvmButtonWidth = (CHARTVIEW_MENU_WIDTH - 2*CHARTVIEW_MENU_COLUMNS*PANEL_EDGE_SIZE - 4*CHARTVIEW_MENU_COLUMNS*UI_PADDING_SIZE);
 				float cvmButtonHeight = (CHARTVIEW_MENU_ITEM_SPACING - UI_PADDING_SIZE);
-				for(uint8_t i=0; i<CHARTVIEW_ENUM_LENGTH; i++){
-					state->ds.uiElemWidth[(int32_t)UIELEM_CHARTVIEW_MENU-((int32_t)CHARTVIEW_ENUM_LENGTH)+i] = (int16_t)(cvmButtonWidth*state->ds.uiUserScale);
-					state->ds.uiElemHeight[(int32_t)UIELEM_CHARTVIEW_MENU-((int32_t)CHARTVIEW_ENUM_LENGTH)+i] = (int16_t)(cvmButtonHeight*state->ds.uiUserScale);
-					state->ds.uiElemPosX[(int32_t)UIELEM_CHARTVIEW_MENU-((int32_t)CHARTVIEW_ENUM_LENGTH)+i] = (int16_t)(state->ds.windowXRes-((CHARTVIEW_MENU_WIDTH+CHARTVIEW_MENU_POS_XR - 4*PANEL_EDGE_SIZE - 4*UI_PADDING_SIZE + (float)(((CHARTVIEW_MENU_COLUMNS-1) - (i/numViewsPerCol))*(cvmButtonWidth + UI_TILE_SIZE - UI_PADDING_SIZE)))*state->ds.uiUserScale) );
-					state->ds.uiElemPosY[(int32_t)UIELEM_CHARTVIEW_MENU-((int32_t)CHARTVIEW_ENUM_LENGTH)+i] = (int16_t)((CHARTVIEW_MENU_POS_Y + PANEL_EDGE_SIZE + CHARTVIEW_MENU_ITEM_SPACING + 2*UI_PADDING_SIZE + (float)((i%numViewsPerCol)*CHARTVIEW_MENU_ITEM_SPACING))*state->ds.uiUserScale);
+				if(numViewsPerCol > 0){
+					for(uint8_t i=0; i<CHARTVIEW_ENUM_LENGTH; i++){
+						state->ds.uiElemWidth[(int32_t)UIELEM_CHARTVIEW_MENU-((int32_t)CHARTVIEW_ENUM_LENGTH)+i] = (int16_t)(cvmButtonWidth*state->ds.uiUserScale);
+						state->ds.uiElemHeight[(int32_t)UIELEM_CHARTVIEW_MENU-((int32_t)CHARTVIEW_ENUM_LENGTH)+i] = (int16_t)(cvmButtonHeight*state->ds.uiUserScale);
+						state->ds.uiElemPosX[(int32_t)UIELEM_CHARTVIEW_MENU-((int32_t)CHARTVIEW_ENUM_LENGTH)+i] = (int16_t)(state->ds.windowXRes-((CHARTVIEW_MENU_WIDTH+CHARTVIEW_MENU_POS_XR - 4*PANEL_EDGE_SIZE - 4*UI_PADDING_SIZE + (float)(((CHARTVIEW_MENU_COLUMNS-1) - (float)((i/numViewsPerCol))*(cvmButtonWidth + UI_TILE_SIZE - UI_PADDING_SIZE))))*state->ds.uiUserScale) );
+						state->ds.uiElemPosY[(int32_t)UIELEM_CHARTVIEW_MENU-((int32_t)CHARTVIEW_ENUM_LENGTH)+i] = (int16_t)((CHARTVIEW_MENU_POS_Y + PANEL_EDGE_SIZE + CHARTVIEW_MENU_ITEM_SPACING + 2*UI_PADDING_SIZE + (float)((i%numViewsPerCol)*CHARTVIEW_MENU_ITEM_SPACING))*state->ds.uiUserScale);
+					}
 				}
+				
 			}
 			break;
 		case UIELEM_SEARCH_MENU:
@@ -5951,36 +5961,38 @@ void updateSingleUIElemPosition(const app_data *restrict dat, app_state *restric
 			break;
 		case UIELEM_RXN_MENU:
 			{//prevent -Wjump-misses-init
-				state->ds.uiElemPosY[uiElemInd] = (int16_t)(state->ds.uiElemPosY[UIELEM_NUCL_FULLINFOBOX_RXNBUTTON] + state->ds.uiElemHeight[UIELEM_NUCL_FULLINFOBOX_RXNBUTTON]);
-				float effResY = (float)(state->ds.windowYRes);
-				if(effResY > 650.0f*state->ds.uiUserScale){
-					effResY = 650.0f*state->ds.uiUserScale; //limit vertical size of the menu
-				}
-				state->ds.rxnMenuColumns = (uint8_t)(SDL_ceilf((dat->ndat.nuclData[state->chartSelectedNucl].numRxns+1.0f)/SDL_floorf((float)(effResY - state->ds.uiElemPosY[uiElemInd])/(RXN_MENU_ITEM_SPACING*state->ds.uiUserScale) - 1.0f)));
-				if(state->ds.rxnMenuColumns == 0){
-					state->ds.rxnMenuColumns = 1;
-				}
-				if((state->ds.rxnMenuColumns < 3)&&(((dat->ndat.nuclData[state->chartSelectedNucl].numRxns+1.0f)/state->ds.rxnMenuColumns) > 8.5f)){
-					state->ds.rxnMenuColumns++;
-				}
-				//SDL_Log("numRxns: %u, columns: %u\n",dat->ndat.nuclData[state->chartSelectedNucl].numRxns,state->ds.rxnMenuColumns);
-				int16_t menuWidth = (int16_t)((RXN_MENU_COLUMN_WIDTH*state->ds.rxnMenuColumns + 4.0f*PANEL_EDGE_SIZE)*state->ds.uiUserScale);
-				while(menuWidth > (state->ds.windowXRes - 2*UI_PADDING_SIZE*state->ds.uiUserScale)){
-					if(state->ds.rxnMenuColumns > 1){
-						state->ds.rxnMenuColumns--;
-						menuWidth = (int16_t)((RXN_MENU_COLUMN_WIDTH*state->ds.rxnMenuColumns + 4.0f*PANEL_EDGE_SIZE)*state->ds.uiUserScale);
-					}else{
-						break;
+				if(state->chartSelectedNucl < dat->ndat.numNucl){
+					state->ds.uiElemPosY[uiElemInd] = (int16_t)(state->ds.uiElemPosY[UIELEM_NUCL_FULLINFOBOX_RXNBUTTON] + state->ds.uiElemHeight[UIELEM_NUCL_FULLINFOBOX_RXNBUTTON]);
+					float effResY = (float)(state->ds.windowYRes);
+					if(effResY > 650.0f*state->ds.uiUserScale){
+						effResY = 650.0f*state->ds.uiUserScale; //limit vertical size of the menu
 					}
+					state->ds.rxnMenuColumns = (uint8_t)(SDL_ceilf((dat->ndat.nuclData[state->chartSelectedNucl].numRxns+1.0f)/(SDL_floorf((float)(effResY - state->ds.uiElemPosY[uiElemInd])/(RXN_MENU_ITEM_SPACING*state->ds.uiUserScale) - 1.0f))));
+					if(state->ds.rxnMenuColumns == 0){
+						state->ds.rxnMenuColumns = 1;
+					}
+					if((state->ds.rxnMenuColumns < 3)&&(((dat->ndat.nuclData[state->chartSelectedNucl].numRxns+1.0f)/state->ds.rxnMenuColumns) > 8.5f)){
+						state->ds.rxnMenuColumns++;
+					}
+					//SDL_Log("numRxns: %u, columns: %u\n",dat->ndat.nuclData[state->chartSelectedNucl].numRxns,state->ds.rxnMenuColumns);
+					int16_t menuWidth = (int16_t)((RXN_MENU_COLUMN_WIDTH*state->ds.rxnMenuColumns + 4.0f*PANEL_EDGE_SIZE)*state->ds.uiUserScale);
+					while(menuWidth > (state->ds.windowXRes - 2*UI_PADDING_SIZE*state->ds.uiUserScale)){
+						if(state->ds.rxnMenuColumns > 1){
+							state->ds.rxnMenuColumns--;
+							menuWidth = (int16_t)((RXN_MENU_COLUMN_WIDTH*state->ds.rxnMenuColumns + 4.0f*PANEL_EDGE_SIZE)*state->ds.uiUserScale);
+						}else{
+							break;
+						}
+					}
+					state->ds.uiElemWidth[uiElemInd] = menuWidth;
+					state->ds.uiElemHeight[uiElemInd] = (int16_t)((SDL_ceilf((dat->ndat.nuclData[state->chartSelectedNucl].numRxns+1.0f)/(state->ds.rxnMenuColumns*1.0f))*RXN_MENU_ITEM_SPACING + 2*PANEL_EDGE_SIZE + 3*UI_PADDING_SIZE)*state->ds.uiUserScale);
+					state->ds.uiElemPosX[uiElemInd] = (int16_t)(state->ds.uiElemPosX[UIELEM_NUCL_FULLINFOBOX_RXNBUTTON] + state->ds.uiElemWidth[UIELEM_NUCL_FULLINFOBOX_RXNBUTTON]/2 - state->ds.uiElemWidth[UIELEM_RXN_MENU]/2);
+					if((state->ds.uiElemPosX[uiElemInd] + state->ds.uiElemWidth[uiElemInd]) > state->ds.windowXRes){
+						//offset menu to keep it on-screen
+						state->ds.uiElemPosX[uiElemInd] = (int16_t)(state->ds.windowXRes - state->ds.uiElemWidth[uiElemInd] - UI_PADDING_SIZE*state->ds.uiUserScale);
+					}
+					//SDL_Log("position: %i %i, dimensions: %i %i\n",state->ds.uiElemPosX[uiElemInd],state->ds.uiElemPosY[uiElemInd],state->ds.uiElemWidth[uiElemInd],state->ds.uiElemHeight[uiElemInd]);
 				}
-				state->ds.uiElemWidth[uiElemInd] = menuWidth;
-				state->ds.uiElemHeight[uiElemInd] = (int16_t)((SDL_ceilf((dat->ndat.nuclData[state->chartSelectedNucl].numRxns+1.0f)/(state->ds.rxnMenuColumns*1.0f))*RXN_MENU_ITEM_SPACING + 2*PANEL_EDGE_SIZE + 3*UI_PADDING_SIZE)*state->ds.uiUserScale);
-				state->ds.uiElemPosX[uiElemInd] = (int16_t)(state->ds.uiElemPosX[UIELEM_NUCL_FULLINFOBOX_RXNBUTTON] + state->ds.uiElemWidth[UIELEM_NUCL_FULLINFOBOX_RXNBUTTON]/2 - state->ds.uiElemWidth[UIELEM_RXN_MENU]/2);
-				if((state->ds.uiElemPosX[uiElemInd] + state->ds.uiElemWidth[uiElemInd]) > state->ds.windowXRes){
-					//offset menu to keep it on-screen
-					state->ds.uiElemPosX[uiElemInd] = (int16_t)(state->ds.windowXRes - state->ds.uiElemWidth[uiElemInd] - UI_PADDING_SIZE*state->ds.uiUserScale);
-				}
-				//SDL_Log("position: %i %i, dimensions: %i %i\n",state->ds.uiElemPosX[uiElemInd],state->ds.uiElemPosY[uiElemInd],state->ds.uiElemWidth[uiElemInd],state->ds.uiElemHeight[uiElemInd]);
 			}
 			break;
 		case UIELEM_NUCL_FULLINFOBOX_SCROLLBAR:

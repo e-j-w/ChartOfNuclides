@@ -19,6 +19,7 @@ list
 *.ini
 # temporary files from text editors
 *.save
+*.out
 *~
 *.png
 .vscode
