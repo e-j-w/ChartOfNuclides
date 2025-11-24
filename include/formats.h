@@ -63,7 +63,8 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #define MAX_SPIN_VARS            32 //maximum spin variables (ie. J1, J2, J3...) per nuclide
 
 #define ISOMER_MVAL_HL_THRESHOLD    1.0E-3 //half-life (in seconds) lower threshold for an m-value to be assigned to an isomer
-#define ISOMER_MVAL_E_THRESHOLD     0.02   //energy (keV) upper threshold for an m-value to be assigned to an isomer
+#define ISOMER_MVAL_E_THRESHOLD     0.02   //energy (keV) upper threshold for an m-value to be assigned to an isomer, if the half-life is unknown
+
 
 #define NUMSHELLCLOSURES 7
 static const uint16_t shellClosureValues[NUMSHELLCLOSURES] = {2,8,20,28,50,82,126};
@@ -134,6 +135,8 @@ typedef struct
   uint8_t numMultipoles; //only uses the first couple bits
   uint8_t multipole[MAXMULTPERLEVEL]; //bit 0: E (unset) or M (set), bits 1-4: multipole order, bits 5-6: values from tentative_mult_enum, bit 7: if set, bit 0 corresponds to quadrupole/dipole
   uint16_t finalLvlOffset; //offset of the index of the final level from the initial level (some nuclides eg. 146Nd have decays spanning more than 256 levels, so uint8_t can't be used here)
+  uint8_t hasComment; //bit-pattern specifying which ENSDF comment types are available for this transition (bit indices from tran_comment_enum)
+  uint32_t commentStrBufStartPos; //where the comments start in ensdfStrBuf
 }transition; //a transition between levels
 
 typedef struct
@@ -151,6 +154,8 @@ typedef struct
   uint8_t format; //bit 0: whether spin-parity values are half integer (if set, then spinVal is multiplied by 0.5)
   //bits 1-4: labels for special levels (see special_level_enum)
   //bits 5-7: m-value for isomer levels
+  uint8_t hasComment; //bit-pattern specifying which ENSDF comment types are available for this level (bit indices from level_comment_enum)
+  uint32_t commentStrBufStartPos; //where the comments start in ensdfStrBuf
 }level; //an individual excited level
 
 typedef struct

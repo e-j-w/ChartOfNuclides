@@ -4253,7 +4253,7 @@ int parseMassData(const char * filePath, ndata * nd){
 								double snCalcVal = getRawDblValFromDB(&nd->nuclData[nuclInd2].massExcess) + getRawDblValFromDB(&nd->nuclData[nnuclInd].massExcess) - getRawDblValFromDB(&nd->nuclData[i].massExcess);
 								if(SDL_fabs(snCalcVal - getRawValFromDB(&nd->nuclData[i].sn)) > SDL_fabs(0.3*getRawValFromDB(&nd->nuclData[i].sn))){
 									//replace value
-									SDL_Log("  Replacing S(n) for nuclide with  N = %3u, Z = %3u.\n",nd->nuclData[i].N,nd->nuclData[i].Z);
+									//SDL_Log("  Replacing S(n) for nuclide with  N = %3u, Z = %3u.\n",nd->nuclData[i].N,nd->nuclData[i].Z);
 									double snCalcErr = SDL_sqrt(SDL_pow(getRawDblErrFromDB(&nd->nuclData[nuclInd2].massExcess),2.0) + SDL_pow(getRawDblErrFromDB(&nd->nuclData[nnuclInd].massExcess),2.0) + SDL_pow(getRawDblErrFromDB(&nd->nuclData[i].massExcess),2.0));
 									uint8_t numSigFigs = 0;
 									int8_t exponent = 0;
@@ -4291,7 +4291,7 @@ int parseMassData(const char * filePath, ndata * nd){
 								double spCalcVal = getRawDblValFromDB(&nd->nuclData[nuclInd2].massExcess) + getRawDblValFromDB(&nd->nuclData[pnuclInd].massExcess) - getRawDblValFromDB(&nd->nuclData[i].massExcess);
 								if(SDL_fabs(spCalcVal - getRawValFromDB(&nd->nuclData[i].sp)) > SDL_fabs(0.3*getRawValFromDB(&nd->nuclData[i].sp))){
 									//replace value
-									SDL_Log("  Replacing S(p) for nuclide with  N = %3u, Z = %3u.\n",nd->nuclData[i].N,nd->nuclData[i].Z);
+									//SDL_Log("  Replacing S(p) for nuclide with  N = %3u, Z = %3u.\n",nd->nuclData[i].N,nd->nuclData[i].Z);
 									double spCalcErr = SDL_sqrt(SDL_pow(getRawDblErrFromDB(&nd->nuclData[nuclInd2].massExcess),2.0) + SDL_pow(getRawDblErrFromDB(&nd->nuclData[pnuclInd].massExcess),2.0) + SDL_pow(getRawDblErrFromDB(&nd->nuclData[i].massExcess),2.0));
 									uint8_t numSigFigs = 0;
 									int8_t exponent = 0;
@@ -4329,7 +4329,7 @@ int parseMassData(const char * filePath, ndata * nd){
 								double qaCalcVal = getRawDblValFromDB(&nd->nuclData[i].massExcess) - getRawDblValFromDB(&nd->nuclData[nuclInd2].massExcess) - getRawDblValFromDB(&nd->nuclData[anuclInd].massExcess);
 								if(SDL_fabs(qaCalcVal - getRawValFromDB(&nd->nuclData[i].qalpha)) > SDL_fabs(0.3*getRawValFromDB(&nd->nuclData[i].qalpha))){
 									//replace value
-									SDL_Log("  Replacing Q(α) for nuclide with  N = %3u, Z = %3u.\n",nd->nuclData[i].N,nd->nuclData[i].Z);
+									//SDL_Log("  Replacing Q(α) for nuclide with  N = %3u, Z = %3u.\n",nd->nuclData[i].N,nd->nuclData[i].Z);
 									double qaCalcErr = SDL_sqrt(SDL_pow(getRawDblErrFromDB(&nd->nuclData[nuclInd2].massExcess),2.0) + SDL_pow(getRawDblErrFromDB(&nd->nuclData[anuclInd].massExcess),2.0) + SDL_pow(getRawDblErrFromDB(&nd->nuclData[i].massExcess),2.0));
 									uint8_t numSigFigs = 0;
 									int8_t exponent = 0;
@@ -4367,7 +4367,7 @@ int parseMassData(const char * filePath, ndata * nd){
 								double qbCalcVal = getRawDblValFromDB(&nd->nuclData[i].massExcess) - getRawDblValFromDB(&nd->nuclData[nuclInd2].massExcess);
 								if(SDL_fabs(qbCalcVal - getRawValFromDB(&nd->nuclData[i].qbeta)) > SDL_fabs(0.3*getRawValFromDB(&nd->nuclData[i].qbeta))){
 									//replace value
-									SDL_Log("  Replacing Q(β-) for nuclide with N = %3u, Z = %3u.\n",nd->nuclData[i].N,nd->nuclData[i].Z);
+									//SDL_Log("  Replacing Q(β-) for nuclide with N = %3u, Z = %3u.\n",nd->nuclData[i].N,nd->nuclData[i].Z);
 									//SDL_Log("    Old value: %f, new value: %f\n",getRawValFromDB(&nd->nuclData[i].qbeta),qbCalcVal);
 									double qbCalcErr = SDL_sqrt(SDL_pow(getRawDblErrFromDB(&nd->nuclData[nuclInd2].massExcess),2.0) + SDL_pow(getRawDblErrFromDB(&nd->nuclData[i].massExcess),2.0));
 									uint8_t numSigFigs = 0;
@@ -4582,6 +4582,12 @@ int parseAppData(app_data *restrict dat, const char *appBasePath){
 		return -1;
 	}else if(VALUE_UNIT_ENUM_LENGTH > /* DISABLES CODE */ (128)){
 		SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"VALUE_UNIT_ENUM_LENGTH is too large, can't store as 7 bits (eg. valWithErr->unit).\n");
+		return -1;
+	}else if(LCOMMENT_ENUM_LENGTH > /* DISABLES CODE */ (8)){
+		SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"LCOMMENT_ENUM_LENGTH is too large, can't use values as indices in a 8-bit bit-pattern (eg. level->hasComment).\n");
+		return -1;
+	}else if(TCOMMENT_ENUM_LENGTH > /* DISABLES CODE */ (8)){
+		SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"TCOMMENT_ENUM_LENGTH is too large, can't use values as indices in a 8-bit bit-pattern (eg. transition->hasComment).\n");
 		return -1;
 	}else if(MAX_RXN_STRLEN >= /* DISABLES CODE */ (255)){
 		SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"MAX_RXN_STRLEN is too large, can't use 255 as a special return value in parseRxn().\n");
