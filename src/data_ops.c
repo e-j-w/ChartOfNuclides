@@ -5656,11 +5656,10 @@ void updateSingleUIElemPosition(const app_data *restrict dat, app_state *restric
 					for(uint8_t i=0; i<CHARTVIEW_ENUM_LENGTH; i++){
 						state->ds.uiElemWidth[(int32_t)UIELEM_CHARTVIEW_MENU-((int32_t)CHARTVIEW_ENUM_LENGTH)+i] = (int16_t)(cvmButtonWidth*state->ds.uiUserScale);
 						state->ds.uiElemHeight[(int32_t)UIELEM_CHARTVIEW_MENU-((int32_t)CHARTVIEW_ENUM_LENGTH)+i] = (int16_t)(cvmButtonHeight*state->ds.uiUserScale);
-						state->ds.uiElemPosX[(int32_t)UIELEM_CHARTVIEW_MENU-((int32_t)CHARTVIEW_ENUM_LENGTH)+i] = (int16_t)(state->ds.windowXRes-((CHARTVIEW_MENU_WIDTH+CHARTVIEW_MENU_POS_XR - 4*PANEL_EDGE_SIZE - 4*UI_PADDING_SIZE + (float)(((CHARTVIEW_MENU_COLUMNS-1) - (float)((i/numViewsPerCol))*(cvmButtonWidth + UI_TILE_SIZE - UI_PADDING_SIZE))))*state->ds.uiUserScale) );
+						state->ds.uiElemPosX[(int32_t)UIELEM_CHARTVIEW_MENU-((int32_t)CHARTVIEW_ENUM_LENGTH)+i] = (int16_t)(state->ds.windowXRes-((CHARTVIEW_MENU_WIDTH+CHARTVIEW_MENU_POS_XR - 4*PANEL_EDGE_SIZE - 4*UI_PADDING_SIZE + (float)(((CHARTVIEW_MENU_COLUMNS-1) - (float)(i/numViewsPerCol))*(cvmButtonWidth + UI_TILE_SIZE - UI_PADDING_SIZE)))*state->ds.uiUserScale) );
 						state->ds.uiElemPosY[(int32_t)UIELEM_CHARTVIEW_MENU-((int32_t)CHARTVIEW_ENUM_LENGTH)+i] = (int16_t)((CHARTVIEW_MENU_POS_Y + PANEL_EDGE_SIZE + CHARTVIEW_MENU_ITEM_SPACING + 2*UI_PADDING_SIZE + (float)((i%numViewsPerCol)*CHARTVIEW_MENU_ITEM_SPACING))*state->ds.uiUserScale);
 					}
 				}
-				
 			}
 			break;
 		case UIELEM_SEARCH_MENU:
