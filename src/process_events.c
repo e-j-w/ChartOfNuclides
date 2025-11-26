@@ -205,7 +205,11 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
           state->ds.chartPanToX = (-0.25f*getChartWidthN(&state->ds));
         }
         state->ds.timeSincePanStart = 0.0f;
-        state->ds.totalPanTime = CHART_KEY_PAN_TIME;
+        if(state->kbdModVal == KBD_MOD_SHIFT){
+          state->ds.totalPanTime = CHART_KEY_PAN_TIME*PAN_SPRINT_MULTIPLIER;
+        }else{
+          state->ds.totalPanTime = CHART_KEY_PAN_TIME;
+        }
         state->ds.panInProgress = 1;
         state->ds.panFinished = 0;
       }else if(right && !left){
@@ -219,7 +223,11 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
           state->ds.chartPanToX = dat->ndat.maxN+(0.25f*getChartWidthN(&state->ds));
         }
         state->ds.timeSincePanStart = 0.0f;
-        state->ds.totalPanTime = CHART_KEY_PAN_TIME;
+        if(state->kbdModVal == KBD_MOD_SHIFT){
+          state->ds.totalPanTime = CHART_KEY_PAN_TIME*PAN_SPRINT_MULTIPLIER;
+        }else{
+          state->ds.totalPanTime = CHART_KEY_PAN_TIME;
+        }
         state->ds.panInProgress = 1;
         state->ds.panFinished = 0;
       }
@@ -234,7 +242,11 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
           state->ds.chartPanToY = dat->ndat.maxZ+(0.25f*getChartHeightZ(&state->ds));
         }
         state->ds.timeSincePanStart = 0.0f;
-        state->ds.totalPanTime = CHART_KEY_PAN_TIME;
+        if(state->kbdModVal == KBD_MOD_SHIFT){
+          state->ds.totalPanTime = CHART_KEY_PAN_TIME*PAN_SPRINT_MULTIPLIER;
+        }else{
+          state->ds.totalPanTime = CHART_KEY_PAN_TIME;
+        }
         state->ds.panInProgress = 1;
         state->ds.panFinished = 0;
         //SDL_Log("pan start: [%0.2f %0.2f], pan to: [%0.2f %0.2f]\n",(double)state->ds.chartPanStartX,(double)state->ds.chartPanStartY,(double)state->ds.chartPanToX,(double)state->ds.chartPanToY);
@@ -249,7 +261,11 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
           state->ds.chartPanToY = (-0.25f*getChartHeightZ(&state->ds));
         }
         state->ds.timeSincePanStart = 0.0f;
-        state->ds.totalPanTime = CHART_KEY_PAN_TIME;
+        if(state->kbdModVal == KBD_MOD_SHIFT){
+          state->ds.totalPanTime = CHART_KEY_PAN_TIME*PAN_SPRINT_MULTIPLIER;
+        }else{
+          state->ds.totalPanTime = CHART_KEY_PAN_TIME;
+        }
         state->ds.panInProgress = 1;
         state->ds.panFinished = 0;
       }
