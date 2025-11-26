@@ -1655,6 +1655,14 @@ void drawisomerBoxLabel(const app_data *restrict dat, app_state *restrict state,
   }
 }
 
+#define CHARTZOOM_LVL0 3.5f
+#define CHARTZOOM_LVL1 4.0f
+#define CHARTZOOM_LVL2 7.3f
+#define CHARTZOOM_LVL3 9.5f
+#define CHARTZOOM_LVL4 12.0f
+#define CHARTZOOM_LVL5 18.0f
+#define CHARTZOOM_LVL6 20.0f
+
 void drawNuclBoxLabelDetails(const app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat, const float xPos, const float yPos, const float boxWidth, const float boxHeight, SDL_Color col, const uint16_t nuclInd){
   char tmpStr[32];
   const uint32_t gsLevInd = (uint32_t)(dat->ndat.nuclData[nuclInd].firstLevel + dat->ndat.nuclData[nuclInd].gsLevel);
@@ -1670,7 +1678,7 @@ void drawNuclBoxLabelDetails(const app_data *restrict dat, app_state *restrict s
   uint8_t drawYOffsets = 1;
   uint8_t labelFontInd = FONTSIZE_NORMAL;
   float labelLineSpacing = 19.0f;
-  if(state->ds.chartZoomScale >= 20.0f){
+  if(state->ds.chartZoomScale >= CHARTZOOM_LVL6){
     labelFontInd = FONTSIZE_LARGE;
     labelLineSpacing = 24.0f;
   }
@@ -1733,7 +1741,7 @@ void drawNuclBoxLabelDetails(const app_data *restrict dat, app_state *restrict s
       drawTextAlignedSized(rdat,drawXPos,drawYPos+((yOffsets*labelLineSpacing + 36.0f)*state->ds.uiUserScale),col,labelFontInd,255,"(...)",ALIGN_CENTER,maxLblWidth);
     }
     //draw corner label(s)
-    if(state->ds.chartZoomScale >= 18.0f){
+    if(state->ds.chartZoomScale >= CHARTZOOM_LVL5){
       getSpinParStr(tmpStr,&dat->ndat,gsLevInd);
       drawTextAlignedSized(rdat,xPos+boxWidth-labelSmallMargin,yPos+labelSmallMargin,col,FONTSIZE_NORMAL,255,tmpStr,ALIGN_RIGHT,16384); //draw spin-parity label
     }else if(dat->ndat.levels[gsLevInd].numSpinParVals <= 1){
@@ -1802,7 +1810,7 @@ void drawNuclBoxLabelDetails(const app_data *restrict dat, app_state *restrict s
       }
     }
     //draw corner label(s)
-    if(state->ds.chartZoomScale >= 18.0f){
+    if(state->ds.chartZoomScale >= CHARTZOOM_LVL5){
       getSpinParStr(tmpStr,&dat->ndat,gsLevInd);
       drawTextAlignedSized(rdat,xPos+boxWidth-labelSmallMargin,yPos+labelSmallMargin,col,FONTSIZE_NORMAL,255,tmpStr,ALIGN_RIGHT,16384); //draw spin-parity label
     }else if(dat->ndat.levels[gsLevInd].numSpinParVals <= 1){
@@ -1981,35 +1989,41 @@ void drawNuclBoxLabel(const app_data *restrict dat, app_state *restrict state, r
   const float labelMargin = NUCLBOX_LABEL_MARGIN*state->ds.chartZoomScale*state->ds.uiUserScale;
   const uint16_t Z = (uint16_t)dat->ndat.nuclData[nuclInd].Z;
   Uint8 alpha = 255;
-  if(state->ds.chartZoomScale < 4.0f){
+  if(state->ds.chartZoomScale < CHARTZOOM_LVL1){
     //handle fade-in of text
-    alpha = (Uint8)((1.0f - 2.0f*(4.0f - state->ds.chartZoomScale))*255.0f);
+    alpha = (Uint8)((1.0f - 2.0f*(CHARTZOOM_LVL1 - state->ds.chartZoomScale))*255.0f);
   }
-  if(state->ds.chartZoomScale >= 7.3f){
+  if(state->ds.chartZoomScale >= CHARTZOOM_LVL2){
     getNuclNameStr(tmpStr,&dat->ndat.nuclData[nuclInd],255);
     float totalLblWidth = 0.0f;
-    if(state->ds.chartZoomScale < 20.0f){
+    if(state->ds.chartZoomScale < CHARTZOOM_LVL3){
       totalLblWidth = SDL_roundf(getTextWidth(rdat,FONTSIZE_LARGE,tmpStr)/rdat->uiDPIScale);
+    }else if(state->ds.chartZoomScale < CHARTZOOM_LVL4){
+      totalLblWidth = SDL_roundf(getTextWidth(rdat,FONTSIZE_HUGE,tmpStr)/rdat->uiDPIScale);
+    }else if(state->ds.chartZoomScale < CHARTZOOM_LVL6){
+      totalLblWidth = SDL_roundf(getTextWidth(rdat,FONTSIZE_LARGE_BOLD,tmpStr)/rdat->uiDPIScale);
     }else{
       totalLblWidth = SDL_roundf(getTextWidth(rdat,FONTSIZE_HUGE_BOLD,tmpStr)/rdat->uiDPIScale);
     }
     drawXPos = xPos+boxWidth*0.5f - totalLblWidth*0.5f;
-    if(state->ds.chartZoomScale >= 12.0f){
+    if(state->ds.chartZoomScale >= CHARTZOOM_LVL4){
       drawYPos = yPos + labelMargin;
     }else{
       const float totalLblHeight = SDL_roundf((getTextHeight(rdat,FONTSIZE_SMALL,tmpStr) - (2.0f*state->ds.uiUserScale) + getTextHeight(rdat,FONTSIZE_LARGE,getElemStr((uint8_t)Z)))/rdat->uiDPIScale);
       drawYPos = yPos+boxWidth*0.5f - totalLblHeight*0.5f;
     }
-    if(state->ds.chartZoomScale < 20.0f){
-      if(state->ds.chartZoomScale >= 12.0f){
+    if(state->ds.chartZoomScale < CHARTZOOM_LVL6){
+      if(state->ds.chartZoomScale >= CHARTZOOM_LVL4){
         drawTextAlignedSized(rdat,drawXPos-(2.0f*state->ds.uiUserScale),drawYPos+(10.0f*state->ds.uiUserScale),col,FONTSIZE_LARGE_BOLD,alpha,tmpStr,ALIGN_LEFT,16384); //draw number and element label
+      }else if(state->ds.chartZoomScale >= CHARTZOOM_LVL3){
+        drawTextAlignedSized(rdat,drawXPos,drawYPos+(10.0f*state->ds.uiUserScale),col,FONTSIZE_HUGE,alpha,tmpStr,ALIGN_LEFT,16384); //draw number and element label
       }else{
         drawTextAlignedSized(rdat,drawXPos,drawYPos+(10.0f*state->ds.uiUserScale),col,FONTSIZE_LARGE,alpha,tmpStr,ALIGN_LEFT,16384); //draw number and element label
       }
     }else{
       drawTextAlignedSized(rdat,drawXPos-(2.0f*state->ds.uiUserScale),drawYPos+(6.0f*state->ds.uiUserScale),col,FONTSIZE_HUGE_BOLD,alpha,tmpStr,ALIGN_LEFT,16384); //draw number and element label
     }
-    if(state->ds.chartZoomScale >= 12.0f){
+    if(state->ds.chartZoomScale >= CHARTZOOM_LVL4){
       drawNuclBoxLabelDetails(dat,state,rdat,xPos,yPos,boxWidth,boxHeight,col,nuclInd);
     }
   }else{
@@ -2036,7 +2050,7 @@ void drawChartOfNuclides(const app_data *restrict dat, app_state *restrict state
 
   //calculate size of low box (extra info like isomers, 2+ energies etc.)
   float lowBoxHeight = 0.0f;
-  if(state->ds.chartZoomScale >= 3.5f){
+  if(state->ds.chartZoomScale >= CHARTZOOM_LVL0){
     lowBoxHeight = (boxLineLimit - 3)*10.0f*state->ds.uiUserScale;
     if(lowBoxHeight < 1.0f*state->ds.uiUserScale){
       lowBoxHeight = 1.0f*state->ds.uiUserScale;
@@ -2097,7 +2111,7 @@ void drawChartOfNuclides(const app_data *restrict dat, app_state *restrict state
               }
               drawFlatRect(rdat,rect,boxCol);
               
-              if(state->ds.chartZoomScale >= 3.5f){
+              if(state->ds.chartZoomScale >= CHARTZOOM_LVL0){
                 uint8_t drawingLowBox = 0;
                 //setup low box rect
                 lowBoxRect.x = rect.x + lowBoxPadding;
@@ -2125,9 +2139,9 @@ void drawChartOfNuclides(const app_data *restrict dat, app_state *restrict state
                           iboxCol.b *= 0.91f;
                         }
                       }
-                      if(state->ds.chartZoomScale < 4.0f){
+                      if(state->ds.chartZoomScale < CHARTZOOM_LVL1){
                         //handle fading in of isomer boxes
-                        iboxCol.a =  1.0f - (4.0f-state->ds.chartZoomScale);
+                        iboxCol.a =  1.0f - (CHARTZOOM_LVL1-state->ds.chartZoomScale);
                       }
                       drawFlatRect(rdat,lowBoxRect,iboxCol);
                       drawisomerBoxLabel(dat,state,rdat,lowBoxRect.x,lowBoxRect.y,lowBoxRect.w,lowBoxRect.h,(isomerHl > 600) ? whiteCol8Bit : blackCol8Bit,(uint16_t)i,isomerLvl,dat->ndat.nuclData[i].longestIsomerMVal);
@@ -2162,9 +2176,9 @@ void drawChartOfNuclides(const app_data *restrict dat, app_state *restrict state
                           }
                           
                         }
-                        if(state->ds.chartZoomScale < 4.0f){
+                        if(state->ds.chartZoomScale < CHARTZOOM_LVL1){
                           //handle fading in of isomer boxes
-                          iboxCol.a =  1.0f - (4.0f-state->ds.chartZoomScale);
+                          iboxCol.a =  1.0f - (CHARTZOOM_LVL1-state->ds.chartZoomScale);
                         }
                         drawFlatRect(rdat,lowBoxRect,iboxCol);
                         drawIsomerDecayModeBoxLabel(dat,state,rdat,lowBoxRect.x,lowBoxRect.y,lowBoxRect.w,lowBoxRect.h,getDecayModeTextCol(isomerDcyMode),(uint16_t)i,isomerLvl,dat->ndat.nuclData[i].longestIsomerMVal,isomerDcyMode);
@@ -2180,9 +2194,9 @@ void drawChartOfNuclides(const app_data *restrict dat, app_state *restrict state
                           iboxCol.g += 0.1f;
                           iboxCol.b += 0.1f;
                         }
-                        if(state->ds.chartZoomScale < 4.0f){
+                        if(state->ds.chartZoomScale < CHARTZOOM_LVL1){
                           //handle fading in of isomer boxes
-                          iboxCol.a =  1.0f - (4.0f-state->ds.chartZoomScale);
+                          iboxCol.a =  1.0f - (CHARTZOOM_LVL1-state->ds.chartZoomScale);
                         }
                         drawFlatRect(rdat,lowBoxRect,iboxCol);
                         drawIsomerDecayModeBoxLabel(dat,state,rdat,lowBoxRect.x,lowBoxRect.y,lowBoxRect.w,lowBoxRect.h,getDecayModeTextCol(isomerDcyMode),(uint16_t)i,isomerLvl,dat->ndat.nuclData[i].longestIsomerMVal,isomerDcyMode);
@@ -2198,9 +2212,9 @@ void drawChartOfNuclides(const app_data *restrict dat, app_state *restrict state
                       double isomerSpin = getMostProbableSpin(&dat->ndat,dat->ndat.nuclData[i].longestIsomerLevel);
                       drawingLowBox = 1;
                       SDL_FColor iboxCol = getSpinCol(isomerSpin);
-                      if(state->ds.chartZoomScale < 4.0f){
+                      if(state->ds.chartZoomScale < CHARTZOOM_LVL1){
                         //handle fading in of isomer boxes
-                        iboxCol.a =  1.0f - (4.0f-state->ds.chartZoomScale);
+                        iboxCol.a =  1.0f - (CHARTZOOM_LVL1-state->ds.chartZoomScale);
                       }
                       drawFlatRect(rdat,lowBoxRect,iboxCol);
                       drawIsomerSpinBoxLabel(dat,state,rdat,lowBoxRect.x,lowBoxRect.y,lowBoxRect.w,lowBoxRect.h,(isomerSpin <= 2.0) ? whiteCol8Bit : blackCol8Bit,(uint16_t)i,isomerLvl,dat->ndat.nuclData[i].longestIsomerMVal);
@@ -2228,9 +2242,9 @@ void drawChartOfNuclides(const app_data *restrict dat, app_state *restrict state
                           iboxCol.b += 0.1f;
                         }
                       }
-                      if(state->ds.chartZoomScale < 4.0f){
+                      if(state->ds.chartZoomScale < CHARTZOOM_LVL1){
                         //handle fading in of isomer boxes
-                        iboxCol.a =  1.0f - (4.0f-state->ds.chartZoomScale);
+                        iboxCol.a =  1.0f - (CHARTZOOM_LVL1-state->ds.chartZoomScale);
                       }
                       drawFlatRect(rdat,lowBoxRect,iboxCol);
                       drawIsomerSpinBoxLabel(dat,state,rdat,lowBoxRect.x,lowBoxRect.y,lowBoxRect.w,lowBoxRect.h,(isomerPar < 0) ? whiteCol8Bit : blackCol8Bit,(uint16_t)i,isomerLvl,dat->ndat.nuclData[i].longestIsomerMVal);
