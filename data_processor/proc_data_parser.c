@@ -2420,6 +2420,8 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 
 							//parse and handle level properties not related to energy
 							nd->levels[nd->numLvls-1].populatingRxns = 0;
+							nd->levels[nd->numLvls-1].hasComment = 0;
+							nd->levels[nd->numLvls-1].commentStrBufStartPos = MAX_UINT32_VAL;
 
 							uint8_t halfInt = 0;
 							if(((nd->nuclData[nd->numNucl].N + nd->nuclData[nd->numNucl].Z) % 2) != 0){
@@ -2529,6 +2531,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 					}
 
 					//add decay modes
+					uint8_t currentLineIsDcyMode = 0;
 					if(nd->nuclData[nd->numNucl].numLevels>0){ //check that indices are valid
 						//can parse multiple 'L' lines, but only one 'cL' (comment) line
 						//logic here is that if there are many known decay modes, they will be
@@ -2565,6 +2568,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 									}
 									if(parseDcyModeSubstr(nd,nd->numDecModes,dmBuff)==1){
 										decModeLineParsed = 1;
+										currentLineIsDcyMode = 1; //so as not to confuse this with a comment later...
 										nd->levels[nd->numLvls-1].numDecModes++;
 										nd->numDecModes++;
 
@@ -2648,6 +2652,74 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 											qValDecModeFlag = 1;
 											qValDecModeType = DECAYMODE_2BETAPLUS;
 										}
+									}
+								}
+							}
+						}
+					}
+
+					if(currentLineIsDcyMode == 0){
+						if(nd->nuclData[nd->numNucl].numLevels>0){ //check that indices are valid
+							if(SDL_strcmp(typebuff+1,"cL")==0){
+								//comment on the current level
+								char comBuff[128];
+								memcpy(comBuff, &line[9], 118);
+								comBuff[118] = '\0';
+								//use find and replace to de-uglify strings
+								char *modComBuff;
+								modComBuff = findReplaceAllUTF8("|b{+-}","β-",comBuff);
+								SDL_strlcpy(comBuff,modComBuff,118);
+								SDL_free(modComBuff);
+								modComBuff = findReplaceAllUTF8("|b- ","β- ",comBuff);
+								SDL_strlcpy(comBuff,modComBuff,118);
+								SDL_free(modComBuff);
+								modComBuff = findReplaceAllUTF8("|b{++}","β+",comBuff);
+								SDL_strlcpy(comBuff,modComBuff,118);
+								SDL_free(modComBuff);
+								modComBuff = findReplaceAllUTF8("E|g","E(γ)",comBuff);
+								SDL_strlcpy(comBuff,modComBuff,118);
+								SDL_free(modComBuff);
+								modComBuff = findReplaceAllUTF8("I|g","I(γ)",comBuff);
+								SDL_strlcpy(comBuff,modComBuff,118);
+								SDL_free(modComBuff);
+								//SDL_Log("line: %s\n",line);
+								uint32_t len = (uint32_t)SDL_strlen(comBuff);
+								//SDL_Log("comBuff: %s, len: %u\n",comBuff,len);
+								if(!(SDL_isspace(comBuff[0]))){
+
+									//remove trailing spaces from comment
+									for(uint32_t i=(uint32_t)(len-1); i>0; i--){
+										if(SDL_isspace(comBuff[i])){
+											comBuff[i] = '\0';
+											len = i;
+										}else{
+											break;
+										}
+									}
+									
+									if(SDL_strncmp(comBuff,"E$",2)==0){
+										nd->levels[nd->numLvls-1].hasComment |= (uint8_t)(1U << LCOMMENT_ELEVEL);
+									}else if(SDL_strncmp(comBuff,"J$",2)==0){
+										nd->levels[nd->numLvls-1].hasComment |= (uint8_t)(1U << LCOMMENT_JPI);
+									}else if(SDL_strncmp(comBuff,"T$",2)==0){
+										nd->levels[nd->numLvls-1].hasComment |= (uint8_t)(1U << LCOMMENT_HALFLIFE);
+									}
+									//SDL_Log("%u %u\n",nd->ensdfStrBufLen,len);
+									if((nd->ensdfStrBufLen + len) <= ENSDFSTRBUFSIZE){
+										//copy comment to buffer
+										SDL_strlcpy(&nd->ensdfStrBuf[nd->ensdfStrBufLen],comBuff,len);
+										if(nd->levels[nd->numLvls-1].commentStrBufStartPos == MAX_UINT32_VAL){
+											//this level doesn't have a comment yet
+											nd->levels[nd->numLvls-1].commentStrBufStartPos = nd->ensdfStrBufLen;
+										}else{
+											//level comment is being continued from the previous line,
+											//remove the null terminator (replace with space)
+											nd->ensdfStrBuf[nd->ensdfStrBufLen] = ' ';
+										}
+										nd->ensdfStrBufLen += len;
+									}else{
+										SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"cannot parse level comment, buffer size is too small (%u)!\n",ENSDFSTRBUFSIZE);
+										exit(-1);	
 									}
 								}
 							}

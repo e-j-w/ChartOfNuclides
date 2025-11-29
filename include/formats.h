@@ -29,6 +29,8 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "enums.h"
 
+#define MAX_UINT32_VAL 4294967295U
+
 //app data parameters (should all be powers of 2)
 #define MAX_NUM_STRINGS          128  //maximum number of text strings
 
@@ -38,7 +40,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #define MAX_SEARCH_RESULTS       64 //number of results to cache (max 64, indexed by corrRes bitpattern)
 #define MAX_DISP_SEARCH_RESULTS  4  //number of results to display
 #define SEARCH_RESULT_DATASIZE   4
-#define UNUSED_SEARCH_RESULT     4294967295U
+#define UNUSED_SEARCH_RESULT     MAX_UINT32_VAL
 
 //text selection parameters
 #define MAX_SELECTABLE_STRS      1024 //maximum number of onscreen text strings that can be selectable at once
@@ -49,7 +51,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 //increasing these numbers will increase the size of 
 //the nuclear database stored in memory (and on disk)
-#define ENSDFSTRBUFSIZE          262144 //2^18
+#define ENSDFSTRBUFSIZE          7820000
 #define MAXMULTPERLEVEL          3
 #define MAXNUMNUCL               3500
 #define MAXNUMLVLS               200000
