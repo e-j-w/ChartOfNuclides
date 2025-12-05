@@ -51,7 +51,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 //increasing these numbers will increase the size of 
 //the nuclear database stored in memory (and on disk)
-#define ENSDFSTRBUFSIZE          7820000
+#define ENSDFSTRBUFSIZE          7900000
 #define MAXMULTPERLEVEL          3
 #define MAXNUMNUCL               3500
 #define MAXNUMLVLS               200000
@@ -323,7 +323,7 @@ typedef struct
 {
   SDL_FRect selectableStrRect[MAX_SELECTABLE_STRS]; //position and size of selectable text
   char selectableStrTxt[MAX_SELECTABLE_STRS][MAX_SELECTABLE_STR_LEN]; //the actual strings that are selectable
-  uint8_t selectableStrProp[MAX_SELECTABLE_STRS]; //bits 0-2: font size of each selectable string (from font_size_enum), bit 3: whether string is clickable, bit 4: click action (from text_click_action_enum)
+  uint8_t selectableStrProp[MAX_SELECTABLE_STRS]; //bits 0-3: font size of each selectable string (from font_size_enum)
   uint32_t selectableStrMetadata[MAX_SELECTABLE_STRS]; //extra data for each string (eg. level in the level list)
   uint16_t numSelStrs;
   uint16_t selectedStr; //65535 if nothing selected

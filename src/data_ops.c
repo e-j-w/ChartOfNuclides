@@ -124,8 +124,8 @@ void initializeTempState(const app_data *restrict dat, app_state *restrict state
 		SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"search_agent_enum is too long, cannot be indexed by a uint32_t bit pattern (ss->finishedSearchAgents)!\n");
 		exit(-1);
 	}
-	if(FONTSIZE_ENUM_LENGTH > /* DISABLES CODE */ (8)){
-		SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"FONTSIZE_ENUM_LENGTH is too long, fonts cannot be expressed in 3 bits (tss->selectableStrProp)!\n");
+	if(FONTSIZE_ENUM_LENGTH > /* DISABLES CODE */ (16)){
+		SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"FONTSIZE_ENUM_LENGTH is too long, fonts cannot be expressed in 4 bits (tss->selectableStrProp)!\n");
 		exit(-1);
 	}
 	if(LLCOLUMN_ENUM_LENGTH > /* DISABLES CODE */ (16)){
@@ -2592,7 +2592,7 @@ void addValsFromDB(const valWithErr *restrict valStruct1, const valWithErr *rest
 			}
 		}else if(outErr < 2.0){
 			while(outErr < 2.0){
-				SDL_Log("outErr: %f\n",outErr);
+				//SDL_Log("outErr: %f\n",outErr);
 				outErr *= 10.0;
 				outSigFigs++;
 			}
@@ -5525,8 +5525,8 @@ SDL_FRect getTextSelRect(const text_selection_state *restrict tss, resource_data
 		//SDL_Log("selSubStr: %s\n",selSubStr);
 
 		rect = tss->selectableStrRect[tss->selectedStr];
-		rect.x = rect.x + getTextWidth(rdat,tss->selectableStrProp[tss->selectedStr] & 7U,selPreStr)/rdat->uiDPIScale;
-		rect.w = getTextWidth(rdat,tss->selectableStrProp[tss->selectedStr] & 7U,selSubStr)/rdat->uiDPIScale;
+		rect.x = rect.x + getTextWidth(rdat,tss->selectableStrProp[tss->selectedStr] & 15U,selPreStr)/rdat->uiDPIScale;
+		rect.w = getTextWidth(rdat,tss->selectableStrProp[tss->selectedStr] & 15U,selSubStr)/rdat->uiDPIScale;
 	}
 	return rect;
 }

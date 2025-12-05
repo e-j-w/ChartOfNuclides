@@ -907,7 +907,7 @@ void parseHalfLife(level * lev, const char * hlstring){
     tok = SDL_strtok_r(NULL, "",&saveptr);
     if(tok!=NULL){
       //SDL_Log("%s\n",tok);
-      SDL_strlcpy(hlUnitVal,tok,3);
+      SDL_strlcpy(hlUnitVal,tok,4);
       for(uint8_t i=0;i<3;i++){
         if(SDL_isspace(hlUnitVal[i])){
           hlUnitVal[i] = '\0'; //terminate string at first space
@@ -918,6 +918,10 @@ void parseHalfLife(level * lev, const char * hlstring){
       }
     }
   }
+	//convert unit to uppercase
+	for(size_t i=0; i<SDL_strlen(hlUnitVal); i++){
+		hlUnitVal[i] = (char)SDL_toupper(hlUnitVal[i]);
+	}
   memcpy(hlErrVal,&hlstring[10],6);
   hlErrVal[6] = '\0'; //terminate string
 
@@ -981,9 +985,9 @@ void parseHalfLife(level * lev, const char * hlstring){
       lev->halfLife.unit = VALUE_UNIT_DAYS;
     }else if(SDL_strcmp(hlUnitVal,"H")==0){
       lev->halfLife.unit = VALUE_UNIT_HOURS;
-    }else if(SDL_strcmp(hlUnitVal,"M")==0){
+    }else if((SDL_strcmp(hlUnitVal,"M")==0)||(SDL_strcmp(hlUnitVal,"MIN")==0)){
       lev->halfLife.unit = VALUE_UNIT_MINUTES;
-    }else if(SDL_strcmp(hlUnitVal,"S")==0){
+    }else if((SDL_strcmp(hlUnitVal,"S")==0)||(SDL_strcmp(hlUnitVal,"SEC")==0)){
       lev->halfLife.unit = VALUE_UNIT_SECONDS;
     }else if(SDL_strcmp(hlUnitVal,"MS")==0){
       lev->halfLife.unit = VALUE_UNIT_MILLISECONDS;
@@ -1005,6 +1009,7 @@ void parseHalfLife(level * lev, const char * hlstring){
       lev->halfLife.unit = VALUE_UNIT_MEV;
     }else{
 			//assume keV if no unit given (this occurs once in the Nov 2024 ENSDF data)
+			//SDL_Log("Unit: %s\n",hlUnitVal);
       lev->halfLife.unit = VALUE_UNIT_KEV;
     }
 

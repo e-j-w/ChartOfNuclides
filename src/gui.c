@@ -2769,20 +2769,27 @@ void drawNuclFullInfoBox(const app_data *restrict dat, app_state *restrict state
     if(((drawYPos + NUCL_INFOBOX_SMALLLINE_HEIGHT*state->ds.uiUserScale*numLines) >= NUCL_FULLINFOBOX_LEVELLIST_POS_Y)&&(drawYPos <= state->ds.windowYRes)){
       
       uint8_t lvlFontInd = FONTSIZE_NORMAL;
+      uint8_t lvlUlFontInd = FONTSIZE_NORMAL_UL;
       SDL_Color whiteLvlListCol = whiteCol8Bit;
       SDL_Color blackLvlListCol = blackCol8Bit;
+      SDL_Color lightBlueLvlListCol = lightBlueCol8Bit;
+      SDL_Color darkBlueLvlListCol = darkBlueCol8Bit;
       if((state->ds.reactionModeInd == REACTIONMODE_HIGHLIGHT)&&(state->ds.selectedRxn > 0)&&(state->ds.selectedRxn < 254)){
         if(dat->ndat.levels[lvlInd].populatingRxns & ((uint64_t)(1) << (state->ds.selectedRxn-1))){
           lvlFontInd = FONTSIZE_NORMAL_BOLD;
+          lvlUlFontInd= FONTSIZE_NORMAL_BOLDUL;
         }else{
           whiteLvlListCol = lightGrayCol8Bit;
           blackLvlListCol = darkGrayCol8Bit;
+          lightBlueLvlListCol = lightGrayCol8Bit;
+          darkBlueLvlListCol = darkGrayCol8Bit;
         }
       }else if(state->ds.selectedRxn >= 254){
         //highlight level of interest
         const uint16_t nuclLvlInd = (uint16_t)(lvlInd - dat->ndat.nuclData[nuclInd].firstLevel);
         if(nuclLvlInd == state->coincLvlFlag){
           lvlFontInd = FONTSIZE_NORMAL_BOLD;
+          lvlUlFontInd= FONTSIZE_NORMAL_BOLDUL;
         }
       }
 
@@ -2884,9 +2891,17 @@ void drawNuclFullInfoBox(const app_data *restrict dat, app_state *restrict state
         uint32_t strMetadata = (lvlInd - dat->ndat.nuclData[nuclInd].firstLevel) & 65535U; //16 lower bits give level index
         strMetadata |= (uint32_t)((uint32_t)(LLCOLUMN_ELEVEL & 255U) << 16); //bits 16-23 give column
         if((state->tss.selStrsModifiable)&&(strMetadata == state->ds.nuclFullInfoSelStrMetadata)){state->tss.selectedStr = state->tss.numSelStrs;}
-        drawSelectableTextAlignedSizedWithMetadata(rdat,&state->tss,drawXPos,drawYPos,(hl > 600) ? whiteLvlListCol : blackLvlListCol,lvlFontInd,txtAlpha,tmpStr,ALIGN_LEFT,16384,strMetadata);
+        if(dat->ndat.levels[lvlInd].hasComment & (uint8_t)(1U << LCOMMENT_ELEVEL)){
+          drawSelectableTextAlignedSizedWithMetadata(rdat,&state->tss,drawXPos,drawYPos,(hl > 600) ? lightBlueLvlListCol : darkBlueLvlListCol,lvlUlFontInd,txtAlpha,tmpStr,ALIGN_LEFT,16384,strMetadata);
+        }else{
+          drawSelectableTextAlignedSizedWithMetadata(rdat,&state->tss,drawXPos,drawYPos,(hl > 600) ? whiteLvlListCol : blackLvlListCol,lvlFontInd,txtAlpha,tmpStr,ALIGN_LEFT,16384,strMetadata);
+        }
       }else{
-        drawTextAlignedSized(rdat,drawXPos,drawYPos,(hl > 600) ? whiteLvlListCol : blackLvlListCol,lvlFontInd,txtAlpha,tmpStr,ALIGN_LEFT,16384);
+        if(dat->ndat.levels[lvlInd].hasComment & (uint8_t)(1U << LCOMMENT_ELEVEL)){
+          drawTextAlignedSized(rdat,drawXPos,drawYPos,(hl > 600) ? lightBlueLvlListCol : darkBlueLvlListCol,lvlUlFontInd,txtAlpha,tmpStr,ALIGN_LEFT,16384);
+        }else{
+          drawTextAlignedSized(rdat,drawXPos,drawYPos,(hl > 600) ? whiteLvlListCol : blackLvlListCol,lvlFontInd,txtAlpha,tmpStr,ALIGN_LEFT,16384);
+        }
       }
       //handle special level info
       const uint8_t slInd = (uint8_t)((dat->ndat.levels[lvlInd].format >> 1U) & 15U);
@@ -2944,9 +2959,17 @@ void drawNuclFullInfoBox(const app_data *restrict dat, app_state *restrict state
         uint32_t strMetadata = (lvlInd - dat->ndat.nuclData[nuclInd].firstLevel) & 65535U; //16 lower bits give level index
         strMetadata |= (uint32_t)((uint32_t)(LLCOLUMN_JPI & 255U) << 16); //bits 16-23 give column
         if((state->tss.selStrsModifiable)&&(strMetadata == state->ds.nuclFullInfoSelStrMetadata)){state->tss.selectedStr = state->tss.numSelStrs;}
-        drawSelectableTextAlignedSizedWithMetadata(rdat,&state->tss,drawXPos,drawYPos,(hl > 600) ? whiteLvlListCol : blackLvlListCol,lvlFontInd,txtAlpha,tmpStr,ALIGN_LEFT,16384,strMetadata);
+        if(dat->ndat.levels[lvlInd].hasComment & (uint8_t)(1U << LCOMMENT_JPI)){
+          drawSelectableTextAlignedSizedWithMetadata(rdat,&state->tss,drawXPos,drawYPos,(hl > 600) ? lightBlueLvlListCol : darkBlueLvlListCol,lvlUlFontInd,txtAlpha,tmpStr,ALIGN_LEFT,16384,strMetadata);
+        }else{
+          drawSelectableTextAlignedSizedWithMetadata(rdat,&state->tss,drawXPos,drawYPos,(hl > 600) ? whiteLvlListCol : blackLvlListCol,lvlFontInd,txtAlpha,tmpStr,ALIGN_LEFT,16384,strMetadata);
+        }
       }else{
-        drawTextAlignedSized(rdat,drawXPos,drawYPos,(hl > 600) ? whiteLvlListCol : blackLvlListCol,lvlFontInd,txtAlpha,tmpStr,ALIGN_LEFT,16384);
+        if(dat->ndat.levels[lvlInd].hasComment & (uint8_t)(1U << LCOMMENT_JPI)){
+          drawTextAlignedSized(rdat,drawXPos,drawYPos,(hl > 600) ? lightBlueLvlListCol : darkBlueLvlListCol,lvlUlFontInd,txtAlpha,tmpStr,ALIGN_LEFT,16384);
+        }else{
+          drawTextAlignedSized(rdat,drawXPos,drawYPos,(hl > 600) ? whiteLvlListCol : blackLvlListCol,lvlFontInd,txtAlpha,tmpStr,ALIGN_LEFT,16384);
+        }
       }
       if(state->ds.selectedRxn == 254){
         lvlFontInd = FONTSIZE_NORMAL; //reset
@@ -2957,9 +2980,17 @@ void drawNuclFullInfoBox(const app_data *restrict dat, app_state *restrict state
         uint32_t strMetadata = (lvlInd - dat->ndat.nuclData[nuclInd].firstLevel) & 65535U; //16 lower bits give level index
         strMetadata |= (uint32_t)((uint32_t)(LLCOLUMN_HALFLIFE & 255U) << 16); //bits 16-23 give column
         if((state->tss.selStrsModifiable)&&(strMetadata == state->ds.nuclFullInfoSelStrMetadata)){state->tss.selectedStr = state->tss.numSelStrs;}
-        drawSelectableTextAlignedSizedWithMetadata(rdat,&state->tss,drawXPos,drawYPos,(hl > 600) ? whiteLvlListCol : blackLvlListCol,lvlFontInd,txtAlpha,tmpStr,ALIGN_LEFT,16384,strMetadata);
+        if(dat->ndat.levels[lvlInd].hasComment & (uint8_t)(1U << LCOMMENT_HALFLIFE)){
+          drawSelectableTextAlignedSizedWithMetadata(rdat,&state->tss,drawXPos,drawYPos,(hl > 600) ? lightBlueLvlListCol : darkBlueLvlListCol,lvlUlFontInd,txtAlpha,tmpStr,ALIGN_LEFT,16384,strMetadata);
+        }else{
+          drawSelectableTextAlignedSizedWithMetadata(rdat,&state->tss,drawXPos,drawYPos,(hl > 600) ? whiteLvlListCol : blackLvlListCol,lvlFontInd,txtAlpha,tmpStr,ALIGN_LEFT,16384,strMetadata);
+        }
       }else{
-        drawTextAlignedSized(rdat,drawXPos,drawYPos,(hl > 600) ? whiteLvlListCol : blackLvlListCol,lvlFontInd,txtAlpha,tmpStr,ALIGN_LEFT,16384);
+        if(dat->ndat.levels[lvlInd].hasComment & (uint8_t)(1U << LCOMMENT_HALFLIFE)){
+          drawTextAlignedSized(rdat,drawXPos,drawYPos,(hl > 600) ? lightBlueLvlListCol : darkBlueLvlListCol,lvlUlFontInd,txtAlpha,tmpStr,ALIGN_LEFT,16384);
+        }else{
+          drawTextAlignedSized(rdat,drawXPos,drawYPos,(hl > 600) ? whiteLvlListCol : blackLvlListCol,lvlFontInd,txtAlpha,tmpStr,ALIGN_LEFT,16384);
+        }
       }
       if(dat->ndat.levels[lvlInd].numDecModes > 0){
         for(int8_t i=0; i<dat->ndat.levels[lvlInd].numDecModes; i++){

@@ -440,6 +440,7 @@ SDL_FRect drawTextAlignedSized(resource_data *restrict rdat, const float xPos, c
   }else{
     TTF_SetFontWrapAlignment(rdat->font[fontSizeInd],TTF_HORIZONTAL_ALIGN_LEFT);
   }
+  //TTF_SetFontStyle(rdat->font[fontSizeInd],TTF_STYLE_UNDERLINE);
   TTF_Text *ttxt = TTF_CreateText(rdat->te,rdat->font[fontSizeInd],txt,0);
   TTF_SetTextWrapWidth(ttxt,(int)(maxWidth*rdat->uiDPIScale));
   SDL_FRect drawRect;
@@ -447,15 +448,13 @@ SDL_FRect drawTextAlignedSized(resource_data *restrict rdat, const float xPos, c
   drawRect.y = drawY;
   drawRect.w = getTextWidth(rdat,fontSizeInd,txt);
   drawRect.h = getTextHeight(rdat,fontSizeInd,txt);
+  SDL_Color drawCol = textColor;
   if(alpha != textColor.a){
-    SDL_Color drawCol = textColor;
     drawCol.a = alpha;
-    TTF_SetTextColor(ttxt,drawCol.r,drawCol.g,drawCol.b,drawCol.a);
-    TTF_DrawRendererText(ttxt,drawX,drawY);
-  }else{
-    TTF_SetTextColor(ttxt,textColor.r,textColor.g,textColor.b,textColor.a);
-    TTF_DrawRendererText(ttxt,drawX,drawY);
   }
+  TTF_SetTextColor(ttxt,drawCol.r,drawCol.g,drawCol.b,drawCol.a);
+  //TTF_SetTextColorFloat(ttxt,drawCol.r/255.0f,drawCol.g/255.0f,drawCol.b/255.0f,drawCol.a/255.0f);
+  TTF_DrawRendererText(ttxt,drawX,drawY);
   if(alignment == ALIGN_RIGHT){
     drawRect.x = xPos - (drawRect.w/rdat->uiDPIScale);
     drawRect.y = yPos;
@@ -469,6 +468,13 @@ SDL_FRect drawTextAlignedSized(resource_data *restrict rdat, const float xPos, c
   drawRect.w /= rdat->uiDPIScale;
   drawRect.h /= rdat->uiDPIScale;
   TTF_DestroyText(ttxt);
+  if((fontStyles[fontSizeInd] == FONTSTYLE_UL)||(fontStyles[fontSizeInd] == FONTSTYLE_BOLDUL)){
+    //draw an underline
+    //SDL_ttf in principle supports this OOTB, but the color is wrong
+    //(and this way gives me more control over the look and feel)
+    SDL_FColor lineCol = {drawCol.r/255.0f,drawCol.g/255.0f,drawCol.b/255.0f,drawCol.a/255.0f};
+    drawLine(rdat,drawRect.x,drawRect.y+0.93f*drawRect.h,drawRect.x+drawRect.w,drawRect.y+0.93f*drawRect.h,1.0f,lineCol,lineCol);
+  }
   return drawRect;
 }
 
@@ -482,7 +488,7 @@ SDL_FRect drawSelectableTextAlignedSizedWithMetadata(resource_data *restrict rda
       //SDL_Log("Adding selection string %u: %s\n",tss->numSelStrs,txt);
       //SDL_Log("  Rect: %0.3f %0.3f %0.3f %0.3f\n",(double)rect.x,(double)rect.y,(double)rect.w,(double)rect.h);
       tss->selectableStrRect[tss->numSelStrs] = rect;
-      tss->selectableStrProp[tss->numSelStrs] = (uint8_t)(fontSizeInd & 7U);
+      tss->selectableStrProp[tss->numSelStrs] = (uint8_t)(fontSizeInd & 15U);
       tss->selectableStrMetadata[tss->numSelStrs] = metadata;
       SDL_strlcpy(tss->selectableStrTxt[tss->numSelStrs],txt,MAX_SELECTABLE_STR_LEN);
       tss->numSelStrs++;

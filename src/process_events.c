@@ -891,7 +891,7 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
         if(cursorRelPos < 0.0f){
           cursorRelPos = 0.0f;
         }
-        state->tss.selEndPos = (uint8_t)(getNumTextCharsUnderWidth(rdat,(uint16_t)(cursorRelPos),state->tss.selectableStrTxt[state->tss.selectedStr],0,state->tss.selectableStrProp[state->tss.selectedStr] & 7U));
+        state->tss.selEndPos = (uint8_t)(getNumTextCharsUnderWidth(rdat,(uint16_t)(cursorRelPos),state->tss.selectableStrTxt[state->tss.selectedStr],0,state->tss.selectableStrProp[state->tss.selectedStr] & 15U));
         state->ds.forceRedraw = 1;
       }
       //SDL_Log("start: %u, end: %u, len: %lu, strInd: %u\n",state->tss.selStartPos,state->tss.selEndPos,SDL_strlen(state->tss.selectableStrTxt[state->tss.selectedStr]),state->tss.selectedStr);
@@ -937,7 +937,7 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
                       //start drag over text
                       state->ds.textDragStartMouseX = state->mouseXPx;
                       state->ds.textDragInProgress = TXTDRAGSTATE_DRAG_OVER_TXT;
-                      state->tss.selStartPos = (uint8_t)(getNumTextCharsUnderWidth(rdat,(uint16_t)(cursorRelPos),state->tss.selectableStrTxt[i],0,state->tss.selectableStrProp[i] & 7U));
+                      state->tss.selStartPos = (uint8_t)(getNumTextCharsUnderWidth(rdat,(uint16_t)(cursorRelPos),state->tss.selectableStrTxt[i],0,state->tss.selectableStrProp[i] & 15U));
                       state->tss.selEndPos = state->tss.selStartPos;
                     }
                     if(state->uiState == UISTATE_FULLLEVELINFO){
@@ -1235,7 +1235,7 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
           if(cursorRelPos < 0.0f){
             cursorRelPos = 0.0f;
           }
-          state->tss.selEndPos = (uint8_t)(getNumTextCharsUnderWidth(rdat,(uint16_t)(cursorRelPos),state->tss.selectableStrTxt[state->tss.selectedStr],0,state->tss.selectableStrProp[state->tss.selectedStr] & 7U));
+          state->tss.selEndPos = (uint8_t)(getNumTextCharsUnderWidth(rdat,(uint16_t)(cursorRelPos),state->tss.selectableStrTxt[state->tss.selectedStr],0,state->tss.selectableStrProp[state->tss.selectedStr] & 15U));
           //SDL_Log("start pos: %u, end pos: %u\n",state->tss.selStartPos,state->tss.selEndPos);
         }
         setSelTxtPrimarySelection(&state->tss); //support primary selection on Linux
