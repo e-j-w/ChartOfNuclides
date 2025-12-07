@@ -66,6 +66,9 @@ void drawColoredText(resource_data *restrict rdat, const float xPos, const float
 void drawDefaultTextAligned(const ui_theme_rules *restrict uirules, resource_data *restrict rdat, const float xPos, const float yPos, const char *txt, const uint8_t alignment);
 void drawDefaultText(const ui_theme_rules *restrict uirules, resource_data *restrict rdat, const float xPos, const float yPos, const char *txt);
 
+SDL_FRect getTooltipRect(resource_data *restrict rdat, const float xPos, const float yPos, const char *txt);
+void drawTooltipBox(const ui_theme_rules *restrict uirules, resource_data *restrict rdat, const SDL_FRect rect, const float alpha, const char *txt);
+
 void drawFlatRect(resource_data *restrict rdat, const SDL_FRect rect, const SDL_FColor col);
 void drawFlatBG(const drawing_state *restrict ds, resource_data *restrict rdat, const SDL_FColor col);
 

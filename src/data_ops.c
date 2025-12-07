@@ -93,6 +93,7 @@ void initializeTempState(const app_data *restrict dat, app_state *restrict state
 	state->ds.fcScrollFinished = 0;
 	state->ds.fcScrollInProgress = 0;
 	state->ds.fcNuclChangeInProgress = 0;
+	state->ds.showingTooltip = 0;
 	state->ds.searchEntryDispStartChar = 0;
 	state->ds.searchEntryDispNumChars = 65535U; //default value specifying no text has been input yet
 	state->ds.interfaceSizeInd = UISCALE_NORMAL;
@@ -3616,6 +3617,44 @@ uint16_t getMaxNumLvlDispLines(const ndata *restrict nd, const app_state *restri
 	}
 	//SDL_Log("max line: %u, screen lines: %u\n",numLines,numScreenLines);
 	return numLines;
+}
+
+//finds the starting index of the ENSDF comment of a specific type for a specific level
+//returns MAX_UINT32_VAL if there is no valid ENSDF comment available
+//commentType: values from level_comment_enum
+uint32_t getENSDFLvlCommentStrInd(const ndata *restrict nd, const uint32_t lvlInd, const uint8_t commentType){
+	if(nd->levels[lvlInd].hasComment & (uint8_t)(1U << commentType)){
+		uint32_t strBufPos = nd->levels[lvlInd].commentStrBufStartPos;
+		while(strBufPos < nd->levels[lvlInd].commentStrBufStartPos + 2048){
+			switch(commentType){
+				case LCOMMENT_ELEVEL:
+					if(SDL_strncmp(&nd->ensdfStrBuf[strBufPos],"E$",2)==0){
+						return strBufPos+2;
+					}
+					break;
+				case LCOMMENT_JPI:
+					if(SDL_strncmp(&nd->ensdfStrBuf[strBufPos],"J$",2)==0){
+						return strBufPos+2;
+					}
+					break;
+				case LCOMMENT_HALFLIFE:
+					if(SDL_strncmp(&nd->ensdfStrBuf[strBufPos],"T$",2)==0){
+						return strBufPos+2;
+					}
+					break;
+				default:
+					return MAX_UINT32_VAL;
+			}
+			uint32_t len = (uint32_t)SDL_strlen(&nd->ensdfStrBuf[strBufPos]);
+			if(len > 0){
+				strBufPos += len;
+			}else{
+				strBufPos++;
+			}
+			//SDL_Log("strBufPos: %u\n",strBufPos);
+		}	
+	}
+	return MAX_UINT32_VAL;
 }
 
 float mouseXPxToN(const drawing_state *restrict ds, const float mouseX){

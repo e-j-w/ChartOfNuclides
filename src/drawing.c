@@ -521,6 +521,26 @@ void drawDefaultText(const ui_theme_rules *restrict uirules, resource_data *rest
   drawDefaultTextAligned(uirules,rdat,xPos,yPos,txt,ALIGN_LEFT);
 }
 
+SDL_FRect getTooltipRect(resource_data *restrict rdat, const float xPos, const float yPos, const char *txt){
+  float txtMaxWidth = (TOOLTIP_MAX_WIDTH - 8.0f*UI_PADDING_SIZE)*rdat->uiScale/rdat->uiDPIScale;
+  int textW = 0;
+  int textH = 0;
+  TTF_Text *ttxt = TTF_CreateText(rdat->te,rdat->font[FONTSIZE_NORMAL],txt,0);
+  TTF_SetTextWrapWidth(ttxt,(int)(txtMaxWidth*rdat->uiDPIScale));
+  TTF_GetTextSize(ttxt,&textW,&textH);
+  TTF_DestroyText(ttxt);
+  SDL_FRect rect = {xPos, yPos, ((float)textW/rdat->uiDPIScale) + 8.0f*UI_PADDING_SIZE*rdat->uiScale/rdat->uiDPIScale, ((float)textH/rdat->uiDPIScale)  + 8.0f*UI_PADDING_SIZE*rdat->uiScale/rdat->uiDPIScale};
+  return rect;
+}
+
+void drawTooltipBox(const ui_theme_rules *restrict uirules, resource_data *restrict rdat, const SDL_FRect rect, const float alpha, const char *txt){
+
+  float txtMaxWidth = (TOOLTIP_MAX_WIDTH - 8.0f*UI_PADDING_SIZE)*rdat->uiScale/rdat->uiDPIScale;
+  drawPanelBG(uirules,rdat,rect,alpha);
+  drawTextAlignedSized(rdat,rect.x + 4*UI_PADDING_SIZE*rdat->uiScale/rdat->uiDPIScale,rect.y + 4*UI_PADDING_SIZE*rdat->uiScale/rdat->uiDPIScale,blackCol8Bit,FONTSIZE_NORMAL,(Uint8)(alpha*255.0f),txt,ALIGN_LEFT,(Uint16)txtMaxWidth);
+
+}
+
 //draws a flat colored rectangle, without transparency
 void drawFlatRect(resource_data *restrict rdat, const SDL_FRect rect, const SDL_FColor col){
 

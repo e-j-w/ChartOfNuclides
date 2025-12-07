@@ -1094,6 +1094,36 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
           startUIAnimation(dat,state,rdat,UIANIM_CONTEXT_MENU_HIDE); //menu will be closed after animation finishes
         }
       }
+    }else{
+      //no right click, check if the moused-over column has an ENSDF comment,
+      //and if so, show it in a tooltip
+      if(state->ds.nuclFullInfoMouseOverNuclLvl != 65535U){
+        uint32_t mouseOverLvlInd = (uint32_t)(dat->ndat.nuclData[state->chartSelectedNucl].firstLevel + state->ds.nuclFullInfoMouseOverNuclLvl);
+        switch(state->ds.nuclFullInfoMouseOverCol){
+          case LLCOLUMN_ELEVEL:
+            if(dat->ndat.levels[mouseOverLvlInd].hasComment & (uint8_t)(1U << LCOMMENT_ELEVEL)){
+              state->ds.showingTooltip = 1;
+              state->ds.tooltipPar = getENSDFLvlCommentStrInd(&dat->ndat,mouseOverLvlInd,LCOMMENT_ELEVEL);
+            }
+            break;
+          case LLCOLUMN_JPI:
+            if(dat->ndat.levels[mouseOverLvlInd].hasComment & (uint8_t)(1U << LCOMMENT_JPI)){
+              state->ds.showingTooltip = 1;
+              state->ds.tooltipPar = getENSDFLvlCommentStrInd(&dat->ndat,mouseOverLvlInd,LCOMMENT_JPI);
+            }
+            break;
+          case LLCOLUMN_HALFLIFE:
+            if(dat->ndat.levels[mouseOverLvlInd].hasComment & (uint8_t)(1U << LCOMMENT_HALFLIFE)){
+              state->ds.showingTooltip = 1;
+              state->ds.tooltipPar = getENSDFLvlCommentStrInd(&dat->ndat,mouseOverLvlInd,LCOMMENT_HALFLIFE);
+            }
+            break;
+          default:
+            break;
+        }
+      }
+      
+
     }
 
     uint8_t mouseReleaseElement = UIELEM_ENUM_LENGTH;
@@ -2012,6 +2042,8 @@ void processFrameEvents(app_data *restrict dat, app_state *restrict state, resou
       state->inputFlags &= ~(1U << INPUT_DOUBLECLICK);
     }
     state->inputFlags &= ~(1U << INPUT_RIGHTCLICK);
+
+    state->ds.showingTooltip = 0; //reset
 
     if((state->ds.uiAnimPlaying != 0)||(state->ds.zoomInProgress)||(state->ds.chartDragInProgress)||(state->ds.panInProgress)||(state->ds.fcScrollInProgress)||(state->ds.fcNuclChangeInProgress)){
       //a UI animation is playing, don't block the main thread

@@ -2687,6 +2687,12 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 								modComBuff = findReplaceAllUTF8("I|g","I(γ)",comBuff);
 								SDL_strlcpy(comBuff,modComBuff,118);
 								SDL_free(modComBuff);
+								modComBuff = findReplaceAllUTF8("|g","γ",comBuff);
+								SDL_strlcpy(comBuff,modComBuff,118);
+								SDL_free(modComBuff);
+								modComBuff = findReplaceAllUTF8("|D","Δ",comBuff);
+								SDL_strlcpy(comBuff,modComBuff,118);
+								SDL_free(modComBuff);
 								//SDL_Log("line: %s\n",line);
 								uint32_t len = (uint32_t)SDL_strlen(comBuff);
 								//SDL_Log("comBuff: %s, len: %u\n",comBuff,len);

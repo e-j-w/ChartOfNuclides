@@ -113,8 +113,8 @@ uint16_t getNumTotalLvlDispLines(const ndata *restrict nd, const app_state *rest
 uint16_t getNumDispLinesUpToLvl(const ndata *restrict nd, const app_state *restrict state, const uint16_t nuclLevel);
 uint16_t getNumDispLinesForLvl(const ndata *restrict nd, const uint32_t lvlInd);
 
-float mouseXtoN(const drawing_state *restrict ds, const float mouseX);
-float mouseYtoZ(const drawing_state *restrict ds, const float mouseY);
+uint32_t getENSDFLvlCommentStrInd(const ndata *restrict nd, const uint32_t lvlInd, const uint8_t commentType);
+
 float getMinChartN(const drawing_state *restrict ds);
 float getMaxChartN(const drawing_state *restrict ds);
 float getMinChartZ(const drawing_state *restrict ds);

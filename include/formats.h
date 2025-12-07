@@ -277,6 +277,8 @@ typedef struct
   uint16_t searchEntryDispStartChar, searchEntryDispNumChars; //search string display state
   uint8_t interfaceSizeInd; //user preference for UI scaling, values from ui_scale_enum
   uint8_t reactionModeInd; //user preference for reaction display mode, values from reaction_mode_enum
+  uint8_t showingTooltip; //0=no tooltip, 1=tooltip at mouse position
+  uint32_t tooltipPar; //for ENSDF comment tooltips, the index of the ENSDF string buffer where the tooltip appears
   unsigned int fcScrollInProgress : 1;
   unsigned int fcScrollFinished : 1;
   unsigned int fcNuclChangeInProgress : 1;
