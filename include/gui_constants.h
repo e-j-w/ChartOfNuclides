@@ -206,7 +206,7 @@ static const float uiScales[UISCALE_ENUM_LENGTH] = {1.0f,1.20f,1.60f,1.85f};
 #define NUCL_FULLINFOBOX_COL_MOUSEOVER_OFFSET           8.0f //in unscaled pixels
 
 //tooltip
-#define TOOLTIP_MAX_WIDTH                               200.0f //in unscaled pixels
+#define TOOLTIP_MAX_WIDTH                               400.0f //in unscaled pixels
 
 //performance overlay
 #define PERF_OVERLAY_BUTTON_X_ANCHOR  (CHART_AXIS_DEPTH+16)

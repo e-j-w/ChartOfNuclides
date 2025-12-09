@@ -51,7 +51,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 //increasing these numbers will increase the size of 
 //the nuclear database stored in memory (and on disk)
-#define ENSDFSTRBUFSIZE          7900000
+#define ENSDFSTRBUFSIZE          5500000
 #define MAXMULTPERLEVEL          3
 #define MAXNUMNUCL               3500
 #define MAXNUMLVLS               200000

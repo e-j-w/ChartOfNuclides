@@ -4380,10 +4380,10 @@ void drawContextMenu(const app_data *restrict dat, const app_state *restrict sta
 }
 
 //draws a tooltip at the mouse position
+char ttTxt[1024]; //some comments are very long, eg. 32Si GS half-life comment
 void drawENSDFCommentTooltip(const ui_theme_rules *restrict uirules, const app_data *restrict dat, const app_state *restrict state, resource_data *restrict rdat){
   if(state->ds.tooltipPar < dat->ndat.ensdfStrBufLen){
-    char ttTxt[256];
-    SDL_strlcpy(ttTxt,&dat->ndat.ensdfStrBuf[state->ds.tooltipPar],256);
+    SDL_strlcpy(ttTxt,&dat->ndat.ensdfStrBuf[state->ds.tooltipPar],1024);
     SDL_FRect ttRect = getTooltipRect(rdat,state->mouseXPx + UI_PADDING_SIZE*rdat->uiScale,state->mouseYPx + UI_PADDING_SIZE*rdat->uiScale,ttTxt);
     drawTooltipBox(uirules,rdat,ttRect,1.0f,ttTxt);
   }
