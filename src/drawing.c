@@ -521,15 +521,30 @@ void drawDefaultText(const ui_theme_rules *restrict uirules, resource_data *rest
   drawDefaultTextAligned(uirules,rdat,xPos,yPos,txt,ALIGN_LEFT);
 }
 
-SDL_FRect getTooltipRect(resource_data *restrict rdat, const float xPos, const float yPos, const char *txt){
+SDL_FRect getTooltipRect(const drawing_state *restrict ds, resource_data *restrict rdat, const float xPos, const float yPos, const char *txt){
   float txtMaxWidth = (TOOLTIP_MAX_WIDTH - 8.0f*UI_PADDING_SIZE)*rdat->uiScale/rdat->uiDPIScale;
   int textW = 0;
   int textH = 0;
   TTF_Text *ttxt = TTF_CreateText(rdat->te,rdat->font[FONTSIZE_NORMAL],txt,0);
-  TTF_SetTextWrapWidth(ttxt,(int)(txtMaxWidth*rdat->uiDPIScale));
   TTF_GetTextSize(ttxt,&textW,&textH);
+  if(textW > (int)(txtMaxWidth*rdat->uiDPIScale)){
+    //text needs to be wrapped
+    TTF_SetTextWrapWidth(ttxt,(int)(txtMaxWidth*rdat->uiDPIScale));
+    TTF_GetTextSize(ttxt,&textW,&textH);
+  }
   TTF_DestroyText(ttxt);
-  SDL_FRect rect = {xPos, yPos, ((float)textW/rdat->uiDPIScale) + 8.0f*UI_PADDING_SIZE*rdat->uiScale/rdat->uiDPIScale, ((float)textH/rdat->uiDPIScale)  + 8.0f*UI_PADDING_SIZE*rdat->uiScale/rdat->uiDPIScale};
+  float width = ((float)textW/rdat->uiDPIScale) + 8.0f*UI_PADDING_SIZE*rdat->uiScale/rdat->uiDPIScale;
+  float height = ((float)textH/rdat->uiDPIScale) + 8.0f*UI_PADDING_SIZE*rdat->uiScale/rdat->uiDPIScale;
+  float xPosOut = xPos;
+  float yPosOut = yPos;
+  if(xPos + width > ds->windowXRes){
+    xPosOut -= (width + 2.0f*UI_PADDING_SIZE*rdat->uiScale/rdat->uiDPIScale);
+  }
+  if(yPos + height > ds->windowYRes){
+    yPosOut -= (height + 2.0f*UI_PADDING_SIZE*rdat->uiScale/rdat->uiDPIScale);
+  }
+
+  SDL_FRect rect = {xPosOut, yPosOut, width, height};
   return rect;
 }
 

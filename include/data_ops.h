@@ -114,6 +114,7 @@ uint16_t getNumDispLinesUpToLvl(const ndata *restrict nd, const app_state *restr
 uint16_t getNumDispLinesForLvl(const ndata *restrict nd, const uint32_t lvlInd);
 
 uint32_t getENSDFLvlCommentStrInd(const ndata *restrict nd, const uint32_t lvlInd, const uint8_t commentType);
+uint32_t getENSDFTranCommentStrInd(const ndata *restrict nd, const uint32_t tranInd, const uint8_t commentType);
 
 float getMinChartN(const drawing_state *restrict ds);
 float getMaxChartN(const drawing_state *restrict ds);

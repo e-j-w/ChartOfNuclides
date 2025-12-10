@@ -4,8 +4,8 @@ ok|OK
 no_db|No ENSDF database loaded.
 gm_state|Ground and isomeric state information:
 qalpha|Q(α)
-q_betaminus|Q(β-)
-q_betaplus|Q(β+)
+q_betaminus|Q(β⁻)
+q_betaplus|Q(β⁺)
 q_ec|Q(ε)
 q_p|Q(p)
 q_n|Q(n)
@@ -74,15 +74,15 @@ chartview_menu_title|Select color scheme:
 chartview_lifetime|Lifetime
 chartview_halflife|Half-life
 chartview_decaymode|Decay Mode
-chartview_2plus|E(2+)
-chartview_r42|E(4+)/E(2+)
+chartview_2plus|E(2⁺)
+chartview_r42|E(4⁺)/E(2⁺)
 chartview_beta2|β₂
 chartview_beA|Binding E / A
 chartview_sn|S(n)
 chartview_sp|S(p)
 chartview_qalpha|Q(α)
-chartview_qbeta|Q(β-)
-chartview_qbetaplus|Q(β+)
+chartview_qbeta|Q(β⁻)
+chartview_qbetaplus|Q(β⁺)
 chartview_qec|Q(ε)
 chartview_spin|Ground state spin
 chartview_parity|GS parity

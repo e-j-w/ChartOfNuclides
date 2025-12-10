@@ -51,7 +51,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 //increasing these numbers will increase the size of 
 //the nuclear database stored in memory (and on disk)
-#define ENSDFSTRBUFSIZE          5500000
+#define ENSDFSTRBUFSIZE          9200000
 #define MAXMULTPERLEVEL          3
 #define MAXNUMNUCL               3500
 #define MAXNUMLVLS               200000
@@ -260,9 +260,11 @@ typedef struct
   uint16_t nuclFullInfoMaxScrollY; //maximum scroll position, in lines
   uint16_t nuclFullInfoShownColumns; //bit-pattern describing which columns are shown in the full level info view (values from level_list_column_enum)
   uint32_t nuclFullInfoSelStrMetadata;
-  uint8_t nuclFullInfoMouseOverCol, nuclFullInfoMouseOverLvlRow;
+  uint8_t nuclFullInfoMouseOverCol;
+  uint16_t nuclFullInfoMouseOverLvlRow;
   uint16_t nuclFullInfoMouseOverNuclLvl;
-  uint8_t nuclFullInfoRightClickCol, nuclFullInfoRightClickLvlRow;
+  uint8_t nuclFullInfoRightClickCol;
+  uint16_t nuclFullInfoRightClickLvlRow;
   uint16_t nuclFullInfoRightClickNuclLvl;
   uint8_t rxnMenuColumns; //how many columns to use in the reaction menu
   uint8_t mouseOverRxn, mouseHoldRxn; //which item in the reaction menu is moused-over, =255 if none

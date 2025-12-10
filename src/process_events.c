@@ -960,7 +960,7 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
     //handle mouseover in the full level list
     //by default, there is no moused-over row or column
     state->ds.nuclFullInfoMouseOverCol = 255U;
-    state->ds.nuclFullInfoMouseOverLvlRow = 255U;
+    state->ds.nuclFullInfoMouseOverLvlRow = 65535U;
     state->ds.nuclFullInfoMouseOverNuclLvl = 65535U;
     if(state->uiState == UISTATE_FULLLEVELINFO){
       if(state->mouseYPx > (NUCL_FULLINFOBOX_LEVELLIST_POS_Y*state->ds.uiUserScale)){
@@ -990,7 +990,7 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
                   //make sure to account for Q-values by only counting lines from the level itself
                   if(mouseRow < (getNumDispLinesUpToLvl(&dat->ndat,state,nuclLvlInd) + getNumDispLinesForLvl(&dat->ndat,dat->ndat.nuclData[state->chartSelectedNucl].firstLevel + nuclLvlInd))){
                     state->ds.nuclFullInfoMouseOverNuclLvl = nuclLvlInd;
-                    state->ds.nuclFullInfoMouseOverLvlRow = (uint8_t)(mouseRow - getNumDispLinesUpToLvl(&dat->ndat,state,nuclLvlInd));
+                    state->ds.nuclFullInfoMouseOverLvlRow = (uint16_t)(mouseRow - getNumDispLinesUpToLvl(&dat->ndat,state,nuclLvlInd));
                     break;
                   } //else the user right-clicked on a Q-value
                 }
@@ -1099,6 +1099,10 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
       //and if so, show it in a tooltip
       if(state->ds.nuclFullInfoMouseOverNuclLvl != 65535U){
         uint32_t mouseOverLvlInd = (uint32_t)(dat->ndat.nuclData[state->chartSelectedNucl].firstLevel + state->ds.nuclFullInfoMouseOverNuclLvl);
+        uint32_t mouseOverTrInd = MAX_UINT32_VAL;
+        if((state->ds.nuclFullInfoMouseOverLvlRow != 65535U)&&(state->ds.nuclFullInfoMouseOverLvlRow < dat->ndat.levels[mouseOverLvlInd].numTran)){
+          mouseOverTrInd = (uint32_t)(dat->ndat.levels[mouseOverLvlInd].firstTran + state->ds.nuclFullInfoMouseOverLvlRow);
+        }
         switch(state->ds.nuclFullInfoMouseOverCol){
           case LLCOLUMN_ELEVEL:
             if(dat->ndat.levels[mouseOverLvlInd].hasComment & (uint8_t)(1U << LCOMMENT_ELEVEL)){
@@ -1116,6 +1120,31 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
             if(dat->ndat.levels[mouseOverLvlInd].hasComment & (uint8_t)(1U << LCOMMENT_HALFLIFE)){
               state->ds.showingTooltip = 1;
               state->ds.tooltipPar = getENSDFLvlCommentStrInd(&dat->ndat,mouseOverLvlInd,LCOMMENT_HALFLIFE);
+            }
+            break;
+          case LLCOLUMN_EGAMMA:
+            if(mouseOverTrInd != MAX_UINT32_VAL){
+              if(dat->ndat.tran[mouseOverTrInd].hasComment & (uint8_t)(1U << TCOMMENT_EGAMMA)){
+                //SDL_Log("mouseOverTrInd: %u, hasComment: %u\n",mouseOverTrInd,dat->ndat.tran[mouseOverTrInd].hasComment);
+                state->ds.showingTooltip = 1;
+                state->ds.tooltipPar = getENSDFTranCommentStrInd(&dat->ndat,mouseOverTrInd,TCOMMENT_EGAMMA);
+              }
+            }
+            break;
+          case LLCOLUMN_MGAMMA:
+            if(mouseOverTrInd != MAX_UINT32_VAL){
+              if(dat->ndat.tran[mouseOverTrInd].hasComment & (uint8_t)(1U << TCOMMENT_MGAMMA)){
+                state->ds.showingTooltip = 1;
+                state->ds.tooltipPar = getENSDFTranCommentStrInd(&dat->ndat,mouseOverTrInd,TCOMMENT_MGAMMA);
+              }
+            }
+            break;
+          case LLCOLUMN_DELTA:
+            if(mouseOverTrInd != MAX_UINT32_VAL){
+              if(dat->ndat.tran[mouseOverTrInd].hasComment & (uint8_t)(1U << TCOMMENT_DELTA)){
+                state->ds.showingTooltip = 1;
+                state->ds.tooltipPar = getENSDFTranCommentStrInd(&dat->ndat,mouseOverTrInd,TCOMMENT_DELTA);
+              }
             }
             break;
           default:

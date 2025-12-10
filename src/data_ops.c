@@ -1715,37 +1715,37 @@ const char* getValueTypeShortStr(const uint8_t type){
 const char* getDecayTypeShortStr(const uint8_t type){
 	switch(type){
 		case DECAYMODE_BETAMINUS:
-			return "β-";
+			return "β⁻";
 		case DECAYMODE_BETAPLUS:
-			return "β+";
+			return "β⁺";
 		case DECAYMODE_ALPHA:
 			return "α";
 		case DECAYMODE_BETAMINUS_ALPHA:
-			return "β-α";
+			return "β⁻α";
 		case DECAYMODE_BETAMINUS_NEUTRON:
-			return "β-n";
+			return "β⁻n";
 		case DECAYMODE_BETAMINUS_TWONEUTRON:
-			return "β-2n";
+			return "β⁻2n";
 		case DECAYMODE_BETAMINUS_THREENEUTRON:
-			return "β-3n";
+			return "β⁻3n";
 		case DECAYMODE_BETAMINUS_FOURNEUTRON:
-			return "β-4n";
+			return "β⁻4n";
 		case DECAYMODE_BETAMINUS_FIVENEUTRON:
-			return "β-5n";
+			return "β⁻5n";
 		case DECAYMODE_BETAMINUS_SIXNEUTRON:
-			return "β-6n";
+			return "β⁻6n";
 		case DECAYMODE_BETAMINUS_SEVENNEUTRON:
-			return "β-7n";
+			return "β⁻7n";
 		case DECAYMODE_BETAMINUS_PROTON:
-			return "β-p";
+			return "β⁻p";
 		case DECAYMODE_BETAPLUS_PROTON:
-			return "β+p";
+			return "β⁺p";
 		case DECAYMODE_BETAPLUS_TWOPROTON:
-			return "β+2p";
+			return "β⁺2p";
 		case DECAYMODE_BETAPLUS_THREEPROTON:
-			return "β+3p";
+			return "β⁺3p";
 		case DECAYMODE_BETAPLUS_ALPHA:
-			return "β+α";
+			return "β⁺α";
 		case DECAYMODE_EC:
 			return "ε";
 		case DECAYMODE_EC_PROTON:
@@ -1757,7 +1757,7 @@ const char* getDecayTypeShortStr(const uint8_t type){
 		case DECAYMODE_EC_ALPHA:
 			return "εα";
 		case DECAYMODE_ECANDBETAPLUS:
-			return "ε/β+";
+			return "ε/β⁺";
 		case DECAYMODE_IT:
 			return "IT";
 		case DECAYMODE_3H:
@@ -1777,15 +1777,15 @@ const char* getDecayTypeShortStr(const uint8_t type){
 		case DECAYMODE_SPONTANEOUSFISSION:
 			return "SF";
 		case DECAYMODE_BETAMINUS_SPONTANEOUSFISSION:
-			return "β-SF";
+			return "β⁻SF";
 		case DECAYMODE_EC_SPONTANEOUSFISSION:
 			return "εSF";
 		case DECAYMODE_ECANDBETAPLUS_SPONTANEOUSFISSION:
-			return "ε/β+SF";
+			return "ε/β⁺SF";
 		case DECAYMODE_2BETAMINUS:
-			return "2β-";
+			return "2β⁻";
 		case DECAYMODE_2BETAPLUS:
-			return "2β+";
+			return "2β⁺";
 		case DECAYMODE_2EC:
 			return "2ε";
 		case DECAYMODE_8BE:
@@ -2443,9 +2443,17 @@ void getSpinParStr(char strOut[32], const ndata *restrict nd, const uint32_t lvl
 			}
 			if((tentative != TENTATIVESP_SPINONLY)&&(tentative != TENTATIVESP_PARITYONLY)){
 				if(nd->spv[nd->levels[lvlInd].firstSpinParVal + (uint32_t)i].parVal == -1){
-					SDL_strlcat(strOut,"-",32);
+					if(nd->spv[nd->levels[lvlInd].firstSpinParVal + (uint32_t)i].spinVal == 255){
+						SDL_strlcat(strOut,"-",32);
+					}else{
+						SDL_strlcat(strOut,"⁻",32);
+					}
 				}else if(nd->spv[nd->levels[lvlInd].firstSpinParVal + (uint32_t)i].parVal == 1){
-					SDL_strlcat(strOut,"+",32);
+					if(nd->spv[nd->levels[lvlInd].firstSpinParVal + (uint32_t)i].spinVal == 255){
+						SDL_strlcat(strOut,"+",32);
+					}else{
+						SDL_strlcat(strOut,"⁺",32);
+					}
 				}
 			}
 			if((tentative == TENTATIVESP_SPINANDPARITY)||(tentative == TENTATIVESP_SPINONLY)){
@@ -2453,9 +2461,17 @@ void getSpinParStr(char strOut[32], const ndata *restrict nd, const uint32_t lvl
 					SDL_strlcat(strOut,")",32);
 					if(tentative == TENTATIVESP_SPINONLY){
 						if(nd->spv[nd->levels[lvlInd].firstSpinParVal + (uint32_t)i].parVal == -1){
-							SDL_strlcat(strOut,"-",32);
+							if(nd->spv[nd->levels[lvlInd].firstSpinParVal + (uint32_t)i].spinVal == 255){
+								SDL_strlcat(strOut,"-",32);
+							}else{
+								SDL_strlcat(strOut,"⁻",32);
+							}
 						}else if(nd->spv[nd->levels[lvlInd].firstSpinParVal + (uint32_t)i].parVal == 1){
-							SDL_strlcat(strOut,"+",32);
+							if(nd->spv[nd->levels[lvlInd].firstSpinParVal + (uint32_t)i].spinVal == 255){
+								SDL_strlcat(strOut,"+",32);
+							}else{
+								SDL_strlcat(strOut,"⁺",32);
+							}
 						}
 					}
 				}else if(i<nd->levels[lvlInd].numSpinParVals-1){
@@ -2465,9 +2481,17 @@ void getSpinParStr(char strOut[32], const ndata *restrict nd, const uint32_t lvl
 								SDL_strlcat(strOut,")",32);
 								if(tentative == TENTATIVESP_SPINONLY){
 									if(nd->spv[nd->levels[lvlInd].firstSpinParVal + (uint32_t)i].parVal == -1){
-										SDL_strlcat(strOut,"-",32);
+										if(nd->spv[nd->levels[lvlInd].firstSpinParVal + (uint32_t)i].spinVal == 255){
+											SDL_strlcat(strOut,"-",32);
+										}else{
+											SDL_strlcat(strOut,"⁻",32);
+										}
 									}else if(nd->spv[nd->levels[lvlInd].firstSpinParVal + (uint32_t)i].parVal == 1){
-										SDL_strlcat(strOut,"+",32);
+										if(nd->spv[nd->levels[lvlInd].firstSpinParVal + (uint32_t)i].spinVal == 255){
+											SDL_strlcat(strOut,"+",32);
+										}else{
+											SDL_strlcat(strOut,"⁺",32);
+										}
 									}
 								}
 							}
@@ -2476,18 +2500,34 @@ void getSpinParStr(char strOut[32], const ndata *restrict nd, const uint32_t lvl
 				}
 			}else if(tentative == TENTATIVESP_PARITYONLY){
 				if(nd->spv[nd->levels[lvlInd].firstSpinParVal + (uint32_t)i].parVal == -1){
-					SDL_strlcat(strOut,"(-)",32);
+					if(nd->spv[nd->levels[lvlInd].firstSpinParVal + (uint32_t)i].spinVal == 255){
+						SDL_strlcat(strOut,"(-)",32);
+					}else{
+						SDL_strlcat(strOut,"⁽⁻⁾",32);
+					}
 				}else if(nd->spv[nd->levels[lvlInd].firstSpinParVal + (uint32_t)i].parVal == 1){
-					SDL_strlcat(strOut,"(+)",32);
+					if(nd->spv[nd->levels[lvlInd].firstSpinParVal + (uint32_t)i].spinVal == 255){
+						SDL_strlcat(strOut,"(+)",32);
+					}else{
+						SDL_strlcat(strOut,"⁽⁺⁾",32);
+					}
 				}
 			}else if((tentative == TENTATIVESP_ASSUMED)||(tentative == TENTATIVESP_ASSUMEDSPINONLY)){
 				if(i==nd->levels[lvlInd].numSpinParVals-1){
 					SDL_strlcat(strOut,"]",32);
 					if(tentative == TENTATIVESP_ASSUMEDSPINONLY){
 						if(nd->spv[nd->levels[lvlInd].firstSpinParVal + (uint32_t)i].parVal == -1){
-							SDL_strlcat(strOut,"-",32);
+							if(nd->spv[nd->levels[lvlInd].firstSpinParVal + (uint32_t)i].spinVal == 255){
+								SDL_strlcat(strOut,"-",32);
+							}else{
+								SDL_strlcat(strOut,"⁻",32);
+							}
 						}else if(nd->spv[nd->levels[lvlInd].firstSpinParVal + (uint32_t)i].parVal == 1){
-							SDL_strlcat(strOut,"+",32);
+							if(nd->spv[nd->levels[lvlInd].firstSpinParVal + (uint32_t)i].spinVal == 255){
+								SDL_strlcat(strOut,"+",32);
+							}else{
+								SDL_strlcat(strOut,"⁺",32);
+							}
 						}
 					}
 				}else if(i<nd->levels[lvlInd].numSpinParVals-1){
@@ -2497,9 +2537,17 @@ void getSpinParStr(char strOut[32], const ndata *restrict nd, const uint32_t lvl
 								SDL_strlcat(strOut,"]",32);
 								if(tentative == TENTATIVESP_ASSUMEDSPINONLY){
 									if(nd->spv[nd->levels[lvlInd].firstSpinParVal + (uint32_t)i].parVal == -1){
-										SDL_strlcat(strOut,"-",32);
+										if(nd->spv[nd->levels[lvlInd].firstSpinParVal + (uint32_t)i].spinVal == 255){
+											SDL_strlcat(strOut,"-",32);
+										}else{
+											SDL_strlcat(strOut,"⁻",32);
+										}
 									}else if(nd->spv[nd->levels[lvlInd].firstSpinParVal + (uint32_t)i].parVal == 1){
-										SDL_strlcat(strOut,"+",32);
+										if(nd->spv[nd->levels[lvlInd].firstSpinParVal + (uint32_t)i].spinVal == 255){
+											SDL_strlcat(strOut,"+",32);
+										}else{
+											SDL_strlcat(strOut,"⁺",32);
+										}
 									}
 								}
 							}
@@ -3640,6 +3688,44 @@ uint32_t getENSDFLvlCommentStrInd(const ndata *restrict nd, const uint32_t lvlIn
 				case LCOMMENT_HALFLIFE:
 					if(SDL_strncmp(&nd->ensdfStrBuf[strBufPos],"T$",2)==0){
 						return strBufPos+2;
+					}
+					break;
+				default:
+					return MAX_UINT32_VAL;
+			}
+			uint32_t len = (uint32_t)SDL_strlen(&nd->ensdfStrBuf[strBufPos]);
+			if(len > 0){
+				strBufPos += len;
+			}else{
+				strBufPos++;
+			}
+			//SDL_Log("strBufPos: %u\n",strBufPos);
+		}	
+	}
+	return MAX_UINT32_VAL;
+}
+
+//finds the starting index of the ENSDF comment of a specific type for a specific transition
+//returns MAX_UINT32_VAL if there is no valid ENSDF comment available
+//commentType: values from tran_comment_enum
+uint32_t getENSDFTranCommentStrInd(const ndata *restrict nd, const uint32_t tranInd, const uint8_t commentType){
+	if(nd->tran[tranInd].hasComment & (uint8_t)(1U << commentType)){
+		uint32_t strBufPos = nd->tran[tranInd].commentStrBufStartPos;
+		while(strBufPos < nd->tran[tranInd].commentStrBufStartPos + 2048){
+			switch(commentType){
+				case TCOMMENT_EGAMMA:
+					if(SDL_strncmp(&nd->ensdfStrBuf[strBufPos],"E$",2)==0){
+						return strBufPos+2;
+					}
+					break;
+				case TCOMMENT_MGAMMA:
+					if(SDL_strncmp(&nd->ensdfStrBuf[strBufPos],"M$",2)==0){
+						return strBufPos+2;
+					}
+					break;
+				case TCOMMENT_DELTA:
+					if(SDL_strncmp(&nd->ensdfStrBuf[strBufPos],"MR$",3)==0){
+						return strBufPos+3;
 					}
 					break;
 				default:
