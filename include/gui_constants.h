@@ -26,7 +26,7 @@ which can be referenced by both the GUI draw code as well as the interaction cod
 
 //minimum dimensions of the window, assuming 1x UI scaling
 #define MIN_RENDER_WIDTH  800
-#define MIN_RENDER_HEIGHT 480
+#define MIN_RENDER_HEIGHT 520
 
 //maximum dimensions of the window
 #define MAX_RENDER_WIDTH  16384
@@ -59,8 +59,8 @@ static const uint8_t UITHEME_ICON_TILE_X[UIICON_ENUM_LENGTH] = {0,0, 0, 1, 2, 2,
 static const uint8_t UITHEME_ICON_TILE_Y[UIICON_ENUM_LENGTH] = {1,9,10,10,11,10,9,9,8,8,11,11,3,3};
 
 //font sizes (assuming UI scale of 1)
-static const float fontSizes[FONTSIZE_ENUM_LENGTH] = {13.0f,15.0f,15.0f,19.0f,19.0f,23.0f,23.0f};
-static const uint16_t fontStyles[FONTSIZE_ENUM_LENGTH] = {TTF_STYLE_NORMAL,TTF_STYLE_NORMAL,TTF_STYLE_BOLD,TTF_STYLE_NORMAL,TTF_STYLE_BOLD,TTF_STYLE_NORMAL,TTF_STYLE_BOLD};
+static const float fontSizes[FONTSIZE_ENUM_LENGTH] = {13.0f,15.0f,15.0f,15.0f,15.0f,19.0f,19.0f,23.0f,23.0f};
+static const uint16_t fontStyles[FONTSIZE_ENUM_LENGTH] = {FONTSTYLE_NORMAL,FONTSTYLE_NORMAL,FONTSTYLE_BOLD,FONTSTYLE_UL,FONTSTYLE_BOLDUL,FONTSTYLE_NORMAL,FONTSTYLE_BOLD,FONTSTYLE_NORMAL,FONTSTYLE_BOLD};
 
 //user UI scaling factors
 static const float uiScales[UISCALE_ENUM_LENGTH] = {1.0f,1.20f,1.60f,1.85f};
@@ -132,9 +132,9 @@ static const float uiScales[UISCALE_ENUM_LENGTH] = {1.0f,1.20f,1.60f,1.85f};
 #define ABOUT_BOX_STR4_Y           284.0f //in unscaled pixels
 
 //preferences dialog
-#define PREFS_DIALOG_NUM_UIELEMENTS                  8
+#define PREFS_DIALOG_NUM_UIELEMENTS                  9
 #define PREFS_DIALOG_WIDTH                           520 //in unscaled pixels
-#define PREFS_DIALOG_HEIGHT                          416 //in unscaled pixels
+#define PREFS_DIALOG_HEIGHT                          460 //in unscaled pixels
 #define PREFS_DIALOG_HEADERTXT_X                     (6*UI_PADDING_SIZE)
 #define PREFS_DIALOG_HEADERTXT_Y                     (6*UI_PADDING_SIZE)
 #define PREFS_DIALOG_PREF_Y_SPACING                  36.0f //in unscaled pixels
@@ -205,6 +205,9 @@ static const float uiScales[UISCALE_ENUM_LENGTH] = {1.0f,1.20f,1.60f,1.85f};
 #define NUCL_FULLINFOBOX_ALLCOL_DISPLAY_PADDING         (UI_TILE_SIZE)
 #define NUCL_FULLINFOBOX_COL_MOUSEOVER_OFFSET           8.0f //in unscaled pixels
 
+//tooltip
+#define TOOLTIP_MAX_WIDTH                               400.0f //in unscaled pixels
+
 //performance overlay
 #define PERF_OVERLAY_BUTTON_X_ANCHOR  (CHART_AXIS_DEPTH+16)
 #define PERF_OVERLAY_BUTTON_Y_ANCHOR  10
@@ -229,5 +232,7 @@ static const SDL_Color darkGrayCol8Bit = {80,80,80,255};
 static const SDL_Color blackCol8Bit = {0,0,0,255};
 static const SDL_Color darkGreenTxtCol8Bit = {0,150,0,255};
 static const SDL_Color darkRedTxtCol8Bit = {150,0,0,255};
+static const SDL_Color lightBlueCol8Bit = {210,210,255,255};
+static const SDL_Color darkBlueCol8Bit = {0,0,190,255};
 
 #endif

@@ -314,6 +314,7 @@ static int parseAppRules(app_data *restrict dat, asset_mapping *restrict stringI
 	dat->locStringIDs[LOCSTR_PREF_LEVELLIST_HEADER] = (uint16_t)nameToAssetID("pref_levellist_header",stringIDmap);
 	dat->locStringIDs[LOCSTR_PREF_LEVELLIST_SEPARATION] = (uint16_t)nameToAssetID("pref_levellist_separation",stringIDmap);
 	dat->locStringIDs[LOCSTR_PREF_LEVELLIST_THRESHOLD] = (uint16_t)nameToAssetID("pref_levellist_threshold",stringIDmap);
+	dat->locStringIDs[LOCSTR_PREF_LEVELLIST_COMMENTS] = (uint16_t)nameToAssetID("pref_levellist_comments",stringIDmap);
 	dat->locStringIDs[LOCSTR_PREF_UIANIM] = (uint16_t)nameToAssetID("pref_ui_animations",stringIDmap);
 	dat->locStringIDs[LOCSTR_CHARTVIEW_MENUTITLE] = (uint16_t)nameToAssetID("chartview_menu_title",stringIDmap);
 	dat->locStringIDs[LOCSTR_CHARTVIEW_LIFETIME] = (uint16_t)nameToAssetID("chartview_lifetime",stringIDmap);
@@ -907,7 +908,7 @@ void parseHalfLife(level * lev, const char * hlstring){
     tok = SDL_strtok_r(NULL, "",&saveptr);
     if(tok!=NULL){
       //SDL_Log("%s\n",tok);
-      SDL_strlcpy(hlUnitVal,tok,3);
+      SDL_strlcpy(hlUnitVal,tok,4);
       for(uint8_t i=0;i<3;i++){
         if(SDL_isspace(hlUnitVal[i])){
           hlUnitVal[i] = '\0'; //terminate string at first space
@@ -918,6 +919,10 @@ void parseHalfLife(level * lev, const char * hlstring){
       }
     }
   }
+	//convert unit to uppercase
+	for(size_t i=0; i<SDL_strlen(hlUnitVal); i++){
+		hlUnitVal[i] = (char)SDL_toupper(hlUnitVal[i]);
+	}
   memcpy(hlErrVal,&hlstring[10],6);
   hlErrVal[6] = '\0'; //terminate string
 
@@ -981,9 +986,9 @@ void parseHalfLife(level * lev, const char * hlstring){
       lev->halfLife.unit = VALUE_UNIT_DAYS;
     }else if(SDL_strcmp(hlUnitVal,"H")==0){
       lev->halfLife.unit = VALUE_UNIT_HOURS;
-    }else if(SDL_strcmp(hlUnitVal,"M")==0){
+    }else if((SDL_strcmp(hlUnitVal,"M")==0)||(SDL_strcmp(hlUnitVal,"MIN")==0)){
       lev->halfLife.unit = VALUE_UNIT_MINUTES;
-    }else if(SDL_strcmp(hlUnitVal,"S")==0){
+    }else if((SDL_strcmp(hlUnitVal,"S")==0)||(SDL_strcmp(hlUnitVal,"SEC")==0)){
       lev->halfLife.unit = VALUE_UNIT_SECONDS;
     }else if(SDL_strcmp(hlUnitVal,"MS")==0){
       lev->halfLife.unit = VALUE_UNIT_MILLISECONDS;
@@ -1005,6 +1010,7 @@ void parseHalfLife(level * lev, const char * hlstring){
       lev->halfLife.unit = VALUE_UNIT_MEV;
     }else{
 			//assume keV if no unit given (this occurs once in the Nov 2024 ENSDF data)
+			//SDL_Log("Unit: %s\n",hlUnitVal);
       lev->halfLife.unit = VALUE_UNIT_KEV;
     }
 
@@ -1713,6 +1719,248 @@ uint8_t getDcyModeFromENSDFSubstr(const char *substr){
 	}
 }
 
+#define CCS_MAXBUFSIZE 32
+void cleanCommentStr(char *comBuff){
+	//use find and replace to de-uglify strings
+	//SDL_Log("cleaning string: %s\n",comBuff);
+	char *modComBuff;
+	modComBuff = findReplaceAllUTF8("|b","β",comBuff);
+	SDL_strlcpy(comBuff,modComBuff,118);
+	SDL_free(modComBuff);
+	modComBuff = findReplaceAllUTF8("E|g","E(γ)",comBuff);
+	SDL_strlcpy(comBuff,modComBuff,118);
+	SDL_free(modComBuff);
+	modComBuff = findReplaceAllUTF8("I|g","I(γ)",comBuff);
+	SDL_strlcpy(comBuff,modComBuff,118);
+	SDL_free(modComBuff);
+	modComBuff = findReplaceAllUTF8("|g","γ",comBuff);
+	SDL_strlcpy(comBuff,modComBuff,118);
+	SDL_free(modComBuff);
+	modComBuff = findReplaceAllUTF8("|D","Δ",comBuff);
+	SDL_strlcpy(comBuff,modComBuff,118);
+	SDL_free(modComBuff);
+	modComBuff = findReplaceAllUTF8("|d","δ",comBuff);
+	SDL_strlcpy(comBuff,modComBuff,118);
+	SDL_free(modComBuff);
+	modComBuff = findReplaceAllUTF8("|p","π",comBuff);
+	SDL_strlcpy(comBuff,modComBuff,118);
+	SDL_free(modComBuff);
+	modComBuff = findReplaceAllUTF8("|n","ν",comBuff);
+	SDL_strlcpy(comBuff,modComBuff,118);
+	SDL_free(modComBuff);
+	modComBuff = findReplaceAllUTF8("|e","ε",comBuff);
+	SDL_strlcpy(comBuff,modComBuff,118);
+	SDL_free(modComBuff);
+	modComBuff = findReplaceAllUTF8("|m","μ",comBuff);
+	SDL_strlcpy(comBuff,modComBuff,118);
+	SDL_free(modComBuff);
+	modComBuff = findReplaceAllUTF8("|q","θ",comBuff);
+	SDL_strlcpy(comBuff,modComBuff,118);
+	SDL_free(modComBuff);
+	modComBuff = findReplaceAllUTF8("|a","α",comBuff);
+	SDL_strlcpy(comBuff,modComBuff,118);
+	SDL_free(modComBuff);
+	modComBuff = findReplaceAllUTF8("|*","×",comBuff);
+	SDL_strlcpy(comBuff,modComBuff,118);
+	SDL_free(modComBuff);
+	modComBuff = findReplaceAllUTF8("|?","≈",comBuff);
+	SDL_strlcpy(comBuff,modComBuff,118);
+	SDL_free(modComBuff);
+	modComBuff = findReplaceAllUTF8("|h","χ",comBuff);
+	SDL_strlcpy(comBuff,modComBuff,118);
+	SDL_free(modComBuff);
+	modComBuff = findReplaceAllUTF8("T{-1/2}","t½",comBuff);
+	SDL_strlcpy(comBuff,modComBuff,118);
+	SDL_free(modComBuff);
+	modComBuff = findReplaceAllUTF8("|^","↑",comBuff);
+	SDL_strlcpy(comBuff,modComBuff,118);
+	SDL_free(modComBuff);
+	modComBuff = findReplaceAllUTF8("log|","log",comBuff);
+	SDL_strlcpy(comBuff,modComBuff,118);
+	SDL_free(modComBuff);
+	modComBuff = findReplaceAllUTF8("s{-","s(",comBuff);
+	SDL_strlcpy(comBuff,modComBuff,118);
+	SDL_free(modComBuff);
+	modComBuff = findReplaceAllUTF8("p{-","p(",comBuff);
+	SDL_strlcpy(comBuff,modComBuff,118);
+	SDL_free(modComBuff);
+	modComBuff = findReplaceAllUTF8("d{-","d(",comBuff);
+	SDL_strlcpy(comBuff,modComBuff,118);
+	SDL_free(modComBuff);
+	modComBuff = findReplaceAllUTF8("f{-","f(",comBuff);
+	SDL_strlcpy(comBuff,modComBuff,118);
+	SDL_free(modComBuff);
+	modComBuff = findReplaceAllUTF8("g{-","g(",comBuff);
+	SDL_strlcpy(comBuff,modComBuff,118);
+	SDL_free(modComBuff);
+	modComBuff = findReplaceAllUTF8("h{-","h(",comBuff);
+	SDL_strlcpy(comBuff,modComBuff,118);
+	SDL_free(modComBuff);
+	modComBuff = findReplaceAllUTF8("i{-","i(",comBuff);
+	SDL_strlcpy(comBuff,modComBuff,118);
+	SDL_free(modComBuff);
+	modComBuff = findReplaceAllUTF8(" ce "," CE ",comBuff);
+	SDL_strlcpy(comBuff,modComBuff,118);
+	SDL_free(modComBuff);
+	modComBuff = findReplaceAllUTF8("$Ce ","$CE ",comBuff);
+	SDL_strlcpy(comBuff,modComBuff,118);
+	SDL_free(modComBuff);
+	modComBuff = findReplaceAllUTF8(" Ms "," μs ",comBuff);
+	SDL_strlcpy(comBuff,modComBuff,118);
+	SDL_free(modComBuff);
+	modComBuff = findReplaceAllUTF8("%EC","%ε",comBuff);
+	SDL_strlcpy(comBuff,modComBuff,118);
+	SDL_free(modComBuff);
+	modComBuff = findReplaceAllUTF8("%B+","%β⁺",comBuff);
+	SDL_strlcpy(comBuff,modComBuff,118);
+	SDL_free(modComBuff);
+	modComBuff = findReplaceAllUTF8("%B-","%β⁻",comBuff);
+	SDL_strlcpy(comBuff,modComBuff,118);
+	SDL_free(modComBuff);
+	modComBuff = findReplaceAllUTF8("%B","%β",comBuff);
+	SDL_strlcpy(comBuff,modComBuff,118);
+	SDL_free(modComBuff);
+	modComBuff = findReplaceAllUTF8("CONF ","Configuration: ",comBuff);
+	SDL_strlcpy(comBuff,modComBuff,118);
+	SDL_free(modComBuff);
+
+	//handle superscript sequences
+	char ssBuff[CCS_MAXBUFSIZE];
+	char ssReplace[CCS_MAXBUFSIZE*4];
+	int len = (int)SDL_strlen(comBuff);
+	for(int i=0; i<len;i++){
+		if(SDL_strncmp(&comBuff[i],"{+",2)==0){
+			for(int j=0; j<(CCS_MAXBUFSIZE-1); j++){
+				if(comBuff[i+j] != '}'){
+					ssBuff[j] = comBuff[i+j];
+				}else{
+					ssBuff[j] = '}';
+					ssBuff[j+1] = '\0'; //terminate string
+					break;
+				}
+				if(j==(CCS_MAXBUFSIZE-2)){
+					SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,"Invalid superscript sequence in comment: %s\n",comBuff);
+					ssBuff[j+1] = '\0'; //terminate string
+				}
+			}
+			char *modssBuff;
+			modssBuff = findReplaceAllUTF8("{+","",ssBuff);
+			SDL_strlcpy(ssReplace,modssBuff,CCS_MAXBUFSIZE*4);
+			SDL_free(modssBuff);
+			modssBuff = findReplaceAllUTF8("}","",ssReplace);
+			SDL_strlcpy(ssReplace,modssBuff,CCS_MAXBUFSIZE*4);
+			SDL_free(modssBuff);
+			modssBuff = findReplaceAllUTF8("0","⁰",ssReplace);
+			SDL_strlcpy(ssReplace,modssBuff,CCS_MAXBUFSIZE*4);
+			SDL_free(modssBuff);
+			modssBuff = findReplaceAllUTF8("1","¹",ssReplace);
+			SDL_strlcpy(ssReplace,modssBuff,CCS_MAXBUFSIZE*4);
+			SDL_free(modssBuff);
+			modssBuff = findReplaceAllUTF8("2","²",ssReplace);
+			SDL_strlcpy(ssReplace,modssBuff,CCS_MAXBUFSIZE*4);
+			SDL_free(modssBuff);
+			modssBuff = findReplaceAllUTF8("3","³",ssReplace);
+			SDL_strlcpy(ssReplace,modssBuff,CCS_MAXBUFSIZE*4);
+			SDL_free(modssBuff);
+			modssBuff = findReplaceAllUTF8("4","⁴",ssReplace);
+			SDL_strlcpy(ssReplace,modssBuff,CCS_MAXBUFSIZE*4);
+			SDL_free(modssBuff);
+			modssBuff = findReplaceAllUTF8("5","⁵",ssReplace);
+			SDL_strlcpy(ssReplace,modssBuff,CCS_MAXBUFSIZE*4);
+			SDL_free(modssBuff);
+			modssBuff = findReplaceAllUTF8("6","⁶",ssReplace);
+			SDL_strlcpy(ssReplace,modssBuff,CCS_MAXBUFSIZE*4);
+			SDL_free(modssBuff);
+			modssBuff = findReplaceAllUTF8("7","⁷",ssReplace);
+			SDL_strlcpy(ssReplace,modssBuff,CCS_MAXBUFSIZE*4);
+			SDL_free(modssBuff);
+			modssBuff = findReplaceAllUTF8("8","⁸",ssReplace);
+			SDL_strlcpy(ssReplace,modssBuff,CCS_MAXBUFSIZE*4);
+			SDL_free(modssBuff);
+			modssBuff = findReplaceAllUTF8("9","⁹",ssReplace);
+			SDL_strlcpy(ssReplace,modssBuff,CCS_MAXBUFSIZE*4);
+			SDL_free(modssBuff);
+			modssBuff = findReplaceAllUTF8("-","⁻",ssReplace);
+			SDL_strlcpy(ssReplace,modssBuff,CCS_MAXBUFSIZE*4);
+			SDL_free(modssBuff);
+			modssBuff = findReplaceAllUTF8("+","⁺",ssReplace);
+			SDL_strlcpy(ssReplace,modssBuff,CCS_MAXBUFSIZE*4);
+			SDL_free(modssBuff);
+			modssBuff = findReplaceAllUTF8("/","ᐟ",ssReplace);
+			SDL_strlcpy(ssReplace,modssBuff,CCS_MAXBUFSIZE*4);
+			SDL_free(modssBuff);
+			modssBuff = findReplaceAllUTF8(",","̓",ssReplace);
+			SDL_strlcpy(ssReplace,modssBuff,CCS_MAXBUFSIZE*4);
+			SDL_free(modssBuff);
+			modComBuff = findReplaceAllUTF8(ssBuff,ssReplace,comBuff);
+			SDL_strlcpy(comBuff,modComBuff,118);
+			SDL_free(modComBuff);
+			i += ((int)SDL_strlen(ssReplace)); //jump forward in string until after the superscript sequence
+			len = (int)SDL_strlen(comBuff); //recalculate
+		}
+	}
+	
+	//handle italic sequences
+	//since we don't have italic font glyphs, and these are mostly used for uncertainties,
+	//just enclose the values in brackets
+	len = (int)SDL_strlen(comBuff);
+	for(int i=0; i<len;i++){
+		uint8_t italicIsErr = 1; //flag as to whether the italicized value is an error (generally the case if it's a number)
+		if(SDL_strncmp(&comBuff[i],"{I",2)==0){
+			for(int j=0; j<(CCS_MAXBUFSIZE-1); j++){
+				if((j>1)&&(SDL_isalpha(comBuff[i+j]))){
+					italicIsErr = 0;	
+				}
+				if(comBuff[i+j] != '}'){
+					ssBuff[j] = comBuff[i+j];
+				}else if(comBuff[i+j] == '\0'){
+					//early end of input string
+					ssBuff[j] = '}';
+					ssBuff[j+1] = '\0'; //terminate string
+					break;
+				}else{
+					ssBuff[j] = '}';
+					ssBuff[j+1] = '\0'; //terminate string
+					break;
+				}
+				if(j==(CCS_MAXBUFSIZE-2)){
+					ssBuff[j+1] = '\0'; //terminate string
+				}
+			}
+			char *modssBuff;
+			if(italicIsErr){
+				modssBuff = findReplaceAllUTF8("{I","(",ssBuff);
+				SDL_strlcpy(ssReplace,modssBuff,CCS_MAXBUFSIZE*4);
+				SDL_free(modssBuff);
+				modssBuff = findReplaceAllUTF8("}",")",ssReplace);
+				SDL_strlcpy(ssReplace,modssBuff,CCS_MAXBUFSIZE*4);
+				SDL_free(modssBuff);
+			}else{
+				modssBuff = findReplaceAllUTF8("{I","",ssBuff);
+				SDL_strlcpy(ssReplace,modssBuff,CCS_MAXBUFSIZE*4);
+				SDL_free(modssBuff);
+				modssBuff = findReplaceAllUTF8("}","",ssReplace);
+				SDL_strlcpy(ssReplace,modssBuff,CCS_MAXBUFSIZE*4);
+				SDL_free(modssBuff);
+			}
+			modComBuff = findReplaceAllUTF8(ssBuff,ssReplace,comBuff);
+			SDL_strlcpy(comBuff,modComBuff,118);
+			SDL_free(modComBuff);
+			i += ((int)SDL_strlen(ssReplace)); //jump forward in string until after the superscript sequence
+			len = (int)SDL_strlen(comBuff); //recalculate
+		}
+	}
+
+	//clean up any remaining brackets
+	modComBuff = findReplaceAllUTF8("{","(",comBuff);
+	SDL_strlcpy(comBuff,modComBuff,118);
+	SDL_free(modComBuff);
+	modComBuff = findReplaceAllUTF8("}",")",comBuff);
+	SDL_strlcpy(comBuff,modComBuff,118);
+	SDL_free(modComBuff);
+
+}
+
 //parses a substring containing info on a single decay mode
 //eg. '%EC+%B+>99.87'
 //returns 1 if successful
@@ -1990,6 +2238,8 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 	uint8_t qValDecModeType = DECAYMODE_ENUM_LENGTH; //the specific decay mode specified by Q-value
 	double longestIsomerHl = 0.0; //longest isomeric state half-life for a given nucleus
 	uint8_t isomerMValInNucl = 0;
+	uint8_t lvlComLineIsGood = 0;
+	uint8_t tranComLineIsGood = 0;
 	sp_var_data varDat;
 	reaction_mapping rxnMap;
   
@@ -2420,6 +2670,8 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 
 							//parse and handle level properties not related to energy
 							nd->levels[nd->numLvls-1].populatingRxns = 0;
+							nd->levels[nd->numLvls-1].hasComment = 0;
+							nd->levels[nd->numLvls-1].commentStrBufStartPos = MAX_UINT32_VAL;
 
 							uint8_t halfInt = 0;
 							if(((nd->nuclData[nd->numNucl].N + nd->nuclData[nd->numNucl].Z) % 2) != 0){
@@ -2529,6 +2781,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 					}
 
 					//add decay modes
+					uint8_t currentLineIsDcyMode = 0;
 					if(nd->nuclData[nd->numNucl].numLevels>0){ //check that indices are valid
 						//can parse multiple 'L' lines, but only one 'cL' (comment) line
 						//logic here is that if there are many known decay modes, they will be
@@ -2565,6 +2818,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 									}
 									if(parseDcyModeSubstr(nd,nd->numDecModes,dmBuff)==1){
 										decModeLineParsed = 1;
+										currentLineIsDcyMode = 1; //so as not to confuse this with a comment later...
 										nd->levels[nd->numLvls-1].numDecModes++;
 										nd->numDecModes++;
 
@@ -2654,7 +2908,155 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 						}
 					}
 
+					if(currentLineIsDcyMode == 0){
+						if(nd->nuclData[nd->numNucl].numLevels>0){ //check that indices are valid
+							if(SDL_strcmp(typebuff+1,"cL")==0){
+								//comment on the current level
+								//SDL_Log("line: %s\n",line);
+								
+
+								//find the beginning of the comment (remove leading spaces)
+								int32_t len = (int32_t)SDL_strlen(line) - 9;
+								int32_t comBufStart = 0;
+								for(int32_t i=0; i<len; i++){
+									if(SDL_isspace(line[9+i])){
+										comBufStart++;
+									}else{
+										break;
+									}
+								}
+
+								char comBuff[128];
+								memcpy(comBuff, &line[9+comBufStart], 118);
+								comBuff[118] = '\0';
+								len = (int32_t)SDL_strlen(comBuff); //length of the comment
+
+								//remove all repeat spaces from the comment (some are formatted very weirdly)
+								for(int32_t i=(len-1); i>=0; i--){
+									if((SDL_isspace(comBuff[i]))&&(SDL_isspace(comBuff[i+1]))){
+										//shift all characters back by one
+										for(int32_t j=i; j<(len-1); j++){
+											comBuff[j] = comBuff[j+1];
+										}
+										len--; //correct the comment length
+									}else if((i > 0)&&((comBuff[i-1] == '$')&&(SDL_isspace(comBuff[i])))){
+										//Cannot have spaces after $ (comment type identifier)
+										//shift all characters back by one
+										for(int32_t j=i; j<(len-1); j++){
+											comBuff[j] = comBuff[j+1];
+										}
+										len--; //correct the comment length
+									}
+								}
+								comBuff[len] = '\0';
+								
+								//SDL_Log("comBuff: %s, len: %u\n",comBuff,len);
+								if(len >= 1){
+
+									//figure out the comment type
+									//(and only allow one comment of each type)
+									if((len >=3)&&((SDL_strncmp(comBuff,"E$",2)==0)||(SDL_strncmp(comBuff,"E ",2)==0))){
+										if(!(nd->levels[nd->numLvls-1].hasComment & (uint8_t)(1U << LCOMMENT_ELEVEL))){
+											nd->levels[nd->numLvls-1].hasComment |= (uint8_t)(1U << LCOMMENT_ELEVEL);
+											lvlComLineIsGood = 2; //new comment
+											comBuff[1] = '$'; comBuff[2] = (char)SDL_toupper(comBuff[2]); //enforce standard formatting
+										}else{
+											lvlComLineIsGood = 0;
+										}
+									}else if((len >=3)&&((SDL_strncmp(comBuff,"J$",2)==0)||(SDL_strncmp(comBuff,"J ",2)==0))){
+										if(!(nd->levels[nd->numLvls-1].hasComment & (uint8_t)(1U << LCOMMENT_JPI))){
+											nd->levels[nd->numLvls-1].hasComment |= (uint8_t)(1U << LCOMMENT_JPI);
+											lvlComLineIsGood = 2; //new comment
+											comBuff[1] = '$'; comBuff[2] = (char)SDL_toupper(comBuff[2]); //enforce standard formatting
+										}else{
+											lvlComLineIsGood = 0;
+										}
+									}else if((len >=3)&&((SDL_strncmp(comBuff,"T$",2)==0)||(SDL_strncmp(comBuff,"T ",2)==0))){
+										if(!(nd->levels[nd->numLvls-1].hasComment & (uint8_t)(1U << LCOMMENT_HALFLIFE))){
+											nd->levels[nd->numLvls-1].hasComment |= (uint8_t)(1U << LCOMMENT_HALFLIFE);
+											lvlComLineIsGood = 2; //new comment
+											comBuff[1] = '$'; comBuff[2] = (char)SDL_toupper(comBuff[2]); //enforce standard formatting
+										}else{
+											lvlComLineIsGood = 0;
+										}
+									}else if(SDL_strncmp(comBuff,"$",1)==0){
+										lvlComLineIsGood = 0;
+									}else if(SDL_strncmp(comBuff,"MOM",3)==0){
+										//moment (unsupported for now)
+										lvlComLineIsGood = 0;
+									}else if(SDL_strncmp(comBuff,"BE2$",4)==0){
+										//B(E2) (unsupported for now)
+										lvlComLineIsGood = 0;
+									}
+
+									if(lvlComLineIsGood > 0){
+
+										//remove trailing spaces from comment
+										for(int32_t i=(int32_t)(len-1); i>0; i--){
+											if(SDL_isspace(comBuff[i])){
+												comBuff[i] = '\0';
+												len = i;
+											}else{
+												break;
+											}
+										}
+
+										//SDL_Log("comBuff2: %s, len: %u, lvlComLineIsGood: %u\n",comBuff,len,lvlComLineIsGood);
+
+										cleanCommentStr(comBuff); //use proper unicode symbols
+										len = (int32_t)SDL_strlen(comBuff); //figure out length of the comment after modification
+
+										//SDL_Log("comBuff3: %s, len: %u, lvlComLineIsGood: %u\n",comBuff,len,lvlComLineIsGood);
+										
+										//SDL_Log("%u %u\n",nd->ensdfStrBufLen,len);
+										if((nd->ensdfStrBufLen + (uint32_t)(len + 1)) <= ENSDFSTRBUFSIZE){
+											if(lvlComLineIsGood == 2){
+												//new comment, make sure that the previous comment ends with a period
+												if(nd->ensdfStrBufLen >= 2){
+													if(nd->ensdfStrBuf[nd->ensdfStrBufLen-1] == '\0'){
+														if(nd->ensdfStrBuf[nd->ensdfStrBufLen-2] != '.'){
+															nd->ensdfStrBuf[nd->ensdfStrBufLen-1] = '.';
+															nd->ensdfStrBuf[nd->ensdfStrBufLen] = '\0';
+															nd->ensdfStrBufLen++;
+														}
+													}else{
+														SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,"unusual ENSDF comment end: %c\n",nd->ensdfStrBuf[nd->ensdfStrBufLen-1]);
+													}
+												}
+											}
+											//copy comment to buffer
+											SDL_strlcpy(&nd->ensdfStrBuf[nd->ensdfStrBufLen],comBuff,(size_t)(len+1));
+											if(nd->levels[nd->numLvls-1].commentStrBufStartPos == MAX_UINT32_VAL){
+												//this level doesn't have any comments yet
+												nd->levels[nd->numLvls-1].commentStrBufStartPos = nd->ensdfStrBufLen;
+											}else if(lvlComLineIsGood == 1){
+												//level comment is being continued from the previous line,
+												//(this is also not the first line of the comment, otherwise lvlComLineIsGood == 2)
+												//remove the null terminator (replace with space)
+												nd->ensdfStrBuf[nd->ensdfStrBufLen-1] = ' ';
+											}
+											nd->ensdfStrBufLen += (uint32_t)(len+1);
+										}else{
+											SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"cannot parse level comment, buffer size is too small (%u)!\n",ENSDFSTRBUFSIZE);
+											exit(-1);	
+										}
+
+										if(lvlComLineIsGood == 2){
+											lvlComLineIsGood = 1; //first line of the new comment is finished
+										}
+
+									}
+								}
+							}else{
+								lvlComLineIsGood = 0; //possible non-comment line in-between two comments
+							}
+						}
+					}else{
+						lvlComLineIsGood = 0; //possible decay mode in-between two comments
+					}
+
 					//add gamma rays
+					uint8_t currentLineIsGamProp = 0;
 					if(nd->nuclData[nd->numNucl].numLevels>0){ //check that indices are valid
 						if(SDL_strcmp(typebuff,"  G")==0){
 							//SDL_Log("%s\n",line);
@@ -2708,6 +3110,9 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 							}
 							
 							uint32_t tranInd = nd->levels[nd->numLvls-1].firstTran + (uint32_t)(nd->levels[nd->numLvls-1].numTran);
+
+							nd->tran[tranInd].hasComment = 0;
+							nd->tran[tranInd].commentStrBufStartPos = MAX_UINT32_VAL;
 
 							//process gamma energy
 							
@@ -3319,6 +3724,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 								SDL_strlcpy(tval,tok,80);
 								if(SDL_strcmp(tval,"CC")==0){
 									//SDL_Log("Found conversion coefficient in line: %s\n",line);
+									currentLineIsGamProp = 1;
 									if(nd->tran[tranInd].icc.val == 0.0f){
 										tok = SDL_strtok_r(NULL," $={},",&saveptr);
 										if(tok!=NULL){
@@ -3409,6 +3815,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 									}
 								}else if(SDL_strcmp(tval,"FL")==0){
 									//SDL_Log("Found final level specified in line: %s\n",line);
+									currentLineIsGamProp = 1;
 									tok = SDL_strtok_r(NULL," $={},",&saveptr);
 									if(tok!=NULL){
 										SDL_strlcpy(tval,tok,80);
@@ -3479,6 +3886,166 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 								}
 							}
 						}
+					}
+
+					if(currentLineIsGamProp == 0){
+						if(nd->nuclData[nd->numNucl].numLevels>0){ //check that indices are valid
+							if(SDL_strcmp(typebuff+1,"cG")==0){
+								//comment on the current gamma
+								//SDL_Log("line: %s\n",line);
+
+								//find the beginning of the comment (remove leading spaces)
+								int32_t len = (int32_t)SDL_strlen(line) - 9;
+								int32_t comBufStart = 0;
+								for(int32_t i=0; i<len; i++){
+									if(SDL_isspace(line[9+i])){
+										comBufStart++;
+									}else{
+										break;
+									}
+								}
+
+								char comBuff[128];
+								memcpy(comBuff, &line[9+comBufStart], 118);
+								comBuff[118] = '\0';
+								len = (int32_t)SDL_strlen(comBuff); //length of the comment
+								//SDL_Log("comBuff: %s, len: %u\n",comBuff,len);
+
+								//pre-process to clean up formatting
+								if(len > 0){
+									char *modComBuff;
+									modComBuff = findReplaceAllUTF8("M,MR$","M$",comBuff);
+									SDL_strlcpy(comBuff,modComBuff,118);
+									SDL_free(modComBuff);
+									len = (int32_t)SDL_strlen(comBuff); //new length of the comment
+								}
+
+								//remove all repeat spaces from the comment (some are formatted very weirdly)
+								for(int32_t i=(len-2); i>=0; i--){
+									if((SDL_isspace(comBuff[i]))&&(SDL_isspace(comBuff[i+1]))){
+										//shift all characters back by one
+										for(int32_t j=i; j<(len-1); j++){
+											comBuff[j] = comBuff[j+1];
+										}
+										len--; //correct the comment length
+									}else if((i > 0)&&((comBuff[i-1] == '$')&&(SDL_isspace(comBuff[i])))){
+										//Cannot have spaces after $ (comment type identifier)
+										//shift all characters back by one
+										for(int32_t j=i; j<(len-1); j++){
+											comBuff[j] = comBuff[j+1];
+										}
+										len--; //correct the comment length
+									}
+								}
+								comBuff[len] = '\0';
+
+								//SDL_Log("comBuff: %s, len: %u\n",comBuff,len);
+								if(len >= 1){
+
+									uint32_t tranInd = nd->levels[nd->numLvls-1].firstTran + (uint32_t)(nd->levels[nd->numLvls-1].numTran - 1);
+
+									//figure out the comment type
+									//(and only allow one comment of each type)
+									if((len >=3)&&((SDL_strncmp(comBuff,"E$",2)==0)||(SDL_strncmp(comBuff,"E ",2)==0))){
+										if(!(nd->tran[tranInd].hasComment & (uint8_t)(1U << TCOMMENT_EGAMMA))){
+											nd->tran[tranInd].hasComment |= (uint8_t)(1U << TCOMMENT_EGAMMA);
+											tranComLineIsGood = 2; //new comment
+											comBuff[1] = '$'; comBuff[2] = (char)SDL_toupper(comBuff[2]); //enforce standard formatting
+										}else{
+											tranComLineIsGood = 0;
+										}
+									}else if((len >=3)&&((SDL_strncmp(comBuff,"M$",2)==0)||(SDL_strncmp(comBuff,"M ",2)==0))){
+										if(!(nd->tran[tranInd].hasComment & (uint8_t)(1U << TCOMMENT_MGAMMA))){
+											nd->tran[tranInd].hasComment |= (uint8_t)(1U << TCOMMENT_MGAMMA);
+											tranComLineIsGood = 2; //new comment
+											comBuff[1] = '$'; comBuff[2] = (char)SDL_toupper(comBuff[2]); //enforce standard formatting
+										}else{
+											tranComLineIsGood = 0;
+										}
+									}else if((len >=4)&&(SDL_strncmp(comBuff,"RI",2)==0)){
+										if(!(nd->tran[tranInd].hasComment & (uint8_t)(1U << TCOMMENT_IGAMMA))){
+											nd->tran[tranInd].hasComment |= (uint8_t)(1U << TCOMMENT_IGAMMA);
+											tranComLineIsGood = 2; //new comment
+											comBuff[2] = '$'; comBuff[3] = (char)SDL_toupper(comBuff[3]); //enforce standard formatting
+										}else{
+											tranComLineIsGood = 0;
+										}
+									}else if((len >=4)&&(SDL_strncmp(comBuff,"MR",2)==0)){
+										if(!(nd->tran[tranInd].hasComment & (uint8_t)(1U << TCOMMENT_DELTA))){
+											nd->tran[tranInd].hasComment |= (uint8_t)(1U << TCOMMENT_DELTA);
+											tranComLineIsGood = 2; //new comment
+											comBuff[2] = '$'; comBuff[3] = (char)SDL_toupper(comBuff[3]); //enforce standard formatting
+										}else{
+											tranComLineIsGood = 0;
+										}
+									}else if(SDL_strncmp(comBuff,"$",1)==0){
+										tranComLineIsGood = 0;
+									}
+
+									if(tranComLineIsGood > 0){
+
+										//remove trailing spaces from comment
+										for(int32_t i=(int32_t)(len-1); i>0; i--){
+											if(SDL_isspace(comBuff[i])){
+												comBuff[i] = '\0';
+												len = i;
+											}else{
+												break;
+											}
+										}
+
+										//SDL_Log("comBuff2: %s, len: %u, tranComLineIsGood: %u\n",comBuff,len,tranComLineIsGood);
+										
+										cleanCommentStr(comBuff); //use proper unicode symbols
+										len = (int32_t)SDL_strlen(comBuff); //figure out length of the comment after modification
+
+										//SDL_Log("comBuff3: %s, len: %u, tranComLineIsGood: %u\n",comBuff,len,tranComLineIsGood);
+										
+										//SDL_Log("%u %u\n",nd->ensdfStrBufLen,len);
+										if((nd->ensdfStrBufLen + (uint32_t)(len + 1)) <= ENSDFSTRBUFSIZE){
+											if(tranComLineIsGood == 2){
+												//new comment, make sure that the previous comment ends with a period
+												if(nd->ensdfStrBufLen >= 2){
+													if(nd->ensdfStrBuf[nd->ensdfStrBufLen-1] == '\0'){
+														if(nd->ensdfStrBuf[nd->ensdfStrBufLen-2] != '.'){
+															nd->ensdfStrBuf[nd->ensdfStrBufLen-1] = '.';
+															nd->ensdfStrBuf[nd->ensdfStrBufLen] = '\0';
+															nd->ensdfStrBufLen++;
+														}
+													}else{
+														SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,"unusual ENSDF comment end: %c\n",nd->ensdfStrBuf[nd->ensdfStrBufLen-1]);
+													}
+												}
+											}
+											//copy comment to buffer
+											SDL_strlcpy(&nd->ensdfStrBuf[nd->ensdfStrBufLen],comBuff,(size_t)(len+1));
+											if(nd->tran[tranInd].commentStrBufStartPos == MAX_UINT32_VAL){
+												//this transition doesn't have any comments yet
+												nd->tran[tranInd].commentStrBufStartPos = nd->ensdfStrBufLen;
+											}else if(tranComLineIsGood == 1){
+												//transition comment is being continued from the previous line,
+												//(this is also not the first line of the comment, otherwise tranComLineIsGood == 2)
+												//remove the null terminator (replace with space)
+												nd->ensdfStrBuf[nd->ensdfStrBufLen-1] = ' ';
+											}
+											nd->ensdfStrBufLen += (uint32_t)(len+1);
+										}else{
+											SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"cannot parse transition comment, buffer size is too small (%u)!\n",ENSDFSTRBUFSIZE);
+											exit(-1);	
+										}
+
+										if(tranComLineIsGood == 2){
+											tranComLineIsGood = 1; //first line of the new comment is finished
+										}
+
+									}
+								}
+							}else{
+								tranComLineIsGood = 0; //possible non-comment line in-between two comments
+							}
+						}
+					}else{
+						tranComLineIsGood = 0; //possible decay mode in-between two comments
 					}
 					//SDL_Log("Done parsing gamma line.\n");
 
@@ -4253,7 +4820,7 @@ int parseMassData(const char * filePath, ndata * nd){
 								double snCalcVal = getRawDblValFromDB(&nd->nuclData[nuclInd2].massExcess) + getRawDblValFromDB(&nd->nuclData[nnuclInd].massExcess) - getRawDblValFromDB(&nd->nuclData[i].massExcess);
 								if(SDL_fabs(snCalcVal - getRawValFromDB(&nd->nuclData[i].sn)) > SDL_fabs(0.3*getRawValFromDB(&nd->nuclData[i].sn))){
 									//replace value
-									SDL_Log("  Replacing S(n) for nuclide with  N = %3u, Z = %3u.\n",nd->nuclData[i].N,nd->nuclData[i].Z);
+									//SDL_Log("  Replacing S(n) for nuclide with  N = %3u, Z = %3u.\n",nd->nuclData[i].N,nd->nuclData[i].Z);
 									double snCalcErr = SDL_sqrt(SDL_pow(getRawDblErrFromDB(&nd->nuclData[nuclInd2].massExcess),2.0) + SDL_pow(getRawDblErrFromDB(&nd->nuclData[nnuclInd].massExcess),2.0) + SDL_pow(getRawDblErrFromDB(&nd->nuclData[i].massExcess),2.0));
 									uint8_t numSigFigs = 0;
 									int8_t exponent = 0;
@@ -4291,7 +4858,7 @@ int parseMassData(const char * filePath, ndata * nd){
 								double spCalcVal = getRawDblValFromDB(&nd->nuclData[nuclInd2].massExcess) + getRawDblValFromDB(&nd->nuclData[pnuclInd].massExcess) - getRawDblValFromDB(&nd->nuclData[i].massExcess);
 								if(SDL_fabs(spCalcVal - getRawValFromDB(&nd->nuclData[i].sp)) > SDL_fabs(0.3*getRawValFromDB(&nd->nuclData[i].sp))){
 									//replace value
-									SDL_Log("  Replacing S(p) for nuclide with  N = %3u, Z = %3u.\n",nd->nuclData[i].N,nd->nuclData[i].Z);
+									//SDL_Log("  Replacing S(p) for nuclide with  N = %3u, Z = %3u.\n",nd->nuclData[i].N,nd->nuclData[i].Z);
 									double spCalcErr = SDL_sqrt(SDL_pow(getRawDblErrFromDB(&nd->nuclData[nuclInd2].massExcess),2.0) + SDL_pow(getRawDblErrFromDB(&nd->nuclData[pnuclInd].massExcess),2.0) + SDL_pow(getRawDblErrFromDB(&nd->nuclData[i].massExcess),2.0));
 									uint8_t numSigFigs = 0;
 									int8_t exponent = 0;
@@ -4329,7 +4896,7 @@ int parseMassData(const char * filePath, ndata * nd){
 								double qaCalcVal = getRawDblValFromDB(&nd->nuclData[i].massExcess) - getRawDblValFromDB(&nd->nuclData[nuclInd2].massExcess) - getRawDblValFromDB(&nd->nuclData[anuclInd].massExcess);
 								if(SDL_fabs(qaCalcVal - getRawValFromDB(&nd->nuclData[i].qalpha)) > SDL_fabs(0.3*getRawValFromDB(&nd->nuclData[i].qalpha))){
 									//replace value
-									SDL_Log("  Replacing Q(α) for nuclide with  N = %3u, Z = %3u.\n",nd->nuclData[i].N,nd->nuclData[i].Z);
+									//SDL_Log("  Replacing Q(α) for nuclide with  N = %3u, Z = %3u.\n",nd->nuclData[i].N,nd->nuclData[i].Z);
 									double qaCalcErr = SDL_sqrt(SDL_pow(getRawDblErrFromDB(&nd->nuclData[nuclInd2].massExcess),2.0) + SDL_pow(getRawDblErrFromDB(&nd->nuclData[anuclInd].massExcess),2.0) + SDL_pow(getRawDblErrFromDB(&nd->nuclData[i].massExcess),2.0));
 									uint8_t numSigFigs = 0;
 									int8_t exponent = 0;
@@ -4367,7 +4934,7 @@ int parseMassData(const char * filePath, ndata * nd){
 								double qbCalcVal = getRawDblValFromDB(&nd->nuclData[i].massExcess) - getRawDblValFromDB(&nd->nuclData[nuclInd2].massExcess);
 								if(SDL_fabs(qbCalcVal - getRawValFromDB(&nd->nuclData[i].qbeta)) > SDL_fabs(0.3*getRawValFromDB(&nd->nuclData[i].qbeta))){
 									//replace value
-									SDL_Log("  Replacing Q(β-) for nuclide with N = %3u, Z = %3u.\n",nd->nuclData[i].N,nd->nuclData[i].Z);
+									//SDL_Log("  Replacing Q(β-) for nuclide with N = %3u, Z = %3u.\n",nd->nuclData[i].N,nd->nuclData[i].Z);
 									//SDL_Log("    Old value: %f, new value: %f\n",getRawValFromDB(&nd->nuclData[i].qbeta),qbCalcVal);
 									double qbCalcErr = SDL_sqrt(SDL_pow(getRawDblErrFromDB(&nd->nuclData[nuclInd2].massExcess),2.0) + SDL_pow(getRawDblErrFromDB(&nd->nuclData[i].massExcess),2.0));
 									uint8_t numSigFigs = 0;
@@ -4582,6 +5149,12 @@ int parseAppData(app_data *restrict dat, const char *appBasePath){
 		return -1;
 	}else if(VALUE_UNIT_ENUM_LENGTH > /* DISABLES CODE */ (128)){
 		SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"VALUE_UNIT_ENUM_LENGTH is too large, can't store as 7 bits (eg. valWithErr->unit).\n");
+		return -1;
+	}else if(LCOMMENT_ENUM_LENGTH > /* DISABLES CODE */ (8)){
+		SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"LCOMMENT_ENUM_LENGTH is too large, can't use values as indices in a 8-bit bit-pattern (eg. level->hasComment).\n");
+		return -1;
+	}else if(TCOMMENT_ENUM_LENGTH > /* DISABLES CODE */ (8)){
+		SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"TCOMMENT_ENUM_LENGTH is too large, can't use values as indices in a 8-bit bit-pattern (eg. transition->hasComment).\n");
 		return -1;
 	}else if(MAX_RXN_STRLEN >= /* DISABLES CODE */ (255)){
 		SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"MAX_RXN_STRLEN is too large, can't use 255 as a special return value in parseRxn().\n");

@@ -29,6 +29,8 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "enums.h"
 
+#define MAX_UINT32_VAL 4294967295U
+
 //app data parameters (should all be powers of 2)
 #define MAX_NUM_STRINGS          128  //maximum number of text strings
 
@@ -38,7 +40,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #define MAX_SEARCH_RESULTS       64 //number of results to cache (max 64, indexed by corrRes bitpattern)
 #define MAX_DISP_SEARCH_RESULTS  4  //number of results to display
 #define SEARCH_RESULT_DATASIZE   4
-#define UNUSED_SEARCH_RESULT     4294967295U
+#define UNUSED_SEARCH_RESULT     MAX_UINT32_VAL
 
 //text selection parameters
 #define MAX_SELECTABLE_STRS      1024 //maximum number of onscreen text strings that can be selectable at once
@@ -49,7 +51,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 //increasing these numbers will increase the size of 
 //the nuclear database stored in memory (and on disk)
-#define ENSDFSTRBUFSIZE          262144 //2^18
+#define ENSDFSTRBUFSIZE          9400000
 #define MAXMULTPERLEVEL          3
 #define MAXNUMNUCL               3500
 #define MAXNUMLVLS               200000
@@ -63,7 +65,8 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #define MAX_SPIN_VARS            32 //maximum spin variables (ie. J1, J2, J3...) per nuclide
 
 #define ISOMER_MVAL_HL_THRESHOLD    1.0E-3 //half-life (in seconds) lower threshold for an m-value to be assigned to an isomer
-#define ISOMER_MVAL_E_THRESHOLD     0.02   //energy (keV) upper threshold for an m-value to be assigned to an isomer
+#define ISOMER_MVAL_E_THRESHOLD     0.02   //energy (keV) upper threshold for an m-value to be assigned to an isomer, if the half-life is unknown
+
 
 #define NUMSHELLCLOSURES 7
 static const uint16_t shellClosureValues[NUMSHELLCLOSURES] = {2,8,20,28,50,82,126};
@@ -134,6 +137,8 @@ typedef struct
   uint8_t numMultipoles; //only uses the first couple bits
   uint8_t multipole[MAXMULTPERLEVEL]; //bit 0: E (unset) or M (set), bits 1-4: multipole order, bits 5-6: values from tentative_mult_enum, bit 7: if set, bit 0 corresponds to quadrupole/dipole
   uint16_t finalLvlOffset; //offset of the index of the final level from the initial level (some nuclides eg. 146Nd have decays spanning more than 256 levels, so uint8_t can't be used here)
+  uint8_t hasComment; //bit-pattern specifying which ENSDF comment types are available for this transition (bit indices from tran_comment_enum)
+  uint32_t commentStrBufStartPos; //where the comments start in ensdfStrBuf
 }transition; //a transition between levels
 
 typedef struct
@@ -151,6 +156,8 @@ typedef struct
   uint8_t format; //bit 0: whether spin-parity values are half integer (if set, then spinVal is multiplied by 0.5)
   //bits 1-4: labels for special levels (see special_level_enum)
   //bits 5-7: m-value for isomer levels
+  uint8_t hasComment; //bit-pattern specifying which ENSDF comment types are available for this level (bit indices from level_comment_enum)
+  uint32_t commentStrBufStartPos; //where the comments start in ensdfStrBuf
 }level; //an individual excited level
 
 typedef struct
@@ -253,9 +260,11 @@ typedef struct
   uint16_t nuclFullInfoMaxScrollY; //maximum scroll position, in lines
   uint16_t nuclFullInfoShownColumns; //bit-pattern describing which columns are shown in the full level info view (values from level_list_column_enum)
   uint32_t nuclFullInfoSelStrMetadata;
-  uint8_t nuclFullInfoMouseOverCol, nuclFullInfoMouseOverLvlRow;
+  uint8_t nuclFullInfoMouseOverCol;
+  uint16_t nuclFullInfoMouseOverLvlRow;
   uint16_t nuclFullInfoMouseOverNuclLvl;
-  uint8_t nuclFullInfoRightClickCol, nuclFullInfoRightClickLvlRow;
+  uint8_t nuclFullInfoRightClickCol;
+  uint16_t nuclFullInfoRightClickLvlRow;
   uint16_t nuclFullInfoRightClickNuclLvl;
   uint8_t rxnMenuColumns; //how many columns to use in the reaction menu
   uint8_t mouseOverRxn, mouseHoldRxn; //which item in the reaction menu is moused-over, =255 if none
@@ -270,6 +279,8 @@ typedef struct
   uint16_t searchEntryDispStartChar, searchEntryDispNumChars; //search string display state
   uint8_t interfaceSizeInd; //user preference for UI scaling, values from ui_scale_enum
   uint8_t reactionModeInd; //user preference for reaction display mode, values from reaction_mode_enum
+  uint8_t showingTooltip; //0=no tooltip, 1=tooltip at mouse position
+  uint32_t tooltipPar; //for ENSDF comment tooltips, the index of the ENSDF string buffer where the tooltip appears
   unsigned int fcScrollInProgress : 1;
   unsigned int fcScrollFinished : 1;
   unsigned int fcNuclChangeInProgress : 1;
@@ -285,6 +296,7 @@ typedef struct
   unsigned int useLifetimes : 1;
   unsigned int useLevelListSeparationEnergies : 1;
   unsigned int useLevelListParentThresholds : 1;
+  unsigned int useLevelListCommentTooltips : 1;
   unsigned int useUIAnimations : 1;
   unsigned int drawShellClosures : 1;
   unsigned int drawPerformanceStats : 1; //0=don't draw, 1=draw
@@ -316,7 +328,7 @@ typedef struct
 {
   SDL_FRect selectableStrRect[MAX_SELECTABLE_STRS]; //position and size of selectable text
   char selectableStrTxt[MAX_SELECTABLE_STRS][MAX_SELECTABLE_STR_LEN]; //the actual strings that are selectable
-  uint8_t selectableStrProp[MAX_SELECTABLE_STRS]; //bits 0-2: font size of each selectable string (from font_size_enum), bit 3: whether string is clickable, bit 4: click action (from text_click_action_enum)
+  uint8_t selectableStrProp[MAX_SELECTABLE_STRS]; //bits 0-3: font size of each selectable string (from font_size_enum)
   uint32_t selectableStrMetadata[MAX_SELECTABLE_STRS]; //extra data for each string (eg. level in the level list)
   uint16_t numSelStrs;
   uint16_t selectedStr; //65535 if nothing selected

@@ -128,6 +128,12 @@ static int readConfigFile(FILE *file, app_state *restrict state){
         }else{
           state->ds.useLevelListParentThresholds = 0;
         }
+      }else if(strcmp(par,"use_level_list_comment_tooltips") == 0){
+        if(strcmp(val,"yes") == 0){
+          state->ds.useLevelListCommentTooltips = 1;
+        }else{
+          state->ds.useLevelListCommentTooltips = 0;
+        }
       }else if(strcmp(par,"user_interface_size") == 0){
         int sval = atoi(val);
         if((sval >= 0)&&(sval < UISCALE_ENUM_LENGTH)){
@@ -211,6 +217,11 @@ static int writeConfigFile(FILE *file, const app_rules *restrict rules, const ap
     fprintf(file,"use_level_list_parent_thresholds=yes\n");
   }else{
     fprintf(file,"use_level_list_parent_thresholds=no\n");
+  }
+  if(state->ds.useLevelListCommentTooltips){
+    fprintf(file,"use_level_list_comment_tooltips=yes\n");
+  }else{
+    fprintf(file,"use_level_list_comment_tooltips=no\n");
   }
   fprintf(file,"chart_display_mode=%u\n",state->chartView);
   if(state->ds.useUIAnimations){

@@ -87,11 +87,11 @@ int main(int argc, char *argv[]){
     SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"could not allocate application data structure.\n");
     return 0;
   }else{
-    SDL_Log("Application data structure allocated.\n");
-    SDL_Log("app_state     - allocated: %10li bytes\n",(long int)sizeof(app_state));
-    SDL_Log("app_data      - allocated: %10li bytes\n",(long int)sizeof(app_data));
-    SDL_Log("resource_data - allocated: %10li bytes\n",(long int)sizeof(resource_data));
-    SDL_Log("Total:                     %10li bytes\n",(long int)(sizeof(app_state) + sizeof(app_data) + sizeof(resource_data)));
+    SDL_Log("Application data structure allocated:\n");
+    SDL_Log("  app_state     - allocated: %10li bytes\n",(long int)sizeof(app_state));
+    SDL_Log("  app_data      - allocated: %10li bytes\n",(long int)sizeof(app_data));
+    SDL_Log("  resource_data - allocated: %10li bytes\n",(long int)sizeof(resource_data));
+    SDL_Log("  Total:                     %10li bytes\n",(long int)(sizeof(app_state) + sizeof(app_data) + sizeof(resource_data)));
   }
 
   //load preferences (needed prior to window created)

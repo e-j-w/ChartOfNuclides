@@ -440,6 +440,7 @@ SDL_FRect drawTextAlignedSized(resource_data *restrict rdat, const float xPos, c
   }else{
     TTF_SetFontWrapAlignment(rdat->font[fontSizeInd],TTF_HORIZONTAL_ALIGN_LEFT);
   }
+  //TTF_SetFontStyle(rdat->font[fontSizeInd],TTF_STYLE_UNDERLINE);
   TTF_Text *ttxt = TTF_CreateText(rdat->te,rdat->font[fontSizeInd],txt,0);
   TTF_SetTextWrapWidth(ttxt,(int)(maxWidth*rdat->uiDPIScale));
   SDL_FRect drawRect;
@@ -447,15 +448,13 @@ SDL_FRect drawTextAlignedSized(resource_data *restrict rdat, const float xPos, c
   drawRect.y = drawY;
   drawRect.w = getTextWidth(rdat,fontSizeInd,txt);
   drawRect.h = getTextHeight(rdat,fontSizeInd,txt);
+  SDL_Color drawCol = textColor;
   if(alpha != textColor.a){
-    SDL_Color drawCol = textColor;
     drawCol.a = alpha;
-    TTF_SetTextColor(ttxt,drawCol.r,drawCol.g,drawCol.b,drawCol.a);
-    TTF_DrawRendererText(ttxt,drawX,drawY);
-  }else{
-    TTF_SetTextColor(ttxt,textColor.r,textColor.g,textColor.b,textColor.a);
-    TTF_DrawRendererText(ttxt,drawX,drawY);
   }
+  TTF_SetTextColor(ttxt,drawCol.r,drawCol.g,drawCol.b,drawCol.a);
+  //TTF_SetTextColorFloat(ttxt,drawCol.r/255.0f,drawCol.g/255.0f,drawCol.b/255.0f,drawCol.a/255.0f);
+  TTF_DrawRendererText(ttxt,drawX,drawY);
   if(alignment == ALIGN_RIGHT){
     drawRect.x = xPos - (drawRect.w/rdat->uiDPIScale);
     drawRect.y = yPos;
@@ -469,6 +468,13 @@ SDL_FRect drawTextAlignedSized(resource_data *restrict rdat, const float xPos, c
   drawRect.w /= rdat->uiDPIScale;
   drawRect.h /= rdat->uiDPIScale;
   TTF_DestroyText(ttxt);
+  if((fontStyles[fontSizeInd] == FONTSTYLE_UL)||(fontStyles[fontSizeInd] == FONTSTYLE_BOLDUL)){
+    //draw an underline
+    //SDL_ttf in principle supports this OOTB, but the color is wrong
+    //(and this way gives me more control over the look and feel)
+    SDL_FColor lineCol = {drawCol.r/255.0f,drawCol.g/255.0f,drawCol.b/255.0f,drawCol.a/255.0f};
+    drawLine(rdat,drawRect.x,drawRect.y+0.93f*drawRect.h,drawRect.x+drawRect.w,drawRect.y+0.93f*drawRect.h,1.0f,lineCol,lineCol);
+  }
   return drawRect;
 }
 
@@ -482,7 +488,7 @@ SDL_FRect drawSelectableTextAlignedSizedWithMetadata(resource_data *restrict rda
       //SDL_Log("Adding selection string %u: %s\n",tss->numSelStrs,txt);
       //SDL_Log("  Rect: %0.3f %0.3f %0.3f %0.3f\n",(double)rect.x,(double)rect.y,(double)rect.w,(double)rect.h);
       tss->selectableStrRect[tss->numSelStrs] = rect;
-      tss->selectableStrProp[tss->numSelStrs] = (uint8_t)(fontSizeInd & 7U);
+      tss->selectableStrProp[tss->numSelStrs] = (uint8_t)(fontSizeInd & 15U);
       tss->selectableStrMetadata[tss->numSelStrs] = metadata;
       SDL_strlcpy(tss->selectableStrTxt[tss->numSelStrs],txt,MAX_SELECTABLE_STR_LEN);
       tss->numSelStrs++;
@@ -513,6 +519,41 @@ void drawColoredText(resource_data *restrict rdat, const float xPos, const float
 }
 void drawDefaultText(const ui_theme_rules *restrict uirules, resource_data *restrict rdat, const float xPos, const float yPos, const char *txt){
   drawDefaultTextAligned(uirules,rdat,xPos,yPos,txt,ALIGN_LEFT);
+}
+
+SDL_FRect getTooltipRect(const drawing_state *restrict ds, resource_data *restrict rdat, const float xPos, const float yPos, const char *txt){
+  float txtMaxWidth = (TOOLTIP_MAX_WIDTH - 8.0f*UI_PADDING_SIZE)*rdat->uiScale/rdat->uiDPIScale;
+  int textW = 0;
+  int textH = 0;
+  TTF_Text *ttxt = TTF_CreateText(rdat->te,rdat->font[FONTSIZE_NORMAL],txt,0);
+  TTF_GetTextSize(ttxt,&textW,&textH);
+  if(textW > (int)(txtMaxWidth*rdat->uiDPIScale)){
+    //text needs to be wrapped
+    TTF_SetTextWrapWidth(ttxt,(int)(txtMaxWidth*rdat->uiDPIScale));
+    TTF_GetTextSize(ttxt,&textW,&textH);
+  }
+  TTF_DestroyText(ttxt);
+  float width = ((float)textW/rdat->uiDPIScale) + 8.0f*UI_PADDING_SIZE*rdat->uiScale/rdat->uiDPIScale;
+  float height = ((float)textH/rdat->uiDPIScale) + 8.0f*UI_PADDING_SIZE*rdat->uiScale/rdat->uiDPIScale;
+  float xPosOut = xPos;
+  float yPosOut = yPos;
+  if(xPos + width > ds->windowXRes){
+    xPosOut -= (width + 2.0f*UI_PADDING_SIZE*rdat->uiScale/rdat->uiDPIScale);
+  }
+  if(yPos + height > ds->windowYRes){
+    yPosOut -= (height + 2.0f*UI_PADDING_SIZE*rdat->uiScale/rdat->uiDPIScale);
+  }
+
+  SDL_FRect rect = {xPosOut, yPosOut, width, height};
+  return rect;
+}
+
+void drawTooltipBox(const ui_theme_rules *restrict uirules, resource_data *restrict rdat, const SDL_FRect rect, const float alpha, const char *txt){
+
+  float txtMaxWidth = (TOOLTIP_MAX_WIDTH - 8.0f*UI_PADDING_SIZE)*rdat->uiScale/rdat->uiDPIScale;
+  drawPanelBG(uirules,rdat,rect,alpha);
+  drawTextAlignedSized(rdat,rect.x + 4*UI_PADDING_SIZE*rdat->uiScale/rdat->uiDPIScale,rect.y + 4*UI_PADDING_SIZE*rdat->uiScale/rdat->uiDPIScale,blackCol8Bit,FONTSIZE_NORMAL,(Uint8)(alpha*255.0f),txt,ALIGN_LEFT,(Uint16)txtMaxWidth);
+
 }
 
 //draws a flat colored rectangle, without transparency

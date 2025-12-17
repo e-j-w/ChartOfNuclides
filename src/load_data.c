@@ -205,14 +205,13 @@ int importAppData(app_data *restrict dat, resource_data *restrict rdat){
   }
 
   for(uint8_t i=0; i<FONTSIZE_ENUM_LENGTH; i++){
-    if(fontStyles[i]==TTF_STYLE_BOLD){
+    if((fontStyles[i]==FONTSTYLE_BOLD) || (fontStyles[i]==FONTSTYLE_BOLDUL)){
       //bold font
       rdat->font[i] = TTF_OpenFontIO(SDL_IOFromConstMem(rdat->fontDataBold,(size_t)fontFilesizeBold),false,(float)(fontSizes[i]*rdat->uiScale));
-      TTF_SetFontStyle(rdat->font[i],TTF_STYLE_NORMAL); //glyphs are already bolded
     }else{
       rdat->font[i] = TTF_OpenFontIO(SDL_IOFromConstMem(rdat->fontData,(size_t)fontFilesize),false,(float)(fontSizes[i]*rdat->uiScale));
-      TTF_SetFontStyle(rdat->font[i],fontStyles[i]);
     }
+    TTF_SetFontStyle(rdat->font[i],TTF_STYLE_NORMAL); //bold or normal weights are based on the font glyphs themselves
     if(rdat->font[i]==NULL){
       SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,"Error","App data file read error - unable to load resource.",rdat->window);
       SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"importAppData - couldn't read font resource %u - %s.\n",i,SDL_GetError());
@@ -347,14 +346,13 @@ int regenerateThemeAndFontCache(app_data *restrict dat, resource_data *restrict 
   }
 
   for(uint8_t i=0; i<FONTSIZE_ENUM_LENGTH; i++){
-    if(fontStyles[i]==TTF_STYLE_BOLD){
+    if((fontStyles[i]==FONTSTYLE_BOLD) || (fontStyles[i]==FONTSTYLE_BOLDUL)){
       //bold font
       rdat->font[i] = TTF_OpenFontIO(SDL_IOFromConstMem(rdat->fontDataBold,(size_t)fontFilesizeBold),false,(float)(fontSizes[i]*rdat->uiScale));
-      TTF_SetFontStyle(rdat->font[i],TTF_STYLE_NORMAL); //glyphs are already bolded
     }else{
       rdat->font[i] = TTF_OpenFontIO(SDL_IOFromConstMem(rdat->fontData,(size_t)fontFilesize),false,(float)(fontSizes[i]*rdat->uiScale));
-      TTF_SetFontStyle(rdat->font[i],fontStyles[i]);
     }
+    TTF_SetFontStyle(rdat->font[i],TTF_STYLE_NORMAL); //bold or normal weights are based on the font glyphs themselves
     if(rdat->font[i]==NULL){
       SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,"Error","App data file read error - unable to load resource.",rdat->window);
       SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"regenerateThemeAndFontCache - couldn't read font resource %u - %s.\n",i,SDL_GetError());

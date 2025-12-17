@@ -22,7 +22,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "formats.h"
 
-#define STR_METADATA_UNUSED 4294967295U
+#define STR_METADATA_UNUSED MAX_UINT32_VAL
 
 #define HALFPI 1.5708f
 
@@ -65,6 +65,9 @@ void drawColoredTextAligned(resource_data *restrict rdat, const float xPos, cons
 void drawColoredText(resource_data *restrict rdat, const float xPos, const float yPos, const SDL_Color textColor, const char *txt);
 void drawDefaultTextAligned(const ui_theme_rules *restrict uirules, resource_data *restrict rdat, const float xPos, const float yPos, const char *txt, const uint8_t alignment);
 void drawDefaultText(const ui_theme_rules *restrict uirules, resource_data *restrict rdat, const float xPos, const float yPos, const char *txt);
+
+SDL_FRect getTooltipRect(const drawing_state *restrict ds, resource_data *restrict rdat, const float xPos, const float yPos, const char *txt);
+void drawTooltipBox(const ui_theme_rules *restrict uirules, resource_data *restrict rdat, const SDL_FRect rect, const float alpha, const char *txt);
 
 void drawFlatRect(resource_data *restrict rdat, const SDL_FRect rect, const SDL_FColor col);
 void drawFlatBG(const drawing_state *restrict ds, resource_data *restrict rdat, const SDL_FColor col);
