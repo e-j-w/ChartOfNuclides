@@ -68,6 +68,7 @@ void initializeTempState(const app_data *restrict dat, app_state *restrict state
 	state->ds.useLifetimes = 0;
 	state->ds.useLevelListSeparationEnergies = 1;
 	state->ds.useLevelListParentThresholds = 1;
+	state->ds.useLevelListCommentTooltips = 1;
 	state->ds.drawShellClosures = 1;
 	state->ds.chartPosX = 86.0f;
 	state->ds.chartPosY = 52.0f;
@@ -3718,6 +3719,11 @@ uint32_t getENSDFTranCommentStrInd(const ndata *restrict nd, const uint32_t tran
 						return strBufPos+2;
 					}
 					break;
+				case TCOMMENT_IGAMMA:
+					if(SDL_strncmp(&nd->ensdfStrBuf[strBufPos],"RI$",2)==0){
+						return strBufPos+3;
+					}
+					break;
 				case TCOMMENT_MGAMMA:
 					if(SDL_strncmp(&nd->ensdfStrBuf[strBufPos],"M$",2)==0){
 						return strBufPos+2;
@@ -3805,6 +3811,7 @@ void changeUIState(const app_data *restrict dat, app_state *restrict state, reso
 			state->interactableElement |= ((uint64_t)(1) << UIELEM_PREFS_DIALOG_LIFETIME_CHECKBOX);
 			state->interactableElement |= ((uint64_t)(1) << UIELEM_PREFS_DIALOG_LEVELLIST_SEPARATION_CHECKBOX);
 			state->interactableElement |= ((uint64_t)(1) << UIELEM_PREFS_DIALOG_LEVELLIST_THRESHOLD_CHECKBOX);
+			state->interactableElement |= ((uint64_t)(1) << UIELEM_PREFS_DIALOG_LEVELLIST_COMMENT_CHECKBOX);
 			state->interactableElement |= ((uint64_t)(1) << UIELEM_PREFS_DIALOG_UIANIM_CHECKBOX);
 			state->interactableElement |= ((uint64_t)(1) << UIELEM_PREFS_DIALOG_UISCALE_DROPDOWN);
 			state->interactableElement |= ((uint64_t)(1) << UIELEM_PREFS_DIALOG_REACTIONMODE_DROPDOWN);
@@ -5097,6 +5104,14 @@ void uiElemClickAction(app_data *restrict dat, app_state *restrict state, resour
 				setSelectedNuclOnLevelList(dat,state,rdat,(uint16_t)(dat->ndat.nuclData[state->chartSelectedNucl].N),(uint16_t)(dat->ndat.nuclData[state->chartSelectedNucl].Z),1);
 			}
 			break;
+		case UIELEM_PREFS_DIALOG_LEVELLIST_COMMENT_CHECKBOX:
+			state->ds.useLevelListCommentTooltips = !(state->ds.useLevelListCommentTooltips);
+			state->ds.forceRedraw = 1;
+			state->clickedUIElem = UIELEM_ENUM_LENGTH; //'unclick' the button
+			/*if(state->ds.shownElements & ((uint64_t)(1) << UIELEM_NUCL_FULLINFOBOX)){
+				setSelectedNuclOnLevelList(dat,state,rdat,(uint16_t)(dat->ndat.nuclData[state->chartSelectedNucl].N),(uint16_t)(dat->ndat.nuclData[state->chartSelectedNucl].Z),1);
+			}*/
+			break;
 		case UIELEM_PREFS_DIALOG_UIANIM_CHECKBOX:
 			state->ds.useUIAnimations = !(state->ds.useUIAnimations);
 			state->ds.forceRedraw = 1;
@@ -5882,6 +5897,7 @@ void updateSingleUIElemPosition(const app_data *restrict dat, app_state *restric
 			updateSingleUIElemPosition(dat,state,rdat,UIELEM_PREFS_DIALOG_LIFETIME_CHECKBOX);
 			updateSingleUIElemPosition(dat,state,rdat,UIELEM_PREFS_DIALOG_LEVELLIST_SEPARATION_CHECKBOX);
 			updateSingleUIElemPosition(dat,state,rdat,UIELEM_PREFS_DIALOG_LEVELLIST_THRESHOLD_CHECKBOX);
+			updateSingleUIElemPosition(dat,state,rdat,UIELEM_PREFS_DIALOG_LEVELLIST_COMMENT_CHECKBOX);
 			updateSingleUIElemPosition(dat,state,rdat,UIELEM_PREFS_DIALOG_UIANIM_CHECKBOX);
 			updateSingleUIElemPosition(dat,state,rdat,UIELEM_PREFS_DIALOG_UISCALE_DROPDOWN);
 			updateSingleUIElemPosition(dat,state,rdat,UIELEM_PREFS_DIALOG_REACTIONMODE_DROPDOWN);
@@ -5928,11 +5944,18 @@ void updateSingleUIElemPosition(const app_data *restrict dat, app_state *restric
 			state->ds.uiElemPosY[UIELEM_PREFS_DIALOG_LEVELLIST_THRESHOLD_CHECKBOX] = state->ds.uiElemPosY[UIELEM_PREFS_DIALOG] + (int16_t)((PREFS_DIALOG_PREFCOL1_Y + 6*PREFS_DIALOG_PREF_Y_SPACING + 2*UI_PADDING_SIZE)*state->ds.uiUserScale);
 			state->ds.uiElemExtPlusX[UIELEM_PREFS_DIALOG_LEVELLIST_THRESHOLD_CHECKBOX] = (uint16_t)(2*UI_PADDING_SIZE*state->ds.uiUserScale) + (uint16_t)(getTextWidth(rdat,FONTSIZE_NORMAL,dat->strings[dat->locStringIDs[LOCSTR_PREF_LEVELLIST_THRESHOLD]])/rdat->uiDPIScale); //so that checkbox can be toggled by clicking on adjacent text
 			break;
+		case UIELEM_PREFS_DIALOG_LEVELLIST_COMMENT_CHECKBOX:
+			state->ds.uiElemWidth[UIELEM_PREFS_DIALOG_LEVELLIST_COMMENT_CHECKBOX] = (int16_t)(UI_TILE_SIZE*state->ds.uiUserScale);
+			state->ds.uiElemHeight[UIELEM_PREFS_DIALOG_LEVELLIST_COMMENT_CHECKBOX] = state->ds.uiElemWidth[UIELEM_PREFS_DIALOG_LEVELLIST_COMMENT_CHECKBOX];
+			state->ds.uiElemPosX[UIELEM_PREFS_DIALOG_LEVELLIST_COMMENT_CHECKBOX] = state->ds.uiElemPosX[UIELEM_PREFS_DIALOG] + (int16_t)((PREFS_DIALOG_PREFCOL1_X + 4*UI_PADDING_SIZE)*state->ds.uiUserScale);
+			state->ds.uiElemPosY[UIELEM_PREFS_DIALOG_LEVELLIST_COMMENT_CHECKBOX] = state->ds.uiElemPosY[UIELEM_PREFS_DIALOG] + (int16_t)((PREFS_DIALOG_PREFCOL1_Y + 7*PREFS_DIALOG_PREF_Y_SPACING + 2*UI_PADDING_SIZE)*state->ds.uiUserScale);
+			state->ds.uiElemExtPlusX[UIELEM_PREFS_DIALOG_LEVELLIST_COMMENT_CHECKBOX] = (uint16_t)(2*UI_PADDING_SIZE*state->ds.uiUserScale) + (uint16_t)(getTextWidth(rdat,FONTSIZE_NORMAL,dat->strings[dat->locStringIDs[LOCSTR_PREF_LEVELLIST_COMMENTS]])/rdat->uiDPIScale); //so that checkbox can be toggled by clicking on adjacent text
+			break;
 		case UIELEM_PREFS_DIALOG_UIANIM_CHECKBOX:
 			state->ds.uiElemWidth[UIELEM_PREFS_DIALOG_UIANIM_CHECKBOX] = (int16_t)(UI_TILE_SIZE*state->ds.uiUserScale);
 			state->ds.uiElemHeight[UIELEM_PREFS_DIALOG_UIANIM_CHECKBOX] = state->ds.uiElemWidth[UIELEM_PREFS_DIALOG_UIANIM_CHECKBOX];
 			state->ds.uiElemPosX[UIELEM_PREFS_DIALOG_UIANIM_CHECKBOX] = state->ds.uiElemPosX[UIELEM_PREFS_DIALOG] + (int16_t)(PREFS_DIALOG_PREFCOL1_X*state->ds.uiUserScale);
-			state->ds.uiElemPosY[UIELEM_PREFS_DIALOG_UIANIM_CHECKBOX] = state->ds.uiElemPosY[UIELEM_PREFS_DIALOG] + (int16_t)((PREFS_DIALOG_PREFCOL1_Y + 7.5f*PREFS_DIALOG_PREF_Y_SPACING + 2*UI_PADDING_SIZE)*state->ds.uiUserScale);
+			state->ds.uiElemPosY[UIELEM_PREFS_DIALOG_UIANIM_CHECKBOX] = state->ds.uiElemPosY[UIELEM_PREFS_DIALOG] + (int16_t)((PREFS_DIALOG_PREFCOL1_Y + 8.5f*PREFS_DIALOG_PREF_Y_SPACING + 2*UI_PADDING_SIZE)*state->ds.uiUserScale);
 			state->ds.uiElemExtPlusX[UIELEM_PREFS_DIALOG_UIANIM_CHECKBOX] = (uint16_t)(2*UI_PADDING_SIZE*state->ds.uiUserScale) + (uint16_t)(getTextWidth(rdat,FONTSIZE_NORMAL,dat->strings[dat->locStringIDs[LOCSTR_PREF_UIANIM]])/rdat->uiDPIScale); //so that checkbox can be toggled by clicking on adjacent text
 			break;
 		case UIELEM_PREFS_DIALOG_UISCALE_DROPDOWN:

@@ -111,6 +111,15 @@ char* findReplaceUTF8(const char *findstr, const char *replacestr, const char *o
 }
 
 char* findReplaceAllUTF8(const char *findstr, const char *replacestr, const char *origstr){
+
+  //first, check if the find string is shorter than the entire original string,
+  //and if so, simply return the original string
+  if(strlen(origstr) < strlen(findstr)){
+    char *new_string = (char*)calloc(strlen(origstr), sizeof(char));
+    strcpy(new_string, origstr);
+    return new_string;
+  }
+
   char *new_string = findReplaceUTF8(findstr, replacestr, origstr);
   char *old_new_string = NULL;
   

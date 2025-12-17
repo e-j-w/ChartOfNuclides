@@ -1131,6 +1131,15 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
               }
             }
             break;
+          case LLCOLUMN_IGAMMA:
+            if(mouseOverTrInd != MAX_UINT32_VAL){
+              if(dat->ndat.tran[mouseOverTrInd].hasComment & (uint8_t)(1U << TCOMMENT_IGAMMA)){
+                //SDL_Log("mouseOverTrInd: %u, hasComment: %u\n",mouseOverTrInd,dat->ndat.tran[mouseOverTrInd].hasComment);
+                state->ds.showingTooltip = 1;
+                state->ds.tooltipPar = getENSDFTranCommentStrInd(&dat->ndat,mouseOverTrInd,TCOMMENT_IGAMMA);
+              }
+            }
+            break;
           case LLCOLUMN_MGAMMA:
             if(mouseOverTrInd != MAX_UINT32_VAL){
               if(dat->ndat.tran[mouseOverTrInd].hasComment & (uint8_t)(1U << TCOMMENT_MGAMMA)){

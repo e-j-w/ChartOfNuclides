@@ -69,6 +69,7 @@ pref_lifetime|Show lifetimes instead of half-lives
 pref_levellist_header|In level lists:
 pref_levellist_separation|Show separation energies
 pref_levellist_threshold|Show parent decay thresholds
+pref_levellist_comments|Show additional data tooltips
 pref_ui_animations|Enable UI animations
 chartview_menu_title|Select color scheme:
 chartview_lifetime|Lifetime

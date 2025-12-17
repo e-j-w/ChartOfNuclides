@@ -26,7 +26,7 @@ which can be referenced by both the GUI draw code as well as the interaction cod
 
 //minimum dimensions of the window, assuming 1x UI scaling
 #define MIN_RENDER_WIDTH  800
-#define MIN_RENDER_HEIGHT 480
+#define MIN_RENDER_HEIGHT 520
 
 //maximum dimensions of the window
 #define MAX_RENDER_WIDTH  16384
@@ -132,9 +132,9 @@ static const float uiScales[UISCALE_ENUM_LENGTH] = {1.0f,1.20f,1.60f,1.85f};
 #define ABOUT_BOX_STR4_Y           284.0f //in unscaled pixels
 
 //preferences dialog
-#define PREFS_DIALOG_NUM_UIELEMENTS                  8
+#define PREFS_DIALOG_NUM_UIELEMENTS                  9
 #define PREFS_DIALOG_WIDTH                           520 //in unscaled pixels
-#define PREFS_DIALOG_HEIGHT                          416 //in unscaled pixels
+#define PREFS_DIALOG_HEIGHT                          460 //in unscaled pixels
 #define PREFS_DIALOG_HEADERTXT_X                     (6*UI_PADDING_SIZE)
 #define PREFS_DIALOG_HEADERTXT_Y                     (6*UI_PADDING_SIZE)
 #define PREFS_DIALOG_PREF_Y_SPACING                  36.0f //in unscaled pixels

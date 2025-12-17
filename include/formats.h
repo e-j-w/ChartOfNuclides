@@ -51,7 +51,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 //increasing these numbers will increase the size of 
 //the nuclear database stored in memory (and on disk)
-#define ENSDFSTRBUFSIZE          9200000
+#define ENSDFSTRBUFSIZE          9400000
 #define MAXMULTPERLEVEL          3
 #define MAXNUMNUCL               3500
 #define MAXNUMLVLS               200000
@@ -296,6 +296,7 @@ typedef struct
   unsigned int useLifetimes : 1;
   unsigned int useLevelListSeparationEnergies : 1;
   unsigned int useLevelListParentThresholds : 1;
+  unsigned int useLevelListCommentTooltips : 1;
   unsigned int useUIAnimations : 1;
   unsigned int drawShellClosures : 1;
   unsigned int drawPerformanceStats : 1; //0=don't draw, 1=draw
