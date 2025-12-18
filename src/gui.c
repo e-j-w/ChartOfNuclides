@@ -4418,7 +4418,12 @@ void drawContextMenu(const app_data *restrict dat, const app_state *restrict sta
 char ttTxt[MAX_COPY_STR_LEN]; //some comments are very long, eg. 32Si GS half-life comment
 void drawENSDFCommentTooltip(const ui_theme_rules *restrict uirules, const app_data *restrict dat, const app_state *restrict state, resource_data *restrict rdat){
   if(state->ds.tooltipPar < dat->ndat.ensdfStrBufLen){
-    SDL_strlcpy(ttTxt,&dat->ndat.ensdfStrBuf[state->ds.tooltipPar],MAX_COPY_STR_LEN);
+    if((state->ds.useLifetimes)&&(state->ds.nuclFullInfoMouseOverCol == LLCOLUMN_HALFLIFE)){
+      //add t(1/2) label to tooltip to clarify that the comment is for the half-life and not the lifetime
+      SDL_snprintf(ttTxt,MAX_COPY_STR_LEN,"%s: %s",dat->strings[dat->locStringIDs[LOCSTR_HALFLIFE]],&dat->ndat.ensdfStrBuf[state->ds.tooltipPar]);
+    }else{
+      SDL_strlcpy(ttTxt,&dat->ndat.ensdfStrBuf[state->ds.tooltipPar],MAX_COPY_STR_LEN);
+    }
     SDL_FRect ttRect = getTooltipRect(&state->ds,rdat,state->mouseXPx + UI_PADDING_SIZE*rdat->uiScale,state->mouseYPx + UI_PADDING_SIZE*rdat->uiScale,ttTxt);
     drawTooltipBox(uirules,rdat,ttRect,1.0f,ttTxt);
   }
