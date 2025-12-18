@@ -1041,6 +1041,9 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
                 }
               }
             }
+            if((state->ds.useLevelListCommentTooltips == 1)&&(state->ds.tooltipPar != MAX_UINT32_VAL)){
+              appendContextMenuItem(state,CONTEXTITEM_COPY_COMMENT);
+            }
             showContextMenu(dat,state,rdat);
             break;
           case LLCOLUMN_HALFLIFE:
@@ -1066,6 +1069,9 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
                 }
               }
             }
+            if((state->ds.useLevelListCommentTooltips == 1)&&(state->ds.tooltipPar != MAX_UINT32_VAL)){
+              appendContextMenuItem(state,CONTEXTITEM_COPY_COMMENT);
+            }
             showContextMenu(dat,state,rdat);
             break;
           case LLCOLUMN_EGAMMA:
@@ -1080,6 +1086,9 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
               state->cms.selectionInd = (uint16_t)(finalLvlInd - dat->ndat.nuclData[state->chartSelectedNucl].firstLevel);
               //SDL_Log("Going to level: %u (%u %u)\n",state->cms.selectionInd, finalLvlInd, dat->ndat.nuclData[state->chartSelectedNucl].firstLevel);
               appendContextMenuItem(state,CONTEXTITEM_GOTO_LEVEL);
+              if((state->ds.useLevelListCommentTooltips == 1)&&(state->ds.tooltipPar != MAX_UINT32_VAL)){
+                appendContextMenuItem(state,CONTEXTITEM_COPY_COMMENT);
+              }
               showContextMenu(dat,state,rdat);
             }
             break;
@@ -1097,70 +1106,73 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
     }else{
       //no right click, check if the moused-over column has an ENSDF comment,
       //and if so, show it in a tooltip
-      if(state->ds.nuclFullInfoMouseOverNuclLvl != 65535U){
-        uint32_t mouseOverLvlInd = (uint32_t)(dat->ndat.nuclData[state->chartSelectedNucl].firstLevel + state->ds.nuclFullInfoMouseOverNuclLvl);
-        uint32_t mouseOverTrInd = MAX_UINT32_VAL;
-        if((state->ds.nuclFullInfoMouseOverLvlRow != 65535U)&&(state->ds.nuclFullInfoMouseOverLvlRow < dat->ndat.levels[mouseOverLvlInd].numTran)){
-          mouseOverTrInd = (uint32_t)(dat->ndat.levels[mouseOverLvlInd].firstTran + state->ds.nuclFullInfoMouseOverLvlRow);
-        }
-        switch(state->ds.nuclFullInfoMouseOverCol){
-          case LLCOLUMN_ELEVEL:
-            if(dat->ndat.levels[mouseOverLvlInd].hasComment & (uint8_t)(1U << LCOMMENT_ELEVEL)){
-              state->ds.showingTooltip = 1;
-              state->ds.tooltipPar = getENSDFLvlCommentStrInd(&dat->ndat,mouseOverLvlInd,LCOMMENT_ELEVEL);
-            }
-            break;
-          case LLCOLUMN_JPI:
-            if(dat->ndat.levels[mouseOverLvlInd].hasComment & (uint8_t)(1U << LCOMMENT_JPI)){
-              state->ds.showingTooltip = 1;
-              state->ds.tooltipPar = getENSDFLvlCommentStrInd(&dat->ndat,mouseOverLvlInd,LCOMMENT_JPI);
-            }
-            break;
-          case LLCOLUMN_HALFLIFE:
-            if(dat->ndat.levels[mouseOverLvlInd].hasComment & (uint8_t)(1U << LCOMMENT_HALFLIFE)){
-              state->ds.showingTooltip = 1;
-              state->ds.tooltipPar = getENSDFLvlCommentStrInd(&dat->ndat,mouseOverLvlInd,LCOMMENT_HALFLIFE);
-            }
-            break;
-          case LLCOLUMN_EGAMMA:
-            if(mouseOverTrInd != MAX_UINT32_VAL){
-              if(dat->ndat.tran[mouseOverTrInd].hasComment & (uint8_t)(1U << TCOMMENT_EGAMMA)){
-                //SDL_Log("mouseOverTrInd: %u, hasComment: %u\n",mouseOverTrInd,dat->ndat.tran[mouseOverTrInd].hasComment);
+      //(but don't do do if the right-click context menu is open)
+      if(state->cms.numContextMenuItems == 0){
+        state->ds.tooltipPar = MAX_UINT32_VAL; //reset tooltip
+        if(state->ds.nuclFullInfoMouseOverNuclLvl != 65535U){
+          uint32_t mouseOverLvlInd = (uint32_t)(dat->ndat.nuclData[state->chartSelectedNucl].firstLevel + state->ds.nuclFullInfoMouseOverNuclLvl);
+          uint32_t mouseOverTrInd = MAX_UINT32_VAL;
+          if((state->ds.nuclFullInfoMouseOverLvlRow != 65535U)&&(state->ds.nuclFullInfoMouseOverLvlRow < dat->ndat.levels[mouseOverLvlInd].numTran)){
+            mouseOverTrInd = (uint32_t)(dat->ndat.levels[mouseOverLvlInd].firstTran + state->ds.nuclFullInfoMouseOverLvlRow);
+          }
+          switch(state->ds.nuclFullInfoMouseOverCol){
+            case LLCOLUMN_ELEVEL:
+              if(dat->ndat.levels[mouseOverLvlInd].hasComment & (uint8_t)(1U << LCOMMENT_ELEVEL)){
                 state->ds.showingTooltip = 1;
-                state->ds.tooltipPar = getENSDFTranCommentStrInd(&dat->ndat,mouseOverTrInd,TCOMMENT_EGAMMA);
+                state->ds.tooltipPar = getENSDFLvlCommentStrInd(&dat->ndat,mouseOverLvlInd,LCOMMENT_ELEVEL);
               }
-            }
-            break;
-          case LLCOLUMN_IGAMMA:
-            if(mouseOverTrInd != MAX_UINT32_VAL){
-              if(dat->ndat.tran[mouseOverTrInd].hasComment & (uint8_t)(1U << TCOMMENT_IGAMMA)){
-                //SDL_Log("mouseOverTrInd: %u, hasComment: %u\n",mouseOverTrInd,dat->ndat.tran[mouseOverTrInd].hasComment);
+              break;
+            case LLCOLUMN_JPI:
+              if(dat->ndat.levels[mouseOverLvlInd].hasComment & (uint8_t)(1U << LCOMMENT_JPI)){
                 state->ds.showingTooltip = 1;
-                state->ds.tooltipPar = getENSDFTranCommentStrInd(&dat->ndat,mouseOverTrInd,TCOMMENT_IGAMMA);
+                state->ds.tooltipPar = getENSDFLvlCommentStrInd(&dat->ndat,mouseOverLvlInd,LCOMMENT_JPI);
               }
-            }
-            break;
-          case LLCOLUMN_MGAMMA:
-            if(mouseOverTrInd != MAX_UINT32_VAL){
-              if(dat->ndat.tran[mouseOverTrInd].hasComment & (uint8_t)(1U << TCOMMENT_MGAMMA)){
+              break;
+            case LLCOLUMN_HALFLIFE:
+              if(dat->ndat.levels[mouseOverLvlInd].hasComment & (uint8_t)(1U << LCOMMENT_HALFLIFE)){
                 state->ds.showingTooltip = 1;
-                state->ds.tooltipPar = getENSDFTranCommentStrInd(&dat->ndat,mouseOverTrInd,TCOMMENT_MGAMMA);
+                state->ds.tooltipPar = getENSDFLvlCommentStrInd(&dat->ndat,mouseOverLvlInd,LCOMMENT_HALFLIFE);
               }
-            }
-            break;
-          case LLCOLUMN_DELTA:
-            if(mouseOverTrInd != MAX_UINT32_VAL){
-              if(dat->ndat.tran[mouseOverTrInd].hasComment & (uint8_t)(1U << TCOMMENT_DELTA)){
-                state->ds.showingTooltip = 1;
-                state->ds.tooltipPar = getENSDFTranCommentStrInd(&dat->ndat,mouseOverTrInd,TCOMMENT_DELTA);
+              break;
+            case LLCOLUMN_EGAMMA:
+              if(mouseOverTrInd != MAX_UINT32_VAL){
+                if(dat->ndat.tran[mouseOverTrInd].hasComment & (uint8_t)(1U << TCOMMENT_EGAMMA)){
+                  //SDL_Log("mouseOverTrInd: %u, hasComment: %u\n",mouseOverTrInd,dat->ndat.tran[mouseOverTrInd].hasComment);
+                  state->ds.showingTooltip = 1;
+                  state->ds.tooltipPar = getENSDFTranCommentStrInd(&dat->ndat,mouseOverTrInd,TCOMMENT_EGAMMA);
+                }
               }
-            }
-            break;
-          default:
-            break;
+              break;
+            case LLCOLUMN_IGAMMA:
+              if(mouseOverTrInd != MAX_UINT32_VAL){
+                if(dat->ndat.tran[mouseOverTrInd].hasComment & (uint8_t)(1U << TCOMMENT_IGAMMA)){
+                  //SDL_Log("mouseOverTrInd: %u, hasComment: %u\n",mouseOverTrInd,dat->ndat.tran[mouseOverTrInd].hasComment);
+                  state->ds.showingTooltip = 1;
+                  state->ds.tooltipPar = getENSDFTranCommentStrInd(&dat->ndat,mouseOverTrInd,TCOMMENT_IGAMMA);
+                }
+              }
+              break;
+            case LLCOLUMN_MGAMMA:
+              if(mouseOverTrInd != MAX_UINT32_VAL){
+                if(dat->ndat.tran[mouseOverTrInd].hasComment & (uint8_t)(1U << TCOMMENT_MGAMMA)){
+                  state->ds.showingTooltip = 1;
+                  state->ds.tooltipPar = getENSDFTranCommentStrInd(&dat->ndat,mouseOverTrInd,TCOMMENT_MGAMMA);
+                }
+              }
+              break;
+            case LLCOLUMN_DELTA:
+              if(mouseOverTrInd != MAX_UINT32_VAL){
+                if(dat->ndat.tran[mouseOverTrInd].hasComment & (uint8_t)(1U << TCOMMENT_DELTA)){
+                  state->ds.showingTooltip = 1;
+                  state->ds.tooltipPar = getENSDFTranCommentStrInd(&dat->ndat,mouseOverTrInd,TCOMMENT_DELTA);
+                }
+              }
+              break;
+            default:
+              break;
+          }
         }
       }
-      
 
     }
 

@@ -95,6 +95,7 @@ void initializeTempState(const app_data *restrict dat, app_state *restrict state
 	state->ds.fcScrollInProgress = 0;
 	state->ds.fcNuclChangeInProgress = 0;
 	state->ds.showingTooltip = 0;
+	state->ds.tooltipPar = MAX_UINT32_VAL;
 	state->ds.searchEntryDispStartChar = 0;
 	state->ds.searchEntryDispNumChars = 65535U; //default value specifying no text has been input yet
 	state->ds.interfaceSizeInd = UISCALE_NORMAL;
@@ -136,6 +137,10 @@ void initializeTempState(const app_data *restrict dat, app_state *restrict state
 	}
 	if(MAXNUMNUCL > /* DISABLES CODE */ (32768)){
 		SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"MAXNUMNUCL is too long, cannot be indexed by a uint16_t bit variable (ss->boostedNucl)!\n");
+		exit(-1);
+	}
+	if(MAX_COPY_STR_LEN < /* DISABLES CODE */ (MAX_SELECTABLE_STR_LEN)){
+		SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"MAX_SELECTABLE_STR_LEN is too long, will overflow the buffer used for copied text!\n");
 		exit(-1);
 	}
 
@@ -4774,6 +4779,14 @@ void contextMenuClickAction(app_data *restrict dat, app_state *restrict state, r
 				setSameJpiLvlFlags(&dat->ndat,state,state->chartSelectedNucl,state->cms.selectionInd);
 				state->ds.selectedRxn = 254; //same Jpi display mode
 				setSelectedNuclOnLevelList(dat,state,rdat,(uint16_t)(dat->ndat.nuclData[state->chartSelectedNucl].N),(uint16_t)(dat->ndat.nuclData[state->chartSelectedNucl].Z),1); //update and re-draw level list
+			}
+			break;
+		case CONTEXTITEM_COPY_COMMENT:
+			//copy ENSDF comment
+			if(state->ds.tooltipPar < dat->ndat.ensdfStrBufLen){
+    		SDL_strlcpy(state->copiedTxt,&dat->ndat.ensdfStrBuf[state->ds.tooltipPar],MAX_COPY_STR_LEN);
+				SDL_SetClipboardText(state->copiedTxt);
+				//SDL_Log("Copied text to clipboard: %s\n",SDL_GetClipboardText());
 			}
 			break;
 		case CONTEXTITEM_ENUM_LENGTH:

@@ -45,6 +45,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //text selection parameters
 #define MAX_SELECTABLE_STRS      1024 //maximum number of onscreen text strings that can be selectable at once
 #define MAX_SELECTABLE_STR_LEN   256 //maximum length of selectable text strings (should be larger than 32, which is the size used by some string composition functions in data_ops.c)
+#define MAX_COPY_STR_LEN         1024 //size of the cliboard text buffer, also the maximum ENSDF comment size that can be displayed
 
 //context menu parameters
 #define MAX_CONTEXT_MENU_ITEMS   4 //maximum number of items in the context menu
@@ -280,7 +281,7 @@ typedef struct
   uint8_t interfaceSizeInd; //user preference for UI scaling, values from ui_scale_enum
   uint8_t reactionModeInd; //user preference for reaction display mode, values from reaction_mode_enum
   uint8_t showingTooltip; //0=no tooltip, 1=tooltip at mouse position
-  uint32_t tooltipPar; //for ENSDF comment tooltips, the index of the ENSDF string buffer where the tooltip appears
+  uint32_t tooltipPar; //for ENSDF comment tooltips, the index of the ENSDF string buffer where the tooltip appears, MAX_UINT32_VAL if no tooltip
   unsigned int fcScrollInProgress : 1;
   unsigned int fcScrollFinished : 1;
   unsigned int fcNuclChangeInProgress : 1;
@@ -356,7 +357,7 @@ typedef struct
   search_state ss;           //the state information for search queries
   text_selection_state tss;  //the state information for text selection
   context_menu_state cms;    //the state information for right-click context menus
-  char copiedTxt[MAX_SELECTABLE_STR_LEN];  //buffer for copying text to clipboard
+  char copiedTxt[MAX_COPY_STR_LEN];  //buffer for copying text to clipboard
   int searchCursorPos, searchSelectionLen; //for search query text editing
   float mouseXPx, mouseYPx; //current position of the mouse, in pixels
   float mouseHoldStartPosXPx, mouseHoldStartPosYPx; //mouse position at the start of the last mouse button down event, in pixels

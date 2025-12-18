@@ -4297,7 +4297,7 @@ void drawContextMenu(const app_data *restrict dat, const app_state *restrict sta
   }
 
   //draw menu item text
-  char tmpStr[32];
+  char tmpStr[32], tmpStr2[32];
   drawRect.x = state->ds.uiElemPosX[UIELEM_CONTEXT_MENU] + (PANEL_EDGE_SIZE + 3*UI_PADDING_SIZE)*state->ds.uiUserScale;
   drawRect.y = ((float)state->ds.uiElemPosY[UIELEM_CONTEXT_MENU] + PANEL_EDGE_SIZE*state->ds.uiUserScale);
   if(state->cms.useHeaderText){
@@ -4320,12 +4320,13 @@ void drawContextMenu(const app_data *restrict dat, const app_state *restrict sta
         switch(state->chartView){
           case CHARTVIEW_HALFLIFE:
             if(state->ds.useLifetimes){
-              SDL_snprintf(tmpStr,32,"%s %s",dat->strings[dat->locStringIDs[LOCSTR_CONTEXT_COPY]],dat->strings[dat->locStringIDs[LOCSTR_CHARTVIEW_LIFETIME]]);
-              drawTextAlignedSized(rdat,drawRect.x,drawRect.y + (0.4f + (float)i)*CONTEXT_MENU_ITEM_SPACING*state->ds.uiUserScale,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_LEFT,(Uint16)(drawRect.w - (PANEL_EDGE_SIZE + 6*UI_PADDING_SIZE)*state->ds.uiUserScale));
+              SDL_strlcpy(tmpStr2,dat->strings[dat->locStringIDs[LOCSTR_CHARTVIEW_LIFETIME]],32);
             }else{
-              SDL_snprintf(tmpStr,32,"%s %s",dat->strings[dat->locStringIDs[LOCSTR_CONTEXT_COPY]],dat->strings[dat->locStringIDs[LOCSTR_CHARTVIEW_HALFLIFE]]);
-              drawTextAlignedSized(rdat,drawRect.x,drawRect.y + (0.4f + (float)i)*CONTEXT_MENU_ITEM_SPACING*state->ds.uiUserScale,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_LEFT,(Uint16)(drawRect.w - (PANEL_EDGE_SIZE + 6*UI_PADDING_SIZE)*state->ds.uiUserScale));
+              SDL_strlcpy(tmpStr2,dat->strings[dat->locStringIDs[LOCSTR_CHARTVIEW_HALFLIFE]],32);
             }
+            tmpStr2[0] = (char)SDL_tolower(tmpStr2[0]);
+            SDL_snprintf(tmpStr,32,"%s %s",dat->strings[dat->locStringIDs[LOCSTR_CONTEXT_COPY]],tmpStr2);
+            drawTextAlignedSized(rdat,drawRect.x,drawRect.y + (0.4f + (float)i)*CONTEXT_MENU_ITEM_SPACING*state->ds.uiUserScale,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_LEFT,(Uint16)(drawRect.w - (PANEL_EDGE_SIZE + 6*UI_PADDING_SIZE)*state->ds.uiUserScale));
             break;
           case CHARTVIEW_DECAYMODE:
             SDL_snprintf(tmpStr,32,"%s %s",dat->strings[dat->locStringIDs[LOCSTR_CONTEXT_COPY]],dat->strings[dat->locStringIDs[LOCSTR_CHARTVIEW_DECAYMODE]]);
@@ -4403,6 +4404,9 @@ void drawContextMenu(const app_data *restrict dat, const app_state *restrict sta
       case CONTEXTITEM_SHOW_SAME_JPI:
         drawTextAlignedSized(rdat,drawRect.x,drawRect.y + (0.4f + (float)i)*CONTEXT_MENU_ITEM_SPACING*state->ds.uiUserScale,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,dat->strings[dat->locStringIDs[LOCSTR_CLICKACTION_SHOWSAMEJPI]],ALIGN_LEFT,(Uint16)(drawRect.w - (PANEL_EDGE_SIZE + 6*UI_PADDING_SIZE)*state->ds.uiUserScale));
         break;
+      case CONTEXTITEM_COPY_COMMENT:
+        drawTextAlignedSized(rdat,drawRect.x,drawRect.y + (0.4f + (float)i)*CONTEXT_MENU_ITEM_SPACING*state->ds.uiUserScale,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,dat->strings[dat->locStringIDs[LOCSTR_CONTEXT_COPY_COMMENT]],ALIGN_LEFT,(Uint16)(drawRect.w - (PANEL_EDGE_SIZE + 6*UI_PADDING_SIZE)*state->ds.uiUserScale));
+        break;
       default:
         break;
     }
@@ -4411,10 +4415,10 @@ void drawContextMenu(const app_data *restrict dat, const app_state *restrict sta
 }
 
 //draws a tooltip at the mouse position
-char ttTxt[1024]; //some comments are very long, eg. 32Si GS half-life comment
+char ttTxt[MAX_COPY_STR_LEN]; //some comments are very long, eg. 32Si GS half-life comment
 void drawENSDFCommentTooltip(const ui_theme_rules *restrict uirules, const app_data *restrict dat, const app_state *restrict state, resource_data *restrict rdat){
   if(state->ds.tooltipPar < dat->ndat.ensdfStrBufLen){
-    SDL_strlcpy(ttTxt,&dat->ndat.ensdfStrBuf[state->ds.tooltipPar],1024);
+    SDL_strlcpy(ttTxt,&dat->ndat.ensdfStrBuf[state->ds.tooltipPar],MAX_COPY_STR_LEN);
     SDL_FRect ttRect = getTooltipRect(&state->ds,rdat,state->mouseXPx + UI_PADDING_SIZE*rdat->uiScale,state->mouseYPx + UI_PADDING_SIZE*rdat->uiScale,ttTxt);
     drawTooltipBox(uirules,rdat,ttRect,1.0f,ttTxt);
   }

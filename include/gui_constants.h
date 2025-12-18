@@ -112,7 +112,7 @@ static const float uiScales[UISCALE_ENUM_LENGTH] = {1.0f,1.20f,1.60f,1.85f};
 
 //context menu
 #define CONTEXT_MENU_HEADER_HEIGHT   32  //in unscaled pixels
-#define CONTEXT_MENU_WIDTH           210 //in unscaled pixels
+#define CONTEXT_MENU_WIDTH           220 //in unscaled pixels
 #define CONTEXT_MENU_ITEM_SPACING    28  //in unscaled pixels
 
 //zoom buttons

@@ -338,6 +338,7 @@ static int parseAppRules(app_data *restrict dat, asset_mapping *restrict stringI
 	dat->locStringIDs[LOCSTR_CONTEXT_COPYTEXT] = (uint16_t)nameToAssetID("context_copytext",stringIDmap);
 	dat->locStringIDs[LOCSTR_CONTEXT_COPY_NUCLNAME] = (uint16_t)nameToAssetID("context_copy_nuclname",stringIDmap);
 	dat->locStringIDs[LOCSTR_CONTEXT_COPY_NUCLINFO] = (uint16_t)nameToAssetID("context_copy_nuclinfo",stringIDmap);
+	dat->locStringIDs[LOCSTR_CONTEXT_COPY_COMMENT] = (uint16_t)nameToAssetID("context_copy_comment",stringIDmap);
 	dat->locStringIDs[LOCSTR_SEARCH_PLACEHOLDER] = (uint16_t)nameToAssetID("search_placeholder",stringIDmap);
 	dat->locStringIDs[LOCSTR_SEARCH_PLACEHOLDER_LEVELINFO] = (uint16_t)nameToAssetID("search_placeholder_levelinfo",stringIDmap);
 	dat->locStringIDs[LOCSTR_SEARCHRES_NUCLIDE] = (uint16_t)nameToAssetID("search_result_nuclide",stringIDmap);
@@ -1775,6 +1776,12 @@ void cleanCommentStr(char *comBuff){
 	modComBuff = findReplaceAllUTF8("|^","↑",comBuff);
 	SDL_strlcpy(comBuff,modComBuff,118);
 	SDL_free(modComBuff);
+	modComBuff = findReplaceAllUTF8("|<","≤",comBuff);
+	SDL_strlcpy(comBuff,modComBuff,118);
+	SDL_free(modComBuff);
+	modComBuff = findReplaceAllUTF8("|>","≥",comBuff);
+	SDL_strlcpy(comBuff,modComBuff,118);
+	SDL_free(modComBuff);
 	modComBuff = findReplaceAllUTF8("log|","log",comBuff);
 	SDL_strlcpy(comBuff,modComBuff,118);
 	SDL_free(modComBuff);
@@ -1797,6 +1804,9 @@ void cleanCommentStr(char *comBuff){
 	SDL_strlcpy(comBuff,modComBuff,118);
 	SDL_free(modComBuff);
 	modComBuff = findReplaceAllUTF8("i{-","i(",comBuff);
+	SDL_strlcpy(comBuff,modComBuff,118);
+	SDL_free(modComBuff);
+	modComBuff = findReplaceAllUTF8("}{-","}(",comBuff);
 	SDL_strlcpy(comBuff,modComBuff,118);
 	SDL_free(modComBuff);
 	modComBuff = findReplaceAllUTF8(" ce "," CE ",comBuff);
@@ -1887,6 +1897,9 @@ void cleanCommentStr(char *comBuff){
 			SDL_strlcpy(ssReplace,modssBuff,CCS_MAXBUFSIZE*4);
 			SDL_free(modssBuff);
 			modssBuff = findReplaceAllUTF8("/","ᐟ",ssReplace);
+			SDL_strlcpy(ssReplace,modssBuff,CCS_MAXBUFSIZE*4);
+			SDL_free(modssBuff);
+			modssBuff = findReplaceAllUTF8("u","ᵘ",ssReplace);
 			SDL_strlcpy(ssReplace,modssBuff,CCS_MAXBUFSIZE*4);
 			SDL_free(modssBuff);
 			modssBuff = findReplaceAllUTF8(",","̓",ssReplace);
@@ -2950,6 +2963,15 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 								}
 								comBuff[len] = '\0';
 								
+								//pre-process to clean up formatting
+								if(len > 0){
+									char *modComBuff;
+									modComBuff = findReplaceAllUTF8("CONF$","J$",comBuff);
+									SDL_strlcpy(comBuff,modComBuff,118);
+									SDL_free(modComBuff);
+									len = (int32_t)SDL_strlen(comBuff); //new length of the comment
+								}
+
 								//SDL_Log("comBuff: %s, len: %u\n",comBuff,len);
 								if(len >= 1){
 
@@ -3911,15 +3933,6 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 								len = (int32_t)SDL_strlen(comBuff); //length of the comment
 								//SDL_Log("comBuff: %s, len: %u\n",comBuff,len);
 
-								//pre-process to clean up formatting
-								if(len > 0){
-									char *modComBuff;
-									modComBuff = findReplaceAllUTF8("M,MR$","M$",comBuff);
-									SDL_strlcpy(comBuff,modComBuff,118);
-									SDL_free(modComBuff);
-									len = (int32_t)SDL_strlen(comBuff); //new length of the comment
-								}
-
 								//remove all repeat spaces from the comment (some are formatted very weirdly)
 								for(int32_t i=(len-2); i>=0; i--){
 									if((SDL_isspace(comBuff[i]))&&(SDL_isspace(comBuff[i+1]))){
@@ -3938,6 +3951,18 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 									}
 								}
 								comBuff[len] = '\0';
+
+								//pre-process to clean up formatting
+								if(len > 0){
+									char *modComBuff;
+									modComBuff = findReplaceAllUTF8("M,MR$","M$",comBuff);
+									SDL_strlcpy(comBuff,modComBuff,118);
+									SDL_free(modComBuff);
+									modComBuff = findReplaceAllUTF8("M,MR ","M$",comBuff);
+									SDL_strlcpy(comBuff,modComBuff,118);
+									SDL_free(modComBuff);
+									len = (int32_t)SDL_strlen(comBuff); //new length of the comment
+								}
 
 								//SDL_Log("comBuff: %s, len: %u\n",comBuff,len);
 								if(len >= 1){
