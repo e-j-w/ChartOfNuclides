@@ -38,7 +38,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #define SEARCH_STRING_MAX_SIZE   256
 #define MAX_SEARCH_TOKENS        16
 #define MAX_SEARCH_RESULTS       64 //number of results to cache (max 64, indexed by corrRes bitpattern)
-#define MAX_DISP_SEARCH_RESULTS  4  //number of results to display
+#define MAX_DISP_SEARCH_RESULTS  5  //number of results to display
 #define SEARCH_RESULT_DATASIZE   4
 #define UNUSED_SEARCH_RESULT     MAX_UINT32_VAL
 

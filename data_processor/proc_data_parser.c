@@ -1734,6 +1734,9 @@ void cleanCommentStr(char *comBuff){
 	modComBuff = findReplaceAllUTF8("I|g","I(γ)",comBuff);
 	SDL_strlcpy(comBuff,modComBuff,118);
 	SDL_free(modComBuff);
+	modComBuff = findReplaceAllUTF8("ce|g","CEγ",comBuff);
+	SDL_strlcpy(comBuff,modComBuff,118);
+	SDL_free(modComBuff);
 	modComBuff = findReplaceAllUTF8("|g","γ",comBuff);
 	SDL_strlcpy(comBuff,modComBuff,118);
 	SDL_free(modComBuff);
@@ -1916,13 +1919,14 @@ void cleanCommentStr(char *comBuff){
 	//handle italic sequences
 	//since we don't have italic font glyphs, and these are mostly used for uncertainties,
 	//just enclose the values in brackets
+	//SDL_Log("comBuff: %s\n",comBuff);
 	len = (int)SDL_strlen(comBuff);
 	for(int i=0; i<len;i++){
 		uint8_t italicIsErr = 1; //flag as to whether the italicized value is an error (generally the case if it's a number)
-		if(SDL_strncmp(&comBuff[i],"{I",2)==0){
+		if((SDL_strncmp(&comBuff[i],"{I",2)==0)||(SDL_strncmp(&comBuff[i],"{i",2)==0)){
 			for(int j=0; j<(CCS_MAXBUFSIZE-1); j++){
 				if((j>1)&&(SDL_isalpha(comBuff[i+j]))){
-					italicIsErr = 0;	
+					italicIsErr = 0;
 				}
 				if(comBuff[i+j] != '}'){
 					ssBuff[j] = comBuff[i+j];
@@ -1945,11 +1949,17 @@ void cleanCommentStr(char *comBuff){
 				modssBuff = findReplaceAllUTF8("{I","(",ssBuff);
 				SDL_strlcpy(ssReplace,modssBuff,CCS_MAXBUFSIZE*4);
 				SDL_free(modssBuff);
+				modssBuff = findReplaceAllUTF8("{i","(",ssReplace);
+				SDL_strlcpy(ssReplace,modssBuff,CCS_MAXBUFSIZE*4);
+				SDL_free(modssBuff);
 				modssBuff = findReplaceAllUTF8("}",")",ssReplace);
 				SDL_strlcpy(ssReplace,modssBuff,CCS_MAXBUFSIZE*4);
 				SDL_free(modssBuff);
 			}else{
 				modssBuff = findReplaceAllUTF8("{I","",ssBuff);
+				SDL_strlcpy(ssReplace,modssBuff,CCS_MAXBUFSIZE*4);
+				SDL_free(modssBuff);
+				modssBuff = findReplaceAllUTF8("{i","",ssReplace);
 				SDL_strlcpy(ssReplace,modssBuff,CCS_MAXBUFSIZE*4);
 				SDL_free(modssBuff);
 				modssBuff = findReplaceAllUTF8("}","",ssReplace);
@@ -2709,7 +2719,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 							//check isomerism
 							uint8_t eValueType = (uint8_t)((nd->levels[nd->numLvls-1].energy.format >> 5U) & 15U);
 							double en = getLevelEnergykeV(nd,nd->numLvls-1);
-							if((en > 0.0)||((nd->nuclData[nd->numNucl].numLevels > 1) && (eValueType == VALUETYPE_PLUSX))){
+							if((en > 0.0)||((nd->nuclData[nd->numNucl].numLevels > 1) && ((eValueType == VALUETYPE_X)||(eValueType == VALUETYPE_PLUSX)))){
 								uint8_t hlValueType = (uint8_t)((nd->levels[nd->numLvls-1].halfLife.format >> 5U) & 15U);
 								if(!((hlValueType == VALUETYPE_LESSTHAN)||(hlValueType == VALUETYPE_LESSOREQUALTHAN))){
 									double hl = getLevelHalfLifeSeconds(nd,nd->numLvls-1);

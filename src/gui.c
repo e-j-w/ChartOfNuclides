@@ -1662,6 +1662,7 @@ void drawisomerBoxLabel(const app_data *restrict dat, app_state *restrict state,
 #define CHARTZOOM_LVL4 12.0f
 #define CHARTZOOM_LVL5 18.0f
 #define CHARTZOOM_LVL6 20.0f
+#define CHARTZOOM_LVL7 LOWBOX_TXT_CHANGE_ZOOM
 
 void drawNuclBoxLabelDetails(const app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat, const float xPos, const float yPos, const float boxWidth, const float boxHeight, SDL_Color col, const uint16_t nuclInd){
   char tmpStr[32];
@@ -1743,7 +1744,11 @@ void drawNuclBoxLabelDetails(const app_data *restrict dat, app_state *restrict s
     //draw corner label(s)
     if(state->ds.chartZoomScale >= CHARTZOOM_LVL5){
       getSpinParStr(tmpStr,&dat->ndat,gsLevInd);
-      drawTextAlignedSized(rdat,xPos+boxWidth-labelSmallMargin,yPos+labelSmallMargin,col,FONTSIZE_NORMAL,255,tmpStr,ALIGN_RIGHT,16384); //draw spin-parity label
+      if(state->ds.chartZoomScale >= CHARTZOOM_LVL7){
+        drawTextAlignedSized(rdat,xPos+boxWidth-labelSmallMargin,yPos+labelSmallMargin,col,FONTSIZE_LARGE,255,tmpStr,ALIGN_RIGHT,16384); //draw large spin-parity label
+      }else{
+        drawTextAlignedSized(rdat,xPos+boxWidth-labelSmallMargin,yPos+labelSmallMargin,col,FONTSIZE_NORMAL,255,tmpStr,ALIGN_RIGHT,16384); //draw spin-parity label
+      }
     }else if(dat->ndat.levels[gsLevInd].numSpinParVals <= 1){
       getSpinParStr(tmpStr,&dat->ndat,gsLevInd);
       drawTextAlignedSized(rdat,xPos+boxWidth-labelSmallMargin,yPos+labelSmallMargin,col,FONTSIZE_SMALL,255,tmpStr,ALIGN_RIGHT,16384); //draw small spin-parity label
@@ -1812,7 +1817,11 @@ void drawNuclBoxLabelDetails(const app_data *restrict dat, app_state *restrict s
     //draw corner label(s)
     if(state->ds.chartZoomScale >= CHARTZOOM_LVL5){
       getSpinParStr(tmpStr,&dat->ndat,gsLevInd);
-      drawTextAlignedSized(rdat,xPos+boxWidth-labelSmallMargin,yPos+labelSmallMargin,col,FONTSIZE_NORMAL,255,tmpStr,ALIGN_RIGHT,16384); //draw spin-parity label
+      if(state->ds.chartZoomScale >= CHARTZOOM_LVL7){
+        drawTextAlignedSized(rdat,xPos+boxWidth-labelSmallMargin,yPos+labelSmallMargin,col,FONTSIZE_LARGE,255,tmpStr,ALIGN_RIGHT,16384); //draw large spin-parity label
+      }else{
+        drawTextAlignedSized(rdat,xPos+boxWidth-labelSmallMargin,yPos+labelSmallMargin,col,FONTSIZE_NORMAL,255,tmpStr,ALIGN_RIGHT,16384); //draw spin-parity label
+      }
     }else if(dat->ndat.levels[gsLevInd].numSpinParVals <= 1){
       getSpinParStr(tmpStr,&dat->ndat,gsLevInd);
       drawTextAlignedSized(rdat,xPos+boxWidth-labelSmallMargin,yPos+labelSmallMargin,col,FONTSIZE_SMALL,255,tmpStr,ALIGN_RIGHT,16384); //draw small spin-parity label

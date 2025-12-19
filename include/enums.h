@@ -158,6 +158,7 @@ UIELEM_SEARCH_RESULT, //MAX_DISP_SEARCH_RESULTS elements defined in order
 UIELEM_SEARCH_RESULT_2,
 UIELEM_SEARCH_RESULT_3,
 UIELEM_SEARCH_RESULT_4,
+UIELEM_SEARCH_RESULT_5,
 UIELEM_SEARCH_MENU, //buttons in search menu should be defined in the entries directly preceding this, in top to bottom order
 UIELEM_MENU_BUTTON,
 UIELEM_CHARTVIEW_BUTTON,

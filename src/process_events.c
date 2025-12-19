@@ -104,7 +104,7 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
     //scroll between search results
     if(state->ss.numResults > 0){
       if(up && !down){
-        if((state->ss.numResults > 1)&&(state->mouseoverElement >= UIELEM_SEARCH_RESULT)&&(state->mouseoverElement <= UIELEM_SEARCH_RESULT_4)){
+        if((state->ss.numResults > 1)&&(state->mouseoverElement >= UIELEM_SEARCH_RESULT)&&(state->mouseoverElement <= UIELEM_SEARCH_RESULT_5)){
           if(state->mouseoverElement <= UIELEM_SEARCH_RESULT){
             state->mouseoverElement = (uint8_t)(UIELEM_SEARCH_RESULT + state->ss.numResults - 1);
           }else{
@@ -118,7 +118,7 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
           }
         }
       }else if(down && !up){
-        if((state->ss.numResults > 1)&&(state->mouseoverElement >= UIELEM_SEARCH_RESULT)&&(state->mouseoverElement <= UIELEM_SEARCH_RESULT_4)){
+        if((state->ss.numResults > 1)&&(state->mouseoverElement >= UIELEM_SEARCH_RESULT)&&(state->mouseoverElement <= UIELEM_SEARCH_RESULT_5)){
           if(state->mouseoverElement >= (UIELEM_SEARCH_RESULT + state->ss.numResults - 1)){
             state->mouseoverElement = UIELEM_SEARCH_RESULT;
           }else{
@@ -131,7 +131,7 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
             state->mouseoverElement = UIELEM_ENUM_LENGTH;
           }
         }
-      }else if((left && !right)&&((state->mouseoverElement < UIELEM_SEARCH_RESULT)||(state->mouseoverElement > UIELEM_SEARCH_RESULT_4))){
+      }else if((left && !right)&&((state->mouseoverElement < UIELEM_SEARCH_RESULT)||(state->mouseoverElement > UIELEM_SEARCH_RESULT_5))){
         if(state->searchCursorPos > 0){
           state->searchCursorPos -= 1;
           if(state->searchCursorPos > 0){
@@ -144,7 +144,7 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
             state->ds.searchEntryDispNumChars = getNumTextCharsUnderWidth(rdat,SEARCH_MENU_ENTRYBOX_ENTRY_WIDTH,state->ss.searchString,state->ds.searchEntryDispStartChar,FONTSIZE_NORMAL);
           }
         }
-      }else if((right && !left)&&((state->mouseoverElement < UIELEM_SEARCH_RESULT)||(state->mouseoverElement > UIELEM_SEARCH_RESULT_4))){
+      }else if((right && !left)&&((state->mouseoverElement < UIELEM_SEARCH_RESULT)||(state->mouseoverElement > UIELEM_SEARCH_RESULT_5))){
         if(state->searchCursorPos < (int)strlen(state->ss.searchString)){
           state->searchCursorPos += 1;
           state->ds.searchEntryDispNumChars = getNumTextCharsUnderWidth(rdat,SEARCH_MENU_ENTRYBOX_ENTRY_WIDTH,state->ss.searchString,state->ds.searchEntryDispStartChar,FONTSIZE_NORMAL);
@@ -707,7 +707,7 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
   if(state->inputFlags & (1U << INPUT_SELECT)){
     if((state->ds.shownElements & ((uint64_t)(1) << UIELEM_SEARCH_MENU))&&(state->ss.numResults > 0)&&(state->ds.timeLeftInUIAnimation[UIANIM_SEARCH_MENU_HIDE]==0.0f)){
       //commit search result
-      if((state->mouseoverElement >= UIELEM_SEARCH_RESULT)&&(state->mouseoverElement <= UIELEM_SEARCH_RESULT_4)){
+      if((state->mouseoverElement >= UIELEM_SEARCH_RESULT)&&(state->mouseoverElement <= UIELEM_SEARCH_RESULT_5)){
         state->mouseholdElement = state->mouseoverElement;
         uiElemClickAction(dat,state,rdat,0,state->mouseoverElement);
       }else{

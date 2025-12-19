@@ -2249,7 +2249,19 @@ void getHalfLifeStr(char strOut[32], const app_data *restrict dat, const uint32_
 }
 void getGSHalfLifeStr(char strOut[32], const app_data *restrict dat, const uint16_t nuclInd, const uint8_t useLifetime){
 	if(dat->ndat.nuclData[nuclInd].numLevels > 0){
-		getHalfLifeStr(strOut,dat,dat->ndat.nuclData[nuclInd].firstLevel + dat->ndat.nuclData[nuclInd].gsLevel,1,1,useLifetime);
+		uint16_t gsLvlInd = dat->ndat.nuclData[nuclInd].gsLevel;
+		double gsHl = getNuclLevelHalfLifeSeconds(&dat->ndat,nuclInd,dat->ndat.nuclData[nuclInd].gsLevel);
+		if(gsHl < 0.0){
+			//find the first level with a half-life, and use that
+			for(uint16_t i=0; i<dat->ndat.nuclData[nuclInd].numLevels; i++){
+				gsHl = getNuclLevelHalfLifeSeconds(&dat->ndat,nuclInd,i);
+				if(gsHl > 0.0){
+					gsLvlInd = i;
+					break;
+				}
+			}
+		}
+		getHalfLifeStr(strOut,dat,dat->ndat.nuclData[nuclInd].firstLevel + gsLvlInd,1,1,useLifetime);
 	}else{
 		SDL_snprintf(strOut,32,"%s",dat->strings[dat->locStringIDs[LOCSTR_UNKNOWN]]);
 	}
@@ -3888,6 +3900,7 @@ void changeUIState(const app_data *restrict dat, app_state *restrict state, reso
 			updateSingleUIElemPosition(dat,state,rdat,UIELEM_SEARCH_RESULT_2);
 			updateSingleUIElemPosition(dat,state,rdat,UIELEM_SEARCH_RESULT_3);
 			updateSingleUIElemPosition(dat,state,rdat,UIELEM_SEARCH_RESULT_4);
+			updateSingleUIElemPosition(dat,state,rdat,UIELEM_SEARCH_RESULT_5);
 			state->ds.nuclFullInfoSelStrMetadata = STR_METADATA_UNUSED;
 			break;
 		case UISTATE_INFOBOX:
@@ -3911,6 +3924,7 @@ void changeUIState(const app_data *restrict dat, app_state *restrict state, reso
 			updateSingleUIElemPosition(dat,state,rdat,UIELEM_SEARCH_RESULT_2);
 			updateSingleUIElemPosition(dat,state,rdat,UIELEM_SEARCH_RESULT_3);
 			updateSingleUIElemPosition(dat,state,rdat,UIELEM_SEARCH_RESULT_4);
+			updateSingleUIElemPosition(dat,state,rdat,UIELEM_SEARCH_RESULT_5);
 			break;
 		case UISTATE_CHARTWITHMENU:
 			state->interactableElement |= ((uint64_t)(1) << UIELEM_MENU_BUTTON);
@@ -5316,6 +5330,9 @@ void uiElemClickAction(app_data *restrict dat, app_state *restrict state, resour
 		case UIELEM_SEARCH_RESULT_4:
 			searchResultClickAction(dat,state,rdat,3);
 			break;
+		case UIELEM_SEARCH_RESULT_5:
+			searchResultClickAction(dat,state,rdat,4);
+			break;
 		case UIELEM_PRIMARY_MENU:
 			//clicked on menu background, do nothing except keep the menu button selected
 			state->clickedUIElem = UIELEM_MENU_BUTTON;
@@ -5882,6 +5899,17 @@ void updateSingleUIElemPosition(const app_data *restrict dat, app_state *restric
 				state->ds.uiElemPosX[uiElemInd] = (int16_t)(state->ds.windowXRes-((SEARCH_MENU_WIDTH+SEARCH_MENU_POS_XR-SEARCH_MENU_ENTRYBOX_POS_X)*state->ds.uiUserScale));
 			}
 			state->ds.uiElemPosY[uiElemInd] = (int16_t)((SEARCH_MENU_POS_Y+SEARCH_MENU_ENTRYBOX_POS_Y+UI_TILE_SIZE+UI_PADDING_SIZE+3*SEARCH_MENU_RESULT_HEIGHT)*state->ds.uiUserScale);
+			state->ds.uiElemWidth[uiElemInd] = (int16_t)(SEARCH_MENU_ENTRYBOX_WIDTH*state->ds.uiUserScale);
+			state->ds.uiElemHeight[uiElemInd] = (int16_t)((SEARCH_MENU_RESULT_HEIGHT-UI_PADDING_SIZE)*state->ds.uiUserScale);
+			break;
+		case UIELEM_SEARCH_RESULT_5:
+			if((state->uiState == UISTATE_FULLLEVELINFO)||(state->uiState == UISTATE_FULLLEVELINFOWITHMENU)){
+				//in the full level list, position search menu relative to the reaction selector button
+				state->ds.uiElemPosX[uiElemInd] = (int16_t)(state->ds.windowXRes-state->ds.uiElemWidth[UIELEM_NUCL_FULLINFOBOX_RXNBUTTON]-((SEARCH_MENU_WIDTH+SEARCH_MENU_POS_XR-SEARCH_MENU_ENTRYBOX_POS_X+UI_PADDING_SIZE)*state->ds.uiUserScale));
+			}else{
+				state->ds.uiElemPosX[uiElemInd] = (int16_t)(state->ds.windowXRes-((SEARCH_MENU_WIDTH+SEARCH_MENU_POS_XR-SEARCH_MENU_ENTRYBOX_POS_X)*state->ds.uiUserScale));
+			}
+			state->ds.uiElemPosY[uiElemInd] = (int16_t)((SEARCH_MENU_POS_Y+SEARCH_MENU_ENTRYBOX_POS_Y+UI_TILE_SIZE+UI_PADDING_SIZE+4*SEARCH_MENU_RESULT_HEIGHT)*state->ds.uiUserScale);
 			state->ds.uiElemWidth[uiElemInd] = (int16_t)(SEARCH_MENU_ENTRYBOX_WIDTH*state->ds.uiUserScale);
 			state->ds.uiElemHeight[uiElemInd] = (int16_t)((SEARCH_MENU_RESULT_HEIGHT-UI_PADDING_SIZE)*state->ds.uiUserScale);
 			break;
