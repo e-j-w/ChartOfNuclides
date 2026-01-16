@@ -1,4 +1,4 @@
-/* © J. Williams 2017-2024 */
+/* © J. Williams 2017-2026 */
 /* Functions handling low-level operations on game state, or calculations using game data/state */
 
 #ifndef SOPS_H
