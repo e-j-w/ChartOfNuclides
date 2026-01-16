@@ -1725,6 +1725,10 @@ void cleanCommentStr(char *comBuff){
 	//use find and replace to de-uglify strings
 	//SDL_Log("cleaning string: %s\n",comBuff);
 	char *modComBuff;
+	
+	modComBuff = findReplaceAllUTF8("%|e+%|b","%ε/β",comBuff);
+	SDL_strlcpy(comBuff,modComBuff,118);
+	SDL_free(modComBuff);
 	modComBuff = findReplaceAllUTF8("|b","β",comBuff);
 	SDL_strlcpy(comBuff,modComBuff,118);
 	SDL_free(modComBuff);
@@ -1762,6 +1766,9 @@ void cleanCommentStr(char *comBuff){
 	SDL_strlcpy(comBuff,modComBuff,118);
 	SDL_free(modComBuff);
 	modComBuff = findReplaceAllUTF8("|a","α",comBuff);
+	SDL_strlcpy(comBuff,modComBuff,118);
+	SDL_free(modComBuff);
+	modComBuff = findReplaceAllUTF8("|s","σ",comBuff);
 	SDL_strlcpy(comBuff,modComBuff,118);
 	SDL_free(modComBuff);
 	modComBuff = findReplaceAllUTF8("|*","×",comBuff);
@@ -2949,8 +2956,8 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 									}
 								}
 
-								char comBuff[128];
-								memcpy(comBuff, &line[9+comBufStart], 118);
+								char comBuff[128], tmpComBuff[128];
+								SDL_memcpy(comBuff, &line[9+comBufStart], 118);
 								comBuff[118] = '\0';
 								len = (int32_t)SDL_strlen(comBuff); //length of the comment
 
@@ -3018,6 +3025,26 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 										lvlComLineIsGood = 0;
 									}else if(SDL_strncmp(comBuff,"BE2$",4)==0){
 										//B(E2) (unsupported for now)
+										lvlComLineIsGood = 0;
+									}else if( (SDL_strncmp(comBuff,"%IT:",4)==0)
+									|| (SDL_strncmp(comBuff,"%|b{+-}:",8)==0)
+									|| (SDL_strncmp(comBuff,"%|b{++}:",8)==0)
+									|| (SDL_strncmp(comBuff,"%|e:",4)==0)
+									|| (SDL_strncmp(comBuff,"%IT, %|e+%|b{++}:",17)==0)
+								  || (SDL_strncmp(comBuff,"%|e+%|b{++}:",12)==0) ){
+										//decay mode 
+										if(!(nd->levels[nd->numLvls-1].hasComment & (uint8_t)(1U << LCOMMENT_DECAYMODE))){
+											nd->levels[nd->numLvls-1].hasComment |= (uint8_t)(1U << LCOMMENT_DECAYMODE);
+											lvlComLineIsGood = 2; //new comment
+											SDL_strlcpy(tmpComBuff,comBuff,128);
+											SDL_snprintf(comBuff,128,"D$%s",tmpComBuff);
+											comBuff[strcspn(comBuff,"\r\n")] = 0; //strips newline characters from the string
+											//SDL_Log("decay mode comment: %s",comBuff);
+										}else{
+											lvlComLineIsGood = 0;
+										}
+									}else if(SDL_strncmp(comBuff,"|m:",3)==0){
+										//mu (unsupported for now)
 										lvlComLineIsGood = 0;
 									}
 

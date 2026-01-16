@@ -1129,9 +1129,16 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
               }
               break;
             case LLCOLUMN_HALFLIFE:
-              if(dat->ndat.levels[mouseOverLvlInd].hasComment & (uint8_t)(1U << LCOMMENT_HALFLIFE)){
-                state->ds.showingTooltip = 1;
-                state->ds.tooltipPar = getENSDFLvlCommentStrInd(&dat->ndat,mouseOverLvlInd,LCOMMENT_HALFLIFE);
+              if(state->ds.nuclFullInfoMouseOverLvlRow == 0){
+                if(dat->ndat.levels[mouseOverLvlInd].hasComment & (uint8_t)(1U << LCOMMENT_HALFLIFE)){
+                  state->ds.showingTooltip = 1;
+                  state->ds.tooltipPar = getENSDFLvlCommentStrInd(&dat->ndat,mouseOverLvlInd,LCOMMENT_HALFLIFE);
+                }
+              }else{
+                if(dat->ndat.levels[mouseOverLvlInd].hasComment & (uint8_t)(1U << LCOMMENT_DECAYMODE)){
+                  state->ds.showingTooltip = 1;
+                  state->ds.tooltipPar = getENSDFLvlCommentStrInd(&dat->ndat,mouseOverLvlInd,LCOMMENT_DECAYMODE);
+                }
               }
               break;
             case LLCOLUMN_EGAMMA:

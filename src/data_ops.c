@@ -3708,6 +3708,11 @@ uint32_t getENSDFLvlCommentStrInd(const ndata *restrict nd, const uint32_t lvlIn
 						return strBufPos+2;
 					}
 					break;
+				case LCOMMENT_DECAYMODE:
+					if(SDL_strncmp(&nd->ensdfStrBuf[strBufPos],"D$",2)==0){
+						return strBufPos+2;
+					}
+					break;
 				default:
 					return MAX_UINT32_VAL;
 			}

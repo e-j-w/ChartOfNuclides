@@ -3009,15 +3009,27 @@ void drawNuclFullInfoBox(const app_data *restrict dat, app_state *restrict state
             strMetadata |= (uint32_t)((uint32_t)(LLCOLUMN_HALFLIFE & 255U) << 16); //bits 16-23 give column
             strMetadata |= (uint32_t)((uint32_t)(i+1) << 24); //bits 24-31 give row
             if((state->tss.selStrsModifiable)&&(strMetadata == state->ds.nuclFullInfoSelStrMetadata)){state->tss.selectedStr = state->tss.numSelStrs;}
-            drawSelectableTextAlignedSizedWithMetadata(rdat,&state->tss,drawXPos+(2*UI_PADDING_SIZE*state->ds.uiUserScale),drawYPos,(hl > 600) ? whiteLvlListCol : blackLvlListCol,lvlFontInd,txtAlpha,tmpStr,ALIGN_LEFT,16384,strMetadata); //draw selectable decay mode label
+            if((state->ds.useLevelListCommentTooltips == 1)&&(dat->ndat.levels[lvlInd].hasComment & (uint8_t)(1U << LCOMMENT_DECAYMODE))){
+              drawSelectableTextAlignedSizedWithMetadata(rdat,&state->tss,drawXPos+(2*UI_PADDING_SIZE*state->ds.uiUserScale),drawYPos,(hl > 600) ? lightBlueLvlListCol : darkBlueLvlListCol,lvlFontInd,txtAlpha,tmpStr,ALIGN_LEFT,16384,strMetadata); //draw selectable decay mode label
+            }else{
+              drawSelectableTextAlignedSizedWithMetadata(rdat,&state->tss,drawXPos+(2*UI_PADDING_SIZE*state->ds.uiUserScale),drawYPos,(hl > 600) ? whiteLvlListCol : blackLvlListCol,lvlFontInd,txtAlpha,tmpStr,ALIGN_LEFT,16384,strMetadata); //draw selectable decay mode label
+            }
           }else if(drawYPos >= (NUCL_FULLINFOBOX_LEVELLIST_POS_Y*state->ds.uiUserScale - 1.0f)){
             uint32_t strMetadata = (lvlInd - dat->ndat.nuclData[nuclInd].firstLevel) & 65535U; //16 lower bits give level index
             strMetadata |= (uint32_t)((uint32_t)(LLCOLUMN_HALFLIFE & 255U) << 16); //bits 16-23 give column
             strMetadata |= (uint32_t)((uint32_t)(i+1) << 24); //bits 24-31 give row
             if((state->tss.selStrsModifiable)&&(strMetadata == state->ds.nuclFullInfoSelStrMetadata)){state->tss.selectedStr = state->tss.numSelStrs;}
-            drawSelectableTextAlignedSizedWithMetadata(rdat,&state->tss,drawXPos+(2*UI_PADDING_SIZE*state->ds.uiUserScale),drawYPos,(hl > 600) ? whiteLvlListCol : blackLvlListCol,lvlFontInd,txtAlpha,tmpStr,ALIGN_LEFT,16384,strMetadata); //draw decay mode label
+            if((state->ds.useLevelListCommentTooltips == 1)&&(dat->ndat.levels[lvlInd].hasComment & (uint8_t)(1U << LCOMMENT_DECAYMODE))){
+              drawSelectableTextAlignedSizedWithMetadata(rdat,&state->tss,drawXPos+(2*UI_PADDING_SIZE*state->ds.uiUserScale),drawYPos,(hl > 600) ? lightBlueLvlListCol : darkBlueLvlListCol,lvlFontInd,txtAlpha,tmpStr,ALIGN_LEFT,16384,strMetadata); //draw decay mode label
+            }else{
+              drawSelectableTextAlignedSizedWithMetadata(rdat,&state->tss,drawXPos+(2*UI_PADDING_SIZE*state->ds.uiUserScale),drawYPos,(hl > 600) ? whiteLvlListCol : blackLvlListCol,lvlFontInd,txtAlpha,tmpStr,ALIGN_LEFT,16384,strMetadata); //draw decay mode label
+            }
           }else{
-            drawTextAlignedSized(rdat,drawXPos+(2*UI_PADDING_SIZE*state->ds.uiUserScale),drawYPos,(hl > 600) ? whiteLvlListCol : blackLvlListCol,lvlFontInd,txtAlpha,tmpStr,ALIGN_LEFT,16384); //draw decay mode label
+            if((state->ds.useLevelListCommentTooltips == 1)&&(dat->ndat.levels[lvlInd].hasComment & (uint8_t)(1U << LCOMMENT_DECAYMODE))){
+              drawTextAlignedSized(rdat,drawXPos+(2*UI_PADDING_SIZE*state->ds.uiUserScale),drawYPos,(hl > 600) ? lightBlueLvlListCol : darkBlueLvlListCol,lvlFontInd,txtAlpha,tmpStr,ALIGN_LEFT,16384); //draw decay mode label
+            }else{
+              drawTextAlignedSized(rdat,drawXPos+(2*UI_PADDING_SIZE*state->ds.uiUserScale),drawYPos,(hl > 600) ? whiteLvlListCol : blackLvlListCol,lvlFontInd,txtAlpha,tmpStr,ALIGN_LEFT,16384); //draw decay mode label
+            }
           }
         }
       }
@@ -4427,7 +4439,7 @@ void drawContextMenu(const app_data *restrict dat, const app_state *restrict sta
 char ttTxt[MAX_COPY_STR_LEN]; //some comments are very long, eg. 32Si GS half-life comment
 void drawENSDFCommentTooltip(const ui_theme_rules *restrict uirules, const app_data *restrict dat, const app_state *restrict state, resource_data *restrict rdat){
   if(state->ds.tooltipPar < dat->ndat.ensdfStrBufLen){
-    if((state->ds.useLifetimes)&&(state->ds.nuclFullInfoMouseOverCol == LLCOLUMN_HALFLIFE)){
+    if((state->ds.useLifetimes)&&(state->ds.nuclFullInfoMouseOverCol == LLCOLUMN_HALFLIFE)&&(state->ds.nuclFullInfoMouseOverLvlRow == 0)){
       //add t(1/2) label to tooltip to clarify that the comment is for the half-life and not the lifetime
       SDL_snprintf(ttTxt,MAX_COPY_STR_LEN,"%s: %s",dat->strings[dat->locStringIDs[LOCSTR_HALFLIFE]],&dat->ndat.ensdfStrBuf[state->ds.tooltipPar]);
     }else{

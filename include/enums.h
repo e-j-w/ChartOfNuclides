@@ -455,6 +455,7 @@ enum level_comment_enum{
 LCOMMENT_ELEVEL,
 LCOMMENT_JPI,
 LCOMMENT_HALFLIFE,
+LCOMMENT_DECAYMODE,
 LCOMMENT_ENUM_LENGTH
 };
 enum tran_comment_enum{
