@@ -88,6 +88,10 @@ char* findReplaceUTF8(const char *findstr, const char *replacestr, const char *o
   }
 
   char *new_string = (char*)calloc(new_string_len, sizeof(char));
+  if(new_string == NULL){
+    //allocation failed
+    return "";
+  }
   
   char *pos = strstr(origstr, findstr);
   
@@ -116,6 +120,10 @@ char* findReplaceAllUTF8(const char *findstr, const char *replacestr, const char
   //and if so, simply return the original string
   if(strlen(origstr) < strlen(findstr)){
     char *new_string = (char*)calloc(strlen(origstr), sizeof(char));
+    if(new_string == NULL){
+      //allocation failed
+      return "";
+    }
     strcpy(new_string, origstr);
     return new_string;
   }
