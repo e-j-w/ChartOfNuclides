@@ -65,11 +65,11 @@ sl_spectmedical|SPECT medical isotope
 sl_e6isomer|E6-decaying isomer
 sl_pdecayisomer|Proton-decaying isomer
 pref_shellclosure|Show shell closures on chart
-pref_lifetime|Show lifetimes instead of half-lives
+pref_lifetime|Show lifetimes (τ) instead of half-lives (t½)
 pref_levellist_header|In level lists:
 pref_levellist_separation|Show separation energies
 pref_levellist_threshold|Show parent decay thresholds
-pref_levellist_comments|Show additional ENSDF data tooltips
+pref_levellist_comments|Show additional ENSDF data (tooltips)
 pref_ui_animations|Enable UI animations
 chartview_menu_title|Select color scheme:
 chartview_lifetime|Lifetime
