@@ -44,6 +44,7 @@ The program is designed to be mostly navigable with a keyboard and/or gamepad.
 | Arrow keys         | Analog thumbsticks          | Pan chart view, navigate menus, scroll list views |
 | W / A / S / D      | D-pad                       | Change selected nuclide (in chart and level list views) |
 | + / -              | Left/right triggers         | Zoom in/out on chart |
+| 0                  | N/A                         | Re-center the chart view |
 | ] / [              | Left/right shoulder buttons | Cycle between view modes for the chart (half-life, 2+ energy, etc.), or between reaction datasets in the detail view |
 | Enter              | A / Circle (right button)   | Select menu items |
 | Alt                | X / Triangle (top button)   | Open menu |

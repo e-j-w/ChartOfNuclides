@@ -174,6 +174,7 @@ UIELEM_RXN_MENU,
 UIELEM_CONTEXT_MENU,
 UIELEM_ZOOMIN_BUTTON,
 UIELEM_ZOOMOUT_BUTTON,
+UIELEM_RECENTER_BUTTON,
 UIELEM_ENUM_LENGTH
 }; //order in which UI elements are defined here determines 
 //order in which they receive input, if they overlap 
@@ -203,6 +204,7 @@ UIICON_CHARTVIEW,
 UIICON_DROPDOWNARROW,
 UIICON_ZOOMOUT,
 UIICON_ZOOMIN,
+UIICON_RECENTER,
 UIICON_ENUM_LENGTH
 };
 enum ui_animation_enum{

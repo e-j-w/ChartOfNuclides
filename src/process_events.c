@@ -1739,6 +1739,12 @@ void processSingleEvent(app_data *restrict dat, app_state *restrict state, resou
             uiElemClickAction(dat,state,rdat,0,UIELEM_ZOOMOUT_BUTTON);
           }
           break;
+        case SDL_SCANCODE_0:
+          if(!(SDL_TextInputActive(rdat->window))){
+            state->mouseholdElement = UIELEM_RECENTER_BUTTON;
+            uiElemClickAction(dat,state,rdat,0,UIELEM_RECENTER_BUTTON);
+          }
+          break;
         case SDL_SCANCODE_LEFTBRACKET:
           if(!(SDL_TextInputActive(rdat->window))){
             state->inputFlags |= (1U << INPUT_CYCLELEFT);

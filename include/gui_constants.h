@@ -32,6 +32,11 @@ which can be referenced by both the GUI draw code as well as the interaction cod
 #define MAX_RENDER_WIDTH  16384
 #define MAX_RENDER_HEIGHT 16384
 
+//default chart position/scale
+#define DEFAULT_CHART_ZOOM  0.5f
+#define DEFAULT_CHART_X_POS 86.0f
+#define DEFAULT_CHART_Y_POS 52.0f
+
 #define UI_ANIM_LENGTH            0.2f //length of UI animations, in seconds
 #define SHORT_UI_ANIM_LENGTH      0.1f
 
@@ -55,8 +60,8 @@ which can be referenced by both the GUI draw code as well as the interaction cod
 #define UITHEME_SCROLLBAR_TILE_Y 3
 
 //UI theme icons
-static const uint8_t UITHEME_ICON_TILE_X[UIICON_ENUM_LENGTH] = {0,0, 0, 1, 2, 2,1,2,0,1, 0, 1,1,2};
-static const uint8_t UITHEME_ICON_TILE_Y[UIICON_ENUM_LENGTH] = {1,9,10,10,11,10,9,9,8,8,11,11,3,3};
+static const uint8_t UITHEME_ICON_TILE_X[UIICON_ENUM_LENGTH] = {0,0, 0, 1, 2, 2,1,2,0,1, 0, 1,1,2,2};
+static const uint8_t UITHEME_ICON_TILE_Y[UIICON_ENUM_LENGTH] = {1,9,10,10,11,10,9,9,8,8,11,11,3,3,1};
 
 //font sizes (assuming UI scale of 1)
 static const float fontSizes[FONTSIZE_ENUM_LENGTH] = {13.0f,15.0f,15.0f,15.0f,15.0f,19.0f,19.0f,23.0f,23.0f};

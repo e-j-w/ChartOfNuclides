@@ -70,9 +70,9 @@ void initializeTempState(const app_data *restrict dat, app_state *restrict state
 	state->ds.useLevelListParentThresholds = 1;
 	state->ds.useLevelListCommentTooltips = 1;
 	state->ds.drawShellClosures = 1;
-	state->ds.chartPosX = 86.0f;
-	state->ds.chartPosY = 52.0f;
-	state->ds.chartZoomScale = 0.5f;
+	state->ds.chartPosX = DEFAULT_CHART_X_POS;
+	state->ds.chartPosY = DEFAULT_CHART_Y_POS;
+	state->ds.chartZoomScale = DEFAULT_CHART_ZOOM;
 	state->ds.chartZoomToScale = state->ds.chartZoomScale;
 	state->ds.chartZoomStartScale = state->ds.chartZoomScale;
 	state->ds.infoBoxTableHeight = NUCL_INFOBOX_BIGLINE_HEIGHT;
@@ -438,12 +438,19 @@ void updateDrawingState(const app_data *restrict dat, app_state *restrict state,
 	if(state->ds.zoomInProgress){
 		state->ds.timeSinceZoomStart += deltaTime;
 		state->ds.chartZoomScale = state->ds.chartZoomStartScale + ((state->ds.chartZoomToScale - state->ds.chartZoomStartScale)*juice_smoothStop2(state->ds.timeSinceZoomStart/CHART_ZOOM_TIME));
-		//compute new x,y range on each axis at the new zoom scale
-		float xRange = getChartWidthN(&state->ds);
-		float yRange = getChartHeightZ(&state->ds);
-		//set the center focus such that the cursor is at the same fractional value of the screen axes
-		state->ds.chartPosX = state->ds.chartZoomStartMouseX + (0.5f - state->ds.chartZoomStartMouseXFrac)*xRange;
-		state->ds.chartPosY = state->ds.chartZoomStartMouseY + (0.5f - state->ds.chartZoomStartMouseYFrac)*yRange;
+		if(state->ds.chartZoomStartMouseXFrac == -1.0f){
+			//special zoom mode where we are also panning to a specific (pre-programmed) focus
+			state->ds.chartPosX = state->ds.chartZoomStartMouseX  + ((state->ds.chartZoomToX - state->ds.chartZoomStartMouseX)*juice_smoothStop2(state->ds.timeSinceZoomStart/CHART_ZOOM_TIME));
+			state->ds.chartPosY = state->ds.chartZoomStartMouseY  + ((state->ds.chartZoomToY - state->ds.chartZoomStartMouseY)*juice_smoothStop2(state->ds.timeSinceZoomStart/CHART_ZOOM_TIME));
+		}else{
+			//normal zoom mode
+			//compute new x,y range on each axis at the new zoom scale
+			float xRange = getChartWidthN(&state->ds);
+			float yRange = getChartHeightZ(&state->ds);
+			//set the center focus such that the cursor is at the same fractional value of the screen axes
+			state->ds.chartPosX = state->ds.chartZoomStartMouseX + (0.5f - state->ds.chartZoomStartMouseXFrac)*xRange;
+			state->ds.chartPosY = state->ds.chartZoomStartMouseY + (0.5f - state->ds.chartZoomStartMouseYFrac)*yRange;
+		}
 		if(state->ds.timeSinceZoomStart >= CHART_ZOOM_TIME){
 			state->ds.chartZoomScale = state->ds.chartZoomToScale;
 			state->ds.chartPosX = state->ds.chartZoomToX;
@@ -3921,6 +3928,7 @@ void changeUIState(const app_data *restrict dat, app_state *restrict state, reso
 			if(state->ds.chartZoomToScale < MAX_CHART_ZOOM_SCALE){
 				state->interactableElement |= ((uint64_t)(1) << UIELEM_ZOOMIN_BUTTON);
 			}
+			state->interactableElement |= ((uint64_t)(1) << UIELEM_RECENTER_BUTTON);
 			clearSelectionStrs(&state->ds,&state->tss,1,0); //allow strings on the info box to be selectable
 			updateSingleUIElemPosition(dat,state,rdat,UIELEM_SEARCH_BUTTON); //update search button position, if moving here from the full info box
 			updateSingleUIElemPosition(dat,state,rdat,UIELEM_SEARCH_MENU);
@@ -3985,6 +3993,7 @@ void changeUIState(const app_data *restrict dat, app_state *restrict state, reso
 			if(state->ds.chartZoomToScale < MAX_CHART_ZOOM_SCALE){
 				state->interactableElement |= ((uint64_t)(1) << UIELEM_ZOOMIN_BUTTON);
 			}
+			state->interactableElement |= ((uint64_t)(1) << UIELEM_RECENTER_BUTTON);
 			clearSelectionStrs(&state->ds,&state->tss,0,0); //strings on the info box are no longer selectable
       break;
   }
@@ -5500,6 +5509,20 @@ void uiElemClickAction(app_data *restrict dat, app_state *restrict state, resour
 			state->ds.zoomFinished = 0;
 			state->clickedUIElem = UIELEM_ENUM_LENGTH; //'unclick' the zoom button
 			break;
+		case UIELEM_RECENTER_BUTTON:
+			//reset the chart back to the default scale
+			state->ds.chartZoomToScale = DEFAULT_CHART_ZOOM;
+			state->ds.chartZoomToX = DEFAULT_CHART_X_POS;
+			state->ds.chartZoomToY = DEFAULT_CHART_Y_POS;
+			state->ds.chartZoomStartScale = state->ds.chartZoomScale;
+			state->ds.chartZoomStartMouseX = state->ds.chartPosX;
+			state->ds.chartZoomStartMouseY = state->ds.chartPosY;
+			state->ds.chartZoomStartMouseXFrac = -1.0f; //set pre-programmed focus zoom mode
+			state->ds.timeSinceZoomStart = 0.0f;
+			state->ds.zoomInProgress = 1;
+			state->ds.zoomFinished = 0;
+			state->clickedUIElem = UIELEM_ENUM_LENGTH; //'unclick' the recenter button
+			break;
 		case UIELEM_CONTEXT_MENU:
 			break; //do nothing
 		case UIELEM_ENUM_LENGTH:
@@ -6198,7 +6221,7 @@ void updateSingleUIElemPosition(const app_data *restrict dat, app_state *restric
 			state->ds.uiElemExtPlusY[UIELEM_NUCL_FULLINFOBOX_SCROLLBAR] = (uint16_t)(NUCL_FULLINFOBOX_LEVELLIST_POS_Y*state->ds.uiUserScale); //Fitts' law (extend to screen edge)
 			break;
 		case UIELEM_ZOOMIN_BUTTON:
-			state->ds.uiElemPosX[uiElemInd] = (int16_t)(state->ds.windowXRes-((UI_TILE_SIZE+ZOOM_BUTTON_POS_XR)*state->ds.uiUserScale));
+			state->ds.uiElemPosX[uiElemInd] = (int16_t)(state->ds.windowXRes-((2*(UI_TILE_SIZE+ZOOM_BUTTON_POS_XR))*state->ds.uiUserScale));
 			state->ds.uiElemPosY[uiElemInd] = (int16_t)(state->ds.windowYRes-((UI_TILE_SIZE+ZOOM_BUTTON_POS_YB+CHART_AXIS_DEPTH)*state->ds.uiUserScale));
 			state->ds.uiElemWidth[uiElemInd] = (int16_t)(UI_TILE_SIZE*state->ds.uiUserScale);
 			state->ds.uiElemHeight[uiElemInd] = (int16_t)(UI_TILE_SIZE*state->ds.uiUserScale);
@@ -6207,12 +6230,21 @@ void updateSingleUIElemPosition(const app_data *restrict dat, app_state *restric
 			state->ds.uiElemExtMinusX[uiElemInd] = (uint16_t)((0.5f*ZOOM_BUTTON_POS_XR + 1.0f)*state->ds.uiUserScale); //prevent clicking chart 'in between' buttons
 			break;
 		case UIELEM_ZOOMOUT_BUTTON:
-			state->ds.uiElemPosX[uiElemInd] = (int16_t)(state->ds.windowXRes-((2*(UI_TILE_SIZE+ZOOM_BUTTON_POS_XR))*state->ds.uiUserScale));
+			state->ds.uiElemPosX[uiElemInd] = (int16_t)(state->ds.windowXRes-((3*(UI_TILE_SIZE+ZOOM_BUTTON_POS_XR))*state->ds.uiUserScale));
 			state->ds.uiElemPosY[uiElemInd] = (int16_t)(state->ds.windowYRes-((UI_TILE_SIZE+ZOOM_BUTTON_POS_YB+CHART_AXIS_DEPTH)*state->ds.uiUserScale));
 			state->ds.uiElemWidth[uiElemInd] = (int16_t)(UI_TILE_SIZE*state->ds.uiUserScale);
 			state->ds.uiElemHeight[uiElemInd] = (int16_t)(UI_TILE_SIZE*state->ds.uiUserScale);
 			state->ds.uiElemExtPlusX[uiElemInd] = (uint16_t)((ZOOM_BUTTON_POS_XR + 1.0f)*state->ds.uiUserScale); //prevent clicking chart 'in between' buttons
 			state->ds.uiElemExtPlusY[uiElemInd] = (uint16_t)((ZOOM_BUTTON_POS_YB + 1.0f)*state->ds.uiUserScale); //prevent clicking chart 'in between' buttons
+			break;
+		case UIELEM_RECENTER_BUTTON:
+			state->ds.uiElemPosX[uiElemInd] = (int16_t)(state->ds.windowXRes-((UI_TILE_SIZE+ZOOM_BUTTON_POS_XR)*state->ds.uiUserScale));
+			state->ds.uiElemPosY[uiElemInd] = (int16_t)(state->ds.windowYRes-((UI_TILE_SIZE+ZOOM_BUTTON_POS_YB+CHART_AXIS_DEPTH)*state->ds.uiUserScale));
+			state->ds.uiElemWidth[uiElemInd] = (int16_t)(UI_TILE_SIZE*state->ds.uiUserScale);
+			state->ds.uiElemHeight[uiElemInd] = (int16_t)(UI_TILE_SIZE*state->ds.uiUserScale);
+			state->ds.uiElemExtPlusX[uiElemInd] = (uint16_t)((ZOOM_BUTTON_POS_XR + 1.0f)*state->ds.uiUserScale); //prevent clicking chart 'in between' buttons
+			state->ds.uiElemExtPlusY[uiElemInd] = (uint16_t)((ZOOM_BUTTON_POS_YB + 1.0f)*state->ds.uiUserScale); //prevent clicking chart 'in between' buttons
+			state->ds.uiElemExtMinusX[uiElemInd] = (uint16_t)((0.5f*ZOOM_BUTTON_POS_XR + 1.0f)*state->ds.uiUserScale); //prevent clicking chart 'in between' buttons
 			break;
 		default:
 			break;
