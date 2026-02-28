@@ -1842,6 +1842,9 @@ void cleanCommentStr(char *comBuff){
 	modComBuff = findReplaceAllUTF8("%B","%β",comBuff);
 	SDL_strlcpy(comBuff,modComBuff,118);
 	SDL_free(modComBuff);
+	modComBuff = findReplaceAllUTF8("$from"," from",comBuff);
+	SDL_strlcpy(comBuff,modComBuff,118);
+	SDL_free(modComBuff);
 	modComBuff = findReplaceAllUTF8("CONF ","Configuration: ",comBuff);
 	SDL_strlcpy(comBuff,modComBuff,118);
 	SDL_free(modComBuff);
