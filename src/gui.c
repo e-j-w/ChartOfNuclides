@@ -4457,6 +4457,23 @@ void drawENSDFCommentTooltip(const ui_theme_rules *restrict uirules, const app_d
     drawTooltipBox(uirules,rdat,ttRect,1.0f,ttTxt);
   }
 }
+void drawChartTooltip(const ui_theme_rules *restrict uirules, const app_data *restrict dat, const app_state *restrict state, resource_data *restrict rdat){
+  if(state->ds.tooltipPar < 2){
+    switch(state->ds.tooltipPar){
+      case 1:
+        SDL_snprintf(ttTxt,MAX_COPY_STR_LEN,"%s",dat->strings[dat->locStringIDs[LOCSTR_NUMNEUTRONS]]);
+        break;
+      case 0:
+      default:
+        SDL_snprintf(ttTxt,MAX_COPY_STR_LEN,"%s",dat->strings[dat->locStringIDs[LOCSTR_NUMPROTONS]]);
+        break;
+    }
+    SDL_FRect ttRect = getTooltipRect(&state->ds,rdat,state->mouseXPx + UI_PADDING_SIZE*rdat->uiScale,state->mouseYPx + UI_PADDING_SIZE*rdat->uiScale,ttTxt);
+    drawTooltipBox(uirules,rdat,ttRect,1.0f,ttTxt);
+  }else{
+    SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,"drawChartTooltip - invalid tooltip parameter (%u)\n",state->ds.tooltipPar);
+  }
+}
 
 //draw some stats, ie. FPS overlay and further diagnostic info
 void drawPerformanceStats(const ui_theme_rules *restrict uirules, const app_state *restrict state, const thread_manager_state *restrict tms, resource_data *restrict rdat, const float deltaTime){
@@ -4596,6 +4613,9 @@ void drawUI(const app_data *restrict dat, app_state *restrict state, resource_da
       //draw tooltip
       if((state->ds.useLevelListCommentTooltips == 1)&&(state->ds.showingTooltip == 1)&&(state->ds.shownElements & ((uint64_t)(1) << UIELEM_NUCL_FULLINFOBOX))){
         drawENSDFCommentTooltip(&dat->rules.themeRules,dat,state,rdat);
+      }
+      if(((state->uiState == UISTATE_CHARTONLY)||(state->uiState == UISTATE_INFOBOX))&&(state->ds.showingTooltip == 1)){
+        drawChartTooltip(&dat->rules.themeRules,dat,state,rdat);
       }
     }
 

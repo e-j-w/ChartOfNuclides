@@ -366,6 +366,8 @@ static int parseAppRules(app_data *restrict dat, asset_mapping *restrict stringI
 	dat->locStringIDs[LOCSTR_FEEDING] = (uint16_t)nameToAssetID("feeding",stringIDmap);
 	dat->locStringIDs[LOCSTR_DECAY] = (uint16_t)nameToAssetID("decay",stringIDmap);
 	dat->locStringIDs[LOCSTR_SAME_JPI_AS] = (uint16_t)nameToAssetID("same_jpi_as",stringIDmap);
+	dat->locStringIDs[LOCSTR_NUMPROTONS] = (uint16_t)nameToAssetID("num_protons",stringIDmap);
+	dat->locStringIDs[LOCSTR_NUMNEUTRONS] = (uint16_t)nameToAssetID("num_neutrons",stringIDmap);
 
   return 0; //success
 

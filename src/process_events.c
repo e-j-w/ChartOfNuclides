@@ -1018,84 +1018,86 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
 
       //handle mouseover in the full level list
       //by default, there is no moused-over row or column
-      state->ds.nuclFullInfoRightClickCol = state->ds.nuclFullInfoMouseOverCol;
-      state->ds.nuclFullInfoRightClickLvlRow = state->ds.nuclFullInfoMouseOverLvlRow;
-      state->ds.nuclFullInfoRightClickNuclLvl = state->ds.nuclFullInfoMouseOverNuclLvl;
-      uint32_t rightClickLvlInd = (uint32_t)(dat->ndat.nuclData[state->chartSelectedNucl].firstLevel + state->ds.nuclFullInfoRightClickNuclLvl);
-      if(state->ds.nuclFullInfoRightClickNuclLvl != 65535U){
-        //SDL_Log("Right click on lvl: %u (row: %u), col %u\n",state->ds.nuclFullInfoRightClickNuclLvl,state->ds.nuclFullInfoRightClickLvlRow,state->ds.nuclFullInfoRightClickCol);
-        //TO-DO: replace selection string context items (besides copy) with context items specific to the specific
-        //level in the level list
-        switch(state->ds.nuclFullInfoRightClickCol){
-          case LLCOLUMN_ELEVEL:
-          case LLCOLUMN_JPI:
-            state->cms.selectionInd = state->ds.nuclFullInfoRightClickNuclLvl;
-            appendContextMenuItem(state,CONTEXTITEM_SHOW_COINC);
-            if(dat->ndat.levels[rightClickLvlInd].numSpinParVals > 0){
-              for(uint32_t i=0; i<dat->ndat.levels[rightClickLvlInd].numSpinParVals; i++){
-                spinparval spv1 = dat->ndat.spv[dat->ndat.levels[rightClickLvlInd].firstSpinParVal + i];
-                if((spv1.format & 1U) == 0){
-                  //at least one non-variable spin-parity value for this level
-                  appendContextMenuItem(state,CONTEXTITEM_SHOW_SAME_JPI);
-                  break;
+      if(state->uiState == UISTATE_FULLLEVELINFO){
+        state->ds.nuclFullInfoRightClickCol = state->ds.nuclFullInfoMouseOverCol;
+        state->ds.nuclFullInfoRightClickLvlRow = state->ds.nuclFullInfoMouseOverLvlRow;
+        state->ds.nuclFullInfoRightClickNuclLvl = state->ds.nuclFullInfoMouseOverNuclLvl;
+        uint32_t rightClickLvlInd = (uint32_t)(dat->ndat.nuclData[state->chartSelectedNucl].firstLevel + state->ds.nuclFullInfoRightClickNuclLvl);
+        if(state->ds.nuclFullInfoRightClickNuclLvl != 65535U){
+          //SDL_Log("Right click on lvl: %u (row: %u), col %u\n",state->ds.nuclFullInfoRightClickNuclLvl,state->ds.nuclFullInfoRightClickLvlRow,state->ds.nuclFullInfoRightClickCol);
+          //TO-DO: replace selection string context items (besides copy) with context items specific to the specific
+          //level in the level list
+          switch(state->ds.nuclFullInfoRightClickCol){
+            case LLCOLUMN_ELEVEL:
+            case LLCOLUMN_JPI:
+              state->cms.selectionInd = state->ds.nuclFullInfoRightClickNuclLvl;
+              appendContextMenuItem(state,CONTEXTITEM_SHOW_COINC);
+              if(dat->ndat.levels[rightClickLvlInd].numSpinParVals > 0){
+                for(uint32_t i=0; i<dat->ndat.levels[rightClickLvlInd].numSpinParVals; i++){
+                  spinparval spv1 = dat->ndat.spv[dat->ndat.levels[rightClickLvlInd].firstSpinParVal + i];
+                  if((spv1.format & 1U) == 0){
+                    //at least one non-variable spin-parity value for this level
+                    appendContextMenuItem(state,CONTEXTITEM_SHOW_SAME_JPI);
+                    break;
+                  }
                 }
               }
-            }
-            if((state->ds.useLevelListCommentTooltips == 1)&&(state->ds.tooltipPar != MAX_UINT32_VAL)){
-              appendContextMenuItem(state,CONTEXTITEM_COPY_COMMENT);
-            }
-            showContextMenu(dat,state,rdat);
-            break;
-          case LLCOLUMN_HALFLIFE:
-            state->cms.selectionInd = state->ds.nuclFullInfoRightClickNuclLvl; //nuclide level index
-            appendContextMenuItem(state,CONTEXTITEM_SHOW_COINC);
-            if(dat->ndat.levels[rightClickLvlInd].numSpinParVals > 0){
-              for(uint32_t i=0; i<dat->ndat.levels[rightClickLvlInd].numSpinParVals; i++){
-                spinparval spv1 = dat->ndat.spv[dat->ndat.levels[rightClickLvlInd].firstSpinParVal + i];
-                if((spv1.format & 1U) == 0){
-                  //at least one non-variable spin-parity value for this level
-                  appendContextMenuItem(state,CONTEXTITEM_SHOW_SAME_JPI);
-                  break;
-                }
-              }
-            }
-            if(state->ds.nuclFullInfoRightClickLvlRow > 0){
-              if((dat->ndat.levels[rightClickLvlInd].numDecModes > 0)&&(dat->ndat.levels[rightClickLvlInd].numDecModes >= state->ds.nuclFullInfoRightClickLvlRow)){
-                //right-clicked on a decay mode
-                uint16_t decayModeNucl = getDecayModeDaughterNucl(&dat->ndat,state->chartSelectedNucl,dat->ndat.dcyMode[dat->ndat.levels[rightClickLvlInd].firstDecMode + (uint32_t)(state->ds.nuclFullInfoRightClickLvlRow - 1)].type);
-                if(decayModeNucl != state->chartSelectedNucl){
-                  state->cms.selectionInd2 = decayModeNucl; //daughter nuclide
-                  appendContextMenuItem(state,CONTEXTITEM_GOTO_DAUGHTER);
-                }
-              }
-            }
-            if((state->ds.useLevelListCommentTooltips == 1)&&(state->ds.tooltipPar != MAX_UINT32_VAL)){
-              appendContextMenuItem(state,CONTEXTITEM_COPY_COMMENT);
-            }
-            showContextMenu(dat,state,rdat);
-            break;
-          case LLCOLUMN_EGAMMA:
-          case LLCOLUMN_IGAMMA:
-          case LLCOLUMN_MGAMMA:
-          case LLCOLUMN_DELTA:
-          case LLCOLUMN_ICC:
-          case LLCOLUMN_FINALLEVEL_E:
-          case LLCOLUMN_FINALLEVEL_JPI:
-            if(state->ds.nuclFullInfoRightClickLvlRow < dat->ndat.levels[rightClickLvlInd].numTran){
-              uint32_t finalLvlInd = getFinalLvlInd(&dat->ndat,rightClickLvlInd,(uint32_t)(dat->ndat.levels[rightClickLvlInd].firstTran + state->ds.nuclFullInfoRightClickLvlRow));
-              state->cms.selectionInd = (uint16_t)(finalLvlInd - dat->ndat.nuclData[state->chartSelectedNucl].firstLevel);
-              //SDL_Log("Going to level: %u (%u %u)\n",state->cms.selectionInd, finalLvlInd, dat->ndat.nuclData[state->chartSelectedNucl].firstLevel);
-              appendContextMenuItem(state,CONTEXTITEM_GOTO_LEVEL);
               if((state->ds.useLevelListCommentTooltips == 1)&&(state->ds.tooltipPar != MAX_UINT32_VAL)){
                 appendContextMenuItem(state,CONTEXTITEM_COPY_COMMENT);
               }
               showContextMenu(dat,state,rdat);
-            }
-            break;
-          default:
-            break;
+              break;
+            case LLCOLUMN_HALFLIFE:
+              state->cms.selectionInd = state->ds.nuclFullInfoRightClickNuclLvl; //nuclide level index
+              appendContextMenuItem(state,CONTEXTITEM_SHOW_COINC);
+              if(dat->ndat.levels[rightClickLvlInd].numSpinParVals > 0){
+                for(uint32_t i=0; i<dat->ndat.levels[rightClickLvlInd].numSpinParVals; i++){
+                  spinparval spv1 = dat->ndat.spv[dat->ndat.levels[rightClickLvlInd].firstSpinParVal + i];
+                  if((spv1.format & 1U) == 0){
+                    //at least one non-variable spin-parity value for this level
+                    appendContextMenuItem(state,CONTEXTITEM_SHOW_SAME_JPI);
+                    break;
+                  }
+                }
+              }
+              if(state->ds.nuclFullInfoRightClickLvlRow > 0){
+                if((dat->ndat.levels[rightClickLvlInd].numDecModes > 0)&&(dat->ndat.levels[rightClickLvlInd].numDecModes >= state->ds.nuclFullInfoRightClickLvlRow)){
+                  //right-clicked on a decay mode
+                  uint16_t decayModeNucl = getDecayModeDaughterNucl(&dat->ndat,state->chartSelectedNucl,dat->ndat.dcyMode[dat->ndat.levels[rightClickLvlInd].firstDecMode + (uint32_t)(state->ds.nuclFullInfoRightClickLvlRow - 1)].type);
+                  if(decayModeNucl != state->chartSelectedNucl){
+                    state->cms.selectionInd2 = decayModeNucl; //daughter nuclide
+                    appendContextMenuItem(state,CONTEXTITEM_GOTO_DAUGHTER);
+                  }
+                }
+              }
+              if((state->ds.useLevelListCommentTooltips == 1)&&(state->ds.tooltipPar != MAX_UINT32_VAL)){
+                appendContextMenuItem(state,CONTEXTITEM_COPY_COMMENT);
+              }
+              showContextMenu(dat,state,rdat);
+              break;
+            case LLCOLUMN_EGAMMA:
+            case LLCOLUMN_IGAMMA:
+            case LLCOLUMN_MGAMMA:
+            case LLCOLUMN_DELTA:
+            case LLCOLUMN_ICC:
+            case LLCOLUMN_FINALLEVEL_E:
+            case LLCOLUMN_FINALLEVEL_JPI:
+              if(state->ds.nuclFullInfoRightClickLvlRow < dat->ndat.levels[rightClickLvlInd].numTran){
+                uint32_t finalLvlInd = getFinalLvlInd(&dat->ndat,rightClickLvlInd,(uint32_t)(dat->ndat.levels[rightClickLvlInd].firstTran + state->ds.nuclFullInfoRightClickLvlRow));
+                state->cms.selectionInd = (uint16_t)(finalLvlInd - dat->ndat.nuclData[state->chartSelectedNucl].firstLevel);
+                //SDL_Log("Going to level: %u (%u %u)\n",state->cms.selectionInd, finalLvlInd, dat->ndat.nuclData[state->chartSelectedNucl].firstLevel);
+                appendContextMenuItem(state,CONTEXTITEM_GOTO_LEVEL);
+                if((state->ds.useLevelListCommentTooltips == 1)&&(state->ds.tooltipPar != MAX_UINT32_VAL)){
+                  appendContextMenuItem(state,CONTEXTITEM_COPY_COMMENT);
+                }
+                showContextMenu(dat,state,rdat);
+              }
+              break;
+            default:
+              break;
+          }
+          rightClick = 0; //unset
         }
-        rightClick = 0; //unset
       }
       
       if(rightClick){
@@ -1107,80 +1109,98 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
       //no right click, check if the moused-over column has an ENSDF comment,
       //and if so, show it in a tooltip
       //(but don't do do if the right-click context menu is open)
-      if(state->cms.numContextMenuItems == 0){
-        state->ds.tooltipPar = MAX_UINT32_VAL; //reset tooltip
-        if(state->ds.nuclFullInfoMouseOverNuclLvl != 65535U){
-          uint32_t mouseOverLvlInd = (uint32_t)(dat->ndat.nuclData[state->chartSelectedNucl].firstLevel + state->ds.nuclFullInfoMouseOverNuclLvl);
-          uint32_t mouseOverTrInd = MAX_UINT32_VAL;
-          if((state->ds.nuclFullInfoMouseOverLvlRow != 65535U)&&(state->ds.nuclFullInfoMouseOverLvlRow < dat->ndat.levels[mouseOverLvlInd].numTran)){
-            mouseOverTrInd = (uint32_t)(dat->ndat.levels[mouseOverLvlInd].firstTran + state->ds.nuclFullInfoMouseOverLvlRow);
+      if(state->uiState == UISTATE_FULLLEVELINFO){
+        if(state->cms.numContextMenuItems == 0){
+          state->ds.tooltipPar = MAX_UINT32_VAL; //reset tooltip
+          if(state->ds.nuclFullInfoMouseOverNuclLvl != 65535U){
+            uint32_t mouseOverLvlInd = (uint32_t)(dat->ndat.nuclData[state->chartSelectedNucl].firstLevel + state->ds.nuclFullInfoMouseOverNuclLvl);
+            uint32_t mouseOverTrInd = MAX_UINT32_VAL;
+            if((state->ds.nuclFullInfoMouseOverLvlRow != 65535U)&&(state->ds.nuclFullInfoMouseOverLvlRow < dat->ndat.levels[mouseOverLvlInd].numTran)){
+              mouseOverTrInd = (uint32_t)(dat->ndat.levels[mouseOverLvlInd].firstTran + state->ds.nuclFullInfoMouseOverLvlRow);
+            }
+            switch(state->ds.nuclFullInfoMouseOverCol){
+              case LLCOLUMN_ELEVEL:
+                if(dat->ndat.levels[mouseOverLvlInd].hasComment & (uint8_t)(1U << LCOMMENT_ELEVEL)){
+                  state->ds.showingTooltip = 1;
+                  state->ds.tooltipPar = getENSDFLvlCommentStrInd(&dat->ndat,mouseOverLvlInd,LCOMMENT_ELEVEL);
+                }
+                break;
+              case LLCOLUMN_JPI:
+                if(dat->ndat.levels[mouseOverLvlInd].hasComment & (uint8_t)(1U << LCOMMENT_JPI)){
+                  state->ds.showingTooltip = 1;
+                  state->ds.tooltipPar = getENSDFLvlCommentStrInd(&dat->ndat,mouseOverLvlInd,LCOMMENT_JPI);
+                }
+                break;
+              case LLCOLUMN_HALFLIFE:
+                if(state->ds.nuclFullInfoMouseOverLvlRow == 0){
+                  if(dat->ndat.levels[mouseOverLvlInd].hasComment & (uint8_t)(1U << LCOMMENT_HALFLIFE)){
+                    state->ds.showingTooltip = 1;
+                    state->ds.tooltipPar = getENSDFLvlCommentStrInd(&dat->ndat,mouseOverLvlInd,LCOMMENT_HALFLIFE);
+                  }
+                }else{
+                  if(dat->ndat.levels[mouseOverLvlInd].hasComment & (uint8_t)(1U << LCOMMENT_DECAYMODE)){
+                    state->ds.showingTooltip = 1;
+                    state->ds.tooltipPar = getENSDFLvlCommentStrInd(&dat->ndat,mouseOverLvlInd,LCOMMENT_DECAYMODE);
+                  }
+                }
+                break;
+              case LLCOLUMN_EGAMMA:
+                if(mouseOverTrInd != MAX_UINT32_VAL){
+                  if(dat->ndat.tran[mouseOverTrInd].hasComment & (uint8_t)(1U << TCOMMENT_EGAMMA)){
+                    //SDL_Log("mouseOverTrInd: %u, hasComment: %u\n",mouseOverTrInd,dat->ndat.tran[mouseOverTrInd].hasComment);
+                    state->ds.showingTooltip = 1;
+                    state->ds.tooltipPar = getENSDFTranCommentStrInd(&dat->ndat,mouseOverTrInd,TCOMMENT_EGAMMA);
+                  }
+                }
+                break;
+              case LLCOLUMN_IGAMMA:
+                if(mouseOverTrInd != MAX_UINT32_VAL){
+                  if(dat->ndat.tran[mouseOverTrInd].hasComment & (uint8_t)(1U << TCOMMENT_IGAMMA)){
+                    //SDL_Log("mouseOverTrInd: %u, hasComment: %u\n",mouseOverTrInd,dat->ndat.tran[mouseOverTrInd].hasComment);
+                    state->ds.showingTooltip = 1;
+                    state->ds.tooltipPar = getENSDFTranCommentStrInd(&dat->ndat,mouseOverTrInd,TCOMMENT_IGAMMA);
+                  }
+                }
+                break;
+              case LLCOLUMN_MGAMMA:
+                if(mouseOverTrInd != MAX_UINT32_VAL){
+                  if(dat->ndat.tran[mouseOverTrInd].hasComment & (uint8_t)(1U << TCOMMENT_MGAMMA)){
+                    state->ds.showingTooltip = 1;
+                    state->ds.tooltipPar = getENSDFTranCommentStrInd(&dat->ndat,mouseOverTrInd,TCOMMENT_MGAMMA);
+                  }
+                }
+                break;
+              case LLCOLUMN_DELTA:
+                if(mouseOverTrInd != MAX_UINT32_VAL){
+                  if(dat->ndat.tran[mouseOverTrInd].hasComment & (uint8_t)(1U << TCOMMENT_DELTA)){
+                    state->ds.showingTooltip = 1;
+                    state->ds.tooltipPar = getENSDFTranCommentStrInd(&dat->ndat,mouseOverTrInd,TCOMMENT_DELTA);
+                  }
+                }
+                break;
+              default:
+                break;
+            }
           }
-          switch(state->ds.nuclFullInfoMouseOverCol){
-            case LLCOLUMN_ELEVEL:
-              if(dat->ndat.levels[mouseOverLvlInd].hasComment & (uint8_t)(1U << LCOMMENT_ELEVEL)){
-                state->ds.showingTooltip = 1;
-                state->ds.tooltipPar = getENSDFLvlCommentStrInd(&dat->ndat,mouseOverLvlInd,LCOMMENT_ELEVEL);
-              }
-              break;
-            case LLCOLUMN_JPI:
-              if(dat->ndat.levels[mouseOverLvlInd].hasComment & (uint8_t)(1U << LCOMMENT_JPI)){
-                state->ds.showingTooltip = 1;
-                state->ds.tooltipPar = getENSDFLvlCommentStrInd(&dat->ndat,mouseOverLvlInd,LCOMMENT_JPI);
-              }
-              break;
-            case LLCOLUMN_HALFLIFE:
-              if(state->ds.nuclFullInfoMouseOverLvlRow == 0){
-                if(dat->ndat.levels[mouseOverLvlInd].hasComment & (uint8_t)(1U << LCOMMENT_HALFLIFE)){
-                  state->ds.showingTooltip = 1;
-                  state->ds.tooltipPar = getENSDFLvlCommentStrInd(&dat->ndat,mouseOverLvlInd,LCOMMENT_HALFLIFE);
-                }
-              }else{
-                if(dat->ndat.levels[mouseOverLvlInd].hasComment & (uint8_t)(1U << LCOMMENT_DECAYMODE)){
-                  state->ds.showingTooltip = 1;
-                  state->ds.tooltipPar = getENSDFLvlCommentStrInd(&dat->ndat,mouseOverLvlInd,LCOMMENT_DECAYMODE);
-                }
-              }
-              break;
-            case LLCOLUMN_EGAMMA:
-              if(mouseOverTrInd != MAX_UINT32_VAL){
-                if(dat->ndat.tran[mouseOverTrInd].hasComment & (uint8_t)(1U << TCOMMENT_EGAMMA)){
-                  //SDL_Log("mouseOverTrInd: %u, hasComment: %u\n",mouseOverTrInd,dat->ndat.tran[mouseOverTrInd].hasComment);
-                  state->ds.showingTooltip = 1;
-                  state->ds.tooltipPar = getENSDFTranCommentStrInd(&dat->ndat,mouseOverTrInd,TCOMMENT_EGAMMA);
-                }
-              }
-              break;
-            case LLCOLUMN_IGAMMA:
-              if(mouseOverTrInd != MAX_UINT32_VAL){
-                if(dat->ndat.tran[mouseOverTrInd].hasComment & (uint8_t)(1U << TCOMMENT_IGAMMA)){
-                  //SDL_Log("mouseOverTrInd: %u, hasComment: %u\n",mouseOverTrInd,dat->ndat.tran[mouseOverTrInd].hasComment);
-                  state->ds.showingTooltip = 1;
-                  state->ds.tooltipPar = getENSDFTranCommentStrInd(&dat->ndat,mouseOverTrInd,TCOMMENT_IGAMMA);
-                }
-              }
-              break;
-            case LLCOLUMN_MGAMMA:
-              if(mouseOverTrInd != MAX_UINT32_VAL){
-                if(dat->ndat.tran[mouseOverTrInd].hasComment & (uint8_t)(1U << TCOMMENT_MGAMMA)){
-                  state->ds.showingTooltip = 1;
-                  state->ds.tooltipPar = getENSDFTranCommentStrInd(&dat->ndat,mouseOverTrInd,TCOMMENT_MGAMMA);
-                }
-              }
-              break;
-            case LLCOLUMN_DELTA:
-              if(mouseOverTrInd != MAX_UINT32_VAL){
-                if(dat->ndat.tran[mouseOverTrInd].hasComment & (uint8_t)(1U << TCOMMENT_DELTA)){
-                  state->ds.showingTooltip = 1;
-                  state->ds.tooltipPar = getENSDFTranCommentStrInd(&dat->ndat,mouseOverTrInd,TCOMMENT_DELTA);
-                }
-              }
-              break;
-            default:
-              break;
+        }
+      }else if((state->uiState == UISTATE_CHARTONLY)||(state->uiState == UISTATE_INFOBOX)){
+        //check for mouseover of axis labels
+        if((state->mouseXPx >= 0.0f)&&(state->mouseXPx < (CHART_AXIS_DEPTH*state->ds.uiUserScale))){
+          if((state->mouseYPx >= 0.0f)&&(state->mouseYPx < (CHART_AXIS_DEPTH*state->ds.uiUserScale))){
+            //mouse over 'Z' label
+            //SDL_Log("Mouse over 'Z'\n");
+            state->ds.showingTooltip = 1;
+            state->ds.tooltipPar = 0;
+          }
+        }else if((state->mouseXPx > (state->ds.windowXRes - (CHART_AXIS_DEPTH*state->ds.uiUserScale)))&&(state->mouseXPx <= state->ds.windowXRes)){
+          if((state->mouseYPx > (state->ds.windowYRes - (CHART_AXIS_DEPTH*state->ds.uiUserScale)))&&(state->mouseYPx <= state->ds.windowYRes)){
+            //mouse over 'N' label
+            //SDL_Log("Mouse over 'N'\n");
+            state->ds.showingTooltip = 1;
+            state->ds.tooltipPar = 1;
           }
         }
       }
-
     }
 
     uint8_t mouseReleaseElement = UIELEM_ENUM_LENGTH;
