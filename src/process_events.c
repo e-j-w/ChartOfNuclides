@@ -1570,6 +1570,9 @@ void processSingleEvent(app_data *restrict dat, app_state *restrict state, resou
         case SDL_GAMEPAD_BUTTON_EAST:
           if(state->uiState != UISTATE_CHARTONLY){
             state->inputFlags |= (1U << INPUT_BACK);
+          }else{
+            state->mouseholdElement = UIELEM_RECENTER_BUTTON;
+            uiElemClickAction(dat,state,rdat,0,UIELEM_RECENTER_BUTTON);
           }
           break;
         case SDL_GAMEPAD_BUTTON_GUIDE:

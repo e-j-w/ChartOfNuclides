@@ -9,7 +9,7 @@
 
 ## What is a "chart of nuclides"?
 
-The [chart of nuclides](https://en.wikipedia.org/wiki/Table_of_nuclides) is to nuclear physics what the [periodic table of the elements](https://en.wikipedia.org/wiki/Periodic_table) is to chemistry. While the periodic table lists the known elements of nature (defined by the number of protons in the atomic nucleus), the chart of nuclides is a 2D graph showing all known isotopes in nature (defined by the number of protons **and** neutrons in the atomic nucleus).
+The [chart of nuclides](https://en.wikipedia.org/wiki/Table_of_nuclides) is to nuclear physics what the [periodic table of the elements](https://en.wikipedia.org/wiki/Periodic_table) is to chemistry. While the periodic table lists the known elements of nature (defined by the number of protons in the atomic nucleus), the chart of nuclides is a 2D table showing all known isotopes in nature (defined by the number of protons **and** neutrons in the atomic nucleus).
 
 For example: while [carbon](https://en.wikipedia.org/wiki/Carbon) appears as a single element in the periodic table with 6 protons, in the chart of nuclides all known isotopes of carbon are shown, including carbon-12 and carbon-13 (which make up almost all of the carbon on Earth), carbon-14 (which is radioactive and is used in [carbon dating](https://en.wikipedia.org/wiki/Radiocarbon_dating)), as well as several other short-lived radioactive isotopes of carbon which have been studied using various nuclear reactions.
 
@@ -30,10 +30,13 @@ Right clicking on selected text or on the chart will open a menu allowing you to
 
 The level list view (accessed using the 'All Levels/Gammas' button) shows detailed information for all known energy levels of the selected nuclide. The list is scrollable, and levels are shown in ascending order of level energy (in units of [keV](https://en.wikipedia.org/wiki/Electronvolt)). By default all available data is shown, however data from specific datasets (corresponding to different nuclear reactions or decay modes) can be selected using the dropdown menu at the top of the screen.
 
-Right clicking on a specific level energy gives the option to show only levels which feed into or are decay products of that level.
+Right clicking on a specific level energy gives the option to show only levels which feed into or are decay products of that level, or levels with the same spin-parity (Jπ).
 
 Right clicking on a specific transition energy gives the option to show the final level of that transition.
 
+Right clicking on a specific decay mode of a level (other than IT) gives the option to go to the daughter nuclide of that decay process.
+
+Mousing over certain properties in the level list may show tooltips containing additional nuclear structure information. These tooltips can be enabled or disabled in the preferences menu.
 
 ## Keyboard/gamepad controls
 
@@ -44,11 +47,11 @@ The program is designed to be mostly navigable with a keyboard and/or gamepad.
 | Arrow keys         | Analog thumbsticks          | Pan chart view, navigate menus, scroll list views |
 | W / A / S / D      | D-pad                       | Change selected nuclide (in chart and level list views) |
 | + / -              | Left/right triggers         | Zoom in/out on chart |
-| C                  | N/A                         | Re-center the chart view |
+| C                  | B / Circle (right button), from main chart view   | Re-center the chart view |
 | ] / [              | Left/right shoulder buttons | Cycle between view modes for the chart (half-life, 2+ energy, etc.), or between reaction datasets in the detail view |
-| Enter              | A / Circle (right button)   | Select menu items |
+| Enter              | A / Cross (bottom button)   | Select menu items |
 | Alt                | X / Triangle (top button)   | Open menu |
-| Escape / backspace / delete | B / Cross (bottom button)   | Exit out of open menus, cancel selection, etc. |
+| Escape / backspace / delete | B / Circle (right button)   | Exit out of open menus, cancel selection, etc. |
 | Ctrl+C             | N/A                         | Copy selected text to clipboard |
 | Ctrl+F             | N/A                         | Search |
 | F11                | Home button                 | Toggle fullscreen mode |
