@@ -440,8 +440,8 @@ void updateDrawingState(const app_data *restrict dat, app_state *restrict state,
 		state->ds.chartZoomScale = state->ds.chartZoomStartScale + ((state->ds.chartZoomToScale - state->ds.chartZoomStartScale)*juice_smoothStop2(state->ds.timeSinceZoomStart/CHART_ZOOM_TIME));
 		if(state->ds.chartZoomStartMouseXFrac == -1.0f){
 			//special zoom mode where we are also panning to a specific (pre-programmed) focus
-			state->ds.chartPosX = state->ds.chartZoomStartMouseX  + ((state->ds.chartZoomToX - state->ds.chartZoomStartMouseX)*juice_smoothStop2(state->ds.timeSinceZoomStart/CHART_ZOOM_TIME));
-			state->ds.chartPosY = state->ds.chartZoomStartMouseY  + ((state->ds.chartZoomToY - state->ds.chartZoomStartMouseY)*juice_smoothStop2(state->ds.timeSinceZoomStart/CHART_ZOOM_TIME));
+			state->ds.chartPosX = state->ds.chartZoomStartMouseX  + ((state->ds.chartZoomToX - state->ds.chartZoomStartMouseX)*juice_smoothStart4(state->ds.timeSinceZoomStart/CHART_ZOOM_TIME));
+			state->ds.chartPosY = state->ds.chartZoomStartMouseY  + ((state->ds.chartZoomToY - state->ds.chartZoomStartMouseY)*juice_smoothStart4(state->ds.timeSinceZoomStart/CHART_ZOOM_TIME));
 		}else{
 			//normal zoom mode
 			//compute new x,y range on each axis at the new zoom scale
@@ -5521,6 +5521,10 @@ void uiElemClickAction(app_data *restrict dat, app_state *restrict state, resour
 			state->ds.timeSinceZoomStart = 0.0f;
 			state->ds.zoomInProgress = 1;
 			state->ds.zoomFinished = 0;
+			if((state->ds.shownElements & ((uint64_t)(1) << UIELEM_NUCL_INFOBOX))&&(state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_HIDE]==0.0f)){
+				startUIAnimation(dat,state,rdat,UIANIM_NUCLINFOBOX_HIDE); //hide the info box, see stopUIAnimation() for info box hiding action
+				startUIAnimation(dat,state,rdat,UIANIM_NUCLHIGHLIGHT_HIDE);
+			}
 			state->clickedUIElem = UIELEM_ENUM_LENGTH; //'unclick' the recenter button
 			break;
 		case UIELEM_CONTEXT_MENU:

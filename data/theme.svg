@@ -27,9 +27,9 @@
      inkscape:deskcolor="#d1d1d1"
      inkscape:document-units="px"
      showgrid="true"
-     inkscape:zoom="3.6976787"
-     inkscape:cx="-5.4087988"
-     inkscape:cy="69.232624"
+     inkscape:zoom="12.75802"
+     inkscape:cx="94.136862"
+     inkscape:cy="45.148071"
      inkscape:window-width="1504"
      inkscape:window-height="931"
      inkscape:window-x="0"
@@ -1689,6 +1689,14 @@
        style="fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.315648"
        d="m 20.6375,14.287499 h -1.058333 v -1.058333 h 0.529166 v 0.529167 H 20.6375 Z"
        id="path2-2-6-1" />
+    <ellipse
+       style="fill:#646464;fill-opacity:1;stroke:#c8c8c8;stroke-width:0.142663;stroke-dasharray:none;stroke-opacity:1"
+       id="path7"
+       cx="8.5673037"
+       cy="23.157648"
+       rx="0.88328511"
+       ry="0.33123192"
+       transform="rotate(-38.682142)" />
   </g>
   <metadata
      id="metadata1">

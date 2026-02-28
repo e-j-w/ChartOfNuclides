@@ -34,8 +34,8 @@ which can be referenced by both the GUI draw code as well as the interaction cod
 
 //default chart position/scale
 #define DEFAULT_CHART_ZOOM  0.5f
-#define DEFAULT_CHART_X_POS 86.0f
-#define DEFAULT_CHART_Y_POS 52.0f
+#define DEFAULT_CHART_X_POS 89.0f
+#define DEFAULT_CHART_Y_POS 54.0f
 
 #define UI_ANIM_LENGTH            0.2f //length of UI animations, in seconds
 #define SHORT_UI_ANIM_LENGTH      0.1f

@@ -1844,7 +1844,7 @@ void cleanCommentStr(char *comBuff){
 	SDL_strlcpy(comBuff,modComBuff,118);
 	SDL_free(modComBuff);
 
-	//handle superscript sequences
+	//handle superscript/subscript sequences
 	char ssBuff[CCS_MAXBUFSIZE];
 	char ssReplace[CCS_MAXBUFSIZE*4];
 	int len = (int)SDL_strlen(comBuff);
@@ -1912,6 +1912,9 @@ void cleanCommentStr(char *comBuff){
 			modssBuff = findReplaceAllUTF8("u","ᵘ",ssReplace);
 			SDL_strlcpy(ssReplace,modssBuff,CCS_MAXBUFSIZE*4);
 			SDL_free(modssBuff);
+			modssBuff = findReplaceAllUTF8("m","ᵐ",ssReplace);
+			SDL_strlcpy(ssReplace,modssBuff,CCS_MAXBUFSIZE*4);
+			SDL_free(modssBuff);
 			modssBuff = findReplaceAllUTF8(",","̓",ssReplace);
 			SDL_strlcpy(ssReplace,modssBuff,CCS_MAXBUFSIZE*4);
 			SDL_free(modssBuff);
@@ -1919,6 +1922,71 @@ void cleanCommentStr(char *comBuff){
 			SDL_strlcpy(comBuff,modComBuff,118);
 			SDL_free(modComBuff);
 			i += ((int)SDL_strlen(ssReplace)); //jump forward in string until after the superscript sequence
+			len = (int)SDL_strlen(comBuff); //recalculate
+		}else if(SDL_strncmp(&comBuff[i],"{-",2)==0){
+			for(int j=0; j<(CCS_MAXBUFSIZE-1); j++){
+				if(comBuff[i+j] != '}'){
+					ssBuff[j] = comBuff[i+j];
+				}else{
+					ssBuff[j] = '}';
+					ssBuff[j+1] = '\0'; //terminate string
+					break;
+				}
+				if(j==(CCS_MAXBUFSIZE-2)){
+					SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,"Invalid subscript sequence in comment: %s\n",comBuff);
+					ssBuff[j+1] = '\0'; //terminate string
+				}
+			}
+			char *modssBuff;
+			modssBuff = findReplaceAllUTF8("{-","",ssBuff);
+			SDL_strlcpy(ssReplace,modssBuff,CCS_MAXBUFSIZE*4);
+			SDL_free(modssBuff);
+			modssBuff = findReplaceAllUTF8("}","",ssReplace);
+			SDL_strlcpy(ssReplace,modssBuff,CCS_MAXBUFSIZE*4);
+			SDL_free(modssBuff);
+			modssBuff = findReplaceAllUTF8("0","₀",ssReplace);
+			SDL_strlcpy(ssReplace,modssBuff,CCS_MAXBUFSIZE*4);
+			SDL_free(modssBuff);
+			modssBuff = findReplaceAllUTF8("1","₁",ssReplace);
+			SDL_strlcpy(ssReplace,modssBuff,CCS_MAXBUFSIZE*4);
+			SDL_free(modssBuff);
+			modssBuff = findReplaceAllUTF8("2","₂",ssReplace);
+			SDL_strlcpy(ssReplace,modssBuff,CCS_MAXBUFSIZE*4);
+			SDL_free(modssBuff);
+			modssBuff = findReplaceAllUTF8("3","₃",ssReplace);
+			SDL_strlcpy(ssReplace,modssBuff,CCS_MAXBUFSIZE*4);
+			SDL_free(modssBuff);
+			modssBuff = findReplaceAllUTF8("4","₄",ssReplace);
+			SDL_strlcpy(ssReplace,modssBuff,CCS_MAXBUFSIZE*4);
+			SDL_free(modssBuff);
+			modssBuff = findReplaceAllUTF8("5","₅",ssReplace);
+			SDL_strlcpy(ssReplace,modssBuff,CCS_MAXBUFSIZE*4);
+			SDL_free(modssBuff);
+			modssBuff = findReplaceAllUTF8("6","₆",ssReplace);
+			SDL_strlcpy(ssReplace,modssBuff,CCS_MAXBUFSIZE*4);
+			SDL_free(modssBuff);
+			modssBuff = findReplaceAllUTF8("7","₇",ssReplace);
+			SDL_strlcpy(ssReplace,modssBuff,CCS_MAXBUFSIZE*4);
+			SDL_free(modssBuff);
+			modssBuff = findReplaceAllUTF8("8","₈",ssReplace);
+			SDL_strlcpy(ssReplace,modssBuff,CCS_MAXBUFSIZE*4);
+			SDL_free(modssBuff);
+			modssBuff = findReplaceAllUTF8("9","₉",ssReplace);
+			SDL_strlcpy(ssReplace,modssBuff,CCS_MAXBUFSIZE*4);
+			SDL_free(modssBuff);
+			modssBuff = findReplaceAllUTF8("-","₋",ssReplace);
+			SDL_strlcpy(ssReplace,modssBuff,CCS_MAXBUFSIZE*4);
+			SDL_free(modssBuff);
+			modssBuff = findReplaceAllUTF8("+","₊",ssReplace);
+			SDL_strlcpy(ssReplace,modssBuff,CCS_MAXBUFSIZE*4);
+			SDL_free(modssBuff);
+			modssBuff = findReplaceAllUTF8(",","̓",ssReplace);
+			SDL_strlcpy(ssReplace,modssBuff,CCS_MAXBUFSIZE*4);
+			SDL_free(modssBuff);
+			modComBuff = findReplaceAllUTF8(ssBuff,ssReplace,comBuff);
+			SDL_strlcpy(comBuff,modComBuff,118);
+			SDL_free(modComBuff);
+			i += ((int)SDL_strlen(ssReplace)); //jump forward in string until after the subscript sequence
 			len = (int)SDL_strlen(comBuff); //recalculate
 		}
 	}

@@ -1729,20 +1729,18 @@ void processSingleEvent(app_data *restrict dat, app_state *restrict state, resou
           break;
         case SDL_SCANCODE_EQUALS:
           if(!(SDL_TextInputActive(rdat->window))){
-            state->mouseholdElement = UIELEM_ZOOMIN_BUTTON;
-            uiElemClickAction(dat,state,rdat,0,UIELEM_ZOOMIN_BUTTON);
+            if((state->uiState == UISTATE_CHARTONLY)||(state->uiState == UISTATE_INFOBOX)){
+              state->mouseholdElement = UIELEM_ZOOMIN_BUTTON;
+              uiElemClickAction(dat,state,rdat,0,UIELEM_ZOOMIN_BUTTON);
+            }
           }
           break;
         case SDL_SCANCODE_MINUS:
           if(!(SDL_TextInputActive(rdat->window))){
-            state->mouseholdElement = UIELEM_ZOOMOUT_BUTTON;
-            uiElemClickAction(dat,state,rdat,0,UIELEM_ZOOMOUT_BUTTON);
-          }
-          break;
-        case SDL_SCANCODE_0:
-          if(!(SDL_TextInputActive(rdat->window))){
-            state->mouseholdElement = UIELEM_RECENTER_BUTTON;
-            uiElemClickAction(dat,state,rdat,0,UIELEM_RECENTER_BUTTON);
+            if((state->uiState == UISTATE_CHARTONLY)||(state->uiState == UISTATE_INFOBOX)){
+              state->mouseholdElement = UIELEM_ZOOMOUT_BUTTON;
+              uiElemClickAction(dat,state,rdat,0,UIELEM_ZOOMOUT_BUTTON);
+            }
           }
           break;
         case SDL_SCANCODE_LEFTBRACKET:
@@ -1789,6 +1787,12 @@ void processSingleEvent(app_data *restrict dat, app_state *restrict state, resou
             }
           }else{
             state->kbdModVal = KBD_MOD_OTHER; //block key combo if entered in reverse order
+            if(!(SDL_TextInputActive(rdat->window))){
+              if((state->uiState == UISTATE_CHARTONLY)||(state->uiState == UISTATE_INFOBOX)){
+                state->mouseholdElement = UIELEM_RECENTER_BUTTON;
+                uiElemClickAction(dat,state,rdat,0,UIELEM_RECENTER_BUTTON);
+              }
+            }
           }
           break;
         /*case SDL_SCANCODE_F7:
