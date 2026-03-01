@@ -121,5 +121,5 @@ levels_bolded|Bolded levels
 feeding|feeding
 decay|decay
 same_jpi_as|Same Jπ as the
-num_protons|Number of protons
-num_neutrons|Number of neutrons
+num_protons|Z – number of protons
+num_neutrons|N – number of neutrons

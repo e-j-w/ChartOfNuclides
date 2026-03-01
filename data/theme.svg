@@ -27,11 +27,11 @@
      inkscape:deskcolor="#d1d1d1"
      inkscape:document-units="px"
      showgrid="true"
-     inkscape:zoom="12.75802"
-     inkscape:cx="94.136862"
-     inkscape:cy="45.148071"
-     inkscape:window-width="1504"
-     inkscape:window-height="931"
+     inkscape:zoom="51.03208"
+     inkscape:cx="77.382697"
+     inkscape:cy="49.370906"
+     inkscape:window-width="1920"
+     inkscape:window-height="1044"
      inkscape:window-x="0"
      inkscape:window-y="0"
      inkscape:window-maximized="1"
@@ -488,8 +488,8 @@
        rx="0.14664483"
        ry="0.28264293" />
     <path
-       style="fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:0.400823px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-       d="m 19.97999,87.312503 1.202463,1.202465 1.202464,-1.202465 0.400823,0.400823 -1.202465,1.202463 1.202465,1.202464 -0.400823,0.400822 -1.202464,-1.202465 -1.202463,1.202465 -0.400822,-0.400822 1.202465,-1.202464 -1.202465,-1.202463 z"
+       style="fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:0.33073px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       d="m 20.174479,87.577085 0.992186,0.992188 0.992187,-0.992188 0.33073,0.33073 -0.992188,0.992186 0.992188,0.992187 -0.33073,0.330729 -0.992187,-0.992188 -0.992186,0.992188 -0.330729,-0.330729 0.992188,-0.992187 -0.992188,-0.992186 z"
        id="path1-3" />
     <rect
        style="fill:#cbcbcb;fill-opacity:1;stroke:none;stroke-width:0.3;stroke-dasharray:none"
@@ -1690,12 +1690,12 @@
        d="m 20.6375,14.287499 h -1.058333 v -1.058333 h 0.529166 v 0.529167 H 20.6375 Z"
        id="path2-2-6-1" />
     <ellipse
-       style="fill:#646464;fill-opacity:1;stroke:#c8c8c8;stroke-width:0.142663;stroke-dasharray:none;stroke-opacity:1"
+       style="fill:#646464;fill-opacity:1;stroke:none;stroke-width:0.157293;stroke-dasharray:none;stroke-opacity:1"
        id="path7"
-       cx="8.5673037"
-       cy="23.157648"
-       rx="0.88328511"
-       ry="0.33123192"
+       cx="8.5742426"
+       cy="23.157457"
+       rx="0.97386605"
+       ry="0.3651998"
        transform="rotate(-38.682142)" />
   </g>
   <metadata

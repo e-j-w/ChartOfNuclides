@@ -2435,8 +2435,8 @@ void drawChartOfNuclides(const app_data *restrict dat, app_state *restrict state
   }else{
     drawFlatRect(rdat,rect,whiteCol);
   }
-  drawTextAligned(rdat,CHART_AXIS_DEPTH*0.5f*state->ds.uiUserScale,CHART_AXIS_DEPTH*0.5f*state->ds.uiUserScale,blackCol8Bit,FONTSIZE_NORMAL_BOLD,"Z",ALIGN_CENTER);
-  drawTextAligned(rdat,state->ds.windowXRes - CHART_AXIS_DEPTH*0.5f*state->ds.uiUserScale,state->ds.windowYRes - CHART_AXIS_DEPTH*0.5f*state->ds.uiUserScale,blackCol8Bit,FONTSIZE_NORMAL_BOLD,"N",ALIGN_CENTER);
+  drawTextAligned(rdat,CHART_AXIS_DEPTH*0.5f*state->ds.uiUserScale,CHART_AXIS_DEPTH*0.51f*state->ds.uiUserScale,blackCol8Bit,FONTSIZE_NORMAL_BOLD,"Z",ALIGN_CENTER);
+  drawTextAligned(rdat,state->ds.windowXRes - CHART_AXIS_DEPTH*0.51f*state->ds.uiUserScale,state->ds.windowYRes - CHART_AXIS_DEPTH*0.5f*state->ds.uiUserScale,blackCol8Bit,FONTSIZE_NORMAL_BOLD,"N",ALIGN_CENTER);
   //draw ticks
   char tmpStr[32];
   rect.y = state->ds.windowYRes - (CHART_AXIS_DEPTH*0.5f*state->ds.uiUserScale);
