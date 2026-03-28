@@ -32,7 +32,6 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #define MAX_UINT32_VAL 4294967295U
 
 //app data parameters (should all be powers of 2)
-#define MAX_NUM_STRINGS          128  //maximum number of text strings
 
 //search parameters
 #define SEARCH_STRING_MAX_SIZE   256
@@ -420,8 +419,8 @@ typedef struct
 {
   app_rules rules; //app rules
   ndata ndat; //nuclear structure database
-  char strings[MAX_NUM_STRINGS][256]; //array of text strings used in the app
-  uint16_t numStrings; //total number of text strings used
+  char strings[LOCSTR_ENUM_LENGTH][256]; //array of text strings used in the app
+  uint16_t numLocStrings; //total number of text strings used
   uint16_t locStringIDs[LOCSTR_ENUM_LENGTH];
 }app_data; //structure for all imported app data
 

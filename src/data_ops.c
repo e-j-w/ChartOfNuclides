@@ -100,6 +100,7 @@ void initializeTempState(const app_data *restrict dat, app_state *restrict state
 	state->ds.searchEntryDispNumChars = 65535U; //default value specifying no text has been input yet
 	state->ds.interfaceSizeInd = UISCALE_NORMAL;
 	state->ds.infoBoxPrevX = -1.0f;
+	state->cms.useHeaderText = 0;
 	state->cms.numContextMenuItems = 0;
 	state->ss.numResults = 0;
 	state->ss.searchInProgress = SEARCHSTATE_NOTSEARCHING;
@@ -377,6 +378,7 @@ void stopUIAnimation(const app_data *restrict dat, app_state *restrict state, re
 			clearSelectionStrs(&state->ds,&state->tss,0,0); //strings on full level list are no longer selectable
 			break;
 		case UIANIM_CONTEXT_MENU_HIDE:
+			state->cms.useHeaderText = 0;
 			state->cms.numContextMenuItems = 0; //prevent further interactions with the context menu
 			state->ds.uiElemPosX[UIELEM_CONTEXT_MENU] = -1;
 			state->ds.uiElemPosY[UIELEM_CONTEXT_MENU] = -1;
@@ -4839,6 +4841,8 @@ void searchResultClickAction(app_data *restrict dat, app_state *restrict state, 
 	}else{
 		changeUIState(dat,state,rdat,UISTATE_CHARTONLY); //prevents mouseover from still highlighting buttons while the menu closes
 	}
+
+	
 	
 	uint16_t nuclLevel = 65535U;
 	switch(state->ss.results[resultInd].resultType){
@@ -6007,21 +6011,21 @@ void updateSingleUIElemPosition(const app_data *restrict dat, app_state *restric
 			state->ds.uiElemWidth[UIELEM_PREFS_DIALOG_LEVELLIST_SEPARATION_CHECKBOX] = (int16_t)(UI_TILE_SIZE*state->ds.uiUserScale);
 			state->ds.uiElemHeight[UIELEM_PREFS_DIALOG_LEVELLIST_SEPARATION_CHECKBOX] = state->ds.uiElemWidth[UIELEM_PREFS_DIALOG_LEVELLIST_SEPARATION_CHECKBOX];
 			state->ds.uiElemPosX[UIELEM_PREFS_DIALOG_LEVELLIST_SEPARATION_CHECKBOX] = state->ds.uiElemPosX[UIELEM_PREFS_DIALOG] + (int16_t)((PREFS_DIALOG_PREFCOL1_X + 4*UI_PADDING_SIZE)*state->ds.uiUserScale);
-			state->ds.uiElemPosY[UIELEM_PREFS_DIALOG_LEVELLIST_SEPARATION_CHECKBOX] = state->ds.uiElemPosY[UIELEM_PREFS_DIALOG] + (int16_t)((PREFS_DIALOG_PREFCOL1_Y + 5*PREFS_DIALOG_PREF_Y_SPACING + 2*UI_PADDING_SIZE)*state->ds.uiUserScale);
+			state->ds.uiElemPosY[UIELEM_PREFS_DIALOG_LEVELLIST_SEPARATION_CHECKBOX] = state->ds.uiElemPosY[UIELEM_PREFS_DIALOG] + (int16_t)((PREFS_DIALOG_PREFCOL1_Y + 5.15f*PREFS_DIALOG_PREF_Y_SPACING + 2*UI_PADDING_SIZE)*state->ds.uiUserScale);
 			state->ds.uiElemExtPlusX[UIELEM_PREFS_DIALOG_LEVELLIST_SEPARATION_CHECKBOX] = (uint16_t)(2*UI_PADDING_SIZE*state->ds.uiUserScale) + (uint16_t)(getTextWidth(rdat,FONTSIZE_NORMAL,dat->strings[dat->locStringIDs[LOCSTR_PREF_LEVELLIST_SEPARATION]])/rdat->uiDPIScale); //so that checkbox can be toggled by clicking on adjacent text
 			break;
 		case UIELEM_PREFS_DIALOG_LEVELLIST_THRESHOLD_CHECKBOX:
 			state->ds.uiElemWidth[UIELEM_PREFS_DIALOG_LEVELLIST_THRESHOLD_CHECKBOX] = (int16_t)(UI_TILE_SIZE*state->ds.uiUserScale);
 			state->ds.uiElemHeight[UIELEM_PREFS_DIALOG_LEVELLIST_THRESHOLD_CHECKBOX] = state->ds.uiElemWidth[UIELEM_PREFS_DIALOG_LEVELLIST_THRESHOLD_CHECKBOX];
 			state->ds.uiElemPosX[UIELEM_PREFS_DIALOG_LEVELLIST_THRESHOLD_CHECKBOX] = state->ds.uiElemPosX[UIELEM_PREFS_DIALOG] + (int16_t)((PREFS_DIALOG_PREFCOL1_X + 4*UI_PADDING_SIZE)*state->ds.uiUserScale);
-			state->ds.uiElemPosY[UIELEM_PREFS_DIALOG_LEVELLIST_THRESHOLD_CHECKBOX] = state->ds.uiElemPosY[UIELEM_PREFS_DIALOG] + (int16_t)((PREFS_DIALOG_PREFCOL1_Y + 6*PREFS_DIALOG_PREF_Y_SPACING + 2*UI_PADDING_SIZE)*state->ds.uiUserScale);
+			state->ds.uiElemPosY[UIELEM_PREFS_DIALOG_LEVELLIST_THRESHOLD_CHECKBOX] = state->ds.uiElemPosY[UIELEM_PREFS_DIALOG] + (int16_t)((PREFS_DIALOG_PREFCOL1_Y + 6.15f*PREFS_DIALOG_PREF_Y_SPACING + 2*UI_PADDING_SIZE)*state->ds.uiUserScale);
 			state->ds.uiElemExtPlusX[UIELEM_PREFS_DIALOG_LEVELLIST_THRESHOLD_CHECKBOX] = (uint16_t)(2*UI_PADDING_SIZE*state->ds.uiUserScale) + (uint16_t)(getTextWidth(rdat,FONTSIZE_NORMAL,dat->strings[dat->locStringIDs[LOCSTR_PREF_LEVELLIST_THRESHOLD]])/rdat->uiDPIScale); //so that checkbox can be toggled by clicking on adjacent text
 			break;
 		case UIELEM_PREFS_DIALOG_LEVELLIST_COMMENT_CHECKBOX:
 			state->ds.uiElemWidth[UIELEM_PREFS_DIALOG_LEVELLIST_COMMENT_CHECKBOX] = (int16_t)(UI_TILE_SIZE*state->ds.uiUserScale);
 			state->ds.uiElemHeight[UIELEM_PREFS_DIALOG_LEVELLIST_COMMENT_CHECKBOX] = state->ds.uiElemWidth[UIELEM_PREFS_DIALOG_LEVELLIST_COMMENT_CHECKBOX];
 			state->ds.uiElemPosX[UIELEM_PREFS_DIALOG_LEVELLIST_COMMENT_CHECKBOX] = state->ds.uiElemPosX[UIELEM_PREFS_DIALOG] + (int16_t)((PREFS_DIALOG_PREFCOL1_X + 4*UI_PADDING_SIZE)*state->ds.uiUserScale);
-			state->ds.uiElemPosY[UIELEM_PREFS_DIALOG_LEVELLIST_COMMENT_CHECKBOX] = state->ds.uiElemPosY[UIELEM_PREFS_DIALOG] + (int16_t)((PREFS_DIALOG_PREFCOL1_Y + 7*PREFS_DIALOG_PREF_Y_SPACING + 2*UI_PADDING_SIZE)*state->ds.uiUserScale);
+			state->ds.uiElemPosY[UIELEM_PREFS_DIALOG_LEVELLIST_COMMENT_CHECKBOX] = state->ds.uiElemPosY[UIELEM_PREFS_DIALOG] + (int16_t)((PREFS_DIALOG_PREFCOL1_Y + 7.15f*PREFS_DIALOG_PREF_Y_SPACING + 2*UI_PADDING_SIZE)*state->ds.uiUserScale);
 			state->ds.uiElemExtPlusX[UIELEM_PREFS_DIALOG_LEVELLIST_COMMENT_CHECKBOX] = (uint16_t)(2*UI_PADDING_SIZE*state->ds.uiUserScale) + (uint16_t)(getTextWidth(rdat,FONTSIZE_NORMAL,dat->strings[dat->locStringIDs[LOCSTR_PREF_LEVELLIST_COMMENTS]])/rdat->uiDPIScale); //so that checkbox can be toggled by clicking on adjacent text
 			break;
 		case UIELEM_PREFS_DIALOG_UIANIM_CHECKBOX:

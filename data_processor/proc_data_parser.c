@@ -368,6 +368,9 @@ static int parseAppRules(app_data *restrict dat, asset_mapping *restrict stringI
 	dat->locStringIDs[LOCSTR_SAME_JPI_AS] = (uint16_t)nameToAssetID("same_jpi_as",stringIDmap);
 	dat->locStringIDs[LOCSTR_NUMPROTONS] = (uint16_t)nameToAssetID("num_protons",stringIDmap);
 	dat->locStringIDs[LOCSTR_NUMNEUTRONS] = (uint16_t)nameToAssetID("num_neutrons",stringIDmap);
+	dat->locStringIDs[LOCSTR_IS] = (uint16_t)nameToAssetID("is",stringIDmap);
+	dat->locStringIDs[LOCSTR_OF] = (uint16_t)nameToAssetID("of",stringIDmap);
+	dat->locStringIDs[LOCSTR_ONEARTH] = (uint16_t)nameToAssetID("on_earth",stringIDmap);
 
   return 0; //success
 
@@ -393,14 +396,14 @@ static int parseStrings(app_data *restrict dat, asset_mapping *restrict stringID
         if(SDL_strcmp(str,"")!=0){
           tok = SDL_strtok_r(str,"|",&saveptr);
           if(tok!=NULL){
-            if(dat->numStrings >= MAX_NUM_STRINGS){
-              SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"maximum number of text strings reached, cannot parse file %s\n",filePath);
+            if(dat->numLocStrings >= LOCSTR_ENUM_LENGTH){
+              SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"maximum number of text strings reached (%u), cannot parse file %s\n",LOCSTR_ENUM_LENGTH,filePath);
               return -1;
             }
-            SDL_memcpy(stringIDmap->assetID[dat->numStrings],str,256);
+            SDL_memcpy(stringIDmap->assetID[dat->numLocStrings],str,256);
             tok = SDL_strtok_r(NULL,"",&saveptr); //get the rest of the string
-            SDL_memcpy(dat->strings[dat->numStrings],tok,255);
-            dat->numStrings++;
+            SDL_memcpy(dat->strings[dat->numLocStrings],tok,255);
+            dat->numLocStrings++;
           }else{
             SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"improperly formatted string in file %s\n",filePath);
             return -1;
@@ -413,7 +416,7 @@ static int parseStrings(app_data *restrict dat, asset_mapping *restrict stringID
     return -1;
   }
   fclose(inp);
-  stringIDmap->numAssets = dat->numStrings;
+  stringIDmap->numAssets = dat->numLocStrings;
 
   return 0; //success
 }
@@ -5302,7 +5305,7 @@ int parseAppData(app_data *restrict dat, const char *appBasePath){
 	asset_mapping *restrict stringIDmap=(asset_mapping*)SDL_calloc(1,sizeof(asset_mapping)); //allocated on heap to not overflow the stack
 
 	//set default values
-	dat->numStrings=0;
+	dat->numLocStrings=0;
 	SDL_memset(dat->locStringIDs,0,sizeof(dat->locStringIDs));
 
 	//start parsing data
@@ -5314,7 +5317,7 @@ int parseAppData(app_data *restrict dat, const char *appBasePath){
 
 	//summarize
 	SDL_Log("Data parsing complete.\n");
-	SDL_Log("  Number of localization strings parsed:    %7i (%7i max)\n",dat->numStrings,MAX_NUM_STRINGS);
+	SDL_Log("  Number of localization strings parsed:    %7i (%7i max)\n",dat->numLocStrings,LOCSTR_ENUM_LENGTH);
 	SDL_Log("  ENSDF string buffer size:                 %7i (%7i max)\n",dat->ndat.ensdfStrBufLen,ENSDFSTRBUFSIZE);
 
 	return 0; //success
