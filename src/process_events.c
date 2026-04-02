@@ -896,12 +896,14 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
       }
       //SDL_Log("start: %u, end: %u, len: %lu, strInd: %u\n",state->tss.selStartPos,state->tss.selEndPos,SDL_strlen(state->tss.selectableStrTxt[state->tss.selectedStr]),state->tss.selectedStr);
       if((state->tss.selStartPos == 0)&&(state->tss.selEndPos == 0)){
-        state->tss.selectedStr = 65535; //de-select text
+        state->tss.selectedStr = 65535U; //de-select text
+        state->ds.nuclFullInfoSelStrMetadata = STR_METADATA_UNUSED;
         state->ds.textDragInProgress = TXTDRAGSTATE_DRAG_NOT_OVER_TXT;
       }else{
         uint8_t len = (uint8_t)(SDL_strlen(state->tss.selectableStrTxt[state->tss.selectedStr]));
         if((state->tss.selStartPos == len)&&(state->tss.selEndPos == len)){
-          state->tss.selectedStr = 65535; //de-select text
+          state->tss.selectedStr = 65535U; //de-select text
+          state->ds.nuclFullInfoSelStrMetadata = STR_METADATA_UNUSED;
           state->ds.textDragInProgress = TXTDRAGSTATE_DRAG_NOT_OVER_TXT;
         }
       }
@@ -1356,7 +1358,8 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
     if(state->mouseHoldStartPosXPx >= 0.0f){
       if(state->ds.textDragInProgress == TXTDRAGSTATE_NO_DRAG){
         if(state->cms.numContextMenuItems == 0){
-          state->tss.selectedStr = 65535; //de-select text
+          state->tss.selectedStr = 65535U; //de-select text
+          state->ds.nuclFullInfoSelStrMetadata = STR_METADATA_UNUSED; //make sure the string doesn't get highlighted again when scrollong the level list
         }
       }
     }

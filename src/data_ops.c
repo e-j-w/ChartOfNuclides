@@ -207,13 +207,14 @@ void clearSelectionStrs(const drawing_state *restrict ds, text_selection_state *
 		tss->selStartPos = 0;
 		tss->selEndPos = 0;
 	}
-	tss->selectedStr = 65535; //no string selected
-	tss->numSelStrs = 0; //no selectable strings defined
+	
 	if(ds->shownElements & ((uint64_t)(1) << UIELEM_PREFS_DIALOG)){
 		tss->selStrsModifiable = 0;
 	}else{
 		tss->selStrsModifiable = modifiableAfter;
 	}
+	tss->selectedStr = 65535; //no string selected
+	tss->numSelStrs = 0; //no selectable strings defined
 }
 
 void startUIAnimation(const app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat, const uint8_t uiAnim){
