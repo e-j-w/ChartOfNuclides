@@ -5164,6 +5164,39 @@ int parseMassData(const char * filePath, ndata * nd){
   return 0;
 }
 
+//returns 0 if the specified transition multipole between 2 states
+//with the specified spin difference/sum and parity change is incorrect
+uint8_t isTranMulipolarityCorrect(const uint8_t multipole, const uint8_t spinDiff, const uint8_t spinSum, const uint8_t parChange){
+	
+	const uint8_t mEM = (uint8_t)(multipole & 1U);
+	const uint8_t mOrder = (uint8_t)((multipole >> 1U) & 15U);
+	const uint8_t mDQ = (uint8_t)((multipole >> 7U) & 1U);
+	
+	if((mDQ)&&(mEM == 0)&&(mOrder == 2)&&((spinDiff > 2)||(spinSum < 2))){
+		return 0;
+	}else if((mDQ)&&(mEM == 1)&&(mOrder == 1)&&((spinDiff > 1)||(spinSum < 1))){
+		return 0;
+	}else if(!mDQ){
+		if((mOrder < spinDiff)||(mOrder > spinSum)){
+			return 0;
+		}else if(((mEM == 0)&&((mOrder % 2)==0)) || ((mEM == 1)&&((mOrder % 2)==1))){
+			//electric multipole, even L
+			//or magnetic multipole, odd L
+			if(parChange == 1){
+				return 0;
+			}
+		}else if(((mEM == 1)&&((mOrder % 2)==0)) || ((mEM == 0)&&((mOrder % 2)==1))){
+			//magnetic multipole, even L
+			//or electric multipole, odd L
+			if(parChange == 0){
+				return 0;
+			}
+		}
+	}
+
+	return 1;
+}
+
 int buildDatabase(const char *appBasePath, ndata *nd){
 
 	char filePath[256],str[8];
@@ -5171,7 +5204,7 @@ int buildDatabase(const char *appBasePath, ndata *nd){
 	initialize_database(nd);
 	
 	//parse ENSDF data files
-	for(uint16_t i=1;i<350;i++){
+	for(uint16_t i=1;i<((uint16_t)(MAX_NEUTRON_NUM+MAX_PROTON_NUM));i++){
 		SDL_strlcpy(filePath,"",256);
 		SDL_strlcat(filePath,appBasePath,256);
     SDL_strlcat(filePath,"data/ensdf/",256);
@@ -5204,8 +5237,8 @@ int buildDatabase(const char *appBasePath, ndata *nd){
 	}
 
   //post-process the data
-  //find ground state level
   for(uint16_t i=0;i<nd->numNucl;i++){
+		//find ground state level
 		uint8_t firstLvlWithHl = 255;
 		uint8_t zeroEnLvl = 255;
 		nd->nuclData[i].gsLevel = 0;
@@ -5257,6 +5290,105 @@ int buildDatabase(const char *appBasePath, ndata *nd){
 			//could have searched through all the levels but didn't find a ground state
 			//maybe it had variable energy or was excluded for some other reason
 			nd->nuclData[i].gsLevel = firstLvlWithHl;
+		}
+
+		//check transition multipolarities for obvious errors
+		for(uint16_t j=0; j<nd->nuclData[i].numLevels; j++){
+			const uint32_t lInd = nd->nuclData[i].firstLevel + (uint32_t)j;
+			if(nd->levels[lInd].numSpinParVals == 1){
+				for(uint16_t k=0;k<nd->levels[lInd].numTran; k++){
+					const uint32_t tInd = nd->levels[lInd].firstTran + (uint32_t)k;
+					if(nd->tran[tInd].finalLvlOffset > 0){
+						const uint32_t finalLvlInd = (uint32_t)(lInd - nd->tran[tInd].finalLvlOffset);
+						if(nd->levels[finalLvlInd].numSpinParVals == 1){
+							if((nd->spv[nd->levels[finalLvlInd].firstSpinParVal].spinVal == 255)||(nd->spv[nd->levels[lInd].firstSpinParVal].spinVal == 255)){
+								//at least one of the spins is unknown
+								continue;
+							}else if((nd->spv[nd->levels[finalLvlInd].firstSpinParVal].parVal == 0)||(nd->spv[nd->levels[lInd].firstSpinParVal].parVal == 0)){
+								//at least one of the parities is unknown
+								continue;
+							}
+							const uint8_t halfInt = (uint8_t)(nd->levels[lInd].format & 1U);
+							const int initSpin = (int)(nd->spv[nd->levels[lInd].firstSpinParVal].spinVal);
+							const int finalSpin = (int)(nd->spv[nd->levels[finalLvlInd].firstSpinParVal].spinVal);
+							const int initPar = (int)(nd->spv[nd->levels[lInd].firstSpinParVal].parVal);
+							const int finalPar = (int)(nd->spv[nd->levels[finalLvlInd].firstSpinParVal].parVal);
+							uint8_t spinDiff = (uint8_t)SDL_abs(initSpin - finalSpin);
+							uint8_t spinSum = (uint8_t)(initSpin + finalSpin);
+							if(halfInt){spinDiff = spinDiff / 2;}
+							if(halfInt){spinSum = spinSum / 2;}
+							uint8_t parChange = (!(finalPar == initPar));
+							if(nd->tran[tInd].numMultipoles == 1){
+
+								uint8_t correctMult = isTranMulipolarityCorrect(nd->tran[tInd].multipole[0],spinDiff,spinSum,parChange);
+
+								if(correctMult == 0){
+									//multipolarity appears to be incorrect
+
+									const uint8_t mEM = (uint8_t)(nd->tran[tInd].multipole[0] & 1U);
+									const uint8_t mOrder = (uint8_t)((nd->tran[tInd].multipole[0] >> 1U) & 15U);
+									const uint8_t mDQ = (uint8_t)((nd->tran[tInd].multipole[0] >> 7U) & 1U);
+									char strOut[32], strOut2[32];
+									getNuclNameStr(strOut,&nd->nuclData[i],255);
+									getGammaEnergyStr(strOut2,nd,tInd,1);
+									if(!mDQ){
+										if(halfInt){
+											printf("Nuclide %s transition with energy %s keV appears to have incorrect multipolarity %s%u (initial spin-parity: %u/2%s, final spin-parity %u/2%s).\n",strOut,strOut2,(mEM == 0) ? "E" : "M",mOrder,initSpin,(initPar == 1) ? "+" : "-",finalSpin,(finalPar == 1) ? "+" : "-");
+										}else{
+											printf("Nuclide %s transition with energy %s keV appears to have incorrect multipolarity %s%u (initial spin-parity: %u%s, final spin-parity %u%s).\n",strOut,strOut2,(mEM == 0) ? "E" : "M",mOrder,initSpin,(initPar == 1) ? "+" : "-",finalSpin,(finalPar == 1) ? "+" : "-");
+										}
+									}else{
+										if(halfInt){
+											printf("Nuclide %s transition with energy %s keV appears to have incorrect multipolarity %s (initial spin-parity: %u/2%s, final spin-parity %u/2%s).\n",strOut,strOut2,(mOrder == 1) ? "D" : "Q",initSpin,(initPar == 1) ? "+" : "-",finalSpin,(finalPar == 1) ? "+" : "-");
+										}else{
+											printf("Nuclide %s transition with energy %s keV appears to have incorrect multipolarity %s (initial spin-parity: %u%s, final spin-parity %u%s).\n",strOut,strOut2,(mOrder == 1) ? "D" : "Q",initSpin,(initPar == 1) ? "+" : "-",finalSpin,(finalPar == 1) ? "+" : "-");
+										}
+									}
+
+									//maybe the final level was improperly set
+									//check nearby levels of similar energy
+									for(int lvlSearch = -10; lvlSearch <= 10; lvlSearch++){
+										if((uint32_t)((int32_t)finalLvlInd + lvlSearch) < nd->nuclData[i].firstLevel){
+											continue; //can only look at levels within the same nuclide
+										}else if((uint32_t)((int32_t)finalLvlInd + lvlSearch) >= (nd->nuclData[i].firstLevel + nd->nuclData[i].numLevels)){
+											continue; //can only look at levels within the same nuclide
+										}
+										uint32_t lvlSearchInd = (uint32_t)((int32_t)finalLvlInd + lvlSearch);
+										if(nd->levels[lvlSearchInd].numSpinParVals == 1){
+											if(nd->levels[lvlSearchInd].energy.unit == nd->levels[finalLvlInd].energy.unit){
+												uint8_t eValueType1 = (uint8_t)((nd->levels[lvlSearchInd].energy.format >> 5U) & 15U);
+												uint8_t eValueType2 = (uint8_t)((nd->levels[finalLvlInd].energy.format >> 5U) & 15U);
+												if(eValueType1 == eValueType2){
+													if(SDL_fabsf(nd->levels[lvlSearchInd].energy.val - nd->levels[finalLvlInd].energy.val) < 1.0f){
+														//this is a possible candidate for the correct final level
+														spinDiff = (uint8_t)SDL_abs(initSpin - ((int)(nd->spv[nd->levels[lvlSearchInd].firstSpinParVal].spinVal)));
+														spinSum = (uint8_t)(initSpin + ((int)(nd->spv[nd->levels[lvlSearchInd].firstSpinParVal].spinVal)));
+														if(halfInt){spinDiff = spinDiff / 2;}
+														if(halfInt){spinSum = spinSum / 2;}
+														parChange = (!(((int)nd->spv[nd->levels[lvlSearchInd].firstSpinParVal].parVal) == initPar));
+														correctMult = isTranMulipolarityCorrect(nd->tran[tInd].multipole[0],spinDiff,spinSum,parChange);
+														if(correctMult){
+															//re-assign the final transition
+															printf("  Correcting final level of transition by %i.\n",lvlSearch);
+															nd->tran[tInd].finalLvlOffset = (uint16_t)((int)nd->tran[tInd].finalLvlOffset - lvlSearch);
+															break;
+														}
+													}
+												}
+											}
+										}
+									}
+
+									if(correctMult == 0){
+										//see if 
+									}
+
+								}
+							}
+						}
+					}
+				}
+			}
 		}
   }
 
