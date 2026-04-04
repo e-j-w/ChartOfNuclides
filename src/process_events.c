@@ -51,7 +51,7 @@ void setSelTxtPrimarySelection(const text_selection_state *restrict tss){
   }
 }
 
-void fcScrollAction(app_state *restrict state, const float deltaVal){
+void fcScrollAction(app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat, const float deltaVal){
   //SDL_Log("scroll delta: %f\n",(double)deltaVal);
   if((state->ds.nuclFullInfoScrollY <= 0.0f)&&(deltaVal >= 0.0f)){
     return;
@@ -79,6 +79,10 @@ void fcScrollAction(app_state *restrict state, const float deltaVal){
   state->ds.fcScrollInProgress = 1;
   state->ds.fcScrollFinished = 0;
   clearSelectionStrs(&state->ds,&state->tss,1,1); //selection string positions are changed on scroll
+  //automatically hide the context menu upon scrolling
+  if((state->cms.numContextMenuItems > 0)&&(state->ds.timeLeftInUIAnimation[UIANIM_CONTEXT_MENU_HIDE]==0.0f)){
+    startUIAnimation(dat,state,rdat,UIANIM_CONTEXT_MENU_HIDE); //menu will be closed after animation finishes
+  }
   //SDL_Log("scroll pos: %f, scroll to: %f\n",(double)state->ds.nuclFullInfoScrollY,(double)state->ds.nuclFullInfoScrollToY);
 }
 
@@ -520,21 +524,21 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
   }else if(state->uiState == UISTATE_FULLLEVELINFO){
 
     if(up && !down){
-      fcScrollAction(state,0.15f);
+      fcScrollAction(dat,state,rdat,0.15f);
     }else if(down && !up){
-      fcScrollAction(state,-0.15f);
+      fcScrollAction(dat,state,rdat,-0.15f);
     }else if(state->inputFlags & (1U << INPUT_PAGEUP)){
       if(state->ds.fcScrollInProgress==0){
-        fcScrollAction(state,1.0f);
+        fcScrollAction(dat,state,rdat,1.0f);
       }
     }else if(state->inputFlags & (1U << INPUT_PAGEDOWN)){
       if(state->ds.fcScrollInProgress==0){
-        fcScrollAction(state,-1.0f);
+        fcScrollAction(dat,state,rdat,-1.0f);
       }
     }else if(state->inputFlags & (1U << INPUT_SCROLLSTART)){
-      fcScrollAction(state,1000.0f);
+      fcScrollAction(dat,state,rdat,1000.0f);
     }else if(state->inputFlags & (1U << INPUT_SCROLLEND)){
-      fcScrollAction(state,-1000.0f);
+      fcScrollAction(dat,state,rdat,-1000.0f);
     }else if(state->ds.fcNuclChangeInProgress == 0){
       change_lvl_list_nucl:
       //change selected nucleus
@@ -1005,6 +1009,9 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
     //SDL_Log("Mouse over level: %u\n",state->ds.nuclFullInfoMouseOverNuclLvl);
 
     if(rightClick){
+
+      clearContextMenu(state);
+
       //check for clickable strings
 
       //check if there is a text selection
@@ -1484,7 +1491,7 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
       }
       //SDL_Log("scale: %0.2f\n",(double)state->ds.chartZoomScale);
     }else if((state->uiState == UISTATE_FULLLEVELINFO)||(state->uiState == UISTATE_FULLLEVELINFOWITHMENU)){
-      fcScrollAction(state,state->zoomDeltaVal*0.4f);
+      fcScrollAction(dat,state,rdat,state->zoomDeltaVal*0.4f);
     }
     
   }

@@ -553,6 +553,13 @@ void showContextMenu(const app_data *restrict dat, app_state *restrict state, re
 	startUIAnimation(dat,state,rdat,UIANIM_CONTEXT_MENU_SHOW);
 }
 
+//should be called whenever a new context menu is spawned, otherwise
+//entries from the previous context menu may still be visible
+void clearContextMenu(app_state *restrict state){
+  state->cms.useHeaderText = 0;
+	state->cms.numContextMenuItems = 0;
+}
+
 void appendContextMenuItem(app_state *restrict state, const uint8_t contextItem){
 	if(state->cms.numContextMenuItems < 255U){
 		state->cms.contextMenuItems[state->cms.numContextMenuItems] = contextItem;

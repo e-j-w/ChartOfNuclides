@@ -3426,10 +3426,12 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 									//transitions cannot link between levels defined by different variables
 									uint8_t prevLvlValType = ((nd->levels[lvlInd].energy.format >> 5U) & 15U);
 									if((lvlValType == VALUETYPE_X)||(lvlValType == VALUETYPE_PLUSX)){
+										//SDL_Log("Level %u has variable type %u.\n",nd->numLvls-1,lvlValType);
 										if((prevLvlValType != VALUETYPE_X)&&(prevLvlValType != VALUETYPE_PLUSX)){
 											if(lvlInd == 0){
 												break; //handle rare integer overflow case
 											}
+											//SDL_Log("  Skipping comparison to level %u as it is not variable.\n",lvlInd);
 											continue; //skip
 										}else{
 											//check that the variables are the same
@@ -3439,9 +3441,11 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 												if(lvlInd == 0){
 													break; //handle rare integer overflow case
 												}
+												//SDL_Log("  Skipping comparison to level %u as it doesn not have the same variable (%u, expecting %u).\n",lvlInd,prevVar,var);
 												continue; //variables don't match, skip
 											}
 										}
+										//SDL_Log("  Comparing to level %u, energies: %f, %f.\n",lvlInd,getRawValFromDB(&nd->levels[nd->numLvls-1].energy),getRawValFromDB(&nd->levels[lvlInd].energy));
 									}else{
 										if((prevLvlValType == VALUETYPE_X)||(prevLvlValType == VALUETYPE_PLUSX)){
 											if(lvlInd == 0){
@@ -3966,6 +3970,10 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 												finalLvlType = VALUETYPE_X;
 											}
 											finalLvlVar = (uint8_t)tval[0];
+											if(tlen > 2){
+												finalLvlE = SDL_atof(&tval[2]);
+											}
+											//SDL_Log("variable: %c, energy: %f\n",finalLvlVar,finalLvlE);
 										}else if((tlen < 80)&&(SDL_isalpha(tval[tlen-1]))){
 											if((tlen>1)&&(tval[tlen-2] == '+')){
 												finalLvlType = VALUETYPE_PLUSX;
@@ -3986,23 +3994,24 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 													double eDiff = fabs(getRawValFromDB(&nd->levels[lvlInd].energy) - finalLvlE);
 													if(eDiff <= 0.01){
 														nd->tran[tranInd].finalLvlOffset = (uint16_t)((nd->numLvls-1) - lvlInd);
-														//SDL_Log("finalLvlOffset: %u\n",nd->tran[tranInd].finalLvlOffset);
+														//SDL_Log("finalLvlOffset 1: %u\n",nd->tran[tranInd].finalLvlOffset);
 													}
 													
 												}else if(finalLvlType == VALUETYPE_PLUSX){
 													uint8_t lvlVariable = (uint8_t)((nd->levels[lvlInd].energy.format >> 9U) & 127U);
 													if(finalLvlVar == lvlVariable){
+														//SDL_Log("variable: %c, energies: %f %f\n",lvlVariable,getRawValFromDB(&nd->levels[lvlInd].energy),finalLvlE);
 														double eDiff = fabs(getRawValFromDB(&nd->levels[lvlInd].energy) - finalLvlE);
 														if(eDiff <= 0.01){
 															nd->tran[tranInd].finalLvlOffset = (uint16_t)((nd->numLvls-1) - lvlInd);
-															//SDL_Log("finalLvlOffset: %u\n",nd->tran[tranInd].finalLvlOffset);
+															//SDL_Log("finalLvlOffset 2: %u\n",nd->tran[tranInd].finalLvlOffset);
 														}
 													}
 												}else if(finalLvlType == VALUETYPE_X){
 													uint8_t lvlVariable = (uint8_t)((nd->levels[lvlInd].energy.format >> 9U) & 127U);
 													if(finalLvlVar == lvlVariable){
 														nd->tran[tranInd].finalLvlOffset = (uint16_t)((nd->numLvls-1) - lvlInd);
-														//SDL_Log("finalLvlOffset: %u\n",nd->tran[tranInd].finalLvlOffset);
+														//SDL_Log("finalLvlOffset 3: %u\n",nd->tran[tranInd].finalLvlOffset);
 													}
 												}else{
 													SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,"Unimplemented final level parsing for line: %s\n",line);
