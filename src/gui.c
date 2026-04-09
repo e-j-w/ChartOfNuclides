@@ -521,11 +521,11 @@ SDL_FColor getR42Col(const double r42, const double halflifeSeconds){
     col.r = 0.0f;
     col.g = 0.0f;
     col.b = 0.8f;
-  }else if(r42 >= 3.2){ //box color inversion point
+  }else if(r42 >= 3.2){
     col.r = 0.0f;
     col.g = 0.0f;
     col.b = 1.0f;
-  }else if(r42 >= 3.1){
+  }else if(r42 >= 3.1){ //box color inversion point
     col.r = 0.0f;
     col.g = 0.2f;
     col.b = 0.9f;
@@ -2147,9 +2147,9 @@ void drawChartOfNuclides(const app_data *restrict dat, app_state *restrict state
                         //make isomer box colors slightly different, to distinguish them from
                         //ground states of similar half-life
                         if(getNuclGSHalfLifeSeconds(&dat->ndat,(uint16_t)i) > isomerHl){
-                          iboxCol.r *= 1.10f; if(iboxCol.r > 1.0f){iboxCol.r = 1.0f;}
-                          iboxCol.g *= 1.10f; if(iboxCol.g > 1.0f){iboxCol.g = 1.0f;}
-                          iboxCol.b *= 1.10f; if(iboxCol.b > 1.0f){iboxCol.b = 1.0f;}
+                          iboxCol.r *= 1.10f; if(iboxCol.r > 1.0f){iboxCol.r = 1.0f;} //color range check prevents discolored boxes when running MSYS2 builds in Wine
+                          iboxCol.g *= 1.10f; if(iboxCol.g > 1.0f){iboxCol.g = 1.0f;} //color range check prevents discolored boxes when running MSYS2 builds in Wine
+                          iboxCol.b *= 1.10f; if(iboxCol.b > 1.0f){iboxCol.b = 1.0f;} //color range check prevents discolored boxes when running MSYS2 builds in Wine
                         }else{
                           iboxCol.r *= 0.91f;
                           iboxCol.g *= 0.91f;
@@ -2290,7 +2290,7 @@ void drawChartOfNuclides(const app_data *restrict dat, app_state *restrict state
                   }else if(state->chartView == CHARTVIEW_2PLUS){
                     drawNuclBoxLabel(dat,state,rdat,rect.x,rect.y,rect.w,rect.h,(get2PlusEnergy(&dat->ndat,(uint16_t)i) >= 2000.0) ? whiteCol8Bit : blackCol8Bit,(uint16_t)i);
                   }else if(state->chartView == CHARTVIEW_R42){
-                    drawNuclBoxLabel(dat,state,rdat,rect.x,rect.y,rect.w,rect.h,(getR42(&dat->ndat,(uint16_t)i) >= 3.2) ? whiteCol8Bit : blackCol8Bit,(uint16_t)i);
+                    drawNuclBoxLabel(dat,state,rdat,rect.x,rect.y,rect.w,rect.h,(getR42(&dat->ndat,(uint16_t)i) >= 3.1) ? whiteCol8Bit : blackCol8Bit,(uint16_t)i);
                   }else if(state->chartView == CHARTVIEW_BETA2){
                     drawNuclBoxLabel(dat,state,rdat,rect.x,rect.y,rect.w,rect.h,(getBeta2(&dat->ndat,(uint16_t)i) >= 0.35) ? whiteCol8Bit : blackCol8Bit,(uint16_t)i);
                   }else if(state->chartView == CHARTVIEW_SPIN){
