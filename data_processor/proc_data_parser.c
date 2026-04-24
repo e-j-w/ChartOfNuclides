@@ -1797,7 +1797,7 @@ void cleanCommentStr(char *comBuff){
 	modComBuff = findReplaceAllUTF8("|>","≥",comBuff);
 	SDL_strlcpy(comBuff,modComBuff,118);
 	SDL_free(modComBuff);
-	modComBuff = findReplaceAllUTF8("log|","log",comBuff);
+	modComBuff = findReplaceAllUTF8("og|","og",comBuff);
 	SDL_strlcpy(comBuff,modComBuff,118);
 	SDL_free(modComBuff);
 	modComBuff = findReplaceAllUTF8("s{-","s(",comBuff);
