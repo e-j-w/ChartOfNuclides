@@ -78,7 +78,7 @@ chartview_2plus|E(2⁺)
 chartview_r42|E(4⁺)/E(2⁺)
 chartview_beta2|β₂
 chartview_spin|Ground state spin
-chartview_parity|GS parity
+chartview_parity|Ground state parity
 chartview_beA|Binding E / A
 chartview_sn|S(n)
 chartview_sp|S(p)
@@ -89,7 +89,8 @@ chartview_qec|Q(ε)
 chartview_num_levels|Known levels
 chartview_num_isomers|Isomers (t½ ≥ 10 ns)
 chartview_num_isomers_1min|Isomers (t½ ≥ 1 min)
-chartview_num_betaalpha|Particle-decaying levels
+chartview_num_betadec|β⁻/β⁺/ε decaying levels
+chartview_num_partdec|Particle decaying levels
 chartview_unknown_energy|Unknown energy levels
 context_copy|Copy
 context_copytext|Copy selected text

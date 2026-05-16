@@ -1477,13 +1477,13 @@ SDL_FColor getNumIsomersCol(const uint16_t numIsomers, const double halflifeSeco
     col.r = 0.9f;
     col.g = 0.9f;
     col.b = 0.9f;
-  }else if(numIsomers == 1){ //box color inversion point
+  }else if(numIsomers == 1){
     col.r = 0.4f;
     col.g = 0.6f;
-    col.b = 0.9f;
+    col.b = 1.0f;
   }else if(numIsomers == 2){
     col.r = 0.4f;
-    col.g = 0.9f;
+    col.g = 1.0f;
     col.b = 0.6f;
   }else if(numIsomers == 3){
     col.r = 0.9f;
@@ -2075,9 +2075,13 @@ void drawNuclBoxLabelDetails(const app_data *restrict dat, app_state *restrict s
         drawTextAlignedSized(rdat,drawXPos,drawYPos+((yOffsets*labelLineSpacing + 36.0f)*state->ds.uiUserScale),col,labelFontInd,255,tmpStr,ALIGN_CENTER,maxLblWidth); //draw GS half-life label
       }
     }
-  }else if(state->chartView == CHARTVIEW_NUMPARTDCY){
+  }else if((state->chartView == CHARTVIEW_NUMBETADCY)||(state->chartView == CHARTVIEW_NUMPARTDCY)){
     uint16_t numLvls = 0;
-    numLvls = getNumParticleDecayingLvls(&dat->ndat,nuclInd);
+    if(state->chartView == CHARTVIEW_NUMPARTDCY){
+      numLvls = getNumParticleDecayingLvls(&dat->ndat,nuclInd);
+    }else{
+      numLvls = getNumBetaDecayingLvls(&dat->ndat,nuclInd);
+    }
     if(numLvls == 0){
       SDL_snprintf(tmpStr,32,"No %s",dat->strings[dat->locStringIDs[LOCSTR_LEVEL]]);
     }else{
@@ -2257,6 +2261,8 @@ void drawChartOfNuclides(const app_data *restrict dat, app_state *restrict state
                 boxCol = getNumIsomersCol(getNumIsomers(&dat->ndat,1.0E-8,(uint16_t)i),getNuclGSHalfLifeSeconds(&dat->ndat,(uint16_t)i));
               }else if(state->chartView == CHARTVIEW_NUMISOMERS_1MIN){
                 boxCol = getNumIsomersCol(getNumIsomers(&dat->ndat,60.0,(uint16_t)i),getNuclGSHalfLifeSeconds(&dat->ndat,(uint16_t)i));
+              }else if(state->chartView == CHARTVIEW_NUMBETADCY){
+                boxCol = getNumIsomersCol(getNumBetaDecayingLvls(&dat->ndat,(uint16_t)i),getNuclGSHalfLifeSeconds(&dat->ndat,(uint16_t)i));
               }else if(state->chartView == CHARTVIEW_NUMPARTDCY){
                 boxCol = getNumIsomersCol(getNumParticleDecayingLvls(&dat->ndat,(uint16_t)i),getNuclGSHalfLifeSeconds(&dat->ndat,(uint16_t)i));
               }else if(state->chartView == CHARTVIEW_UNKNOWN_ENERGY){
@@ -2454,6 +2460,8 @@ void drawChartOfNuclides(const app_data *restrict dat, app_state *restrict state
                   }else if(state->chartView == CHARTVIEW_NUMISOMERS){
                     drawNuclBoxLabel(dat,state,rdat,rect.x,rect.y,rect.w,rect.h,blackCol8Bit,(uint16_t)i);
                   }else if(state->chartView == CHARTVIEW_NUMISOMERS_1MIN){
+                    drawNuclBoxLabel(dat,state,rdat,rect.x,rect.y,rect.w,rect.h,blackCol8Bit,(uint16_t)i);
+                  }else if(state->chartView == CHARTVIEW_NUMBETADCY){
                     drawNuclBoxLabel(dat,state,rdat,rect.x,rect.y,rect.w,rect.h,blackCol8Bit,(uint16_t)i);
                   }else if(state->chartView == CHARTVIEW_NUMPARTDCY){
                     drawNuclBoxLabel(dat,state,rdat,rect.x,rect.y,rect.w,rect.h,blackCol8Bit,(uint16_t)i);
@@ -4563,6 +4571,10 @@ void drawContextMenu(const app_data *restrict dat, const app_state *restrict sta
             SDL_snprintf(tmpStr,32,"%s %s",dat->strings[dat->locStringIDs[LOCSTR_CONTEXT_COPY]],dat->strings[dat->locStringIDs[LOCSTR_CHARTVIEW_NUMISOMERS_1MIN]]);
             drawTextAlignedSized(rdat,drawRect.x,drawRect.y + (0.4f + (float)i)*CONTEXT_MENU_ITEM_SPACING*state->ds.uiUserScale,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_LEFT,(Uint16)(drawRect.w - (PANEL_EDGE_SIZE + 6*UI_PADDING_SIZE)*state->ds.uiUserScale));
             break;
+          case CHARTVIEW_NUMBETADCY:
+            SDL_snprintf(tmpStr,32,"%s %s",dat->strings[dat->locStringIDs[LOCSTR_CONTEXT_COPY]],dat->strings[dat->locStringIDs[LOCSTR_CHARTVIEW_NUMBETADCY]]);
+            drawTextAlignedSized(rdat,drawRect.x,drawRect.y + (0.4f + (float)i)*CONTEXT_MENU_ITEM_SPACING*state->ds.uiUserScale,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_LEFT,(Uint16)(drawRect.w - (PANEL_EDGE_SIZE + 6*UI_PADDING_SIZE)*state->ds.uiUserScale));
+            break;
           case CHARTVIEW_NUMPARTDCY:
             SDL_snprintf(tmpStr,32,"%s %s",dat->strings[dat->locStringIDs[LOCSTR_CONTEXT_COPY]],dat->strings[dat->locStringIDs[LOCSTR_CHARTVIEW_NUMPARTDCY]]);
             drawTextAlignedSized(rdat,drawRect.x,drawRect.y + (0.4f + (float)i)*CONTEXT_MENU_ITEM_SPACING*state->ds.uiUserScale,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_LEFT,(Uint16)(drawRect.w - (PANEL_EDGE_SIZE + 6*UI_PADDING_SIZE)*state->ds.uiUserScale));
@@ -4713,6 +4725,8 @@ void drawUI(const app_data *restrict dat, app_state *restrict state, resource_da
         drawIconAndTextButton(&dat->rules.themeRules,rdat,state->ds.uiElemPosX[UIELEM_CHARTVIEW_BUTTON],(int16_t)(state->ds.uiElemPosY[UIELEM_CHARTVIEW_BUTTON] + yOffset),state->ds.uiElemWidth[UIELEM_CHARTVIEW_BUTTON],getHighlightState(state,UIELEM_CHARTVIEW_BUTTON),255,UIICON_CHARTVIEW,dat->strings[dat->locStringIDs[LOCSTR_CHARTVIEW_NUMISOMERS]]);
       }else if(state->chartView == CHARTVIEW_NUMISOMERS_1MIN){
         drawIconAndTextButton(&dat->rules.themeRules,rdat,state->ds.uiElemPosX[UIELEM_CHARTVIEW_BUTTON],(int16_t)(state->ds.uiElemPosY[UIELEM_CHARTVIEW_BUTTON] + yOffset),state->ds.uiElemWidth[UIELEM_CHARTVIEW_BUTTON],getHighlightState(state,UIELEM_CHARTVIEW_BUTTON),255,UIICON_CHARTVIEW,dat->strings[dat->locStringIDs[LOCSTR_CHARTVIEW_NUMISOMERS_1MIN]]);
+      }else if(state->chartView == CHARTVIEW_NUMBETADCY){
+        drawIconAndTextButton(&dat->rules.themeRules,rdat,state->ds.uiElemPosX[UIELEM_CHARTVIEW_BUTTON],(int16_t)(state->ds.uiElemPosY[UIELEM_CHARTVIEW_BUTTON] + yOffset),state->ds.uiElemWidth[UIELEM_CHARTVIEW_BUTTON],getHighlightState(state,UIELEM_CHARTVIEW_BUTTON),255,UIICON_CHARTVIEW,dat->strings[dat->locStringIDs[LOCSTR_CHARTVIEW_NUMBETADCY]]);
       }else if(state->chartView == CHARTVIEW_NUMPARTDCY){
         drawIconAndTextButton(&dat->rules.themeRules,rdat,state->ds.uiElemPosX[UIELEM_CHARTVIEW_BUTTON],(int16_t)(state->ds.uiElemPosY[UIELEM_CHARTVIEW_BUTTON] + yOffset),state->ds.uiElemWidth[UIELEM_CHARTVIEW_BUTTON],getHighlightState(state,UIELEM_CHARTVIEW_BUTTON),255,UIICON_CHARTVIEW,dat->strings[dat->locStringIDs[LOCSTR_CHARTVIEW_NUMPARTDCY]]);
       }else if(state->chartView == CHARTVIEW_UNKNOWN_ENERGY){
