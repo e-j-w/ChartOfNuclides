@@ -117,8 +117,8 @@ void initializeTempState(const app_data *restrict dat, app_state *restrict state
 	}
 
 	//check that constants are valid
-	if(UIELEM_ENUM_LENGTH > /* DISABLES CODE */ (MAX_UI_ELEMENTS)){
-		SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"ui_element_enum is too long, maximum size is %u!\n",MAX_UI_ELEMENTS);
+	if(UIELEM_ENUM_LENGTH > /* DISABLES CODE */ (128)){
+		SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"ui_element_enum is too long, cannot be indexed by a 128-bit bit pattern!\n");
 		exit(-1);
 	}
 	if(UIANIM_ENUM_LENGTH > /* DISABLES CODE */ (32)){

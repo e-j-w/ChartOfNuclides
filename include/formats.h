@@ -42,8 +42,6 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #define SEARCH_RESULT_DATASIZE   4
 #define UNUSED_SEARCH_RESULT     MAX_UINT32_VAL
 
-#define MAX_UI_ELEMENTS      128 //multiple of 64, determines how many uint64_t's are needed for UI element bit-patterns 
-
 //text selection parameters
 #define MAX_SELECTABLE_STRS      1024 //maximum number of onscreen text strings that can be selectable at once
 #define MAX_SELECTABLE_STR_LEN   256 //maximum length of selectable text strings (should be larger than 32, which is the size used by some string composition functions in data_ops.c)
