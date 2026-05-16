@@ -73,7 +73,7 @@ pref_ui_animations|Enable UI animations
 chartview_menu_title|Select color scheme:
 chartview_lifetime|Lifetime
 chartview_halflife|Half-life
-chartview_decaymode|Decay Mode
+chartview_decaymode|Decay mode
 chartview_2plus|E(2⁺)
 chartview_r42|E(4⁺)/E(2⁺)
 chartview_beta2|β₂
@@ -86,10 +86,11 @@ chartview_qalpha|Q(α)
 chartview_qbeta|Q(β⁻)
 chartview_qbetaplus|Q(β⁺)
 chartview_qec|Q(ε)
-chartview_num_levels|Known Levels
-chartview_num_isomers|Isomers ≥ 10 ns
-chartview_num_isomers_1min|Isomers ≥ 1 min
-chartview_unknown_energy|Ambiguous Lvls
+chartview_num_levels|Known levels
+chartview_num_isomers|Isomers (t½ ≥ 10 ns)
+chartview_num_isomers_1min|Isomers (t½ ≥ 1 min)
+chartview_num_betaalpha|Particle-decaying levels
+chartview_unknown_energy|Unknown energy levels
 context_copy|Copy
 context_copytext|Copy selected text
 context_copy_nuclname|Copy nuclide name
@@ -99,7 +100,7 @@ search_placeholder|Type to search (eg. '32Si')
 search_placeholder_levelinfo|Type to search (eg. level/gamma energy)
 search_result_nuclide|Nuclide / Isotope
 search_result_egamma|Transition
-search_result_elevel|Excited State
+search_result_elevel|Excited state
 search_result_elevel_diff|Level energy difference
 search_result_gammacascade|Gamma-ray cascade
 search_result_halflife|Half-life

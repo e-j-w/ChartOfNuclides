@@ -86,6 +86,7 @@ double getLevelEnergykeV(const ndata *restrict nd, const uint32_t levelInd);
 
 int8_t getMostProbableParity(const ndata *restrict nd, const uint32_t lvlInd);
 double getMostProbableSpin(const ndata *restrict nd, const uint32_t lvlInd);
+uint16_t getNumParticleDecayingLvls(const ndata *restrict nd, const uint16_t nuclInd);
 uint16_t getNumIsomers(const ndata *restrict nd, const double hlLimitSeconds, const uint16_t nuclInd);
 uint16_t getNumUnknownLvls(const ndata *restrict nd, const uint16_t nuclInd);
 double getBEA(const ndata *restrict nd, const uint16_t nuclInd);

@@ -3208,7 +3208,28 @@ double getMostProbableSpin(const ndata *restrict nd, const uint32_t lvlInd){
 	return 255.0; //unknown spin
 }
 
-//gets the number of levels which are isomeric (t1/2 > specified limit)
+// gets the number of levels in the nuclide which have a decay mode other than IT
+uint16_t getNumParticleDecayingLvls(const ndata *restrict nd, const uint16_t nuclInd){
+	uint16_t numLvls = 0;
+	for(uint32_t i=nd->nuclData[nuclInd].firstLevel; i<(uint32_t)(nd->nuclData[nuclInd].firstLevel + nd->nuclData[nuclInd].numLevels); i++){
+		uint8_t ambiguousLvl = (uint8_t)((nd->levels[i].energy.unit >> 7U) & 1U);
+		if(!ambiguousLvl){
+			for(int8_t j=0; j<nd->levels[i].numDecModes; j++){
+				uint32_t dcyModeInd = nd->levels[i].firstDecMode + (uint32_t)j;
+				uint8_t decUnitType = (uint8_t)(nd->dcyMode[dcyModeInd].prob.unit & 127U);
+				if((decUnitType != VALUETYPE_LESSTHAN)&&(decUnitType != VALUETYPE_LESSOREQUALTHAN)&&(decUnitType != VALUETYPE_UNKNOWN)){
+					if((nd->dcyMode[dcyModeInd].type != DECAYMODE_IT)&&(nd->dcyMode[dcyModeInd].type < DECAYMODE_ENUM_LENGTH)){
+						numLvls++;
+						break; //only count each level once
+					}
+				}
+			}
+		}
+	}
+	return numLvls;
+}
+
+//gets the number of levels in the nuclide which are isomeric (t1/2 > specified limit)
 uint16_t getNumIsomers(const ndata *restrict nd, const double hlLimitSeconds, const uint16_t nuclInd){
 	uint16_t numIsomers = 0;
 	uint32_t gsLvlInd = (uint32_t)(nd->nuclData[nuclInd].firstLevel + nd->nuclData[nuclInd].gsLevel);
@@ -4000,6 +4021,7 @@ void changeUIState(const app_data *restrict dat, app_state *restrict state, reso
 				bp_set128(&state->interactableElement,UIELEM_CVM_NUMLVLS);
 				bp_set128(&state->interactableElement,UIELEM_CVM_NUMISOMERS);
 				bp_set128(&state->interactableElement,UIELEM_CVM_NUMISOMERS_1MIN);
+				bp_set128(&state->interactableElement,UIELEM_CVM_NUMPARTDCY);
 				bp_set128(&state->interactableElement,UIELEM_CVM_UNKNOWN_ENERGY_BUTTON);
 				bp_set128(&state->interactableElement,UIELEM_CHARTVIEW_MENU);
 				if(state->lastInputType != INPUT_TYPE_MOUSE){
@@ -4784,6 +4806,14 @@ void contextMenuClickAction(app_data *restrict dat, app_state *restrict state, r
 							//SDL_Log("Copied text to clipboard: %s\n",SDL_GetClipboardText());
 						}
 						break;
+					case CHARTVIEW_NUMPARTDCY:
+						{//prevent -Wjump-misses-init
+							const uint16_t numLvls = getNumParticleDecayingLvls(&dat->ndat,state->cms.selectionInd);
+							SDL_snprintf(state->copiedTxt,MAX_SELECTABLE_STR_LEN,"%s: %u",dat->strings[dat->locStringIDs[LOCSTR_CHARTVIEW_NUMPARTDCY]],numLvls);
+							SDL_SetClipboardText(state->copiedTxt);
+							//SDL_Log("Copied text to clipboard: %s\n",SDL_GetClipboardText());
+						}
+						break;
 					case CHARTVIEW_UNKNOWN_ENERGY:
 						{//prevent -Wjump-misses-init
 							const uint16_t numUnknowns = getNumUnknownLvls(&dat->ndat,state->cms.selectionInd);
@@ -5028,7 +5058,7 @@ void uiElemClickAction(app_data *restrict dat, app_state *restrict state, resour
 	(uiElemID != UIELEM_CVM_QALPHA_BUTTON)&&(uiElemID != UIELEM_CVM_QBETAMINUS_BUTTON)&&
 	(uiElemID != UIELEM_CVM_QBETAPLUS_BUTTON)&&(uiElemID != UIELEM_CVM_QEC_BUTTON)&&
 	(uiElemID != UIELEM_CVM_NUMLVLS)&&(uiElemID != UIELEM_CVM_NUMISOMERS)&&(uiElemID != UIELEM_CVM_NUMISOMERS_1MIN)&&
-	(uiElemID != UIELEM_CVM_UNKNOWN_ENERGY_BUTTON)){
+	(uiElemID != UIELEM_CVM_NUMPARTDCY)&&(uiElemID != UIELEM_CVM_UNKNOWN_ENERGY_BUTTON)){
 		if((bp_check128(&state->ds.shownElements,UIELEM_CHARTVIEW_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_CHARTVIEW_MENU_HIDE]==0.0f)){
 			startUIAnimation(dat,state,rdat,UIANIM_CHARTVIEW_MENU_HIDE); //menu will be closed after animation finishes
 			state->clickedUIElem = UIELEM_ENUM_LENGTH; //'unclick' the menu button
@@ -5371,6 +5401,12 @@ void uiElemClickAction(app_data *restrict dat, app_state *restrict state, resour
 			startUIAnimation(dat,state,rdat,UIANIM_CHARTVIEW_MENU_HIDE); //menu will be closed after animation finishes
 			state->clickedUIElem = UIELEM_ENUM_LENGTH; //'unclick' the menu button
 			state->chartView = CHARTVIEW_NUMISOMERS_1MIN;
+			changeUIState(dat,state,rdat,UISTATE_CHARTONLY); //prevents mouseover from still highlighting buttons while the menu closes
+			break;
+		case UIELEM_CVM_NUMPARTDCY:
+			startUIAnimation(dat,state,rdat,UIANIM_CHARTVIEW_MENU_HIDE); //menu will be closed after animation finishes
+			state->clickedUIElem = UIELEM_ENUM_LENGTH; //'unclick' the menu button
+			state->chartView = CHARTVIEW_NUMPARTDCY;
 			changeUIState(dat,state,rdat,UISTATE_CHARTONLY); //prevents mouseover from still highlighting buttons while the menu closes
 			break;
 		case UIELEM_CVM_UNKNOWN_ENERGY_BUTTON:
