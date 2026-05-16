@@ -28,6 +28,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include <SDL3_ttf/SDL_ttf.h>
 
 #include "enums.h"
+#include "bitpattern.h" //bp128 and other long bit-pattern types
 
 #define MAX_UINT32_VAL 4294967295U
 
@@ -40,6 +41,8 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #define MAX_DISP_SEARCH_RESULTS  5  //number of results to display
 #define SEARCH_RESULT_DATASIZE   4
 #define UNUSED_SEARCH_RESULT     MAX_UINT32_VAL
+
+#define MAX_UI_ELEMENTS      128 //multiple of 64, determines how many uint64_t's are needed for UI element bit-patterns 
 
 //text selection parameters
 #define MAX_SELECTABLE_STRS      1024 //maximum number of onscreen text strings that can be selectable at once
@@ -269,7 +272,7 @@ typedef struct
   uint8_t rxnMenuColumns; //how many columns to use in the reaction menu
   uint8_t mouseOverRxn, mouseHoldRxn; //which item in the reaction menu is moused-over, =255 if none
   uint8_t selectedRxn; //which item in the reaction menu is selected, =0 if none, =255 if showing coincident levels, =254 if showing same Jpi levels 
-  uint64_t shownElements; //bit pattern describing which UI elements are being shown, values from ui_element_enum
+  bp128 shownElements; //bit pattern describing which UI elements are being shown, values from ui_element_enum
   uint32_t uiAnimPlaying; //bit pattern describing which UI animations are playing
   float timeLeftInUIAnimation[UIANIM_ENUM_LENGTH]; //time left in each UI animation
   uint16_t windowXRes, windowYRes; //resolution of the window
@@ -377,7 +380,7 @@ typedef struct
   uint8_t mouseholdElement; //which UI element is the mouse button being held over, =UIELEM_ENUM_LENGTH if none
   uint8_t uiState, lastUIState; //modal state of the UI, values from ui_state_enum
   uint16_t chartSelectedNucl; //nucleus selected on the chart, =MAXNUMNUCL if none selected
-  uint64_t interactableElement; //bit pattern describing which UI elements are interactable, values from ui_element_enum
+  bp128 interactableElement; //bit pattern describing which UI elements are interactable, values from ui_element_enum
   uint16_t coincLvlFlag; //which level in the selected nuclide (0-indexed) is selected for showing coincident levels, 0 if no level selected (the GS isn't selectable, since everything is coincident with it)
   uint64_t flaggedCoincLvls[COINC_FLAG_BITPATTERN_SIZE]; //bit-pattern describing which levels in the nuclide are coincident with the selected level
   unsigned int mouseMovedDuringClick : 1; //whether or not the mouse was moved significantly while the mouse button is held down

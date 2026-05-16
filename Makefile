@@ -3,8 +3,8 @@ CFLAGS = -O2 -Wall -Wextra -Wpedantic -Wc++-compat -Wdouble-promotion -Wshadow -
 #CFLAGS += $(DEBUG_FLAGS)
 SDL = `pkg-config sdl3 --libs --cflags` -lSDL3_image -lSDL3_ttf
 COMMON = include/formats.h include/enums.h include/gui_constants.h
-OBJ = lib/strops.o lib/juicer.o io_ops.o load_data.o data_ops.o search_ops.o gui.o drawing.o process_events.o thread_manager.o
-INC =  -I./include -I./src
+OBJ = lib/strops.o lib/juicer.o lib/bitpattern.o io_ops.o load_data.o data_ops.o search_ops.o gui.o drawing.o process_events.o thread_manager.o
+INC =  -I./include -I./src -I./lib/bitpattern
 CC = gcc
 #CC = clang
 
@@ -50,6 +50,9 @@ chart.dat: proc_data
 	@if [ ! -f chart.dat ]; then \
 		./proc_data ; \
 	fi
+
+lib/bitpattern.o: lib/bitpattern/*.c lib/bitpattern/*.h
+	$(CC) lib/bitpattern/bitpattern.c $(CFLAGS) -c -o lib/bitpattern.o
 
 lib/juicer.o: lib/juicer/*.c lib/juicer/*.h
 	$(CC) lib/juicer/juicer.c $(CFLAGS) -c -o lib/juicer.o

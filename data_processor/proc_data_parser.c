@@ -333,6 +333,8 @@ static int parseAppRules(app_data *restrict dat, asset_mapping *restrict stringI
 	dat->locStringIDs[LOCSTR_CHARTVIEW_QBETAPLUS] = (uint16_t)nameToAssetID("chartview_qbetaplus",stringIDmap);
 	dat->locStringIDs[LOCSTR_CHARTVIEW_QEC] = (uint16_t)nameToAssetID("chartview_qec",stringIDmap);
 	dat->locStringIDs[LOCSTR_CHARTVIEW_NUMLVLS] = (uint16_t)nameToAssetID("chartview_num_levels",stringIDmap);
+	dat->locStringIDs[LOCSTR_CHARTVIEW_NUMISOMERS] = (uint16_t)nameToAssetID("chartview_num_isomers",stringIDmap);
+	dat->locStringIDs[LOCSTR_CHARTVIEW_NUMISOMERS_1MIN] = (uint16_t)nameToAssetID("chartview_num_isomers_1min",stringIDmap);
 	dat->locStringIDs[LOCSTR_CHARTVIEW_UNKNOWN_ENERGY] = (uint16_t)nameToAssetID("chartview_unknown_energy",stringIDmap);
 	dat->locStringIDs[LOCSTR_CONTEXT_COPY] = (uint16_t)nameToAssetID("context_copy",stringIDmap);
 	dat->locStringIDs[LOCSTR_CONTEXT_COPYTEXT] = (uint16_t)nameToAssetID("context_copytext",stringIDmap);
@@ -5342,15 +5344,15 @@ int buildDatabase(const char *appBasePath, ndata *nd){
 									getGammaEnergyStr(strOut2,nd,tInd,1);
 									if(!mDQ){
 										if(halfInt){
-											printf("Nuclide %s transition with energy %s keV appears to have incorrect multipolarity %s%u (initial spin-parity: %u/2%s, final spin-parity %u/2%s).\n",strOut,strOut2,(mEM == 0) ? "E" : "M",mOrder,initSpin,(initPar == 1) ? "+" : "-",finalSpin,(finalPar == 1) ? "+" : "-");
+											SDL_Log("Nuclide %s transition with energy %s keV appears to have incorrect multipolarity %s%u (initial spin-parity: %u/2%s, final spin-parity %u/2%s).\n",strOut,strOut2,(mEM == 0) ? "E" : "M",mOrder,initSpin,(initPar == 1) ? "+" : "-",finalSpin,(finalPar == 1) ? "+" : "-");
 										}else{
-											printf("Nuclide %s transition with energy %s keV appears to have incorrect multipolarity %s%u (initial spin-parity: %u%s, final spin-parity %u%s).\n",strOut,strOut2,(mEM == 0) ? "E" : "M",mOrder,initSpin,(initPar == 1) ? "+" : "-",finalSpin,(finalPar == 1) ? "+" : "-");
+											SDL_Log("Nuclide %s transition with energy %s keV appears to have incorrect multipolarity %s%u (initial spin-parity: %u%s, final spin-parity %u%s).\n",strOut,strOut2,(mEM == 0) ? "E" : "M",mOrder,initSpin,(initPar == 1) ? "+" : "-",finalSpin,(finalPar == 1) ? "+" : "-");
 										}
 									}else{
 										if(halfInt){
-											printf("Nuclide %s transition with energy %s keV appears to have incorrect multipolarity %s (initial spin-parity: %u/2%s, final spin-parity %u/2%s).\n",strOut,strOut2,(mOrder == 1) ? "D" : "Q",initSpin,(initPar == 1) ? "+" : "-",finalSpin,(finalPar == 1) ? "+" : "-");
+											SDL_Log("Nuclide %s transition with energy %s keV appears to have incorrect multipolarity %s (initial spin-parity: %u/2%s, final spin-parity %u/2%s).\n",strOut,strOut2,(mOrder == 1) ? "D" : "Q",initSpin,(initPar == 1) ? "+" : "-",finalSpin,(finalPar == 1) ? "+" : "-");
 										}else{
-											printf("Nuclide %s transition with energy %s keV appears to have incorrect multipolarity %s (initial spin-parity: %u%s, final spin-parity %u%s).\n",strOut,strOut2,(mOrder == 1) ? "D" : "Q",initSpin,(initPar == 1) ? "+" : "-",finalSpin,(finalPar == 1) ? "+" : "-");
+											SDL_Log("Nuclide %s transition with energy %s keV appears to have incorrect multipolarity %s (initial spin-parity: %u%s, final spin-parity %u%s).\n",strOut,strOut2,(mOrder == 1) ? "D" : "Q",initSpin,(initPar == 1) ? "+" : "-",finalSpin,(finalPar == 1) ? "+" : "-");
 										}
 									}
 
@@ -5378,7 +5380,7 @@ int buildDatabase(const char *appBasePath, ndata *nd){
 														correctMult = isTranMulipolarityCorrect(nd->tran[tInd].multipole[0],spinDiff,spinSum,parChange);
 														if(correctMult){
 															//re-assign the final transition
-															printf("  Correcting final level of transition by %i.\n",lvlSearch);
+															SDL_Log("  Correcting final level of transition by %i.\n",lvlSearch);
 															nd->tran[tInd].finalLvlOffset = (uint16_t)((int)nd->tran[tInd].finalLvlOffset - lvlSearch);
 															break;
 														}
@@ -5389,7 +5391,32 @@ int buildDatabase(const char *appBasePath, ndata *nd){
 									}
 
 									if(correctMult == 0){
-										//see if 
+										//see if the transition energy actually corresponds to a final level energy
+										for(uint32_t checkLvlInd = nd->nuclData[i].firstLevel; checkLvlInd<(nd->nuclData[i].firstLevel + nd->nuclData[i].numLevels); checkLvlInd++){
+											uint8_t eValueType1 = (uint8_t)((nd->levels[checkLvlInd].energy.format >> 5U) & 15U);
+											uint8_t eValueType2 = (uint8_t)((nd->levels[finalLvlInd].energy.format >> 5U) & 15U);
+											if(eValueType1 == eValueType2){
+												if(SDL_fabsf(nd->levels[checkLvlInd].energy.val - nd->tran[tInd].energy.val) < 1.0f){
+													//this is a possible candidate for the correct final level
+													spinDiff = (uint8_t)SDL_abs(initSpin - ((int)(nd->spv[nd->levels[checkLvlInd].firstSpinParVal].spinVal)));
+													spinSum = (uint8_t)(initSpin + ((int)(nd->spv[nd->levels[checkLvlInd].firstSpinParVal].spinVal)));
+													if(halfInt){spinDiff = spinDiff / 2;}
+													if(halfInt){spinSum = spinSum / 2;}
+													parChange = (!(((int)nd->spv[nd->levels[checkLvlInd].firstSpinParVal].parVal) == initPar));
+													correctMult = isTranMulipolarityCorrect(nd->tran[tInd].multipole[0],spinDiff,spinSum,parChange);
+													if(correctMult){
+														//re-assign the final level
+														SDL_Log("  Gamma energy appears to be final level energy instead.\n");
+														nd->tran[tInd].finalLvlOffset = (uint16_t)(nd->tran[tInd].finalLvlOffset - checkLvlInd + finalLvlInd);
+														SDL_Log("  Correcting final level offset to %u.\n",nd->tran[tInd].finalLvlOffset);
+														//determine the energy of the transition
+														nd->tran[tInd].energy.val = nd->levels[checkLvlInd+nd->tran[tInd].finalLvlOffset].energy.val - nd->levels[checkLvlInd].energy.val;
+														nd->tran[tInd].energy.err = 0; //error unknown
+														break;
+													}
+												}
+											}
+										}
 									}
 
 								}
