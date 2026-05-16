@@ -5966,7 +5966,7 @@ void updateSingleUIElemPosition(const app_data *restrict dat, app_state *restric
 		case UIELEM_SEARCH_MENU:
 			if((state->uiState == UISTATE_FULLLEVELINFO)||(state->uiState == UISTATE_FULLLEVELINFOWITHMENU)){
 				//in the full level list, position search menu relative to the reaction selector button
-				state->ds.uiElemPosX[uiElemInd] = (int16_t)(state->ds.windowXRes-state->ds.uiElemWidth[UIELEM_NUCL_FULLINFOBOX_RXNBUTTON]-((SEARCH_MENU_WIDTH+SEARCH_MENU_POS_XR+UI_PADDING_SIZE)*state->ds.uiUserScale));
+				state->ds.uiElemPosX[uiElemInd] = (int16_t)(state->ds.windowXRes-state->ds.uiElemWidth[UIELEM_NUCL_FULLINFOBOX_RXNBUTTON]-((SEARCH_MENU_WIDTH+SEARCH_MENU_POS_XR_FULLINFO+UI_PADDING_SIZE)*state->ds.uiUserScale));
 			}else{
 				state->ds.uiElemPosX[uiElemInd] = (int16_t)(state->ds.windowXRes-((SEARCH_MENU_WIDTH+SEARCH_MENU_POS_XR)*state->ds.uiUserScale));
 			}
@@ -5981,7 +5981,7 @@ void updateSingleUIElemPosition(const app_data *restrict dat, app_state *restric
 		case UIELEM_SEARCH_ENTRYBOX:
 			if((state->uiState == UISTATE_FULLLEVELINFO)||(state->uiState == UISTATE_FULLLEVELINFOWITHMENU)){
 				//in the full level list, position search menu relative to the reaction selector button
-				state->ds.uiElemPosX[uiElemInd] = (int16_t)(state->ds.windowXRes-state->ds.uiElemWidth[UIELEM_NUCL_FULLINFOBOX_RXNBUTTON]-((SEARCH_MENU_WIDTH+SEARCH_MENU_POS_XR-SEARCH_MENU_ENTRYBOX_POS_X+UI_PADDING_SIZE)*state->ds.uiUserScale));
+				state->ds.uiElemPosX[uiElemInd] = (int16_t)(state->ds.windowXRes-state->ds.uiElemWidth[UIELEM_NUCL_FULLINFOBOX_RXNBUTTON]-((SEARCH_MENU_WIDTH+SEARCH_MENU_POS_XR_FULLINFO-SEARCH_MENU_ENTRYBOX_POS_X+UI_PADDING_SIZE)*state->ds.uiUserScale));
 			}else{
 				state->ds.uiElemPosX[uiElemInd] = (int16_t)(state->ds.windowXRes-((SEARCH_MENU_WIDTH+SEARCH_MENU_POS_XR-SEARCH_MENU_ENTRYBOX_POS_X)*state->ds.uiUserScale));
 			}
@@ -5992,7 +5992,7 @@ void updateSingleUIElemPosition(const app_data *restrict dat, app_state *restric
 		case UIELEM_SEARCH_RESULT:
 			if((state->uiState == UISTATE_FULLLEVELINFO)||(state->uiState == UISTATE_FULLLEVELINFOWITHMENU)){
 				//in the full level list, position search menu relative to the reaction selector button
-				state->ds.uiElemPosX[uiElemInd] = (int16_t)(state->ds.windowXRes-state->ds.uiElemWidth[UIELEM_NUCL_FULLINFOBOX_RXNBUTTON]-((SEARCH_MENU_WIDTH+SEARCH_MENU_POS_XR-SEARCH_MENU_ENTRYBOX_POS_X+UI_PADDING_SIZE)*state->ds.uiUserScale));
+				state->ds.uiElemPosX[uiElemInd] = (int16_t)(state->ds.windowXRes-state->ds.uiElemWidth[UIELEM_NUCL_FULLINFOBOX_RXNBUTTON]-((SEARCH_MENU_WIDTH+SEARCH_MENU_POS_XR_FULLINFO-SEARCH_MENU_ENTRYBOX_POS_X+UI_PADDING_SIZE)*state->ds.uiUserScale));
 			}else{
 				state->ds.uiElemPosX[uiElemInd] = (int16_t)(state->ds.windowXRes-((SEARCH_MENU_WIDTH+SEARCH_MENU_POS_XR-SEARCH_MENU_ENTRYBOX_POS_X)*state->ds.uiUserScale));
 			}
@@ -6003,7 +6003,7 @@ void updateSingleUIElemPosition(const app_data *restrict dat, app_state *restric
 		case UIELEM_SEARCH_RESULT_2:
 			if((state->uiState == UISTATE_FULLLEVELINFO)||(state->uiState == UISTATE_FULLLEVELINFOWITHMENU)){
 				//in the full level list, position search menu relative to the reaction selector button
-				state->ds.uiElemPosX[uiElemInd] = (int16_t)(state->ds.windowXRes-state->ds.uiElemWidth[UIELEM_NUCL_FULLINFOBOX_RXNBUTTON]-((SEARCH_MENU_WIDTH+SEARCH_MENU_POS_XR-SEARCH_MENU_ENTRYBOX_POS_X+UI_PADDING_SIZE)*state->ds.uiUserScale));
+				state->ds.uiElemPosX[uiElemInd] = (int16_t)(state->ds.windowXRes-state->ds.uiElemWidth[UIELEM_NUCL_FULLINFOBOX_RXNBUTTON]-((SEARCH_MENU_WIDTH+SEARCH_MENU_POS_XR_FULLINFO-SEARCH_MENU_ENTRYBOX_POS_X+UI_PADDING_SIZE)*state->ds.uiUserScale));
 			}else{
 				state->ds.uiElemPosX[uiElemInd] = (int16_t)(state->ds.windowXRes-((SEARCH_MENU_WIDTH+SEARCH_MENU_POS_XR-SEARCH_MENU_ENTRYBOX_POS_X)*state->ds.uiUserScale));
 			}
@@ -6014,7 +6014,7 @@ void updateSingleUIElemPosition(const app_data *restrict dat, app_state *restric
 		case UIELEM_SEARCH_RESULT_3:
 			if((state->uiState == UISTATE_FULLLEVELINFO)||(state->uiState == UISTATE_FULLLEVELINFOWITHMENU)){
 				//in the full level list, position search menu relative to the reaction selector button
-				state->ds.uiElemPosX[uiElemInd] = (int16_t)(state->ds.windowXRes-state->ds.uiElemWidth[UIELEM_NUCL_FULLINFOBOX_RXNBUTTON]-((SEARCH_MENU_WIDTH+SEARCH_MENU_POS_XR-SEARCH_MENU_ENTRYBOX_POS_X+UI_PADDING_SIZE)*state->ds.uiUserScale));
+				state->ds.uiElemPosX[uiElemInd] = (int16_t)(state->ds.windowXRes-state->ds.uiElemWidth[UIELEM_NUCL_FULLINFOBOX_RXNBUTTON]-((SEARCH_MENU_WIDTH+SEARCH_MENU_POS_XR_FULLINFO-SEARCH_MENU_ENTRYBOX_POS_X+UI_PADDING_SIZE)*state->ds.uiUserScale));
 			}else{
 				state->ds.uiElemPosX[uiElemInd] = (int16_t)(state->ds.windowXRes-((SEARCH_MENU_WIDTH+SEARCH_MENU_POS_XR-SEARCH_MENU_ENTRYBOX_POS_X)*state->ds.uiUserScale));
 			}
@@ -6025,7 +6025,7 @@ void updateSingleUIElemPosition(const app_data *restrict dat, app_state *restric
 		case UIELEM_SEARCH_RESULT_4:
 			if((state->uiState == UISTATE_FULLLEVELINFO)||(state->uiState == UISTATE_FULLLEVELINFOWITHMENU)){
 				//in the full level list, position search menu relative to the reaction selector button
-				state->ds.uiElemPosX[uiElemInd] = (int16_t)(state->ds.windowXRes-state->ds.uiElemWidth[UIELEM_NUCL_FULLINFOBOX_RXNBUTTON]-((SEARCH_MENU_WIDTH+SEARCH_MENU_POS_XR-SEARCH_MENU_ENTRYBOX_POS_X+UI_PADDING_SIZE)*state->ds.uiUserScale));
+				state->ds.uiElemPosX[uiElemInd] = (int16_t)(state->ds.windowXRes-state->ds.uiElemWidth[UIELEM_NUCL_FULLINFOBOX_RXNBUTTON]-((SEARCH_MENU_WIDTH+SEARCH_MENU_POS_XR_FULLINFO-SEARCH_MENU_ENTRYBOX_POS_X+UI_PADDING_SIZE)*state->ds.uiUserScale));
 			}else{
 				state->ds.uiElemPosX[uiElemInd] = (int16_t)(state->ds.windowXRes-((SEARCH_MENU_WIDTH+SEARCH_MENU_POS_XR-SEARCH_MENU_ENTRYBOX_POS_X)*state->ds.uiUserScale));
 			}
@@ -6036,7 +6036,7 @@ void updateSingleUIElemPosition(const app_data *restrict dat, app_state *restric
 		case UIELEM_SEARCH_RESULT_5:
 			if((state->uiState == UISTATE_FULLLEVELINFO)||(state->uiState == UISTATE_FULLLEVELINFOWITHMENU)){
 				//in the full level list, position search menu relative to the reaction selector button
-				state->ds.uiElemPosX[uiElemInd] = (int16_t)(state->ds.windowXRes-state->ds.uiElemWidth[UIELEM_NUCL_FULLINFOBOX_RXNBUTTON]-((SEARCH_MENU_WIDTH+SEARCH_MENU_POS_XR-SEARCH_MENU_ENTRYBOX_POS_X+UI_PADDING_SIZE)*state->ds.uiUserScale));
+				state->ds.uiElemPosX[uiElemInd] = (int16_t)(state->ds.windowXRes-state->ds.uiElemWidth[UIELEM_NUCL_FULLINFOBOX_RXNBUTTON]-((SEARCH_MENU_WIDTH+SEARCH_MENU_POS_XR_FULLINFO-SEARCH_MENU_ENTRYBOX_POS_X+UI_PADDING_SIZE)*state->ds.uiUserScale));
 			}else{
 				state->ds.uiElemPosX[uiElemInd] = (int16_t)(state->ds.windowXRes-((SEARCH_MENU_WIDTH+SEARCH_MENU_POS_XR-SEARCH_MENU_ENTRYBOX_POS_X)*state->ds.uiUserScale));
 			}
