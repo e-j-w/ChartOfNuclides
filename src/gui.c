@@ -2013,11 +2013,9 @@ void drawNuclBoxLabelDetails(const app_data *restrict dat, app_state *restrict s
       drawTextAlignedSized(rdat,drawXPos,drawYPos+((yOffsets*labelLineSpacing + 40.0f)*state->ds.uiUserScale),col,labelFontInd,255,dat->strings[dat->locStringIDs[LOCSTR_UNKNOWN]],ALIGN_CENTER,maxLblWidth); //draw QEC label
     }
   }else if(state->chartView == CHARTVIEW_NUMLVLS){
-    SDL_snprintf(tmpStr,32,"%u",dat->ndat.nuclData[nuclInd].numLevels);
-    if(dat->ndat.nuclData[nuclInd].numLevels == 1){
-      SDL_strlcat(tmpStr," level",32);
-    }else{
-      SDL_strlcat(tmpStr," levels",32);
+    SDL_snprintf(tmpStr,32,"%u %s",dat->ndat.nuclData[nuclInd].numLevels,dat->strings[dat->locStringIDs[LOCSTR_LEVEL]]);
+    if(dat->ndat.nuclData[nuclInd].numLevels != 1){
+      SDL_strlcat(tmpStr,"s",32);
     }
     drawYOffsets = 1;
     if((yOffsets+drawYOffsets) <= yOffsetLimit){
@@ -2042,14 +2040,12 @@ void drawNuclBoxLabelDetails(const app_data *restrict dat, app_state *restrict s
       numIsomers = getNumIsomers(&dat->ndat,60.0,nuclInd);
     }
     if(numIsomers == 0){
-      SDL_snprintf(tmpStr,32,"No isomers");
+      SDL_snprintf(tmpStr,32,"No %s",dat->strings[dat->locStringIDs[LOCSTR_ISOMER]]);
     }else{
-      SDL_snprintf(tmpStr,32,"%u",numIsomers);
-      if(numIsomers == 1){
-        SDL_strlcat(tmpStr," isomer",32);
-      }else{
-        SDL_strlcat(tmpStr," isomers",32);
-      }
+      SDL_snprintf(tmpStr,32,"%u %s",numIsomers,dat->strings[dat->locStringIDs[LOCSTR_ISOMER]]);
+    }
+    if(numIsomers != 1){
+      SDL_strlcat(tmpStr,"s",32);
     }
     
     drawYOffsets = 1;
@@ -2083,14 +2079,12 @@ void drawNuclBoxLabelDetails(const app_data *restrict dat, app_state *restrict s
     uint16_t numLvls = 0;
     numLvls = getNumParticleDecayingLvls(&dat->ndat,nuclInd);
     if(numLvls == 0){
-      SDL_snprintf(tmpStr,32,"No levels");
+      SDL_snprintf(tmpStr,32,"No %s",dat->strings[dat->locStringIDs[LOCSTR_LEVEL]]);
     }else{
-      SDL_snprintf(tmpStr,32,"%u",numLvls);
-      if(numLvls == 1){
-        SDL_strlcat(tmpStr," level",32);
-      }else{
-        SDL_strlcat(tmpStr," levels",32);
-      }
+      SDL_snprintf(tmpStr,32,"%u %s",numLvls,dat->strings[dat->locStringIDs[LOCSTR_LEVEL]]);
+    }
+    if(numLvls != 1){
+      SDL_strlcat(tmpStr,"s",32);
     }
     
     drawYOffsets = 1;
@@ -3554,7 +3548,7 @@ void drawNuclFullInfoBox(const app_data *restrict dat, app_state *restrict state
         selStr[0] = (char)SDL_toupper(selStr[0]);
       }else{
         getLvlEnergyStr(tmpStr,&dat->ndat,(uint32_t)(dat->ndat.nuclData[nuclInd].firstLevel + state->coincLvlFlag),0);
-        SDL_snprintf(selStr,64,"%s keV level %s/%s",tmpStr,dat->strings[dat->locStringIDs[LOCSTR_FEEDING]],dat->strings[dat->locStringIDs[LOCSTR_DECAY]]);
+        SDL_snprintf(selStr,64,"%s keV %s %s/%s",tmpStr,dat->strings[dat->locStringIDs[LOCSTR_LEVEL]],dat->strings[dat->locStringIDs[LOCSTR_FEEDING]],dat->strings[dat->locStringIDs[LOCSTR_DECAY]]);
       }
       drawDropDownTextButtonFontSize(&dat->rules.themeRules,rdat,state->ds.uiElemPosX[UIELEM_NUCL_FULLINFOBOX_RXNBUTTON],(int16_t)(state->ds.uiElemPosY[UIELEM_NUCL_FULLINFOBOX_RXNBUTTON] - txtYOffset),state->ds.uiElemWidth[UIELEM_NUCL_FULLINFOBOX_RXNBUTTON],getHighlightState(state,UIELEM_NUCL_FULLINFOBOX_RXNBUTTON),txtAlpha,FONTSIZE_NORMAL_BOLD,selStr);
     }else if(state->ds.selectedRxn == 254){
@@ -3566,7 +3560,7 @@ void drawNuclFullInfoBox(const app_data *restrict dat, app_state *restrict state
         selStr[0] = (char)SDL_toupper(selStr[0]);
       }else{
         getLvlEnergyStr(tmpStr,&dat->ndat,(uint32_t)(dat->ndat.nuclData[nuclInd].firstLevel + state->coincLvlFlag),0);
-        SDL_snprintf(selStr,64,"%s %s keV level",dat->strings[dat->locStringIDs[LOCSTR_SAME_JPI_AS]],tmpStr);
+        SDL_snprintf(selStr,64,"%s %s keV %s",dat->strings[dat->locStringIDs[LOCSTR_SAME_JPI_AS]],tmpStr,dat->strings[dat->locStringIDs[LOCSTR_LEVEL]]);
       }
       drawDropDownTextButtonFontSize(&dat->rules.themeRules,rdat,state->ds.uiElemPosX[UIELEM_NUCL_FULLINFOBOX_RXNBUTTON],(int16_t)(state->ds.uiElemPosY[UIELEM_NUCL_FULLINFOBOX_RXNBUTTON] - txtYOffset),state->ds.uiElemWidth[UIELEM_NUCL_FULLINFOBOX_RXNBUTTON],getHighlightState(state,UIELEM_NUCL_FULLINFOBOX_RXNBUTTON),txtAlpha,FONTSIZE_NORMAL_BOLD,selStr);
     }else{
@@ -4159,7 +4153,7 @@ void drawSearchMenu(const app_data *restrict dat, const app_state *restrict stat
           }
           drawTextAlignedSized(rdat,drawRect.x+12.0f*state->ds.uiUserScale,drawRect.y+(16.0f*state->ds.uiUserScale),blackCol8Bit,FONTSIZE_LARGE,alpha8,tmpStr,ALIGN_LEFT,16384); //draw element and gamma label
           getLvlEnergyStr(eStr2,&dat->ndat,state->ss.results[i].resultVal[2],1);
-          SDL_snprintf(tmpStr,64,"%s from the %s keV level",dat->strings[dat->locStringIDs[LOCSTR_SEARCHRES_EGAMMA]],eStr2);
+          SDL_snprintf(tmpStr,64,"%s from the %s keV %s",dat->strings[dat->locStringIDs[LOCSTR_SEARCHRES_EGAMMA]],eStr2,dat->strings[dat->locStringIDs[LOCSTR_LEVEL]]);
           drawTextAlignedSized(rdat,drawRect.x+12.0f*state->ds.uiUserScale,drawRect.y+(SEARCH_MENU_RESULT_HEIGHT-32.0f)*state->ds.uiUserScale,grayCol8Bit,FONTSIZE_NORMAL,alpha8,tmpStr,ALIGN_LEFT,16384);
           break;
         case SEARCHAGENT_ELEVEL:
@@ -4279,9 +4273,9 @@ void drawSearchMenu(const app_data *restrict dat, const app_state *restrict stat
           }else{
             getLvlEnergyStr(eStr2,&dat->ndat,state->ss.results[i].resultVal[1],1);
             if(state->ds.useLifetimes){
-              SDL_snprintf(tmpStr,64,"%s – %s keV level",dat->strings[dat->locStringIDs[LOCSTR_SEARCHRES_LIFETIME]],eStr2);
+              SDL_snprintf(tmpStr,64,"%s – %s keV %s",dat->strings[dat->locStringIDs[LOCSTR_SEARCHRES_LIFETIME]],eStr2,dat->strings[dat->locStringIDs[LOCSTR_LEVEL]]);
             }else{
-              SDL_snprintf(tmpStr,64,"%s – %s keV level",dat->strings[dat->locStringIDs[LOCSTR_SEARCHRES_HALFLIFE]],eStr2);
+              SDL_snprintf(tmpStr,64,"%s – %s keV %s",dat->strings[dat->locStringIDs[LOCSTR_SEARCHRES_HALFLIFE]],eStr2,dat->strings[dat->locStringIDs[LOCSTR_LEVEL]]);
             }
           }
           drawTextAlignedSized(rdat,drawRect.x+12.0f*state->ds.uiUserScale,drawRect.y+(SEARCH_MENU_RESULT_HEIGHT-32.0f)*state->ds.uiUserScale,grayCol8Bit,FONTSIZE_NORMAL,alpha8,tmpStr,ALIGN_LEFT,16384);

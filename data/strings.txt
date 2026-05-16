@@ -120,6 +120,8 @@ reaction_mode|Dataset display mode
 reactionmode_exclude|Only show selected dataset
 reactionmode_highlight|Highlight levels from selected dataset
 levels_bolded|Bolded levels
+level|level
+isomer|isomer
 feeding|feeding
 decay|decay
 same_jpi_as|Same Jπ as the

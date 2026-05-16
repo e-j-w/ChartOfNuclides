@@ -366,6 +366,8 @@ static int parseAppRules(app_data *restrict dat, asset_mapping *restrict stringI
 	dat->locStringIDs[LOCSTR_PREF_REACTIONMODE_EXCLUDE] = (uint16_t)nameToAssetID("reactionmode_exclude",stringIDmap);
 	dat->locStringIDs[LOCSTR_PREF_REACTIONMODE_HIGHLIGHT] = (uint16_t)nameToAssetID("reactionmode_highlight",stringIDmap);
 	dat->locStringIDs[LOCSTR_LEVELS_BOLDED] = (uint16_t)nameToAssetID("levels_bolded",stringIDmap);
+	dat->locStringIDs[LOCSTR_LEVEL] = (uint16_t)nameToAssetID("level",stringIDmap);
+	dat->locStringIDs[LOCSTR_ISOMER] = (uint16_t)nameToAssetID("isomer",stringIDmap);
 	dat->locStringIDs[LOCSTR_FEEDING] = (uint16_t)nameToAssetID("feeding",stringIDmap);
 	dat->locStringIDs[LOCSTR_DECAY] = (uint16_t)nameToAssetID("decay",stringIDmap);
 	dat->locStringIDs[LOCSTR_SAME_JPI_AS] = (uint16_t)nameToAssetID("same_jpi_as",stringIDmap);
