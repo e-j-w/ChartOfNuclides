@@ -2774,7 +2774,10 @@ uint32_t getParentBetaDecayLvlInd(const ndata *restrict nd, const uint16_t nuclI
 				uint32_t dcyModeInd = nd->levels[lvlInd].firstDecMode + (uint32_t)i;
 				//permit all slow decay modes (some decay branches haven't been measured yet, 
 				//so we can presume that any level that meets one of these conditions can beta decay)
-				if((nd->dcyMode[dcyModeInd].type == DECAYMODE_EC)||(nd->dcyMode[dcyModeInd].type == DECAYMODE_ECANDBETAPLUS)||(nd->dcyMode[dcyModeInd].type == DECAYMODE_BETAPLUS)||(nd->dcyMode[dcyModeInd].type == DECAYMODE_BETAMINUS)||(nd->dcyMode[dcyModeInd].type == DECAYMODE_ALPHA)){
+				if((nd->dcyMode[dcyModeInd].type == DECAYMODE_EC)||(nd->dcyMode[dcyModeInd].type == DECAYMODE_ECANDBETAPLUS)||
+				  (nd->dcyMode[dcyModeInd].type == DECAYMODE_BETAPLUS)||(nd->dcyMode[dcyModeInd].type == DECAYMODE_BETAMINUS)||
+					(nd->dcyMode[dcyModeInd].type == DECAYMODE_ALPHA)||(nd->dcyMode[dcyModeInd].type == DECAYMODE_2BETAMINUS)||
+					(nd->dcyMode[dcyModeInd].type == DECAYMODE_2BETAPLUS)){
 					foundInd++;
 					//SDL_Log("foundInd %u, lvlInd %u, dcyModeInd %u\n",foundInd,lvlInd,dcyModeInd);
 					if((foundInd-1) == decayInd){
@@ -2799,7 +2802,10 @@ uint32_t getParentBetaDecayLvlInd(const ndata *restrict nd, const uint16_t nuclI
 				uint32_t dcyModeInd = nd->levels[lvlInd].firstDecMode + (uint32_t)i;
 				//permit all slow decay modes (some decay branches haven't been measured yet, 
 				//so we can presume that any level that meets one of these conditions can beta decay)
-				if((nd->dcyMode[dcyModeInd].type == DECAYMODE_EC)||(nd->dcyMode[dcyModeInd].type == DECAYMODE_ECANDBETAPLUS)||(nd->dcyMode[dcyModeInd].type == DECAYMODE_BETAPLUS)||(nd->dcyMode[dcyModeInd].type == DECAYMODE_BETAMINUS)||(nd->dcyMode[dcyModeInd].type == DECAYMODE_ALPHA)){
+				if((nd->dcyMode[dcyModeInd].type == DECAYMODE_EC)||(nd->dcyMode[dcyModeInd].type == DECAYMODE_ECANDBETAPLUS)||
+				  (nd->dcyMode[dcyModeInd].type == DECAYMODE_BETAPLUS)||(nd->dcyMode[dcyModeInd].type == DECAYMODE_BETAMINUS)||
+					(nd->dcyMode[dcyModeInd].type == DECAYMODE_ALPHA)||(nd->dcyMode[dcyModeInd].type == DECAYMODE_2BETAMINUS)||
+					(nd->dcyMode[dcyModeInd].type == DECAYMODE_2BETAPLUS)){
 					foundInd++;
 					if((foundInd-1) == decayInd){
 						//only consider non-variable or non-limit level energies
@@ -3669,6 +3675,10 @@ uint16_t getNumTotalLvlDispLines(const ndata *restrict nd, const app_state *rest
 						case QVAL_PARENT_BETA_2:
 						case QVAL_PARENT_BETA_3:
 						case QVAL_PARENT_BETA_4:
+						case QVAL_PARENT_BETA_5:
+						case QVAL_PARENT_BETA_6:
+						case QVAL_PARENT_BETA_7:
+						case QVAL_PARENT_BETA_8:
 							if(state->ds.useLevelListParentThresholds){
 								//SDL_Log("getNumTotalLvlDispLines - adding line for Q-value: %i\n",i);
 								numLines++;
@@ -3711,6 +3721,10 @@ uint16_t getNumDispLinesUpToLvl(const ndata *restrict nd, const app_state *restr
 						case QVAL_PARENT_BETA_2:
 						case QVAL_PARENT_BETA_3:
 						case QVAL_PARENT_BETA_4:
+						case QVAL_PARENT_BETA_5:
+						case QVAL_PARENT_BETA_6:
+						case QVAL_PARENT_BETA_7:
+						case QVAL_PARENT_BETA_8:
 							if(state->ds.useLevelListParentThresholds){
 								//SDL_Log("getNumDispLinesUpToLvl - adding line for Q-value: %i\n",j);
 								numLines++;
@@ -4241,6 +4255,10 @@ void setFullLevelInfoDimensions(const app_data *restrict dat, app_state *restric
 			case QVAL_PARENT_BETA_2:
 			case QVAL_PARENT_BETA_3:
 			case QVAL_PARENT_BETA_4:
+			case QVAL_PARENT_BETA_5:
+			case QVAL_PARENT_BETA_6:
+			case QVAL_PARENT_BETA_7:
+			case QVAL_PARENT_BETA_8:
 				state->ds.fullInfoQVal[i].value = getParentBetaDecayQVal(&dat->ndat,selNucl,i-QVAL_PARENT_BETA_1);
 				state->ds.fullInfoQVal[i].levelListEntryPos = dat->ndat.nuclData[selNucl].firstLevel+dat->ndat.nuclData[selNucl].numLevels;
 				break;

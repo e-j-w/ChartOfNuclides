@@ -403,6 +403,10 @@ QVAL_PARENT_BETA_1, //for beta decay of parent nuclide to the currently viewed n
 QVAL_PARENT_BETA_2, //(multiple beta decays are possible to some nuclides, therefore multiple entries)
 QVAL_PARENT_BETA_3,
 QVAL_PARENT_BETA_4,
+QVAL_PARENT_BETA_5,
+QVAL_PARENT_BETA_6,
+QVAL_PARENT_BETA_7,
+QVAL_PARENT_BETA_8,
 QVAL_ENUM_LENGTH
 };
 enum tentative_sp_enum{

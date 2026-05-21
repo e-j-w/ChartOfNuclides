@@ -2830,6 +2830,10 @@ void drawNuclFullInfoBox(const app_data *restrict dat, app_state *restrict state
             case QVAL_PARENT_BETA_2:
             case QVAL_PARENT_BETA_3:
             case QVAL_PARENT_BETA_4:
+            case QVAL_PARENT_BETA_5:
+            case QVAL_PARENT_BETA_6:
+            case QVAL_PARENT_BETA_7:
+            case QVAL_PARENT_BETA_8:
               if(!(state->ds.useLevelListParentThresholds)){
                 continue; //skip drawing this Q-value
               }
@@ -2888,6 +2892,18 @@ void drawNuclFullInfoBox(const app_data *restrict dat, app_state *restrict state
                 break;
               case QVAL_PARENT_BETA_4:
                 drawParentDecayQValStr(dat,state,rdat,drawYPos,txtAlpha,nuclInd,3,strMetadata);
+                break;
+              case QVAL_PARENT_BETA_5:
+                drawParentDecayQValStr(dat,state,rdat,drawYPos,txtAlpha,nuclInd,4,strMetadata);
+                break;
+              case QVAL_PARENT_BETA_6:
+                drawParentDecayQValStr(dat,state,rdat,drawYPos,txtAlpha,nuclInd,5,strMetadata);
+                break;
+              case QVAL_PARENT_BETA_7:
+                drawParentDecayQValStr(dat,state,rdat,drawYPos,txtAlpha,nuclInd,6,strMetadata);
+                break;
+              case QVAL_PARENT_BETA_8:
+                drawParentDecayQValStr(dat,state,rdat,drawYPos,txtAlpha,nuclInd,7,strMetadata);
                 break;
             }
             drawYPos += (NUCL_INFOBOX_SMALLLINE_HEIGHT*state->ds.uiUserScale + txtYOffset);
