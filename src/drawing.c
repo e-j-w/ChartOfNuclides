@@ -527,9 +527,9 @@ SDL_FRect getTooltipRect(const drawing_state *restrict ds, resource_data *restri
   int textH = 0;
   TTF_Text *ttxt = TTF_CreateText(rdat->te,rdat->font[FONTSIZE_NORMAL],txt,0);
   TTF_GetTextSize(ttxt,&textW,&textH);
-  if(textW > (int)(txtMaxWidth*rdat->uiDPIScale)){
+  if(textW > (int)(SDL_ceilf(txtMaxWidth*rdat->uiDPIScale))){
     //text needs to be wrapped
-    TTF_SetTextWrapWidth(ttxt,(int)(txtMaxWidth*rdat->uiDPIScale));
+    TTF_SetTextWrapWidth(ttxt,(int)(SDL_ceilf(txtMaxWidth*rdat->uiDPIScale)));
     TTF_GetTextSize(ttxt,&textW,&textH);
   }
   TTF_DestroyText(ttxt);
@@ -550,7 +550,7 @@ SDL_FRect getTooltipRect(const drawing_state *restrict ds, resource_data *restri
 
 void drawTooltipBox(const ui_theme_rules *restrict uirules, resource_data *restrict rdat, const SDL_FRect rect, const float alpha, const char *txt){
 
-  float txtMaxWidth = (TOOLTIP_MAX_WIDTH - 8.0f*UI_PADDING_SIZE)*rdat->uiScale/rdat->uiDPIScale;
+  float txtMaxWidth = SDL_ceilf((TOOLTIP_MAX_WIDTH - 8.0f*UI_PADDING_SIZE)*rdat->uiScale/rdat->uiDPIScale);
   drawPanelBG(uirules,rdat,rect,alpha);
   drawTextAlignedSized(rdat,rect.x + 4*UI_PADDING_SIZE*rdat->uiScale/rdat->uiDPIScale,rect.y + 4*UI_PADDING_SIZE*rdat->uiScale/rdat->uiDPIScale,blackCol8Bit,FONTSIZE_NORMAL,(Uint8)(alpha*255.0f),txt,ALIGN_LEFT,(Uint16)txtMaxWidth);
 

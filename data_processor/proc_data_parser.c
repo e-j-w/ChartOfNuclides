@@ -1857,6 +1857,9 @@ void cleanCommentStr(char *comBuff){
 	modComBuff = findReplaceAllUTF8("CONF ","Configuration: ",comBuff);
 	SDL_strlcpy(comBuff,modComBuff,118);
 	SDL_free(modComBuff);
+	modComBuff = findReplaceAllUTF8(" kev "," keV ",comBuff);
+	SDL_strlcpy(comBuff,modComBuff,118);
+	SDL_free(modComBuff);
 
 	//handle superscript/subscript sequences
 	char ssBuff[CCS_MAXBUFSIZE];
