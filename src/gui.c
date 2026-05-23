@@ -676,6 +676,7 @@ SDL_FColor getBeta2Col(const double beta2, const double halflifeSeconds){
   return col;
 }
 
+# define SPIN_COL_INV_VAL 3.5 //box color inversion point
 SDL_FColor getSpinCol(const double spin){
   SDL_FColor col;
   col.r = 0.9f;
@@ -685,35 +686,35 @@ SDL_FColor getSpinCol(const double spin){
   if(spin <= 0.0){
     col.r = 0.0f;
     col.g = 0.1f;
-    col.b = 0.4f;
+    col.b = 0.2f;
   }else if(spin <= 0.5){
+    col.r = 0.0f;
+    col.g = 0.15f;
+    col.b = 0.35f;
+  }else if(spin <= 1.0){
     col.r = 0.05f;
     col.g = 0.2f;
     col.b = 0.5f;
-  }else if(spin <= 1.0){
+  }else if(spin <= 1.5){
     col.r = 0.1f;
+    col.g = 0.25f;
+    col.b = 0.55f;
+  }else if(spin <= 2.0){ 
+    col.r = 0.15f;
     col.g = 0.3f;
     col.b = 0.6f;
-  }else if(spin <= 1.5){
+  }else if(spin <= 2.5){
+    col.r = 0.20f;
+    col.g = 0.35f;
+    col.b = 0.65f;
+  }else if(spin <= 3.0){
     col.r = 0.25f;
     col.g = 0.4f;
     col.b = 0.7f;
-  }else if(spin <= 2.0){ //box color inversion point
-    col.r = 0.3f;
-    col.g = 0.5f;
-    col.b = 0.8f;
-  }else if(spin <= 2.5){
-    col.r = 0.3f;
-    col.g = 0.6f;
-    col.b = 0.75f;
-  }else if(spin <= 3.0){
-    col.r = 0.35f;
-    col.g = 0.7f;
-    col.b = 0.7f;
-  }else if(spin <= 3.5){
+  }else if(spin <= 3.5){ 
     col.r = 0.4f;
-    col.g = 0.8f;
-    col.b = 0.7f;
+    col.g = 0.65f;
+    col.b = 0.65f;
   }else if(spin <= 4.0){
     col.r = 0.5f;
     col.g = 0.9f;
@@ -822,6 +823,7 @@ SDL_FColor getParCol(const int8_t par){
   return col;
 }
 
+#define BEA_COL_INV_VAL 8000.0 //box color inversion point
 SDL_FColor getBEACol(const double beA){
   SDL_FColor col;
   col.r = 0.9f;
@@ -888,7 +890,7 @@ SDL_FColor getBEACol(const double beA){
     col.r = 0.3f;
     col.g = 0.6f;
     col.b = 0.75f;
-  }else if(beA >= 8000.0){ //box color inversion point
+  }else if(beA >= 8000.0){
     col.r = 0.3f;
     col.g = 0.6f;
     col.b = 0.7f;
@@ -925,53 +927,61 @@ SDL_FColor getBEACol(const double beA){
     col.g = 1.0f;
     col.b = 0.7f;
   }else if(beA >= 7550.0){
-    col.r = 0.4f;
+    col.r = 0.45f;
     col.g = 0.95f;
     col.b = 0.7f;
   }else if(beA >= 7500.0){
-    col.r = 0.5f;
+    col.r = 0.45f;
     col.g = 0.95f;
-    col.b = 0.7f;
+    col.b = 0.65f;
   }else if(beA >= 7450.0){
+    col.r = 0.45f;
+    col.g = 0.9f;
+    col.b = 0.65f;
+  }else if(beA >= 7400.0){
     col.r = 0.5f;
     col.g = 0.9f;
     col.b = 0.6f;
-  }else if(beA >= 7400.0){
-    col.r = 0.6f;
+  }else if(beA >= 7350.0){
+    col.r = 0.55f;
     col.g = 0.9f;
     col.b = 0.6f;
   }else if(beA >= 7300.0){
+    col.r = 0.6f;
+    col.g = 0.9f;
+    col.b = 0.55f;
+  }else if(beA >= 7250.0){
     col.r = 0.7f;
     col.g = 0.9f;
     col.b = 0.5f;
   }else if(beA >= 7200.0){
     col.r = 0.8f;
     col.g = 0.9f;
-    col.b = 0.4f;
+    col.b = 0.45f;
   }else if(beA >= 7100.0){
     col.r = 0.9f;
     col.g = 0.9f;
-    col.b = 0.4f;
+    col.b = 0.5f;
   }else if(beA >= 6800.0){
     col.r = 1.0f;
     col.g = 1.0f;
-    col.b = 0.3f;
+    col.b = 0.55f;
   }else if(beA >= 6500.0){
     col.r = 1.0f;
     col.g = 0.8f;
-    col.b = 0.4f;
+    col.b = 0.6f;
   }else if(beA >= 6200.0){
     col.r = 1.0f;
     col.g = 0.7f;
-    col.b = 0.5f;
+    col.b = 0.65f;
   }else if(beA >= 5900.0){
     col.r = 1.0f;
     col.g = 0.6f;
-    col.b = 0.6f;
+    col.b = 0.7f;
   }else if(beA >= 5600.0){
     col.r = 1.0f;
     col.g = 0.6f;
-    col.b = 0.7f;
+    col.b = 0.75f;
   }else if(beA >= 5300.0){
     col.r = 1.0f;
     col.g = 0.7f;
@@ -979,7 +989,7 @@ SDL_FColor getBEACol(const double beA){
   }else if(beA >= 4500.0){
     col.r = 1.0f;
     col.g = 0.8f;
-    col.b = 0.9f;
+    col.b = 0.85f;
   }else if(beA > 0.0){
     col.r = 1.0f;
     col.g = 0.9f;
@@ -2376,7 +2386,7 @@ void drawChartOfNuclides(const app_data *restrict dat, app_state *restrict state
                         iboxCol.a =  1.0f - (CHARTZOOM_LVL1-state->ds.chartZoomScale);
                       }
                       drawFlatRect(rdat,lowBoxRect,iboxCol);
-                      drawIsomerSpinBoxLabel(dat,state,rdat,lowBoxRect.x,lowBoxRect.y,lowBoxRect.w,lowBoxRect.h,(isomerSpin <= 2.0) ? whiteCol8Bit : blackCol8Bit,(uint16_t)i,isomerLvl,dat->ndat.nuclData[i].longestIsomerMVal);
+                      drawIsomerSpinBoxLabel(dat,state,rdat,lowBoxRect.x,lowBoxRect.y,lowBoxRect.w,lowBoxRect.h,(isomerSpin <= SPIN_COL_INV_VAL) ? whiteCol8Bit : blackCol8Bit,(uint16_t)i,isomerLvl,dat->ndat.nuclData[i].longestIsomerMVal);
                     }
                   }
                 }else if(state->chartView == CHARTVIEW_PARITY){
@@ -2417,12 +2427,12 @@ void drawChartOfNuclides(const app_data *restrict dat, app_state *restrict state
                     drawNuclBoxLabel(dat,state,rdat,rect.x,rect.y,rect.w,(rect.h-lowBoxHeight-(2.0f*lowBoxPadding)),getDecayModeTextCol(getNuclGSMostProbableDcyMode(&dat->ndat,(uint16_t)i)),(uint16_t)i);
                   }else if(state->chartView == CHARTVIEW_SPIN){
                     double spin = getMostProbableSpin(&dat->ndat,dat->ndat.nuclData[i].firstLevel + dat->ndat.nuclData[i].gsLevel);
-                    drawNuclBoxLabel(dat,state,rdat,rect.x,rect.y,rect.w,(rect.h-lowBoxHeight-(2.0f*lowBoxPadding)),(spin <= 2.0) ? whiteCol8Bit : blackCol8Bit,(uint16_t)i);
+                    drawNuclBoxLabel(dat,state,rdat,rect.x,rect.y,rect.w,(rect.h-lowBoxHeight-(2.0f*lowBoxPadding)),(spin <= SPIN_COL_INV_VAL) ? whiteCol8Bit : blackCol8Bit,(uint16_t)i);
                   }else if(state->chartView == CHARTVIEW_PARITY){
                     int8_t par = getMostProbableParity(&dat->ndat,dat->ndat.nuclData[i].firstLevel + dat->ndat.nuclData[i].gsLevel);
                     drawNuclBoxLabel(dat,state,rdat,rect.x,rect.y,rect.w,(rect.h-lowBoxHeight-(2.0f*lowBoxPadding)),(par < 0) ? whiteCol8Bit : blackCol8Bit,(uint16_t)i);
                   }else if(state->chartView == CHARTVIEW_BEA){
-                    drawNuclBoxLabel(dat,state,rdat,rect.x,rect.y,rect.w,(rect.h-lowBoxHeight-(2.0f*lowBoxPadding)),(getBEA(&dat->ndat,(uint16_t)i) >= 8000.0) ? whiteCol8Bit : blackCol8Bit,(uint16_t)i);
+                    drawNuclBoxLabel(dat,state,rdat,rect.x,rect.y,rect.w,(rect.h-lowBoxHeight-(2.0f*lowBoxPadding)),(getBEA(&dat->ndat,(uint16_t)i) >= BEA_COL_INV_VAL) ? whiteCol8Bit : blackCol8Bit,(uint16_t)i);
                   }
                 }else{
                   if(state->chartView == CHARTVIEW_HALFLIFE){
@@ -2437,12 +2447,12 @@ void drawChartOfNuclides(const app_data *restrict dat, app_state *restrict state
                     drawNuclBoxLabel(dat,state,rdat,rect.x,rect.y,rect.w,rect.h,(getBeta2(&dat->ndat,(uint16_t)i) >= 0.35) ? whiteCol8Bit : blackCol8Bit,(uint16_t)i);
                   }else if(state->chartView == CHARTVIEW_SPIN){
                     double spin = getMostProbableSpin(&dat->ndat,dat->ndat.nuclData[i].firstLevel + dat->ndat.nuclData[i].gsLevel);
-                    drawNuclBoxLabel(dat,state,rdat,rect.x,rect.y,rect.w,rect.h,(spin <= 2.0) ? whiteCol8Bit : blackCol8Bit,(uint16_t)i);
+                    drawNuclBoxLabel(dat,state,rdat,rect.x,rect.y,rect.w,rect.h,(spin <= SPIN_COL_INV_VAL) ? whiteCol8Bit : blackCol8Bit,(uint16_t)i);
                   }else if(state->chartView == CHARTVIEW_PARITY){
                     int8_t par = getMostProbableParity(&dat->ndat,dat->ndat.nuclData[i].firstLevel + dat->ndat.nuclData[i].gsLevel);
                     drawNuclBoxLabel(dat,state,rdat,rect.x,rect.y,rect.w,rect.h,(par < 0) ? whiteCol8Bit : blackCol8Bit,(uint16_t)i);
                   }else if(state->chartView == CHARTVIEW_BEA){
-                    drawNuclBoxLabel(dat,state,rdat,rect.x,rect.y,rect.w,rect.h,(getBEA(&dat->ndat,(uint16_t)i) >= 8000.0) ? whiteCol8Bit : blackCol8Bit,(uint16_t)i);
+                    drawNuclBoxLabel(dat,state,rdat,rect.x,rect.y,rect.w,rect.h,(getBEA(&dat->ndat,(uint16_t)i) >= BEA_COL_INV_VAL) ? whiteCol8Bit : blackCol8Bit,(uint16_t)i);
                   }else if(state->chartView == CHARTVIEW_SN){
                     drawNuclBoxLabel(dat,state,rdat,rect.x,rect.y,rect.w,rect.h,(getRawValFromDB(&dat->ndat.nuclData[i].sn) >= 8000.0) ? whiteCol8Bit : blackCol8Bit,(uint16_t)i);
                   }else if(state->chartView == CHARTVIEW_SP){
