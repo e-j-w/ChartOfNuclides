@@ -2655,7 +2655,7 @@ void drawInfoBoxHeader(const app_data *restrict dat, app_state *restrict state, 
   getNuclNameStr(nuclStr,&dat->ndat.nuclData[nuclInd],255);
   if((uint16_t)(dat->ndat.nuclData[nuclInd].Z <= 1)&&(dat->ndat.nuclData[nuclInd].N <= 2)){
     SDL_snprintf(tmpStr,32,"%s (%s)",nuclStr,getFullElemStr((uint8_t)dat->ndat.nuclData[nuclInd].Z,(uint8_t)dat->ndat.nuclData[nuclInd].N));
-  }else if((uint16_t)(dat->ndat.nuclData[nuclInd].Z == 0)&&(dat->ndat.nuclData[nuclInd].N <= 5)){
+  }else if((uint16_t)(dat->ndat.nuclData[nuclInd].Z == 0)&&(dat->ndat.nuclData[nuclInd].N <= 6)){
     SDL_snprintf(tmpStr,32,"%s (%s)",nuclStr,getFullElemStr((uint8_t)dat->ndat.nuclData[nuclInd].Z,(uint8_t)dat->ndat.nuclData[nuclInd].N));
   }else if((uint16_t)(dat->ndat.nuclData[nuclInd].Z == 2)&&(dat->ndat.nuclData[nuclInd].N == 2)){
     SDL_snprintf(tmpStr,32,"%s (%s-%u) (α)",nuclStr,getFullElemStr((uint8_t)dat->ndat.nuclData[nuclInd].Z,(uint8_t)dat->ndat.nuclData[nuclInd].N),nucA);

@@ -624,6 +624,8 @@ const char* getFullElemStr(const uint8_t Z, const uint8_t N){
 					return "Tetraneutron";
 				}else if(N==5){
 					return "Pentaneutron";
+				}else if(N==6){
+					return "Hexaneutron";
 				}else{
 					return "Neutron";
 				}
@@ -1154,7 +1156,9 @@ const char* getElemStr(const uint8_t Z){
 //isomerMVal = 255 for non-isomers, 0 for isomers where the m-index is not drawn
 void getNuclNameStr(char strOut[32], const nucl *restrict nuclide, const uint8_t isomerMVal){
 	char *nameStrCpy;
-	if(isomerMVal == 255){
+	if((nuclide->Z + nuclide->N) <= 1){
+		SDL_snprintf(strOut,32,"%s",getElemStr((uint8_t)(nuclide->Z)));
+	}else if(isomerMVal == 255){
 		SDL_snprintf(strOut,32,"%u%s",nuclide->Z + nuclide->N,getElemStr((uint8_t)(nuclide->Z)));
 	}else if(isomerMVal == 0){
 		SDL_snprintf(strOut,32,"%uᵐ%s",nuclide->Z + nuclide->N,getElemStr((uint8_t)(nuclide->Z)));
