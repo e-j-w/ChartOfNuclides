@@ -3350,6 +3350,8 @@ double get2PlusEnergy(const ndata *restrict nd, const uint16_t nuclInd){
 	return -1.0; //no 2+ state, or not even-even
 }
 
+#define HBAR 6.582119569E-16 //in eV s
+
 double getLevelHalfLifeSeconds(const ndata *restrict nd, const uint32_t levelInd){
 	if(levelInd < nd->numLvls){
 		uint8_t hlValueType = (uint8_t)((nd->levels[levelInd].halfLife.format >> 5U) & 15U);
@@ -3358,7 +3360,7 @@ double getLevelHalfLifeSeconds(const ndata *restrict nd, const uint32_t levelInd
 			return -2.0;
 		}
 		double hl = getRawValFromDB(&nd->levels[levelInd].halfLife);
-		if(hl < 0.0){
+		if(hl <= 0.0){
 			//unknown half-life
 			return -2.0;
 		}
@@ -3388,6 +3390,12 @@ double getLevelHalfLifeSeconds(const ndata *restrict nd, const uint32_t levelInd
 				return hl*0.000000000000001;
 			case VALUE_UNIT_ATTOSECONDS:
 				return hl*0.000000000000000001;
+			case VALUE_UNIT_MEV:
+				return HBAR*3.14159/(1.4427*4*hl*1000000.0); //lifetime * deltaE = (pi/4)*hbar ... log(2) factor to convert lifetime to half-life
+			case VALUE_UNIT_KEV:
+				return HBAR*3.14159/(1.4427*4*hl*1000.0); //lifetime * deltaE = (pi/4)*hbar ... log(2) factor to convert lifetime to half-life
+			case VALUE_UNIT_EV:
+				return HBAR*3.14159/(1.4427*4*hl); //lifetime * deltaE = (pi/4)*hbar ... log(2) factor to convert lifetime to half-life
 			case VALUE_UNIT_NOVAL:
 			default:
 				return -2.0; //couldn't find half-life

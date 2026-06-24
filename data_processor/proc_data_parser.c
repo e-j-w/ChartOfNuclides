@@ -377,6 +377,7 @@ static int parseAppRules(app_data *restrict dat, asset_mapping *restrict stringI
 	dat->locStringIDs[LOCSTR_IS] = (uint16_t)nameToAssetID("is",stringIDmap);
 	dat->locStringIDs[LOCSTR_OF] = (uint16_t)nameToAssetID("of",stringIDmap);
 	dat->locStringIDs[LOCSTR_ONEARTH] = (uint16_t)nameToAssetID("on_earth",stringIDmap);
+	dat->locStringIDs[LOCSTR_ABUNDANCE] = (uint16_t)nameToAssetID("abundance",stringIDmap);
 
   return 0; //success
 

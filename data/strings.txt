@@ -131,3 +131,4 @@ num_neutrons|N – number of neutrons
 is|is
 of|of
 on_earth|on Earth
+abundance|abundance

@@ -4162,7 +4162,23 @@ void drawSearchMenu(const app_data *restrict dat, const app_state *restrict stat
         case SEARCHAGENT_NUCLIDE:
           getNuclNameStr(eStr,&dat->ndat.nuclData[state->ss.results[i].resultVal[0]],255);
           drawTextAlignedSized(rdat,drawRect.x+12.0f*state->ds.uiUserScale,drawRect.y+(16.0f*state->ds.uiUserScale),blackCol8Bit,FONTSIZE_LARGE,alpha8,eStr,ALIGN_LEFT,16384); //draw element label
-          drawTextAlignedSized(rdat,drawRect.x+12.0f*state->ds.uiUserScale,drawRect.y+(SEARCH_MENU_RESULT_HEIGHT-32.0f)*state->ds.uiUserScale,grayCol8Bit,FONTSIZE_NORMAL,alpha8,dat->strings[dat->locStringIDs[LOCSTR_SEARCHRES_NUCLIDE]],ALIGN_LEFT,16384);
+          if(dat->ndat.nuclData[state->ss.results[i].resultVal[0]].abundance.val > 0.0f){
+            getAbundanceStr(eStr,&dat->ndat,(uint16_t)state->ss.results[i].resultVal[0]);
+            SDL_snprintf(tmpStr,64,"%s [%s %s]",dat->strings[dat->locStringIDs[LOCSTR_SEARCHRES_NUCLIDE]],eStr,dat->strings[dat->locStringIDs[LOCSTR_ABUNDANCE]]);
+          }else{
+            getGSHalfLifeStr(eStr,dat,(uint16_t)state->ss.results[i].resultVal[0],state->ds.useLifetimes);
+            if(state->ds.useLifetimes){
+              SDL_snprintf(tmpStr,64,"%s [%s: %s]",dat->strings[dat->locStringIDs[LOCSTR_SEARCHRES_NUCLIDE]],dat->strings[dat->locStringIDs[LOCSTR_LIFETIME]],eStr);
+            }else{
+              SDL_snprintf(tmpStr,64,"%s [%s: %s]",dat->strings[dat->locStringIDs[LOCSTR_SEARCHRES_NUCLIDE]],dat->strings[dat->locStringIDs[LOCSTR_HALFLIFE]],eStr);
+            }
+          }
+          //SDL_Log("len: %li",SDL_strlen(tmpStr));
+          if(SDL_strlen(tmpStr) > 42){
+            tmpStr[42]='.'; tmpStr[43]='.'; tmpStr[44]='.';
+            tmpStr[45]='\0'; //terminate
+          }
+          drawTextAlignedSized(rdat,drawRect.x+12.0f*state->ds.uiUserScale,drawRect.y+(SEARCH_MENU_RESULT_HEIGHT-32.0f)*state->ds.uiUserScale,grayCol8Bit,FONTSIZE_NORMAL,alpha8,tmpStr,ALIGN_LEFT,16384);
           break;
         case SEARCHAGENT_EGAMMA:
           if((state->uiState == UISTATE_FULLLEVELINFOWITHMENU)||(state->uiState == UISTATE_FULLLEVELINFO)){

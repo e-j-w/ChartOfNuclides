@@ -816,6 +816,10 @@ void searchNuclides(const ndata *restrict ndat, search_state *restrict ss){
 						foundNucl = 1;
 						break;
 					}
+				}else if(j==(len-1)){
+					//element name only
+					SDL_strlcpy(nuclElemName,ss->searchTok[i],31);
+					SDL_strlcpy(nuclAStr,"-1",7); //mark special case
 				}
 			}
 			if(foundNucl == 0){
@@ -838,6 +842,9 @@ void searchNuclides(const ndata *restrict ndat, search_state *restrict ss){
 			}else if(strcmp(nuclElemName,"Tetraneutron")==0){
 				nuclZ = 0;
 				nuclA = 4;
+			}else if(strcmp(nuclElemName,"Hexaneutron")==0){
+				nuclZ = 0;
+				nuclA = 6;
 			}else if((strcmp(nuclElemName,"Proton")==0)||(strcmp(nuclElemName,"Hydrogen")==0)){
 				nuclZ = 1;
 				nuclA = 1;
@@ -848,45 +855,105 @@ void searchNuclides(const ndata *restrict ndat, search_state *restrict ss){
 				nuclZ = 1;
 				nuclA = 3;
 			}else{
-				continue; //go to the next token
+				nuclZ = (int16_t)elemStrToZ(nuclElemName);
+				nuclElemName[0] = (char)SDL_toupper(nuclElemName[0]); //convert to uppercase
+				nuclZu = (int16_t)elemStrToZ(nuclElemName);
+				if((nuclZ == 255)&&(nuclZu == 255)){
+					//not a valid element name
+					continue; //go to the next token
+				}
+				nuclA = -1; //flag as element only
 			}
 		}else{
 			nuclZ = (int16_t)elemStrToZ(nuclElemName);
 			nuclElemName[0] = (char)SDL_toupper(nuclElemName[0]); //convert to uppercase
 			nuclZu = (int16_t)elemStrToZ(nuclElemName);
 		}
-		for(int16_t j=0; j<ndat->numNucl; j++){
-			if(nuclZ >= 0){
-				if(ndat->nuclData[j].Z == nuclZ){
-					if(((ndat->nuclData[j].N + ndat->nuclData[j].Z)) == nuclA){
-						if((ndat->nuclData[j].flags & 3U) == OBSFLAG_OBSERVED){
-							//identified nuclide (exact match)
-							search_result res;
-							res.relevance = 1.0f; //base value
-							res.resultType = SEARCHAGENT_NUCLIDE;
-							res.resultVal[0] = (uint32_t)j; //nuclide index
-							sortAndAppendResult(ss,&res);
-							ss->boostedNucl = (uint16_t)j;
+		if(nuclA >= 1){
+			for(int16_t j=0; j<ndat->numNucl; j++){
+				uint8_t nuclFound = 0;
+				if(nuclZ >= 0){
+					if(ndat->nuclData[j].Z == nuclZ){
+						if(((ndat->nuclData[j].N + ndat->nuclData[j].Z)) == nuclA){
+							if((ndat->nuclData[j].flags & 3U) == OBSFLAG_OBSERVED){
+								//identified nuclide (exact match)
+								nuclFound = 1;
+							}
 						}
 					}
 				}
-			}
-			if(nuclZu >= 0){
-				if((nuclZu != nuclZ)&&(ndat->nuclData[j].Z == nuclZu)){
-					if(((ndat->nuclData[j].N + ndat->nuclData[j].Z)) == nuclA){
-						if((ndat->nuclData[j].flags & 3U) == OBSFLAG_OBSERVED){
-							//identified nuclide (uppercase match)
-							search_result res;
-							res.relevance = 1.0f; //base value
-							res.resultType = SEARCHAGENT_NUCLIDE;
-							res.resultVal[0] = (uint32_t)j; //nuclide index
-							sortAndAppendResult(ss,&res);
-							ss->boostedNucl = (uint16_t)j;
+				if(nuclZu >= 0){
+					if((nuclZu != nuclZ)&&(ndat->nuclData[j].Z == nuclZu)){
+						if(((ndat->nuclData[j].N + ndat->nuclData[j].Z)) == nuclA){
+							if((ndat->nuclData[j].flags & 3U) == OBSFLAG_OBSERVED){
+								//identified nuclide (uppercase match)
+								nuclFound = 1;
+							}
 						}
 					}
+				}
+				if(nuclFound == 1){
+					search_result res;
+					res.relevance = 1.0f; //base value
+					res.resultType = SEARCHAGENT_NUCLIDE;
+					res.resultVal[0] = (uint32_t)j; //nuclide index
+					sortAndAppendResult(ss,&res);
+					ss->boostedNucl = (uint16_t)j;
+				}
+			}
+		}else if((nuclZ >= 0)||(nuclZu >= 0)){
+			//element only, no mass number specified
+			//rank isotopes by abundance, then half-life
+			for(int16_t j=0; j<ndat->numNucl; j++){
+				uint8_t nuclFound = 0;
+				if(nuclZ >= 0){
+					if(ndat->nuclData[j].Z == nuclZ){
+						if((ndat->nuclData[j].flags & 3U) == OBSFLAG_OBSERVED){
+							//identified nuclide (exact match)
+							nuclFound = 1;
+						}
+					}
+				}
+				if(nuclZu >= 0){
+					if((nuclZu != nuclZ)&&(ndat->nuclData[j].Z == nuclZu)){
+						if((ndat->nuclData[j].flags & 3U) == OBSFLAG_OBSERVED){
+							//identified nuclide (uppercase match)
+							nuclFound = 1;
+						}
+					}
+				}
+				if(nuclFound == 1){
+					search_result res;
+					res.relevance = 0.0f; //base value
+					float abundance = ndat->nuclData[j].abundance.val;
+					if(abundance > 0.0f){
+						res.relevance = 0.5f + 0.5f*(abundance/100.0f); //100% abundance gives relevance = 1
+					}else{
+						double gsHlFac = getNuclLevelHalfLifeSeconds(ndat,(uint16_t)j,ndat->nuclData[j].gsLevel);
+						if(gsHlFac <= 0.0){
+							res.relevance = 0.0f;
+						}else{
+							//SDL_Log("%i %i: %e\n",ndat->nuclData[j].Z,ndat->nuclData[j].N,gsHlFac);
+							gsHlFac = 100.0 + SDL_log(gsHlFac); //SDL_log (logarithm), not SDL_Log (printf equivalent)
+							if(gsHlFac > 130.0){
+								gsHlFac = 130.0;
+							}else if(gsHlFac < 0.0){
+								gsHlFac = 0.0;
+							}
+							gsHlFac /= 130.0;
+							res.relevance = (float)(0.5*gsHlFac);
+							//SDL_Log("%i %i: %e\n",ndat->nuclData[j].Z,ndat->nuclData[j].N,(double)res.relevance);
+						}
+						
+					}
+					res.resultType = SEARCHAGENT_NUCLIDE;
+					res.resultVal[0] = (uint32_t)j; //nuclide index
+					sortAndAppendResult(ss,&res);
+					ss->boostedNucl = (uint16_t)j;
 				}
 			}
 		}
+		
 	}
 
 	//SDL_Log("Number of search results: %u\n",ss->numUpdatedResults);
