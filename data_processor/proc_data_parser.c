@@ -1843,6 +1843,9 @@ void cleanCommentStr(char *comBuff){
 	modComBuff = findReplaceAllUTF8("%EC","%ε",comBuff);
 	SDL_strlcpy(comBuff,modComBuff,118);
 	SDL_free(modComBuff);
+	modComBuff = findReplaceAllUTF8("%B+$","%β⁺: ",comBuff);
+	SDL_strlcpy(comBuff,modComBuff,118);
+	SDL_free(modComBuff);
 	modComBuff = findReplaceAllUTF8("%B+","%β⁺",comBuff);
 	SDL_strlcpy(comBuff,modComBuff,118);
 	SDL_free(modComBuff);
@@ -1850,6 +1853,9 @@ void cleanCommentStr(char *comBuff){
 	SDL_strlcpy(comBuff,modComBuff,118);
 	SDL_free(modComBuff);
 	modComBuff = findReplaceAllUTF8("%B","%β",comBuff);
+	SDL_strlcpy(comBuff,modComBuff,118);
+	SDL_free(modComBuff);
+	modComBuff = findReplaceAllUTF8("%A","%α",comBuff);
 	SDL_strlcpy(comBuff,modComBuff,118);
 	SDL_free(modComBuff);
 	modComBuff = findReplaceAllUTF8("$from"," from",comBuff);
@@ -3117,7 +3123,8 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 									|| (SDL_strncmp(comBuff,"%|b{++}:",8)==0)
 									|| (SDL_strncmp(comBuff,"%|e:",4)==0)
 									|| (SDL_strncmp(comBuff,"%IT, %|e+%|b{++}:",17)==0)
-								  || (SDL_strncmp(comBuff,"%|e+%|b{++}:",12)==0) ){
+								  || (SDL_strncmp(comBuff,"%|e+%|b{++}:",12)==0) 
+									|| (SDL_strncmp(comBuff,"%EC+%B+$",8)==0) ){
 										//decay mode 
 										if(!(nd->levels[nd->numLvls-1].hasComment & (uint8_t)(1U << LCOMMENT_DECAYMODE))){
 											nd->levels[nd->numLvls-1].hasComment |= (uint8_t)(1U << LCOMMENT_DECAYMODE);
