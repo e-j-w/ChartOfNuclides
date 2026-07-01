@@ -836,22 +836,22 @@ void searchNuclides(const ndata *restrict ndat, search_state *restrict ss){
 		if(nuclA < 0){
 			//check for special cases
 			nuclElemName[0] = (char)SDL_toupper(nuclElemName[0]); //convert to uppercase
-			if(strcmp(nuclElemName,"Neutron")==0){
+			if(SDL_strncmp(nuclElemName,"Neutron",3)==0){
 				nuclZ = 0;
 				nuclA = 1;
-			}else if(strcmp(nuclElemName,"Tetraneutron")==0){
+			}else if(SDL_strncmp(nuclElemName,"Tetraneutron",3)==0){
 				nuclZ = 0;
 				nuclA = 4;
-			}else if(strcmp(nuclElemName,"Hexaneutron")==0){
+			}else if(SDL_strncmp(nuclElemName,"Hexaneutron",3)==0){
 				nuclZ = 0;
 				nuclA = 6;
-			}else if((strcmp(nuclElemName,"Proton")==0)||(strcmp(nuclElemName,"Hydrogen")==0)){
+			}else if((SDL_strncmp(nuclElemName,"Proton",5)==0)||(SDL_strncmp(nuclElemName,"Hydrogen",3)==0)){
 				nuclZ = 1;
 				nuclA = 1;
-			}else if(strcmp(nuclElemName,"Deuterium")==0){
+			}else if(SDL_strncmp(nuclElemName,"Deuterium",3)==0){
 				nuclZ = 1;
 				nuclA = 2;
-			}else if(strcmp(nuclElemName,"Tritium")==0){
+			}else if(SDL_strncmp(nuclElemName,"Tritium",3)==0){
 				nuclZ = 1;
 				nuclA = 3;
 			}else{

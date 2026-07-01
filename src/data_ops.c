@@ -1199,481 +1199,481 @@ void getNuclNameStr(char strOut[32], const nucl *restrict nuclide, const uint8_t
 }
 
 uint8_t elemStrToZ(const char *elemStr){
-	if(strcmp(elemStr,"n")==0){
+	if(SDL_strcmp(elemStr,"n")==0){
 		return 0;
-	}else if(strcmp(elemStr,"H")==0){
+	}else if(SDL_strcmp(elemStr,"H")==0){
 		return 1;
-	}else if(strcmp(elemStr,"He")==0){
+	}else if(SDL_strcmp(elemStr,"He")==0){
 		return 2;
-	}else if(strcmp(elemStr,"Li")==0){
+	}else if(SDL_strcmp(elemStr,"Li")==0){
 		return 3;
-	}else if(strcmp(elemStr,"Be")==0){
+	}else if(SDL_strcmp(elemStr,"Be")==0){
 		return 4;
-	}else if(strcmp(elemStr,"B")==0){
+	}else if(SDL_strcmp(elemStr,"B")==0){
 		return 5;
-	}else if(strcmp(elemStr,"C")==0){
+	}else if(SDL_strcmp(elemStr,"C")==0){
 		return 6;
-	}else if(strcmp(elemStr,"N")==0){
+	}else if(SDL_strcmp(elemStr,"N")==0){
 		return 7;
-	}else if(strcmp(elemStr,"O")==0){
+	}else if(SDL_strcmp(elemStr,"O")==0){
 		return 8;
-	}else if(strcmp(elemStr,"F")==0){
+	}else if(SDL_strcmp(elemStr,"F")==0){
 		return 9;
-	}else if(strcmp(elemStr,"Ne")==0){
+	}else if(SDL_strcmp(elemStr,"Ne")==0){
 		return 10;
-	}else if(strcmp(elemStr,"Na")==0){
+	}else if(SDL_strcmp(elemStr,"Na")==0){
 		return 11;
-	}else if(strcmp(elemStr,"Mg")==0){
+	}else if(SDL_strcmp(elemStr,"Mg")==0){
 		return 12;
-	}else if(strcmp(elemStr,"Al")==0){
+	}else if(SDL_strcmp(elemStr,"Al")==0){
 		return 13;
-	}else if(strcmp(elemStr,"Si")==0){
+	}else if(SDL_strcmp(elemStr,"Si")==0){
 		return 14;
-	}else if(strcmp(elemStr,"P")==0){
+	}else if(SDL_strcmp(elemStr,"P")==0){
 		return 15;
-	}else if(strcmp(elemStr,"S")==0){
+	}else if(SDL_strcmp(elemStr,"S")==0){
 		return 16;
-	}else if(strcmp(elemStr,"Cl")==0){
+	}else if(SDL_strcmp(elemStr,"Cl")==0){
 		return 17;
-	}else if(strcmp(elemStr,"Ar")==0){
+	}else if(SDL_strcmp(elemStr,"Ar")==0){
 		return 18;
-	}else if(strcmp(elemStr,"K")==0){
+	}else if(SDL_strcmp(elemStr,"K")==0){
 		return 19;
-	}else if(strcmp(elemStr,"Ca")==0){
+	}else if(SDL_strcmp(elemStr,"Ca")==0){
 		return 20;
-	}else if(strcmp(elemStr,"Sc")==0){
+	}else if(SDL_strcmp(elemStr,"Sc")==0){
 		return 21;
-	}else if(strcmp(elemStr,"Ti")==0){
+	}else if(SDL_strcmp(elemStr,"Ti")==0){
 		return 22;
-	}else if(strcmp(elemStr,"V")==0){
+	}else if(SDL_strcmp(elemStr,"V")==0){
 		return 23;
-	}else if(strcmp(elemStr,"Cr")==0){
+	}else if(SDL_strcmp(elemStr,"Cr")==0){
 		return 24;
-	}else if(strcmp(elemStr,"Mn")==0){
+	}else if(SDL_strcmp(elemStr,"Mn")==0){
 		return 25;
-	}else if(strcmp(elemStr,"Fe")==0){
+	}else if(SDL_strcmp(elemStr,"Fe")==0){
 		return 26;
-	}else if(strcmp(elemStr,"Co")==0){
+	}else if(SDL_strcmp(elemStr,"Co")==0){
 		return 27;
-	}else if(strcmp(elemStr,"Ni")==0){
+	}else if(SDL_strcmp(elemStr,"Ni")==0){
 		return 28;
-	}else if(strcmp(elemStr,"Cu")==0){
+	}else if(SDL_strcmp(elemStr,"Cu")==0){
 		return 29;
-	}else if(strcmp(elemStr,"Zn")==0){
+	}else if(SDL_strcmp(elemStr,"Zn")==0){
 		return 30;
-	}else if(strcmp(elemStr,"Ga")==0){
+	}else if(SDL_strcmp(elemStr,"Ga")==0){
 		return 31;
-	}else if(strcmp(elemStr,"Ge")==0){
+	}else if(SDL_strcmp(elemStr,"Ge")==0){
 		return 32;
-	}else if(strcmp(elemStr,"As")==0){
+	}else if(SDL_strcmp(elemStr,"As")==0){
 		return 33;
-	}else if(strcmp(elemStr,"Se")==0){
+	}else if(SDL_strcmp(elemStr,"Se")==0){
 		return 34;
-	}else if(strcmp(elemStr,"Br")==0){
+	}else if(SDL_strcmp(elemStr,"Br")==0){
 		return 35;
-	}else if(strcmp(elemStr,"Kr")==0){
+	}else if(SDL_strcmp(elemStr,"Kr")==0){
 		return 36;
-	}else if(strcmp(elemStr,"Rb")==0){
+	}else if(SDL_strcmp(elemStr,"Rb")==0){
 		return 37;
-	}else if(strcmp(elemStr,"Sr")==0){
+	}else if(SDL_strcmp(elemStr,"Sr")==0){
 		return 38;
-	}else if(strcmp(elemStr,"Y")==0){
+	}else if(SDL_strcmp(elemStr,"Y")==0){
 		return 39;
-	}else if(strcmp(elemStr,"Zr")==0){
+	}else if(SDL_strcmp(elemStr,"Zr")==0){
 		return 40;
-	}else if(strcmp(elemStr,"Nb")==0){
+	}else if(SDL_strcmp(elemStr,"Nb")==0){
 		return 41;
-	}else if(strcmp(elemStr,"Mo")==0){
+	}else if(SDL_strcmp(elemStr,"Mo")==0){
 		return 42;
-	}else if(strcmp(elemStr,"Tc")==0){
+	}else if(SDL_strcmp(elemStr,"Tc")==0){
 		return 43;
-	}else if(strcmp(elemStr,"Ru")==0){
+	}else if(SDL_strcmp(elemStr,"Ru")==0){
 		return 44;
-	}else if(strcmp(elemStr,"Rh")==0){
+	}else if(SDL_strcmp(elemStr,"Rh")==0){
 		return 45;
-	}else if(strcmp(elemStr,"Pd")==0){
+	}else if(SDL_strcmp(elemStr,"Pd")==0){
 		return 46;
-	}else if(strcmp(elemStr,"Ag")==0){
+	}else if(SDL_strcmp(elemStr,"Ag")==0){
 		return 47;
-	}else if(strcmp(elemStr,"Cd")==0){
+	}else if(SDL_strcmp(elemStr,"Cd")==0){
 		return 48;
-	}else if(strcmp(elemStr,"In")==0){
+	}else if(SDL_strcmp(elemStr,"In")==0){
 		return 49;
-	}else if(strcmp(elemStr,"Sn")==0){
+	}else if(SDL_strcmp(elemStr,"Sn")==0){
 		return 50;
-	}else if(strcmp(elemStr,"Sb")==0){
+	}else if(SDL_strcmp(elemStr,"Sb")==0){
 		return 51;
-	}else if(strcmp(elemStr,"Te")==0){
+	}else if(SDL_strcmp(elemStr,"Te")==0){
 		return 52;
-	}else if(strcmp(elemStr,"I")==0){
+	}else if(SDL_strcmp(elemStr,"I")==0){
 		return 53;
-	}else if(strcmp(elemStr,"Xe")==0){
+	}else if(SDL_strcmp(elemStr,"Xe")==0){
 		return 54;
-	}else if(strcmp(elemStr,"Cs")==0){
+	}else if(SDL_strcmp(elemStr,"Cs")==0){
 		return 55;
-	}else if(strcmp(elemStr,"Ba")==0){
+	}else if(SDL_strcmp(elemStr,"Ba")==0){
 		return 56;
-	}else if(strcmp(elemStr,"La")==0){
+	}else if(SDL_strcmp(elemStr,"La")==0){
 		return 57;
-	}else if(strcmp(elemStr,"Ce")==0){
+	}else if(SDL_strcmp(elemStr,"Ce")==0){
 		return 58;
-	}else if(strcmp(elemStr,"Pr")==0){
+	}else if(SDL_strcmp(elemStr,"Pr")==0){
 		return 59;
-	}else if(strcmp(elemStr,"Nd")==0){
+	}else if(SDL_strcmp(elemStr,"Nd")==0){
 		return 60;
-	}else if(strcmp(elemStr,"Pm")==0){
+	}else if(SDL_strcmp(elemStr,"Pm")==0){
 		return 61;
-	}else if(strcmp(elemStr,"Sm")==0){
+	}else if(SDL_strcmp(elemStr,"Sm")==0){
 		return 62;
-	}else if(strcmp(elemStr,"Eu")==0){
+	}else if(SDL_strcmp(elemStr,"Eu")==0){
 		return 63;
-	}else if(strcmp(elemStr,"Gd")==0){
+	}else if(SDL_strcmp(elemStr,"Gd")==0){
 		return 64;
-	}else if(strcmp(elemStr,"Tb")==0){
+	}else if(SDL_strcmp(elemStr,"Tb")==0){
 		return 65;
-	}else if(strcmp(elemStr,"Dy")==0){
+	}else if(SDL_strcmp(elemStr,"Dy")==0){
 		return 66;
-	}else if(strcmp(elemStr,"Ho")==0){
+	}else if(SDL_strcmp(elemStr,"Ho")==0){
 		return 67;
-	}else if(strcmp(elemStr,"Er")==0){
+	}else if(SDL_strcmp(elemStr,"Er")==0){
 		return 68;
-	}else if(strcmp(elemStr,"Tm")==0){
+	}else if(SDL_strcmp(elemStr,"Tm")==0){
 		return 69;
-	}else if(strcmp(elemStr,"Yb")==0){
+	}else if(SDL_strcmp(elemStr,"Yb")==0){
 		return 70;
-	}else if(strcmp(elemStr,"Lu")==0){
+	}else if(SDL_strcmp(elemStr,"Lu")==0){
 		return 71;
-	}else if(strcmp(elemStr,"Hf")==0){
+	}else if(SDL_strcmp(elemStr,"Hf")==0){
 		return 72;
-	}else if(strcmp(elemStr,"Ta")==0){
+	}else if(SDL_strcmp(elemStr,"Ta")==0){
 		return 73;
-	}else if(strcmp(elemStr,"W")==0){
+	}else if(SDL_strcmp(elemStr,"W")==0){
 		return 74;
-	}else if(strcmp(elemStr,"Re")==0){
+	}else if(SDL_strcmp(elemStr,"Re")==0){
 		return 75;
-	}else if(strcmp(elemStr,"Os")==0){
+	}else if(SDL_strcmp(elemStr,"Os")==0){
 		return 76;
-	}else if(strcmp(elemStr,"Ir")==0){
+	}else if(SDL_strcmp(elemStr,"Ir")==0){
 		return 77;
-	}else if(strcmp(elemStr,"Pt")==0){
+	}else if(SDL_strcmp(elemStr,"Pt")==0){
 		return 78;
-	}else if(strcmp(elemStr,"Au")==0){
+	}else if(SDL_strcmp(elemStr,"Au")==0){
 		return 79;
-	}else if(strcmp(elemStr,"Hg")==0){
+	}else if(SDL_strcmp(elemStr,"Hg")==0){
 		return 80;
-	}else if(strcmp(elemStr,"Tl")==0){
+	}else if(SDL_strcmp(elemStr,"Tl")==0){
 		return 81;
-	}else if(strcmp(elemStr,"Pb")==0){
+	}else if(SDL_strcmp(elemStr,"Pb")==0){
 		return 82;
-	}else if(strcmp(elemStr,"Bi")==0){
+	}else if(SDL_strcmp(elemStr,"Bi")==0){
 		return 83;
-	}else if(strcmp(elemStr,"Po")==0){
+	}else if(SDL_strcmp(elemStr,"Po")==0){
 		return 84;
-	}else if(strcmp(elemStr,"At")==0){
+	}else if(SDL_strcmp(elemStr,"At")==0){
 		return 85;
-	}else if(strcmp(elemStr,"Rn")==0){
+	}else if(SDL_strcmp(elemStr,"Rn")==0){
 		return 86;
-	}else if(strcmp(elemStr,"Fr")==0){
+	}else if(SDL_strcmp(elemStr,"Fr")==0){
 		return 87;
-	}else if(strcmp(elemStr,"Ra")==0){
+	}else if(SDL_strcmp(elemStr,"Ra")==0){
 		return 88;
-	}else if(strcmp(elemStr,"Ac")==0){
+	}else if(SDL_strcmp(elemStr,"Ac")==0){
 		return 89;
-	}else if(strcmp(elemStr,"Th")==0){
+	}else if(SDL_strcmp(elemStr,"Th")==0){
 		return 90;
-	}else if(strcmp(elemStr,"Pa")==0){
+	}else if(SDL_strcmp(elemStr,"Pa")==0){
 		return 91;
-	}else if(strcmp(elemStr,"U")==0){
+	}else if(SDL_strcmp(elemStr,"U")==0){
 		return 92;
-	}else if(strcmp(elemStr,"Np")==0){
+	}else if(SDL_strcmp(elemStr,"Np")==0){
 		return 93;
-	}else if(strcmp(elemStr,"Pu")==0){
+	}else if(SDL_strcmp(elemStr,"Pu")==0){
 		return 94;
-	}else if(strcmp(elemStr,"Am")==0){
+	}else if(SDL_strcmp(elemStr,"Am")==0){
 		return 95;
-	}else if(strcmp(elemStr,"Cm")==0){
+	}else if(SDL_strcmp(elemStr,"Cm")==0){
 		return 96;
-	}else if(strcmp(elemStr,"Bk")==0){
+	}else if(SDL_strcmp(elemStr,"Bk")==0){
 		return 97;
-	}else if(strcmp(elemStr,"Cf")==0){
+	}else if(SDL_strcmp(elemStr,"Cf")==0){
 		return 98;
-	}else if(strcmp(elemStr,"Es")==0){
+	}else if(SDL_strcmp(elemStr,"Es")==0){
 		return 99;
-	}else if(strcmp(elemStr,"Fm")==0){
+	}else if(SDL_strcmp(elemStr,"Fm")==0){
 		return 100;
-	}else if(strcmp(elemStr,"Md")==0){
+	}else if(SDL_strcmp(elemStr,"Md")==0){
 		return 101;
-	}else if(strcmp(elemStr,"No")==0){
+	}else if(SDL_strcmp(elemStr,"No")==0){
 		return 102;
-	}else if(strcmp(elemStr,"Lr")==0){
+	}else if(SDL_strcmp(elemStr,"Lr")==0){
 		return 103;
-	}else if(strcmp(elemStr,"Rf")==0){
+	}else if(SDL_strcmp(elemStr,"Rf")==0){
 		return 104;
-	}else if(strcmp(elemStr,"Db")==0){
+	}else if(SDL_strcmp(elemStr,"Db")==0){
 		return 105;
-	}else if(strcmp(elemStr,"Sg")==0){
+	}else if(SDL_strcmp(elemStr,"Sg")==0){
 		return 106;
-	}else if(strcmp(elemStr,"Bh")==0){
+	}else if(SDL_strcmp(elemStr,"Bh")==0){
 		return 107;
-	}else if(strcmp(elemStr,"Hs")==0){
+	}else if(SDL_strcmp(elemStr,"Hs")==0){
 		return 108;
-	}else if(strcmp(elemStr,"Mt")==0){
+	}else if(SDL_strcmp(elemStr,"Mt")==0){
 		return 109;
-	}else if(strcmp(elemStr,"Ds")==0){
+	}else if(SDL_strcmp(elemStr,"Ds")==0){
 		return 110;
-	}else if(strcmp(elemStr,"Rg")==0){
+	}else if(SDL_strcmp(elemStr,"Rg")==0){
 		return 111;
-	}else if(strcmp(elemStr,"Cn")==0){
+	}else if(SDL_strcmp(elemStr,"Cn")==0){
 		return 112;
-	}else if(strcmp(elemStr,"Nh")==0){
+	}else if(SDL_strcmp(elemStr,"Nh")==0){
 		return 113;
-	}else if(strcmp(elemStr,"Fl")==0){
+	}else if(SDL_strcmp(elemStr,"Fl")==0){
 		return 114;
-	}else if(strcmp(elemStr,"Mc")==0){
+	}else if(SDL_strcmp(elemStr,"Mc")==0){
 		return 115;
-	}else if(strcmp(elemStr,"Lv")==0){
+	}else if(SDL_strcmp(elemStr,"Lv")==0){
 		return 116;
-	}else if(strcmp(elemStr,"Ts")==0){
+	}else if(SDL_strcmp(elemStr,"Ts")==0){
 		return 117;
-	}else if(strcmp(elemStr,"Og")==0){
+	}else if(SDL_strcmp(elemStr,"Og")==0){
 		return 118;
-	}else if(strcmp(elemStr,"Neutron")==0){
+	}else if(SDL_strcmp(elemStr,"Neutron")==0){
 		return 0;
-	}else if((strcmp(elemStr,"Hydrogen")==0)||(strcmp(elemStr,"Proton")==0)){
+	}else if((SDL_strncmp(elemStr,"Hydrogen",3)==0)||(SDL_strncmp(elemStr,"Proton",5)==0)){
 		return 1;
-	}else if(strcmp(elemStr,"Helium")==0){
+	}else if(SDL_strncmp(elemStr,"Helium",3)==0){
 		return 2;
-	}else if(strcmp(elemStr,"Lithium")==0){
+	}else if(SDL_strncmp(elemStr,"Lithium",3)==0){
 		return 3;
-	}else if(strcmp(elemStr,"Beryllium")==0){
+	}else if(SDL_strncmp(elemStr,"Beryllium",4)==0){
 		return 4;
-	}else if(strcmp(elemStr,"Boron")==0){
+	}else if(SDL_strncmp(elemStr,"Boron",3)==0){
 		return 5;
-	}else if(strcmp(elemStr,"Carbon")==0){
+	}else if(SDL_strncmp(elemStr,"Carbon",3)==0){
 		return 6;
-	}else if(strcmp(elemStr,"Nitrogen")==0){
+	}else if(SDL_strncmp(elemStr,"Nitrogen",3)==0){
 		return 7;
-	}else if(strcmp(elemStr,"Oxygen")==0){
+	}else if(SDL_strncmp(elemStr,"Oxygen",2)==0){
 		return 8;
-	}else if(strcmp(elemStr,"Fluorine")==0){
+	}else if((SDL_strncmp(elemStr,"Fluorine",3)==0)||(SDL_strncmp(elemStr,"Florine",3)==0)){
 		return 9;
-	}else if(strcmp(elemStr,"Neon")==0){
+	}else if(SDL_strcmp(elemStr,"Neon")==0){
 		return 10;
-	}else if(strcmp(elemStr,"Sodium")==0){
+	}else if(SDL_strncmp(elemStr,"Sodium",2)==0){
 		return 11;
-	}else if(strcmp(elemStr,"Magnesium")==0){
+	}else if(SDL_strcmp(elemStr,"Magnesium")==0){
 		return 12;
-	}else if((strcmp(elemStr,"Aluminium")==0)||(strcmp(elemStr,"Aluminum")==0)){
+	}else if(SDL_strncmp(elemStr,"Aluminium",3)==0){
 		return 13;
-	}else if(strcmp(elemStr,"Silicon")==0){
+	}else if(SDL_strncmp(elemStr,"Silicon",4)==0){
 		return 14;
-	}else if(strcmp(elemStr,"Phosphorus")==0){
+	}else if(SDL_strncmp(elemStr,"Phosphorus",3)==0){
 		return 15;
-	}else if((strcmp(elemStr,"Sulfur")==0)||(strcmp(elemStr,"Sulphur")==0)){
+	}else if(SDL_strncmp(elemStr,"Sulfur",3)==0){
 		return 16;
-	}else if(strcmp(elemStr,"Chlorine")==0){
+	}else if(SDL_strncmp(elemStr,"Chlorine",3)==0){
 		return 17;
-	}else if(strcmp(elemStr,"Argon")==0){
+	}else if(SDL_strncmp(elemStr,"Argon",3)==0){
 		return 18;
-	}else if(strcmp(elemStr,"Potassium")==0){
+	}else if(SDL_strncmp(elemStr,"Potassium",3)==0){
 		return 19;
-	}else if(strcmp(elemStr,"Calcium")==0){
+	}else if(SDL_strncmp(elemStr,"Calcium",4)==0){
 		return 20;
-	}else if(strcmp(elemStr,"Scandium")==0){
+	}else if(SDL_strncmp(elemStr,"Scandium",3)==0){
 		return 21;
-	}else if(strcmp(elemStr,"Titanium")==0){
+	}else if(SDL_strncmp(elemStr,"Titanium",3)==0){
 		return 22;
-	}else if(strcmp(elemStr,"Vanadium")==0){
+	}else if(SDL_strncmp(elemStr,"Vanadium",3)==0){
 		return 23;
-	}else if(strcmp(elemStr,"Chromium")==0){
+	}else if((SDL_strncmp(elemStr,"Chromium",3)==0)||(SDL_strncmp(elemStr,"Cromium",3)==0)){
 		return 24;
-	}else if(strcmp(elemStr,"Manganese")==0){
+	}else if((SDL_strncmp(elemStr,"Manganese",3)==0)||(SDL_strncmp(elemStr,"Maganese",4)==0)){
 		return 25;
-	}else if(strcmp(elemStr,"Iron")==0){
+	}else if(SDL_strncmp(elemStr,"Iron",3)==0){
 		return 26;
-	}else if(strcmp(elemStr,"Cobalt")==0){
+	}else if(SDL_strncmp(elemStr,"Cobalt",3)==0){
 		return 27;
-	}else if(strcmp(elemStr,"Nickel")==0){
+	}else if(SDL_strncmp(elemStr,"Nickel",3)==0){
 		return 28;
-	}else if(strcmp(elemStr,"Copper")==0){
+	}else if(SDL_strncmp(elemStr,"Copper",4)==0){
 		return 29;
-	}else if(strcmp(elemStr,"Zinc")==0){
+	}else if(SDL_strncmp(elemStr,"Zinc",3)==0){
 		return 30;
-	}else if(strcmp(elemStr,"Gallium")==0){
+	}else if(SDL_strncmp(elemStr,"Gallium",3)==0){
 		return 31;
-	}else if(strcmp(elemStr,"Germanium")==0){
+	}else if(SDL_strncmp(elemStr,"Germanium",3)==0){
 		return 32;
-	}else if(strcmp(elemStr,"Arsenic")==0){
+	}else if(SDL_strncmp(elemStr,"Arsenic",3)==0){
 		return 33;
-	}else if(strcmp(elemStr,"Selenium")==0){
+	}else if(SDL_strncmp(elemStr,"Selenium",3)==0){
 		return 34;
-	}else if(strcmp(elemStr,"Bromine")==0){
+	}else if(SDL_strncmp(elemStr,"Bromine",3)==0){
 		return 35;
-	}else if(strcmp(elemStr,"Krypton")==0){
+	}else if(SDL_strncmp(elemStr,"Krypton",3)==0){
 		return 36;
-	}else if(strcmp(elemStr,"Rubidium")==0){
+	}else if(SDL_strncmp(elemStr,"Rubidium",3)==0){
 		return 37;
-	}else if(strcmp(elemStr,"Strontium")==0){
+	}else if(SDL_strncmp(elemStr,"Strontium",3)==0){
 		return 38;
-	}else if(strcmp(elemStr,"Yttrium")==0){
+	}else if((SDL_strncmp(elemStr,"Yttrium",4)==0)||(SDL_strncmp(elemStr,"Ytrium",3)==0)){
 		return 39;
-	}else if(strcmp(elemStr,"Zirconium")==0){
+	}else if(SDL_strncmp(elemStr,"Zirconium",3)==0){
 		return 40;
-	}else if((strcmp(elemStr,"Niobium")==0)||(strcmp(elemStr,"Columbium")==0)){
+	}else if((SDL_strncmp(elemStr,"Niobium",3)==0)||(SDL_strncmp(elemStr,"Columbium",4)==0)){
 		return 41;
-	}else if(strcmp(elemStr,"Molybdenum")==0){
+	}else if(SDL_strncmp(elemStr,"Molybdenum",3)==0){
 		return 42;
-	}else if(strcmp(elemStr,"Technetium")==0){
+	}else if(SDL_strncmp(elemStr,"Technetium",3)==0){
 		return 43;
-	}else if(strcmp(elemStr,"Ruthenium")==0){
+	}else if(SDL_strncmp(elemStr,"Ruthenium",6)==0){
 		return 44;
-	}else if(strcmp(elemStr,"Rhodium")==0){
+	}else if(SDL_strncmp(elemStr,"Rhodium",3)==0){
 		return 45;
-	}else if(strcmp(elemStr,"Palladium")==0){
+	}else if(SDL_strncmp(elemStr,"Palladium",3)==0){
 		return 46;
-	}else if(strcmp(elemStr,"Silver")==0){
+	}else if(SDL_strncmp(elemStr,"Silver",4)==0){
 		return 47;
-	}else if(strcmp(elemStr,"Cadmium")==0){
+	}else if(SDL_strncmp(elemStr,"Cadmium",3)==0){
 		return 48;
-	}else if(strcmp(elemStr,"Indium")==0){
+	}else if(SDL_strncmp(elemStr,"Indium",3)==0){
 		return 49;
-	}else if(strcmp(elemStr,"Tin")==0){
+	}else if(SDL_strcmp(elemStr,"Tin")==0){
 		return 50;
-	}else if(strcmp(elemStr,"Antimony")==0){
+	}else if(SDL_strncmp(elemStr,"Antimony",3)==0){
 		return 51;
-	}else if(strcmp(elemStr,"Tellurium")==0){
+	}else if(SDL_strncmp(elemStr,"Tellurium",3)==0){
 		return 52;
-	}else if(strcmp(elemStr,"Iodine")==0){
+	}else if(SDL_strncmp(elemStr,"Iodine",2)==0){
 		return 53;
-	}else if(strcmp(elemStr,"Xenon")==0){
+	}else if(SDL_strncmp(elemStr,"Xenon",3)==0){
 		return 54;
-	}else if((strcmp(elemStr,"Caesium")==0)||(strcmp(elemStr,"Cesium")==0)){
+	}else if((SDL_strncmp(elemStr,"Caesium",3)==0)||(SDL_strncmp(elemStr,"Cesium",3)==0)){
 		return 55;
-	}else if(strcmp(elemStr,"Barium")==0){
+	}else if(SDL_strncmp(elemStr,"Barium",3)==0){
 		return 56;
-	}else if(strcmp(elemStr,"Lanthanum")==0){
+	}else if(SDL_strncmp(elemStr,"Lanthanum",3)==0){
 		return 57;
-	}else if(strcmp(elemStr,"Cerium")==0){
+	}else if(SDL_strncmp(elemStr,"Cerium",3)==0){
 		return 58;
-	}else if(strcmp(elemStr,"Praseodymium")==0){
+	}else if(SDL_strncmp(elemStr,"Praseodymium",3)==0){
 		return 59;
-	}else if(strcmp(elemStr,"Neodymium")==0){
+	}else if(SDL_strncmp(elemStr,"Neodymium",4)==0){
 		return 60;
-	}else if(strcmp(elemStr,"Promethium")==0){
+	}else if(SDL_strncmp(elemStr,"Promethium",4)==0){
 		return 61;
-	}else if(strcmp(elemStr,"Samarium")==0){
+	}else if(SDL_strncmp(elemStr,"Samarium",3)==0){
 		return 62;
-	}else if(strcmp(elemStr,"Europium")==0){
+	}else if(SDL_strncmp(elemStr,"Europium",3)==0){
 		return 63;
-	}else if(strcmp(elemStr,"Gadolinium")==0){
+	}else if(SDL_strncmp(elemStr,"Gadolinium",3)==0){
 		return 64;
-	}else if(strcmp(elemStr,"Terbium")==0){
+	}else if(SDL_strncmp(elemStr,"Terbium",3)==0){
 		return 65;
-	}else if(strcmp(elemStr,"Dysprosium")==0){
+	}else if(SDL_strncmp(elemStr,"Dysprosium",3)==0){
 		return 66;
-	}else if(strcmp(elemStr,"Holmium")==0){
+	}else if(SDL_strncmp(elemStr,"Holmium",3)==0){
 		return 67;
-	}else if(strcmp(elemStr,"Erbium")==0){
+	}else if(SDL_strncmp(elemStr,"Erbium",3)==0){
 		return 68;
-	}else if(strcmp(elemStr,"Thulium")==0){
+	}else if(SDL_strncmp(elemStr,"Thulium",3)==0){
 		return 69;
-	}else if(strcmp(elemStr,"Ytterbium")==0){
+	}else if((SDL_strncmp(elemStr,"Ytterbium",4)==0)||(SDL_strncmp(elemStr,"Yterbium",3)==0)){
 		return 70;
-	}else if(strcmp(elemStr,"Lutetium")==0){
+	}else if(SDL_strncmp(elemStr,"Lutetium",3)==0){
 		return 71;
-	}else if(strcmp(elemStr,"Hafnium")==0){
+	}else if(SDL_strncmp(elemStr,"Hafnium",3)==0){
 		return 72;
-	}else if(strcmp(elemStr,"Tantalum")==0){
+	}else if(SDL_strncmp(elemStr,"Tantalum",3)==0){
 		return 73;
-	}else if((strcmp(elemStr,"Tungsten")==0)||(strcmp(elemStr,"Wolfram")==0)){
+	}else if((SDL_strncmp(elemStr,"Tungsten",3)==0)||(SDL_strncmp(elemStr,"Wolfram",3)==0)){
 		return 74;
-	}else if(strcmp(elemStr,"Rhenium")==0){
+	}else if(SDL_strncmp(elemStr,"Rhenium",3)==0){
 		return 75;
-	}else if(strcmp(elemStr,"Osmium")==0){
+	}else if(SDL_strncmp(elemStr,"Osmium",3)==0){
 		return 76;
-	}else if(strcmp(elemStr,"Iridium")==0){
+	}else if(SDL_strncmp(elemStr,"Iridium",3)==0){
 		return 77;
-	}else if(strcmp(elemStr,"Platinum")==0){
+	}else if(SDL_strncmp(elemStr,"Platinum",3)==0){
 		return 78;
-	}else if(strcmp(elemStr,"Gold")==0){
+	}else if(SDL_strncmp(elemStr,"Gold",3)==0){
 		return 79;
-	}else if(strcmp(elemStr,"Mercury")==0){
+	}else if(SDL_strncmp(elemStr,"Mercury",3)==0){
 		return 80;
-	}else if(strcmp(elemStr,"Thallium")==0){
+	}else if(SDL_strncmp(elemStr,"Thallium",3)==0){
 		return 81;
-	}else if(strcmp(elemStr,"Lead")==0){
+	}else if((SDL_strncmp(elemStr,"Lead",3)==0)||(SDL_strcmp(elemStr,"Led")==0)){
 		return 82;
-	}else if(strcmp(elemStr,"Bismuth")==0){
+	}else if(SDL_strncmp(elemStr,"Bismuth",3)==0){
 		return 83;
-	}else if(strcmp(elemStr,"Polonium")==0){
+	}else if(SDL_strncmp(elemStr,"Polonium",3)==0){
 		return 84;
-	}else if(strcmp(elemStr,"Astatine")==0){
+	}else if(SDL_strncmp(elemStr,"Astatine",3)==0){
 		return 85;
-	}else if(strcmp(elemStr,"Radon")==0){
+	}else if(SDL_strncmp(elemStr,"Radon",4)==0){
 		return 86;
-	}else if(strcmp(elemStr,"Francium")==0){
+	}else if(SDL_strncmp(elemStr,"Francium",3)==0){
 		return 87;
-	}else if(strcmp(elemStr,"Radium")==0){
+	}else if(SDL_strncmp(elemStr,"Radium",4)==0){
 		return 88;
-	}else if(strcmp(elemStr,"Actinium")==0){
+	}else if(SDL_strncmp(elemStr,"Actinium",3)==0){
 		return 89;
-	}else if(strcmp(elemStr,"Thorium")==0){
+	}else if(SDL_strncmp(elemStr,"Thorium",3)==0){
 		return 90;
-	}else if(strcmp(elemStr,"Protactinium")==0){
+	}else if(SDL_strncmp(elemStr,"Protactinium",5)==0){
 		return 91;
-	}else if(strcmp(elemStr,"Uranium")==0){
+	}else if(SDL_strncmp(elemStr,"Uranium",3)==0){
 		return 92;
-	}else if(strcmp(elemStr,"Neptunium")==0){
+	}else if(SDL_strncmp(elemStr,"Neptunium",3)==0){
 		return 93;
-	}else if(strcmp(elemStr,"Plutonium")==0){
+	}else if(SDL_strncmp(elemStr,"Plutonium",3)==0){
 		return 94;
-	}else if(strcmp(elemStr,"Americium")==0){
+	}else if(SDL_strncmp(elemStr,"Americium",3)==0){
 		return 95;
-	}else if(strcmp(elemStr,"Curium")==0){
+	}else if(SDL_strncmp(elemStr,"Curium",3)==0){
 		return 96;
-	}else if(strcmp(elemStr,"Berkelium")==0){
+	}else if(SDL_strncmp(elemStr,"Berkelium",4)==0){
 		return 97;
-	}else if(strcmp(elemStr,"Californium")==0){
+	}else if(SDL_strncmp(elemStr,"Californium",4)==0){
 		return 98;
-	}else if(strcmp(elemStr,"Einsteinium")==0){
+	}else if(SDL_strncmp(elemStr,"Einsteinium",3)==0){
 		return 99;
-	}else if(strcmp(elemStr,"Fermium")==0){
+	}else if(SDL_strncmp(elemStr,"Fermium",3)==0){
 		return 100;
-	}else if(strcmp(elemStr,"Mendelevium")==0){
+	}else if(SDL_strncmp(elemStr,"Mendelevium",3)==0){
 		return 101;
-	}else if(strcmp(elemStr,"Nobelium")==0){
+	}else if(SDL_strncmp(elemStr,"Nobelium",3)==0){
 		return 102;
-	}else if(strcmp(elemStr,"Lawrencium")==0){
+	}else if(SDL_strncmp(elemStr,"Lawrencium",3)==0){
 		return 103;
-	}else if(strcmp(elemStr,"Rutherfordium")==0){
+	}else if(SDL_strncmp(elemStr,"Rutherfordium",6)==0){
 		return 104;
-	}else if(strcmp(elemStr,"Dubnium")==0){
+	}else if(SDL_strncmp(elemStr,"Dubnium",3)==0){
 		return 105;
-	}else if(strcmp(elemStr,"Seaborgium")==0){
+	}else if(SDL_strncmp(elemStr,"Seaborgium",3)==0){
 		return 106;
-	}else if(strcmp(elemStr,"Bohrium")==0){
+	}else if(SDL_strncmp(elemStr,"Bohrium",3)==0){
 		return 107;
-	}else if(strcmp(elemStr,"Hassium")==0){
+	}else if(SDL_strncmp(elemStr,"Hassium",3)==0){
 		return 108;
-	}else if(strcmp(elemStr,"Meitnerium")==0){
+	}else if(SDL_strncmp(elemStr,"Meitnerium",3)==0){
 		return 109;
-	}else if(strcmp(elemStr,"Darmstadtium")==0){
+	}else if(SDL_strncmp(elemStr,"Darmstadtium",3)==0){
 		return 110;
-	}else if((strcmp(elemStr,"Roentgenium")==0)||(strcmp(elemStr,"Unununium")==0)){
+	}else if((SDL_strncmp(elemStr,"Roentgenium",3)==0)||(SDL_strncmp(elemStr,"Unununium",6)==0)){
 		return 111;
-	}else if(strcmp(elemStr,"Copernicium")==0){
+	}else if(SDL_strncmp(elemStr,"Copernicium",4)==0){
 		return 112;
-	}else if(strcmp(elemStr,"Nihonium")==0){
+	}else if(SDL_strncmp(elemStr,"Nihonium",3)==0){
 		return 113;
-	}else if(strcmp(elemStr,"Flerovium")==0){
+	}else if(SDL_strncmp(elemStr,"Flerovium",3)==0){
 		return 114;
-	}else if(strcmp(elemStr,"Moscovium")==0){
+	}else if(SDL_strncmp(elemStr,"Moscovium",3)==0){
 		return 115;
-	}else if(strcmp(elemStr,"Livermorium")==0){
+	}else if(SDL_strncmp(elemStr,"Livermorium",3)==0){
 		return 116;
-	}else if(strcmp(elemStr,"Tennessine")==0){
+	}else if(SDL_strncmp(elemStr,"Tennessine",3)==0){
 		return 117;
-	}else if(strcmp(elemStr,"Oganesson")==0){
+	}else if(SDL_strncmp(elemStr,"Oganesson",3)==0){
 		return 118;
 	}
 
