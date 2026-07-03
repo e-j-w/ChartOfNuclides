@@ -1461,7 +1461,7 @@ uint8_t elemStrToZ(const char *elemStr){
 		return 10;
 	}else if(SDL_strncmp(elemStr,"Sodium",2)==0){
 		return 11;
-	}else if(SDL_strcmp(elemStr,"Magnesium")==0){
+	}else if(SDL_strncmp(elemStr,"Magnesium",3)==0){
 		return 12;
 	}else if(SDL_strncmp(elemStr,"Aluminium",3)==0){
 		return 13;
@@ -1487,7 +1487,7 @@ uint8_t elemStrToZ(const char *elemStr){
 		return 23;
 	}else if((SDL_strncmp(elemStr,"Chromium",3)==0)||(SDL_strncmp(elemStr,"Cromium",3)==0)){
 		return 24;
-	}else if((SDL_strncmp(elemStr,"Manganese",3)==0)||(SDL_strncmp(elemStr,"Maganese",4)==0)){
+	}else if(SDL_strncmp(elemStr,"Manganese",3)==0){
 		return 25;
 	}else if(SDL_strncmp(elemStr,"Iron",3)==0){
 		return 26;
