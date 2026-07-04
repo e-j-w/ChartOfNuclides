@@ -158,7 +158,7 @@ static const float uiScales[UISCALE_ENUM_LENGTH] = {1.0f,1.20f,1.60f,1.85f};
 #define DEFAULT_LOWBOX_PADDING             0.25f //padding for the 'lower' box containing isomer info etc.
 #define MIN_CHART_ZOOM_SCALE               0.5f
 #define MAX_CHART_ZOOM_SCALE               32.0f
-#define CHART_ZOOM_TIME                    0.2f //time (in seconds) for the zoom animation to finish
+#define CHART_ZOOM_TIME                    UI_ANIM_LENGTH //time (in seconds) for the zoom animation to finish
 #define NUCLBOX_LABEL_MARGIN               1.0f //in scaled pixels
 #define NUCLBOX_LABEL_SMALLMARGIN          0.25f //in scaled pixels
 #define CHART_KEY_PAN_TIME                 0.1f //time (in seconds) for the pan animation to finish (keyboard)

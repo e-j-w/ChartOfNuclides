@@ -68,7 +68,7 @@ pref_lifetime|Show lifetimes (τ) instead of half-lives (t½)
 pref_levellist_header|In level lists:
 pref_levellist_separation|Show separation energies
 pref_levellist_threshold|Show parent decay thresholds
-pref_levellist_comments|Show additional ENSDF data (tooltips)
+pref_levellist_comments|Show ENSDF comment data (tooltips)
 pref_ui_animations|Enable UI animations
 chartview_menu_title|Select color scheme:
 chartview_lifetime|Lifetime
@@ -96,7 +96,7 @@ context_copy|Copy
 context_copytext|Copy selected text
 context_copy_nuclname|Copy nuclide name
 context_copy_nuclinfo|Copy nuclide info
-context_copy_comment|Copy additional ENSDF data
+context_copy_comment|Copy ENSDF comment(s)
 search_placeholder|Type to search (eg. '32Si')
 search_placeholder_levelinfo|Type to search (eg. level/gamma energy)
 search_result_nuclide|Nuclide / Isotope

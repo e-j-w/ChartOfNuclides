@@ -40,7 +40,7 @@ Mousing over certain properties in the level list may show tooltips containing a
 
 ## Keyboard/gamepad controls
 
-The program is designed to be mostly navigable with a keyboard and/or gamepad.
+The program is also designed to be *mostly* navigable with a keyboard and/or gamepad.
 
 | Key(s)             | Gamepad button(s)           | Action |
 | :----------------- | :-------------------------- |:----- |
@@ -68,6 +68,7 @@ Example search queries include:
 
 | Search type             | Description                                         | Example search(es)           | Tips and tricks |
 | :---------------------- | :-------------------------------------------------- | :--------------------------- | :-------------- |
+| Element                 | Search for isotopes of a specific element on the main chart | `silicon`, `Ca` (shows calcium isotopes) | Isotopes will be shown in descending order of abundance, followed by half-life. | 
 | Nuclide / isotope       | Search for a nuclide / isotope on the main chart    | `32Si`, `cobalt-60` (shows 60Co), `eu152` (shows 152Eu) | Adding a nuclide name to any other search query will prioritize results from that nuclide. | 
 | Level energy            | Energy (in keV) of an excited state in a nuclide. Can be combined with the nuclide name.  | `7654.07` (shows Holye state of 12C), `32Si 5505` (shows isomer of 32Si) | Prioritze search results of this type by adding `level` to the search query. The search radius can be expanded by adding `wide` to the search query. |
 | Level energy difference | Energy difference (in keV) between known excited states in a nuclide. Can be combined with the nuclide name.  | `93Mo 263 diff` (shows excited states in 93Mo which differ by ~263 keV) | The search radius can be expanded by adding `wide` to the search query. |

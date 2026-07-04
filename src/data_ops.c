@@ -239,6 +239,22 @@ void startUIAnimation(const app_data *restrict dat, app_state *restrict state, r
 
 	//take action at the start of the animation
 	switch(uiAnim){
+		case UIANIM_CHART_FADEIN:
+			if(state->ds.useUIAnimations){
+				//setup initial chart zoom animation
+				state->ds.chartZoomStartScale = state->ds.chartZoomScale*0.7f;
+				state->ds.chartZoomToScale = state->ds.chartZoomScale;
+				//zoom to center of screen
+				state->ds.chartZoomToX = state->ds.chartPosX;
+				state->ds.chartZoomToY = state->ds.chartPosY;
+				state->ds.chartZoomStartMouseX = state->ds.chartPosX; //centred on screen
+				state->ds.chartZoomStartMouseY = state->ds.chartPosY; //centred on screen
+				state->ds.chartZoomStartMouseXFrac = -1.0f; //set pre-programmed focus zoom mode
+				state->ds.timeSinceZoomStart = 0.0f;
+				state->ds.zoomInProgress = 1;
+				state->ds.zoomFinished = 0;
+			}
+			break;
 		case UIANIM_PRIMARY_MENU_HIDE:
 			changeUIState(dat,state,rdat,state->uiState); //make menu items uninteractable
 			break;

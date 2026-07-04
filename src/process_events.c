@@ -807,7 +807,7 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
       //close the chart view menu
       uiElemClickAction(dat,state,rdat,0,UIELEM_CHARTVIEW_BUTTON);
     }else if((bp_check128(&state->ds.shownElements,UIELEM_SEARCH_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_SEARCH_MENU_HIDE]==0.0f)){
-      //close the chart view menu
+      //close the search menu
       uiElemClickAction(dat,state,rdat,0,UIELEM_SEARCH_BUTTON);
     }else if((bp_check128(&state->ds.shownElements,UIELEM_NUCL_INFOBOX))&&(state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_HIDE]==0.0f)){
       startUIAnimation(dat,state,rdat,UIANIM_NUCLINFOBOX_HIDE); //hide the info box, see stopUIAnimation() for info box hiding action

@@ -1737,12 +1737,13 @@ void drawisomerBoxLabel(const app_data *restrict dat, app_state *restrict state,
 
 #define CHARTZOOM_LVL0 3.5f
 #define CHARTZOOM_LVL1 4.0f
-#define CHARTZOOM_LVL2 7.3f
-#define CHARTZOOM_LVL3 9.5f
-#define CHARTZOOM_LVL4 12.0f
-#define CHARTZOOM_LVL5 18.0f
-#define CHARTZOOM_LVL6 20.0f
-#define CHARTZOOM_LVL7 LOWBOX_TXT_CHANGE_ZOOM
+#define CHARTZOOM_LVL2 5.0f
+#define CHARTZOOM_LVL3 7.3f
+#define CHARTZOOM_LVL4 9.5f
+#define CHARTZOOM_LVL5 12.0f
+#define CHARTZOOM_LVL6 18.0f
+#define CHARTZOOM_LVL7 20.0f
+#define CHARTZOOM_LVL8 LOWBOX_TXT_CHANGE_ZOOM
 
 void drawNuclBoxLabelDetails(const app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat, const float xPos, const float yPos, const float boxWidth, const float boxHeight, SDL_Color col, const uint16_t nuclInd){
   char tmpStr[32];
@@ -1759,7 +1760,7 @@ void drawNuclBoxLabelDetails(const app_data *restrict dat, app_state *restrict s
   uint8_t drawYOffsets = 1;
   uint8_t labelFontInd = FONTSIZE_NORMAL;
   float labelLineSpacing = 19.0f;
-  if(state->ds.chartZoomScale >= CHARTZOOM_LVL6){
+  if(state->ds.chartZoomScale >= CHARTZOOM_LVL7){
     labelFontInd = FONTSIZE_LARGE;
     labelLineSpacing = 24.0f;
   }
@@ -1822,9 +1823,9 @@ void drawNuclBoxLabelDetails(const app_data *restrict dat, app_state *restrict s
       drawTextAlignedSized(rdat,drawXPos,drawYPos+((yOffsets*labelLineSpacing + 36.0f)*state->ds.uiUserScale),col,labelFontInd,255,"(...)",ALIGN_CENTER,maxLblWidth);
     }
     //draw corner label(s)
-    if(state->ds.chartZoomScale >= CHARTZOOM_LVL5){
+    if(state->ds.chartZoomScale >= CHARTZOOM_LVL6){
       getSpinParStr(tmpStr,&dat->ndat,gsLevInd);
-      if(state->ds.chartZoomScale >= CHARTZOOM_LVL7){
+      if(state->ds.chartZoomScale >= CHARTZOOM_LVL8){
         drawTextAlignedSized(rdat,xPos+boxWidth-labelSmallMargin,yPos+labelSmallMargin,col,FONTSIZE_LARGE,255,tmpStr,ALIGN_RIGHT,16384); //draw large spin-parity label
       }else{
         drawTextAlignedSized(rdat,xPos+boxWidth-labelSmallMargin,yPos+labelSmallMargin,col,FONTSIZE_NORMAL,255,tmpStr,ALIGN_RIGHT,16384); //draw spin-parity label
@@ -1895,9 +1896,9 @@ void drawNuclBoxLabelDetails(const app_data *restrict dat, app_state *restrict s
       }
     }
     //draw corner label(s)
-    if(state->ds.chartZoomScale >= CHARTZOOM_LVL5){
+    if(state->ds.chartZoomScale >= CHARTZOOM_LVL6){
       getSpinParStr(tmpStr,&dat->ndat,gsLevInd);
-      if(state->ds.chartZoomScale >= CHARTZOOM_LVL7){
+      if(state->ds.chartZoomScale >= CHARTZOOM_LVL8){
         drawTextAlignedSized(rdat,xPos+boxWidth-labelSmallMargin,yPos+labelSmallMargin,col,FONTSIZE_LARGE,255,tmpStr,ALIGN_RIGHT,16384); //draw large spin-parity label
       }else{
         drawTextAlignedSized(rdat,xPos+boxWidth-labelSmallMargin,yPos+labelSmallMargin,col,FONTSIZE_NORMAL,255,tmpStr,ALIGN_RIGHT,16384); //draw spin-parity label
@@ -2154,29 +2155,29 @@ void drawNuclBoxLabel(const app_data *restrict dat, app_state *restrict state, r
     //handle fade-in of text
     alpha = (Uint8)((1.0f - 2.0f*(CHARTZOOM_LVL1 - state->ds.chartZoomScale))*255.0f);
   }
-  if(state->ds.chartZoomScale >= CHARTZOOM_LVL2){
+  if(state->ds.chartZoomScale >= CHARTZOOM_LVL3){
     getNuclNameStr(tmpStr,&dat->ndat.nuclData[nuclInd],255);
     float totalLblWidth = 0.0f;
-    if(state->ds.chartZoomScale < CHARTZOOM_LVL3){
+    if(state->ds.chartZoomScale < CHARTZOOM_LVL4){
       totalLblWidth = SDL_roundf(getTextWidth(rdat,FONTSIZE_LARGE,tmpStr)/rdat->uiDPIScale);
-    }else if(state->ds.chartZoomScale < CHARTZOOM_LVL4){
+    }else if(state->ds.chartZoomScale < CHARTZOOM_LVL5){
       totalLblWidth = SDL_roundf(getTextWidth(rdat,FONTSIZE_HUGE,tmpStr)/rdat->uiDPIScale);
-    }else if(state->ds.chartZoomScale < CHARTZOOM_LVL6){
+    }else if(state->ds.chartZoomScale < CHARTZOOM_LVL7){
       totalLblWidth = SDL_roundf(getTextWidth(rdat,FONTSIZE_LARGE_BOLD,tmpStr)/rdat->uiDPIScale);
     }else{
       totalLblWidth = SDL_roundf(getTextWidth(rdat,FONTSIZE_HUGE_BOLD,tmpStr)/rdat->uiDPIScale);
     }
     drawXPos = xPos+boxWidth*0.5f - totalLblWidth*0.5f;
-    if(state->ds.chartZoomScale >= CHARTZOOM_LVL4){
+    if(state->ds.chartZoomScale >= CHARTZOOM_LVL5){
       drawYPos = yPos + labelMargin;
     }else{
       const float totalLblHeight = SDL_roundf((getTextHeight(rdat,FONTSIZE_SMALL,tmpStr) - (2.0f*state->ds.uiUserScale) + getTextHeight(rdat,FONTSIZE_LARGE,getElemStr((uint8_t)Z)))/rdat->uiDPIScale);
       drawYPos = yPos+boxWidth*0.5f - totalLblHeight*0.5f;
     }
-    if(state->ds.chartZoomScale < CHARTZOOM_LVL6){
-      if(state->ds.chartZoomScale >= CHARTZOOM_LVL4){
+    if(state->ds.chartZoomScale < CHARTZOOM_LVL7){
+      if(state->ds.chartZoomScale >= CHARTZOOM_LVL5){
         drawTextAlignedSized(rdat,drawXPos-(2.0f*state->ds.uiUserScale),drawYPos+(10.0f*state->ds.uiUserScale),col,FONTSIZE_LARGE_BOLD,alpha,tmpStr,ALIGN_LEFT,16384); //draw number and element label
-      }else if(state->ds.chartZoomScale >= CHARTZOOM_LVL3){
+      }else if(state->ds.chartZoomScale >= CHARTZOOM_LVL4){
         drawTextAlignedSized(rdat,drawXPos,drawYPos+(10.0f*state->ds.uiUserScale),col,FONTSIZE_HUGE,alpha,tmpStr,ALIGN_LEFT,16384); //draw number and element label
       }else{
         drawTextAlignedSized(rdat,drawXPos,drawYPos+(10.0f*state->ds.uiUserScale),col,FONTSIZE_LARGE,alpha,tmpStr,ALIGN_LEFT,16384); //draw number and element label
@@ -2184,9 +2185,11 @@ void drawNuclBoxLabel(const app_data *restrict dat, app_state *restrict state, r
     }else{
       drawTextAlignedSized(rdat,drawXPos-(2.0f*state->ds.uiUserScale),drawYPos+(6.0f*state->ds.uiUserScale),col,FONTSIZE_HUGE_BOLD,alpha,tmpStr,ALIGN_LEFT,16384); //draw number and element label
     }
-    if(state->ds.chartZoomScale >= CHARTZOOM_LVL4){
+    if(state->ds.chartZoomScale >= CHARTZOOM_LVL5){
       drawNuclBoxLabelDetails(dat,state,rdat,xPos,yPos,boxWidth,boxHeight,col,nuclInd);
     }
+  }else if(state->ds.chartZoomScale >= CHARTZOOM_LVL2){
+    drawTextAlignedSized(rdat,xPos+boxWidth*0.5f,yPos+boxWidth*0.5f,col,FONTSIZE_LARGE,alpha,getElemStr((uint8_t)Z),ALIGN_CENTER,16384); //draw element label only
   }else{
     drawTextAlignedSized(rdat,xPos+boxWidth*0.5f,yPos+boxWidth*0.5f,col,FONTSIZE_NORMAL,alpha,getElemStr((uint8_t)Z),ALIGN_CENTER,16384); //draw element label only
   }
@@ -4838,7 +4841,7 @@ void drawUI(const app_data *restrict dat, app_state *restrict state, resource_da
     if(state->ds.uiAnimPlaying & (1U << UIANIM_CHART_FADEIN)){
       
       SDL_FColor white = {1.0f,1.0f,1.0f,1.0f};
-      white.a = (float)(1.0f*juice_smoothStart2(state->ds.timeLeftInUIAnimation[UIANIM_CHART_FADEIN]/UI_ANIM_LENGTH));
+      white.a = (float)(1.0f*juice_smoothStop2(state->ds.timeLeftInUIAnimation[UIANIM_CHART_FADEIN]/UI_ANIM_LENGTH));
       drawFlatBG(&state->ds,rdat,white);
     }
   }
