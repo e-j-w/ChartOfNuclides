@@ -77,9 +77,10 @@ chartview_decaymode|Decay mode
 chartview_2plus|E(2⁺)
 chartview_r42|E(4⁺)/E(2⁺)
 chartview_beta2|β₂
+chartview_0plus|E(2ⁿᵈ 0⁺)
 chartview_spin|Ground state spin
 chartview_parity|Ground state parity
-chartview_beA|Binding E / A
+chartview_beA|Binding Energy / A
 chartview_sn|S(n)
 chartview_sp|S(p)
 chartview_qalpha|Q(α)

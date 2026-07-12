@@ -93,8 +93,8 @@ static const float uiScales[UISCALE_ENUM_LENGTH] = {1.0f,1.20f,1.60f,1.85f};
 #define CHARTVIEW_MENU_POS_XR        (MENU_BUTTON_POS_XR) //in unscaled pixels
 #define CHARTVIEW_MENU_POS_Y         (UI_TILE_SIZE+UI_PADDING_SIZE)  //in unscaled pixels
 #define CHARTVIEW_MENU_WIDTH         222 //in unscaled pixels
-#define CHARTVIEW_MENU_HEIGHT        ((CHARTVIEW_ENUM_LENGTH+1)*CHARTVIEW_MENU_ITEM_SPACING + 2*PANEL_EDGE_SIZE + 3*UI_PADDING_SIZE) //in unscaled pixels
-#define CHARTVIEW_MENU_COLUMNS       2
+#define CHARTVIEW_MENU_HEIGHT        ((CHARTVIEW_ENUM_LENGTH)*CHARTVIEW_MENU_ITEM_SPACING + 2*UI_PADDING_SIZE) //in unscaled pixels
+#define CHARTVIEW_MENU_COLUMNS       3
 
 #define SEARCH_BUTTON_POS_XR         (UI_PADDING_SIZE) //in unscaled pixels, relative to chart view betton position
 #define SEARCH_BUTTON_POS_Y          UI_PADDING_SIZE //in unscaled pixels

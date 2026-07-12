@@ -3186,6 +3186,32 @@ uint32_t get2PlusLvlInd(const ndata *restrict nd, const uint16_t nuclInd){
 	return MAXNUMLVLS;
 }
 
+uint32_t get2nd0PlusLvlInd(const ndata *restrict nd, const uint16_t nuclInd){
+	if((nd->nuclData[nuclInd].N + nd->nuclData[nuclInd].Z) > 0){
+		if((nd->nuclData[nuclInd].N % 2)==0){
+			if((nd->nuclData[nuclInd].Z % 2)==0){
+				for(uint16_t i=0; i<nd->nuclData[nuclInd].numLevels; i++){
+					if((i > 255)||((uint8_t)i != nd->nuclData[nuclInd].gsLevel)){
+						if(nd->levels[nd->nuclData[nuclInd].firstLevel + (uint32_t)i].numSpinParVals == 1){
+							if(nd->spv[nd->levels[nd->nuclData[nuclInd].firstLevel + (uint32_t)i].firstSpinParVal].spinVal == 0){
+								if(nd->spv[nd->levels[nd->nuclData[nuclInd].firstLevel + (uint32_t)i].firstSpinParVal].parVal == 1){
+									//one of the spin-parity values is 0+
+									uint8_t eValueType = (uint8_t)((nd->levels[nd->nuclData[nuclInd].firstLevel + (uint32_t)i].energy.format >> 5U) & 15U);
+									if(eValueType == VALUETYPE_NUMBER){
+										//not some weird offset or variable energy, use this level
+										return (uint32_t)(nd->nuclData[nuclInd].firstLevel + (uint32_t)i);
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	return MAXNUMLVLS;
+}
+
 int8_t getMostProbableParity(const ndata *restrict nd, const uint32_t lvlInd){
 	if(nd->levels[lvlInd].numSpinParVals == 1){
 		return nd->spv[nd->levels[lvlInd].firstSpinParVal].parVal;
@@ -3364,6 +3390,15 @@ double get2PlusEnergy(const ndata *restrict nd, const uint16_t nuclInd){
 		return getLevelEnergykeV(nd,lvlInd);
 	}
 	return -1.0; //no 2+ state, or not even-even
+}
+
+//get the energy of the first 2nd 0+ state, for even-even nuclei
+double get2nd0PlusEnergy(const ndata *restrict nd, const uint16_t nuclInd){
+	uint32_t lvlInd = get2nd0PlusLvlInd(nd,nuclInd);
+	if(lvlInd != MAXNUMLVLS){
+		return getLevelEnergykeV(nd,lvlInd);
+	}
+	return -1.0; //no 2nd 0+ state, or not even-even
 }
 
 #define HBAR 6.582119569E-16 //in eV s
@@ -4073,6 +4108,7 @@ void changeUIState(const app_data *restrict dat, app_state *restrict state, reso
 				bp_set128(&state->interactableElement,UIELEM_CVM_2PLUS_BUTTON);
 				bp_set128(&state->interactableElement,UIELEM_CVM_R42_BUTTON);
 				bp_set128(&state->interactableElement,UIELEM_CVM_BETA2_BUTTON);
+				bp_set128(&state->interactableElement,UIELEM_CVM_0PLUS_BUTTON);
 				bp_set128(&state->interactableElement,UIELEM_CVM_SPIN_BUTTON);
 				bp_set128(&state->interactableElement,UIELEM_CVM_PARITY_BUTTON);
 				bp_set128(&state->interactableElement,UIELEM_CVM_BEA_BUTTON);
@@ -4774,6 +4810,21 @@ void contextMenuClickAction(app_data *restrict dat, app_state *restrict state, r
 							//SDL_Log("Copied text to clipboard: %s\n",SDL_GetClipboardText());
 						}
 						break;
+					case CHARTVIEW_0PLUS:
+						{//prevent -Wjump-misses-init
+							uint32_t plus0Lvl = get2nd0PlusLvlInd(&dat->ndat,state->cms.selectionInd);
+							if(plus0Lvl != MAXNUMLVLS){
+								char tmpEnStr[32];
+								getLvlEnergyStr(tmpEnStr,&dat->ndat,plus0Lvl,1);
+								SDL_strlcat(tmpEnStr," keV",32);
+								SDL_snprintf(state->copiedTxt,MAX_SELECTABLE_STR_LEN,"%s: %s",dat->strings[dat->locStringIDs[LOCSTR_CHARTVIEW_0PLUS]],tmpEnStr);
+							}else{
+								SDL_snprintf(state->copiedTxt,MAX_SELECTABLE_STR_LEN,"%s: %s",dat->strings[dat->locStringIDs[LOCSTR_CHARTVIEW_0PLUS]],dat->strings[dat->locStringIDs[LOCSTR_UNKNOWN]]);
+							}
+							SDL_SetClipboardText(state->copiedTxt);
+							//SDL_Log("Copied text to clipboard: %s\n",SDL_GetClipboardText());
+						}
+						break;
 					case CHARTVIEW_SPIN:
 					case CHARTVIEW_PARITY:
 						if(getMostProbableSpin(&dat->ndat,gsLevInd) >= 255.0){
@@ -5130,9 +5181,9 @@ void uiElemClickAction(app_data *restrict dat, app_state *restrict state, resour
 	}
 	if((uiElemID != UIELEM_CHARTVIEW_BUTTON)&&(uiElemID != UIELEM_CHARTVIEW_MENU)&&(uiElemID != UIELEM_CVM_HALFLIFE_BUTTON)&&
 	(uiElemID != UIELEM_CVM_DECAYMODE_BUTTON)&&(uiElemID != UIELEM_CVM_2PLUS_BUTTON)&&(uiElemID != UIELEM_CVM_R42_BUTTON)&&
-	(uiElemID != UIELEM_CVM_BETA2_BUTTON)&&(uiElemID != UIELEM_CVM_SPIN_BUTTON)&&(uiElemID != UIELEM_CVM_PARITY_BUTTON)&&
-	(uiElemID != UIELEM_CVM_BEA_BUTTON)&&(uiElemID != UIELEM_CVM_SN_BUTTON)&&(uiElemID != UIELEM_CVM_SP_BUTTON)&&
-	(uiElemID != UIELEM_CVM_QALPHA_BUTTON)&&(uiElemID != UIELEM_CVM_QBETAMINUS_BUTTON)&&
+	(uiElemID != UIELEM_CVM_BETA2_BUTTON)&&(uiElemID != UIELEM_CVM_0PLUS_BUTTON)&&(uiElemID != UIELEM_CVM_SPIN_BUTTON)&&
+	(uiElemID != UIELEM_CVM_PARITY_BUTTON)&&(uiElemID != UIELEM_CVM_BEA_BUTTON)&&(uiElemID != UIELEM_CVM_SN_BUTTON)&&
+	(uiElemID != UIELEM_CVM_SP_BUTTON)&&(uiElemID != UIELEM_CVM_QALPHA_BUTTON)&&(uiElemID != UIELEM_CVM_QBETAMINUS_BUTTON)&&
 	(uiElemID != UIELEM_CVM_QBETAPLUS_BUTTON)&&(uiElemID != UIELEM_CVM_QEC_BUTTON)&&
 	(uiElemID != UIELEM_CVM_NUMLVLS)&&(uiElemID != UIELEM_CVM_NUMISOMERS)&&(uiElemID != UIELEM_CVM_NUMISOMERS_1MIN)&&
 	(uiElemID != UIELEM_CVM_NUMBETADCY)&&(uiElemID != UIELEM_CVM_NUMPARTDCY)&&(uiElemID != UIELEM_CVM_UNKNOWN_ENERGY_BUTTON)){
@@ -5406,6 +5457,12 @@ void uiElemClickAction(app_data *restrict dat, app_state *restrict state, resour
 			startUIAnimation(dat,state,rdat,UIANIM_CHARTVIEW_MENU_HIDE); //menu will be closed after animation finishes
 			state->clickedUIElem = UIELEM_ENUM_LENGTH; //'unclick' the menu button
 			state->chartView = CHARTVIEW_BETA2;
+			changeUIState(dat,state,rdat,UISTATE_CHARTONLY); //prevents mouseover from still highlighting buttons while the menu closes
+			break;
+		case UIELEM_CVM_0PLUS_BUTTON:
+			startUIAnimation(dat,state,rdat,UIANIM_CHARTVIEW_MENU_HIDE); //menu will be closed after animation finishes
+			state->clickedUIElem = UIELEM_ENUM_LENGTH; //'unclick' the menu button
+			state->chartView = CHARTVIEW_0PLUS;
 			changeUIState(dat,state,rdat,UISTATE_CHARTONLY); //prevents mouseover from still highlighting buttons while the menu closes
 			break;
 		case UIELEM_CVM_SPIN_BUTTON:
@@ -6034,13 +6091,13 @@ void updateSingleUIElemPosition(const app_data *restrict dat, app_state *restric
 				state->ds.uiElemHeight[uiElemInd] = (int16_t)(CHARTVIEW_MENU_HEIGHT*heightFrac*state->ds.uiUserScale);
 				state->ds.uiElemPosX[uiElemInd] = (int16_t)(state->ds.windowXRes-(state->ds.uiElemWidth[uiElemInd] + CHARTVIEW_MENU_POS_XR*state->ds.uiUserScale));
 				state->ds.uiElemPosY[uiElemInd] = (int16_t)(CHARTVIEW_MENU_POS_Y*state->ds.uiUserScale);
-				float cvmButtonWidth = (CHARTVIEW_MENU_WIDTH - 2*CHARTVIEW_MENU_COLUMNS*PANEL_EDGE_SIZE - 4*CHARTVIEW_MENU_COLUMNS*UI_PADDING_SIZE);
+				float cvmButtonWidth = (CHARTVIEW_MENU_WIDTH - 2*PANEL_EDGE_SIZE - 6*UI_PADDING_SIZE);
 				float cvmButtonHeight = (CHARTVIEW_MENU_ITEM_SPACING - UI_PADDING_SIZE);
 				if(numViewsPerCol > 0){
 					for(uint8_t i=0; i<CHARTVIEW_ENUM_LENGTH; i++){
 						state->ds.uiElemWidth[(int32_t)UIELEM_CHARTVIEW_MENU-((int32_t)CHARTVIEW_ENUM_LENGTH)+i] = (int16_t)(cvmButtonWidth*state->ds.uiUserScale);
 						state->ds.uiElemHeight[(int32_t)UIELEM_CHARTVIEW_MENU-((int32_t)CHARTVIEW_ENUM_LENGTH)+i] = (int16_t)(cvmButtonHeight*state->ds.uiUserScale);
-						state->ds.uiElemPosX[(int32_t)UIELEM_CHARTVIEW_MENU-((int32_t)CHARTVIEW_ENUM_LENGTH)+i] = (int16_t)(state->ds.windowXRes-((CHARTVIEW_MENU_WIDTH+CHARTVIEW_MENU_POS_XR - 4*PANEL_EDGE_SIZE - 4*UI_PADDING_SIZE + (float)(((CHARTVIEW_MENU_COLUMNS-1) - (float)(i/numViewsPerCol))*(cvmButtonWidth + UI_TILE_SIZE - UI_PADDING_SIZE)))*state->ds.uiUserScale) );
+						state->ds.uiElemPosX[(int32_t)UIELEM_CHARTVIEW_MENU-((int32_t)CHARTVIEW_ENUM_LENGTH)+i] = (int16_t)(state->ds.windowXRes-((CHARTVIEW_MENU_WIDTH+CHARTVIEW_MENU_POS_XR - PANEL_EDGE_SIZE - 2*UI_PADDING_SIZE + (float)(((CHARTVIEW_MENU_COLUMNS-1) - (float)(i/numViewsPerCol))*(cvmButtonWidth + 2*UI_PADDING_SIZE)))*state->ds.uiUserScale) );
 						state->ds.uiElemPosY[(int32_t)UIELEM_CHARTVIEW_MENU-((int32_t)CHARTVIEW_ENUM_LENGTH)+i] = (int16_t)((CHARTVIEW_MENU_POS_Y + PANEL_EDGE_SIZE + CHARTVIEW_MENU_ITEM_SPACING + 2*UI_PADDING_SIZE + (float)((i%numViewsPerCol)*CHARTVIEW_MENU_ITEM_SPACING))*state->ds.uiUserScale);
 					}
 				}

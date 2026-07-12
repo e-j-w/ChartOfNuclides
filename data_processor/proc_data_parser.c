@@ -323,6 +323,7 @@ static int parseAppRules(app_data *restrict dat, asset_mapping *restrict stringI
 	dat->locStringIDs[LOCSTR_CHARTVIEW_2PLUS] = (uint16_t)nameToAssetID("chartview_2plus",stringIDmap);
 	dat->locStringIDs[LOCSTR_CHARTVIEW_R42] = (uint16_t)nameToAssetID("chartview_r42",stringIDmap);
 	dat->locStringIDs[LOCSTR_CHARTVIEW_BETA2] = (uint16_t)nameToAssetID("chartview_beta2",stringIDmap);
+	dat->locStringIDs[LOCSTR_CHARTVIEW_0PLUS] = (uint16_t)nameToAssetID("chartview_0plus",stringIDmap);
 	dat->locStringIDs[LOCSTR_CHARTVIEW_SPIN] = (uint16_t)nameToAssetID("chartview_spin",stringIDmap);
 	dat->locStringIDs[LOCSTR_CHARTVIEW_PARITY] = (uint16_t)nameToAssetID("chartview_parity",stringIDmap);
 	dat->locStringIDs[LOCSTR_CHARTVIEW_BEA] = (uint16_t)nameToAssetID("chartview_beA",stringIDmap);
