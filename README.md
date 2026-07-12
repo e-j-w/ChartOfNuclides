@@ -2,11 +2,11 @@
 
 <div align = center><img src="https://github.com/e-j-w/ChartOfNuclides-flatpak/blob/master/assets/chart_screenshot1.png?raw=true" width="188" height="124" alt="main interface"><img src="https://github.com/e-j-w/ChartOfNuclides-flatpak/blob/master/assets/chart_screenshot2.png?raw=true" width="188" height="124" alt="zoomed in interface"><img src="https://github.com/e-j-w/ChartOfNuclides-flatpak/blob/master/assets/chart_screenshot3.png?raw=true" width="188" height="124" alt="level list view"><img src="https://github.com/e-j-w/ChartOfNuclides-flatpak/blob/master/assets/chart_screenshot4.png?raw=true" width="188" height="124" alt="alternate color scheme view"></div>
 
-A fully-offline desktop app for browsing isotope and nuclear structure data in the [Chart of Nuclides / Segrè chart](https://en.wikipedia.org/wiki/Table_of_nuclides) format. Uses nuclear structure data from [ENSDF](https://www.nndc.bnl.gov/ensdf/about.jsp), masses from [AME2020](https://amdc.impcas.ac.cn/web/masseval.html), and isotopic abundance data from [NIST](https://www.nist.gov/pml/atomic-weights-and-isotopic-compositions-relative-atomic-masses). A full list of features is [here](doc/FEATURES.md).
+A fast and fully-offline desktop app for browsing isotope and nuclear structure data in the [Chart of Nuclides / Segrè chart](https://en.wikipedia.org/wiki/Table_of_nuclides) format, using nuclear structure data from [ENSDF](https://www.nndc.bnl.gov/ensdf/about.jsp), masses from [AME2020](https://amdc.impcas.ac.cn/web/masseval.html), and isotopic abundance data from [NIST](https://www.nist.gov/pml/atomic-weights-and-isotopic-compositions-relative-atomic-masses). A full list of features is [here](doc/FEATURES.md).
 
 ## Quick installation
 
-Prebuilt binaries are available for desktop Linux (via Flatpak) and Windows 10+ (experimental). The latest release and installation instructions are [here](https://github.com/e-j-w/ChartOfNuclides/releases/latest).
+Prebuilt binaries are available for desktop Linux (via Flatpak) and Windows 10+. The latest release and installation instructions are [here](https://github.com/e-j-w/ChartOfNuclides/releases/latest).
 
 ## Using the program
 
@@ -24,4 +24,4 @@ The author(s) cannot guarantee the accuracy or completeness of the information p
 
 Developed and maintained by [Jonathan Williams](https://e-j-w.github.io/).
 
-The fonts used in this program (`data/font.ttf`, `data/font-bold.ttf`) are modified versions of [Oxygen](https://github.com/KDE/oxygen-fonts) with some additional unicode glyphs from [Noto Sans](https://fonts.google.com/noto/specimen/Noto+Sans) and [Inter](https://fonts.google.com/specimen/Inter).  All fonts are made available under the [Open Font License](https://openfontlicense.org/) (as described [here](https://fonts.google.com/specimen/Oxygen/license), [here](https://fonts.google.com/noto/specimen/Noto+Sans/license), and [here](https://fonts.google.com/specimen/Inter/license)).
+The fonts used in this program (`data/font.ttf`, `data/font-bold.ttf`) are modified versions of [Oxygen](https://github.com/KDE/oxygen-fonts) with some additional unicode glyphs from [Noto Sans](https://fonts.google.com/noto/specimen/Noto+Sans) and [Inter](https://fonts.google.com/specimen/Inter).  All of these fonts are made available under the [Open Font License](https://openfontlicense.org/) (as described [here](https://fonts.google.com/specimen/Oxygen/license), [here](https://fonts.google.com/noto/specimen/Noto+Sans/license), and [here](https://fonts.google.com/specimen/Inter/license)).
