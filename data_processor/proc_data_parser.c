@@ -3529,7 +3529,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 									//SDL_Log("%s\n",tok);
 									nd->tran[tranInd].intensity.format = (uint16_t)SDL_strlen(tok);
 									//check for trailing empty spaces
-									for(uint8_t i=0;i<nd->tran[tranInd].intensity.format;i++){
+									for(uint16_t i=0;i<nd->tran[tranInd].intensity.format;i++){
 										if(SDL_isspace(tok[i])){
 											nd->tran[tranInd].intensity.format = i;
 											break;
@@ -3580,7 +3580,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 							//SDL_Log("iccBuff: %s\n",iccBuff);
 							//check for presence of exponent
 							uint8_t hasExp = 0;
-							for(uint8_t i=0; i<SDL_strlen(iccBuff);i++){
+							for(size_t i=0; i<SDL_strlen(iccBuff);i++){
 								if(iccBuff[i]=='E'){
 									hasExp = 1;
 									break;
@@ -3594,7 +3594,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 									//SDL_Log("tok_2: %s\n",tok);
 									nd->tran[tranInd].icc.format = (uint16_t)SDL_strlen(tok);
 									//check for trailing empty spaces
-									for(uint8_t i=0;i<nd->tran[tranInd].icc.format;i++){
+									for(uint16_t i=0;i<nd->tran[tranInd].icc.format;i++){
 										if(SDL_isspace(tok[i])){
 											nd->tran[tranInd].icc.format = i;
 											break;
@@ -3748,7 +3748,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 							//SDL_Log("deltaBuff: %s\n",deltaBuff);
 							//check for presence of exponent
 							hasExp = 0;
-							for(uint8_t i=0; i<SDL_strlen(deltaBuff);i++){
+							for(size_t i=0; i<SDL_strlen(deltaBuff);i++){
 								if(deltaBuff[i]=='E'){
 									hasExp = 1;
 									break;
@@ -3762,7 +3762,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 									//SDL_Log("tok_2: %s\n",tok);
 									nd->tran[tranInd].delta.format = (uint16_t)SDL_strlen(tok);
 									//check for trailing empty spaces
-									for(uint8_t i=0;i<nd->tran[tranInd].delta.format;i++){
+									for(uint16_t i=0;i<nd->tran[tranInd].delta.format;i++){
 										if(SDL_isspace(tok[i])){
 											nd->tran[tranInd].delta.format = i;
 											break;
@@ -3892,7 +3892,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 											nd->nuclData[nd->numNucl].flags |= (1U << 2);
 											//check for presence of exponent
 											uint8_t hasExp = 0;
-											for(uint8_t i=0; i<SDL_strlen(tval);i++){
+											for(size_t i=0; i<SDL_strlen(tval);i++){
 												if(tval[i]=='E'){
 													hasExp = 1;
 													break;
@@ -3907,7 +3907,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 													//SDL_Log("tok2_2: %s\n",tok2);
 													nd->tran[tranInd].icc.format = (uint16_t)SDL_strlen(tok2);
 													//check for trailing empty spaces
-													for(uint8_t i=0;i<nd->tran[tranInd].icc.format;i++){
+													for(uint16_t i=0;i<nd->tran[tranInd].icc.format;i++){
 														if(SDL_isspace(tok2[i])){
 															nd->tran[tranInd].icc.format = i;
 															break;
