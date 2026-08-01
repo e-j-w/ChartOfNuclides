@@ -1258,7 +1258,23 @@ void parseSpinPar(ndata *nd, level * lev, sp_var_data * varDat, char * spstring)
 								exit(-1);
 							}
 						}
-						SDL_strlcpy(val[i],tok,256); //for further parsing, only give spin value after + sign
+						if(SDL_strncmp(&val[i][1],"(-)",3)==0){
+							//special case: variable spin with -ve parity
+							SDL_Log("variable spin with -ve parity\n");
+							nd->spv[nd->numSpinParVals].parVal = -1;
+							lev->numSpinParVals++;
+							nd->numSpinParVals++;
+							return;
+						}else if(SDL_strncmp(&val[i][1],"(+)",3)==0){
+							//special case: variable spin with +ve parity
+							SDL_Log("variable spin with +ve parity\n");
+							nd->spv[nd->numSpinParVals].parVal = 1;
+							lev->numSpinParVals++;
+							nd->numSpinParVals++;
+							return;
+						}else{
+							SDL_strlcpy(val[i],tok,256); //for further parsing, only give spin value after + sign
+						}
 					}else{
 						//non-offset variable spin value
 						//SDL_Log("non offset: %s\n",tmpstr2);
@@ -1857,6 +1873,9 @@ void cleanCommentStr(char *comBuff){
 	SDL_strlcpy(comBuff,modComBuff,118);
 	SDL_free(modComBuff);
 	modComBuff = findReplaceAllUTF8("%A","%α",comBuff);
+	SDL_strlcpy(comBuff,modComBuff,118);
+	SDL_free(modComBuff);
+	modComBuff = findReplaceAllUTF8(")~#",")",comBuff);
 	SDL_strlcpy(comBuff,modComBuff,118);
 	SDL_free(modComBuff);
 	modComBuff = findReplaceAllUTF8("$from"," from",comBuff);
@@ -3095,6 +3114,14 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 										}else{
 											lvlComLineIsGood = 0;
 										}
+									}else if((len >=5)&&(SDL_strncmp(comBuff,"J,T$",2)==0)){
+										if(!(nd->levels[nd->numLvls-1].hasComment & (uint8_t)(1U << LCOMMENT_JPI))){
+											nd->levels[nd->numLvls-1].hasComment |= (uint8_t)(1U << LCOMMENT_JPI);
+											lvlComLineIsGood = 2; //new comment
+											comBuff[3] = '$'; comBuff[4] = (char)SDL_toupper(comBuff[4]); //enforce standard formatting
+										}else{
+											lvlComLineIsGood = 0;
+										}
 									}else if((len >=3)&&((SDL_strncmp(comBuff,"J$",2)==0)||(SDL_strncmp(comBuff,"J ",2)==0))){
 										if(!(nd->levels[nd->numLvls-1].hasComment & (uint8_t)(1U << LCOMMENT_JPI))){
 											nd->levels[nd->numLvls-1].hasComment |= (uint8_t)(1U << LCOMMENT_JPI);
@@ -3738,6 +3765,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 								if(!SDL_isspace(mBuff[0])){
 									//string with no preceding or trailing spaces
 									SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,"Unhandled multipolarity string: %s\n",mBuff);
+									SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,"  Line: %s\n",line);
 								}
 							}
 

@@ -6,7 +6,9 @@
 
 These instructions produce a 'native' build, and should work on either Linux or MacOS (MacOS compatibility is not as frequently tested however).  For Linux, it is also possible to build a Flatpak package which can then be installed using the `flatpak` package manager, see [here](#linux-flatpak).
 
-### Build dependencies
+## Install dependencies
+
+First, install all neccessary build dependencies:
 
 * C compiler: gcc (or clang)
 * GNU make
@@ -31,9 +33,16 @@ brew install pkg-config sdl3 sdl3_image sdl3_ttf
 ```
 
 
-### Build the application
+## Build the application
 
-Install all build dependencies listed above, then build the application binaries using `make` (from the source tree root directory):
+Clone the source repo:
+
+```
+git clone https://github.com/e-j-w/ChartOfNuclides.git
+cd ChartOfNuclides
+```
+
+Build the application binaries using `make` (from the source tree root directory):
 
 ```
 # using gcc:

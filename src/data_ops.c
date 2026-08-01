@@ -3855,7 +3855,9 @@ uint32_t getENSDFLvlCommentStrInd(const ndata *restrict nd, const uint32_t lvlIn
 					}
 					break;
 				case LCOMMENT_JPI:
-					if(SDL_strncmp(&nd->ensdfStrBuf[strBufPos],"J$",2)==0){
+					if(SDL_strncmp(&nd->ensdfStrBuf[strBufPos],"J,T$",4)==0){
+						return strBufPos+4;
+					}else if(SDL_strncmp(&nd->ensdfStrBuf[strBufPos],"J$",2)==0){
 						return strBufPos+2;
 					}
 					break;
