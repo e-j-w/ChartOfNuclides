@@ -1,5 +1,5 @@
 DEBUG_FLAGS = -g3 -pg -fsanitize=address,undefined -fsanitize-undefined-trap-on-error
-CFLAGS = -O2 -Wall -Wextra -Wpedantic -Wc++-compat -Wdouble-promotion -Wshadow -Wunreachable-code -Wpointer-arith -Wcast-align -Wformat-security -Wstack-protector -Wnull-dereference -Wconversion -std=c99
+CFLAGS = -O2 -Wall -Wextra -Wpedantic -Wc++-compat -Wdouble-promotion -Wshadow -Wunreachable-code -Wpointer-arith -Wcast-align -Wformat-security -Wstack-protector -Wnull-dereference -Wconversion -std=c99 $(shell pkg-config --cflags sdl3)
 #CFLAGS += $(DEBUG_FLAGS)
 SDL = `pkg-config sdl3 --libs --cflags` -lSDL3_image -lSDL3_ttf
 COMMON = include/formats.h include/enums.h include/gui_constants.h
