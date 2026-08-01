@@ -1260,14 +1260,14 @@ void parseSpinPar(ndata *nd, level * lev, sp_var_data * varDat, char * spstring)
 						}
 						if(SDL_strncmp(&val[i][1],"(-)",3)==0){
 							//special case: variable spin with -ve parity
-							SDL_Log("variable spin with -ve parity\n");
+							//SDL_Log("variable spin with -ve parity\n");
 							nd->spv[nd->numSpinParVals].parVal = -1;
 							lev->numSpinParVals++;
 							nd->numSpinParVals++;
 							return;
 						}else if(SDL_strncmp(&val[i][1],"(+)",3)==0){
 							//special case: variable spin with +ve parity
-							SDL_Log("variable spin with +ve parity\n");
+							//SDL_Log("variable spin with +ve parity\n");
 							nd->spv[nd->numSpinParVals].parVal = 1;
 							lev->numSpinParVals++;
 							nd->numSpinParVals++;
