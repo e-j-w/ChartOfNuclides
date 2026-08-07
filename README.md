@@ -8,7 +8,7 @@ A fast and fully-offline desktop app for browsing isotope and nuclear structure 
 
 Prebuilt binaries are available for desktop Linux (via Flatpak) and Windows 10+. The latest release and installation instructions are [here](https://github.com/e-j-w/ChartOfNuclides/releases/latest).
 
-Prebuilt binaries are not available for MacOS (I don't have a Mac to build and test with), but others have verified that the application can be manually built for MacOS using the instructions [here](doc/BUILDING.md).
+Prebuilt binaries are not available for MacOS (I don't have a Mac to build and test with), but others have confirmed that the application can be manually built for MacOS using the instructions [here](doc/BUILDING.md).
 
 ## Using the program
 

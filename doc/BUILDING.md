@@ -71,8 +71,6 @@ To uninstall:
 sudo make uninstall-linux
 ```
 
-
-
 # Linux (Flatpak)
 
 This will build a sandboxed [Flatpak](https://flatpak.org/) package, which can then be installed on any Linux machine which already has `flatpak` (this is the way the [official releases](https://github.com/e-j-w/ChartOfNuclides/releases) are built). This is the recommended method for most users since the Flatpak builder should resolve all dependencies and download all neccessary data files, however the automatic build process can take some time. If you want to avoid that, you can do a [manual build](#manual-build) instead.
@@ -157,7 +155,7 @@ cd /c/path/to/ChartOfNuclides
 make all -j
 ```
 
-Build the data file (using the same [procedure](#build-data-file) as on Linux).
+Build the data file (using the same [procedure](#build-data-file) as on other operating systems).
 
 Check which DLLs are needed to run the application by running `ldd chart.exe`. Copy all of the listed DLLs from the MSYS2 distribution to the same directory as `chart.exe`. Then, it should be possible to run `chart.exe` from the file manager.
 
