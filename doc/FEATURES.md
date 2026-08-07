@@ -14,7 +14,7 @@ Currently implemented features include:
 
 # Technical info and other musings
 
-The overall goal of this project is to make a simple, performant, and multiplatform tool that will be useful in both professional (nuclear structure research) and educational contexts. The reason I'm making this is because there's basically no way to browse isotope data that's both usable offline and suitable for a normal person to use.
+The overall goal of this project is to make a simple, performant, and multiplatform tool that will be useful in both professional (nuclear structure research) and educational contexts. The reason I made this is that there was no other way to browse isotope data that was both usable offline and suitable for a normal person to use (IMHO).
 
 The program is written in portable [C99](https://en.wikipedia.org/wiki/C99) using [SDL](https://github.com/libsdl-org/SDL) (so you can browse nuclear half-lives using some of the same code that powers [Half-Life](https://www.pcgamingwiki.com/wiki/Half-Life#Middleware)). It uses several of SDL's built-in features including fast hardware accelerated rendering and native HI-DPI scaling support.
 

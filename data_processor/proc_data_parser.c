@@ -1809,6 +1809,12 @@ void cleanCommentStr(char *comBuff){
 	modComBuff = findReplaceAllUTF8("|h","χ",comBuff);
 	SDL_strlcpy(comBuff,modComBuff,118);
 	SDL_free(modComBuff);
+	modComBuff = findReplaceAllUTF8("|l","λ",comBuff);
+	SDL_strlcpy(comBuff,modComBuff,118);
+	SDL_free(modComBuff);
+	modComBuff = findReplaceAllUTF8("|w","ω",comBuff);
+	SDL_strlcpy(comBuff,modComBuff,118);
+	SDL_free(modComBuff);
 	modComBuff = findReplaceAllUTF8("T{-1/2}","t½",comBuff);
 	SDL_strlcpy(comBuff,modComBuff,118);
 	SDL_free(modComBuff);
@@ -3370,10 +3376,10 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 							//SDL_Log("ebuff: %s\n",ebuff);
 							tok = SDL_strtok_r(ebuff,".",&saveptr);
 							if(tok!=NULL){
-								//SDL_Log("%s\n",tok);
+								//SDL_Log("tok1: %s\n",tok);
 								tok = SDL_strtok_r(NULL,"E",&saveptr); //some gamma energies are specified with exponents
 								if(tok!=NULL){
-									//SDL_Log("%s\n",tok);
+									//SDL_Log("tok2: %s\n",tok);
 									uint16_t len = (uint16_t)SDL_strlen(tok);
 									//check for trailing empty spaces
 									for(uint16_t i=0;i<len;i++){
@@ -3394,21 +3400,25 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 											nd->tran[tranInd].energy.format |= (uint16_t)(1U << 4U); //exponent flag
 										}
 									}
-								}
-							}else{
-								//potentially an exponent form value with no decimal place
-								memcpy(ebuff, &line[9], 10); //re-copy buffer
-								ebuff[10] = '\0';
-								tok = SDL_strtok_r(ebuff,"E",&saveptr);
-								//SDL_Log("ebuff: %s\n",ebuff);
-								if(tok!=NULL){
-									tok = SDL_strtok_r(NULL,"",&saveptr); //get the remaining part of the string (only get past here if the value was expressed in exponent form)
+								}else{
+									//potentially an exponent form value with no decimal place
+									memcpy(ebuff, &line[9], 10); //re-copy buffer
+									ebuff[10] = '\0';
+									//SDL_Log("ebuff (no decimal): %s\n",ebuff);
+									tok = SDL_strtok_r(ebuff,"E",&saveptr);
 									if(tok!=NULL){
-										//SDL_Log("%s\n",tok);
-										//value was in exponent format
-										nd->tran[tranInd].energy.exponent = (int8_t)SDL_atoi(tok);
-										gammaE = gammaE / powf(10.0f,(float)(nd->tran[tranInd].energy.exponent));
-										nd->tran[tranInd].energy.format |= (uint16_t)(1U << 4U); //exponent flag
+										//SDL_Log("tok1: %s\n",tok);
+										tok = SDL_strtok_r(NULL,"",&saveptr); //get the remaining part of the string (only get past here if the value was expressed in exponent form)
+										if(tok!=NULL){
+											//SDL_Log("tok2: %s\n",tok);
+											//value was in exponent format
+											nd->tran[tranInd].energy.exponent = (int8_t)SDL_atoi(tok);
+											if(nd->tran[tranInd].energy.exponent < -5){
+												//SDL_Log("energy in exponent form: %s\n",ebuff);
+											}
+											gammaE = gammaE / powf(10.0f,(float)(nd->tran[tranInd].energy.exponent));
+											nd->tran[tranInd].energy.format |= (uint16_t)(1U << 4U); //exponent flag
+										}
 									}
 								}
 							}
