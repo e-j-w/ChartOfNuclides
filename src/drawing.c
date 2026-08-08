@@ -511,14 +511,14 @@ void drawText(resource_data *restrict rdat, const float xPos, const float yPos, 
 void drawColoredTextAligned(resource_data *restrict rdat, const float xPos, const float yPos, const SDL_Color textColor, const uint8_t fontSizeInd, const char *txt, const uint8_t alignment){
   drawTextAligned(rdat,xPos,yPos,textColor,fontSizeInd,txt,alignment);
 }
-void drawDefaultTextAligned(const ui_theme_rules *restrict uirules, resource_data *restrict rdat, const float xPos, const float yPos, const char *txt, const uint8_t alignment){
-  drawColoredTextAligned(rdat,xPos,yPos,uirules->textColNormal,FONTSIZE_NORMAL,txt,alignment);
+void drawDefaultTextAligned(const ui_theme_rules *restrict uirules, resource_data *restrict rdat, const uint8_t darkMode, const float xPos, const float yPos, const char *txt, const uint8_t alignment){
+  drawColoredTextAligned(rdat,xPos,yPos,darkMode ? uirules->textColNormalDarkMode : uirules->textColNormal,FONTSIZE_NORMAL,txt,alignment);
 }
 void drawColoredText(resource_data *restrict rdat, const float xPos, const float yPos, const SDL_Color textColor, const char *txt){
   drawColoredTextAligned(rdat,xPos,yPos,textColor,FONTSIZE_NORMAL,txt,ALIGN_LEFT);
 }
-void drawDefaultText(const ui_theme_rules *restrict uirules, resource_data *restrict rdat, const float xPos, const float yPos, const char *txt){
-  drawDefaultTextAligned(uirules,rdat,xPos,yPos,txt,ALIGN_LEFT);
+void drawDefaultText(const ui_theme_rules *restrict uirules, resource_data *restrict rdat, const uint8_t darkMode, const float xPos, const float yPos, const char *txt){
+  drawDefaultTextAligned(uirules,rdat,darkMode,xPos,yPos,txt,ALIGN_LEFT);
 }
 
 SDL_FRect getTooltipRect(const drawing_state *restrict ds, resource_data *restrict rdat, const float xPos, const float yPos, const char *txt){

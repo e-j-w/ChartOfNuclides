@@ -71,6 +71,7 @@ void initializeTempState(const app_data *restrict dat, app_state *restrict state
 	state->ds.useLevelListParentThresholds = 1;
 	state->ds.useLevelListCommentTooltips = 1;
 	state->ds.drawShellClosures = 1;
+	state->ds.darkMode = 0;
 	state->ds.chartPosX = DEFAULT_CHART_X_POS;
 	state->ds.chartPosY = DEFAULT_CHART_Y_POS;
 	state->ds.chartZoomScale = DEFAULT_CHART_ZOOM;
@@ -6537,7 +6538,7 @@ void updateUIScale(app_data *restrict dat, app_state *restrict state, resource_d
 	rdat->uiThemeScale = getUIthemeScale(rdat->uiScale);
 	if(rdat->font[0]){
 		//rescale font and UI theme as well, this requires loading them from the app data file
-		regenerateThemeAndFontCache(dat,rdat); //load_data.c
+		regenerateThemeAndFontCache(dat,rdat,state->ds.darkMode); //load_data.c
 	}
 	if(state->uiState == UISTATE_FULLLEVELINFO){
 		state->ds.nuclFullInfoMaxScrollY = getMaxNumLvlDispLines(&dat->ndat,state);

@@ -69,15 +69,40 @@ static int parseAppRules(app_data *restrict dat, asset_mapping *restrict stringI
                   dat->rules.themeRules.bgCol.b = (float)SDL_atof(tok);
                   dat->rules.themeRules.bgCol.a = 1.0f;
                 }else{
-                  SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"could not white_bg_col color string in file: %s.\n",filePath);
+                  SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"could not bg_col color string in file: %s.\n",filePath);
                   return -1;
                 }
               }else{
-                SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"could not white_bg_col color string in file: %s.\n",filePath);
+                SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"could not bg_col color string in file: %s.\n",filePath);
                 return -1;
               }
             }else{
-              SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"could not white_bg_col color string in file: %s.\n",filePath);
+              SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"could not bg_col color string in file: %s.\n",filePath);
+              return -1;
+            }
+          }else if(SDL_strcmp(tok,"bg_col_dark") == 0){
+            tok = SDL_strtok_r(NULL,"",&saveptr); //get the rest of the string
+            SDL_strlcpy(str2,tok,255);
+            tok = SDL_strtok_r(str2,",",&saveptr);
+            if(tok!=NULL){
+              dat->rules.themeRules.bgColDark.r = (float)SDL_atof(tok);
+              tok = SDL_strtok_r(NULL,",",&saveptr);
+              if(tok!=NULL){
+                dat->rules.themeRules.bgColDark.g = (float)SDL_atof(tok);
+                tok = SDL_strtok_r(NULL,",",&saveptr);
+                if(tok!=NULL){
+                  dat->rules.themeRules.bgColDark.b = (float)SDL_atof(tok);
+                  dat->rules.themeRules.bgColDark.a = 1.0f;
+                }else{
+                  SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"could not bg_col_dark color string in file: %s.\n",filePath);
+                  return -1;
+                }
+              }else{
+                SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"could not bg_col_dark color string in file: %s.\n",filePath);
+                return -1;
+              }
+            }else{
+              SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"could not bg_col_dark color string in file: %s.\n",filePath);
               return -1;
             }
           }else if(SDL_strcmp(tok,"text_col") == 0){
@@ -105,6 +130,32 @@ static int parseAppRules(app_data *restrict dat, asset_mapping *restrict stringI
               SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"could not parse text_col color string in file: %s.\n",filePath);
               return -1;
             }
+          }else if(SDL_strcmp(tok,"text_col_darkmode") == 0){
+            tok = SDL_strtok_r(NULL,"",&saveptr); //get the rest of the string
+            SDL_strlcpy(str2,tok,255);
+            tok = SDL_strtok_r(str2,",",&saveptr);
+            if(tok!=NULL){
+              dat->rules.themeRules.textColNormalDarkMode.r = (Uint8)floor(atof(tok)*255.0);
+              tok = SDL_strtok_r(NULL,",",&saveptr);
+              if(tok!=NULL){
+                dat->rules.themeRules.textColNormalDarkMode.g = (Uint8)floor(atof(tok)*255.0);
+                tok = SDL_strtok_r(NULL,",",&saveptr);
+                if(tok!=NULL){
+                  dat->rules.themeRules.textColNormalDarkMode.b = (Uint8)floor(atof(tok)*255.0);
+                  dat->rules.themeRules.textColNormalDarkMode.a = 255;
+                }else{
+                  SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"could not parse text_col_darkmode color string in file: %s.\n",filePath);
+                  return -1;
+                }
+              }else{
+                SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"could not parse text_col_darkmode color string in file: %s.\n",filePath);
+                return -1;
+              }
+            }else{
+              SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"could not parse text_col_darkmode color string in file: %s.\n",filePath);
+              return -1;
+            }
+						//SDL_Log("Parsed dark mode text color.\n");
           }else if(SDL_strcmp(tok,"text_col_inactive") == 0){
             tok = SDL_strtok_r(NULL,"",&saveptr); //get the rest of the string
             SDL_strlcpy(str2,tok,255);

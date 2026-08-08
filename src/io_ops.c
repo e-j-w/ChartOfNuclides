@@ -134,15 +134,21 @@ static int readConfigFile(FILE *file, app_state *restrict state){
         }else{
           state->ds.useLevelListCommentTooltips = 0;
         }
+      }else if(strcmp(par,"reaction_mode") == 0){
+        int rval = atoi(val);
+        if((rval >= 0)&&(rval < REACTIONMODE_ENUM_LENGTH)){
+          state->ds.reactionModeInd = (uint8_t)rval;
+        }
       }else if(strcmp(par,"user_interface_size") == 0){
         int sval = atoi(val);
         if((sval >= 0)&&(sval < UISCALE_ENUM_LENGTH)){
           state->ds.interfaceSizeInd = (uint8_t)sval;
         }
-      }else if(strcmp(par,"reaction_mode") == 0){
-        int rval = atoi(val);
-        if((rval >= 0)&&(rval < REACTIONMODE_ENUM_LENGTH)){
-          state->ds.reactionModeInd = (uint8_t)rval;
+      }else if(strcmp(par,"interface_dark_mode") == 0){
+        if(strcmp(val,"yes") == 0){
+          state->ds.darkMode = 1;
+        }else{
+          state->ds.darkMode = 0;
         }
       }else if(strcmp(par,"gamepad_deadzone") == 0){
         int dz = atoi(val);
@@ -229,8 +235,13 @@ static int writeConfigFile(FILE *file, const app_rules *restrict rules, const ap
   }else{
     fprintf(file,"use_ui_animations=no\n");
   }
-  fprintf(file,"user_interface_size=%u\n",state->ds.interfaceSizeInd);
   fprintf(file,"reaction_mode=%u\n",state->ds.reactionModeInd);
+  fprintf(file,"user_interface_size=%u\n",state->ds.interfaceSizeInd);
+  if(state->ds.darkMode){
+    fprintf(file,"interface_dark_mode=yes\n");
+  }else{
+    fprintf(file,"interface_dark_mode=no\n");
+  }
 
   fprintf(file,"\n### Gamepad Settings ###\n");
   fprintf(file,"gamepad_deadzone=%i\n",state->gamepadDeadzone);

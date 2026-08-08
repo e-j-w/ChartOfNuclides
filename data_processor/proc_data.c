@@ -105,6 +105,7 @@ int main(int argc, char *argv[]){
       return SDL_APP_FAILURE;
     }
     if(writeAsset(out,"data/theme.svg",appBasePath)==-1){return SDL_APP_FAILURE;}
+    if(writeAsset(out,"data/theme_dark.svg",appBasePath)==-1){return SDL_APP_FAILURE;}
     if(writeAsset(out,"data/font.ttf",appBasePath)==-1){return SDL_APP_FAILURE;}
     if(writeAsset(out,"data/font-bold.ttf",appBasePath)==-1){return SDL_APP_FAILURE;}
     SDL_WriteIO(out,&headerStr[0],sizeof(headerStr)); //write footer

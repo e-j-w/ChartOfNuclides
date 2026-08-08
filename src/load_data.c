@@ -62,7 +62,7 @@ int findAndLoadAppDataFile(SDL_IOStream **inp, resource_data *restrict rdat, con
 }
 
 //import all app data
-int importAppData(app_data *restrict dat, resource_data *restrict rdat){
+int importAppData(app_data *restrict dat, resource_data *restrict rdat, const uint8_t darkMode){
 
   SDL_IOStream *inp = NULL;
   char readStr[6];
@@ -141,33 +141,85 @@ int importAppData(app_data *restrict dat, resource_data *restrict rdat){
   fileSize=0;
   if((SDL_ReadIO(inp,&fileSize,sizeof(int64_t))!=sizeof(int64_t))||(fileSize<=0)){
     SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,"Error","App data file read error - invalid data size.",rdat->window);
-    SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"importAppData - invalid texture atlas filesize (%li) from file %s.\n",(long int)fileSize,rdat->appDataFilepath);
+    SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"importAppData - invalid light theme texture atlas filesize (%li) from file %s.\n",(long int)fileSize,rdat->appDataFilepath);
     return -1;
   }
-  void *themeData=(void*)SDL_calloc(1,(size_t)fileSize);
-  totalAlloc += (size_t)fileSize;
-  if(themeData==NULL){
-    SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,"Error","App data file read error - could not allocate memory.",rdat->window);
-    SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"importAppData - couldn't allocate memory for UI theme texture data.\n");
-    exit(-1);
+  if(darkMode == 0){
+    //load light mode theme texture
+    void *themeData=(void*)SDL_calloc(1,(size_t)fileSize);
+    totalAlloc += (size_t)fileSize;
+    if(themeData==NULL){
+      SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,"Error","App data file read error - could not allocate memory.",rdat->window);
+      SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"importAppData - couldn't allocate memory for UI light theme texture data.\n");
+      exit(-1);
+    }
+    if(SDL_ReadIO(inp,themeData,(size_t)fileSize)!=(size_t)fileSize){
+      SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,"Error","App data file I/O error.",rdat->window);
+      SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"importAppData - couldn't read UI light theme texture data from file %s - %s.\n",rdat->appDataFilepath,SDL_GetError());
+      return -1;
+    }
+    SDL_Surface *surface = IMG_LoadSizedSVG_IO(SDL_IOFromConstMem(themeData,(size_t)fileSize),(int)(UI_TILE_SIZE*UI_THEME_TEX_TILES_X*rdat->uiThemeScale),(int)(UI_TILE_SIZE*UI_THEME_TEX_TILES_Y*rdat->uiThemeScale));
+    if(surface == NULL){
+      SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,"Error","App data file I/O error.",rdat->window);
+      SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"importAppData - couldn't load UI light theme texture atlas data - %s.\n",SDL_GetError());
+      return -1;
+    }
+    SDL_free(themeData);
+    SDL_SetSurfaceRLE(surface, 1); //enable RLE acceleration
+    //upload texture atlas into GPU memory
+    rdat->uiThemeTex = SDL_CreateTextureFromSurface(rdat->renderer,surface);
+    SDL_SetTextureScaleMode(rdat->uiThemeTex,SDL_SCALEMODE_LINEAR);
+    SDL_DestroySurface(surface);
+    //skip over the dark mode theme texture
+    fileSize=0;
+    if((SDL_ReadIO(inp,&fileSize,sizeof(int64_t))!=sizeof(int64_t))||(fileSize<=0)){
+      SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,"Error","App data file read error - invalid data size.",rdat->window);
+      SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"importAppData - invalid light theme texture atlas filesize (%li) from file %s.\n",(long int)fileSize,rdat->appDataFilepath);
+      return -1;
+    }
+    if(SDL_SeekIO(inp,(Sint64)fileSize,SDL_IO_SEEK_CUR)<0){
+      SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,"Error","App data file I/O error.",rdat->window);
+      SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"importAppData - couldn't past dark theme data in file %s - %s.\n",rdat->appDataFilepath,SDL_GetError());
+      return -1;
+    }
+  }else{
+    //load dark mode theme texture (skipping over light mode theme texture)
+    if(SDL_SeekIO(inp,(Sint64)fileSize,SDL_IO_SEEK_CUR)<0){
+      SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,"Error","App data file I/O error.",rdat->window);
+      SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"importAppData - couldn't past light theme data in file %s - %s.\n",rdat->appDataFilepath,SDL_GetError());
+      return -1;
+    }
+    fileSize=0;
+    if((SDL_ReadIO(inp,&fileSize,sizeof(int64_t))!=sizeof(int64_t))||(fileSize<=0)){
+      SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,"Error","App data file read error - invalid data size.",rdat->window);
+      SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"importAppData - invalid light theme texture atlas filesize (%li) from file %s.\n",(long int)fileSize,rdat->appDataFilepath);
+      return -1;
+    }
+    void *themeData=(void*)SDL_calloc(1,(size_t)fileSize);
+    totalAlloc += (size_t)fileSize;
+    if(themeData==NULL){
+      SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,"Error","App data file read error - could not allocate memory.",rdat->window);
+      SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"importAppData - couldn't allocate memory for UI dark theme texture data.\n");
+      exit(-1);
+    }
+    if(SDL_ReadIO(inp,themeData,(size_t)fileSize)!=(size_t)fileSize){
+      SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,"Error","App data file I/O error.",rdat->window);
+      SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"importAppData - couldn't read UI dark theme texture data from file %s - %s.\n",rdat->appDataFilepath,SDL_GetError());
+      return -1;
+    }
+    SDL_Surface *surface = IMG_LoadSizedSVG_IO(SDL_IOFromConstMem(themeData,(size_t)fileSize),(int)(UI_TILE_SIZE*UI_THEME_TEX_TILES_X*rdat->uiThemeScale),(int)(UI_TILE_SIZE*UI_THEME_TEX_TILES_Y*rdat->uiThemeScale));
+    if(surface == NULL){
+      SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,"Error","App data file I/O error.",rdat->window);
+      SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"importAppData - couldn't load UI dark theme texture atlas data - %s.\n",SDL_GetError());
+      return -1;
+    }
+    SDL_free(themeData);
+    SDL_SetSurfaceRLE(surface, 1); //enable RLE acceleration
+    //upload texture atlas into GPU memory
+    rdat->uiThemeTex = SDL_CreateTextureFromSurface(rdat->renderer,surface);
+    SDL_SetTextureScaleMode(rdat->uiThemeTex,SDL_SCALEMODE_LINEAR);
+    SDL_DestroySurface(surface);
   }
-  if(SDL_ReadIO(inp,themeData,(size_t)fileSize)!=(size_t)fileSize){
-    SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,"Error","App data file I/O error.",rdat->window);
-    SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"importAppData - couldn't read UI theme texture data from file %s - %s.\n",rdat->appDataFilepath,SDL_GetError());
-    return -1;
-  }
-  SDL_Surface *surface = IMG_LoadSizedSVG_IO(SDL_IOFromConstMem(themeData,(size_t)fileSize),(int)(UI_TILE_SIZE*UI_THEME_TEX_TILES_X*rdat->uiThemeScale),(int)(UI_TILE_SIZE*UI_THEME_TEX_TILES_Y*rdat->uiThemeScale));
-  if(surface == NULL){
-    SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,"Error","App data file I/O error.",rdat->window);
-    SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"importAppData - couldn't UI theme texture atlas data - %s.\n",SDL_GetError());
-    return -1;
-  }
-  SDL_free(themeData);
-  SDL_SetSurfaceRLE(surface, 1); //enable RLE acceleration
-  //upload texture atlas into GPU memory
-  rdat->uiThemeTex = SDL_CreateTextureFromSurface(rdat->renderer,surface);
-  SDL_SetTextureScaleMode(rdat->uiThemeTex,SDL_SCALEMODE_LINEAR);
-  SDL_DestroySurface(surface);
   
   //load font
   int64_t fontFilesize=0, fontFilesizeBold=0;
@@ -247,11 +299,11 @@ int importAppData(app_data *restrict dat, resource_data *restrict rdat){
 }
 
 //similar to importAppData, but only handles loading and rescaling the font data
-int regenerateThemeAndFontCache(app_data *restrict dat, resource_data *restrict rdat){
+int regenerateThemeAndFontCache(app_data *restrict dat, resource_data *restrict rdat, const uint8_t darkMode){
   
   if(rdat->themeOffset <= 0){
     SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,"regenerateThemeAndFontCache - attempting to regenerate cache when app data was not previously imported. Doing that now...\n");
-    return importAppData(dat,rdat);
+    return importAppData(dat,rdat,darkMode);
   }
 
   TTF_DestroyRendererTextEngine(rdat->te);
@@ -282,32 +334,83 @@ int regenerateThemeAndFontCache(app_data *restrict dat, resource_data *restrict 
   int64_t fileSize=0;
   if((SDL_ReadIO(inp,&fileSize,sizeof(int64_t))!=sizeof(int64_t))||(fileSize<=0)){
     SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,"Error","App data file read error - invalid data size.",rdat->window);
-    SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"regenerateThemeAndFontCache - invalid texture atlas filesize (%li) from file %s.\n",(long int)fileSize,rdat->appDataFilepath);
+    SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"regenerateThemeAndFontCache - invalid light theme texture atlas filesize (%li) from file %s.\n",(long int)fileSize,rdat->appDataFilepath);
     return -1;
   }
-  void *themeData=(void*)SDL_calloc(1,(size_t)fileSize);
-  if(themeData==NULL){
-    SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,"Error","App data file read error - could not allocate memory.",rdat->window);
-    SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"regenerateThemeAndFontCache - couldn't allocate memory for UI theme texture data.\n");
-    exit(-1);
+  if(darkMode == 0){
+    //load light mode theme texture
+    void *themeData=(void*)SDL_calloc(1,(size_t)fileSize);
+    if(themeData==NULL){
+      SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,"Error","App data file read error - could not allocate memory.",rdat->window);
+      SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"regenerateThemeAndFontCache - couldn't allocate memory for UI light theme texture data.\n");
+      exit(-1);
+    }
+    if(SDL_ReadIO(inp,themeData,(size_t)fileSize)!=(size_t)fileSize){
+      SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,"Error","App data file I/O error.",rdat->window);
+      SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"regenerateThemeAndFontCache - couldn't read UI light theme texture data from file %s - %s.\n",rdat->appDataFilepath,SDL_GetError());
+      return -1;
+    }
+    SDL_Surface *surface = IMG_LoadSizedSVG_IO(SDL_IOFromConstMem(themeData,(size_t)fileSize),(int)(UI_TILE_SIZE*UI_THEME_TEX_TILES_X*rdat->uiThemeScale),(int)(UI_TILE_SIZE*UI_THEME_TEX_TILES_Y*rdat->uiThemeScale));
+    if(surface == NULL){
+      SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,"Error","App data file I/O error.",rdat->window);
+      SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"regenerateThemeAndFontCache - couldn't load UI light theme texture atlas data - %s.\n",SDL_GetError());
+      return -1;
+    }
+    SDL_free(themeData);
+    SDL_SetSurfaceRLE(surface, 1); //enable RLE acceleration
+    //upload texture atlas into GPU memory
+    rdat->uiThemeTex = SDL_CreateTextureFromSurface(rdat->renderer,surface);
+    SDL_SetTextureScaleMode(rdat->uiThemeTex,SDL_SCALEMODE_LINEAR);
+    SDL_DestroySurface(surface);
+    //skip over the dark mode theme texture
+    fileSize=0;
+    if((SDL_ReadIO(inp,&fileSize,sizeof(int64_t))!=sizeof(int64_t))||(fileSize<=0)){
+      SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,"Error","App data file read error - invalid data size.",rdat->window);
+      SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"regenerateThemeAndFontCache - invalid light theme texture atlas filesize (%li) from file %s.\n",(long int)fileSize,rdat->appDataFilepath);
+      return -1;
+    }
+    if(SDL_SeekIO(inp,(Sint64)fileSize,SDL_IO_SEEK_CUR)<0){
+      SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,"Error","App data file I/O error.",rdat->window);
+      SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"regenerateThemeAndFontCache - couldn't past dark theme data in file %s - %s.\n",rdat->appDataFilepath,SDL_GetError());
+      return -1;
+    }
+  }else{
+    //load dark mode theme texture (skipping over light mode theme texture)
+    if(SDL_SeekIO(inp,(Sint64)fileSize,SDL_IO_SEEK_CUR)<0){
+      SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,"Error","App data file I/O error.",rdat->window);
+      SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"regenerateThemeAndFontCache - couldn't past light theme data in file %s - %s.\n",rdat->appDataFilepath,SDL_GetError());
+      return -1;
+    }
+    fileSize=0;
+    if((SDL_ReadIO(inp,&fileSize,sizeof(int64_t))!=sizeof(int64_t))||(fileSize<=0)){
+      SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,"Error","App data file read error - invalid data size.",rdat->window);
+      SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"regenerateThemeAndFontCache - invalid light theme texture atlas filesize (%li) from file %s.\n",(long int)fileSize,rdat->appDataFilepath);
+      return -1;
+    }
+    void *themeData=(void*)SDL_calloc(1,(size_t)fileSize);
+    if(themeData==NULL){
+      SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,"Error","App data file read error - could not allocate memory.",rdat->window);
+      SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"regenerateThemeAndFontCache - couldn't allocate memory for UI dark theme texture data.\n");
+      exit(-1);
+    }
+    if(SDL_ReadIO(inp,themeData,(size_t)fileSize)!=(size_t)fileSize){
+      SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,"Error","App data file I/O error.",rdat->window);
+      SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"regenerateThemeAndFontCache - couldn't read UI dark theme texture data from file %s - %s.\n",rdat->appDataFilepath,SDL_GetError());
+      return -1;
+    }
+    SDL_Surface *surface = IMG_LoadSizedSVG_IO(SDL_IOFromConstMem(themeData,(size_t)fileSize),(int)(UI_TILE_SIZE*UI_THEME_TEX_TILES_X*rdat->uiThemeScale),(int)(UI_TILE_SIZE*UI_THEME_TEX_TILES_Y*rdat->uiThemeScale));
+    if(surface == NULL){
+      SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,"Error","App data file I/O error.",rdat->window);
+      SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"regenerateThemeAndFontCache - couldn't load UI dark theme texture atlas data - %s.\n",SDL_GetError());
+      return -1;
+    }
+    SDL_free(themeData);
+    SDL_SetSurfaceRLE(surface, 1); //enable RLE acceleration
+    //upload texture atlas into GPU memory
+    rdat->uiThemeTex = SDL_CreateTextureFromSurface(rdat->renderer,surface);
+    SDL_SetTextureScaleMode(rdat->uiThemeTex,SDL_SCALEMODE_LINEAR);
+    SDL_DestroySurface(surface);
   }
-  if(SDL_ReadIO(inp,themeData,(size_t)fileSize)!=(size_t)fileSize){
-    SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,"Error","App data file I/O error.",rdat->window);
-    SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"regenerateThemeAndFontCache - couldn't read UI theme texture data from file %s - %s.\n",rdat->appDataFilepath,SDL_GetError());
-    return -1;
-  }
-  SDL_Surface *surface = IMG_LoadSizedSVG_IO(SDL_IOFromConstMem(themeData,(size_t)fileSize),(int)(UI_TILE_SIZE*UI_THEME_TEX_TILES_X*rdat->uiThemeScale),(int)(UI_TILE_SIZE*UI_THEME_TEX_TILES_Y*rdat->uiThemeScale));
-  if(surface == NULL){
-    SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,"Error","App data file I/O error.",rdat->window);
-    SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"regenerateThemeAndFontCache - couldn't UI theme texture atlas data - %s.\n",SDL_GetError());
-    return -1;
-  }
-  SDL_free(themeData);
-  SDL_SetSurfaceRLE(surface, 1); //enable RLE acceleration
-  //upload texture atlas into GPU memory
-  rdat->uiThemeTex = SDL_CreateTextureFromSurface(rdat->renderer,surface);
-  SDL_SetTextureScaleMode(rdat->uiThemeTex,SDL_SCALEMODE_LINEAR);
-  SDL_DestroySurface(surface);
 
   //load font
   int64_t fontFilesize=0, fontFilesizeBold=0;

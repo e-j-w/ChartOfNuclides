@@ -225,8 +225,8 @@ typedef struct
 
 typedef struct
 {
-  SDL_FColor bgCol; //background colors
-  SDL_Color textColNormal, textColInactive; //colors for text (cannot be floating point as this is not supported by SDL_ttf)
+  SDL_FColor bgCol, bgColDark; //background colors
+  SDL_Color textColNormal, textColNormalDarkMode, textColInactive; //colors for text (cannot be floating point as this is not supported by SDL_ttf)
   SDL_FColor modNormalCol, modMouseOverCol, modSelectedCol, modSelectedAndMouseOverCol; //color modulations for UI elements in different states
 }ui_theme_rules; //struct containing global UI thene rules
 
@@ -302,6 +302,7 @@ typedef struct
   unsigned int drawShellClosures : 1;
   unsigned int drawPerformanceStats : 1; //0=don't draw, 1=draw
   unsigned int windowFullscreenMode : 1; //true if the window is fullscreen
+  unsigned int darkMode : 1; //true if dark mode is enabled
   unsigned int forceRedraw : 1; //true if a re-draw should be forced
 }drawing_state; //struct containing values used for drawing
 
@@ -397,12 +398,12 @@ typedef struct
 typedef struct
 {
   screenshot_data ssdat;
-  size_t themeOffset; //data file offset for the embedded theme
+  size_t themeOffset; //data file offset for the embedded themes
   float uiDPIScale; //scaling factor for UI, for HI-DPI only
   float uiScale; //overall scaling factor for UI
   float uiThemeScale; //scale of the UI theme texture in GPU memory
   SDL_Surface *iconSurface; //surface for the application icon
-  SDL_Texture *uiThemeTex; //the main texture atlas
+  SDL_Texture *uiThemeTex; //the main texture atlas (specific textures are loaded for each UI theme)
   SDL_Texture *tempTex; //used to store temporary texture data during draw operations
   //using different fonts (rather than resizing a single font) decreases CPU usage at the expense of memory
   TTF_TextEngine *te;

@@ -63,8 +63,8 @@ void drawTextAligned(resource_data *restrict rdat, const float xPos, const float
 void drawText(resource_data *restrict rdat, const float xPos, const float yPos, const SDL_Color textColor, const uint8_t fontSizeInd, const char *txt);
 void drawColoredTextAligned(resource_data *restrict rdat, const float xPos, const float yPos, const SDL_Color textColor, const uint8_t fontSizeInd, const char *txt, const uint8_t alignment);
 void drawColoredText(resource_data *restrict rdat, const float xPos, const float yPos, const SDL_Color textColor, const char *txt);
-void drawDefaultTextAligned(const ui_theme_rules *restrict uirules, resource_data *restrict rdat, const float xPos, const float yPos, const char *txt, const uint8_t alignment);
-void drawDefaultText(const ui_theme_rules *restrict uirules, resource_data *restrict rdat, const float xPos, const float yPos, const char *txt);
+void drawDefaultTextAligned(const ui_theme_rules *restrict uirules, resource_data *restrict rdat, const uint8_t darkMode, const float xPos, const float yPos, const char *txt, const uint8_t alignment);
+void drawDefaultText(const ui_theme_rules *restrict uirules, resource_data *restrict rdat, const uint8_t darkMode, const float xPos, const float yPos, const char *txt);
 
 SDL_FRect getTooltipRect(const drawing_state *restrict ds, resource_data *restrict rdat, const float xPos, const float yPos, const char *txt);
 void drawTooltipBox(const ui_theme_rules *restrict uirules, resource_data *restrict rdat, const SDL_FRect rect, const float alpha, const char *txt);

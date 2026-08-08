@@ -25,7 +25,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include "formats.h"
 #include "gui_constants.h"
 
-int importAppData(app_data *restrict dat, resource_data *restrict rdat);
-int regenerateThemeAndFontCache(app_data *restrict dat, resource_data *restrict rdat);
+int importAppData(app_data *restrict dat, resource_data *restrict rdat, const uint8_t darkMode);
+int regenerateThemeAndFontCache(app_data *restrict dat, resource_data *restrict rdat, const uint8_t darkMode);
 
 #endif
