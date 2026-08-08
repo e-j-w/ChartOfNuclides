@@ -2779,6 +2779,7 @@ uint8_t getHighlightState(const app_state *restrict state, const uint8_t uiElem)
 }
 
 void drawInfoBoxHeader(const app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat, const float x, const float y, const Uint8 alpha, const uint16_t nuclInd, const uint32_t selMetadata){
+  SDL_Color textCol = state->ds.darkMode ? whiteCol8Bit : blackCol8Bit;
   char tmpStr[32], nuclStr[32];
   float drawXPos = (float)(x + (PANEL_EDGE_SIZE + 3*UI_PADDING_SIZE)*state->ds.uiUserScale);
   float drawYPos = (float)(y + (PANEL_EDGE_SIZE + 1.5f*UI_PADDING_SIZE)*state->ds.uiUserScale);
@@ -2793,10 +2794,11 @@ void drawInfoBoxHeader(const app_data *restrict dat, app_state *restrict state, 
   }else{
     SDL_snprintf(tmpStr,32,"%s (%s-%u)",nuclStr,getFullElemStr((uint8_t)dat->ndat.nuclData[nuclInd].Z,(uint8_t)dat->ndat.nuclData[nuclInd].N),nucA);
   }
-  drawSelectableTextAlignedSizedWithMetadata(rdat,&state->tss,drawXPos,drawYPos+(10.0f*state->ds.uiUserScale),blackCol8Bit,FONTSIZE_LARGE_BOLD,alpha,tmpStr,ALIGN_LEFT,16384,selMetadata); //draw element label
+  drawSelectableTextAlignedSizedWithMetadata(rdat,&state->tss,drawXPos,drawYPos+(10.0f*state->ds.uiUserScale),textCol,FONTSIZE_LARGE_BOLD,alpha,tmpStr,ALIGN_LEFT,16384,selMetadata); //draw nuclide name label
 }
 
 void drawParentDecayQValStr(const app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat, const float yPos, const Uint8 alpha, const uint16_t nuclInd, const uint8_t decayInd, const uint32_t selMetadata){
+  SDL_Color textCol = state->ds.darkMode ? whiteCol8Bit : blackCol8Bit;
   char nuclStr[32], jpiStr[32], hlStr[32],descStr[64], qValStr[128];
   uint32_t parentLvlInd = getParentBetaDecayLvlInd(&dat->ndat,nuclInd,decayInd);
   if(parentLvlInd < MAXNUMLVLS){
@@ -2831,9 +2833,9 @@ void drawParentDecayQValStr(const app_data *restrict dat, app_state *restrict st
       //SDL_Log("printing: %s\n",qValStr);
       if(yPos >= (NUCL_FULLINFOBOX_LEVELLIST_POS_Y*state->ds.uiUserScale - 1.0f)){
         if((state->tss.selStrsModifiable)&&(selMetadata == state->ds.nuclFullInfoSelStrMetadata)){state->tss.selectedStr = state->tss.numSelStrs;}
-        drawSelectableTextAlignedSizedWithMetadata(rdat,&state->tss,state->ds.windowXRes/2.0f,yPos+(0.5f*NUCL_INFOBOX_SMALLLINE_HEIGHT*state->ds.uiUserScale),blackCol8Bit,FONTSIZE_NORMAL_BOLD,alpha,qValStr,ALIGN_CENTER,16384,selMetadata);
+        drawSelectableTextAlignedSizedWithMetadata(rdat,&state->tss,state->ds.windowXRes/2.0f,yPos+(0.5f*NUCL_INFOBOX_SMALLLINE_HEIGHT*state->ds.uiUserScale),textCol,FONTSIZE_NORMAL_BOLD,alpha,qValStr,ALIGN_CENTER,16384,selMetadata);
       }else{
-        drawTextAlignedSized(rdat,state->ds.windowXRes/2.0f,yPos+(0.5f*NUCL_INFOBOX_SMALLLINE_HEIGHT*state->ds.uiUserScale),blackCol8Bit,FONTSIZE_NORMAL_BOLD,alpha,qValStr,ALIGN_CENTER,16384);
+        drawTextAlignedSized(rdat,state->ds.windowXRes/2.0f,yPos+(0.5f*NUCL_INFOBOX_SMALLLINE_HEIGHT*state->ds.uiUserScale),textCol,FONTSIZE_NORMAL_BOLD,alpha,qValStr,ALIGN_CENTER,16384);
       }
     }else if(dcyModeInd == DECAYMODE_BETAMINUS){
       if(getRawValFromDB(&dat->ndat.levels[parentLvlInd].energy) > 0.0){
@@ -2852,9 +2854,9 @@ void drawParentDecayQValStr(const app_data *restrict dat, app_state *restrict st
       //SDL_Log("printing: %s\n",qValStr);
       if(yPos >= (NUCL_FULLINFOBOX_LEVELLIST_POS_Y*state->ds.uiUserScale - 1.0f)){
         if((state->tss.selStrsModifiable)&&(selMetadata == state->ds.nuclFullInfoSelStrMetadata)){state->tss.selectedStr = state->tss.numSelStrs;}
-        drawSelectableTextAlignedSizedWithMetadata(rdat,&state->tss,state->ds.windowXRes/2.0f,yPos+(0.5f*NUCL_INFOBOX_SMALLLINE_HEIGHT*state->ds.uiUserScale),blackCol8Bit,FONTSIZE_NORMAL_BOLD,alpha,qValStr,ALIGN_CENTER,16384,selMetadata);
+        drawSelectableTextAlignedSizedWithMetadata(rdat,&state->tss,state->ds.windowXRes/2.0f,yPos+(0.5f*NUCL_INFOBOX_SMALLLINE_HEIGHT*state->ds.uiUserScale),textCol,FONTSIZE_NORMAL_BOLD,alpha,qValStr,ALIGN_CENTER,16384,selMetadata);
       }else{
-        drawTextAlignedSized(rdat,state->ds.windowXRes/2.0f,yPos+(0.5f*NUCL_INFOBOX_SMALLLINE_HEIGHT*state->ds.uiUserScale),blackCol8Bit,FONTSIZE_NORMAL_BOLD,alpha,qValStr,ALIGN_CENTER,16384);
+        drawTextAlignedSized(rdat,state->ds.windowXRes/2.0f,yPos+(0.5f*NUCL_INFOBOX_SMALLLINE_HEIGHT*state->ds.uiUserScale),textCol,FONTSIZE_NORMAL_BOLD,alpha,qValStr,ALIGN_CENTER,16384);
       }
     }else if(dcyModeInd == DECAYMODE_ALPHA){
       if(getRawValFromDB(&dat->ndat.levels[parentLvlInd].energy) > 0.0){
@@ -2873,9 +2875,9 @@ void drawParentDecayQValStr(const app_data *restrict dat, app_state *restrict st
       //SDL_Log("printing: %s\n",qValStr);
       if(yPos >= (NUCL_FULLINFOBOX_LEVELLIST_POS_Y*state->ds.uiUserScale - 1.0f)){
         if((state->tss.selStrsModifiable)&&(selMetadata == state->ds.nuclFullInfoSelStrMetadata)){state->tss.selectedStr = state->tss.numSelStrs;}
-        drawSelectableTextAlignedSizedWithMetadata(rdat,&state->tss,state->ds.windowXRes/2.0f,yPos+(0.5f*NUCL_INFOBOX_SMALLLINE_HEIGHT*state->ds.uiUserScale),blackCol8Bit,FONTSIZE_NORMAL_BOLD,alpha,qValStr,ALIGN_CENTER,16384,selMetadata);
+        drawSelectableTextAlignedSizedWithMetadata(rdat,&state->tss,state->ds.windowXRes/2.0f,yPos+(0.5f*NUCL_INFOBOX_SMALLLINE_HEIGHT*state->ds.uiUserScale),textCol,FONTSIZE_NORMAL_BOLD,alpha,qValStr,ALIGN_CENTER,16384,selMetadata);
       }else{
-        drawTextAlignedSized(rdat,state->ds.windowXRes/2.0f,yPos+(0.5f*NUCL_INFOBOX_SMALLLINE_HEIGHT*state->ds.uiUserScale),blackCol8Bit,FONTSIZE_NORMAL_BOLD,alpha,qValStr,ALIGN_CENTER,16384);
+        drawTextAlignedSized(rdat,state->ds.windowXRes/2.0f,yPos+(0.5f*NUCL_INFOBOX_SMALLLINE_HEIGHT*state->ds.uiUserScale),textCol,FONTSIZE_NORMAL_BOLD,alpha,qValStr,ALIGN_CENTER,16384);
       }
     }
   }
@@ -2894,6 +2896,8 @@ void drawNuclFullInfoBox(const app_data *restrict dat, app_state *restrict state
     txtYOffset = (80.0f*state->ds.uiUserScale*juice_smoothStart2(state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_TXTFADEIN]/UI_ANIM_LENGTH));
     txtAlpha = (uint8_t)(255.0f*juice_smoothStart2(1.0f - state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_TXTFADEIN]/UI_ANIM_LENGTH));
   }
+
+  SDL_Color defaultTextCol = state->ds.darkMode ? whiteCol8Bit : blackCol8Bit;
 
   if(state->ds.fcScrollInProgress){
     //force selection strings to be updated mid-scroll
@@ -2997,9 +3001,9 @@ void drawNuclFullInfoBox(const app_data *restrict dat, app_state *restrict state
                 SDL_snprintf(qValStr,64,"%s: %s=%s %s",dat->strings[dat->locStringIDs[LOCSTR_SN_LONG]],dat->strings[dat->locStringIDs[LOCSTR_SN]],descStr,getValueUnitShortStr(dat->ndat.nuclData[nuclInd].sn.unit));
                 if(drawYPos >= (NUCL_FULLINFOBOX_LEVELLIST_POS_Y*state->ds.uiUserScale - 1.0f)){
                   if((state->tss.selStrsModifiable)&&(strMetadata == state->ds.nuclFullInfoSelStrMetadata)){state->tss.selectedStr = state->tss.numSelStrs;}
-                  drawSelectableTextAlignedSizedWithMetadata(rdat,&state->tss,state->ds.windowXRes/2.0f,drawYPos+(0.5f*NUCL_INFOBOX_SMALLLINE_HEIGHT*state->ds.uiUserScale),blackCol8Bit,FONTSIZE_NORMAL_BOLD,txtAlpha,qValStr,ALIGN_CENTER,16384,strMetadata);
+                  drawSelectableTextAlignedSizedWithMetadata(rdat,&state->tss,state->ds.windowXRes/2.0f,drawYPos+(0.5f*NUCL_INFOBOX_SMALLLINE_HEIGHT*state->ds.uiUserScale),defaultTextCol,FONTSIZE_NORMAL_BOLD,txtAlpha,qValStr,ALIGN_CENTER,16384,strMetadata);
                 }else{
-                  drawTextAlignedSized(rdat,state->ds.windowXRes/2.0f,drawYPos+(0.5f*NUCL_INFOBOX_SMALLLINE_HEIGHT*state->ds.uiUserScale),blackCol8Bit,FONTSIZE_NORMAL_BOLD,txtAlpha,qValStr,ALIGN_CENTER,16384);
+                  drawTextAlignedSized(rdat,state->ds.windowXRes/2.0f,drawYPos+(0.5f*NUCL_INFOBOX_SMALLLINE_HEIGHT*state->ds.uiUserScale),defaultTextCol,FONTSIZE_NORMAL_BOLD,txtAlpha,qValStr,ALIGN_CENTER,16384);
                 }
                 break;
               case QVAL_SP:
@@ -3007,9 +3011,9 @@ void drawNuclFullInfoBox(const app_data *restrict dat, app_state *restrict state
                 SDL_snprintf(qValStr,64,"%s: %s=%s %s",dat->strings[dat->locStringIDs[LOCSTR_SP_LONG]],dat->strings[dat->locStringIDs[LOCSTR_SP]],descStr,getValueUnitShortStr(dat->ndat.nuclData[nuclInd].sp.unit));
                 if(drawYPos >= (NUCL_FULLINFOBOX_LEVELLIST_POS_Y*state->ds.uiUserScale - 1.0f)){
                   if((state->tss.selStrsModifiable)&&(strMetadata == state->ds.nuclFullInfoSelStrMetadata)){state->tss.selectedStr = state->tss.numSelStrs;}
-                  drawSelectableTextAlignedSizedWithMetadata(rdat,&state->tss,state->ds.windowXRes/2.0f,drawYPos+(0.5f*NUCL_INFOBOX_SMALLLINE_HEIGHT*state->ds.uiUserScale),blackCol8Bit,FONTSIZE_NORMAL_BOLD,txtAlpha,qValStr,ALIGN_CENTER,16384,strMetadata);
+                  drawSelectableTextAlignedSizedWithMetadata(rdat,&state->tss,state->ds.windowXRes/2.0f,drawYPos+(0.5f*NUCL_INFOBOX_SMALLLINE_HEIGHT*state->ds.uiUserScale),defaultTextCol,FONTSIZE_NORMAL_BOLD,txtAlpha,qValStr,ALIGN_CENTER,16384,strMetadata);
                 }else{
-                  drawTextAlignedSized(rdat,state->ds.windowXRes/2.0f,drawYPos+(0.5f*NUCL_INFOBOX_SMALLLINE_HEIGHT*state->ds.uiUserScale),blackCol8Bit,FONTSIZE_NORMAL_BOLD,txtAlpha,qValStr,ALIGN_CENTER,16384);
+                  drawTextAlignedSized(rdat,state->ds.windowXRes/2.0f,drawYPos+(0.5f*NUCL_INFOBOX_SMALLLINE_HEIGHT*state->ds.uiUserScale),defaultTextCol,FONTSIZE_NORMAL_BOLD,txtAlpha,qValStr,ALIGN_CENTER,16384);
                 }
                 break;
               case QVAL_SA:
@@ -3017,9 +3021,9 @@ void drawNuclFullInfoBox(const app_data *restrict dat, app_state *restrict state
                 SDL_snprintf(qValStr,64,"%s: %s=%s %s",dat->strings[dat->locStringIDs[LOCSTR_SA_LONG]],dat->strings[dat->locStringIDs[LOCSTR_QALPHA]],descStr,getValueUnitShortStr(dat->ndat.nuclData[nuclInd].qalpha.unit));
                 if(drawYPos >= (NUCL_FULLINFOBOX_LEVELLIST_POS_Y*state->ds.uiUserScale - 1.0f)){
                   if((state->tss.selStrsModifiable)&&(strMetadata == state->ds.nuclFullInfoSelStrMetadata)){state->tss.selectedStr = state->tss.numSelStrs;}
-                  drawSelectableTextAlignedSizedWithMetadata(rdat,&state->tss,state->ds.windowXRes/2.0f,drawYPos+(0.5f*NUCL_INFOBOX_SMALLLINE_HEIGHT*state->ds.uiUserScale),blackCol8Bit,FONTSIZE_NORMAL_BOLD,txtAlpha,qValStr,ALIGN_CENTER,16384,strMetadata);
+                  drawSelectableTextAlignedSizedWithMetadata(rdat,&state->tss,state->ds.windowXRes/2.0f,drawYPos+(0.5f*NUCL_INFOBOX_SMALLLINE_HEIGHT*state->ds.uiUserScale),defaultTextCol,FONTSIZE_NORMAL_BOLD,txtAlpha,qValStr,ALIGN_CENTER,16384,strMetadata);
                 }else{
-                  drawTextAlignedSized(rdat,state->ds.windowXRes/2.0f,drawYPos+(0.5f*NUCL_INFOBOX_SMALLLINE_HEIGHT*state->ds.uiUserScale),blackCol8Bit,FONTSIZE_NORMAL_BOLD,txtAlpha,qValStr,ALIGN_CENTER,16384);
+                  drawTextAlignedSized(rdat,state->ds.windowXRes/2.0f,drawYPos+(0.5f*NUCL_INFOBOX_SMALLLINE_HEIGHT*state->ds.uiUserScale),defaultTextCol,FONTSIZE_NORMAL_BOLD,txtAlpha,qValStr,ALIGN_CENTER,16384);
                 }
                 break;
               case QVAL_PARENT_BETA_1:
@@ -3521,9 +3525,16 @@ void drawNuclFullInfoBox(const app_data *restrict dat, app_state *restrict state
   rect.y = 0.0f;
   rect.w = state->ds.windowXRes;
   rect.h = NUCL_FULLINFOBOX_LEVELLIST_POS_Y*state->ds.uiUserScale;
-  drawFlatRect(rdat,rect,dat->rules.themeRules.bgCol);
+  if(state->ds.darkMode){
+    drawFlatRect(rdat,rect,dat->rules.themeRules.bgColDark);
+  }else{
+    drawFlatRect(rdat,rect,dat->rules.themeRules.bgCol);
+  }
   //rect underneath column titles
   SDL_FColor tableHeaderRectCol = {0.92f,0.92f,0.92f,txtAlpha/255.0f};
+  if(state->ds.darkMode){
+    tableHeaderRectCol.r = 0.08f; tableHeaderRectCol.g = 0.08f; tableHeaderRectCol.b = 0.08f;
+  }
   rect.y = (NUCL_FULLINFOBOX_LEVELLIST_HEADER_POS_Y - 2*UI_PADDING_SIZE)*state->ds.uiUserScale + txtYOffset;
   rect.h = (NUCL_FULLINFOBOX_LEVELLIST_POS_Y - NUCL_FULLINFOBOX_LEVELLIST_HEADER_POS_Y + 2*UI_PADDING_SIZE)*state->ds.uiUserScale;
   drawFlatRect(rdat,rect,tableHeaderRectCol);
@@ -3540,22 +3551,22 @@ void drawNuclFullInfoBox(const app_data *restrict dat, app_state *restrict state
   uint32_t strMetadata = headerStrMetadata | (uint32_t)((uint32_t)(1) << 24); //each string should have a unique metadata value, if we want selection to persist after scrolling
   if((state->tss.selStrsModifiable)&&(strMetadata == state->ds.nuclFullInfoSelStrMetadata)){state->tss.selectedStr = state->tss.numSelStrs;}
   SDL_snprintf(descStr,64,"%s: %3i, %s: %3i",dat->strings[dat->locStringIDs[LOCSTR_PROTONSDESC]],dat->ndat.nuclData[nuclInd].Z,dat->strings[dat->locStringIDs[LOCSTR_NEUTRONSDESC]],dat->ndat.nuclData[nuclInd].N);
-  drawSelectableTextAlignedSizedWithMetadata(rdat,&state->tss,NUCL_FULLINFOBOX_NZVALS_POS_X*state->ds.uiUserScale,drawYPos,blackCol8Bit,FONTSIZE_SMALL,txtAlpha,descStr,ALIGN_LEFT,16384,strMetadata);
+  drawSelectableTextAlignedSizedWithMetadata(rdat,&state->tss,NUCL_FULLINFOBOX_NZVALS_POS_X*state->ds.uiUserScale,drawYPos,defaultTextCol,FONTSIZE_SMALL,txtAlpha,descStr,ALIGN_LEFT,16384,strMetadata);
   drawYPos += 18.0f*state->ds.uiUserScale;
   strMetadata = headerStrMetadata | (uint32_t)((uint32_t)(2) << 24); //each string should have a unique metadata value, if we want selection to persist after scrolling
   if((state->tss.selStrsModifiable)&&(strMetadata == state->ds.nuclFullInfoSelStrMetadata)){state->tss.selectedStr = state->tss.numSelStrs;}
   if(dat->ndat.nuclData[nuclInd].abundance.val > 0.0f){
     getAbundanceStr(tmpStr,&dat->ndat,nuclInd);
     SDL_snprintf(descStr,64,"%s %s %s %s",tmpStr,dat->strings[dat->locStringIDs[LOCSTR_OF]],getFullElemStr((uint8_t)dat->ndat.nuclData[nuclInd].Z,255),dat->strings[dat->locStringIDs[LOCSTR_ONEARTH]]);
-    drawSelectableTextAlignedSizedWithMetadata(rdat,&state->tss,NUCL_FULLINFOBOX_NZVALS_POS_X*state->ds.uiUserScale,drawYPos,blackCol8Bit,FONTSIZE_SMALL,txtAlpha,descStr,ALIGN_LEFT,16384,strMetadata);
+    drawSelectableTextAlignedSizedWithMetadata(rdat,&state->tss,NUCL_FULLINFOBOX_NZVALS_POS_X*state->ds.uiUserScale,drawYPos,defaultTextCol,FONTSIZE_SMALL,txtAlpha,descStr,ALIGN_LEFT,16384,strMetadata);
   }else{
-    drawSelectableTextAlignedSizedWithMetadata(rdat,&state->tss,NUCL_FULLINFOBOX_NZVALS_POS_X*state->ds.uiUserScale,drawYPos,blackCol8Bit,FONTSIZE_SMALL,txtAlpha,dat->strings[dat->locStringIDs[LOCSTR_NOTNATURAL]],ALIGN_LEFT,16384,strMetadata);
+    drawSelectableTextAlignedSizedWithMetadata(rdat,&state->tss,NUCL_FULLINFOBOX_NZVALS_POS_X*state->ds.uiUserScale,drawYPos,defaultTextCol,FONTSIZE_SMALL,txtAlpha,dat->strings[dat->locStringIDs[LOCSTR_NOTNATURAL]],ALIGN_LEFT,16384,strMetadata);
   }
   drawYPos += 18.0f*state->ds.uiUserScale;
   strMetadata = headerStrMetadata | (uint32_t)((uint32_t)(3) << 24); //each string should have a unique metadata value, if we want selection to persist after scrolling
   if((state->tss.selStrsModifiable)&&(strMetadata == state->ds.nuclFullInfoSelStrMetadata)){state->tss.selectedStr = state->tss.numSelStrs;}
   SDL_snprintf(descStr,64,"%s: %s",dat->strings[dat->locStringIDs[LOCSTR_ELEM_TYPE]],getElementFamilyStr(dat,dat->ndat.nuclData[nuclInd].Z));
-  drawSelectableTextAlignedSizedWithMetadata(rdat,&state->tss,NUCL_FULLINFOBOX_NZVALS_POS_X*state->ds.uiUserScale,drawYPos,blackCol8Bit,FONTSIZE_SMALL,txtAlpha,descStr,ALIGN_LEFT,16384,strMetadata);
+  drawSelectableTextAlignedSizedWithMetadata(rdat,&state->tss,NUCL_FULLINFOBOX_NZVALS_POS_X*state->ds.uiUserScale,drawYPos,defaultTextCol,FONTSIZE_SMALL,txtAlpha,descStr,ALIGN_LEFT,16384,strMetadata);
   
   //Q-values and masses
   char massStr[48]; //need a longer string, some masses have many decimal places!
@@ -3569,7 +3580,7 @@ void drawNuclFullInfoBox(const app_data *restrict dat, app_state *restrict state
   }else{
     SDL_snprintf(massStr,48,"%s",dat->strings[dat->locStringIDs[LOCSTR_MASS_UNKNOWN]]);
   }
-  drawSelectableTextAlignedSizedWithMetadata(rdat,&state->tss,drawXPos,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,massStr,ALIGN_RIGHT,16384,strMetadata);
+  drawSelectableTextAlignedSizedWithMetadata(rdat,&state->tss,drawXPos,drawYPos,defaultTextCol,FONTSIZE_NORMAL,txtAlpha,massStr,ALIGN_RIGHT,16384,strMetadata);
   drawYPos += 20.0f*state->ds.uiUserScale;
   if(dat->ndat.nuclData[nuclInd].qalpha.val != 0.0f){
     strMetadata = headerStrMetadata | (uint32_t)((uint32_t)(5) << 24); //each string should have a unique metadata value, if we want selection to persist after scrolling
@@ -3649,53 +3660,53 @@ void drawNuclFullInfoBox(const app_data *restrict dat, app_state *restrict state
   drawYPos = (NUCL_FULLINFOBOX_LEVELLIST_HEADER_POS_Y - 2.0f)*state->ds.uiUserScale + txtYOffset;
   strMetadata = headerStrMetadata | (uint32_t)((uint32_t)(11) << 24); //each string should have a unique metadata value, if we want selection to persist after scrolling
   if((state->tss.selStrsModifiable)&&(strMetadata == state->ds.nuclFullInfoSelStrMetadata)){state->tss.selectedStr = state->tss.numSelStrs;}
-  drawSelectableTextAlignedSizedWithMetadata(rdat,&state->tss,drawXPos - 2*UI_PADDING_SIZE*state->ds.uiUserScale,drawYPos,blackCol8Bit,FONTSIZE_NORMAL_BOLD,txtAlpha,dat->strings[dat->locStringIDs[LOCSTR_LEVELINFO_HEADER]],ALIGN_LEFT,16384,strMetadata);
+  drawSelectableTextAlignedSizedWithMetadata(rdat,&state->tss,drawXPos - 2*UI_PADDING_SIZE*state->ds.uiUserScale,drawYPos,defaultTextCol,FONTSIZE_NORMAL_BOLD,txtAlpha,dat->strings[dat->locStringIDs[LOCSTR_LEVELINFO_HEADER]],ALIGN_LEFT,16384,strMetadata);
   drawYPos += (NUCL_INFOBOX_SMALLLINE_HEIGHT + UI_PADDING_SIZE)*state->ds.uiUserScale;
   strMetadata = headerStrMetadata | (uint32_t)((uint32_t)(12) << 24); //each string should have a unique metadata value, if we want selection to persist after scrolling
   if((state->tss.selStrsModifiable)&&(strMetadata == state->ds.nuclFullInfoSelStrMetadata)){state->tss.selectedStr = state->tss.numSelStrs;}
-  drawSelectableTextAlignedSizedWithMetadata(rdat,&state->tss,drawXPos,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,dat->strings[dat->locStringIDs[LOCSTR_ENERGY_KEV]],ALIGN_LEFT,16384,strMetadata);
+  drawSelectableTextAlignedSizedWithMetadata(rdat,&state->tss,drawXPos,drawYPos,defaultTextCol,FONTSIZE_NORMAL,txtAlpha,dat->strings[dat->locStringIDs[LOCSTR_ENERGY_KEV]],ALIGN_LEFT,16384,strMetadata);
   drawXPos += state->ds.fullInfoColWidth[LLCOLUMN_ELEVEL]*state->ds.uiUserScale;
   strMetadata = headerStrMetadata | (uint32_t)((uint32_t)(13) << 24); //each string should have a unique metadata value, if we want selection to persist after scrolling
   if((state->tss.selStrsModifiable)&&(strMetadata == state->ds.nuclFullInfoSelStrMetadata)){state->tss.selectedStr = state->tss.numSelStrs;}
-  drawSelectableTextAlignedSizedWithMetadata(rdat,&state->tss,drawXPos,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,dat->strings[dat->locStringIDs[LOCSTR_JPI]],ALIGN_LEFT,16384,strMetadata);
+  drawSelectableTextAlignedSizedWithMetadata(rdat,&state->tss,drawXPos,drawYPos,defaultTextCol,FONTSIZE_NORMAL,txtAlpha,dat->strings[dat->locStringIDs[LOCSTR_JPI]],ALIGN_LEFT,16384,strMetadata);
   drawXPos += state->ds.fullInfoColWidth[LLCOLUMN_JPI]*state->ds.uiUserScale;
   strMetadata = headerStrMetadata | (uint32_t)((uint32_t)(14) << 24); //each string should have a unique metadata value, if we want selection to persist after scrolling
   if((state->tss.selStrsModifiable)&&(strMetadata == state->ds.nuclFullInfoSelStrMetadata)){state->tss.selectedStr = state->tss.numSelStrs;}
   if(state->ds.useLifetimes){
-    drawSelectableTextAlignedSizedWithMetadata(rdat,&state->tss,drawXPos,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,dat->strings[dat->locStringIDs[LOCSTR_LIFETIME]],ALIGN_LEFT,16384,strMetadata);
+    drawSelectableTextAlignedSizedWithMetadata(rdat,&state->tss,drawXPos,drawYPos,defaultTextCol,FONTSIZE_NORMAL,txtAlpha,dat->strings[dat->locStringIDs[LOCSTR_LIFETIME]],ALIGN_LEFT,16384,strMetadata);
   }else{
-    drawSelectableTextAlignedSizedWithMetadata(rdat,&state->tss,drawXPos,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,dat->strings[dat->locStringIDs[LOCSTR_HALFLIFE]],ALIGN_LEFT,16384,strMetadata);
+    drawSelectableTextAlignedSizedWithMetadata(rdat,&state->tss,drawXPos,drawYPos,defaultTextCol,FONTSIZE_NORMAL,txtAlpha,dat->strings[dat->locStringIDs[LOCSTR_HALFLIFE]],ALIGN_LEFT,16384,strMetadata);
   }
   drawXPos += state->ds.fullInfoColWidth[LLCOLUMN_HALFLIFE]*state->ds.uiUserScale;
   strMetadata = headerStrMetadata | (uint32_t)((uint32_t)(15) << 24); //each string should have a unique metadata value, if we want selection to persist after scrolling
   if((state->tss.selStrsModifiable)&&(strMetadata == state->ds.nuclFullInfoSelStrMetadata)){state->tss.selectedStr = state->tss.numSelStrs;}
-  drawSelectableTextAlignedSizedWithMetadata(rdat,&state->tss,drawXPos,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,dat->strings[dat->locStringIDs[LOCSTR_ENERGY_GAMMA]],ALIGN_LEFT,16384,strMetadata);
+  drawSelectableTextAlignedSizedWithMetadata(rdat,&state->tss,drawXPos,drawYPos,defaultTextCol,FONTSIZE_NORMAL,txtAlpha,dat->strings[dat->locStringIDs[LOCSTR_ENERGY_GAMMA]],ALIGN_LEFT,16384,strMetadata);
   drawXPos += state->ds.fullInfoColWidth[LLCOLUMN_EGAMMA]*state->ds.uiUserScale;
   strMetadata = headerStrMetadata | (uint32_t)((uint32_t)(16) << 24); //each string should have a unique metadata value, if we want selection to persist after scrolling
   if((state->tss.selStrsModifiable)&&(strMetadata == state->ds.nuclFullInfoSelStrMetadata)){state->tss.selectedStr = state->tss.numSelStrs;}
-  drawSelectableTextAlignedSizedWithMetadata(rdat,&state->tss,drawXPos,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,dat->strings[dat->locStringIDs[LOCSTR_INTENSITY_GAMMA]],ALIGN_LEFT,16384,strMetadata);
+  drawSelectableTextAlignedSizedWithMetadata(rdat,&state->tss,drawXPos,drawYPos,defaultTextCol,FONTSIZE_NORMAL,txtAlpha,dat->strings[dat->locStringIDs[LOCSTR_INTENSITY_GAMMA]],ALIGN_LEFT,16384,strMetadata);
   drawXPos += state->ds.fullInfoColWidth[LLCOLUMN_IGAMMA]*state->ds.uiUserScale;
   if(state->ds.nuclFullInfoShownColumns & (1U << LLCOLUMN_MGAMMA)){
     strMetadata = headerStrMetadata | (uint32_t)((uint32_t)(17) << 24); //each string should have a unique metadata value, if we want selection to persist after scrolling
     if((state->tss.selStrsModifiable)&&(strMetadata == state->ds.nuclFullInfoSelStrMetadata)){state->tss.selectedStr = state->tss.numSelStrs;}
-    drawSelectableTextAlignedSizedWithMetadata(rdat,&state->tss,drawXPos,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,dat->strings[dat->locStringIDs[LOCSTR_MULTIPOLARITY_GAMMA]],ALIGN_LEFT,16384,strMetadata);
+    drawSelectableTextAlignedSizedWithMetadata(rdat,&state->tss,drawXPos,drawYPos,defaultTextCol,FONTSIZE_NORMAL,txtAlpha,dat->strings[dat->locStringIDs[LOCSTR_MULTIPOLARITY_GAMMA]],ALIGN_LEFT,16384,strMetadata);
     drawXPos += state->ds.fullInfoColWidth[LLCOLUMN_MGAMMA]*state->ds.uiUserScale;
   }
   if(state->ds.nuclFullInfoShownColumns & (1U << LLCOLUMN_DELTA)){
     strMetadata = headerStrMetadata | (uint32_t)((uint32_t)(18) << 24); //each string should have a unique metadata value, if we want selection to persist after scrolling
     if((state->tss.selStrsModifiable)&&(strMetadata == state->ds.nuclFullInfoSelStrMetadata)){state->tss.selectedStr = state->tss.numSelStrs;}
-    drawSelectableTextAlignedSizedWithMetadata(rdat,&state->tss,drawXPos,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,dat->strings[dat->locStringIDs[LOCSTR_MIXING_GAMMA]],ALIGN_LEFT,16384,strMetadata);
+    drawSelectableTextAlignedSizedWithMetadata(rdat,&state->tss,drawXPos,drawYPos,defaultTextCol,FONTSIZE_NORMAL,txtAlpha,dat->strings[dat->locStringIDs[LOCSTR_MIXING_GAMMA]],ALIGN_LEFT,16384,strMetadata);
     drawXPos += state->ds.fullInfoColWidth[LLCOLUMN_DELTA]*state->ds.uiUserScale;
   }
   if(state->ds.nuclFullInfoShownColumns & (1U << LLCOLUMN_ICC)){
     strMetadata = headerStrMetadata | (uint32_t)((uint32_t)(19) << 24); //each string should have a unique metadata value, if we want selection to persist after scrolling
     if((state->tss.selStrsModifiable)&&(strMetadata == state->ds.nuclFullInfoSelStrMetadata)){state->tss.selectedStr = state->tss.numSelStrs;}
-    drawSelectableTextAlignedSizedWithMetadata(rdat,&state->tss,drawXPos,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,dat->strings[dat->locStringIDs[LOCSTR_ICC_GAMMA]],ALIGN_LEFT,16384,strMetadata);
+    drawSelectableTextAlignedSizedWithMetadata(rdat,&state->tss,drawXPos,drawYPos,defaultTextCol,FONTSIZE_NORMAL,txtAlpha,dat->strings[dat->locStringIDs[LOCSTR_ICC_GAMMA]],ALIGN_LEFT,16384,strMetadata);
     drawXPos += state->ds.fullInfoColWidth[LLCOLUMN_ICC]*state->ds.uiUserScale;
   }
   strMetadata = headerStrMetadata | (uint32_t)((uint32_t)(20) << 24); //each string should have a unique metadata value, if we want selection to persist after scrolling
   if((state->tss.selStrsModifiable)&&(strMetadata == state->ds.nuclFullInfoSelStrMetadata)){state->tss.selectedStr = state->tss.numSelStrs;}
-  drawSelectableTextAlignedSizedWithMetadata(rdat,&state->tss,drawXPos,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,dat->strings[dat->locStringIDs[LOCSTR_FINALLEVEL]],ALIGN_LEFT,16384,strMetadata);
+  drawSelectableTextAlignedSizedWithMetadata(rdat,&state->tss,drawXPos,drawYPos,defaultTextCol,FONTSIZE_NORMAL,txtAlpha,dat->strings[dat->locStringIDs[LOCSTR_FINALLEVEL]],ALIGN_LEFT,16384,strMetadata);
 
   //draw buttons
   if(rdat->ssdat.takingScreenshot != 1){
@@ -3802,6 +3813,8 @@ void drawNuclInfoBox(const app_data *restrict dat, app_state *restrict state, re
   
   removeSelectableStringsInRect(&state->tss,infoBoxPanelRect); //get rid of selectable strings behind the panel
 
+  SDL_Color textCol = state->ds.darkMode ? whiteCol8Bit : blackCol8Bit;
+
   //draw column title strings
   char tmpStr[32];
   float drawXPos = (float)(infoBoxPanelRect.x + (state->ds.infoBoxEColOffset)*state->ds.uiUserScale);
@@ -3810,21 +3823,21 @@ void drawNuclInfoBox(const app_data *restrict dat, app_state *restrict state, re
     char abundanceStr[64];
     getAbundanceStr(tmpStr,&dat->ndat,nuclInd);
     SDL_snprintf(abundanceStr,64,"...%s %s %s %s %s.",dat->strings[dat->locStringIDs[LOCSTR_IS]],tmpStr,dat->strings[dat->locStringIDs[LOCSTR_OF]],getFullElemStr((uint8_t)dat->ndat.nuclData[nuclInd].Z,255),dat->strings[dat->locStringIDs[LOCSTR_ONEARTH]]);
-    drawSelectableTextAlignedSized(rdat,&state->tss,drawXPos,drawYPos,blackCol8Bit,FONTSIZE_SMALL,alpha,abundanceStr,ALIGN_LEFT,(Uint16)(state->ds.infoBoxCurrentDispWidth));
+    drawSelectableTextAlignedSized(rdat,&state->tss,drawXPos,drawYPos,textCol,FONTSIZE_SMALL,alpha,abundanceStr,ALIGN_LEFT,(Uint16)(state->ds.infoBoxCurrentDispWidth));
 		drawYPos += NUCL_INFOBOX_ABUNDANCE_LINE_HEIGHT*state->ds.uiUserScale;
 	}else{
     drawYPos += 6.0f*state->ds.uiUserScale;
   }
-  drawSelectableTextAlignedSized(rdat,&state->tss,drawXPos,drawYPos + 2.0f*state->ds.uiUserScale,blackCol8Bit,FONTSIZE_NORMAL_BOLD,alpha,dat->strings[dat->locStringIDs[LOCSTR_GM_STATE]],ALIGN_LEFT,(Uint16)(state->ds.infoBoxCurrentDispWidth));
+  drawSelectableTextAlignedSized(rdat,&state->tss,drawXPos,drawYPos + 2.0f*state->ds.uiUserScale,textCol,FONTSIZE_NORMAL_BOLD,alpha,dat->strings[dat->locStringIDs[LOCSTR_GM_STATE]],ALIGN_LEFT,(Uint16)(state->ds.infoBoxCurrentDispWidth));
   drawYPos += NUCL_INFOBOX_BIGLINE_HEIGHT*state->ds.uiUserScale;
-  drawSelectableTextAlignedSized(rdat,&state->tss,drawXPos,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,alpha,dat->strings[dat->locStringIDs[LOCSTR_ENERGY_KEV]],ALIGN_LEFT,(Uint16)(state->ds.infoBoxCurrentDispWidth));
-  drawSelectableTextAlignedSized(rdat,&state->tss,drawXPos+state->ds.infoBoxJpiColOffset*state->ds.uiUserScale,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,alpha,dat->strings[dat->locStringIDs[LOCSTR_JPI]],ALIGN_LEFT,(Uint16)(state->ds.infoBoxCurrentDispWidth));
+  drawSelectableTextAlignedSized(rdat,&state->tss,drawXPos,drawYPos,textCol,FONTSIZE_NORMAL,alpha,dat->strings[dat->locStringIDs[LOCSTR_ENERGY_KEV]],ALIGN_LEFT,(Uint16)(state->ds.infoBoxCurrentDispWidth));
+  drawSelectableTextAlignedSized(rdat,&state->tss,drawXPos+state->ds.infoBoxJpiColOffset*state->ds.uiUserScale,drawYPos,textCol,FONTSIZE_NORMAL,alpha,dat->strings[dat->locStringIDs[LOCSTR_JPI]],ALIGN_LEFT,(Uint16)(state->ds.infoBoxCurrentDispWidth));
   if(state->ds.useLifetimes){
-    drawSelectableTextAlignedSized(rdat,&state->tss,drawXPos+state->ds.infoBoxHlColOffset*state->ds.uiUserScale,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,alpha,dat->strings[dat->locStringIDs[LOCSTR_LIFETIME]],ALIGN_LEFT,(Uint16)(state->ds.infoBoxCurrentDispWidth));
+    drawSelectableTextAlignedSized(rdat,&state->tss,drawXPos+state->ds.infoBoxHlColOffset*state->ds.uiUserScale,drawYPos,textCol,FONTSIZE_NORMAL,alpha,dat->strings[dat->locStringIDs[LOCSTR_LIFETIME]],ALIGN_LEFT,(Uint16)(state->ds.infoBoxCurrentDispWidth));
   }else{
-    drawSelectableTextAlignedSized(rdat,&state->tss,drawXPos+state->ds.infoBoxHlColOffset*state->ds.uiUserScale,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,alpha,dat->strings[dat->locStringIDs[LOCSTR_HALFLIFE]],ALIGN_LEFT,(Uint16)(state->ds.infoBoxCurrentDispWidth));
+    drawSelectableTextAlignedSized(rdat,&state->tss,drawXPos+state->ds.infoBoxHlColOffset*state->ds.uiUserScale,drawYPos,textCol,FONTSIZE_NORMAL,alpha,dat->strings[dat->locStringIDs[LOCSTR_HALFLIFE]],ALIGN_LEFT,(Uint16)(state->ds.infoBoxCurrentDispWidth));
   }
-  drawSelectableTextAlignedSized(rdat,&state->tss,drawXPos+state->ds.infoBoxDcyModeColOffset*state->ds.uiUserScale,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,alpha,dat->strings[dat->locStringIDs[LOCSTR_DECAYMODE]],ALIGN_LEFT,(Uint16)(state->ds.infoBoxCurrentDispWidth));
+  drawSelectableTextAlignedSized(rdat,&state->tss,drawXPos+state->ds.infoBoxDcyModeColOffset*state->ds.uiUserScale,drawYPos,textCol,FONTSIZE_NORMAL,alpha,dat->strings[dat->locStringIDs[LOCSTR_DECAYMODE]],ALIGN_LEFT,(Uint16)(state->ds.infoBoxCurrentDispWidth));
 
   //draw divider line
   drawYPos += 0.9f*NUCL_INFOBOX_BIGLINE_HEIGHT*state->ds.uiUserScale;
@@ -3834,24 +3847,24 @@ void drawNuclInfoBox(const app_data *restrict dat, app_state *restrict state, re
   drawYPos += 0.2f*NUCL_INFOBOX_BIGLINE_HEIGHT*state->ds.uiUserScale;
   uint32_t lvlInd = dat->ndat.nuclData[nuclInd].firstLevel + dat->ndat.nuclData[nuclInd].gsLevel;
   getLvlEnergyStr(tmpStr,&dat->ndat,lvlInd,0);
-  drawSelectableTextAlignedSized(rdat,&state->tss,drawXPos,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,alpha,tmpStr,ALIGN_LEFT,(Uint16)(state->ds.infoBoxCurrentDispWidth));
+  drawSelectableTextAlignedSized(rdat,&state->tss,drawXPos,drawYPos,textCol,FONTSIZE_NORMAL,alpha,tmpStr,ALIGN_LEFT,(Uint16)(state->ds.infoBoxCurrentDispWidth));
   getSpinParStr(tmpStr,&dat->ndat,lvlInd);
-  drawSelectableTextAlignedSized(rdat,&state->tss,drawXPos+state->ds.infoBoxJpiColOffset*state->ds.uiUserScale,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,alpha,tmpStr,ALIGN_LEFT,(Uint16)(state->ds.infoBoxCurrentDispWidth));
+  drawSelectableTextAlignedSized(rdat,&state->tss,drawXPos+state->ds.infoBoxJpiColOffset*state->ds.uiUserScale,drawYPos,textCol,FONTSIZE_NORMAL,alpha,tmpStr,ALIGN_LEFT,(Uint16)(state->ds.infoBoxCurrentDispWidth));
   getHalfLifeStr(tmpStr,dat,lvlInd,1,1,state->ds.useLifetimes);
-  drawSelectableTextAlignedSized(rdat,&state->tss,drawXPos+state->ds.infoBoxHlColOffset*state->ds.uiUserScale,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,alpha,tmpStr,ALIGN_LEFT,(Uint16)(state->ds.infoBoxCurrentDispWidth));
+  drawSelectableTextAlignedSized(rdat,&state->tss,drawXPos+state->ds.infoBoxHlColOffset*state->ds.uiUserScale,drawYPos,textCol,FONTSIZE_NORMAL,alpha,tmpStr,ALIGN_LEFT,(Uint16)(state->ds.infoBoxCurrentDispWidth));
   if(dat->ndat.levels[lvlInd].halfLife.unit == VALUE_UNIT_STABLE){
-    drawSelectableTextAlignedSized(rdat,&state->tss,drawXPos+state->ds.infoBoxDcyModeColOffset*state->ds.uiUserScale,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,alpha,"N/A",ALIGN_LEFT,(Uint16)(state->ds.infoBoxCurrentDispWidth)); //draw no decay mode label
+    drawSelectableTextAlignedSized(rdat,&state->tss,drawXPos+state->ds.infoBoxDcyModeColOffset*state->ds.uiUserScale,drawYPos,textCol,FONTSIZE_NORMAL,alpha,"N/A",ALIGN_LEFT,(Uint16)(state->ds.infoBoxCurrentDispWidth)); //draw no decay mode label
     drawYPos += NUCL_INFOBOX_SMALLLINE_HEIGHT*state->ds.uiUserScale;
   }else{
     if(dat->ndat.levels[lvlInd].numDecModes > 0){
       for(int8_t i=0; i<dat->ndat.levels[lvlInd].numDecModes; i++){
         getDecayModeStr(tmpStr,&dat->ndat,dat->ndat.levels[lvlInd].firstDecMode + (uint32_t)i);
         //SDL_Log("%s\n",tmpStr);
-        drawSelectableTextAlignedSized(rdat,&state->tss,drawXPos+state->ds.infoBoxDcyModeColOffset*state->ds.uiUserScale,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,alpha,tmpStr,ALIGN_LEFT,(Uint16)(state->ds.infoBoxCurrentDispWidth)); //draw decay mode label
+        drawSelectableTextAlignedSized(rdat,&state->tss,drawXPos+state->ds.infoBoxDcyModeColOffset*state->ds.uiUserScale,drawYPos,textCol,FONTSIZE_NORMAL,alpha,tmpStr,ALIGN_LEFT,(Uint16)(state->ds.infoBoxCurrentDispWidth)); //draw decay mode label
         drawYPos += NUCL_INFOBOX_SMALLLINE_HEIGHT*state->ds.uiUserScale;
       }
     }else{
-      drawSelectableTextAlignedSized(rdat,&state->tss,drawXPos+state->ds.infoBoxDcyModeColOffset*state->ds.uiUserScale,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,alpha,dat->strings[dat->locStringIDs[LOCSTR_UNKNOWN]],ALIGN_LEFT,(Uint16)(state->ds.infoBoxCurrentDispWidth)); //draw decay mode label
+      drawSelectableTextAlignedSized(rdat,&state->tss,drawXPos+state->ds.infoBoxDcyModeColOffset*state->ds.uiUserScale,drawYPos,textCol,FONTSIZE_NORMAL,alpha,dat->strings[dat->locStringIDs[LOCSTR_UNKNOWN]],ALIGN_LEFT,(Uint16)(state->ds.infoBoxCurrentDispWidth)); //draw decay mode label
       drawYPos += NUCL_INFOBOX_SMALLLINE_HEIGHT*state->ds.uiUserScale;
     }
     
@@ -3863,24 +3876,24 @@ void drawNuclInfoBox(const app_data *restrict dat, app_state *restrict state, re
   if((lvlInd != MAXNUMLVLS)&&(lvlInd != (dat->ndat.nuclData[nuclInd].firstLevel + dat->ndat.nuclData[nuclInd].gsLevel))){
     drawYPos += ((NUCL_INFOBOX_BIGLINE_HEIGHT - NUCL_INFOBOX_SMALLLINE_HEIGHT)*state->ds.uiUserScale);
     getLvlEnergyStr(tmpStr,&dat->ndat,lvlInd,1);
-    drawSelectableTextAlignedSized(rdat,&state->tss,drawXPos,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,alpha,tmpStr,ALIGN_LEFT,(Uint16)(state->ds.infoBoxCurrentDispWidth));
+    drawSelectableTextAlignedSized(rdat,&state->tss,drawXPos,drawYPos,textCol,FONTSIZE_NORMAL,alpha,tmpStr,ALIGN_LEFT,(Uint16)(state->ds.infoBoxCurrentDispWidth));
     getSpinParStr(tmpStr,&dat->ndat,lvlInd);
-    drawSelectableTextAlignedSized(rdat,&state->tss,drawXPos+state->ds.infoBoxJpiColOffset*state->ds.uiUserScale,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,alpha,tmpStr,ALIGN_LEFT,(Uint16)(state->ds.infoBoxCurrentDispWidth));
+    drawSelectableTextAlignedSized(rdat,&state->tss,drawXPos+state->ds.infoBoxJpiColOffset*state->ds.uiUserScale,drawYPos,textCol,FONTSIZE_NORMAL,alpha,tmpStr,ALIGN_LEFT,(Uint16)(state->ds.infoBoxCurrentDispWidth));
     getHalfLifeStr(tmpStr,dat,lvlInd,1,1,state->ds.useLifetimes);
-    drawSelectableTextAlignedSized(rdat,&state->tss,drawXPos+state->ds.infoBoxHlColOffset*state->ds.uiUserScale,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,alpha,tmpStr,ALIGN_LEFT,(Uint16)(state->ds.infoBoxCurrentDispWidth));
+    drawSelectableTextAlignedSized(rdat,&state->tss,drawXPos+state->ds.infoBoxHlColOffset*state->ds.uiUserScale,drawYPos,textCol,FONTSIZE_NORMAL,alpha,tmpStr,ALIGN_LEFT,(Uint16)(state->ds.infoBoxCurrentDispWidth));
     if(dat->ndat.levels[lvlInd].halfLife.unit == VALUE_UNIT_STABLE){
-      drawSelectableTextAlignedSized(rdat,&state->tss,drawXPos+state->ds.infoBoxDcyModeColOffset*state->ds.uiUserScale,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,alpha,"N/A",ALIGN_LEFT,(Uint16)(state->ds.infoBoxCurrentDispWidth)); //draw no decay mode label
+      drawSelectableTextAlignedSized(rdat,&state->tss,drawXPos+state->ds.infoBoxDcyModeColOffset*state->ds.uiUserScale,drawYPos,textCol,FONTSIZE_NORMAL,alpha,"N/A",ALIGN_LEFT,(Uint16)(state->ds.infoBoxCurrentDispWidth)); //draw no decay mode label
     }else{
       if(dat->ndat.levels[lvlInd].numDecModes > 0){
         for(int8_t i=0; i<dat->ndat.levels[lvlInd].numDecModes; i++){
           getDecayModeStr(tmpStr,&dat->ndat,dat->ndat.levels[lvlInd].firstDecMode + (uint32_t)i);
           //SDL_Log("%s\n",tmpStr);
-          drawSelectableTextAlignedSized(rdat,&state->tss,drawXPos+state->ds.infoBoxDcyModeColOffset*state->ds.uiUserScale,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,alpha,tmpStr,ALIGN_LEFT,(Uint16)(state->ds.infoBoxCurrentDispWidth)); //draw decay mode label
+          drawSelectableTextAlignedSized(rdat,&state->tss,drawXPos+state->ds.infoBoxDcyModeColOffset*state->ds.uiUserScale,drawYPos,textCol,FONTSIZE_NORMAL,alpha,tmpStr,ALIGN_LEFT,(Uint16)(state->ds.infoBoxCurrentDispWidth)); //draw decay mode label
           drawYPos += NUCL_INFOBOX_SMALLLINE_HEIGHT*state->ds.uiUserScale;
         }
       }else if(dat->ndat.levels[lvlInd].numTran >0){
         SDL_strlcpy(tmpStr,"IT > 0%",32);
-        drawSelectableTextAlignedSized(rdat,&state->tss,drawXPos+state->ds.infoBoxDcyModeColOffset*state->ds.uiUserScale,drawYPos,blackCol8Bit,FONTSIZE_NORMAL,alpha,tmpStr,ALIGN_LEFT,(Uint16)(state->ds.infoBoxCurrentDispWidth)); //draw decay mode label
+        drawSelectableTextAlignedSized(rdat,&state->tss,drawXPos+state->ds.infoBoxDcyModeColOffset*state->ds.uiUserScale,drawYPos,textCol,FONTSIZE_NORMAL,alpha,tmpStr,ALIGN_LEFT,(Uint16)(state->ds.infoBoxCurrentDispWidth)); //draw decay mode label
         drawYPos += NUCL_INFOBOX_SMALLLINE_HEIGHT*state->ds.uiUserScale;
       }
     }
@@ -4082,16 +4095,18 @@ void drawUIScaleMenu(const app_data *restrict dat, const app_state *restrict sta
     }
   }
 
+  SDL_Color textCol = state->ds.darkMode ? whiteCol8Bit : blackCol8Bit;
+
   //draw menu item text
   drawRect.x = state->ds.uiElemPosX[UIELEM_PREFS_UISCALE_MENU] + (PANEL_EDGE_SIZE + 3*UI_PADDING_SIZE)*state->ds.uiUserScale;
   drawRect.y = ((float)state->ds.uiElemPosY[UIELEM_PREFS_UISCALE_MENU] + PANEL_EDGE_SIZE*state->ds.uiUserScale + yOffset);
   drawRect.w = state->ds.uiElemWidth[UIELEM_PREFS_UISCALE_MENU];
   drawRect.h = state->ds.uiElemHeight[UIELEM_PREFS_UISCALE_MENU];
   const Uint8 txtAlpha = (Uint8)(alpha*255.0f);
-  drawTextAlignedSized(rdat,drawRect.x,drawRect.y + 0.4f*PREFS_DIALOG_UISCALE_MENU_ITEM_SPACING*state->ds.uiUserScale + yOffset,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,dat->strings[dat->locStringIDs[LOCSTR_SMALL]],ALIGN_LEFT,(Uint16)(drawRect.w - (PANEL_EDGE_SIZE + 6*UI_PADDING_SIZE)*state->ds.uiUserScale));
-  drawTextAlignedSized(rdat,drawRect.x,drawRect.y + 1.4f*PREFS_DIALOG_UISCALE_MENU_ITEM_SPACING*state->ds.uiUserScale + yOffset,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,dat->strings[dat->locStringIDs[LOCSTR_DEFAULT]],ALIGN_LEFT,(Uint16)(drawRect.w - (PANEL_EDGE_SIZE + 6*UI_PADDING_SIZE)*state->ds.uiUserScale));
-  drawTextAlignedSized(rdat,drawRect.x,drawRect.y + 2.4f*PREFS_DIALOG_UISCALE_MENU_ITEM_SPACING*state->ds.uiUserScale + yOffset,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,dat->strings[dat->locStringIDs[LOCSTR_LARGE]],ALIGN_LEFT,(Uint16)(drawRect.w - (PANEL_EDGE_SIZE + 6*UI_PADDING_SIZE)*state->ds.uiUserScale));
-  drawTextAlignedSized(rdat,drawRect.x,drawRect.y + 3.4f*PREFS_DIALOG_UISCALE_MENU_ITEM_SPACING*state->ds.uiUserScale + yOffset,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,dat->strings[dat->locStringIDs[LOCSTR_HUGE]],ALIGN_LEFT,(Uint16)(drawRect.w - (PANEL_EDGE_SIZE + 6*UI_PADDING_SIZE)*state->ds.uiUserScale));
+  drawTextAlignedSized(rdat,drawRect.x,drawRect.y + 0.4f*PREFS_DIALOG_UISCALE_MENU_ITEM_SPACING*state->ds.uiUserScale + yOffset,textCol,FONTSIZE_NORMAL,txtAlpha,dat->strings[dat->locStringIDs[LOCSTR_SMALL]],ALIGN_LEFT,(Uint16)(drawRect.w - (PANEL_EDGE_SIZE + 6*UI_PADDING_SIZE)*state->ds.uiUserScale));
+  drawTextAlignedSized(rdat,drawRect.x,drawRect.y + 1.4f*PREFS_DIALOG_UISCALE_MENU_ITEM_SPACING*state->ds.uiUserScale + yOffset,textCol,FONTSIZE_NORMAL,txtAlpha,dat->strings[dat->locStringIDs[LOCSTR_DEFAULT]],ALIGN_LEFT,(Uint16)(drawRect.w - (PANEL_EDGE_SIZE + 6*UI_PADDING_SIZE)*state->ds.uiUserScale));
+  drawTextAlignedSized(rdat,drawRect.x,drawRect.y + 2.4f*PREFS_DIALOG_UISCALE_MENU_ITEM_SPACING*state->ds.uiUserScale + yOffset,textCol,FONTSIZE_NORMAL,txtAlpha,dat->strings[dat->locStringIDs[LOCSTR_LARGE]],ALIGN_LEFT,(Uint16)(drawRect.w - (PANEL_EDGE_SIZE + 6*UI_PADDING_SIZE)*state->ds.uiUserScale));
+  drawTextAlignedSized(rdat,drawRect.x,drawRect.y + 3.4f*PREFS_DIALOG_UISCALE_MENU_ITEM_SPACING*state->ds.uiUserScale + yOffset,textCol,FONTSIZE_NORMAL,txtAlpha,dat->strings[dat->locStringIDs[LOCSTR_HUGE]],ALIGN_LEFT,(Uint16)(drawRect.w - (PANEL_EDGE_SIZE + 6*UI_PADDING_SIZE)*state->ds.uiUserScale));
 
 }
 
@@ -4137,14 +4152,16 @@ void drawReactionModeMenu(const app_data *restrict dat, const app_state *restric
     }
   }
 
+  SDL_Color textCol = state->ds.darkMode ? whiteCol8Bit : blackCol8Bit;
+
   //draw menu item text
   drawRect.x = state->ds.uiElemPosX[UIELEM_PREFS_REACTIONMODE_MENU] + (PANEL_EDGE_SIZE + 3*UI_PADDING_SIZE)*state->ds.uiUserScale;
   drawRect.y = ((float)state->ds.uiElemPosY[UIELEM_PREFS_REACTIONMODE_MENU] + PANEL_EDGE_SIZE*state->ds.uiUserScale + yOffset);
   drawRect.w = state->ds.uiElemWidth[UIELEM_PREFS_REACTIONMODE_MENU];
   drawRect.h = state->ds.uiElemHeight[UIELEM_PREFS_REACTIONMODE_MENU];
   const Uint8 txtAlpha = (Uint8)(alpha*255.0f);
-  drawTextAlignedSized(rdat,drawRect.x,drawRect.y + 0.4f*PREFS_DIALOG_REACTIONMODE_MENU_ITEM_SPACING*state->ds.uiUserScale + yOffset,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,dat->strings[dat->locStringIDs[LOCSTR_PREF_REACTIONMODE_EXCLUDE]],ALIGN_LEFT,(Uint16)(drawRect.w - (PANEL_EDGE_SIZE + 6*UI_PADDING_SIZE)*state->ds.uiUserScale));
-  drawTextAlignedSized(rdat,drawRect.x,drawRect.y + 1.4f*PREFS_DIALOG_REACTIONMODE_MENU_ITEM_SPACING*state->ds.uiUserScale + yOffset,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,dat->strings[dat->locStringIDs[LOCSTR_PREF_REACTIONMODE_HIGHLIGHT]],ALIGN_LEFT,(Uint16)(drawRect.w - (PANEL_EDGE_SIZE + 6*UI_PADDING_SIZE)*state->ds.uiUserScale));
+  drawTextAlignedSized(rdat,drawRect.x,drawRect.y + 0.4f*PREFS_DIALOG_REACTIONMODE_MENU_ITEM_SPACING*state->ds.uiUserScale + yOffset,textCol,FONTSIZE_NORMAL,txtAlpha,dat->strings[dat->locStringIDs[LOCSTR_PREF_REACTIONMODE_EXCLUDE]],ALIGN_LEFT,(Uint16)(drawRect.w - (PANEL_EDGE_SIZE + 6*UI_PADDING_SIZE)*state->ds.uiUserScale));
+  drawTextAlignedSized(rdat,drawRect.x,drawRect.y + 1.4f*PREFS_DIALOG_REACTIONMODE_MENU_ITEM_SPACING*state->ds.uiUserScale + yOffset,textCol,FONTSIZE_NORMAL,txtAlpha,dat->strings[dat->locStringIDs[LOCSTR_PREF_REACTIONMODE_HIGHLIGHT]],ALIGN_LEFT,(Uint16)(drawRect.w - (PANEL_EDGE_SIZE + 6*UI_PADDING_SIZE)*state->ds.uiUserScale));
 
 }
 
@@ -4216,11 +4233,13 @@ void drawRxnMenu(const app_data *restrict dat, const app_state *restrict state, 
     }
   }
 
+  SDL_Color textCol = state->ds.darkMode ? whiteCol8Bit : blackCol8Bit;
+
   //draw menu item text
   drawRect.x = state->ds.uiElemPosX[UIELEM_RXN_MENU] + (PANEL_EDGE_SIZE + 3*UI_PADDING_SIZE)*state->ds.uiUserScale;
   drawRect.w = state->ds.uiElemWidth[UIELEM_RXN_MENU];
   drawRect.h = state->ds.uiElemHeight[UIELEM_RXN_MENU];
-  drawTextAlignedSized(rdat,drawRect.x,((float)state->ds.uiElemPosY[UIELEM_RXN_MENU] + PANEL_EDGE_SIZE*state->ds.uiUserScale + 0.4f*RXN_MENU_ITEM_SPACING*state->ds.uiUserScale + yOffset),blackCol8Bit,FONTSIZE_NORMAL,alpha8,dat->strings[dat->locStringIDs[LOCSTR_ALLREACTIONS]],ALIGN_LEFT,(Uint16)(RXN_MENU_COLUMN_WIDTH*state->ds.uiUserScale));
+  drawTextAlignedSized(rdat,drawRect.x,((float)state->ds.uiElemPosY[UIELEM_RXN_MENU] + PANEL_EDGE_SIZE*state->ds.uiUserScale + 0.4f*RXN_MENU_ITEM_SPACING*state->ds.uiUserScale + yOffset),textCol,FONTSIZE_NORMAL,alpha8,dat->strings[dat->locStringIDs[LOCSTR_ALLREACTIONS]],ALIGN_LEFT,(Uint16)(RXN_MENU_COLUMN_WIDTH*state->ds.uiUserScale));
   char rxnStr[32];
   for(uint8_t i=0; i<dat->ndat.nuclData[state->chartSelectedNucl].numRxns; i++){
     getRxnStr(rxnStr,&dat->ndat,dat->ndat.nuclData[state->chartSelectedNucl].firstRxn + (uint32_t)i);
@@ -4241,7 +4260,7 @@ void drawRxnMenu(const app_data *restrict dat, const app_state *restrict state, 
     }
     drawRect.x = state->ds.uiElemPosX[UIELEM_RXN_MENU] + (float)(PANEL_EDGE_SIZE + 3*UI_PADDING_SIZE + RXN_MENU_COLUMN_WIDTH*((i+1)/numRxnPerCol))*state->ds.uiUserScale;
     drawRect.y = (float)state->ds.uiElemPosY[UIELEM_RXN_MENU] + (PANEL_EDGE_SIZE + ((float)((i+1)%numRxnPerCol) + 0.4f)*RXN_MENU_ITEM_SPACING)*state->ds.uiUserScale + yOffset;
-    drawTextAlignedSized(rdat,drawRect.x,drawRect.y,blackCol8Bit,FONTSIZE_NORMAL,alpha8,rxnStr,ALIGN_LEFT,(Uint16)(RXN_MENU_COLUMN_WIDTH*state->ds.uiUserScale));
+    drawTextAlignedSized(rdat,drawRect.x,drawRect.y,textCol,FONTSIZE_NORMAL,alpha8,rxnStr,ALIGN_LEFT,(Uint16)(RXN_MENU_COLUMN_WIDTH*state->ds.uiUserScale));
   }
 
 }
@@ -4279,6 +4298,8 @@ void drawSearchMenu(const app_data *restrict dat, const app_state *restrict stat
     drawIconAndTextEntryBox(&dat->rules.themeRules,rdat,state->ds.uiElemPosX[UIELEM_SEARCH_ENTRYBOX],(int16_t)(state->ds.uiElemPosY[UIELEM_SEARCH_ENTRYBOX]+yOffset),state->ds.uiElemWidth[UIELEM_SEARCH_ENTRYBOX],getHighlightState(state,UIELEM_SEARCH_ENTRYBOX),HIGHLIGHT_NORMAL,alpha8,UIICON_SEARCH,state->ss.searchString,state->ds.searchEntryDispStartChar,state->ds.searchEntryDispNumChars,state->searchCursorPos);
   }
 
+  SDL_Color textCol = state->ds.darkMode ? whiteCol8Bit : blackCol8Bit;
+
   //draw results
   for(uint8_t i=0; i<state->ss.numResults; i++){
     char tmpStr[64];
@@ -4296,7 +4317,7 @@ void drawSearchMenu(const app_data *restrict dat, const app_state *restrict stat
       switch(state->ss.results[i].resultType){
         case SEARCHAGENT_NUCLIDE:
           getNuclNameStr(eStr,&dat->ndat.nuclData[state->ss.results[i].resultVal[0]],255);
-          drawTextAlignedSized(rdat,drawRect.x+12.0f*state->ds.uiUserScale,drawRect.y+(16.0f*state->ds.uiUserScale),blackCol8Bit,FONTSIZE_LARGE,alpha8,eStr,ALIGN_LEFT,16384); //draw element label
+          drawTextAlignedSized(rdat,drawRect.x+12.0f*state->ds.uiUserScale,drawRect.y+(16.0f*state->ds.uiUserScale),textCol,FONTSIZE_LARGE,alpha8,eStr,ALIGN_LEFT,16384); //draw element label
           if(dat->ndat.nuclData[state->ss.results[i].resultVal[0]].abundance.val > 0.0f){
             getAbundanceStr(eStr,&dat->ndat,(uint16_t)state->ss.results[i].resultVal[0]);
             SDL_snprintf(tmpStr,64,"%s [%s %s]",dat->strings[dat->locStringIDs[LOCSTR_SEARCHRES_NUCLIDE]],eStr,dat->strings[dat->locStringIDs[LOCSTR_ABUNDANCE]]);
@@ -4336,7 +4357,7 @@ void drawSearchMenu(const app_data *restrict dat, const app_state *restrict stat
               SDL_snprintf(tmpStr,64,"%s – %s keV",eStr,eStr2);
             }
           }
-          drawTextAlignedSized(rdat,drawRect.x+12.0f*state->ds.uiUserScale,drawRect.y+(16.0f*state->ds.uiUserScale),blackCol8Bit,FONTSIZE_LARGE,alpha8,tmpStr,ALIGN_LEFT,16384); //draw element and gamma label
+          drawTextAlignedSized(rdat,drawRect.x+12.0f*state->ds.uiUserScale,drawRect.y+(16.0f*state->ds.uiUserScale),textCol,FONTSIZE_LARGE,alpha8,tmpStr,ALIGN_LEFT,16384); //draw element and gamma label
           getLvlEnergyStr(eStr2,&dat->ndat,state->ss.results[i].resultVal[2],1);
           SDL_snprintf(tmpStr,64,"%s from the %s keV %s",dat->strings[dat->locStringIDs[LOCSTR_SEARCHRES_EGAMMA]],eStr2,dat->strings[dat->locStringIDs[LOCSTR_LEVEL]]);
           drawTextAlignedSized(rdat,drawRect.x+12.0f*state->ds.uiUserScale,drawRect.y+(SEARCH_MENU_RESULT_HEIGHT-32.0f)*state->ds.uiUserScale,grayCol8Bit,FONTSIZE_NORMAL,alpha8,tmpStr,ALIGN_LEFT,16384);
@@ -4363,7 +4384,7 @@ void drawSearchMenu(const app_data *restrict dat, const app_state *restrict stat
             getLvlEnergyStr(eStr2,&dat->ndat,state->ss.results[i].resultVal[1],1);
             SDL_snprintf(tmpStr,64,"%s – %s keV",eStr,eStr2);
           }
-          drawTextAlignedSized(rdat,drawRect.x+12.0f*state->ds.uiUserScale,drawRect.y+(16.0f*state->ds.uiUserScale),blackCol8Bit,FONTSIZE_LARGE,alpha8,tmpStr,ALIGN_LEFT,16384); //draw element and level label
+          drawTextAlignedSized(rdat,drawRect.x+12.0f*state->ds.uiUserScale,drawRect.y+(16.0f*state->ds.uiUserScale),textCol,FONTSIZE_LARGE,alpha8,tmpStr,ALIGN_LEFT,16384); //draw element and level label
           drawTextAlignedSized(rdat,drawRect.x+12.0f*state->ds.uiUserScale,drawRect.y+(SEARCH_MENU_RESULT_HEIGHT-32.0f)*state->ds.uiUserScale,grayCol8Bit,FONTSIZE_NORMAL,alpha8,dat->strings[dat->locStringIDs[LOCSTR_SEARCHRES_ELEVEL]],ALIGN_LEFT,16384);
           break;
         case SEARCHAGENT_ELEVELDIFF:
@@ -4382,7 +4403,7 @@ void drawSearchMenu(const app_data *restrict dat, const app_state *restrict stat
             tmpStr[38]='.'; tmpStr[39]='.'; tmpStr[40]='.';
             tmpStr[41]='\0'; //terminate
           }
-          drawTextAlignedSized(rdat,drawRect.x+12.0f*state->ds.uiUserScale,drawRect.y+(16.0f*state->ds.uiUserScale),blackCol8Bit,FONTSIZE_LARGE,alpha8,tmpStr,ALIGN_LEFT,16384); //draw element and level difference label
+          drawTextAlignedSized(rdat,drawRect.x+12.0f*state->ds.uiUserScale,drawRect.y+(16.0f*state->ds.uiUserScale),textCol,FONTSIZE_LARGE,alpha8,tmpStr,ALIGN_LEFT,16384); //draw element and level difference label
           SDL_snprintf(tmpStr,64,"%s (%0.1f keV)",dat->strings[dat->locStringIDs[LOCSTR_SEARCHRES_ELEVELDIFF]],getLevelEnergykeV(&dat->ndat,state->ss.results[i].resultVal[2])-getLevelEnergykeV(&dat->ndat,state->ss.results[i].resultVal[1]));
           drawTextAlignedSized(rdat,drawRect.x+12.0f*state->ds.uiUserScale,drawRect.y+(SEARCH_MENU_RESULT_HEIGHT-32.0f)*state->ds.uiUserScale,grayCol8Bit,FONTSIZE_NORMAL,alpha8,tmpStr,ALIGN_LEFT,16384);
           break;
@@ -4422,7 +4443,7 @@ void drawSearchMenu(const app_data *restrict dat, const app_state *restrict stat
             }
             SDL_snprintf(tmpStr+length,(uint64_t)(64-length),"%0.0f keV",(double)(dat->ndat.tran[state->ss.results[i].resultVal[numCascadeGammas]].energy.val));
           }
-          drawTextAlignedSized(rdat,drawRect.x+12.0f*state->ds.uiUserScale,drawRect.y+(16.0f*state->ds.uiUserScale),blackCol8Bit,FONTSIZE_LARGE,alpha8,tmpStr,ALIGN_LEFT,16384); //draw element and cascade label
+          drawTextAlignedSized(rdat,drawRect.x+12.0f*state->ds.uiUserScale,drawRect.y+(16.0f*state->ds.uiUserScale),textCol,FONTSIZE_LARGE,alpha8,tmpStr,ALIGN_LEFT,16384); //draw element and cascade label
           drawTextAlignedSized(rdat,drawRect.x+12.0f*state->ds.uiUserScale,drawRect.y+(SEARCH_MENU_RESULT_HEIGHT-32.0f)*state->ds.uiUserScale,grayCol8Bit,FONTSIZE_NORMAL,alpha8,dat->strings[dat->locStringIDs[LOCSTR_SEARCHRES_GAMMACASCADE]],ALIGN_LEFT,16384);
           break;
         case SEARCHAGENT_HALFLIFE:
@@ -4448,7 +4469,7 @@ void drawSearchMenu(const app_data *restrict dat, const app_state *restrict stat
               SDL_snprintf(tmpStr,64,"%s – %s",eStr,eStr2);
             }
           }
-          drawTextAlignedSized(rdat,drawRect.x+12.0f*state->ds.uiUserScale,drawRect.y+(16.0f*state->ds.uiUserScale),blackCol8Bit,FONTSIZE_LARGE,alpha8,tmpStr,ALIGN_LEFT,16384); //draw element and half-life label
+          drawTextAlignedSized(rdat,drawRect.x+12.0f*state->ds.uiUserScale,drawRect.y+(16.0f*state->ds.uiUserScale),textCol,FONTSIZE_LARGE,alpha8,tmpStr,ALIGN_LEFT,16384); //draw element and half-life label
           if(state->ss.results[i].resultVal[1] == (uint32_t)(dat->ndat.nuclData[state->ss.results[i].resultVal[0]].firstLevel + dat->ndat.nuclData[state->ss.results[i].resultVal[0]].gsLevel)){
             if(state->ds.useLifetimes){
               SDL_snprintf(tmpStr,64,"%s – ground state",dat->strings[dat->locStringIDs[LOCSTR_SEARCHRES_LIFETIME]]);
@@ -4520,13 +4541,15 @@ void drawChartViewMenu(const app_data *restrict dat, const app_state *restrict s
     }
   }
 
+  SDL_Color textCol = state->ds.darkMode ? whiteCol8Bit : blackCol8Bit;
+
   //draw menu item text
   uint8_t numViewsPerCol = (uint8_t)SDL_ceilf(((float)CHARTVIEW_ENUM_LENGTH)/(1.0f*((float)CHARTVIEW_MENU_COLUMNS)));
   drawRect.y = ((float)state->ds.uiElemPosY[UIELEM_CHARTVIEW_MENU] + PANEL_EDGE_SIZE*state->ds.uiUserScale + yOffset);
   drawRect.w = state->ds.uiElemWidth[UIELEM_CHARTVIEW_MENU];
   drawRect.h = state->ds.uiElemHeight[UIELEM_CHARTVIEW_MENU];
   const Uint8 txtAlpha = (Uint8)(alpha*255.0f);
-  drawTextAlignedSized(rdat,state->ds.uiElemPosX[UIELEM_CHARTVIEW_MENU] + (PANEL_EDGE_SIZE + 4*UI_PADDING_SIZE)*state->ds.uiUserScale,drawRect.y + 0.4f*CHARTVIEW_MENU_ITEM_SPACING*state->ds.uiUserScale + yOffset,blackCol8Bit,FONTSIZE_NORMAL_BOLD,txtAlpha,dat->strings[dat->locStringIDs[LOCSTR_CHARTVIEW_MENUTITLE]],ALIGN_LEFT,(Uint16)(drawRect.w - 8*UI_PADDING_SIZE*state->ds.uiUserScale));
+  drawTextAlignedSized(rdat,state->ds.uiElemPosX[UIELEM_CHARTVIEW_MENU] + (PANEL_EDGE_SIZE + 4*UI_PADDING_SIZE)*state->ds.uiUserScale,drawRect.y + 0.4f*CHARTVIEW_MENU_ITEM_SPACING*state->ds.uiUserScale + yOffset,textCol,FONTSIZE_NORMAL_BOLD,txtAlpha,dat->strings[dat->locStringIDs[LOCSTR_CHARTVIEW_MENUTITLE]],ALIGN_LEFT,(Uint16)(drawRect.w - 8*UI_PADDING_SIZE*state->ds.uiUserScale));
   for(uint8_t i=0;i<CHARTVIEW_ENUM_LENGTH;i++){
     drawRect.x = state->ds.uiElemPosX[UIELEM_CHARTVIEW_MENU] + ((UI_TILE_SIZE + PANEL_EDGE_SIZE + 3*UI_PADDING_SIZE) + (float)(i/numViewsPerCol)*(CHARTVIEW_MENU_WIDTH - 2*PANEL_EDGE_SIZE - 4*UI_PADDING_SIZE))*state->ds.uiUserScale;
     if(state->chartView == i){
@@ -4534,9 +4557,9 @@ void drawChartViewMenu(const app_data *restrict dat, const app_state *restrict s
       drawIcon(&dat->rules.themeRules,rdat,(int16_t)(state->ds.uiElemPosX[UIELEM_CHARTVIEW_MENU] + ((PANEL_EDGE_SIZE + 3*UI_PADDING_SIZE) + (float)(i/numViewsPerCol)*(CHARTVIEW_MENU_WIDTH - 2*PANEL_EDGE_SIZE - 4*UI_PADDING_SIZE))*state->ds.uiUserScale),(int16_t)(drawRect.y + (1.25f + 1.0f*(i%numViewsPerCol))*CHARTVIEW_MENU_ITEM_SPACING*state->ds.uiUserScale + yOffset),UI_TILE_SIZE,HIGHLIGHT_NORMAL,alpha,UIICON_CHECKBOX_CHECK);
     }
     if((i==0)&&(state->ds.useLifetimes)){
-      drawTextAlignedSized(rdat,drawRect.x,drawRect.y + (1.4f + 1.0f*(i%numViewsPerCol))*CHARTVIEW_MENU_ITEM_SPACING*state->ds.uiUserScale + yOffset,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,dat->strings[dat->locStringIDs[LOCSTR_CHARTVIEW_LIFETIME]],ALIGN_LEFT,(Uint16)(drawRect.w - 8*UI_PADDING_SIZE*state->ds.uiUserScale));
+      drawTextAlignedSized(rdat,drawRect.x,drawRect.y + (1.4f + 1.0f*(i%numViewsPerCol))*CHARTVIEW_MENU_ITEM_SPACING*state->ds.uiUserScale + yOffset,textCol,FONTSIZE_NORMAL,txtAlpha,dat->strings[dat->locStringIDs[LOCSTR_CHARTVIEW_LIFETIME]],ALIGN_LEFT,(Uint16)(drawRect.w - 8*UI_PADDING_SIZE*state->ds.uiUserScale));
     }else{
-      drawTextAlignedSized(rdat,drawRect.x,drawRect.y + (1.4f + 1.0f*(i%numViewsPerCol))*CHARTVIEW_MENU_ITEM_SPACING*state->ds.uiUserScale + yOffset,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,dat->strings[dat->locStringIDs[LOCSTR_CHARTVIEW_HALFLIFE+i]],ALIGN_LEFT,(Uint16)(drawRect.w - 8*UI_PADDING_SIZE*state->ds.uiUserScale));
+      drawTextAlignedSized(rdat,drawRect.x,drawRect.y + (1.4f + 1.0f*(i%numViewsPerCol))*CHARTVIEW_MENU_ITEM_SPACING*state->ds.uiUserScale + yOffset,textCol,FONTSIZE_NORMAL,txtAlpha,dat->strings[dat->locStringIDs[LOCSTR_CHARTVIEW_HALFLIFE+i]],ALIGN_LEFT,(Uint16)(drawRect.w - 8*UI_PADDING_SIZE*state->ds.uiUserScale));
     }
   }
 
@@ -4587,15 +4610,17 @@ void drawPrimaryMenu(const app_data *restrict dat, const app_state *restrict sta
     }
   }
 
+  SDL_Color textCol = state->ds.darkMode ? whiteCol8Bit : blackCol8Bit;
+
   //draw menu item text
   drawRect.x = state->ds.uiElemPosX[UIELEM_PRIMARY_MENU] + (PANEL_EDGE_SIZE + 3*UI_PADDING_SIZE)*state->ds.uiUserScale;
   drawRect.y = ((float)state->ds.uiElemPosY[UIELEM_PRIMARY_MENU] + PANEL_EDGE_SIZE*state->ds.uiUserScale + yOffset);
   drawRect.w = state->ds.uiElemWidth[UIELEM_PRIMARY_MENU];
   drawRect.h = state->ds.uiElemHeight[UIELEM_PRIMARY_MENU];
   const Uint8 txtAlpha = (Uint8)(alpha*255.0f);
-  drawTextAlignedSized(rdat,drawRect.x,drawRect.y + 0.4f*PRIMARY_MENU_ITEM_SPACING*state->ds.uiUserScale + yOffset,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,dat->strings[dat->locStringIDs[LOCSTR_MENUITEM_PREFS]],ALIGN_LEFT,(Uint16)(drawRect.w - (PANEL_EDGE_SIZE + 6*UI_PADDING_SIZE)*state->ds.uiUserScale));
-  drawTextAlignedSized(rdat,drawRect.x,drawRect.y + 1.4f*PRIMARY_MENU_ITEM_SPACING*state->ds.uiUserScale + yOffset,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,dat->strings[dat->locStringIDs[LOCSTR_MENUITEM_SCREENSHOT]],ALIGN_LEFT,(Uint16)(drawRect.w - (PANEL_EDGE_SIZE + 6*UI_PADDING_SIZE)*state->ds.uiUserScale));
-  drawTextAlignedSized(rdat,drawRect.x,drawRect.y + 2.4f*PRIMARY_MENU_ITEM_SPACING*state->ds.uiUserScale + yOffset,blackCol8Bit,FONTSIZE_NORMAL,txtAlpha,dat->strings[dat->locStringIDs[LOCSTR_MENUITEM_ABOUT]],ALIGN_LEFT,(Uint16)(drawRect.w - (PANEL_EDGE_SIZE + 6*UI_PADDING_SIZE)*state->ds.uiUserScale));
+  drawTextAlignedSized(rdat,drawRect.x,drawRect.y + 0.4f*PRIMARY_MENU_ITEM_SPACING*state->ds.uiUserScale + yOffset,textCol,FONTSIZE_NORMAL,txtAlpha,dat->strings[dat->locStringIDs[LOCSTR_MENUITEM_PREFS]],ALIGN_LEFT,(Uint16)(drawRect.w - (PANEL_EDGE_SIZE + 6*UI_PADDING_SIZE)*state->ds.uiUserScale));
+  drawTextAlignedSized(rdat,drawRect.x,drawRect.y + 1.4f*PRIMARY_MENU_ITEM_SPACING*state->ds.uiUserScale + yOffset,textCol,FONTSIZE_NORMAL,txtAlpha,dat->strings[dat->locStringIDs[LOCSTR_MENUITEM_SCREENSHOT]],ALIGN_LEFT,(Uint16)(drawRect.w - (PANEL_EDGE_SIZE + 6*UI_PADDING_SIZE)*state->ds.uiUserScale));
+  drawTextAlignedSized(rdat,drawRect.x,drawRect.y + 2.4f*PRIMARY_MENU_ITEM_SPACING*state->ds.uiUserScale + yOffset,textCol,FONTSIZE_NORMAL,txtAlpha,dat->strings[dat->locStringIDs[LOCSTR_MENUITEM_ABOUT]],ALIGN_LEFT,(Uint16)(drawRect.w - (PANEL_EDGE_SIZE + 6*UI_PADDING_SIZE)*state->ds.uiUserScale));
 
 }
 
