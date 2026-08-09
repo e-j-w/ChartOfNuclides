@@ -71,7 +71,6 @@ void initializeTempState(const app_data *restrict dat, app_state *restrict state
 	state->ds.useLevelListParentThresholds = 1;
 	state->ds.useLevelListCommentTooltips = 1;
 	state->ds.drawShellClosures = 1;
-	state->ds.darkMode = 0;
 	state->ds.chartPosX = DEFAULT_CHART_X_POS;
 	state->ds.chartPosY = DEFAULT_CHART_Y_POS;
 	state->ds.chartZoomScale = DEFAULT_CHART_ZOOM;
@@ -112,6 +111,7 @@ void initializeTempState(const app_data *restrict dat, app_state *restrict state
 	SDL_memset(state->ds.uiElemExtPlusY,0,sizeof(state->ds.uiElemExtPlusY));
 	SDL_memset(state->ds.uiElemExtMinusX,0,sizeof(state->ds.uiElemExtMinusX));
 	SDL_memset(state->ds.uiElemExtMinusY,0,sizeof(state->ds.uiElemExtMinusY));
+	state->ds.uiColorTheme = UITHEME_LIGHT;
 	//threads
 	for(uint8_t i=0;i<MAX_NUM_THREADS;i++){
 		tms->threadData[i].threadState = THREADSTATE_DEAD;
@@ -6538,7 +6538,7 @@ void updateUIScale(app_data *restrict dat, app_state *restrict state, resource_d
 	rdat->uiThemeScale = getUIthemeScale(rdat->uiScale);
 	if(rdat->font[0]){
 		//rescale font and UI theme as well, this requires loading them from the app data file
-		regenerateThemeAndFontCache(dat,rdat,state->ds.darkMode); //load_data.c
+		regenerateThemeAndFontCache(dat,state,rdat); //load_data.c
 	}
 	if(state->uiState == UISTATE_FULLLEVELINFO){
 		state->ds.nuclFullInfoMaxScrollY = getMaxNumLvlDispLines(&dat->ndat,state);
@@ -6548,6 +6548,20 @@ void updateUIScale(app_data *restrict dat, app_state *restrict state, resource_d
 	}
 	updateUIElemPositions(dat,state,rdat); //UI element positions
 	SDL_SetWindowMinimumSize(rdat->window,(int)(MIN_RENDER_WIDTH*state->ds.uiUserScale),(int)(MIN_RENDER_HEIGHT*state->ds.uiUserScale));
+	state->ds.forceRedraw = 1;
+}
+
+//updates the color theme
+void updateUIcolorTheme(app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat, const uint8_t colorThemeInd){
+	if(colorThemeInd >= UITHEME_ENUM_LENGTH){
+		SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,"setUIcolorTheme - invalid theme index %u (max %i)\n",colorThemeInd,UITHEME_ENUM_LENGTH);
+	}
+	if(rdat->uiThemeTex){
+		//regenerate UI theme texture, this requires loading it from the app data file
+		regenerateThemeAndFontCache(dat,state,rdat); //load_data.c
+	}
+	state->ds.uiColorTheme = colorThemeInd;
+	dat->rules.themeRules.uiColorTheme = colorThemeInd;
 	state->ds.forceRedraw = 1;
 }
 

@@ -165,6 +165,7 @@ void removeSelectableStringsInRect(text_selection_state *restrict tss, const SDL
 
 float getUIthemeScale(const float uiScale);
 void updateUIScale(app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat);
+void updateUIcolorTheme(app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat, const uint8_t colorThemeInd);
 void updateWindowRes(app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat);
 void handleScreenGraphicsMode(app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat);
 

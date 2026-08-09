@@ -62,7 +62,7 @@ int findAndLoadAppDataFile(SDL_IOStream **inp, resource_data *restrict rdat, con
 }
 
 //import all app data
-int importAppData(app_data *restrict dat, resource_data *restrict rdat, const uint8_t darkMode){
+int importAppData(app_data *restrict dat, const app_state *restrict state, resource_data *restrict rdat){
 
   SDL_IOStream *inp = NULL;
   char readStr[6];
@@ -135,6 +135,11 @@ int importAppData(app_data *restrict dat, resource_data *restrict rdat, const ui
     SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"importAppData - couldn't read app data from file %s - %s.\n",rdat->appDataFilepath,SDL_GetError());
     return -1;
   }
+
+  //synchronize UI theme setting
+  if(state->ds.uiColorTheme < UITHEME_ENUM_LENGTH){
+    dat->rules.themeRules.uiColorTheme = state->ds.uiColorTheme;
+  }
   
   //load UI theme texture data
   rdat->themeOffset = (size_t)SDL_TellIO(inp);
@@ -144,7 +149,7 @@ int importAppData(app_data *restrict dat, resource_data *restrict rdat, const ui
     SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"importAppData - invalid light theme texture atlas filesize (%li) from file %s.\n",(long int)fileSize,rdat->appDataFilepath);
     return -1;
   }
-  if(darkMode == 0){
+  if(dat->rules.themeRules.uiColorTheme == UITHEME_LIGHT){
     //load light mode theme texture
     void *themeData=(void*)SDL_calloc(1,(size_t)fileSize);
     totalAlloc += (size_t)fileSize;
@@ -299,11 +304,11 @@ int importAppData(app_data *restrict dat, resource_data *restrict rdat, const ui
 }
 
 //similar to importAppData, but only handles loading and rescaling the font data
-int regenerateThemeAndFontCache(app_data *restrict dat, resource_data *restrict rdat, const uint8_t darkMode){
+int regenerateThemeAndFontCache(app_data *restrict dat, const app_state *restrict state, resource_data *restrict rdat){
   
   if(rdat->themeOffset <= 0){
     SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,"regenerateThemeAndFontCache - attempting to regenerate cache when app data was not previously imported. Doing that now...\n");
-    return importAppData(dat,rdat,darkMode);
+    return importAppData(dat,state,rdat);
   }
 
   TTF_DestroyRendererTextEngine(rdat->te);
@@ -337,7 +342,7 @@ int regenerateThemeAndFontCache(app_data *restrict dat, resource_data *restrict 
     SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"regenerateThemeAndFontCache - invalid light theme texture atlas filesize (%li) from file %s.\n",(long int)fileSize,rdat->appDataFilepath);
     return -1;
   }
-  if(darkMode == 0){
+  if(dat->rules.themeRules.uiColorTheme == UITHEME_LIGHT){
     //load light mode theme texture
     void *themeData=(void*)SDL_calloc(1,(size_t)fileSize);
     if(themeData==NULL){

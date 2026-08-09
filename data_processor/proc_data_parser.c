@@ -60,14 +60,14 @@ static int parseAppRules(app_data *restrict dat, asset_mapping *restrict stringI
             SDL_strlcpy(str2,tok,255);
             tok = SDL_strtok_r(str2,",",&saveptr);
             if(tok!=NULL){
-              dat->rules.themeRules.bgCol.r = (float)SDL_atof(tok);
+              dat->rules.themeRules.themeBgCol[UITHEME_LIGHT].r = (float)SDL_atof(tok);
               tok = SDL_strtok_r(NULL,",",&saveptr);
               if(tok!=NULL){
-                dat->rules.themeRules.bgCol.g = (float)SDL_atof(tok);
+                dat->rules.themeRules.themeBgCol[UITHEME_LIGHT].g = (float)SDL_atof(tok);
                 tok = SDL_strtok_r(NULL,",",&saveptr);
                 if(tok!=NULL){
-                  dat->rules.themeRules.bgCol.b = (float)SDL_atof(tok);
-                  dat->rules.themeRules.bgCol.a = 1.0f;
+                  dat->rules.themeRules.themeBgCol[UITHEME_LIGHT].b = (float)SDL_atof(tok);
+                  dat->rules.themeRules.themeBgCol[UITHEME_LIGHT].a = 1.0f;
                 }else{
                   SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"could not bg_col color string in file: %s.\n",filePath);
                   return -1;
@@ -85,14 +85,14 @@ static int parseAppRules(app_data *restrict dat, asset_mapping *restrict stringI
             SDL_strlcpy(str2,tok,255);
             tok = SDL_strtok_r(str2,",",&saveptr);
             if(tok!=NULL){
-              dat->rules.themeRules.bgColDark.r = (float)SDL_atof(tok);
+              dat->rules.themeRules.themeBgCol[UITHEME_DARK].r = (float)SDL_atof(tok);
               tok = SDL_strtok_r(NULL,",",&saveptr);
               if(tok!=NULL){
-                dat->rules.themeRules.bgColDark.g = (float)SDL_atof(tok);
+                dat->rules.themeRules.themeBgCol[UITHEME_DARK].g = (float)SDL_atof(tok);
                 tok = SDL_strtok_r(NULL,",",&saveptr);
                 if(tok!=NULL){
-                  dat->rules.themeRules.bgColDark.b = (float)SDL_atof(tok);
-                  dat->rules.themeRules.bgColDark.a = 1.0f;
+                  dat->rules.themeRules.themeBgCol[UITHEME_DARK].b = (float)SDL_atof(tok);
+                  dat->rules.themeRules.themeBgCol[UITHEME_DARK].a = 1.0f;
                 }else{
                   SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"could not bg_col_dark color string in file: %s.\n",filePath);
                   return -1;
@@ -110,14 +110,14 @@ static int parseAppRules(app_data *restrict dat, asset_mapping *restrict stringI
             SDL_strlcpy(str2,tok,255);
             tok = SDL_strtok_r(str2,",",&saveptr);
             if(tok!=NULL){
-              dat->rules.themeRules.textColNormal.r = (Uint8)floor(atof(tok)*255.0);
+              dat->rules.themeRules.textColNormal[UITHEME_LIGHT].r = (Uint8)floor(atof(tok)*255.0);
               tok = SDL_strtok_r(NULL,",",&saveptr);
               if(tok!=NULL){
-                dat->rules.themeRules.textColNormal.g = (Uint8)floor(atof(tok)*255.0);
+                dat->rules.themeRules.textColNormal[UITHEME_LIGHT].g = (Uint8)floor(atof(tok)*255.0);
                 tok = SDL_strtok_r(NULL,",",&saveptr);
                 if(tok!=NULL){
-                  dat->rules.themeRules.textColNormal.b = (Uint8)floor(atof(tok)*255.0);
-                  dat->rules.themeRules.textColNormal.a = 255;
+                  dat->rules.themeRules.textColNormal[UITHEME_LIGHT].b = (Uint8)floor(atof(tok)*255.0);
+                  dat->rules.themeRules.textColNormal[UITHEME_LIGHT].a = 255;
                 }else{
                   SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"could not parse text_col color string in file: %s.\n",filePath);
                   return -1;
@@ -130,19 +130,19 @@ static int parseAppRules(app_data *restrict dat, asset_mapping *restrict stringI
               SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"could not parse text_col color string in file: %s.\n",filePath);
               return -1;
             }
-          }else if(SDL_strcmp(tok,"text_col_darkmode") == 0){
+          }else if(SDL_strcmp(tok,"text_col_dark") == 0){
             tok = SDL_strtok_r(NULL,"",&saveptr); //get the rest of the string
             SDL_strlcpy(str2,tok,255);
             tok = SDL_strtok_r(str2,",",&saveptr);
             if(tok!=NULL){
-              dat->rules.themeRules.textColNormalDarkMode.r = (Uint8)floor(atof(tok)*255.0);
+              dat->rules.themeRules.textColNormal[UITHEME_DARK].r = (Uint8)floor(atof(tok)*255.0);
               tok = SDL_strtok_r(NULL,",",&saveptr);
               if(tok!=NULL){
-                dat->rules.themeRules.textColNormalDarkMode.g = (Uint8)floor(atof(tok)*255.0);
+                dat->rules.themeRules.textColNormal[UITHEME_DARK].g = (Uint8)floor(atof(tok)*255.0);
                 tok = SDL_strtok_r(NULL,",",&saveptr);
                 if(tok!=NULL){
-                  dat->rules.themeRules.textColNormalDarkMode.b = (Uint8)floor(atof(tok)*255.0);
-                  dat->rules.themeRules.textColNormalDarkMode.a = 255;
+                  dat->rules.themeRules.textColNormal[UITHEME_DARK].b = (Uint8)floor(atof(tok)*255.0);
+                  dat->rules.themeRules.textColNormal[UITHEME_DARK].a = 255;
                 }else{
                   SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"could not parse text_col_darkmode color string in file: %s.\n",filePath);
                   return -1;
@@ -186,14 +186,14 @@ static int parseAppRules(app_data *restrict dat, asset_mapping *restrict stringI
             SDL_strlcpy(str2,tok,255);
             tok = SDL_strtok_r(str2,",",&saveptr);
             if(tok!=NULL){
-              dat->rules.themeRules.modNormalCol.r = (float)SDL_atof(tok);
+              dat->rules.themeRules.modNormalCol[UITHEME_LIGHT].r = (float)SDL_atof(tok);
               tok = SDL_strtok_r(NULL,",",&saveptr);
               if(tok!=NULL){
-                dat->rules.themeRules.modNormalCol.g = (float)SDL_atof(tok);
+                dat->rules.themeRules.modNormalCol[UITHEME_LIGHT].g = (float)SDL_atof(tok);
                 tok = SDL_strtok_r(NULL,",",&saveptr);
                 if(tok!=NULL){
-                  dat->rules.themeRules.modNormalCol.b = (float)SDL_atof(tok);
-                  dat->rules.themeRules.modNormalCol.a = 1.0f;
+                  dat->rules.themeRules.modNormalCol[UITHEME_LIGHT].b = (float)SDL_atof(tok);
+                  dat->rules.themeRules.modNormalCol[UITHEME_LIGHT].a = 1.0f;
                 }else{
                   SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"could not parse mod_col_normal color string in file: %s.\n",filePath);
                   return -1;
@@ -206,19 +206,44 @@ static int parseAppRules(app_data *restrict dat, asset_mapping *restrict stringI
               SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"could not parse mod_col_normal color string in file: %s.\n",filePath);
               return -1;
             }
+          }else if(SDL_strcmp(tok,"mod_col_normal_dark") == 0){
+            tok = SDL_strtok_r(NULL,"",&saveptr); //get the rest of the string
+            SDL_strlcpy(str2,tok,255);
+            tok = SDL_strtok_r(str2,",",&saveptr);
+            if(tok!=NULL){
+              dat->rules.themeRules.modNormalCol[UITHEME_DARK].r = (float)SDL_atof(tok);
+              tok = SDL_strtok_r(NULL,",",&saveptr);
+              if(tok!=NULL){
+                dat->rules.themeRules.modNormalCol[UITHEME_DARK].g = (float)SDL_atof(tok);
+                tok = SDL_strtok_r(NULL,",",&saveptr);
+                if(tok!=NULL){
+                  dat->rules.themeRules.modNormalCol[UITHEME_DARK].b = (float)SDL_atof(tok);
+                  dat->rules.themeRules.modNormalCol[UITHEME_DARK].a = 1.0f;
+                }else{
+                  SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"could not parse mod_col_normal_dark color string in file: %s.\n",filePath);
+                  return -1;
+                }
+              }else{
+                SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"could not parse mod_col_normal_dark color string in file: %s.\n",filePath);
+                return -1;
+              }
+            }else{
+              SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"could not parse mod_col_normal_dark color string in file: %s.\n",filePath);
+              return -1;
+            }
           }else if(SDL_strcmp(tok,"mod_col_mouseover") == 0){
             tok = SDL_strtok_r(NULL,"",&saveptr); //get the rest of the string
             SDL_strlcpy(str2,tok,255);
             tok = SDL_strtok_r(str2,",",&saveptr);
             if(tok!=NULL){
-              dat->rules.themeRules.modMouseOverCol.r = (float)SDL_atof(tok);
+              dat->rules.themeRules.modMouseOverCol[UITHEME_LIGHT].r = (float)SDL_atof(tok);
               tok = SDL_strtok_r(NULL,",",&saveptr);
               if(tok!=NULL){
-                dat->rules.themeRules.modMouseOverCol.g = (float)SDL_atof(tok);
+                dat->rules.themeRules.modMouseOverCol[UITHEME_LIGHT].g = (float)SDL_atof(tok);
                 tok = SDL_strtok_r(NULL,",",&saveptr);
                 if(tok!=NULL){
-                  dat->rules.themeRules.modMouseOverCol.b = (float)SDL_atof(tok);
-                  dat->rules.themeRules.modMouseOverCol.a = 1.0f;
+                  dat->rules.themeRules.modMouseOverCol[UITHEME_LIGHT].b = (float)SDL_atof(tok);
+                  dat->rules.themeRules.modMouseOverCol[UITHEME_LIGHT].a = 1.0f;
                 }else{
                   SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"could not parse mod_col_mouseover color string in file: %s.\n",filePath);
                   return -1;
@@ -231,19 +256,44 @@ static int parseAppRules(app_data *restrict dat, asset_mapping *restrict stringI
               SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"could not parse mod_col_mouseover color string in file: %s.\n",filePath);
               return -1;
             }
+          }else if(SDL_strcmp(tok,"mod_col_mouseover_dark") == 0){
+            tok = SDL_strtok_r(NULL,"",&saveptr); //get the rest of the string
+            SDL_strlcpy(str2,tok,255);
+            tok = SDL_strtok_r(str2,",",&saveptr);
+            if(tok!=NULL){
+              dat->rules.themeRules.modMouseOverCol[UITHEME_DARK].r = (float)SDL_atof(tok);
+              tok = SDL_strtok_r(NULL,",",&saveptr);
+              if(tok!=NULL){
+                dat->rules.themeRules.modMouseOverCol[UITHEME_DARK].g = (float)SDL_atof(tok);
+                tok = SDL_strtok_r(NULL,",",&saveptr);
+                if(tok!=NULL){
+                  dat->rules.themeRules.modMouseOverCol[UITHEME_DARK].b = (float)SDL_atof(tok);
+                  dat->rules.themeRules.modMouseOverCol[UITHEME_DARK].a = 1.0f;
+                }else{
+                  SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"could not parse mod_col_mouseover_dark color string in file: %s.\n",filePath);
+                  return -1;
+                }
+              }else{
+                SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"could not parse mod_col_mouseover_dark color string in file: %s.\n",filePath);
+                return -1;
+              }
+            }else{
+              SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"could not parse mod_col_mouseover_dark color string in file: %s.\n",filePath);
+              return -1;
+            }
           }else if(SDL_strcmp(tok,"mod_col_selected") == 0){
             tok = SDL_strtok_r(NULL,"",&saveptr); //get the rest of the string
             SDL_strlcpy(str2,tok,255);
             tok = SDL_strtok_r(str2,",",&saveptr);
             if(tok!=NULL){
-              dat->rules.themeRules.modSelectedCol.r = (float)SDL_atof(tok);
+              dat->rules.themeRules.modSelectedCol[UITHEME_LIGHT].r = (float)SDL_atof(tok);
               tok = SDL_strtok_r(NULL,",",&saveptr);
               if(tok!=NULL){
-                dat->rules.themeRules.modSelectedCol.g = (float)SDL_atof(tok);
+                dat->rules.themeRules.modSelectedCol[UITHEME_LIGHT].g = (float)SDL_atof(tok);
                 tok = SDL_strtok_r(NULL,",",&saveptr);
                 if(tok!=NULL){
-                  dat->rules.themeRules.modSelectedCol.b = (float)SDL_atof(tok);
-                  dat->rules.themeRules.modSelectedCol.a = 1.0f;
+                  dat->rules.themeRules.modSelectedCol[UITHEME_LIGHT].b = (float)SDL_atof(tok);
+                  dat->rules.themeRules.modSelectedCol[UITHEME_LIGHT].a = 1.0f;
                 }else{
                   SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"could not parse mod_col_selected color string in file: %s.\n",filePath);
                   return -1;
@@ -256,19 +306,44 @@ static int parseAppRules(app_data *restrict dat, asset_mapping *restrict stringI
               SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"could not parse mod_col_selected color string in file: %s.\n",filePath);
               return -1;
             }
+          }else if(SDL_strcmp(tok,"mod_col_selected_dark") == 0){
+            tok = SDL_strtok_r(NULL,"",&saveptr); //get the rest of the string
+            SDL_strlcpy(str2,tok,255);
+            tok = SDL_strtok_r(str2,",",&saveptr);
+            if(tok!=NULL){
+              dat->rules.themeRules.modSelectedCol[UITHEME_DARK].r = (float)SDL_atof(tok);
+              tok = SDL_strtok_r(NULL,",",&saveptr);
+              if(tok!=NULL){
+                dat->rules.themeRules.modSelectedCol[UITHEME_DARK].g = (float)SDL_atof(tok);
+                tok = SDL_strtok_r(NULL,",",&saveptr);
+                if(tok!=NULL){
+                  dat->rules.themeRules.modSelectedCol[UITHEME_DARK].b = (float)SDL_atof(tok);
+                  dat->rules.themeRules.modSelectedCol[UITHEME_DARK].a = 1.0f;
+                }else{
+                  SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"could not parse mod_col_selected_dark color string in file: %s.\n",filePath);
+                  return -1;
+                }
+              }else{
+                SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"could not parse mod_col_selected_dark color string in file: %s.\n",filePath);
+                return -1;
+              }
+            }else{
+              SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"could not parse mod_col_selected_dark color string in file: %s.\n",filePath);
+              return -1;
+            }
           }else if(SDL_strcmp(tok,"mod_col_selected_and_mouseover") == 0){
             tok = SDL_strtok_r(NULL,"",&saveptr); //get the rest of the string
             SDL_strlcpy(str2,tok,255);
             tok = SDL_strtok_r(str2,",",&saveptr);
             if(tok!=NULL){
-              dat->rules.themeRules.modSelectedAndMouseOverCol.r = (float)SDL_atof(tok);
+              dat->rules.themeRules.modSelectedAndMouseOverCol[UITHEME_LIGHT].r = (float)SDL_atof(tok);
               tok = SDL_strtok_r(NULL,",",&saveptr);
               if(tok!=NULL){
-                dat->rules.themeRules.modSelectedAndMouseOverCol.g = (float)SDL_atof(tok);
+                dat->rules.themeRules.modSelectedAndMouseOverCol[UITHEME_LIGHT].g = (float)SDL_atof(tok);
                 tok = SDL_strtok_r(NULL,",",&saveptr);
                 if(tok!=NULL){
-                  dat->rules.themeRules.modSelectedAndMouseOverCol.b = (float)SDL_atof(tok);
-                  dat->rules.themeRules.modSelectedAndMouseOverCol.a = 1.0f;
+                  dat->rules.themeRules.modSelectedAndMouseOverCol[UITHEME_LIGHT].b = (float)SDL_atof(tok);
+                  dat->rules.themeRules.modSelectedAndMouseOverCol[UITHEME_LIGHT].a = 1.0f;
                 }else{
                   SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"could not parse mod_col_selected_and_mouseover color string in file: %s.\n",filePath);
                   return -1;
@@ -279,6 +354,31 @@ static int parseAppRules(app_data *restrict dat, asset_mapping *restrict stringI
               }
             }else{
               SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"could not parse mod_col_selected_and_mouseover color string in file: %s.\n",filePath);
+              return -1;
+            }
+          }else if(SDL_strcmp(tok,"mod_col_selected_and_mouseover_dark") == 0){
+            tok = SDL_strtok_r(NULL,"",&saveptr); //get the rest of the string
+            SDL_strlcpy(str2,tok,255);
+            tok = SDL_strtok_r(str2,",",&saveptr);
+            if(tok!=NULL){
+              dat->rules.themeRules.modSelectedAndMouseOverCol[UITHEME_DARK].r = (float)SDL_atof(tok);
+              tok = SDL_strtok_r(NULL,",",&saveptr);
+              if(tok!=NULL){
+                dat->rules.themeRules.modSelectedAndMouseOverCol[UITHEME_DARK].g = (float)SDL_atof(tok);
+                tok = SDL_strtok_r(NULL,",",&saveptr);
+                if(tok!=NULL){
+                  dat->rules.themeRules.modSelectedAndMouseOverCol[UITHEME_DARK].b = (float)SDL_atof(tok);
+                  dat->rules.themeRules.modSelectedAndMouseOverCol[UITHEME_DARK].a = 1.0f;
+                }else{
+                  SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"could not parse mod_col_selected_and_mouseover_dark color string in file: %s.\n",filePath);
+                  return -1;
+                }
+              }else{
+                SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"could not parse mod_col_selected_and_mouseover_dark color string in file: %s.\n",filePath);
+                return -1;
+              }
+            }else{
+              SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"could not parse mod_col_selected_and_mouseover_dark color string in file: %s.\n",filePath);
               return -1;
             }
           }else{
@@ -430,6 +530,9 @@ static int parseAppRules(app_data *restrict dat, asset_mapping *restrict stringI
 	dat->locStringIDs[LOCSTR_OF] = (uint16_t)nameToAssetID("of",stringIDmap);
 	dat->locStringIDs[LOCSTR_ONEARTH] = (uint16_t)nameToAssetID("on_earth",stringIDmap);
 	dat->locStringIDs[LOCSTR_ABUNDANCE] = (uint16_t)nameToAssetID("abundance",stringIDmap);
+
+	//set default theme
+	dat->rules.themeRules.uiColorTheme = UITHEME_LIGHT;
 
   return 0; //success
 

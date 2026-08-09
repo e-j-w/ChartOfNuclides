@@ -144,11 +144,10 @@ static int readConfigFile(FILE *file, app_state *restrict state){
         if((sval >= 0)&&(sval < UISCALE_ENUM_LENGTH)){
           state->ds.interfaceSizeInd = (uint8_t)sval;
         }
-      }else if(strcmp(par,"interface_dark_mode") == 0){
-        if(strcmp(val,"yes") == 0){
-          state->ds.darkMode = 1;
-        }else{
-          state->ds.darkMode = 0;
+      }else if(strcmp(par,"user_interface_color_theme") == 0){
+        int cval = atoi(val);
+        if((cval >= 0)&&(cval < UITHEME_ENUM_LENGTH)){
+          state->ds.uiColorTheme = (uint8_t)cval;
         }
       }else if(strcmp(par,"gamepad_deadzone") == 0){
         int dz = atoi(val);
@@ -189,9 +188,9 @@ static int readConfigFile(FILE *file, app_state *restrict state){
 //write current settings to a config file
 static int writeConfigFile(FILE *file, const app_rules *restrict rules, const app_state *restrict state){
 
-  fprintf(file,"### %s Configuration File ###\n",rules->appName);
+  fprintf(file,"### %s Configuration File\n",rules->appName);
 
-  fprintf(file,"\n### Video Settings ###\n");
+  fprintf(file,"\n### Video Settings\n");
   if(state->ds.windowFullscreenMode){
     fprintf(file,"fullscreen=yes\n");
   }else{
@@ -200,7 +199,7 @@ static int writeConfigFile(FILE *file, const app_rules *restrict rules, const ap
   fprintf(file,"window_res_x=%u\n",state->ds.windowXRes);
   fprintf(file,"window_res_y=%u\n",state->ds.windowYRes);
 
-  fprintf(file,"\n### Display Settings ###\n");
+  fprintf(file,"\n### Display Settings\n");
   fprintf(file,"chart_pos_x=%0.3f\n",(double)state->ds.chartPosX);
   fprintf(file,"chart_pos_y=%0.3f\n",(double)state->ds.chartPosY);
   fprintf(file,"zoom_scale=%0.3f\n",(double)state->ds.chartZoomScale);
@@ -237,17 +236,13 @@ static int writeConfigFile(FILE *file, const app_rules *restrict rules, const ap
   }
   fprintf(file,"reaction_mode=%u\n",state->ds.reactionModeInd);
   fprintf(file,"user_interface_size=%u\n",state->ds.interfaceSizeInd);
-  if(state->ds.darkMode){
-    fprintf(file,"interface_dark_mode=yes\n");
-  }else{
-    fprintf(file,"interface_dark_mode=no\n");
-  }
+  fprintf(file,"user_interface_color_theme=%i\n",rules->themeRules.uiColorTheme);
 
-  fprintf(file,"\n### Gamepad Settings ###\n");
+  fprintf(file,"\n### Gamepad Settings\n");
   fprintf(file,"gamepad_deadzone=%i\n",state->gamepadDeadzone);
   fprintf(file,"gamepad_trigger_deadzone=%i\n",state->gamepadTriggerDeadzone);
 
-  fprintf(file,"\n### Other Settings ###\n");
+  fprintf(file,"\n### Other Settings\n");
   if(state->ds.drawPerformanceStats == 1){
     fprintf(file,"performance_overlay=yes\n");
   }else{

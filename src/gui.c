@@ -2696,7 +2696,7 @@ void drawChartOfNuclides(const app_data *restrict dat, app_state *restrict state
   rect.h = CHART_AXIS_DEPTH*state->ds.uiUserScale + 1.0f;
   rect.x = 0;
   rect.y = state->ds.windowYRes - rect.h + 1.0f;
-  if(state->ds.darkMode){
+  if(dat->rules.themeRules.uiColorTheme == UITHEME_DARK){
     if(rdat->ssdat.takingScreenshot != 1){
     drawFlatRect(rdat,rect,blackTransparentCol);
     }else{
@@ -2712,7 +2712,7 @@ void drawChartOfNuclides(const app_data *restrict dat, app_state *restrict state
   rect.w = rect.h;
   rect.h = rect.y;
   rect.y = 0;
-  if(state->ds.darkMode){
+  if(dat->rules.themeRules.uiColorTheme == UITHEME_DARK){
     if(rdat->ssdat.takingScreenshot != 1){
     drawFlatRect(rdat,rect,blackTransparentCol);
     }else{
@@ -2725,7 +2725,7 @@ void drawChartOfNuclides(const app_data *restrict dat, app_state *restrict state
       drawFlatRect(rdat,rect,whiteCol);
     }
   }
-  SDL_Color axisLabelCol = state->ds.darkMode ? whiteCol8Bit : blackCol8Bit;
+  SDL_Color axisLabelCol = dat->rules.themeRules.textColNormal[dat->rules.themeRules.uiColorTheme];
   drawTextAligned(rdat,CHART_AXIS_DEPTH*0.5f*state->ds.uiUserScale,CHART_AXIS_DEPTH*0.51f*state->ds.uiUserScale,axisLabelCol,FONTSIZE_NORMAL_BOLD,"Z",ALIGN_CENTER);
   drawTextAligned(rdat,state->ds.windowXRes - CHART_AXIS_DEPTH*0.51f*state->ds.uiUserScale,state->ds.windowYRes - CHART_AXIS_DEPTH*0.5f*state->ds.uiUserScale,axisLabelCol,FONTSIZE_NORMAL_BOLD,"N",ALIGN_CENTER);
   //draw ticks
@@ -2779,7 +2779,7 @@ uint8_t getHighlightState(const app_state *restrict state, const uint8_t uiElem)
 }
 
 void drawInfoBoxHeader(const app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat, const float x, const float y, const Uint8 alpha, const uint16_t nuclInd, const uint32_t selMetadata){
-  SDL_Color textCol = state->ds.darkMode ? whiteCol8Bit : blackCol8Bit;
+  SDL_Color textCol = dat->rules.themeRules.textColNormal[dat->rules.themeRules.uiColorTheme];
   char tmpStr[32], nuclStr[32];
   float drawXPos = (float)(x + (PANEL_EDGE_SIZE + 3*UI_PADDING_SIZE)*state->ds.uiUserScale);
   float drawYPos = (float)(y + (PANEL_EDGE_SIZE + 1.5f*UI_PADDING_SIZE)*state->ds.uiUserScale);
@@ -2798,7 +2798,7 @@ void drawInfoBoxHeader(const app_data *restrict dat, app_state *restrict state, 
 }
 
 void drawParentDecayQValStr(const app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat, const float yPos, const Uint8 alpha, const uint16_t nuclInd, const uint8_t decayInd, const uint32_t selMetadata){
-  SDL_Color textCol = state->ds.darkMode ? whiteCol8Bit : blackCol8Bit;
+  SDL_Color textCol = dat->rules.themeRules.textColNormal[dat->rules.themeRules.uiColorTheme];
   char nuclStr[32], jpiStr[32], hlStr[32],descStr[64], qValStr[128];
   uint32_t parentLvlInd = getParentBetaDecayLvlInd(&dat->ndat,nuclInd,decayInd);
   if(parentLvlInd < MAXNUMLVLS){
@@ -2897,7 +2897,7 @@ void drawNuclFullInfoBox(const app_data *restrict dat, app_state *restrict state
     txtAlpha = (uint8_t)(255.0f*juice_smoothStart2(1.0f - state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_TXTFADEIN]/UI_ANIM_LENGTH));
   }
 
-  SDL_Color defaultTextCol = state->ds.darkMode ? whiteCol8Bit : blackCol8Bit;
+  SDL_Color defaultTextCol = dat->rules.themeRules.textColNormal[dat->rules.themeRules.uiColorTheme];
 
   if(state->ds.fcScrollInProgress){
     //force selection strings to be updated mid-scroll
@@ -3525,14 +3525,11 @@ void drawNuclFullInfoBox(const app_data *restrict dat, app_state *restrict state
   rect.y = 0.0f;
   rect.w = state->ds.windowXRes;
   rect.h = NUCL_FULLINFOBOX_LEVELLIST_POS_Y*state->ds.uiUserScale;
-  if(state->ds.darkMode){
-    drawFlatRect(rdat,rect,dat->rules.themeRules.bgColDark);
-  }else{
-    drawFlatRect(rdat,rect,dat->rules.themeRules.bgCol);
-  }
+  drawFlatRect(rdat,rect,dat->rules.themeRules.themeBgCol[dat->rules.themeRules.uiColorTheme]);
+
   //rect underneath column titles
   SDL_FColor tableHeaderRectCol = {0.92f,0.92f,0.92f,txtAlpha/255.0f};
-  if(state->ds.darkMode){
+  if(dat->rules.themeRules.uiColorTheme == UITHEME_DARK){
     tableHeaderRectCol.r = 0.08f; tableHeaderRectCol.g = 0.08f; tableHeaderRectCol.b = 0.08f;
   }
   rect.y = (NUCL_FULLINFOBOX_LEVELLIST_HEADER_POS_Y - 2*UI_PADDING_SIZE)*state->ds.uiUserScale + txtYOffset;
@@ -3813,7 +3810,7 @@ void drawNuclInfoBox(const app_data *restrict dat, app_state *restrict state, re
   
   removeSelectableStringsInRect(&state->tss,infoBoxPanelRect); //get rid of selectable strings behind the panel
 
-  SDL_Color textCol = state->ds.darkMode ? whiteCol8Bit : blackCol8Bit;
+  SDL_Color textCol = dat->rules.themeRules.textColNormal[dat->rules.themeRules.uiColorTheme];
 
   //draw column title strings
   char tmpStr[32];
@@ -3958,7 +3955,7 @@ void drawAboutBox(const app_data *restrict dat, const app_state *restrict state,
   aboutBoxPanelRect.h = state->ds.uiElemHeight[UIELEM_ABOUT_BOX];
   drawPanelBG(&dat->rules.themeRules,rdat,aboutBoxPanelRect,alpha);
 
-  SDL_Color textCol = state->ds.darkMode ? dat->rules.themeRules.textColNormalDarkMode : dat->rules.themeRules.textColNormal;
+  SDL_Color textCol = dat->rules.themeRules.textColNormal[dat->rules.themeRules.uiColorTheme];
 
   drawIcon(&dat->rules.themeRules,rdat,(int16_t)(aboutBoxPanelRect.x + UI_TILE_SIZE*state->ds.uiUserScale),(int16_t)(aboutBoxPanelRect.y+(ABOUT_BOX_HEADERTXT_Y+1.5f*UI_PADDING_SIZE)*state->ds.uiUserScale),(int16_t)(UI_TILE_SIZE*state->ds.uiUserScale),HIGHLIGHT_NORMAL,alpha,UIICON_APPICON);
   drawTextAlignedSized(rdat,aboutBoxPanelRect.x+(2*UI_TILE_SIZE + 2*UI_PADDING_SIZE)*state->ds.uiUserScale,aboutBoxPanelRect.y+ABOUT_BOX_HEADERTXT_Y*state->ds.uiUserScale,textCol,FONTSIZE_LARGE_BOLD,alpha8,dat->rules.appName,ALIGN_LEFT,(Uint16)(aboutBoxPanelRect.w - 2*UI_PADDING_SIZE*state->ds.uiUserScale));
@@ -4026,7 +4023,7 @@ void drawPrefsDialog(const app_data *restrict dat, const app_state *restrict sta
   prefsDialogPanelRect.h = state->ds.uiElemHeight[UIELEM_PREFS_DIALOG];
   drawPanelBG(&dat->rules.themeRules,rdat,prefsDialogPanelRect,alpha);
 
-  SDL_Color textCol = state->ds.darkMode ? dat->rules.themeRules.textColNormalDarkMode : dat->rules.themeRules.textColNormal;
+  SDL_Color textCol = dat->rules.themeRules.textColNormal[dat->rules.themeRules.uiColorTheme];
 
   uint8_t alpha8 = (uint8_t)SDL_floorf(alpha*255.0f);
   drawTextAlignedSized(rdat,prefsDialogPanelRect.x+PREFS_DIALOG_HEADERTXT_X*state->ds.uiUserScale,prefsDialogPanelRect.y+PREFS_DIALOG_HEADERTXT_Y*state->ds.uiUserScale,textCol,FONTSIZE_LARGE_BOLD,alpha8,dat->strings[dat->locStringIDs[LOCSTR_MENUITEM_PREFS]],ALIGN_LEFT,(Uint16)(prefsDialogPanelRect.w));
@@ -4083,10 +4080,10 @@ void drawUIScaleMenu(const app_data *restrict dat, const app_state *restrict sta
       drawRect.h = state->ds.uiElemHeight[UIELEM_PREFS_UISCALE_MENU-i];
       switch(getHighlightState(state,UIELEM_PREFS_UISCALE_MENU-i)){
         case HIGHLIGHT_SELECTED:
-          drawFlatRect(rdat,drawRect,dat->rules.themeRules.modSelectedCol);
+          drawFlatRect(rdat,drawRect,dat->rules.themeRules.modSelectedCol[dat->rules.themeRules.uiColorTheme]);
           break;
         case HIGHLIGHT_MOUSEOVER:
-          drawFlatRect(rdat,drawRect,dat->rules.themeRules.modMouseOverCol);
+          drawFlatRect(rdat,drawRect,dat->rules.themeRules.modMouseOverCol[dat->rules.themeRules.uiColorTheme]);
           break;
         case HIGHLIGHT_NORMAL:
         default:
@@ -4095,7 +4092,7 @@ void drawUIScaleMenu(const app_data *restrict dat, const app_state *restrict sta
     }
   }
 
-  SDL_Color textCol = state->ds.darkMode ? whiteCol8Bit : blackCol8Bit;
+  SDL_Color textCol = dat->rules.themeRules.textColNormal[dat->rules.themeRules.uiColorTheme];
 
   //draw menu item text
   drawRect.x = state->ds.uiElemPosX[UIELEM_PREFS_UISCALE_MENU] + (PANEL_EDGE_SIZE + 3*UI_PADDING_SIZE)*state->ds.uiUserScale;
@@ -4140,10 +4137,10 @@ void drawReactionModeMenu(const app_data *restrict dat, const app_state *restric
       drawRect.h = state->ds.uiElemHeight[UIELEM_PREFS_REACTIONMODE_MENU-i];
       switch(getHighlightState(state,UIELEM_PREFS_REACTIONMODE_MENU-i)){
         case HIGHLIGHT_SELECTED:
-          drawFlatRect(rdat,drawRect,dat->rules.themeRules.modSelectedCol);
+          drawFlatRect(rdat,drawRect,dat->rules.themeRules.modSelectedCol[dat->rules.themeRules.uiColorTheme]);
           break;
         case HIGHLIGHT_MOUSEOVER:
-          drawFlatRect(rdat,drawRect,dat->rules.themeRules.modMouseOverCol);
+          drawFlatRect(rdat,drawRect,dat->rules.themeRules.modMouseOverCol[dat->rules.themeRules.uiColorTheme]);
           break;
         case HIGHLIGHT_NORMAL:
         default:
@@ -4152,7 +4149,7 @@ void drawReactionModeMenu(const app_data *restrict dat, const app_state *restric
     }
   }
 
-  SDL_Color textCol = state->ds.darkMode ? whiteCol8Bit : blackCol8Bit;
+  SDL_Color textCol = dat->rules.themeRules.textColNormal[dat->rules.themeRules.uiColorTheme];
 
   //draw menu item text
   drawRect.x = state->ds.uiElemPosX[UIELEM_PREFS_REACTIONMODE_MENU] + (PANEL_EDGE_SIZE + 3*UI_PADDING_SIZE)*state->ds.uiUserScale;
@@ -4199,16 +4196,16 @@ void drawRxnMenu(const app_data *restrict dat, const app_state *restrict state, 
         drawRect = getRxnMenuButtonRect(&state->ds,numRxnPerCol,i);
         drawRect.y += yOffset;
         if(state->ds.mouseOverRxn == i){
-          highlightCol = dat->rules.themeRules.modSelectedAndMouseOverCol;
+          highlightCol = dat->rules.themeRules.modSelectedAndMouseOverCol[dat->rules.themeRules.uiColorTheme];
         }else{
-          highlightCol = dat->rules.themeRules.modSelectedCol;
+          highlightCol = dat->rules.themeRules.modSelectedCol[dat->rules.themeRules.uiColorTheme];
         }
         highlightCol.a = alpha;
         drawFlatRect(rdat,drawRect,highlightCol);
       }else if(state->ds.mouseOverRxn == i){
         drawRect = getRxnMenuButtonRect(&state->ds,numRxnPerCol,i);
         drawRect.y += yOffset;
-        highlightCol = dat->rules.themeRules.modMouseOverCol;
+        highlightCol = dat->rules.themeRules.modMouseOverCol[dat->rules.themeRules.uiColorTheme];
         highlightCol.a = alpha;
         drawFlatRect(rdat,drawRect,highlightCol);
       }
@@ -4216,13 +4213,13 @@ void drawRxnMenu(const app_data *restrict dat, const app_state *restrict state, 
       if(state->ds.mouseHoldRxn == i){
         drawRect = getRxnMenuButtonRect(&state->ds,numRxnPerCol,i);
         drawRect.y += yOffset;
-        highlightCol = dat->rules.themeRules.modSelectedCol;
+        highlightCol = dat->rules.themeRules.modSelectedCol[dat->rules.themeRules.uiColorTheme];
         highlightCol.a = alpha;
         drawFlatRect(rdat,drawRect,highlightCol);
       }else if(state->ds.mouseOverRxn == i){
         drawRect = getRxnMenuButtonRect(&state->ds,numRxnPerCol,i);
         drawRect.y += yOffset;
-        highlightCol = dat->rules.themeRules.modMouseOverCol;
+        highlightCol = dat->rules.themeRules.modMouseOverCol[dat->rules.themeRules.uiColorTheme];
         highlightCol.a = alpha;
         drawFlatRect(rdat,drawRect,highlightCol);
       }
@@ -4233,7 +4230,7 @@ void drawRxnMenu(const app_data *restrict dat, const app_state *restrict state, 
     }
   }
 
-  SDL_Color textCol = state->ds.darkMode ? whiteCol8Bit : blackCol8Bit;
+  SDL_Color textCol = dat->rules.themeRules.textColNormal[dat->rules.themeRules.uiColorTheme];
 
   //draw menu item text
   drawRect.x = state->ds.uiElemPosX[UIELEM_RXN_MENU] + (PANEL_EDGE_SIZE + 3*UI_PADDING_SIZE)*state->ds.uiUserScale;
@@ -4298,7 +4295,7 @@ void drawSearchMenu(const app_data *restrict dat, const app_state *restrict stat
     drawIconAndTextEntryBox(&dat->rules.themeRules,rdat,state->ds.uiElemPosX[UIELEM_SEARCH_ENTRYBOX],(int16_t)(state->ds.uiElemPosY[UIELEM_SEARCH_ENTRYBOX]+yOffset),state->ds.uiElemWidth[UIELEM_SEARCH_ENTRYBOX],getHighlightState(state,UIELEM_SEARCH_ENTRYBOX),HIGHLIGHT_NORMAL,alpha8,UIICON_SEARCH,state->ss.searchString,state->ds.searchEntryDispStartChar,state->ds.searchEntryDispNumChars,state->searchCursorPos);
   }
 
-  SDL_Color textCol = state->ds.darkMode ? whiteCol8Bit : blackCol8Bit;
+  SDL_Color textCol = dat->rules.themeRules.textColNormal[dat->rules.themeRules.uiColorTheme];
 
   //draw results
   for(uint8_t i=0; i<state->ss.numResults; i++){
@@ -4525,12 +4522,12 @@ void drawChartViewMenu(const app_data *restrict dat, const app_state *restrict s
       drawRect.h = state->ds.uiElemHeight[UIELEM_CHARTVIEW_MENU-i];
       switch(getHighlightState(state,UIELEM_CHARTVIEW_MENU-i)){
         case HIGHLIGHT_SELECTED:
-          highlightCol = dat->rules.themeRules.modSelectedCol;
+          highlightCol = dat->rules.themeRules.modSelectedCol[dat->rules.themeRules.uiColorTheme];
           highlightCol.a = alpha;
           drawFlatRect(rdat,drawRect,highlightCol);
           break;
         case HIGHLIGHT_MOUSEOVER:
-          highlightCol = dat->rules.themeRules.modMouseOverCol;
+          highlightCol = dat->rules.themeRules.modMouseOverCol[dat->rules.themeRules.uiColorTheme];
           highlightCol.a = alpha;
           drawFlatRect(rdat,drawRect,highlightCol);
           break;
@@ -4541,7 +4538,7 @@ void drawChartViewMenu(const app_data *restrict dat, const app_state *restrict s
     }
   }
 
-  SDL_Color textCol = state->ds.darkMode ? whiteCol8Bit : blackCol8Bit;
+  SDL_Color textCol = dat->rules.themeRules.textColNormal[dat->rules.themeRules.uiColorTheme];
 
   //draw menu item text
   uint8_t numViewsPerCol = (uint8_t)SDL_ceilf(((float)CHARTVIEW_ENUM_LENGTH)/(1.0f*((float)CHARTVIEW_MENU_COLUMNS)));
@@ -4595,12 +4592,12 @@ void drawPrimaryMenu(const app_data *restrict dat, const app_state *restrict sta
     drawRect.h = state->ds.uiElemHeight[UIELEM_PRIMARY_MENU-i];
     switch(getHighlightState(state,UIELEM_PRIMARY_MENU-i)){
       case HIGHLIGHT_SELECTED:
-        highlightCol = dat->rules.themeRules.modSelectedCol;
+        highlightCol = dat->rules.themeRules.modSelectedCol[dat->rules.themeRules.uiColorTheme];
         highlightCol.a = alpha;
         drawFlatRect(rdat,drawRect,highlightCol);
         break;
       case HIGHLIGHT_MOUSEOVER:
-        highlightCol = dat->rules.themeRules.modMouseOverCol;
+        highlightCol = dat->rules.themeRules.modMouseOverCol[dat->rules.themeRules.uiColorTheme];
         highlightCol.a = alpha;
         drawFlatRect(rdat,drawRect,highlightCol);
         break;
@@ -4610,7 +4607,7 @@ void drawPrimaryMenu(const app_data *restrict dat, const app_state *restrict sta
     }
   }
 
-  SDL_Color textCol = state->ds.darkMode ? whiteCol8Bit : blackCol8Bit;
+  SDL_Color textCol = dat->rules.themeRules.textColNormal[dat->rules.themeRules.uiColorTheme];
 
   //draw menu item text
   drawRect.x = state->ds.uiElemPosX[UIELEM_PRIMARY_MENU] + (PANEL_EDGE_SIZE + 3*UI_PADDING_SIZE)*state->ds.uiUserScale;
@@ -4655,7 +4652,7 @@ void drawContextMenu(const app_data *restrict dat, const app_state *restrict sta
   drawRect.h = state->ds.uiElemHeight[UIELEM_CONTEXT_MENU];
   drawPanelBG(&dat->rules.themeRules,rdat,drawRect,alpha);
 
-  SDL_Color textCol = state->ds.darkMode ? whiteCol8Bit : blackCol8Bit;
+  SDL_Color textCol = dat->rules.themeRules.textColNormal[dat->rules.themeRules.uiColorTheme];
 
   //draw header text
   if(state->cms.useHeaderText){
@@ -4669,11 +4666,11 @@ void drawContextMenu(const app_data *restrict dat, const app_state *restrict sta
   for(uint8_t i=0;i<state->cms.numContextMenuItems;i++){
     drawRect = getContextMenuButtonRect(state,i);
     if(i==state->cms.mouseOverContextItem){
-      highlightCol = dat->rules.themeRules.modMouseOverCol;
+      highlightCol = dat->rules.themeRules.modMouseOverCol[dat->rules.themeRules.uiColorTheme];
       highlightCol.a = alpha;
       drawFlatRect(rdat,drawRect,highlightCol);
     }else if(i==state->cms.clickedContextItem){
-      highlightCol = dat->rules.themeRules.modSelectedCol;
+      highlightCol = dat->rules.themeRules.modSelectedCol[dat->rules.themeRules.uiColorTheme];
       highlightCol.a = alpha;
       drawFlatRect(rdat,drawRect,highlightCol);
     }
@@ -4859,7 +4856,7 @@ void drawPerformanceStats(const ui_theme_rules *restrict uirules, const app_stat
   perfOvRect.x = (CHART_AXIS_DEPTH*rdat->uiScale);
   perfOvRect.y = 0.0f;
   
-  if(state->ds.darkMode){
+  if(uirules->uiColorTheme == UITHEME_DARK){
     SDL_SetRenderDrawColor(rdat->renderer,5,5,5,150);
   }else{
     SDL_SetRenderDrawColor(rdat->renderer,255,255,255,150);
@@ -4869,19 +4866,19 @@ void drawPerformanceStats(const ui_theme_rules *restrict uirules, const app_stat
   //draw text
   char txtStr[256];
   SDL_snprintf(txtStr,256,"Debug stats (press P to toggle this display)");
-  drawText(rdat,PERF_OVERLAY_BUTTON_X_ANCHOR,PERF_OVERLAY_BUTTON_Y_ANCHOR,(state->ds.darkMode) ? whiteCol8Bit : blackCol8Bit,FONTSIZE_NORMAL_BOLD,txtStr);
+  drawText(rdat,PERF_OVERLAY_BUTTON_X_ANCHOR,PERF_OVERLAY_BUTTON_Y_ANCHOR,uirules->textColNormal[uirules->uiColorTheme],FONTSIZE_NORMAL_BOLD,txtStr);
   SDL_snprintf(txtStr,256,"UI scale: %0.2f, DPI scale: %0.2f, Resolution: %u x %u (logical), %u x %u (actual)",(double)rdat->uiScale,(double)rdat->uiDPIScale,state->ds.windowXRes,state->ds.windowYRes,state->ds.windowXRenderRes,state->ds.windowYRenderRes);
-  drawDefaultText(uirules,rdat,state->ds.darkMode,PERF_OVERLAY_BUTTON_X_ANCHOR,PERF_OVERLAY_BUTTON_Y_ANCHOR+PERF_OVERLAY_Y_SPACING*state->ds.uiUserScale,txtStr);
+  drawDefaultText(uirules,rdat,PERF_OVERLAY_BUTTON_X_ANCHOR,PERF_OVERLAY_BUTTON_Y_ANCHOR+PERF_OVERLAY_Y_SPACING*state->ds.uiUserScale,txtStr);
   SDL_snprintf(txtStr,256,"Zoom scale: %4.1f, UI status: %u",(double)state->ds.chartZoomScale,state->uiState);
-  drawDefaultText(uirules,rdat,state->ds.darkMode,PERF_OVERLAY_BUTTON_X_ANCHOR,PERF_OVERLAY_BUTTON_Y_ANCHOR+2*PERF_OVERLAY_Y_SPACING*state->ds.uiUserScale,txtStr);
+  drawDefaultText(uirules,rdat,PERF_OVERLAY_BUTTON_X_ANCHOR,PERF_OVERLAY_BUTTON_Y_ANCHOR+2*PERF_OVERLAY_Y_SPACING*state->ds.uiUserScale,txtStr);
   SDL_snprintf(txtStr,256,"Chart position: [%3.2f %3.2f], Selected nuclide: %4u",(double)state->ds.chartPosX,(double)state->ds.chartPosY,state->chartSelectedNucl);
-  drawDefaultText(uirules,rdat,state->ds.darkMode,PERF_OVERLAY_BUTTON_X_ANCHOR,PERF_OVERLAY_BUTTON_Y_ANCHOR+3*PERF_OVERLAY_Y_SPACING*state->ds.uiUserScale,txtStr);
+  drawDefaultText(uirules,rdat,PERF_OVERLAY_BUTTON_X_ANCHOR,PERF_OVERLAY_BUTTON_Y_ANCHOR+3*PERF_OVERLAY_Y_SPACING*state->ds.uiUserScale,txtStr);
   SDL_snprintf(txtStr,256,"Active threads: %2u, Selectable strings: %3u, Selected string: %3u [%3u %3u]",tms->numThreads,state->tss.numSelStrs,state->tss.selectedStr,state->tss.selStartPos,state->tss.selEndPos);
-  drawDefaultText(uirules,rdat,state->ds.darkMode,PERF_OVERLAY_BUTTON_X_ANCHOR,PERF_OVERLAY_BUTTON_Y_ANCHOR+4*PERF_OVERLAY_Y_SPACING*state->ds.uiUserScale,txtStr);
+  drawDefaultText(uirules,rdat,PERF_OVERLAY_BUTTON_X_ANCHOR,PERF_OVERLAY_BUTTON_Y_ANCHOR+4*PERF_OVERLAY_Y_SPACING*state->ds.uiUserScale,txtStr);
   SDL_snprintf(txtStr,256,"FPS: %4.1f",1.0/((double)deltaTime));
-  drawDefaultText(uirules,rdat,state->ds.darkMode,PERF_OVERLAY_BUTTON_X_ANCHOR,PERF_OVERLAY_BUTTON_Y_ANCHOR+5*PERF_OVERLAY_Y_SPACING*state->ds.uiUserScale,txtStr);
+  drawDefaultText(uirules,rdat,PERF_OVERLAY_BUTTON_X_ANCHOR,PERF_OVERLAY_BUTTON_Y_ANCHOR+5*PERF_OVERLAY_Y_SPACING*state->ds.uiUserScale,txtStr);
   SDL_snprintf(txtStr,256,"Frame time (ms): %4.3f",(double)(deltaTime*1000.0f));
-  drawDefaultText(uirules,rdat,state->ds.darkMode,PERF_OVERLAY_BUTTON_X_ANCHOR,PERF_OVERLAY_BUTTON_Y_ANCHOR+6*PERF_OVERLAY_Y_SPACING*state->ds.uiUserScale,txtStr);
+  drawDefaultText(uirules,rdat,PERF_OVERLAY_BUTTON_X_ANCHOR,PERF_OVERLAY_BUTTON_Y_ANCHOR+6*PERF_OVERLAY_Y_SPACING*state->ds.uiUserScale,txtStr);
 }
 
 //meta-function which draws any UI menus, if applicable
@@ -4893,11 +4890,7 @@ void drawUI(const app_data *restrict dat, app_state *restrict state, resource_da
   }
 
   //draw background
-  if(state->ds.darkMode){
-    drawFlatBG(&state->ds,rdat,dat->rules.themeRules.bgColDark);
-  }else{
-    drawFlatBG(&state->ds,rdat,dat->rules.themeRules.bgCol);
-  }
+  drawFlatBG(&state->ds,rdat,dat->rules.themeRules.themeBgCol[dat->rules.themeRules.uiColorTheme]);
   
   //draw chart of nuclides below everything else
   if(bp_check128(&state->ds.shownElements,UIELEM_CHARTOFNUCLIDES)){
@@ -5014,7 +5007,7 @@ void drawUI(const app_data *restrict dat, app_state *restrict state, resource_da
     if(state->ds.uiAnimPlaying & (1U << UIANIM_CHART_FADEIN)){
       
       SDL_FColor overlayCol = {1.0f,1.0f,1.0f,1.0f};
-      if(state->ds.darkMode){
+      if(dat->rules.themeRules.uiColorTheme == UITHEME_DARK){
         overlayCol.r = 0.0f; overlayCol.g = 0.0f; overlayCol.b = 0.0f;
       }
       overlayCol.a = (float)(1.0f*juice_smoothStop2(state->ds.timeLeftInUIAnimation[UIANIM_CHART_FADEIN]/UI_ANIM_LENGTH));

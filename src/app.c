@@ -136,20 +136,12 @@ int main(int argc, char *argv[]){
   SDL_SetCursor(gdat->rdat.defaultCursor);
   
   //setup splash screen
-  gdat->dat.rules.themeRules.bgCol.r = 255;
-  gdat->dat.rules.themeRules.bgCol.g = 255;
-  gdat->dat.rules.themeRules.bgCol.b = 255;
-  gdat->dat.rules.themeRules.bgCol.a = 255;
-  if(gdat->state.ds.darkMode){
-    drawFlatBG(&gdat->state.ds,&gdat->rdat,gdat->dat.rules.themeRules.bgColDark);
-  }else{
-    drawFlatBG(&gdat->state.ds,&gdat->rdat,gdat->dat.rules.themeRules.bgCol);
-  }
+  drawFlatBG(&gdat->state.ds,&gdat->rdat,gdat->dat.rules.themeRules.themeBgCol[gdat->dat.rules.themeRules.uiColorTheme]);
   SDL_RenderPresent(gdat->rdat.renderer); //tell the renderer to actually show the image
 
   //import game data and resources
   //initial text cache is also gneerated here
-  if(importAppData(&gdat->dat,&gdat->rdat,gdat->state.ds.darkMode)!=0){
+  if(importAppData(&gdat->dat,&gdat->state,&gdat->rdat)!=0){
     shutdownApp(gdat,1);
   }
   SDL_SetWindowIcon(gdat->rdat.window,gdat->rdat.iconSurface);

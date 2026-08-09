@@ -225,9 +225,10 @@ typedef struct
 
 typedef struct
 {
-  SDL_FColor bgCol, bgColDark; //background colors
-  SDL_Color textColNormal, textColNormalDarkMode, textColInactive; //colors for text (cannot be floating point as this is not supported by SDL_ttf)
-  SDL_FColor modNormalCol, modMouseOverCol, modSelectedCol, modSelectedAndMouseOverCol; //color modulations for UI elements in different states
+  uint8_t uiColorTheme; //the active UI theme (values from ui_theme_enum), synced to the value in drawing_state
+  SDL_FColor themeBgCol[UITHEME_ENUM_LENGTH]; //background colors for each theme
+  SDL_Color textColNormal[UITHEME_ENUM_LENGTH], textColInactive; //colors for text (cannot be floating point as this is not supported by SDL_ttf)
+  SDL_FColor modNormalCol[UITHEME_ENUM_LENGTH], modMouseOverCol[UITHEME_ENUM_LENGTH], modSelectedCol[UITHEME_ENUM_LENGTH], modSelectedAndMouseOverCol[UITHEME_ENUM_LENGTH]; //color modulations for UI elements in different states
 }ui_theme_rules; //struct containing global UI thene rules
 
 typedef struct
@@ -282,6 +283,7 @@ typedef struct
   uint8_t reactionModeInd; //user preference for reaction display mode, values from reaction_mode_enum
   uint8_t showingTooltip; //0=no tooltip, 1=tooltip at mouse position
   uint32_t tooltipPar; //for ENSDF comment tooltips, the index of the ENSDF string buffer where the tooltip appears, MAX_UINT32_VAL if no tooltip
+  uint8_t uiColorTheme; //the active UI theme (values from ui_theme_enum)
   unsigned int fcScrollInProgress : 1;
   unsigned int fcScrollFinished : 1;
   unsigned int fcNuclChangeInProgress : 1;
@@ -302,7 +304,6 @@ typedef struct
   unsigned int drawShellClosures : 1;
   unsigned int drawPerformanceStats : 1; //0=don't draw, 1=draw
   unsigned int windowFullscreenMode : 1; //true if the window is fullscreen
-  unsigned int darkMode : 1; //true if dark mode is enabled
   unsigned int forceRedraw : 1; //true if a re-draw should be forced
 }drawing_state; //struct containing values used for drawing
 

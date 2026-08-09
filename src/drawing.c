@@ -46,13 +46,13 @@ void drawScrollBar(const ui_theme_rules *restrict uirules, resource_data *restri
   switch(highlightState){
     case HIGHLIGHT_NORMAL:
     default:
-      setUITexColAlpha(rdat,uirules->modNormalCol.r,uirules->modNormalCol.g,uirules->modNormalCol.b,alpha);
+      setUITexColAlpha(rdat,uirules->modNormalCol[uirules->uiColorTheme].r,uirules->modNormalCol[uirules->uiColorTheme].g,uirules->modNormalCol[uirules->uiColorTheme].b,alpha);
       break;
     case HIGHLIGHT_MOUSEOVER:
-      setUITexColAlpha(rdat,uirules->modMouseOverCol.r,uirules->modMouseOverCol.g,uirules->modMouseOverCol.b,alpha);
+      setUITexColAlpha(rdat,uirules->modMouseOverCol[uirules->uiColorTheme].r,uirules->modMouseOverCol[uirules->uiColorTheme].g,uirules->modMouseOverCol[uirules->uiColorTheme].b,alpha);
       break;
     case HIGHLIGHT_SELECTED:
-      setUITexColAlpha(rdat,uirules->modSelectedCol.r,uirules->modSelectedCol.g,uirules->modSelectedCol.b,alpha);
+      setUITexColAlpha(rdat,uirules->modSelectedCol[uirules->uiColorTheme].r,uirules->modSelectedCol[uirules->uiColorTheme].g,uirules->modSelectedCol[uirules->uiColorTheme].b,alpha);
       break;
   }
 
@@ -132,13 +132,13 @@ void drawBGElement(const ui_theme_rules *restrict uirules, resource_data *restri
   switch(highlightState){
     case HIGHLIGHT_NORMAL:
     default:
-      setUITexColAlpha(rdat,uirules->modNormalCol.r,uirules->modNormalCol.g,uirules->modNormalCol.b,alpha);
+      setUITexColAlpha(rdat,uirules->modNormalCol[uirules->uiColorTheme].r,uirules->modNormalCol[uirules->uiColorTheme].g,uirules->modNormalCol[uirules->uiColorTheme].b,alpha);
       break;
     case HIGHLIGHT_MOUSEOVER:
-      setUITexColAlpha(rdat,uirules->modMouseOverCol.r,uirules->modMouseOverCol.g,uirules->modMouseOverCol.b,alpha);
+      setUITexColAlpha(rdat,uirules->modMouseOverCol[uirules->uiColorTheme].r,uirules->modMouseOverCol[uirules->uiColorTheme].g,uirules->modMouseOverCol[uirules->uiColorTheme].b,alpha);
       break;
     case HIGHLIGHT_SELECTED:
-      setUITexColAlpha(rdat,uirules->modSelectedCol.r,uirules->modSelectedCol.g,uirules->modSelectedCol.b,alpha);
+      setUITexColAlpha(rdat,uirules->modSelectedCol[uirules->uiColorTheme].r,uirules->modSelectedCol[uirules->uiColorTheme].g,uirules->modSelectedCol[uirules->uiColorTheme].b,alpha);
       break;
   }
 
@@ -208,7 +208,7 @@ void drawButtonOrEntryElem(const ui_theme_rules *restrict uirules, resource_data
 //x, y, w: position and size of the button, assuming a UI scale of 1 (height assumed to be one tile height)
 //highlightState: values from highlight_state_enum
 void drawButton(const ui_theme_rules *restrict uirules, resource_data *restrict rdat, const int16_t x, const int16_t y, const int16_t w, const uint8_t highlightState, const float alpha){
-   drawButtonOrEntryElem(uirules,rdat,x,y,w,highlightState,UIELEMTYPE_BUTTON,alpha);
+  drawButtonOrEntryElem(uirules,rdat,x,y,w,highlightState,UIELEMTYPE_BUTTON,alpha);
 }
 
 //draw a button with a text label
@@ -217,7 +217,7 @@ void drawTextButton(const ui_theme_rules *restrict uirules, resource_data *restr
   //remember that the font size is scaled by the UI scale, during font import
   const float textX = (float)x + (float)(w)/2.0f;
   const float textY = (float)y + ((float)(UI_TILE_SIZE)/2.0f)*rdat->uiScale/rdat->uiDPIScale;
-  drawTextAlignedSized(rdat,textX,textY,uirules->textColNormal,FONTSIZE_NORMAL,alpha,text,ALIGN_CENTER,(Uint16)w);
+  drawTextAlignedSized(rdat,textX,textY,uirules->textColNormal[uirules->uiColorTheme],FONTSIZE_NORMAL,alpha,text,ALIGN_CENTER,(Uint16)w);
 }
 
 void drawIcon(const ui_theme_rules *restrict uirules, resource_data *restrict rdat, const int16_t x, const int16_t y, const int16_t w, const uint8_t highlightState, const float alpha, const uint8_t iconInd){
@@ -230,13 +230,13 @@ void drawIcon(const ui_theme_rules *restrict uirules, resource_data *restrict rd
   switch(highlightState){
     case HIGHLIGHT_NORMAL:
     default:
-      setUITexColAlpha(rdat,uirules->modNormalCol.r,uirules->modNormalCol.g,uirules->modNormalCol.b,alpha);
+      setUITexColAlpha(rdat,uirules->modNormalCol[uirules->uiColorTheme].r,uirules->modNormalCol[uirules->uiColorTheme].g,uirules->modNormalCol[uirules->uiColorTheme].b,alpha);
       break;
     case HIGHLIGHT_MOUSEOVER:
-      setUITexColAlpha(rdat,uirules->modMouseOverCol.r,uirules->modMouseOverCol.g,uirules->modMouseOverCol.b,alpha);
+      setUITexColAlpha(rdat,uirules->modMouseOverCol[uirules->uiColorTheme].r,uirules->modMouseOverCol[uirules->uiColorTheme].g,uirules->modMouseOverCol[uirules->uiColorTheme].b,alpha);
       break;
     case HIGHLIGHT_SELECTED:
-      setUITexColAlpha(rdat,uirules->modSelectedCol.r,uirules->modSelectedCol.g,uirules->modSelectedCol.b,alpha);
+      setUITexColAlpha(rdat,uirules->modSelectedCol[uirules->uiColorTheme].r,uirules->modSelectedCol[uirules->uiColorTheme].g,uirules->modSelectedCol[uirules->uiColorTheme].b,alpha);
       break;
   }
 
@@ -270,7 +270,7 @@ void drawIconAndTextButton(const ui_theme_rules *restrict uirules, resource_data
   const float textX = (float)x + (((float)(w*rdat->uiDPIScale + UI_TILE_SIZE*rdat->uiScale - 2*UI_PADDING_SIZE*rdat->uiScale)/2.0f)/rdat->uiDPIScale);
   const float textY = (float)y + ((float)(UI_TILE_SIZE)/2.0f)*rdat->uiScale/rdat->uiDPIScale;
   //printf("text x: %f, y: %f\n",(double)textX,(double)textY);
-  drawTextAlignedSized(rdat,textX,textY,uirules->textColNormal,FONTSIZE_NORMAL,alpha,text,ALIGN_CENTER,(Uint16)(w*rdat->uiScale));
+  drawTextAlignedSized(rdat,textX,textY,uirules->textColNormal[uirules->uiColorTheme],FONTSIZE_NORMAL,alpha,text,ALIGN_CENTER,(Uint16)(w*rdat->uiScale));
 }
 
 void drawDropDownTextButtonFontSize(const ui_theme_rules *restrict uirules, resource_data *restrict rdat, const int16_t x, const int16_t y, const int16_t w, const uint8_t highlightState, const uint8_t alpha, const uint8_t fontSizeInd, const char *text){
@@ -285,7 +285,7 @@ void drawDropDownTextButtonFontSize(const ui_theme_rules *restrict uirules, reso
     textY -= 0.5f*rdat->uiScale/rdat->uiDPIScale; //hack to center bolded text
   }
   //printf("text x: %f, y: %f\n",(double)textX,(double)textY);
-  drawTextAlignedSized(rdat,textX,textY,uirules->textColNormal,fontSizeInd,alpha,text,ALIGN_CENTER,(Uint16)(w*rdat->uiScale));
+  drawTextAlignedSized(rdat,textX,textY,uirules->textColNormal[uirules->uiColorTheme],fontSizeInd,alpha,text,ALIGN_CENTER,(Uint16)(w*rdat->uiScale));
 }
 
 void drawDropDownTextButton(const ui_theme_rules *restrict uirules, resource_data *restrict rdat, const int16_t x, const int16_t y, const int16_t w, const uint8_t highlightState, const uint8_t alpha, const char *text){
@@ -299,7 +299,7 @@ void drawTextEntryBox(const ui_theme_rules *restrict uirules, resource_data *res
   switch(textHighlightState){
     case HIGHLIGHT_NORMAL:
     default:
-      drawTextAlignedSized(rdat,textX,textY,uirules->textColNormal,FONTSIZE_NORMAL,alpha,text,ALIGN_LEFT,(Uint16)w);
+      drawTextAlignedSized(rdat,textX,textY,uirules->textColNormal[uirules->uiColorTheme],FONTSIZE_NORMAL,alpha,text,ALIGN_LEFT,(Uint16)w);
       break;
     case HIGHLIGHT_INACTIVE:
       drawTextAlignedSized(rdat,textX,textY,uirules->textColInactive,FONTSIZE_NORMAL,alpha,text,ALIGN_LEFT,(Uint16)w);
@@ -326,7 +326,7 @@ void drawIconAndTextEntryBox(const ui_theme_rules *restrict uirules, resource_da
         SDL_strlcpy(tmpTxt,text,255);
       }
       //draw text
-      drawTextAlignedSized(rdat,textX,textY,uirules->textColNormal,FONTSIZE_NORMAL,alpha,tmpTxt,ALIGN_LEFT,65535U);
+      drawTextAlignedSized(rdat,textX,textY,uirules->textColNormal[uirules->uiColorTheme],FONTSIZE_NORMAL,alpha,tmpTxt,ALIGN_LEFT,65535U);
       //draw cursor
       if((cursorPos >= txtDrawStartPos)&&(cursorPos <= (txtDrawStartPos+txtDrawNumChars))){
         SDL_FColor lineCol = grayCol;
@@ -511,14 +511,14 @@ void drawText(resource_data *restrict rdat, const float xPos, const float yPos, 
 void drawColoredTextAligned(resource_data *restrict rdat, const float xPos, const float yPos, const SDL_Color textColor, const uint8_t fontSizeInd, const char *txt, const uint8_t alignment){
   drawTextAligned(rdat,xPos,yPos,textColor,fontSizeInd,txt,alignment);
 }
-void drawDefaultTextAligned(const ui_theme_rules *restrict uirules, resource_data *restrict rdat, const uint8_t darkMode, const float xPos, const float yPos, const char *txt, const uint8_t alignment){
-  drawColoredTextAligned(rdat,xPos,yPos,darkMode ? uirules->textColNormalDarkMode : uirules->textColNormal,FONTSIZE_NORMAL,txt,alignment);
+void drawDefaultTextAligned(const ui_theme_rules *restrict uirules, resource_data *restrict rdat, const float xPos, const float yPos, const char *txt, const uint8_t alignment){
+  drawColoredTextAligned(rdat,xPos,yPos,uirules->textColNormal[uirules->uiColorTheme],FONTSIZE_NORMAL,txt,alignment);
 }
 void drawColoredText(resource_data *restrict rdat, const float xPos, const float yPos, const SDL_Color textColor, const char *txt){
   drawColoredTextAligned(rdat,xPos,yPos,textColor,FONTSIZE_NORMAL,txt,ALIGN_LEFT);
 }
-void drawDefaultText(const ui_theme_rules *restrict uirules, resource_data *restrict rdat, const uint8_t darkMode, const float xPos, const float yPos, const char *txt){
-  drawDefaultTextAligned(uirules,rdat,darkMode,xPos,yPos,txt,ALIGN_LEFT);
+void drawDefaultText(const ui_theme_rules *restrict uirules, resource_data *restrict rdat, const float xPos, const float yPos, const char *txt){
+  drawDefaultTextAligned(uirules,rdat,xPos,yPos,txt,ALIGN_LEFT);
 }
 
 SDL_FRect getTooltipRect(const drawing_state *restrict ds, resource_data *restrict rdat, const float xPos, const float yPos, const char *txt){
