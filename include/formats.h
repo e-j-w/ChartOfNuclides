@@ -228,7 +228,8 @@ typedef struct
   uint8_t uiColorTheme; //the active UI theme (values from ui_theme_enum), synced to the value in drawing_state
   SDL_FColor themeBgCol[UITHEME_ENUM_LENGTH]; //background colors for each theme
   SDL_Color textColNormal[UITHEME_ENUM_LENGTH], textColInactive; //colors for text (cannot be floating point as this is not supported by SDL_ttf)
-  SDL_FColor modNormalCol[UITHEME_ENUM_LENGTH], modMouseOverCol[UITHEME_ENUM_LENGTH], modSelectedCol[UITHEME_ENUM_LENGTH], modSelectedAndMouseOverCol[UITHEME_ENUM_LENGTH]; //color modulations for UI elements in different states
+  SDL_FColor modMouseOverCol[UITHEME_ENUM_LENGTH], modSelectedCol[UITHEME_ENUM_LENGTH], modSelectedAndMouseOverCol[UITHEME_ENUM_LENGTH]; //color modulations for UI elements in different states
+  SDL_FColor menuMouseOverCol[UITHEME_ENUM_LENGTH], menuSelectedCol[UITHEME_ENUM_LENGTH], menuSelectedAndMouseOverCol[UITHEME_ENUM_LENGTH]; //colors used when directly drawing menu selcection hightlights
 }ui_theme_rules; //struct containing global UI thene rules
 
 typedef struct

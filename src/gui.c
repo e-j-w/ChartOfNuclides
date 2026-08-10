@@ -4080,10 +4080,10 @@ void drawUIScaleMenu(const app_data *restrict dat, const app_state *restrict sta
       drawRect.h = state->ds.uiElemHeight[UIELEM_PREFS_UISCALE_MENU-i];
       switch(getHighlightState(state,UIELEM_PREFS_UISCALE_MENU-i)){
         case HIGHLIGHT_SELECTED:
-          drawFlatRect(rdat,drawRect,dat->rules.themeRules.modSelectedCol[dat->rules.themeRules.uiColorTheme]);
+          drawFlatRect(rdat,drawRect,dat->rules.themeRules.menuSelectedCol[dat->rules.themeRules.uiColorTheme]);
           break;
         case HIGHLIGHT_MOUSEOVER:
-          drawFlatRect(rdat,drawRect,dat->rules.themeRules.modMouseOverCol[dat->rules.themeRules.uiColorTheme]);
+          drawFlatRect(rdat,drawRect,dat->rules.themeRules.menuMouseOverCol[dat->rules.themeRules.uiColorTheme]);
           break;
         case HIGHLIGHT_NORMAL:
         default:
@@ -4137,10 +4137,10 @@ void drawReactionModeMenu(const app_data *restrict dat, const app_state *restric
       drawRect.h = state->ds.uiElemHeight[UIELEM_PREFS_REACTIONMODE_MENU-i];
       switch(getHighlightState(state,UIELEM_PREFS_REACTIONMODE_MENU-i)){
         case HIGHLIGHT_SELECTED:
-          drawFlatRect(rdat,drawRect,dat->rules.themeRules.modSelectedCol[dat->rules.themeRules.uiColorTheme]);
+          drawFlatRect(rdat,drawRect,dat->rules.themeRules.menuSelectedCol[dat->rules.themeRules.uiColorTheme]);
           break;
         case HIGHLIGHT_MOUSEOVER:
-          drawFlatRect(rdat,drawRect,dat->rules.themeRules.modMouseOverCol[dat->rules.themeRules.uiColorTheme]);
+          drawFlatRect(rdat,drawRect,dat->rules.themeRules.menuMouseOverCol[dat->rules.themeRules.uiColorTheme]);
           break;
         case HIGHLIGHT_NORMAL:
         default:
@@ -4198,14 +4198,14 @@ void drawRxnMenu(const app_data *restrict dat, const app_state *restrict state, 
         if(state->ds.mouseOverRxn == i){
           highlightCol = dat->rules.themeRules.modSelectedAndMouseOverCol[dat->rules.themeRules.uiColorTheme];
         }else{
-          highlightCol = dat->rules.themeRules.modSelectedCol[dat->rules.themeRules.uiColorTheme];
+          highlightCol = dat->rules.themeRules.menuSelectedCol[dat->rules.themeRules.uiColorTheme];
         }
         highlightCol.a = alpha;
         drawFlatRect(rdat,drawRect,highlightCol);
       }else if(state->ds.mouseOverRxn == i){
         drawRect = getRxnMenuButtonRect(&state->ds,numRxnPerCol,i);
         drawRect.y += yOffset;
-        highlightCol = dat->rules.themeRules.modMouseOverCol[dat->rules.themeRules.uiColorTheme];
+        highlightCol = dat->rules.themeRules.menuMouseOverCol[dat->rules.themeRules.uiColorTheme];
         highlightCol.a = alpha;
         drawFlatRect(rdat,drawRect,highlightCol);
       }
@@ -4213,13 +4213,13 @@ void drawRxnMenu(const app_data *restrict dat, const app_state *restrict state, 
       if(state->ds.mouseHoldRxn == i){
         drawRect = getRxnMenuButtonRect(&state->ds,numRxnPerCol,i);
         drawRect.y += yOffset;
-        highlightCol = dat->rules.themeRules.modSelectedCol[dat->rules.themeRules.uiColorTheme];
+        highlightCol = dat->rules.themeRules.menuSelectedCol[dat->rules.themeRules.uiColorTheme];
         highlightCol.a = alpha;
         drawFlatRect(rdat,drawRect,highlightCol);
       }else if(state->ds.mouseOverRxn == i){
         drawRect = getRxnMenuButtonRect(&state->ds,numRxnPerCol,i);
         drawRect.y += yOffset;
-        highlightCol = dat->rules.themeRules.modMouseOverCol[dat->rules.themeRules.uiColorTheme];
+        highlightCol = dat->rules.themeRules.menuMouseOverCol[dat->rules.themeRules.uiColorTheme];
         highlightCol.a = alpha;
         drawFlatRect(rdat,drawRect,highlightCol);
       }
@@ -4522,12 +4522,12 @@ void drawChartViewMenu(const app_data *restrict dat, const app_state *restrict s
       drawRect.h = state->ds.uiElemHeight[UIELEM_CHARTVIEW_MENU-i];
       switch(getHighlightState(state,UIELEM_CHARTVIEW_MENU-i)){
         case HIGHLIGHT_SELECTED:
-          highlightCol = dat->rules.themeRules.modSelectedCol[dat->rules.themeRules.uiColorTheme];
+          highlightCol = dat->rules.themeRules.menuSelectedCol[dat->rules.themeRules.uiColorTheme];
           highlightCol.a = alpha;
           drawFlatRect(rdat,drawRect,highlightCol);
           break;
         case HIGHLIGHT_MOUSEOVER:
-          highlightCol = dat->rules.themeRules.modMouseOverCol[dat->rules.themeRules.uiColorTheme];
+          highlightCol = dat->rules.themeRules.menuMouseOverCol[dat->rules.themeRules.uiColorTheme];
           highlightCol.a = alpha;
           drawFlatRect(rdat,drawRect,highlightCol);
           break;
@@ -4592,12 +4592,12 @@ void drawPrimaryMenu(const app_data *restrict dat, const app_state *restrict sta
     drawRect.h = state->ds.uiElemHeight[UIELEM_PRIMARY_MENU-i];
     switch(getHighlightState(state,UIELEM_PRIMARY_MENU-i)){
       case HIGHLIGHT_SELECTED:
-        highlightCol = dat->rules.themeRules.modSelectedCol[dat->rules.themeRules.uiColorTheme];
+        highlightCol = dat->rules.themeRules.menuSelectedCol[dat->rules.themeRules.uiColorTheme];
         highlightCol.a = alpha;
         drawFlatRect(rdat,drawRect,highlightCol);
         break;
       case HIGHLIGHT_MOUSEOVER:
-        highlightCol = dat->rules.themeRules.modMouseOverCol[dat->rules.themeRules.uiColorTheme];
+        highlightCol = dat->rules.themeRules.menuMouseOverCol[dat->rules.themeRules.uiColorTheme];
         highlightCol.a = alpha;
         drawFlatRect(rdat,drawRect,highlightCol);
         break;
@@ -4666,11 +4666,11 @@ void drawContextMenu(const app_data *restrict dat, const app_state *restrict sta
   for(uint8_t i=0;i<state->cms.numContextMenuItems;i++){
     drawRect = getContextMenuButtonRect(state,i);
     if(i==state->cms.mouseOverContextItem){
-      highlightCol = dat->rules.themeRules.modMouseOverCol[dat->rules.themeRules.uiColorTheme];
+      highlightCol = dat->rules.themeRules.menuMouseOverCol[dat->rules.themeRules.uiColorTheme];
       highlightCol.a = alpha;
       drawFlatRect(rdat,drawRect,highlightCol);
     }else if(i==state->cms.clickedContextItem){
-      highlightCol = dat->rules.themeRules.modSelectedCol[dat->rules.themeRules.uiColorTheme];
+      highlightCol = dat->rules.themeRules.menuSelectedCol[dat->rules.themeRules.uiColorTheme];
       highlightCol.a = alpha;
       drawFlatRect(rdat,drawRect,highlightCol);
     }

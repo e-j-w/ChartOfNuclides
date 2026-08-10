@@ -44,8 +44,9 @@ which can be referenced by both the GUI draw code as well as the interaction cod
 #define UI_PADDING_SIZE      4   //pixel size of the default UI element padding
 #define PANEL_EDGE_SIZE      6   //pixel size of the unusable edge of a panel background (eg. the shadow section)
 //dimensions of the UI theme texture, in units of tiles
-#define UI_THEME_TEX_TILES_X 3
+#define UI_THEME_TEX_TILES_X 6
 #define UI_THEME_TEX_TILES_Y 12
+#define UI_THEME_HIGHLIGHT_TILE_OFFSET 3 //x-offset of highlight tiles in each theme texture, relative to the corresponding UI element tiles
 
 //positions of UI theme elements, in tiles
 #define UITHEME_BUTTON_TILE_X 0

@@ -181,56 +181,6 @@ static int parseAppRules(app_data *restrict dat, asset_mapping *restrict stringI
               SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"could not parse text_col_inactive color string in file: %s.\n",filePath);
               return -1;
             }
-          }else if(SDL_strcmp(tok,"mod_col_normal") == 0){
-            tok = SDL_strtok_r(NULL,"",&saveptr); //get the rest of the string
-            SDL_strlcpy(str2,tok,255);
-            tok = SDL_strtok_r(str2,",",&saveptr);
-            if(tok!=NULL){
-              dat->rules.themeRules.modNormalCol[UITHEME_LIGHT].r = (float)SDL_atof(tok);
-              tok = SDL_strtok_r(NULL,",",&saveptr);
-              if(tok!=NULL){
-                dat->rules.themeRules.modNormalCol[UITHEME_LIGHT].g = (float)SDL_atof(tok);
-                tok = SDL_strtok_r(NULL,",",&saveptr);
-                if(tok!=NULL){
-                  dat->rules.themeRules.modNormalCol[UITHEME_LIGHT].b = (float)SDL_atof(tok);
-                  dat->rules.themeRules.modNormalCol[UITHEME_LIGHT].a = 1.0f;
-                }else{
-                  SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"could not parse mod_col_normal color string in file: %s.\n",filePath);
-                  return -1;
-                }
-              }else{
-                SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"could not parse mod_col_normal color string in file: %s.\n",filePath);
-                return -1;
-              }
-            }else{
-              SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"could not parse mod_col_normal color string in file: %s.\n",filePath);
-              return -1;
-            }
-          }else if(SDL_strcmp(tok,"mod_col_normal_dark") == 0){
-            tok = SDL_strtok_r(NULL,"",&saveptr); //get the rest of the string
-            SDL_strlcpy(str2,tok,255);
-            tok = SDL_strtok_r(str2,",",&saveptr);
-            if(tok!=NULL){
-              dat->rules.themeRules.modNormalCol[UITHEME_DARK].r = (float)SDL_atof(tok);
-              tok = SDL_strtok_r(NULL,",",&saveptr);
-              if(tok!=NULL){
-                dat->rules.themeRules.modNormalCol[UITHEME_DARK].g = (float)SDL_atof(tok);
-                tok = SDL_strtok_r(NULL,",",&saveptr);
-                if(tok!=NULL){
-                  dat->rules.themeRules.modNormalCol[UITHEME_DARK].b = (float)SDL_atof(tok);
-                  dat->rules.themeRules.modNormalCol[UITHEME_DARK].a = 1.0f;
-                }else{
-                  SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"could not parse mod_col_normal_dark color string in file: %s.\n",filePath);
-                  return -1;
-                }
-              }else{
-                SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"could not parse mod_col_normal_dark color string in file: %s.\n",filePath);
-                return -1;
-              }
-            }else{
-              SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"could not parse mod_col_normal_dark color string in file: %s.\n",filePath);
-              return -1;
-            }
           }else if(SDL_strcmp(tok,"mod_col_mouseover") == 0){
             tok = SDL_strtok_r(NULL,"",&saveptr); //get the rest of the string
             SDL_strlcpy(str2,tok,255);
@@ -379,6 +329,156 @@ static int parseAppRules(app_data *restrict dat, asset_mapping *restrict stringI
               }
             }else{
               SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"could not parse mod_col_selected_and_mouseover_dark color string in file: %s.\n",filePath);
+              return -1;
+            }
+          }else if(SDL_strcmp(tok,"menu_col_mouseover") == 0){
+            tok = SDL_strtok_r(NULL,"",&saveptr); //get the rest of the string
+            SDL_strlcpy(str2,tok,255);
+            tok = SDL_strtok_r(str2,",",&saveptr);
+            if(tok!=NULL){
+              dat->rules.themeRules.menuMouseOverCol[UITHEME_LIGHT].r = (float)SDL_atof(tok);
+              tok = SDL_strtok_r(NULL,",",&saveptr);
+              if(tok!=NULL){
+                dat->rules.themeRules.menuMouseOverCol[UITHEME_LIGHT].g = (float)SDL_atof(tok);
+                tok = SDL_strtok_r(NULL,",",&saveptr);
+                if(tok!=NULL){
+                  dat->rules.themeRules.menuMouseOverCol[UITHEME_LIGHT].b = (float)SDL_atof(tok);
+                  dat->rules.themeRules.menuMouseOverCol[UITHEME_LIGHT].a = 1.0f;
+                }else{
+                  SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"could not parse menu_col_mouseover color string in file: %s.\n",filePath);
+                  return -1;
+                }
+              }else{
+                SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"could not parse menu_col_mouseover color string in file: %s.\n",filePath);
+                return -1;
+              }
+            }else{
+              SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"could not parse menu_col_mouseover color string in file: %s.\n",filePath);
+              return -1;
+            }
+          }else if(SDL_strcmp(tok,"menu_col_selected") == 0){
+            tok = SDL_strtok_r(NULL,"",&saveptr); //get the rest of the string
+            SDL_strlcpy(str2,tok,255);
+            tok = SDL_strtok_r(str2,",",&saveptr);
+            if(tok!=NULL){
+              dat->rules.themeRules.menuSelectedCol[UITHEME_LIGHT].r = (float)SDL_atof(tok);
+              tok = SDL_strtok_r(NULL,",",&saveptr);
+              if(tok!=NULL){
+                dat->rules.themeRules.menuSelectedCol[UITHEME_LIGHT].g = (float)SDL_atof(tok);
+                tok = SDL_strtok_r(NULL,",",&saveptr);
+                if(tok!=NULL){
+                  dat->rules.themeRules.menuSelectedCol[UITHEME_LIGHT].b = (float)SDL_atof(tok);
+                  dat->rules.themeRules.menuSelectedCol[UITHEME_LIGHT].a = 1.0f;
+                }else{
+                  SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"could not parse menu_col_selected color string in file: %s.\n",filePath);
+                  return -1;
+                }
+              }else{
+                SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"could not parse menu_col_selected color string in file: %s.\n",filePath);
+                return -1;
+              }
+            }else{
+              SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"could not parse menu_col_selected color string in file: %s.\n",filePath);
+              return -1;
+            }
+          }else if(SDL_strcmp(tok,"menu_col_selected_and_mouseover") == 0){
+            tok = SDL_strtok_r(NULL,"",&saveptr); //get the rest of the string
+            SDL_strlcpy(str2,tok,255);
+            tok = SDL_strtok_r(str2,",",&saveptr);
+            if(tok!=NULL){
+              dat->rules.themeRules.menuSelectedAndMouseOverCol[UITHEME_LIGHT].r = (float)SDL_atof(tok);
+              tok = SDL_strtok_r(NULL,",",&saveptr);
+              if(tok!=NULL){
+                dat->rules.themeRules.menuSelectedAndMouseOverCol[UITHEME_LIGHT].g = (float)SDL_atof(tok);
+                tok = SDL_strtok_r(NULL,",",&saveptr);
+                if(tok!=NULL){
+                  dat->rules.themeRules.menuSelectedAndMouseOverCol[UITHEME_LIGHT].b = (float)SDL_atof(tok);
+                  dat->rules.themeRules.menuSelectedAndMouseOverCol[UITHEME_LIGHT].a = 1.0f;
+                }else{
+                  SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"could not parse menu_col_selected_and_mouseover color string in file: %s.\n",filePath);
+                  return -1;
+                }
+              }else{
+                SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"could not parse menu_col_selected_and_mouseover color string in file: %s.\n",filePath);
+                return -1;
+              }
+            }else{
+              SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"could not parse menu_col_selected_and_mouseover color string in file: %s.\n",filePath);
+              return -1;
+            }
+          }else if(SDL_strcmp(tok,"menu_col_mouseover_dark") == 0){
+            tok = SDL_strtok_r(NULL,"",&saveptr); //get the rest of the string
+            SDL_strlcpy(str2,tok,255);
+            tok = SDL_strtok_r(str2,",",&saveptr);
+            if(tok!=NULL){
+              dat->rules.themeRules.menuMouseOverCol[UITHEME_DARK].r = (float)SDL_atof(tok);
+              tok = SDL_strtok_r(NULL,",",&saveptr);
+              if(tok!=NULL){
+                dat->rules.themeRules.menuMouseOverCol[UITHEME_DARK].g = (float)SDL_atof(tok);
+                tok = SDL_strtok_r(NULL,",",&saveptr);
+                if(tok!=NULL){
+                  dat->rules.themeRules.menuMouseOverCol[UITHEME_DARK].b = (float)SDL_atof(tok);
+                  dat->rules.themeRules.menuMouseOverCol[UITHEME_DARK].a = 1.0f;
+                }else{
+                  SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"could not parse menu_col_mouseover_dark color string in file: %s.\n",filePath);
+                  return -1;
+                }
+              }else{
+                SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"could not parse menu_col_mouseover_dark color string in file: %s.\n",filePath);
+                return -1;
+              }
+            }else{
+              SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"could not parse menu_col_mouseover_dark color string in file: %s.\n",filePath);
+              return -1;
+            }
+          }else if(SDL_strcmp(tok,"menu_col_selected_dark") == 0){
+            tok = SDL_strtok_r(NULL,"",&saveptr); //get the rest of the string
+            SDL_strlcpy(str2,tok,255);
+            tok = SDL_strtok_r(str2,",",&saveptr);
+            if(tok!=NULL){
+              dat->rules.themeRules.menuSelectedCol[UITHEME_DARK].r = (float)SDL_atof(tok);
+              tok = SDL_strtok_r(NULL,",",&saveptr);
+              if(tok!=NULL){
+                dat->rules.themeRules.menuSelectedCol[UITHEME_DARK].g = (float)SDL_atof(tok);
+                tok = SDL_strtok_r(NULL,",",&saveptr);
+                if(tok!=NULL){
+                  dat->rules.themeRules.menuSelectedCol[UITHEME_DARK].b = (float)SDL_atof(tok);
+                  dat->rules.themeRules.menuSelectedCol[UITHEME_DARK].a = 1.0f;
+                }else{
+                  SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"could not parse menu_col_selected_dark color string in file: %s.\n",filePath);
+                  return -1;
+                }
+              }else{
+                SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"could not parse menu_col_selected_dark color string in file: %s.\n",filePath);
+                return -1;
+              }
+            }else{
+              SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"could not parse menu_col_selected_dark color string in file: %s.\n",filePath);
+              return -1;
+            }
+          }else if(SDL_strcmp(tok,"menu_col_selected_and_mouseover_dark") == 0){
+            tok = SDL_strtok_r(NULL,"",&saveptr); //get the rest of the string
+            SDL_strlcpy(str2,tok,255);
+            tok = SDL_strtok_r(str2,",",&saveptr);
+            if(tok!=NULL){
+              dat->rules.themeRules.menuSelectedAndMouseOverCol[UITHEME_DARK].r = (float)SDL_atof(tok);
+              tok = SDL_strtok_r(NULL,",",&saveptr);
+              if(tok!=NULL){
+                dat->rules.themeRules.menuSelectedAndMouseOverCol[UITHEME_DARK].g = (float)SDL_atof(tok);
+                tok = SDL_strtok_r(NULL,",",&saveptr);
+                if(tok!=NULL){
+                  dat->rules.themeRules.menuSelectedAndMouseOverCol[UITHEME_DARK].b = (float)SDL_atof(tok);
+                  dat->rules.themeRules.menuSelectedAndMouseOverCol[UITHEME_DARK].a = 1.0f;
+                }else{
+                  SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"could not parse menu_col_selected_and_mouseover_dark color string in file: %s.\n",filePath);
+                  return -1;
+                }
+              }else{
+                SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"could not parse menu_col_selected_and_mouseover_dark color string in file: %s.\n",filePath);
+                return -1;
+              }
+            }else{
+              SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"could not parse menu_col_selected_and_mouseover_dark color string in file: %s.\n",filePath);
               return -1;
             }
           }else{

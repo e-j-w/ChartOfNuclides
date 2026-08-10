@@ -43,18 +43,7 @@ void setUITexColAlpha(resource_data *restrict rdat, const float r, const float g
 //sbViewSize: fraction (between 0 and 1) of the view controlled by the scrollbar that is visible, used to set the 'handle' size
 void drawScrollBar(const ui_theme_rules *restrict uirules, resource_data *restrict rdat, const SDL_FRect sbRect, const uint8_t highlightState, const float alpha, const float sbPos, const float sbViewSize){
 
-  switch(highlightState){
-    case HIGHLIGHT_NORMAL:
-    default:
-      setUITexColAlpha(rdat,uirules->modNormalCol[uirules->uiColorTheme].r,uirules->modNormalCol[uirules->uiColorTheme].g,uirules->modNormalCol[uirules->uiColorTheme].b,alpha);
-      break;
-    case HIGHLIGHT_MOUSEOVER:
-      setUITexColAlpha(rdat,uirules->modMouseOverCol[uirules->uiColorTheme].r,uirules->modMouseOverCol[uirules->uiColorTheme].g,uirules->modMouseOverCol[uirules->uiColorTheme].b,alpha);
-      break;
-    case HIGHLIGHT_SELECTED:
-      setUITexColAlpha(rdat,uirules->modSelectedCol[uirules->uiColorTheme].r,uirules->modSelectedCol[uirules->uiColorTheme].g,uirules->modSelectedCol[uirules->uiColorTheme].b,alpha);
-      break;
-  }
+  
 
   float clampedSBPos = sbPos;
   if(clampedSBPos > 1.0f){
@@ -74,7 +63,25 @@ void drawScrollBar(const ui_theme_rules *restrict uirules, resource_data *restri
   destRect.y = sbRect.y*rdat->uiDPIScale;
   destRect.w = sbRect.w*rdat->uiDPIScale;
   destRect.h = sbRect.h*rdat->uiDPIScale;
+  setUITexColAlpha(rdat,1.0f,1.0f,1.0f,alpha); //use the correct transparency
   SDL_RenderTexture9Grid(rdat->renderer,rdat->uiThemeTex,&srcRect,0.0f,0.0f,nineSliceSize,nineSliceSize,0.0f,&destRect);
+
+  //draw the background highlight
+  srcRect.x += UI_THEME_HIGHLIGHT_TILE_OFFSET*UI_TILE_SIZE*rdat->uiThemeScale;
+  switch(highlightState){
+    case HIGHLIGHT_NORMAL:
+    default:
+      break;
+    case HIGHLIGHT_MOUSEOVER:
+      setUITexColAlpha(rdat,uirules->modMouseOverCol[uirules->uiColorTheme].r,uirules->modMouseOverCol[uirules->uiColorTheme].g,uirules->modMouseOverCol[uirules->uiColorTheme].b,alpha);
+      SDL_RenderTexture9Grid(rdat->renderer,rdat->uiThemeTex,&srcRect,0.0f,0.0f,nineSliceSize,nineSliceSize,0.0f,&destRect);
+      break;
+    case HIGHLIGHT_SELECTED:
+      setUITexColAlpha(rdat,uirules->modSelectedCol[uirules->uiColorTheme].r,uirules->modSelectedCol[uirules->uiColorTheme].g,uirules->modSelectedCol[uirules->uiColorTheme].b,alpha);
+      SDL_RenderTexture9Grid(rdat->renderer,rdat->uiThemeTex,&srcRect,0.0f,0.0f,nineSliceSize,nineSliceSize,0.0f,&destRect);
+      break;
+  }
+
   //scrollbar handle
   srcRect.x = UITHEME_SCROLLBAR_TILE_X*UI_TILE_SIZE*rdat->uiThemeScale;
   srcRect.y = UITHEME_SCROLLBAR_TILE_Y*UI_TILE_SIZE*rdat->uiThemeScale;
@@ -83,7 +90,24 @@ void drawScrollBar(const ui_theme_rules *restrict uirules, resource_data *restri
     destRect.h = 2*nineSliceSize; //prevent artifacts from drawing very small handles
   }
   destRect.y = (sbRect.y + clampedSBPos*(sbRect.h - destRect.h/rdat->uiDPIScale))*rdat->uiDPIScale;
+  setUITexColAlpha(rdat,1.0f,1.0f,1.0f,alpha); //use the correct transparency
   SDL_RenderTexture9Grid(rdat->renderer,rdat->uiThemeTex,&srcRect,0.0f,0.0f,nineSliceSize,nineSliceSize,0.0f,&destRect);
+
+  //draw the handle highlight
+  srcRect.x += UI_THEME_HIGHLIGHT_TILE_OFFSET*UI_TILE_SIZE*rdat->uiThemeScale;
+  switch(highlightState){
+    case HIGHLIGHT_NORMAL:
+    default:
+      break;
+    case HIGHLIGHT_MOUSEOVER:
+      setUITexColAlpha(rdat,uirules->modMouseOverCol[uirules->uiColorTheme].r,uirules->modMouseOverCol[uirules->uiColorTheme].g,uirules->modMouseOverCol[uirules->uiColorTheme].b,alpha);
+      SDL_RenderTexture9Grid(rdat->renderer,rdat->uiThemeTex,&srcRect,0.0f,0.0f,nineSliceSize,nineSliceSize,0.0f,&destRect);
+      break;
+    case HIGHLIGHT_SELECTED:
+      setUITexColAlpha(rdat,uirules->modSelectedCol[uirules->uiColorTheme].r,uirules->modSelectedCol[uirules->uiColorTheme].g,uirules->modSelectedCol[uirules->uiColorTheme].b,alpha);
+      SDL_RenderTexture9Grid(rdat->renderer,rdat->uiThemeTex,&srcRect,0.0f,0.0f,nineSliceSize,nineSliceSize,0.0f,&destRect);
+      break;
+  }
   
   //reset the color modulation
   setUITexColAlpha(rdat,1.0f,1.0f,1.0f,1.0f);
@@ -129,21 +153,26 @@ void drawBGElement(const ui_theme_rules *restrict uirules, resource_data *restri
   destRect.w = elemRect.w*rdat->uiDPIScale;
   destRect.h = elemRect.h*rdat->uiDPIScale;
 
+  setUITexColAlpha(rdat,1.0f,1.0f,1.0f,alpha); //use the correct transparency
+  SDL_RenderTexture9Grid(rdat->renderer,rdat->uiThemeTex,&srcRect,nineSliceSize,nineSliceSize,nineSliceSize,nineSliceSize,0.0f,&destRect);
+  
+  //draw the highlight
+  srcRect.x += UI_THEME_HIGHLIGHT_TILE_OFFSET*UI_TILE_SIZE*rdat->uiThemeScale;
   switch(highlightState){
     case HIGHLIGHT_NORMAL:
     default:
-      setUITexColAlpha(rdat,uirules->modNormalCol[uirules->uiColorTheme].r,uirules->modNormalCol[uirules->uiColorTheme].g,uirules->modNormalCol[uirules->uiColorTheme].b,alpha);
       break;
     case HIGHLIGHT_MOUSEOVER:
       setUITexColAlpha(rdat,uirules->modMouseOverCol[uirules->uiColorTheme].r,uirules->modMouseOverCol[uirules->uiColorTheme].g,uirules->modMouseOverCol[uirules->uiColorTheme].b,alpha);
+      SDL_RenderTexture9Grid(rdat->renderer,rdat->uiThemeTex,&srcRect,nineSliceSize,nineSliceSize,nineSliceSize,nineSliceSize,0.0f,&destRect);
       break;
     case HIGHLIGHT_SELECTED:
       setUITexColAlpha(rdat,uirules->modSelectedCol[uirules->uiColorTheme].r,uirules->modSelectedCol[uirules->uiColorTheme].g,uirules->modSelectedCol[uirules->uiColorTheme].b,alpha);
+      SDL_RenderTexture9Grid(rdat->renderer,rdat->uiThemeTex,&srcRect,nineSliceSize,nineSliceSize,nineSliceSize,nineSliceSize,0.0f,&destRect);
       break;
   }
-
-  SDL_RenderTexture9Grid(rdat->renderer,rdat->uiThemeTex,&srcRect,nineSliceSize,nineSliceSize,nineSliceSize,nineSliceSize,0.0f,&destRect);
   
+
   //reset the color modulation
   setUITexColAlpha(rdat,1.0f,1.0f,1.0f,1.0f);
   if(alpha != 1.0f){
@@ -227,18 +256,7 @@ void drawIcon(const ui_theme_rules *restrict uirules, resource_data *restrict rd
     return;
   }
 
-  switch(highlightState){
-    case HIGHLIGHT_NORMAL:
-    default:
-      setUITexColAlpha(rdat,uirules->modNormalCol[uirules->uiColorTheme].r,uirules->modNormalCol[uirules->uiColorTheme].g,uirules->modNormalCol[uirules->uiColorTheme].b,alpha);
-      break;
-    case HIGHLIGHT_MOUSEOVER:
-      setUITexColAlpha(rdat,uirules->modMouseOverCol[uirules->uiColorTheme].r,uirules->modMouseOverCol[uirules->uiColorTheme].g,uirules->modMouseOverCol[uirules->uiColorTheme].b,alpha);
-      break;
-    case HIGHLIGHT_SELECTED:
-      setUITexColAlpha(rdat,uirules->modSelectedCol[uirules->uiColorTheme].r,uirules->modSelectedCol[uirules->uiColorTheme].g,uirules->modSelectedCol[uirules->uiColorTheme].b,alpha);
-      break;
-  }
+  setUITexColAlpha(rdat,1.0f,1.0f,1.0f,alpha); //use the correct transparency
 
   SDL_FRect drawPos,srcRect;
   srcRect.x = UITHEME_ICON_TILE_X[iconInd]*UI_TILE_SIZE*rdat->uiThemeScale;
@@ -250,6 +268,22 @@ void drawIcon(const ui_theme_rules *restrict uirules, resource_data *restrict rd
   drawPos.x = (float)(x*rdat->uiDPIScale) + (float)(w*rdat->uiDPIScale)/2.0f - drawPos.w/2.0f;
   drawPos.y = (float)(y*rdat->uiDPIScale) + (float)(UI_TILE_SIZE*rdat->uiScale)/2.0f - drawPos.h/2.0f;
   SDL_RenderTexture(rdat->renderer,rdat->uiThemeTex,&srcRect,&drawPos);
+
+  //draw the highlight
+  srcRect.x += UI_THEME_HIGHLIGHT_TILE_OFFSET*UI_TILE_SIZE*rdat->uiThemeScale;
+  switch(highlightState){
+    case HIGHLIGHT_NORMAL:
+    default:
+      break;
+    case HIGHLIGHT_MOUSEOVER:
+      setUITexColAlpha(rdat,uirules->modMouseOverCol[uirules->uiColorTheme].r,uirules->modMouseOverCol[uirules->uiColorTheme].g,uirules->modMouseOverCol[uirules->uiColorTheme].b,alpha);
+      SDL_RenderTexture(rdat->renderer,rdat->uiThemeTex,&srcRect,&drawPos);
+      break;
+    case HIGHLIGHT_SELECTED:
+      setUITexColAlpha(rdat,uirules->modSelectedCol[uirules->uiColorTheme].r,uirules->modSelectedCol[uirules->uiColorTheme].g,uirules->modSelectedCol[uirules->uiColorTheme].b,alpha);
+      SDL_RenderTexture(rdat->renderer,rdat->uiThemeTex,&srcRect,&drawPos);
+      break;
+  }
 
   //reset the color modulation
   setUITexColAlpha(rdat,1.0f,1.0f,1.0f,1.0f);
