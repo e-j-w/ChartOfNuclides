@@ -589,7 +589,7 @@ void drawTooltipBox(const ui_theme_rules *restrict uirules, resource_data *restr
 
   float txtMaxWidth = SDL_ceilf((TOOLTIP_MAX_WIDTH - 8.0f*UI_PADDING_SIZE)*rdat->uiScale/rdat->uiDPIScale);
   drawPanelBG(uirules,rdat,rect,alpha);
-  drawTextAlignedSized(rdat,rect.x + 4*UI_PADDING_SIZE*rdat->uiScale/rdat->uiDPIScale,rect.y + 4*UI_PADDING_SIZE*rdat->uiScale/rdat->uiDPIScale,blackCol8Bit,FONTSIZE_NORMAL,(Uint8)(alpha*255.0f),txt,ALIGN_LEFT,(Uint16)txtMaxWidth);
+  drawTextAlignedSized(rdat,rect.x + 4*UI_PADDING_SIZE*rdat->uiScale/rdat->uiDPIScale,rect.y + 4*UI_PADDING_SIZE*rdat->uiScale/rdat->uiDPIScale,uirules->textColNormal[uirules->uiColorTheme],FONTSIZE_NORMAL,(Uint8)(alpha*255.0f),txt,ALIGN_LEFT,(Uint16)txtMaxWidth);
 
 }
 
