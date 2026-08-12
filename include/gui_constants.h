@@ -139,7 +139,7 @@ static const float uiScales[UISCALE_ENUM_LENGTH] = {1.0f,1.20f,1.60f,1.85f};
 #define ABOUT_BOX_STR4_Y           284.0f //in unscaled pixels
 
 //preferences dialog
-#define PREFS_DIALOG_NUM_UIELEMENTS                  9
+#define PREFS_DIALOG_NUM_UIELEMENTS                  10
 #define PREFS_DIALOG_WIDTH                           520 //in unscaled pixels
 #define PREFS_DIALOG_HEIGHT                          460 //in unscaled pixels
 #define PREFS_DIALOG_HEADERTXT_X                     (6*UI_PADDING_SIZE)
@@ -148,9 +148,12 @@ static const float uiScales[UISCALE_ENUM_LENGTH] = {1.0f,1.20f,1.60f,1.85f};
 #define PREFS_DIALOG_PREFCOL1_X                      (6*UI_PADDING_SIZE)
 #define PREFS_DIALOG_PREFCOL1_Y                      82.0f //in unscaled pixels
 #define PREFS_DIALOG_UISCALE_BUTTON_WIDTH            120 //in unscaled pixels
+#define PREFS_DIALOG_UITHEME_BUTTON_WIDTH            120 //in unscaled pixels
 #define PREFS_DIALOG_REACTIONMODE_BUTTON_WIDTH       310 //in unscaled pixels
 #define PREFS_DIALOG_UISCALE_MENU_WIDTH              140 //in unscaled pixels
 #define PREFS_DIALOG_UISCALE_MENU_ITEM_SPACING       36 //in unscaled pixels
+#define PREFS_DIALOG_UITHEME_MENU_WIDTH              PREFS_DIALOG_UISCALE_MENU_WIDTH //in unscaled pixels
+#define PREFS_DIALOG_UITHEME_MENU_ITEM_SPACING       PREFS_DIALOG_UISCALE_MENU_ITEM_SPACING //in unscaled pixels
 #define PREFS_DIALOG_REACTIONMODE_MENU_WIDTH         290 //in unscaled pixels
 #define PREFS_DIALOG_REACTIONMODE_MENU_ITEM_SPACING  PREFS_DIALOG_UISCALE_MENU_ITEM_SPACING //in unscaled pixels
 

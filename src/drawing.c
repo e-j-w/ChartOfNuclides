@@ -43,8 +43,6 @@ void setUITexColAlpha(resource_data *restrict rdat, const float r, const float g
 //sbViewSize: fraction (between 0 and 1) of the view controlled by the scrollbar that is visible, used to set the 'handle' size
 void drawScrollBar(const ui_theme_rules *restrict uirules, resource_data *restrict rdat, const SDL_FRect sbRect, const uint8_t highlightState, const float alpha, const float sbPos, const float sbViewSize){
 
-  
-
   float clampedSBPos = sbPos;
   if(clampedSBPos > 1.0f){
     clampedSBPos = 1.0f;
@@ -123,7 +121,7 @@ void drawBGElement(const ui_theme_rules *restrict uirules, resource_data *restri
   }
   
   SDL_FRect srcRect, destRect;
-  const float nineSliceSize = 0.4f*UI_TILE_SIZE*rdat->uiThemeScale;
+  const float nineSliceSize = 0.3f*UI_TILE_SIZE*rdat->uiThemeScale;
   switch(elemType){
     case UIELEMTYPE_PANEL:
       srcRect.x = UITHEME_PANELBG_TILE_X*UI_TILE_SIZE*rdat->uiThemeScale;

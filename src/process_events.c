@@ -607,6 +607,32 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
             }
           }
         }
+      }else if((bp_check128(&state->ds.shownElements,UIELEM_PREFS_UITHEME_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_UITHEME_MENU_HIDE]==0.0f)){
+        //UI theme dropdown navigation using arrow keys
+        state->mouseholdElement = UIELEM_ENUM_LENGTH; //remove any previous selection highlight
+        if((state->mouseoverElement >= UIELEM_PREFS_UITHEME_MENU)||(state->mouseoverElement < ((int16_t)UIELEM_PREFS_UITHEME_MENU-(int16_t)UITHEME_ENUM_LENGTH))){
+          //no menu item was selected with the keyboard or highlighted with the mouse previously
+          //select the first menu item
+          state->mouseoverElement = (uint8_t)((int16_t)UIELEM_PREFS_UITHEME_MENU-(int16_t)UITHEME_ENUM_LENGTH);
+        }else{
+          uint8_t selMenuElem = (uint8_t)(UITHEME_ENUM_LENGTH - (UIELEM_PREFS_UITHEME_MENU - state->mouseoverElement));
+          if(selMenuElem >= UITHEME_ENUM_LENGTH){
+            state->mouseoverElement = (uint8_t)((int16_t)UIELEM_PREFS_UITHEME_MENU-(int16_t)UITHEME_ENUM_LENGTH);
+          }
+          if(up && !down){
+            if(selMenuElem > 0){
+              state->mouseoverElement--;
+            }else{
+              state->mouseoverElement = (uint8_t)(UIELEM_PREFS_UITHEME_MENU-1);
+            }
+          }else if(down && !up){
+            if(selMenuElem < (UITHEME_ENUM_LENGTH-1)){
+              state->mouseoverElement++;
+            }else{
+              state->mouseoverElement = (uint8_t)((int16_t)UIELEM_PREFS_UITHEME_MENU-(int16_t)UITHEME_ENUM_LENGTH);
+            }
+          }
+        }
       }else if((bp_check128(&state->ds.shownElements,UIELEM_PREFS_REACTIONMODE_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_REACTIONMODE_MENU_HIDE]==0.0f)){
         //Reaction mode dropdown navigation using arrow keys
         state->mouseholdElement = UIELEM_ENUM_LENGTH; //remove any previous selection highlight
@@ -646,20 +672,34 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
             state->mouseoverElement = (uint8_t)(UIELEM_PREFS_DIALOG-PREFS_DIALOG_NUM_UIELEMENTS);
           }
           if(up && !down){
-            if(selMenuElem > 0){
+            if(state->mouseoverElement == UIELEM_PREFS_DIALOG_UITHEME_DROPDOWN){
+              state->mouseoverElement = UIELEM_PREFS_DIALOG_CLOSEBUTTON;
+            }else if(state->mouseoverElement == UIELEM_PREFS_DIALOG_REACTIONMODE_DROPDOWN){
+              state->mouseoverElement = UIELEM_PREFS_DIALOG_UISCALE_DROPDOWN;
+            }else if(selMenuElem > 0){
               state->mouseoverElement--;
             }else{
               state->mouseoverElement = (uint8_t)(UIELEM_PREFS_DIALOG-1);
             }
           }else if(down && !up){
-            if(selMenuElem < (PREFS_DIALOG_NUM_UIELEMENTS-1)){
+            if(state->mouseoverElement == UIELEM_PREFS_DIALOG_UISCALE_DROPDOWN){
+              state->mouseoverElement = UIELEM_PREFS_DIALOG_REACTIONMODE_DROPDOWN;
+            }else if(selMenuElem < (PREFS_DIALOG_NUM_UIELEMENTS-1)){
               state->mouseoverElement++;
             }else{
               state->mouseoverElement = (uint8_t)(UIELEM_PREFS_DIALOG-PREFS_DIALOG_NUM_UIELEMENTS);
             }
           }else if((left && !right)||(right && !left)){
             if(state->mouseoverElement == UIELEM_PREFS_DIALOG_CLOSEBUTTON){
-              state->mouseoverElement = (uint8_t)(UIELEM_PREFS_DIALOG-PREFS_DIALOG_NUM_UIELEMENTS);
+              if(left){
+                state->mouseoverElement = UIELEM_PREFS_DIALOG_UITHEME_DROPDOWN;
+              }else{
+                state->mouseoverElement = UIELEM_PREFS_DIALOG_UISCALE_DROPDOWN;
+              }
+            }else if((right)&&(state->mouseoverElement == UIELEM_PREFS_DIALOG_UISCALE_DROPDOWN)){
+              state->mouseoverElement = UIELEM_PREFS_DIALOG_UITHEME_DROPDOWN;
+            }else if((left)&&(state->mouseoverElement == UIELEM_PREFS_DIALOG_UITHEME_DROPDOWN)){
+              state->mouseoverElement = UIELEM_PREFS_DIALOG_UISCALE_DROPDOWN;
             }else{
               state->mouseoverElement = UIELEM_PREFS_DIALOG_CLOSEBUTTON;
             }
@@ -742,6 +782,12 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
         state->mouseholdElement = state->mouseoverElement;
         uiElemClickAction(dat,state,rdat,0,state->mouseoverElement);
       }
+    }else if((bp_check128(&state->ds.shownElements,UIELEM_PREFS_UITHEME_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_UITHEME_MENU_HIDE]==0.0f)){
+      //select UI theme dropdown menu button
+      if((state->mouseoverElement < UIELEM_PREFS_UITHEME_MENU)&&(state->mouseoverElement >= ((int16_t)UIELEM_PREFS_UITHEME_MENU-(int16_t)UITHEME_ENUM_LENGTH))){
+        state->mouseholdElement = state->mouseoverElement;
+        uiElemClickAction(dat,state,rdat,0,state->mouseoverElement);
+      }
     }else if((bp_check128(&state->ds.shownElements,UIELEM_PREFS_REACTIONMODE_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_REACTIONMODE_MENU_HIDE]==0.0f)){
       //select reaction mode dropdown menu button
       if((state->mouseoverElement < UIELEM_PREFS_REACTIONMODE_MENU)&&(state->mouseoverElement >= ((int16_t)UIELEM_PREFS_REACTIONMODE_MENU-(int16_t)REACTIONMODE_ENUM_LENGTH))){
@@ -794,6 +840,9 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
     }else if((bp_check128(&state->ds.shownElements,UIELEM_PREFS_UISCALE_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_UISCALE_MENU_HIDE]==0.0f)){
       //close the UI scale menu
       uiElemClickAction(dat,state,rdat,0,UIELEM_PREFS_DIALOG_UISCALE_DROPDOWN);
+    }else if((bp_check128(&state->ds.shownElements,UIELEM_PREFS_UITHEME_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_UITHEME_MENU_HIDE]==0.0f)){
+      //close the UI theme menu
+      uiElemClickAction(dat,state,rdat,0,UIELEM_PREFS_DIALOG_UITHEME_DROPDOWN);
     }else if((bp_check128(&state->ds.shownElements,UIELEM_PREFS_REACTIONMODE_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_REACTIONMODE_MENU_HIDE]==0.0f)){
       //close the reaction mode menu
       uiElemClickAction(dat,state,rdat,0,UIELEM_PREFS_DIALOG_REACTIONMODE_DROPDOWN);
@@ -1398,6 +1447,10 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
         if((bp_check128(&state->ds.shownElements,UIELEM_PREFS_UISCALE_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_UISCALE_MENU_HIDE]==0.0f)){
           //close the UI scale menu
           uiElemClickAction(dat,state,rdat,0,UIELEM_PREFS_DIALOG_UISCALE_DROPDOWN);
+        }
+        if((bp_check128(&state->ds.shownElements,UIELEM_PREFS_UITHEME_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_UITHEME_MENU_HIDE]==0.0f)){
+          //close the UI theme menu
+          uiElemClickAction(dat,state,rdat,0,UIELEM_PREFS_DIALOG_UITHEME_DROPDOWN);
         }
         if((bp_check128(&state->ds.shownElements,UIELEM_PREFS_REACTIONMODE_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_REACTIONMODE_MENU_HIDE]==0.0f)){
           //close the reaction mode menu

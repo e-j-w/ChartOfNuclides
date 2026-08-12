@@ -4036,6 +4036,20 @@ uint16_t getStrIndForUIScale(const app_data *restrict dat, const drawing_state *
   }
 }
 
+uint16_t getStrIndForUITheme(const app_data *restrict dat, const drawing_state *restrict ds){
+  switch(ds->uiColorTheme){
+    case UITHEME_DARK:
+      return dat->locStringIDs[LOCSTR_DARK];
+      break;
+    case UITHEME_LIGHT:
+    default:
+      return dat->locStringIDs[LOCSTR_LIGHT];
+      break;
+  }
+}
+
+
+
 void drawPrefsDialog(const app_data *restrict dat, const app_state *restrict state, resource_data *restrict rdat){
   
   float alpha = 1.0f;
@@ -4072,6 +4086,7 @@ void drawPrefsDialog(const app_data *restrict dat, const app_state *restrict sta
   drawTextAlignedSized(rdat,prefsDialogPanelRect.x+(PREFS_DIALOG_PREFCOL1_X+UI_TILE_SIZE+6*UI_PADDING_SIZE)*state->ds.uiUserScale,prefsDialogPanelRect.y+(PREFS_DIALOG_PREFCOL1_Y+6.0f+(7.15f*PREFS_DIALOG_PREF_Y_SPACING)+(2*UI_PADDING_SIZE))*state->ds.uiUserScale,textCol,FONTSIZE_NORMAL,alpha8,dat->strings[dat->locStringIDs[LOCSTR_PREF_LEVELLIST_COMMENTS]],ALIGN_LEFT,(Uint16)(prefsDialogPanelRect.w));
   drawTextAlignedSized(rdat,prefsDialogPanelRect.x+(PREFS_DIALOG_PREFCOL1_X+UI_TILE_SIZE+2*UI_PADDING_SIZE)*state->ds.uiUserScale,prefsDialogPanelRect.y+(PREFS_DIALOG_PREFCOL1_Y+6.0f+(8.5f*PREFS_DIALOG_PREF_Y_SPACING)+(2*UI_PADDING_SIZE))*state->ds.uiUserScale,textCol,FONTSIZE_NORMAL,alpha8,dat->strings[dat->locStringIDs[LOCSTR_PREF_UIANIM]],ALIGN_LEFT,(Uint16)(prefsDialogPanelRect.w));
   drawTextAlignedSized(rdat,prefsDialogPanelRect.x+(PREFS_DIALOG_PREFCOL1_X+UI_PADDING_SIZE)*state->ds.uiUserScale,prefsDialogPanelRect.y+(PREFS_DIALOG_PREFCOL1_Y-2.0f)*state->ds.uiUserScale,textCol,FONTSIZE_NORMAL,alpha8,dat->strings[dat->locStringIDs[LOCSTR_PREF_UISCALE]],ALIGN_LEFT,(Uint16)(prefsDialogPanelRect.w));
+  drawTextAlignedSized(rdat,prefsDialogPanelRect.x+(PREFS_DIALOG_PREFCOL1_X+getTextWidthScaleIndependent(rdat,FONTSIZE_NORMAL,dat->strings[dat->locStringIDs[LOCSTR_PREF_UISCALE]])+5*UI_PADDING_SIZE)*state->ds.uiUserScale + ((float)state->ds.uiElemWidth[UIELEM_PREFS_DIALOG_UISCALE_DROPDOWN]),prefsDialogPanelRect.y+(PREFS_DIALOG_PREFCOL1_Y-2.0f)*state->ds.uiUserScale,textCol,FONTSIZE_NORMAL,alpha8,dat->strings[dat->locStringIDs[LOCSTR_PREF_UITHEME]],ALIGN_LEFT,(Uint16)(prefsDialogPanelRect.w));
   drawTextAlignedSized(rdat,prefsDialogPanelRect.x+(PREFS_DIALOG_PREFCOL1_X+UI_PADDING_SIZE)*state->ds.uiUserScale,prefsDialogPanelRect.y+(PREFS_DIALOG_PREFCOL1_Y+2.0f+UI_PADDING_SIZE+PREFS_DIALOG_PREF_Y_SPACING)*state->ds.uiUserScale,textCol,FONTSIZE_NORMAL,alpha8,dat->strings[dat->locStringIDs[LOCSTR_PREF_REACTIONMODE]],ALIGN_LEFT,(Uint16)(prefsDialogPanelRect.w));
   drawCheckbox(&dat->rules.themeRules,rdat,state->ds.uiElemPosX[UIELEM_PREFS_DIALOG_SHELLCLOSURE_CHECKBOX],(int16_t)(state->ds.uiElemPosY[UIELEM_PREFS_DIALOG_SHELLCLOSURE_CHECKBOX]+yOffset),state->ds.uiElemWidth[UIELEM_PREFS_DIALOG_SHELLCLOSURE_CHECKBOX],getHighlightState(state,UIELEM_PREFS_DIALOG_SHELLCLOSURE_CHECKBOX),alpha,state->ds.drawShellClosures);
   drawCheckbox(&dat->rules.themeRules,rdat,state->ds.uiElemPosX[UIELEM_PREFS_DIALOG_LIFETIME_CHECKBOX],(int16_t)(state->ds.uiElemPosY[UIELEM_PREFS_DIALOG_LIFETIME_CHECKBOX]+yOffset),state->ds.uiElemWidth[UIELEM_PREFS_DIALOG_LIFETIME_CHECKBOX],getHighlightState(state,UIELEM_PREFS_DIALOG_LIFETIME_CHECKBOX),alpha,state->ds.useLifetimes);
@@ -4080,6 +4095,7 @@ void drawPrefsDialog(const app_data *restrict dat, const app_state *restrict sta
   drawCheckbox(&dat->rules.themeRules,rdat,state->ds.uiElemPosX[UIELEM_PREFS_DIALOG_LEVELLIST_COMMENT_CHECKBOX],(int16_t)(state->ds.uiElemPosY[UIELEM_PREFS_DIALOG_LEVELLIST_COMMENT_CHECKBOX]+yOffset),state->ds.uiElemWidth[UIELEM_PREFS_DIALOG_LEVELLIST_COMMENT_CHECKBOX],getHighlightState(state,UIELEM_PREFS_DIALOG_LEVELLIST_COMMENT_CHECKBOX),alpha,state->ds.useLevelListCommentTooltips);
   drawCheckbox(&dat->rules.themeRules,rdat,state->ds.uiElemPosX[UIELEM_PREFS_DIALOG_UIANIM_CHECKBOX],(int16_t)(state->ds.uiElemPosY[UIELEM_PREFS_DIALOG_UIANIM_CHECKBOX]+yOffset),state->ds.uiElemWidth[UIELEM_PREFS_DIALOG_UIANIM_CHECKBOX],getHighlightState(state,UIELEM_PREFS_DIALOG_UIANIM_CHECKBOX),alpha,state->ds.useUIAnimations);
   drawDropDownTextButton(&dat->rules.themeRules,rdat,state->ds.uiElemPosX[UIELEM_PREFS_DIALOG_UISCALE_DROPDOWN],(int16_t)(state->ds.uiElemPosY[UIELEM_PREFS_DIALOG_UISCALE_DROPDOWN]+yOffset),state->ds.uiElemWidth[UIELEM_PREFS_DIALOG_UISCALE_DROPDOWN],getHighlightState(state,UIELEM_PREFS_DIALOG_UISCALE_DROPDOWN),alpha8,dat->strings[getStrIndForUIScale(dat,&state->ds)]);
+  drawDropDownTextButton(&dat->rules.themeRules,rdat,state->ds.uiElemPosX[UIELEM_PREFS_DIALOG_UITHEME_DROPDOWN],(int16_t)(state->ds.uiElemPosY[UIELEM_PREFS_DIALOG_UITHEME_DROPDOWN]+yOffset),state->ds.uiElemWidth[UIELEM_PREFS_DIALOG_UITHEME_DROPDOWN],getHighlightState(state,UIELEM_PREFS_DIALOG_UITHEME_DROPDOWN),alpha8,dat->strings[getStrIndForUITheme(dat,&state->ds)]);
   drawDropDownTextButton(&dat->rules.themeRules,rdat,state->ds.uiElemPosX[UIELEM_PREFS_DIALOG_REACTIONMODE_DROPDOWN],(int16_t)(state->ds.uiElemPosY[UIELEM_PREFS_DIALOG_REACTIONMODE_DROPDOWN]+yOffset),state->ds.uiElemWidth[UIELEM_PREFS_DIALOG_REACTIONMODE_DROPDOWN],getHighlightState(state,UIELEM_PREFS_DIALOG_REACTIONMODE_DROPDOWN),alpha8,dat->strings[getStrIndForReactionMode(dat,&state->ds)]);
   //close button
   drawIcon(&dat->rules.themeRules,rdat,state->ds.uiElemPosX[UIELEM_PREFS_DIALOG_CLOSEBUTTON],(int16_t)(state->ds.uiElemPosY[UIELEM_PREFS_DIALOG_CLOSEBUTTON] + yOffset),state->ds.uiElemWidth[UIELEM_PREFS_DIALOG_CLOSEBUTTON],getHighlightState(state,UIELEM_PREFS_DIALOG_CLOSEBUTTON),alpha,UIICON_CLOSE);
@@ -4141,6 +4157,61 @@ void drawUIScaleMenu(const app_data *restrict dat, const app_state *restrict sta
   drawTextAlignedSized(rdat,drawRect.x,drawRect.y + 1.4f*PREFS_DIALOG_UISCALE_MENU_ITEM_SPACING*state->ds.uiUserScale + yOffset,textCol,FONTSIZE_NORMAL,txtAlpha,dat->strings[dat->locStringIDs[LOCSTR_DEFAULT]],ALIGN_LEFT,(Uint16)(drawRect.w - (PANEL_EDGE_SIZE + 6*UI_PADDING_SIZE)*state->ds.uiUserScale));
   drawTextAlignedSized(rdat,drawRect.x,drawRect.y + 2.4f*PREFS_DIALOG_UISCALE_MENU_ITEM_SPACING*state->ds.uiUserScale + yOffset,textCol,FONTSIZE_NORMAL,txtAlpha,dat->strings[dat->locStringIDs[LOCSTR_LARGE]],ALIGN_LEFT,(Uint16)(drawRect.w - (PANEL_EDGE_SIZE + 6*UI_PADDING_SIZE)*state->ds.uiUserScale));
   drawTextAlignedSized(rdat,drawRect.x,drawRect.y + 3.4f*PREFS_DIALOG_UISCALE_MENU_ITEM_SPACING*state->ds.uiUserScale + yOffset,textCol,FONTSIZE_NORMAL,txtAlpha,dat->strings[dat->locStringIDs[LOCSTR_HUGE]],ALIGN_LEFT,(Uint16)(drawRect.w - (PANEL_EDGE_SIZE + 6*UI_PADDING_SIZE)*state->ds.uiUserScale));
+
+}
+
+void drawUIThemeMenu(const app_data *restrict dat, const app_state *restrict state, resource_data *restrict rdat){
+  
+  float alpha = 1.0f;
+  float yOffset = 0;
+  if(state->ds.uiAnimPlaying & (1U << UIANIM_UITHEME_MENU_HIDE)){
+    alpha = (float)(1.0f*juice_smoothStart2(state->ds.timeLeftInUIAnimation[UIANIM_UITHEME_MENU_HIDE]/(UI_ANIM_LENGTH)));
+  }else if(state->ds.uiAnimPlaying & (1U << UIANIM_UITHEME_MENU_SHOW)){
+    alpha = (float)(1.0f*juice_smoothStop2(1.0f - state->ds.timeLeftInUIAnimation[UIANIM_UITHEME_MENU_SHOW]/UI_ANIM_LENGTH));
+    yOffset = (-30.0f*state->ds.uiUserScale*juice_smoothStart2(state->ds.timeLeftInUIAnimation[UIANIM_UITHEME_MENU_SHOW]/(UI_ANIM_LENGTH)));
+  }
+  //SDL_Log("alpha: %f\n",(double)alpha);
+  
+  //draw menu background
+  SDL_FRect drawRect;
+  drawRect.x = state->ds.uiElemPosX[UIELEM_PREFS_UITHEME_MENU];
+  drawRect.y = ((float)state->ds.uiElemPosY[UIELEM_PREFS_UITHEME_MENU] + yOffset);
+  drawRect.w = state->ds.uiElemWidth[UIELEM_PREFS_UITHEME_MENU];
+  drawRect.h = state->ds.uiElemHeight[UIELEM_PREFS_UITHEME_MENU];
+  const int16_t arrowX = (int16_t)(state->ds.uiElemPosX[UIELEM_PREFS_DIALOG_UITHEME_DROPDOWN] + 0.39f*state->ds.uiElemWidth[UIELEM_PREFS_DIALOG_UITHEME_DROPDOWN]);
+  drawMenuBGWithArrow(&dat->rules.themeRules,rdat,drawRect,arrowX,alpha);
+  
+  //draw menu item highlight
+  if(state->ds.timeLeftInUIAnimation[UIANIM_UITHEME_MENU_HIDE]==0.0f){
+    for(uint8_t i=1;i<=UITHEME_ENUM_LENGTH;i++){
+      drawRect.x = state->ds.uiElemPosX[UIELEM_PREFS_UITHEME_MENU-i];
+      drawRect.y = (state->ds.uiElemPosY[UIELEM_PREFS_UITHEME_MENU-i] + yOffset);
+      drawRect.w = state->ds.uiElemWidth[UIELEM_PREFS_UITHEME_MENU-i];
+      drawRect.h = state->ds.uiElemHeight[UIELEM_PREFS_UITHEME_MENU-i];
+      switch(getHighlightState(state,UIELEM_PREFS_UITHEME_MENU-i)){
+        case HIGHLIGHT_SELECTED:
+          drawFlatRect(rdat,drawRect,dat->rules.themeRules.menuSelectedCol[dat->rules.themeRules.uiColorTheme]);
+          break;
+        case HIGHLIGHT_MOUSEOVER:
+          drawFlatRect(rdat,drawRect,dat->rules.themeRules.menuMouseOverCol[dat->rules.themeRules.uiColorTheme]);
+          break;
+        case HIGHLIGHT_NORMAL:
+        default:
+          break;
+      }
+    }
+  }
+
+  SDL_Color textCol = dat->rules.themeRules.textColNormal[dat->rules.themeRules.uiColorTheme];
+
+  //draw menu item text
+  drawRect.x = state->ds.uiElemPosX[UIELEM_PREFS_UITHEME_MENU] + (PANEL_EDGE_SIZE + 3*UI_PADDING_SIZE)*state->ds.uiUserScale;
+  drawRect.y = ((float)state->ds.uiElemPosY[UIELEM_PREFS_UITHEME_MENU] + PANEL_EDGE_SIZE*state->ds.uiUserScale + yOffset);
+  drawRect.w = state->ds.uiElemWidth[UIELEM_PREFS_UITHEME_MENU];
+  drawRect.h = state->ds.uiElemHeight[UIELEM_PREFS_UITHEME_MENU];
+  const Uint8 txtAlpha = (Uint8)(alpha*255.0f);
+  drawTextAlignedSized(rdat,drawRect.x,drawRect.y + 0.4f*PREFS_DIALOG_UITHEME_MENU_ITEM_SPACING*state->ds.uiUserScale + yOffset,textCol,FONTSIZE_NORMAL,txtAlpha,dat->strings[dat->locStringIDs[LOCSTR_LIGHT]],ALIGN_LEFT,(Uint16)(drawRect.w - (PANEL_EDGE_SIZE + 6*UI_PADDING_SIZE)*state->ds.uiUserScale));
+  drawTextAlignedSized(rdat,drawRect.x,drawRect.y + 1.4f*PREFS_DIALOG_UITHEME_MENU_ITEM_SPACING*state->ds.uiUserScale + yOffset,textCol,FONTSIZE_NORMAL,txtAlpha,dat->strings[dat->locStringIDs[LOCSTR_DARK]],ALIGN_LEFT,(Uint16)(drawRect.w - (PANEL_EDGE_SIZE + 6*UI_PADDING_SIZE)*state->ds.uiUserScale));
 
 }
 
@@ -5020,6 +5091,9 @@ void drawUI(const app_data *restrict dat, app_state *restrict state, resource_da
       drawPrefsDialog(dat,state,rdat);
       if(bp_check128(&state->ds.shownElements,UIELEM_PREFS_UISCALE_MENU)){
         drawUIScaleMenu(dat,state,rdat);
+      }
+      if(bp_check128(&state->ds.shownElements,UIELEM_PREFS_UITHEME_MENU)){
+        drawUIThemeMenu(dat,state,rdat);
       }
       if(bp_check128(&state->ds.shownElements,UIELEM_PREFS_REACTIONMODE_MENU)){
         drawReactionModeMenu(dat,state,rdat);

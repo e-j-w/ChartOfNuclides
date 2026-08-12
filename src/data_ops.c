@@ -112,6 +112,9 @@ void initializeTempState(const app_data *restrict dat, app_state *restrict state
 	SDL_memset(state->ds.uiElemExtMinusX,0,sizeof(state->ds.uiElemExtMinusX));
 	SDL_memset(state->ds.uiElemExtMinusY,0,sizeof(state->ds.uiElemExtMinusY));
 	state->ds.uiColorTheme = UITHEME_LIGHT;
+	if(SDL_GetSystemTheme() == SDL_SYSTEM_THEME_DARK){
+    state->ds.uiColorTheme = UITHEME_DARK;
+  }
 	//threads
 	for(uint8_t i=0;i<MAX_NUM_THREADS;i++){
 		tms->threadData[i].threadState = THREADSTATE_DEAD;
@@ -330,6 +333,10 @@ void stopUIAnimation(const app_data *restrict dat, app_state *restrict state, re
 			break;
 		case UIANIM_UISCALE_MENU_HIDE:
 			bp_clear128(&state->ds.shownElements,UIELEM_PREFS_UISCALE_MENU); //close the menu
+			changeUIState(dat,state,rdat,UISTATE_PREFS_DIALOG);
+			break;
+		case UIANIM_UITHEME_MENU_HIDE:
+			bp_clear128(&state->ds.shownElements,UIELEM_PREFS_UITHEME_MENU); //close the menu
 			changeUIState(dat,state,rdat,UISTATE_PREFS_DIALOG);
 			break;
 		case UIANIM_REACTIONMODE_MENU_HIDE:
@@ -3995,6 +4002,7 @@ void changeUIState(const app_data *restrict dat, app_state *restrict state, reso
 			bp_set128(&state->interactableElement,UIELEM_PREFS_DIALOG_LEVELLIST_COMMENT_CHECKBOX);
 			bp_set128(&state->interactableElement,UIELEM_PREFS_DIALOG_UIANIM_CHECKBOX);
 			bp_set128(&state->interactableElement,UIELEM_PREFS_DIALOG_UISCALE_DROPDOWN);
+			bp_set128(&state->interactableElement,UIELEM_PREFS_DIALOG_UITHEME_DROPDOWN);
 			bp_set128(&state->interactableElement,UIELEM_PREFS_DIALOG_REACTIONMODE_DROPDOWN);
 			if((bp_check128(&state->ds.shownElements,UIELEM_PREFS_UISCALE_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_UISCALE_MENU_HIDE]==0.0f)){
 				bp_set128(&state->interactableElement,UIELEM_UISM_SMALL_BUTTON);
@@ -4005,6 +4013,14 @@ void changeUIState(const app_data *restrict dat, app_state *restrict state, reso
 				if(state->lastInputType != INPUT_TYPE_MOUSE){
 					//keyboard/gamepad navigation of the menu
 					state->mouseoverElement = (uint8_t)((int16_t)UIELEM_PREFS_UISCALE_MENU - (int16_t)UISCALE_ENUM_LENGTH); //select the first menu item
+				}
+			}else if((bp_check128(&state->ds.shownElements,UIELEM_PREFS_UITHEME_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_UITHEME_MENU_HIDE]==0.0f)){
+				bp_set128(&state->interactableElement,UIELEM_UITM_LIGHT_BUTTON);
+				bp_set128(&state->interactableElement,UIELEM_UITM_DARK_BUTTON);
+				bp_set128(&state->interactableElement,UIELEM_PREFS_UITHEME_MENU);
+				if(state->lastInputType != INPUT_TYPE_MOUSE){
+					//keyboard/gamepad navigation of the menu
+					state->mouseoverElement = (uint8_t)((int16_t)UIELEM_PREFS_UITHEME_MENU - (int16_t)UITHEME_ENUM_LENGTH); //select the first menu item
 				}
 			}else if((bp_check128(&state->ds.shownElements,UIELEM_PREFS_REACTIONMODE_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_REACTIONMODE_MENU_HIDE]==0.0f)){
 				bp_set128(&state->interactableElement,UIELEM_RMM_EXCLUDE_BUTTON);
@@ -4020,6 +4036,9 @@ void changeUIState(const app_data *restrict dat, app_state *restrict state, reso
 					if((prevMouseover < UIELEM_PREFS_UISCALE_MENU)&&(prevMouseover >= (uint8_t)((int16_t)UIELEM_PREFS_UISCALE_MENU-(int16_t)UISCALE_ENUM_LENGTH))){
 						//was just in the UI scale dropdown
 						state->mouseoverElement = (uint8_t)(UIELEM_PREFS_DIALOG_UISCALE_DROPDOWN);
+					}else if((prevMouseover < UIELEM_PREFS_UITHEME_MENU)&&(prevMouseover >= (uint8_t)((int16_t)UIELEM_PREFS_UITHEME_MENU-(int16_t)UITHEME_ENUM_LENGTH))){
+						//was just in the UI theme dropdown
+						state->mouseoverElement = (uint8_t)(UIELEM_PREFS_DIALOG_UITHEME_DROPDOWN);
 					}else if((prevMouseover < UIELEM_PREFS_REACTIONMODE_MENU)&&(prevMouseover >= (uint8_t)((int16_t)UIELEM_PREFS_REACTIONMODE_MENU-(int16_t)REACTIONMODE_ENUM_LENGTH))){
 						//was just in the reaction mode dropdown
 						state->mouseoverElement = (uint8_t)(UIELEM_PREFS_DIALOG_REACTIONMODE_DROPDOWN);
@@ -5216,6 +5235,12 @@ void uiElemClickAction(app_data *restrict dat, app_state *restrict state, resour
 			state->clickedUIElem = UIELEM_ENUM_LENGTH; //'unclick' the menu button
 		}
 	}
+	if((uiElemID != UIELEM_PREFS_DIALOG_UITHEME_DROPDOWN)&&(uiElemID != UIELEM_PREFS_UITHEME_MENU)&&(uiElemID != UIELEM_UITM_LIGHT_BUTTON)&&(uiElemID != UIELEM_UITM_LIGHT_BUTTON)){
+		if((bp_check128(&state->ds.shownElements,UIELEM_PREFS_UITHEME_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_UITHEME_MENU_HIDE]==0.0f)){
+			startUIAnimation(dat,state,rdat,UIANIM_UITHEME_MENU_HIDE); //menu will be closed after animation finishes
+			state->clickedUIElem = UIELEM_ENUM_LENGTH; //'unclick' the menu button
+		}
+	}
 	if((uiElemID != UIELEM_PREFS_DIALOG_REACTIONMODE_DROPDOWN)&&(uiElemID != UIELEM_PREFS_REACTIONMODE_MENU)&&(uiElemID != UIELEM_RMM_EXCLUDE_BUTTON)&&(uiElemID != UIELEM_RMM_HIGHLIGHT_BUTTON)){
 		if((bp_check128(&state->ds.shownElements,UIELEM_PREFS_REACTIONMODE_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_REACTIONMODE_MENU_HIDE]==0.0f)){
 			startUIAnimation(dat,state,rdat,UIANIM_REACTIONMODE_MENU_HIDE); //menu will be closed after animation finishes
@@ -5309,6 +5334,17 @@ void uiElemClickAction(app_data *restrict dat, app_state *restrict state, resour
 				startUIAnimation(dat,state,rdat,UIANIM_UISCALE_MENU_SHOW);
 				changeUIState(dat,state,rdat,state->uiState);
 				state->clickedUIElem = UIELEM_PREFS_DIALOG_UISCALE_DROPDOWN;
+      }
+			break;
+		case UIELEM_PREFS_DIALOG_UITHEME_DROPDOWN:
+			if((bp_check128(&state->ds.shownElements,UIELEM_PREFS_UITHEME_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_UITHEME_MENU_HIDE]==0.0f)){
+				startUIAnimation(dat,state,rdat,UIANIM_UITHEME_MENU_HIDE); //menu will be closed after animation finishes
+        state->clickedUIElem = UIELEM_ENUM_LENGTH; //'unclick' the menu button
+      }else if(state->ds.timeLeftInUIAnimation[UIANIM_UITHEME_MENU_SHOW]==0.0f){
+				bp_set128(&state->ds.shownElements,UIELEM_PREFS_UITHEME_MENU);
+				startUIAnimation(dat,state,rdat,UIANIM_UITHEME_MENU_SHOW);
+				changeUIState(dat,state,rdat,state->uiState);
+				state->clickedUIElem = UIELEM_PREFS_DIALOG_UITHEME_DROPDOWN;
       }
 			break;
 		case UIELEM_PREFS_DIALOG_REACTIONMODE_DROPDOWN:
@@ -5628,6 +5664,22 @@ void uiElemClickAction(app_data *restrict dat, app_state *restrict state, resour
 			state->ds.interfaceSizeInd = UISCALE_HUGE;
 			updateUIScale(dat,state,rdat);
 			break;
+		case UIELEM_PREFS_UITHEME_MENU:
+			//clicked on menu background, do nothing except keep the menu button selected
+			state->clickedUIElem = UIELEM_PREFS_DIALOG_UITHEME_DROPDOWN;
+			break;
+		case UIELEM_UITM_LIGHT_BUTTON:
+			startUIAnimation(dat,state,rdat,UIANIM_UITHEME_MENU_HIDE); //menu will be closed after animation finishes
+			state->clickedUIElem = UIELEM_ENUM_LENGTH; //'unclick' the menu button
+			state->ds.uiColorTheme = UITHEME_LIGHT;
+			updateUIcolorTheme(dat,state,rdat,UITHEME_LIGHT);
+			break;
+		case UIELEM_UITM_DARK_BUTTON:
+			startUIAnimation(dat,state,rdat,UIANIM_UITHEME_MENU_HIDE); //menu will be closed after animation finishes
+			state->clickedUIElem = UIELEM_ENUM_LENGTH; //'unclick' the menu button
+			state->ds.uiColorTheme = UITHEME_DARK;
+			updateUIcolorTheme(dat,state,rdat,UITHEME_DARK);
+			break;
 		case UIELEM_PREFS_REACTIONMODE_MENU:
 			//clicked on menu background, do nothing except keep the menu button selected
 			state->clickedUIElem = UIELEM_PREFS_DIALOG_REACTIONMODE_DROPDOWN;
@@ -5813,6 +5865,10 @@ void uiElemClickAction(app_data *restrict dat, app_state *restrict state, resour
 					}
 					if((bp_check128(&state->ds.shownElements,UIELEM_PREFS_UISCALE_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_UISCALE_MENU_HIDE]==0.0f)){
 						startUIAnimation(dat,state,rdat,UIANIM_UISCALE_MENU_HIDE); //menu will be closed after animation finishes
+						state->clickedUIElem = UIELEM_ENUM_LENGTH; //'unclick' the menu button
+					}
+					if((bp_check128(&state->ds.shownElements,UIELEM_PREFS_UITHEME_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_UITHEME_MENU_HIDE]==0.0f)){
+						startUIAnimation(dat,state,rdat,UIANIM_UITHEME_MENU_HIDE); //menu will be closed after animation finishes
 						state->clickedUIElem = UIELEM_ENUM_LENGTH; //'unclick' the menu button
 					}
 					if((bp_check128(&state->ds.shownElements,UIELEM_PREFS_REACTIONMODE_MENU))&&(state->ds.timeLeftInUIAnimation[UIANIM_REACTIONMODE_MENU_HIDE]==0.0f)){
@@ -6215,8 +6271,10 @@ void updateSingleUIElemPosition(const app_data *restrict dat, app_state *restric
 			updateSingleUIElemPosition(dat,state,rdat,UIELEM_PREFS_DIALOG_LEVELLIST_COMMENT_CHECKBOX);
 			updateSingleUIElemPosition(dat,state,rdat,UIELEM_PREFS_DIALOG_UIANIM_CHECKBOX);
 			updateSingleUIElemPosition(dat,state,rdat,UIELEM_PREFS_DIALOG_UISCALE_DROPDOWN);
+			updateSingleUIElemPosition(dat,state,rdat,UIELEM_PREFS_DIALOG_UITHEME_DROPDOWN);
 			updateSingleUIElemPosition(dat,state,rdat,UIELEM_PREFS_DIALOG_REACTIONMODE_DROPDOWN);
 			updateSingleUIElemPosition(dat,state,rdat,UIELEM_PREFS_UISCALE_MENU);
+			updateSingleUIElemPosition(dat,state,rdat,UIELEM_PREFS_UITHEME_MENU);
 			updateSingleUIElemPosition(dat,state,rdat,UIELEM_PREFS_REACTIONMODE_MENU);
 			updateSingleUIElemPosition(dat,state,rdat,UIELEM_RMM_EXCLUDE_BUTTON);
 			updateSingleUIElemPosition(dat,state,rdat,UIELEM_RMM_HIGHLIGHT_BUTTON);
@@ -6224,6 +6282,8 @@ void updateSingleUIElemPosition(const app_data *restrict dat, app_state *restric
 			updateSingleUIElemPosition(dat,state,rdat,UIELEM_UISM_DEFAULT_BUTTON);
 			updateSingleUIElemPosition(dat,state,rdat,UIELEM_UISM_LARGE_BUTTON);
 			updateSingleUIElemPosition(dat,state,rdat,UIELEM_UISM_HUGE_BUTTON);
+			updateSingleUIElemPosition(dat,state,rdat,UIELEM_UITM_LIGHT_BUTTON);
+			updateSingleUIElemPosition(dat,state,rdat,UIELEM_UITM_DARK_BUTTON);
 			break;
 		case UIELEM_PREFS_DIALOG_CLOSEBUTTON:
 			state->ds.uiElemWidth[UIELEM_PREFS_DIALOG_CLOSEBUTTON] = (int16_t)(UI_TILE_SIZE*state->ds.uiUserScale);
@@ -6279,6 +6339,12 @@ void updateSingleUIElemPosition(const app_data *restrict dat, app_state *restric
 			state->ds.uiElemPosX[UIELEM_PREFS_DIALOG_UISCALE_DROPDOWN] = (int16_t)(state->ds.uiElemPosX[UIELEM_PREFS_DIALOG] + (int16_t)((PREFS_DIALOG_PREFCOL1_X+3*UI_PADDING_SIZE)*state->ds.uiUserScale) + (int16_t)(getTextWidth(rdat,FONTSIZE_NORMAL,dat->strings[dat->locStringIDs[LOCSTR_PREF_UISCALE]])/rdat->uiDPIScale));
 			state->ds.uiElemPosY[UIELEM_PREFS_DIALOG_UISCALE_DROPDOWN] = state->ds.uiElemPosY[UIELEM_PREFS_DIALOG] + (int16_t)((PREFS_DIALOG_PREFCOL1_Y - 8.0f)*state->ds.uiUserScale);
 			break;
+		case UIELEM_PREFS_DIALOG_UITHEME_DROPDOWN:
+			state->ds.uiElemWidth[UIELEM_PREFS_DIALOG_UITHEME_DROPDOWN] = (int16_t)(PREFS_DIALOG_UITHEME_BUTTON_WIDTH*state->ds.uiUserScale);
+			state->ds.uiElemHeight[UIELEM_PREFS_DIALOG_UITHEME_DROPDOWN] = (int16_t)(UI_TILE_SIZE*state->ds.uiUserScale);
+			state->ds.uiElemPosX[UIELEM_PREFS_DIALOG_UITHEME_DROPDOWN] = (int16_t)(state->ds.uiElemPosX[UIELEM_PREFS_DIALOG] + (int16_t)((PREFS_DIALOG_PREFCOL1_X+7*UI_PADDING_SIZE)*state->ds.uiUserScale) + (int16_t)(getTextWidth(rdat,FONTSIZE_NORMAL,dat->strings[dat->locStringIDs[LOCSTR_PREF_UISCALE]])/rdat->uiDPIScale) + (int16_t)(getTextWidth(rdat,FONTSIZE_NORMAL,dat->strings[dat->locStringIDs[LOCSTR_PREF_UITHEME]])/rdat->uiDPIScale) + state->ds.uiElemWidth[UIELEM_PREFS_DIALOG_UISCALE_DROPDOWN]);
+			state->ds.uiElemPosY[UIELEM_PREFS_DIALOG_UITHEME_DROPDOWN] = state->ds.uiElemPosY[UIELEM_PREFS_DIALOG] + (int16_t)((PREFS_DIALOG_PREFCOL1_Y - 8.0f)*state->ds.uiUserScale);
+			break;
 		case UIELEM_PREFS_DIALOG_REACTIONMODE_DROPDOWN:
 			state->ds.uiElemWidth[UIELEM_PREFS_DIALOG_REACTIONMODE_DROPDOWN] = (int16_t)(PREFS_DIALOG_REACTIONMODE_BUTTON_WIDTH*state->ds.uiUserScale);
 			state->ds.uiElemHeight[UIELEM_PREFS_DIALOG_REACTIONMODE_DROPDOWN] = (int16_t)(UI_TILE_SIZE*state->ds.uiUserScale);
@@ -6314,6 +6380,24 @@ void updateSingleUIElemPosition(const app_data *restrict dat, app_state *restric
 			state->ds.uiElemPosY[UIELEM_UISM_HUGE_BUTTON] =  state->ds.uiElemPosY[UIELEM_PREFS_UISCALE_MENU] + (int16_t)((PANEL_EDGE_SIZE + 2*UI_PADDING_SIZE + 3*PREFS_DIALOG_UISCALE_MENU_ITEM_SPACING)*state->ds.uiUserScale);
 			state->ds.uiElemWidth[UIELEM_UISM_HUGE_BUTTON] = state->ds.uiElemWidth[UIELEM_PREFS_UISCALE_MENU] - (int16_t)((2*PANEL_EDGE_SIZE + 4*UI_PADDING_SIZE)*state->ds.uiUserScale);
 			state->ds.uiElemHeight[UIELEM_UISM_HUGE_BUTTON] = (int16_t)((PREFS_DIALOG_UISCALE_MENU_ITEM_SPACING - UI_PADDING_SIZE)*state->ds.uiUserScale);
+			break;
+		case UIELEM_PREFS_UITHEME_MENU:
+			state->ds.uiElemWidth[UIELEM_PREFS_UITHEME_MENU] = (int16_t)(PREFS_DIALOG_UITHEME_MENU_WIDTH*state->ds.uiUserScale);
+			state->ds.uiElemHeight[UIELEM_PREFS_UITHEME_MENU] = (int16_t)(((PREFS_DIALOG_UITHEME_MENU_ITEM_SPACING)*UITHEME_ENUM_LENGTH + 2*PANEL_EDGE_SIZE + 3*UI_PADDING_SIZE)*state->ds.uiUserScale);
+			state->ds.uiElemPosX[UIELEM_PREFS_UITHEME_MENU] = (int16_t)(state->ds.uiElemPosX[UIELEM_PREFS_DIALOG_UITHEME_DROPDOWN] + state->ds.uiElemWidth[UIELEM_PREFS_DIALOG_UITHEME_DROPDOWN]/2 - state->ds.uiElemWidth[UIELEM_PREFS_UITHEME_MENU]/2);
+			state->ds.uiElemPosY[UIELEM_PREFS_UITHEME_MENU] = (int16_t)(state->ds.uiElemPosY[UIELEM_PREFS_DIALOG_UITHEME_DROPDOWN] + state->ds.uiElemHeight[UIELEM_PREFS_DIALOG_UITHEME_DROPDOWN]);
+			break;
+		case UIELEM_UITM_LIGHT_BUTTON:
+			state->ds.uiElemPosX[UIELEM_UITM_LIGHT_BUTTON] = state->ds.uiElemPosX[UIELEM_PREFS_UITHEME_MENU] + (int16_t)((PANEL_EDGE_SIZE + 2*UI_PADDING_SIZE)*state->ds.uiUserScale);
+			state->ds.uiElemPosY[UIELEM_UITM_LIGHT_BUTTON] =  state->ds.uiElemPosY[UIELEM_PREFS_UITHEME_MENU] + (int16_t)((PANEL_EDGE_SIZE + 2*UI_PADDING_SIZE)*state->ds.uiUserScale);
+			state->ds.uiElemWidth[UIELEM_UITM_LIGHT_BUTTON] = state->ds.uiElemWidth[UIELEM_PREFS_UITHEME_MENU] - (int16_t)((2*PANEL_EDGE_SIZE + 4*UI_PADDING_SIZE)*state->ds.uiUserScale);
+			state->ds.uiElemHeight[UIELEM_UITM_LIGHT_BUTTON] = (int16_t)((PREFS_DIALOG_UITHEME_MENU_ITEM_SPACING - UI_PADDING_SIZE)*state->ds.uiUserScale);
+			break;
+		case UIELEM_UITM_DARK_BUTTON:
+			state->ds.uiElemPosX[UIELEM_UITM_DARK_BUTTON] = state->ds.uiElemPosX[UIELEM_PREFS_UITHEME_MENU] + (int16_t)((PANEL_EDGE_SIZE + 2*UI_PADDING_SIZE)*state->ds.uiUserScale);
+			state->ds.uiElemPosY[UIELEM_UITM_DARK_BUTTON] =  state->ds.uiElemPosY[UIELEM_PREFS_UITHEME_MENU] + (int16_t)((PANEL_EDGE_SIZE + 2*UI_PADDING_SIZE + PREFS_DIALOG_UITHEME_MENU_ITEM_SPACING)*state->ds.uiUserScale);
+			state->ds.uiElemWidth[UIELEM_UITM_DARK_BUTTON] = state->ds.uiElemWidth[UIELEM_PREFS_UITHEME_MENU] - (int16_t)((2*PANEL_EDGE_SIZE + 4*UI_PADDING_SIZE)*state->ds.uiUserScale);
+			state->ds.uiElemHeight[UIELEM_UITM_DARK_BUTTON] = (int16_t)((PREFS_DIALOG_UITHEME_MENU_ITEM_SPACING - UI_PADDING_SIZE)*state->ds.uiUserScale);
 			break;
 		case UIELEM_PREFS_REACTIONMODE_MENU:
 			state->ds.uiElemWidth[UIELEM_PREFS_REACTIONMODE_MENU] = (int16_t)(PREFS_DIALOG_REACTIONMODE_MENU_WIDTH*state->ds.uiUserScale);
@@ -6556,12 +6640,12 @@ void updateUIcolorTheme(app_data *restrict dat, app_state *restrict state, resou
 	if(colorThemeInd >= UITHEME_ENUM_LENGTH){
 		SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,"setUIcolorTheme - invalid theme index %u (max %i)\n",colorThemeInd,UITHEME_ENUM_LENGTH);
 	}
+	state->ds.uiColorTheme = colorThemeInd;
+	dat->rules.themeRules.uiColorTheme = colorThemeInd;
 	if(rdat->uiThemeTex){
 		//regenerate UI theme texture, this requires loading it from the app data file
 		regenerateThemeAndFontCache(dat,state,rdat); //load_data.c
 	}
-	state->ds.uiColorTheme = colorThemeInd;
-	dat->rules.themeRules.uiColorTheme = colorThemeInd;
 	state->ds.forceRedraw = 1;
 }
 

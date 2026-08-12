@@ -118,6 +118,9 @@ small|Small
 default|Default
 large|Large
 huge|Huge
+interface_style|Interface style
+light|Light
+dark|Dark
 reaction_mode|Dataset display mode
 reactionmode_exclude|Only show selected dataset
 reactionmode_highlight|Highlight levels from selected dataset

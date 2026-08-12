@@ -615,6 +615,9 @@ static int parseAppRules(app_data *restrict dat, asset_mapping *restrict stringI
 	dat->locStringIDs[LOCSTR_LARGE] = (uint16_t)nameToAssetID("large",stringIDmap);
 	dat->locStringIDs[LOCSTR_HUGE] = (uint16_t)nameToAssetID("huge",stringIDmap);
 	dat->locStringIDs[LOCSTR_DEFAULT] = (uint16_t)nameToAssetID("default",stringIDmap);
+	dat->locStringIDs[LOCSTR_PREF_UITHEME] = (uint16_t)nameToAssetID("interface_style",stringIDmap);
+	dat->locStringIDs[LOCSTR_LIGHT] = (uint16_t)nameToAssetID("light",stringIDmap);
+	dat->locStringIDs[LOCSTR_DARK] = (uint16_t)nameToAssetID("dark",stringIDmap);
 	dat->locStringIDs[LOCSTR_PREF_REACTIONMODE] = (uint16_t)nameToAssetID("reaction_mode",stringIDmap);
 	dat->locStringIDs[LOCSTR_PREF_REACTIONMODE_EXCLUDE] = (uint16_t)nameToAssetID("reactionmode_exclude",stringIDmap);
 	dat->locStringIDs[LOCSTR_PREF_REACTIONMODE_HIGHLIGHT] = (uint16_t)nameToAssetID("reactionmode_highlight",stringIDmap);
@@ -662,10 +665,16 @@ static int parseStrings(app_data *restrict dat, asset_mapping *restrict stringID
               SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"maximum number of text strings reached (%u), cannot parse file %s\n",LOCSTR_ENUM_LENGTH,filePath);
               return -1;
             }
+						//SDL_Log("%i str: %s\n",dat->numLocStrings,str);
             SDL_memcpy(stringIDmap->assetID[dat->numLocStrings],str,256);
             tok = SDL_strtok_r(NULL,"",&saveptr); //get the rest of the string
-            SDL_memcpy(dat->strings[dat->numLocStrings],tok,255);
-            dat->numLocStrings++;
+						if(tok != NULL){
+							SDL_memcpy(dat->strings[dat->numLocStrings],tok,255);
+            	dat->numLocStrings++;
+						}else{
+							SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"improperly formatted string in file %s\n",filePath);
+            	return -1;
+						}
           }else{
             SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"improperly formatted string in file %s\n",filePath);
             return -1;
