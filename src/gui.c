@@ -52,246 +52,311 @@ SDL_FColor getHalfLifeCol(const double halflifeSeconds, const uint8_t valueType,
   col.b = 1.0f;
   col.a = 1.0f;
   if((halflifeSeconds >= 1.0E40)||((halflifeSeconds > 1.0E15) && ((valueType == VALUETYPE_GREATERTHAN) || (valueType == VALUETYPE_GREATEROREQUALTHAN)))){
-    col.r = 0.0f;
-    col.g = 0.0f;
-    col.b = 0.0f;
+    if(darkTheme){
+      col.r = 1.0f; col.g = 1.0f; col.b = 1.0f;
+    }else{
+      col.r = 0.0f; col.g = 0.0f; col.b = 0.0f;
+    }
   }else if(halflifeSeconds > 1.0E15){
-    col.r = 0.0f;
-    col.g = 0.05f;
-    col.b = 0.25f;
+    if(darkTheme){
+      col.r = 1.0f; col.g = 0.95f; col.b = 0.95f;
+    }else{
+      col.r = 0.0f; col.g = 0.05f; col.b = 0.25f;
+    }
   }else if(halflifeSeconds > 1.0E10){
-    col.r = 0.0f;
-    col.g = 0.1f;
-    col.b = 0.4f;
+    if(darkTheme){
+      col.r = 1.0f; col.g = 0.9f; col.b = 0.9f;
+    }else{
+      col.r = 0.0f; col.g = 0.1f; col.b = 0.4f;
+    }
   }else if(halflifeSeconds > 1.0E8){
-    col.r = 0.0f;
-    col.g = 0.1f;
-    col.b = 0.5f;
+    if(darkTheme){
+      col.r = 1.0f; col.g = 0.8f; col.b = 0.8f;
+    }else{
+      col.r = 0.0f; col.g = 0.1f; col.b = 0.5f;
+    }
   }else if(halflifeSeconds > 5.0E7){
-    col.r = 0.1f;
-    col.g = 0.15f;
-    col.b = 0.5f;
+    if(darkTheme){
+      col.r = 1.0f; col.g = 0.7f; col.b = 0.8f;
+    }else{
+      col.r = 0.1f; col.g = 0.15f; col.b = 0.5f;
+    }
   }else if(halflifeSeconds > 1.0E7){
-    col.r = 0.1f;
-    col.g = 0.2f;
-    col.b = 0.5f;
+    if(darkTheme){
+      col.r = 1.0f; col.g = 0.7f; col.b = 0.7f;
+    }else{
+      col.r = 0.1f; col.g = 0.2f; col.b = 0.5f;
+    }
   }else if(halflifeSeconds > 5.0E6){
-    col.r = 0.1f;
-    col.g = 0.2f;
-    col.b = 0.55f;
+    if(darkTheme){
+      col.r = 1.0f; col.g = 0.65f; col.b = 0.7f;
+    }else{
+      col.r = 0.1f; col.g = 0.2f; col.b = 0.55f;
+    }
   }else if(halflifeSeconds > 1.0E6){
-    col.r = 0.1f;
-    col.g = 0.2f;
-    col.b = 0.6f;
+    if(darkTheme){
+      col.r = 1.0f; col.g = 0.6f; col.b = 0.7f;
+    }else{
+      col.r = 0.1f; col.g = 0.2f; col.b = 0.6f;
+    }
   }else if(halflifeSeconds > 7.5E5){
-    col.r = 0.1f;
-    col.g = 0.225f;
-    col.b = 0.625f;
+    if(darkTheme){
+      col.r = 1.0f; col.g = 0.65f; col.b = 0.65f;
+    }else{
+      col.r = 0.1f; col.g = 0.225f; col.b = 0.625f;
+    }
   }else if(halflifeSeconds > 5.0E5){
-    col.r = 0.1f;
-    col.g = 0.25f;
-    col.b = 0.65f;
+    if(darkTheme){
+      col.r = 1.0f; col.g = 0.7f; col.b = 0.6f;
+    }else{
+      col.r = 0.1f; col.g = 0.25f; col.b = 0.65f;
+    }
   }else if(halflifeSeconds > 3.0E5){
-    col.r = 0.1f;
-    col.g = 0.275f;
-    col.b = 0.675f;
+    if(darkTheme){
+      col.r = 1.0f; col.g = 0.75f; col.b = 0.5f;
+    }else{
+      col.r = 0.1f; col.g = 0.275f; col.b = 0.675f;
+    }
   }else if(halflifeSeconds > 1.0E5){
-    col.r = 0.1f;
-    col.g = 0.3f;
-    col.b = 0.7f;
-  }else if(halflifeSeconds > 7.5E5){
-    col.r = 0.125f;
-    col.g = 0.325f;
-    col.b = 0.725f;
+    if(darkTheme){
+      col.r = 1.0f; col.g = 0.8f; col.b = 0.4f;
+    }else{
+      col.r = 0.1f; col.g = 0.3f; col.b = 0.7f;
+    }
+  }else if(halflifeSeconds > 7.5E4){
+    if(darkTheme){
+      col.r = 1.0f; col.g = 0.85f; col.b = 0.375f;
+    }else{
+      col.r = 0.125f; col.g = 0.325f; col.b = 0.725f;
+    }
   }else if(halflifeSeconds > 5.0E4){
-    col.r = 0.15f;
-    col.g = 0.35f;
-    col.b = 0.75f;
+    if(darkTheme){
+      col.r = 1.0f; col.g = 0.9f; col.b = 0.35f;
+    }else{
+      col.r = 0.15f; col.g = 0.35f; col.b = 0.75f;
+    }
   }else if(halflifeSeconds > 3.0E4){
-    col.r = 0.175f;
-    col.g = 0.375f;
-    col.b = 0.775f;
+    if(darkTheme){
+      col.r = 1.0f; col.g = 1.0f; col.b = 0.3f;
+    }else{
+      col.r = 0.175f; col.g = 0.375f; col.b = 0.775f;
+    }
   }else if(halflifeSeconds > 1.0E4){
-    col.r = 0.2f;
-    col.g = 0.4f;
-    col.b = 0.8f;
+    if(darkTheme){
+      col.r = 0.975f; col.g = 0.975f; col.b = 0.325f;
+    }else{
+      col.r = 0.2f; col.g = 0.4f; col.b = 0.8f;
+    }
   }else if(halflifeSeconds > 7.5E3){
-    col.r = 0.225f;
-    col.g = 0.425f;
-    col.b = 0.8f;
+    if(darkTheme){
+      col.r = 0.95f; col.g = 0.95f; col.b = 0.35f;
+    }else{
+      col.r = 0.225f; col.g = 0.425f; col.b = 0.8f;
+    }
   }else if(halflifeSeconds > 5.0E3){
-    col.r = 0.25f;
-    col.g = 0.45f;
-    col.b = 0.8f;
+    if(darkTheme){
+      col.r = 0.925f; col.g = 0.925f; col.b = 0.375f;
+    }else{
+      col.r = 0.25f; col.g = 0.45f; col.b = 0.8f;
+    }
   }else if(halflifeSeconds > 3E3){
-    col.r = 0.275f;
-    col.g = 0.475f;
-    col.b = 0.8f;
+    if(darkTheme){
+      col.r = 0.9f; col.g = 0.9f; col.b = 0.4f;
+    }else{
+      col.r = 0.275f; col.g = 0.475f; col.b = 0.8f;
+    }
   }else if(halflifeSeconds > 1.0E3){
-    col.r = 0.3f;
-    col.g = 0.5f;
-    col.b = 0.8f;
+    if(darkTheme){
+      col.r = 0.85f; col.g = 0.9f; col.b = 0.425f;
+    }else{
+      col.r = 0.3f; col.g = 0.5f; col.b = 0.8f;
+    }
   }else if(halflifeSeconds > 7.5E2){
-    col.r = 0.3f;
-    col.g = 0.55f;
-    col.b = 0.775f;
-  }else if(halflifeSeconds > 5.0E2){ //text color inversion point (actually 600)
-    col.r = 0.3f;
-    col.g = 0.6f;
-    col.b = 0.75f;
+    if(darkTheme){
+      col.r = 0.8f; col.g = 0.9f; col.b = 0.45f;
+    }else{
+      col.r = 0.3f; col.g = 0.55f; col.b = 0.775f;
+    }
+  }else if(halflifeSeconds > 5.0E2){ //text color inversion point for light theme (actually 600)
+    if(darkTheme){
+      col.r = 0.75f; col.g = 0.9f; col.b = 0.475f;
+    }else{
+      col.r = 0.3f; col.g = 0.6f; col.b = 0.75f;
+    }
   }else if(halflifeSeconds > 3.0E2){
-    col.r = 0.3f;
-    col.g = 0.65f;
-    col.b = 0.75f;
+    if(darkTheme){
+      col.r = 0.7f; col.g = 0.9f; col.b = 0.5f;
+    }else{
+      col.r = 0.3f; col.g = 0.65f; col.b = 0.75f;
+    }
   }else if(halflifeSeconds > 1.0E2){
-    col.r = 0.3f;
-    col.g = 0.7f;
-    col.b = 0.725f;
+    if(darkTheme){
+      col.r = 0.65f; col.g = 0.925f; col.b = 0.55f;
+    }else{
+      col.r = 0.3f; col.g = 0.7f; col.b = 0.725f;
+    }
   }else if(halflifeSeconds > 7.5E1){
-    col.r = 0.3f;
-    col.g = 0.75f;
-    col.b = 0.7f;
+    if(darkTheme){
+      col.r = 0.6f; col.g = 0.95f; col.b = 0.6f;
+    }else{
+      col.r = 0.3f; col.g = 0.75f; col.b = 0.7f;
+    }
   }else if(halflifeSeconds > 5.0E1){
-    col.r = 0.3f;
-    col.g = 0.8f;
-    col.b = 0.7f;
+    if(darkTheme){
+      col.r = 0.55f; col.g = 0.975f; col.b = 0.65f;
+    }else{
+      col.r = 0.3f; col.g = 0.8f; col.b = 0.7f;
+    }
   }else if(halflifeSeconds > 3.0E1){
-    col.r = 0.3f;
-    col.g = 0.85f;
-    col.b = 0.7f;
+    if(darkTheme){
+      col.r = 0.5f; col.g = 1.0f; col.b = 0.7f;
+    }else{
+      col.r = 0.3f; col.g = 0.85f; col.b = 0.7f;
+    }
   }else if(halflifeSeconds > 1.0E1){
-    col.r = 0.3f;
-    col.g = 0.9f;
-    col.b = 0.7f;
+    if(darkTheme){
+      col.r = 0.45f; col.g = 0.975f; col.b = 0.7f;
+    }else{
+      col.r = 0.3f; col.g = 0.9f; col.b = 0.7f;
+    }
   }else if(halflifeSeconds > 7.5){
-    col.r = 0.35f;
-    col.g = 0.925f;
-    col.b = 0.7f;
+    if(darkTheme){
+      col.r = 0.4f; col.g = 0.95f; col.b = 0.7f;
+    }else{
+      col.r = 0.35f; col.g = 0.925f; col.b = 0.7f;
+    }
   }else if(halflifeSeconds > 5.0){
-    col.r = 0.4f;
-    col.g = 0.95f;
-    col.b = 0.7f;
+    if(darkTheme){
+      col.r = 0.35f; col.g = 0.925f; col.b = 0.7f;
+    }else{
+      col.r = 0.4f; col.g = 0.95f; col.b = 0.7f;
+    }
   }else if(halflifeSeconds > 3.0){
-    col.r = 0.45f;
-    col.g = 0.975f;
-    col.b = 0.7f;
+    if(darkTheme){
+      col.r = 0.3f; col.g = 0.9f; col.b = 0.7f;
+    }else{
+      col.r = 0.45f; col.g = 0.975f; col.b = 0.7f;
+    }
   }else if(halflifeSeconds > 1.0){
-    col.r = 0.5f;
-    col.g = 1.0f;
-    col.b = 0.7f;
+    if(darkTheme){
+      col.r = 0.3f; col.g = 0.85f; col.b = 0.7f;
+    }else{
+      col.r = 0.5f; col.g = 1.0f; col.b = 0.7f;
+    }
   }else if(halflifeSeconds > 7.5E-1){
-    col.r = 0.55f;
-    col.g = 0.975f;
-    col.b = 0.65f;
+    if(darkTheme){
+      col.r = 0.3f; col.g = 0.8f; col.b = 0.7f;
+    }else{
+      col.r = 0.55f; col.g = 0.975f; col.b = 0.65f;
+    }
   }else if(halflifeSeconds > 5.0E-1){
-    col.r = 0.6f;
-    col.g = 0.95f;
-    col.b = 0.6f;
+    if(darkTheme){
+      col.r = 0.3f; col.g = 0.75f; col.b = 0.7f;
+    }else{
+      col.r = 0.6f; col.g = 0.95f; col.b = 0.6f;
+    }
   }else if(halflifeSeconds > 3.0E-1){
-    col.r = 0.65f;
-    col.g = 0.925f;
-    col.b = 0.55f;
+    if(darkTheme){
+      col.r = 0.3f; col.g = 0.7f; col.b = 0.725f;
+    }else{
+      col.r = 0.65f; col.g = 0.925f; col.b = 0.55f;
+    }
   }else if(halflifeSeconds > 1.0E-1){
-    col.r = 0.7f;
-    col.g = 0.9f;
-    col.b = 0.5f;
+    if(darkTheme){
+      col.r = 0.3f; col.g = 0.65f; col.b = 0.75f;
+    }else{
+      col.r = 0.7f; col.g = 0.9f; col.b = 0.5f;
+    }
   }else if(halflifeSeconds > 7.5E-2){
-    col.r = 0.75f;
-    col.g = 0.9f;
-    col.b = 0.475f;
+    if(darkTheme){
+      col.r = 0.3f; col.g = 0.6f; col.b = 0.75f;
+    }else{
+      col.r = 0.75f; col.g = 0.9f; col.b = 0.475f;
+    }
   }else if(halflifeSeconds > 5.0E-2){
-    col.r = 0.8f;
-    col.g = 0.9f;
-    col.b = 0.45f;
+    if(darkTheme){
+      col.r = 0.3f; col.g = 0.55f; col.b = 0.775f;
+    }else{
+      col.r = 0.8f; col.g = 0.9f; col.b = 0.45f;
+    }
   }else if(halflifeSeconds > 3.0E-2){
-    col.r = 0.85f;
-    col.g = 0.9f;
-    col.b = 0.425f;
+    if(darkTheme){
+      col.r = 0.3f; col.g = 0.5f; col.b = 0.8f;
+    }else{
+      col.r = 0.85f; col.g = 0.9f; col.b = 0.425f;
+    }
   }else if(halflifeSeconds > 1.0E-2){
-    col.r = 0.9f;
-    col.g = 0.9f;
-    col.b = 0.4f;
+    if(darkTheme){
+      col.r = 0.275f; col.g = 0.475f; col.b = 0.8f;
+    }else{
+      col.r = 0.9f; col.g = 0.9f; col.b = 0.4f;
+    }
   }else if(halflifeSeconds > 7.5E-3){
-    col.r = 0.925f;
-    col.g = 0.925f;
-    col.b = 0.375f;
+    if(darkTheme){
+      col.r = 0.25f; col.g = 0.45f; col.b = 0.8f;
+    }else{
+      col.r = 0.925f; col.g = 0.925f; col.b = 0.375f;
+    }
   }else if(halflifeSeconds > 5.0E-3){
-    col.r = 0.95f;
-    col.g = 0.95f;
-    col.b = 0.35f;
+    if(darkTheme){
+      col.r = 0.225f; col.g = 0.425f; col.b = 0.8f;
+    }else{
+      col.r = 0.95f; col.g = 0.95f; col.b = 0.35f;
+    }
   }else if(halflifeSeconds > 3.0E-3){
-    col.r = 0.975f;
-    col.g = 0.975f;
-    col.b = 0.325f;
+    if(darkTheme){
+      col.r = 0.2f; col.g = 0.4f; col.b = 0.8f;
+    }else{
+      col.r = 0.975f; col.g = 0.975f; col.b = 0.325f;
+    }
   }else if(halflifeSeconds > 1.0E-3){
-    col.r = 1.0f;
-    col.g = 1.0f;
-    col.b = 0.3f;
+    if(darkTheme){
+      col.r = 0.175f; col.g = 0.375f; col.b = 0.775f;
+    }else{
+      col.r = 1.0f; col.g = 1.0f; col.b = 0.3f;
+    }
   }else if(halflifeSeconds > 7.5E-4){
-    col.r = 1.0f;
-    col.g = 0.95f;
-    col.b = 0.325f;
+    if(darkTheme){
+      col.r = 0.15f; col.g = 0.35f; col.b = 0.75f;
+    }else{
+      col.r = 1.0f; col.g = 0.95f; col.b = 0.325f;
+    }
   }else if(halflifeSeconds > 5.0E-4){
-    col.r = 1.0f;
-    col.g = 0.9f;
-    col.b = 0.35f;
+    if(darkTheme){
+      col.r = 0.125f; col.g = 0.325f; col.b = 0.725f;
+    }else{
+      col.r = 1.0f; col.g = 0.9f; col.b = 0.35f;
+    }
   }else if(halflifeSeconds > 3.0E-4){
-    col.r = 1.0f;
-    col.g = 0.85f;
-    col.b = 0.375f;
+    if(darkTheme){
+      col.r = 0.1f; col.g = 0.3f; col.b = 0.7f;
+    }else{
+      col.r = 1.0f; col.g = 0.85f; col.b = 0.375f;
+    }
   }else if(halflifeSeconds > 1.0E-4){
-    col.r = 1.0f;
-    col.g = 0.8f;
-    col.b = 0.4f;
+    col.r = 1.0f; col.g = 0.8f; col.b = 0.4f;
   }else if(halflifeSeconds > 5.0E-5){
-    col.r = 1.0f;
-    col.g = 0.75f;
-    col.b = 0.5f;
+    col.r = 1.0f; col.g = 0.75f; col.b = 0.5f;
   }else if(halflifeSeconds > 1.0E-5){
-    col.r = 1.0f;
-    col.g = 0.7f;
-    col.b = 0.6f;
+    col.r = 1.0f; col.g = 0.7f; col.b = 0.6f;
   }else if(halflifeSeconds > 5.0E-6){
-    col.r = 1.0f;
-    col.g = 0.65f;
-    col.b = 0.65f;
+    col.r = 1.0f; col.g = 0.65f; col.b = 0.65f;
   }else if(halflifeSeconds > 1.0E-6){
-    col.r = 1.0f;
-    col.g = 0.6f;
-    col.b = 0.7f;
+    col.r = 1.0f; col.g = 0.6f; col.b = 0.7f;
   }else if(halflifeSeconds > 5.0E-7){
-    col.r = 1.0f;
-    col.g = 0.65f;
-    col.b = 0.7f;
+    col.r = 1.0f; col.g = 0.65f; col.b = 0.7f;
   }else if(halflifeSeconds > 1.0E-7){
-    col.r = 1.0f;
-    col.g = 0.7f;
-    col.b = 0.7f;
+    col.r = 1.0f; col.g = 0.7f; col.b = 0.7f;
   }else if(halflifeSeconds > 1.0E-8){
-    col.r = 1.0f;
-    col.g = 0.7f;
-    col.b = 0.8f;
+    col.r = 1.0f; col.g = 0.7f; col.b = 0.8f;
   }else if(halflifeSeconds > 1.0E-9){
-    col.r = 1.0f;
-    col.g = 0.8f;
-    col.b = 0.8f;
+    col.r = 1.0f; col.g = 0.8f; col.b = 0.8f;
   }else if(halflifeSeconds > 1.0E-11){
-    col.r = 1.0f;
-    col.g = 0.9f;
-    col.b = 0.9f;
+    col.r = 1.0f; col.g = 0.9f; col.b = 0.9f;
   }else if(halflifeSeconds > 1.0E-13){
-    col.r = 1.0f;
-    col.g = 0.95f;
-    col.b = 0.95f;
+    col.r = 1.0f; col.g = 0.95f; col.b = 0.95f;
   }else{
-    col.r = 1.0f;
-    col.g = 0.9f;
-    col.b = 0.9f;
-  }
-  if(darkTheme){
-    if(col.r >= 0.8f){ col.r -= 0.1f; }
-    if(col.g >= 0.8f){ col.g -= 0.1f; }
-    if(col.b >= 0.8f){ col.b -= 0.1f; }
+    col.r = 1.0f; col.g = 0.9f; col.b = 0.9f;
   }
   return col;
 }
