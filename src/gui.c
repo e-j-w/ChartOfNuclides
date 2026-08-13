@@ -42,8 +42,24 @@ float getAxisTickSpacing(float zoomScale){
   }
 }
 
-#define HL_COL_INV_VAL 600 //box color inversion point
+#define HL_COL_INV_VAL 600.0 //box color inversion point
+#define HL_COL_INV_VAL_DARK 4.0
 #define HL_LL_NOCOL_VAL 1.0E-13 //value below which there is no color highlight in level lists
+
+uint8_t isHlTxtLight(const double halflifeSeconds, const uint8_t darkTheme){
+  if(darkTheme){
+    if(halflifeSeconds >  HL_COL_INV_VAL_DARK){
+      return 0;
+    }
+    return 1;
+  }else{
+    if(halflifeSeconds > HL_COL_INV_VAL){
+      return 1;
+    }
+    return 0;
+  }
+}
+
 SDL_FColor getHalfLifeCol(const double halflifeSeconds, const uint8_t valueType, const uint8_t darkTheme){
   //SDL_Log("half-life: %0.6f\n",halflifeSeconds);
   SDL_FColor col;
@@ -155,208 +171,256 @@ SDL_FColor getHalfLifeCol(const double halflifeSeconds, const uint8_t valueType,
     }
   }else if(halflifeSeconds > 5.0E3){
     if(darkTheme){
-      col.r = 0.925f; col.g = 0.925f; col.b = 0.375f;
+      col.r = 0.975f; col.g = 0.925f; col.b = 0.375f;
     }else{
       col.r = 0.25f; col.g = 0.45f; col.b = 0.8f;
     }
   }else if(halflifeSeconds > 3E3){
     if(darkTheme){
-      col.r = 0.9f; col.g = 0.9f; col.b = 0.4f;
+      col.r = 0.95f; col.g = 0.9f; col.b = 0.4f;
     }else{
       col.r = 0.275f; col.g = 0.475f; col.b = 0.8f;
     }
   }else if(halflifeSeconds > 1.0E3){
     if(darkTheme){
-      col.r = 0.85f; col.g = 0.9f; col.b = 0.425f;
+      col.r = 0.925f; col.g = 0.9f; col.b = 0.425f;
     }else{
       col.r = 0.3f; col.g = 0.5f; col.b = 0.8f;
     }
   }else if(halflifeSeconds > 7.5E2){
     if(darkTheme){
-      col.r = 0.8f; col.g = 0.9f; col.b = 0.45f;
+      col.r = 0.9f; col.g = 0.9f; col.b = 0.45f;
     }else{
       col.r = 0.3f; col.g = 0.55f; col.b = 0.775f;
     }
   }else if(halflifeSeconds > 5.0E2){ //text color inversion point for light theme (actually 600)
     if(darkTheme){
-      col.r = 0.75f; col.g = 0.9f; col.b = 0.475f;
+      col.r = 0.875f; col.g = 0.9f; col.b = 0.475f;
     }else{
       col.r = 0.3f; col.g = 0.6f; col.b = 0.75f;
     }
   }else if(halflifeSeconds > 3.0E2){
     if(darkTheme){
-      col.r = 0.7f; col.g = 0.9f; col.b = 0.5f;
+      col.r = 0.85f; col.g = 0.9f; col.b = 0.5f;
     }else{
       col.r = 0.3f; col.g = 0.65f; col.b = 0.75f;
     }
   }else if(halflifeSeconds > 1.0E2){
     if(darkTheme){
-      col.r = 0.65f; col.g = 0.925f; col.b = 0.55f;
+      col.r = 0.8f; col.g = 0.95f; col.b = 0.55f;
     }else{
       col.r = 0.3f; col.g = 0.7f; col.b = 0.725f;
     }
   }else if(halflifeSeconds > 7.5E1){
     if(darkTheme){
-      col.r = 0.6f; col.g = 0.95f; col.b = 0.6f;
+      col.r = 0.75f; col.g = 0.9f; col.b = 0.6f;
     }else{
       col.r = 0.3f; col.g = 0.75f; col.b = 0.7f;
     }
   }else if(halflifeSeconds > 5.0E1){
     if(darkTheme){
-      col.r = 0.55f; col.g = 0.975f; col.b = 0.65f;
+      col.r = 0.7f; col.g = 0.85f; col.b = 0.65f;
     }else{
       col.r = 0.3f; col.g = 0.8f; col.b = 0.7f;
     }
   }else if(halflifeSeconds > 3.0E1){
     if(darkTheme){
-      col.r = 0.5f; col.g = 1.0f; col.b = 0.7f;
+      col.r = 0.65f; col.g = 0.8f; col.b = 0.7f;
     }else{
       col.r = 0.3f; col.g = 0.85f; col.b = 0.7f;
     }
   }else if(halflifeSeconds > 1.0E1){
     if(darkTheme){
-      col.r = 0.45f; col.g = 0.975f; col.b = 0.7f;
+      col.r = 0.6f; col.g = 0.75f; col.b = 0.7f;
     }else{
       col.r = 0.3f; col.g = 0.9f; col.b = 0.7f;
     }
   }else if(halflifeSeconds > 7.5){
     if(darkTheme){
-      col.r = 0.4f; col.g = 0.95f; col.b = 0.7f;
+      col.r = 0.55f; col.g = 0.7f; col.b = 0.7f;
     }else{
       col.r = 0.35f; col.g = 0.925f; col.b = 0.7f;
     }
-  }else if(halflifeSeconds > 5.0){
+  }else if(halflifeSeconds > 5.0){ //text color inversion point for dark theme
     if(darkTheme){
-      col.r = 0.35f; col.g = 0.925f; col.b = 0.7f;
+      col.r = 0.5f; col.g = 0.675f; col.b = 0.75f;
     }else{
       col.r = 0.4f; col.g = 0.95f; col.b = 0.7f;
     }
   }else if(halflifeSeconds > 3.0){
     if(darkTheme){
-      col.r = 0.3f; col.g = 0.9f; col.b = 0.7f;
+      col.r = 0.4f; col.g = 0.65f; col.b = 0.725f;
     }else{
       col.r = 0.45f; col.g = 0.975f; col.b = 0.7f;
     }
   }else if(halflifeSeconds > 1.0){
     if(darkTheme){
-      col.r = 0.3f; col.g = 0.85f; col.b = 0.7f;
+      col.r = 0.3f; col.g = 0.625f; col.b = 0.70f;
     }else{
       col.r = 0.5f; col.g = 1.0f; col.b = 0.7f;
     }
   }else if(halflifeSeconds > 7.5E-1){
     if(darkTheme){
-      col.r = 0.3f; col.g = 0.8f; col.b = 0.7f;
+      col.r = 0.3f; col.g = 0.6f; col.b = 0.675f;
     }else{
       col.r = 0.55f; col.g = 0.975f; col.b = 0.65f;
     }
   }else if(halflifeSeconds > 5.0E-1){
     if(darkTheme){
-      col.r = 0.3f; col.g = 0.75f; col.b = 0.7f;
+      col.r = 0.3f; col.g = 0.575f; col.b = 0.65f;
     }else{
       col.r = 0.6f; col.g = 0.95f; col.b = 0.6f;
     }
   }else if(halflifeSeconds > 3.0E-1){
     if(darkTheme){
-      col.r = 0.3f; col.g = 0.7f; col.b = 0.725f;
+      col.r = 0.3f; col.g = 0.55f; col.b = 0.625f;
     }else{
       col.r = 0.65f; col.g = 0.925f; col.b = 0.55f;
     }
   }else if(halflifeSeconds > 1.0E-1){
     if(darkTheme){
-      col.r = 0.3f; col.g = 0.65f; col.b = 0.75f;
+      col.r = 0.3f; col.g = 0.525f; col.b = 0.60f;
     }else{
       col.r = 0.7f; col.g = 0.9f; col.b = 0.5f;
     }
-  }else if(halflifeSeconds > 7.5E-2){
+  }else if(halflifeSeconds > 7.5E-2){ 
     if(darkTheme){
-      col.r = 0.3f; col.g = 0.6f; col.b = 0.75f;
+      col.r = 0.3f; col.g = 0.5f; col.b = 0.575f;
     }else{
       col.r = 0.75f; col.g = 0.9f; col.b = 0.475f;
     }
   }else if(halflifeSeconds > 5.0E-2){
     if(darkTheme){
-      col.r = 0.3f; col.g = 0.55f; col.b = 0.775f;
+      col.r = 0.3f; col.g = 0.475f; col.b = 0.55f;
     }else{
       col.r = 0.8f; col.g = 0.9f; col.b = 0.45f;
     }
   }else if(halflifeSeconds > 3.0E-2){
     if(darkTheme){
-      col.r = 0.3f; col.g = 0.5f; col.b = 0.8f;
+      col.r = 0.3f; col.g = 0.45f; col.b = 0.525f;
     }else{
       col.r = 0.85f; col.g = 0.9f; col.b = 0.425f;
     }
   }else if(halflifeSeconds > 1.0E-2){
     if(darkTheme){
-      col.r = 0.275f; col.g = 0.475f; col.b = 0.8f;
+      col.r = 0.275f; col.g = 0.425f; col.b = 0.50f;
     }else{
       col.r = 0.9f; col.g = 0.9f; col.b = 0.4f;
     }
   }else if(halflifeSeconds > 7.5E-3){
     if(darkTheme){
-      col.r = 0.25f; col.g = 0.45f; col.b = 0.8f;
+      col.r = 0.25f; col.g = 0.40f; col.b = 0.475f;
     }else{
       col.r = 0.925f; col.g = 0.925f; col.b = 0.375f;
     }
   }else if(halflifeSeconds > 5.0E-3){
     if(darkTheme){
-      col.r = 0.225f; col.g = 0.425f; col.b = 0.8f;
+      col.r = 0.225f; col.g = 0.375f; col.b = 0.45f;
     }else{
       col.r = 0.95f; col.g = 0.95f; col.b = 0.35f;
     }
   }else if(halflifeSeconds > 3.0E-3){
     if(darkTheme){
-      col.r = 0.2f; col.g = 0.4f; col.b = 0.8f;
+      col.r = 0.1f; col.g = 0.35f; col.b = 0.425f;
     }else{
       col.r = 0.975f; col.g = 0.975f; col.b = 0.325f;
     }
   }else if(halflifeSeconds > 1.0E-3){
     if(darkTheme){
-      col.r = 0.175f; col.g = 0.375f; col.b = 0.775f;
+      col.r = 0.175f; col.g = 0.325f; col.b = 0.40f;
     }else{
       col.r = 1.0f; col.g = 1.0f; col.b = 0.3f;
     }
   }else if(halflifeSeconds > 7.5E-4){
     if(darkTheme){
-      col.r = 0.15f; col.g = 0.35f; col.b = 0.75f;
+      col.r = 0.15f; col.g = 0.30f; col.b = 0.375f;
     }else{
       col.r = 1.0f; col.g = 0.95f; col.b = 0.325f;
     }
   }else if(halflifeSeconds > 5.0E-4){
     if(darkTheme){
-      col.r = 0.125f; col.g = 0.325f; col.b = 0.725f;
+      col.r = 0.125f; col.g = 0.25f; col.b = 0.35f;
     }else{
       col.r = 1.0f; col.g = 0.9f; col.b = 0.35f;
     }
   }else if(halflifeSeconds > 3.0E-4){
     if(darkTheme){
-      col.r = 0.1f; col.g = 0.3f; col.b = 0.7f;
+      col.r = 0.1f; col.g = 0.225f; col.b = 0.325f;
     }else{
       col.r = 1.0f; col.g = 0.85f; col.b = 0.375f;
     }
   }else if(halflifeSeconds > 1.0E-4){
-    col.r = 1.0f; col.g = 0.8f; col.b = 0.4f;
+    if(darkTheme){
+       col.r = 0.1f; col.g = 0.20f; col.b = 0.30f;
+    }else{
+      col.r = 1.0f; col.g = 0.8f; col.b = 0.4f;
+    }
   }else if(halflifeSeconds > 5.0E-5){
-    col.r = 1.0f; col.g = 0.75f; col.b = 0.5f;
+    if(darkTheme){
+      col.r = 0.1f; col.g = 0.175f; col.b = 0.275f;
+    }else{
+      col.r = 1.0f; col.g = 0.75f; col.b = 0.5f;
+    }
   }else if(halflifeSeconds > 1.0E-5){
-    col.r = 1.0f; col.g = 0.7f; col.b = 0.6f;
+    if(darkTheme){
+      col.r = 0.1f; col.g = 0.15f; col.b = 0.25f;
+    }else{
+      col.r = 1.0f; col.g = 0.7f; col.b = 0.6f;
+    }
   }else if(halflifeSeconds > 5.0E-6){
-    col.r = 1.0f; col.g = 0.65f; col.b = 0.65f;
+    if(darkTheme){
+      col.r = 0.1f; col.g = 0.125f; col.b = 0.225f;
+    }else{
+      col.r = 1.0f; col.g = 0.65f; col.b = 0.65f;
+    }
   }else if(halflifeSeconds > 1.0E-6){
-    col.r = 1.0f; col.g = 0.6f; col.b = 0.7f;
+    if(darkTheme){
+      col.r = 0.1f; col.g = 0.10f; col.b = 0.20f;
+    }else{
+      col.r = 1.0f; col.g = 0.6f; col.b = 0.7f;
+    }
   }else if(halflifeSeconds > 5.0E-7){
-    col.r = 1.0f; col.g = 0.65f; col.b = 0.7f;
+    if(darkTheme){
+      col.r = 0.0f; col.g = 0.075f; col.b = 0.175f;
+    }else{
+      col.r = 1.0f; col.g = 0.65f; col.b = 0.7f;
+    }
   }else if(halflifeSeconds > 1.0E-7){
-    col.r = 1.0f; col.g = 0.7f; col.b = 0.7f;
+    if(darkTheme){
+      col.r = 0.1f; col.g = 0.05f; col.b = 0.15f;
+    }else{
+      col.r = 1.0f; col.g = 0.7f; col.b = 0.7f;
+    }
   }else if(halflifeSeconds > 1.0E-8){
-    col.r = 1.0f; col.g = 0.7f; col.b = 0.8f;
+    if(darkTheme){
+      col.r = 0.0f; col.g = 0.025f; col.b = 0.125f;
+    }else{
+      col.r = 1.0f; col.g = 0.7f; col.b = 0.8f;
+    }
   }else if(halflifeSeconds > 1.0E-9){
-    col.r = 1.0f; col.g = 0.8f; col.b = 0.8f;
+    if(darkTheme){
+      col.r = 0.0f; col.g = 0.0f; col.b = 0.10f;
+    }else{
+      col.r = 1.0f; col.g = 0.8f; col.b = 0.8f;
+    }
   }else if(halflifeSeconds > 1.0E-11){
-    col.r = 1.0f; col.g = 0.9f; col.b = 0.9f;
+    if(darkTheme){
+      col.r = 0.0f; col.g = 0.00f; col.b = 0.05f;
+    }else{
+      col.r = 1.0f; col.g = 0.9f; col.b = 0.9f;
+    }
   }else if(halflifeSeconds > 1.0E-13){
-    col.r = 1.0f; col.g = 0.95f; col.b = 0.95f;
+    if(darkTheme){
+      col.r = 0.0f; col.g = 0.0f; col.b = 0.0f;
+    }else{
+      col.r = 1.0f; col.g = 0.95f; col.b = 0.95f;
+    }
   }else{
-    col.r = 1.0f; col.g = 0.9f; col.b = 0.9f;
+    if(darkTheme){
+      col.r = 0.0f; col.g = 0.05f; col.b = 0.25f;
+    }else{
+      col.r = 1.0f; col.g = 0.9f; col.b = 0.9f;
+    }
   }
   return col;
 }
@@ -2520,7 +2584,7 @@ void drawChartOfNuclides(const app_data *restrict dat, app_state *restrict state
                         iboxCol.a =  1.0f - (CHARTZOOM_LVL1-state->ds.chartZoomScale);
                       }
                       drawFlatRect(rdat,lowBoxRect,iboxCol);
-                      drawisomerBoxLabel(dat,state,rdat,lowBoxRect.x,lowBoxRect.y,lowBoxRect.w,lowBoxRect.h,(isomerHl > HL_COL_INV_VAL) ? whiteCol8Bit : blackCol8Bit,(uint16_t)i,isomerLvl,dat->ndat.nuclData[i].longestIsomerMVal);
+                      drawisomerBoxLabel(dat,state,rdat,lowBoxRect.x,lowBoxRect.y,lowBoxRect.w,lowBoxRect.h,isHlTxtLight(isomerHl,dat->rules.themeRules.uiColorTheme == UITHEME_DARK) ? whiteCol8Bit : blackCol8Bit,(uint16_t)i,isomerLvl,dat->ndat.nuclData[i].longestIsomerMVal);
                     }
                   }
                 }else if(state->chartView == CHARTVIEW_DECAYMODE){
@@ -2629,7 +2693,7 @@ void drawChartOfNuclides(const app_data *restrict dat, app_state *restrict state
                 }
                 if(drawingLowBox){
                   if(state->chartView == CHARTVIEW_HALFLIFE){
-                    drawNuclBoxLabel(dat,state,rdat,rect.x,rect.y,rect.w,(rect.h-lowBoxHeight-(2.0f*lowBoxPadding)),(getNuclGSHalfLifeSeconds(&dat->ndat,(uint16_t)i) > HL_COL_INV_VAL) ? whiteCol8Bit : blackCol8Bit,(uint16_t)i);
+                    drawNuclBoxLabel(dat,state,rdat,rect.x,rect.y,rect.w,(rect.h-lowBoxHeight-(2.0f*lowBoxPadding)),isHlTxtLight(getNuclGSHalfLifeSeconds(&dat->ndat,(uint16_t)i),dat->rules.themeRules.uiColorTheme == UITHEME_DARK) ? whiteCol8Bit : blackCol8Bit,(uint16_t)i);
                   }else if(state->chartView == CHARTVIEW_DECAYMODE){
                     drawNuclBoxLabel(dat,state,rdat,rect.x,rect.y,rect.w,(rect.h-lowBoxHeight-(2.0f*lowBoxPadding)),getDecayModeTextCol(getNuclGSMostProbableDcyMode(&dat->ndat,(uint16_t)i)),(uint16_t)i);
                   }else if(state->chartView == CHARTVIEW_SPIN){
@@ -2643,7 +2707,7 @@ void drawChartOfNuclides(const app_data *restrict dat, app_state *restrict state
                   }
                 }else{
                   if(state->chartView == CHARTVIEW_HALFLIFE){
-                    drawNuclBoxLabel(dat,state,rdat,rect.x,rect.y,rect.w,rect.h,(getNuclGSHalfLifeSeconds(&dat->ndat,(uint16_t)i) > HL_COL_INV_VAL) ? whiteCol8Bit : blackCol8Bit,(uint16_t)i);
+                    drawNuclBoxLabel(dat,state,rdat,rect.x,rect.y,rect.w,rect.h,isHlTxtLight(getNuclGSHalfLifeSeconds(&dat->ndat,(uint16_t)i),dat->rules.themeRules.uiColorTheme == UITHEME_DARK) ? whiteCol8Bit : blackCol8Bit,(uint16_t)i);
                   }else if(state->chartView == CHARTVIEW_DECAYMODE){
                     drawNuclBoxLabel(dat,state,rdat,rect.x,rect.y,rect.w,rect.h,getDecayModeTextCol(getNuclGSMostProbableDcyMode(&dat->ndat,(uint16_t)i)),(uint16_t)i);
                   }else if(state->chartView == CHARTVIEW_2PLUS){
@@ -3211,11 +3275,11 @@ void drawNuclFullInfoBox(const app_data *restrict dat, app_state *restrict state
 
       //setup fonts and text color
       uint8_t lvlFontInd = FONTSIZE_NORMAL;
-      SDL_Color lvlTxtCol = (hl > HL_COL_INV_VAL) ? whiteCol8Bit : blackCol8Bit;
+      SDL_Color lvlTxtCol = isHlTxtLight(hl,dat->rules.themeRules.uiColorTheme == UITHEME_DARK) ? whiteCol8Bit : blackCol8Bit;
       if((darkTheme)&&(hl <= HL_LL_NOCOL_VAL)){
         lvlTxtCol = whiteCol8Bit; //handle dark themes when levels have no color highlights
       }
-      SDL_Color lvlTxtColBlue = (hl > HL_COL_INV_VAL) ? lightBlueCol8Bit : darkBlueCol8Bit;
+      SDL_Color lvlTxtColBlue = isHlTxtLight(hl,dat->rules.themeRules.uiColorTheme == UITHEME_DARK) ? lightBlueCol8Bit : darkBlueCol8Bit;
       if((darkTheme)&&(hl <= HL_LL_NOCOL_VAL)){
         lvlTxtColBlue = lightBlueCol8Bit; //handle dark themes when levels have no color highlights
       }
@@ -3223,7 +3287,7 @@ void drawNuclFullInfoBox(const app_data *restrict dat, app_state *restrict state
         if(dat->ndat.levels[lvlInd].populatingRxns & ((uint64_t)(1) << (state->ds.selectedRxn-1))){
           lvlFontInd = FONTSIZE_NORMAL_BOLD;
         }else{
-          lvlTxtCol = (hl > HL_COL_INV_VAL) ? lightGrayCol8Bit : darkGrayCol8Bit;
+          lvlTxtCol = isHlTxtLight(hl,dat->rules.themeRules.uiColorTheme == UITHEME_DARK) ? lightGrayCol8Bit : darkGrayCol8Bit;
           if((darkTheme)&&(hl <= HL_LL_NOCOL_VAL)){
             lvlTxtCol = lightGrayCol8Bit; //handle dark themes when levels have no color highlights
           }
@@ -3280,7 +3344,7 @@ void drawNuclFullInfoBox(const app_data *restrict dat, app_state *restrict state
                     rect.y = drawYPos;
                   }
                   rect.x -= (NUCL_FULLINFOBOX_COL_MOUSEOVER_OFFSET*state->ds.uiUserScale);
-                  drawFlatRect(rdat,rect,(hl > HL_COL_INV_VAL) ? listHighlightColLight : listHighlightColDark);
+                  drawFlatRect(rdat,rect,isHlTxtLight(hl,dat->rules.themeRules.uiColorTheme == UITHEME_DARK) ? listHighlightColLight : listHighlightColDark);
                 }
                 break;
               case LLCOLUMN_EGAMMA:
@@ -3297,7 +3361,7 @@ void drawNuclFullInfoBox(const app_data *restrict dat, app_state *restrict state
                   rect.y = drawYPos + (hoverLvlRow*NUCL_INFOBOX_SMALLLINE_HEIGHT)*state->ds.uiUserScale;
                   rect.x -= (NUCL_FULLINFOBOX_COL_MOUSEOVER_OFFSET*state->ds.uiUserScale);
                   rect.w += (2.0f*NUCL_FULLINFOBOX_COL_MOUSEOVER_OFFSET*state->ds.uiUserScale);
-                  drawFlatRect(rdat,rect,(hl > HL_COL_INV_VAL) ? listHighlightColLight : listHighlightColDark);
+                  drawFlatRect(rdat,rect,isHlTxtLight(hl,dat->rules.themeRules.uiColorTheme == UITHEME_DARK) ? listHighlightColLight : listHighlightColDark);
                 }
                 break;
                 break;
