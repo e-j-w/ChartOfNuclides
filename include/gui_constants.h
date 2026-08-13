@@ -225,7 +225,7 @@ static const float uiScales[UISCALE_ENUM_LENGTH] = {1.0f,1.20f,1.60f,1.85f};
 
 //colors for drawing
 static const SDL_FColor blackCol = {0.0f,0.0f,0.0f,1.0f};
-static const SDL_FColor blackTransparentCol = {0.0f,0.0f,0.0f,0.9f};
+static const SDL_FColor blackTransparentCol = {0.1f,0.1f,0.1f,0.85f};
 static const SDL_FColor lightGrayCol = {0.8f,0.8f,0.8f,1.0f};
 static const SDL_FColor grayCol = {0.5f,0.5f,0.5f,1.0f};
 static const SDL_FColor darkGrayCol = {0.2f,0.2f,0.2f,1.0f};
@@ -241,6 +241,8 @@ static const SDL_Color lightGrayCol8Bit = {235,235,235,255};
 static const SDL_Color grayCol8Bit = {127,127,127,255};
 static const SDL_Color darkGrayCol8Bit = {80,80,80,255};
 static const SDL_Color blackCol8Bit = {0,0,0,255};
+static const SDL_Color lightGreenTxtCol8Bit = {0,200,0,255};
+static const SDL_Color lightRedTxtCol8Bit = {240,0,0,255};
 static const SDL_Color darkGreenTxtCol8Bit = {0,150,0,255};
 static const SDL_Color darkRedTxtCol8Bit = {150,0,0,255};
 static const SDL_Color lightBlueCol8Bit = {210,210,255,255};

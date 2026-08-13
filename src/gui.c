@@ -3567,7 +3567,7 @@ void drawNuclFullInfoBox(const app_data *restrict dat, app_state *restrict state
   //rect underneath column titles
   SDL_FColor tableHeaderRectCol = {0.92f,0.92f,0.92f,txtAlpha/255.0f};
   if(dat->rules.themeRules.uiColorTheme == UITHEME_DARK){
-    tableHeaderRectCol.r = 0.08f; tableHeaderRectCol.g = 0.08f; tableHeaderRectCol.b = 0.08f;
+    tableHeaderRectCol.r = 0.14f; tableHeaderRectCol.g = 0.14f; tableHeaderRectCol.b = 0.14f;
   }
   rect.y = (NUCL_FULLINFOBOX_LEVELLIST_HEADER_POS_Y - 2*UI_PADDING_SIZE)*state->ds.uiUserScale + txtYOffset;
   rect.h = (NUCL_FULLINFOBOX_LEVELLIST_POS_Y - NUCL_FULLINFOBOX_LEVELLIST_HEADER_POS_Y + 2*UI_PADDING_SIZE)*state->ds.uiUserScale;
@@ -3622,9 +3622,9 @@ void drawNuclFullInfoBox(const app_data *restrict dat, app_state *restrict state
     getQValStr(descStr,dat->ndat.nuclData[nuclInd].qalpha,1,0);
     SDL_snprintf(tmpStr,32,"%s=%s %s",dat->strings[dat->locStringIDs[LOCSTR_QALPHA]],descStr,getValueUnitShortStr(dat->ndat.nuclData[nuclInd].qalpha.unit));
     if(dat->ndat.nuclData[nuclInd].qalpha.val > 0.0f){
-      rect = drawSelectableTextAlignedSizedWithMetadata(rdat,&state->tss,drawXPos,drawYPos,darkGreenTxtCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_RIGHT,16384,strMetadata);
+      rect = drawSelectableTextAlignedSizedWithMetadata(rdat,&state->tss,drawXPos,drawYPos,darkTheme ? lightGreenTxtCol8Bit : darkGreenTxtCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_RIGHT,16384,strMetadata);
     }else{
-      rect = drawSelectableTextAlignedSizedWithMetadata(rdat,&state->tss,drawXPos,drawYPos,darkRedTxtCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_RIGHT,16384,strMetadata);
+      rect = drawSelectableTextAlignedSizedWithMetadata(rdat,&state->tss,drawXPos,drawYPos,darkTheme ? lightRedTxtCol8Bit : darkRedTxtCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_RIGHT,16384,strMetadata);
     }
     drawXPos -= rect.w + 4*UI_PADDING_SIZE*state->ds.uiUserScale;
   }
@@ -3634,9 +3634,9 @@ void drawNuclFullInfoBox(const app_data *restrict dat, app_state *restrict state
     getQValStr(descStr,dat->ndat.nuclData[nuclInd].sp,1,1); //Q(p), not S(p)
     SDL_snprintf(tmpStr,32,"%s=%s %s",dat->strings[dat->locStringIDs[LOCSTR_QP]],descStr,getValueUnitShortStr(dat->ndat.nuclData[nuclInd].sp.unit));
     if(dat->ndat.nuclData[nuclInd].sp.val < 0.0f){
-      rect = drawSelectableTextAlignedSizedWithMetadata(rdat,&state->tss,drawXPos,drawYPos,darkGreenTxtCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_RIGHT,16384,strMetadata);
+      rect = drawSelectableTextAlignedSizedWithMetadata(rdat,&state->tss,drawXPos,drawYPos,darkTheme ? lightGreenTxtCol8Bit : darkGreenTxtCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_RIGHT,16384,strMetadata);
     }else{
-      rect = drawSelectableTextAlignedSizedWithMetadata(rdat,&state->tss,drawXPos,drawYPos,darkRedTxtCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_RIGHT,16384,strMetadata);
+      rect = drawSelectableTextAlignedSizedWithMetadata(rdat,&state->tss,drawXPos,drawYPos,darkTheme ? lightRedTxtCol8Bit : darkRedTxtCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_RIGHT,16384,strMetadata);
     }
     drawXPos -= rect.w + 4*UI_PADDING_SIZE*state->ds.uiUserScale;
   }
@@ -3646,9 +3646,9 @@ void drawNuclFullInfoBox(const app_data *restrict dat, app_state *restrict state
     getQValStr(descStr,dat->ndat.nuclData[nuclInd].sn,1,1); //Q(n), not S(n)
     SDL_snprintf(tmpStr,32,"%s=%s %s",dat->strings[dat->locStringIDs[LOCSTR_QN]],descStr,getValueUnitShortStr(dat->ndat.nuclData[nuclInd].sn.unit));
     if(dat->ndat.nuclData[nuclInd].sn.val < 0.0f){
-      drawSelectableTextAlignedSizedWithMetadata(rdat,&state->tss,drawXPos,drawYPos,darkGreenTxtCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_RIGHT,16384,strMetadata);
+      drawSelectableTextAlignedSizedWithMetadata(rdat,&state->tss,drawXPos,drawYPos,darkTheme ? lightGreenTxtCol8Bit : darkGreenTxtCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_RIGHT,16384,strMetadata);
     }else{
-      drawSelectableTextAlignedSizedWithMetadata(rdat,&state->tss,drawXPos,drawYPos,darkRedTxtCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_RIGHT,16384,strMetadata);
+      drawSelectableTextAlignedSizedWithMetadata(rdat,&state->tss,drawXPos,drawYPos,darkTheme ? lightRedTxtCol8Bit : darkRedTxtCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_RIGHT,16384,strMetadata);
     }
   }
   drawXPos = state->ds.windowXRes - NUCL_FULLINFOBOX_QVAL_POS_XR*state->ds.uiUserScale;
@@ -3659,9 +3659,9 @@ void drawNuclFullInfoBox(const app_data *restrict dat, app_state *restrict state
     getQValStr(descStr,dat->ndat.nuclData[nuclInd].qec,1,0);
     SDL_snprintf(tmpStr,32,"%s=%s %s",dat->strings[dat->locStringIDs[LOCSTR_QEC]],descStr,getValueUnitShortStr(dat->ndat.nuclData[nuclInd].qec.unit));
     if(dat->ndat.nuclData[nuclInd].qec.val > 0.0f){
-      rect = drawSelectableTextAlignedSizedWithMetadata(rdat,&state->tss,drawXPos,drawYPos,darkGreenTxtCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_RIGHT,16384,strMetadata);
+      rect = drawSelectableTextAlignedSizedWithMetadata(rdat,&state->tss,drawXPos,drawYPos,darkTheme ? lightGreenTxtCol8Bit : darkGreenTxtCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_RIGHT,16384,strMetadata);
     }else{
-      rect = drawSelectableTextAlignedSizedWithMetadata(rdat,&state->tss,drawXPos,drawYPos,darkRedTxtCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_RIGHT,16384,strMetadata);
+      rect = drawSelectableTextAlignedSizedWithMetadata(rdat,&state->tss,drawXPos,drawYPos,darkTheme ? lightRedTxtCol8Bit : darkRedTxtCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_RIGHT,16384,strMetadata);
     }
     drawXPos -= rect.w + 4*UI_PADDING_SIZE*state->ds.uiUserScale;
   }
@@ -3671,9 +3671,9 @@ void drawNuclFullInfoBox(const app_data *restrict dat, app_state *restrict state
     getQValStr(descStr,dat->ndat.nuclData[nuclInd].qbetaplus,1,0);
     SDL_snprintf(tmpStr,32,"%s=%s %s",dat->strings[dat->locStringIDs[LOCSTR_QBETAPLUS]],descStr,getValueUnitShortStr(dat->ndat.nuclData[nuclInd].qbetaplus.unit));
     if(dat->ndat.nuclData[nuclInd].qbetaplus.val > 0.0f){
-      rect = drawSelectableTextAlignedSizedWithMetadata(rdat,&state->tss,drawXPos,drawYPos,darkGreenTxtCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_RIGHT,16384,strMetadata);
+      rect = drawSelectableTextAlignedSizedWithMetadata(rdat,&state->tss,drawXPos,drawYPos,darkTheme ? lightGreenTxtCol8Bit : darkGreenTxtCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_RIGHT,16384,strMetadata);
     }else{
-      rect = drawSelectableTextAlignedSizedWithMetadata(rdat,&state->tss,drawXPos,drawYPos,darkRedTxtCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_RIGHT,16384,strMetadata);
+      rect = drawSelectableTextAlignedSizedWithMetadata(rdat,&state->tss,drawXPos,drawYPos,darkTheme ? lightRedTxtCol8Bit : darkRedTxtCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_RIGHT,16384,strMetadata);
     }
     drawXPos -= rect.w + 4*UI_PADDING_SIZE*state->ds.uiUserScale;
   }
@@ -3683,9 +3683,9 @@ void drawNuclFullInfoBox(const app_data *restrict dat, app_state *restrict state
     getQValStr(descStr,dat->ndat.nuclData[nuclInd].qbeta,1,0);
     SDL_snprintf(tmpStr,32,"%s=%s %s",dat->strings[dat->locStringIDs[LOCSTR_QBETAMINUS]],descStr,getValueUnitShortStr(dat->ndat.nuclData[nuclInd].qbeta.unit));
     if(dat->ndat.nuclData[nuclInd].qbeta.val > 0.0f){
-      drawSelectableTextAlignedSizedWithMetadata(rdat,&state->tss,drawXPos,drawYPos,darkGreenTxtCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_RIGHT,16384,strMetadata);
+      drawSelectableTextAlignedSizedWithMetadata(rdat,&state->tss,drawXPos,drawYPos,darkTheme ? lightGreenTxtCol8Bit : darkGreenTxtCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_RIGHT,16384,strMetadata);
     }else{
-      drawSelectableTextAlignedSizedWithMetadata(rdat,&state->tss,drawXPos,drawYPos,darkRedTxtCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_RIGHT,16384,strMetadata);
+      drawSelectableTextAlignedSizedWithMetadata(rdat,&state->tss,drawXPos,drawYPos,darkTheme ? lightRedTxtCol8Bit : darkRedTxtCol8Bit,FONTSIZE_NORMAL,txtAlpha,tmpStr,ALIGN_RIGHT,16384,strMetadata);
     }
   }
 

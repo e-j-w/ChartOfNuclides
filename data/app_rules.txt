@@ -1,6 +1,6 @@
 app_name Chart of Nuclides
 bg_col 0.97,0.97,0.97
-bg_col_dark 0.17,0.17,0.17
+bg_col_dark 0.18,0.18,0.18
 text_col 0.0,0.0,0.0
 text_col_dark 1.0,1.0,1.0
 text_col_inactive 0.5,0.5,0.5
@@ -10,9 +10,9 @@ mod_col_selected_and_mouseover 0.70,0.70,0.70
 menu_col_mouseover 0.9,0.9,0.9
 menu_col_selected 0.7,0.7,0.7
 menu_col_selected_and_mouseover 0.5,0.5,0.5
-mod_col_mouseover_dark 0.65,0.65,0.65
-mod_col_selected_dark 0.95,0.95,0.95
+mod_col_mouseover_dark 0.78,0.78,0.78
+mod_col_selected_dark 0.98,0.98,0.98
 mod_col_selected_and_mouseover_dark 1.0,1.0,1.0
-menu_col_mouseover_dark 0.3,0.3,0.3
-menu_col_selected_dark 0.5,0.5,0.5
+menu_col_mouseover_dark 0.25,0.25,0.25
+menu_col_selected_dark 0.4,0.4,0.4
 menu_col_selected_and_mouseover_dark 0.6,0.6,0.6
