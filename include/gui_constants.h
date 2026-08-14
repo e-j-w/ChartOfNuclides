@@ -241,10 +241,10 @@ static const SDL_Color lightGrayCol8Bit = {235,235,235,255};
 static const SDL_Color grayCol8Bit = {127,127,127,255};
 static const SDL_Color darkGrayCol8Bit = {80,80,80,255};
 static const SDL_Color blackCol8Bit = {0,0,0,255};
-static const SDL_Color lightGreenTxtCol8Bit = {0,200,0,255};
-static const SDL_Color lightRedTxtCol8Bit = {240,0,0,255};
+static const SDL_Color lightGreenTxtCol8Bit = {20,220,20,255};
+static const SDL_Color lightRedTxtCol8Bit = {255,70,70,255};
 static const SDL_Color darkGreenTxtCol8Bit = {0,150,0,255};
-static const SDL_Color darkRedTxtCol8Bit = {150,0,0,255};
+static const SDL_Color darkRedTxtCol8Bit = {170,0,0,255};
 static const SDL_Color lightBlueCol8Bit = {210,210,255,255};
 static const SDL_Color darkBlueCol8Bit = {0,0,190,255};
 

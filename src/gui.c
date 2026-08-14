@@ -69,169 +69,169 @@ SDL_FColor getHalfLifeCol(const double halflifeSeconds, const uint8_t valueType,
   col.a = 1.0f;
   if((halflifeSeconds >= 1.0E40)||((halflifeSeconds > 1.0E15) && ((valueType == VALUETYPE_GREATERTHAN) || (valueType == VALUETYPE_GREATEROREQUALTHAN)))){
     if(darkTheme){
-      col.r = 1.0f; col.g = 1.0f; col.b = 1.0f;
+      col.r = 1.0f; col.g = 1.0f; col.b = 0.9f;
     }else{
       col.r = 0.0f; col.g = 0.0f; col.b = 0.0f;
     }
   }else if(halflifeSeconds > 1.0E15){
     if(darkTheme){
-      col.r = 1.0f; col.g = 0.95f; col.b = 0.95f;
+      col.r = 1.0f; col.g = 1.0f; col.b = 0.8f;
     }else{
       col.r = 0.0f; col.g = 0.05f; col.b = 0.25f;
     }
   }else if(halflifeSeconds > 1.0E10){
     if(darkTheme){
-      col.r = 1.0f; col.g = 0.9f; col.b = 0.9f;
+      col.r = 1.0f; col.g = 0.95f; col.b = 0.8f;
     }else{
       col.r = 0.0f; col.g = 0.1f; col.b = 0.4f;
     }
   }else if(halflifeSeconds > 1.0E8){
     if(darkTheme){
-      col.r = 1.0f; col.g = 0.8f; col.b = 0.8f;
+      col.r = 1.0f; col.g = 0.9f; col.b = 0.75f;
     }else{
       col.r = 0.0f; col.g = 0.1f; col.b = 0.5f;
     }
   }else if(halflifeSeconds > 5.0E7){
     if(darkTheme){
-      col.r = 1.0f; col.g = 0.7f; col.b = 0.8f;
+      col.r = 1.0f; col.g = 0.875f; col.b = 0.7f;
     }else{
       col.r = 0.1f; col.g = 0.15f; col.b = 0.5f;
     }
   }else if(halflifeSeconds > 1.0E7){
     if(darkTheme){
-      col.r = 1.0f; col.g = 0.7f; col.b = 0.7f;
+      col.r = 0.975f; col.g = 0.85f; col.b = 0.65f;
     }else{
       col.r = 0.1f; col.g = 0.2f; col.b = 0.5f;
     }
   }else if(halflifeSeconds > 5.0E6){
     if(darkTheme){
-      col.r = 1.0f; col.g = 0.65f; col.b = 0.7f;
+      col.r = 0.95f; col.g = 0.825f; col.b = 0.6f;
     }else{
       col.r = 0.1f; col.g = 0.2f; col.b = 0.55f;
     }
   }else if(halflifeSeconds > 1.0E6){
     if(darkTheme){
-      col.r = 1.0f; col.g = 0.6f; col.b = 0.7f;
+      col.r = 0.925f; col.g = 0.8f; col.b = 0.55f;
     }else{
       col.r = 0.1f; col.g = 0.2f; col.b = 0.6f;
     }
   }else if(halflifeSeconds > 7.5E5){
     if(darkTheme){
-      col.r = 1.0f; col.g = 0.65f; col.b = 0.65f;
+      col.r = 0.9f; col.g = 0.775f; col.b = 0.4f;
     }else{
       col.r = 0.1f; col.g = 0.225f; col.b = 0.625f;
     }
   }else if(halflifeSeconds > 5.0E5){
     if(darkTheme){
-      col.r = 1.0f; col.g = 0.7f; col.b = 0.6f;
+      col.r = 0.9f; col.g = 0.8f; col.b = 0.35f;
     }else{
       col.r = 0.1f; col.g = 0.25f; col.b = 0.65f;
     }
   }else if(halflifeSeconds > 3.0E5){
     if(darkTheme){
-      col.r = 1.0f; col.g = 0.75f; col.b = 0.5f;
+      col.r = 0.9f; col.g = 0.825f; col.b = 0.3f;
     }else{
       col.r = 0.1f; col.g = 0.275f; col.b = 0.675f;
     }
   }else if(halflifeSeconds > 1.0E5){
     if(darkTheme){
-      col.r = 1.0f; col.g = 0.8f; col.b = 0.4f;
+      col.r = 0.8f; col.g = 0.85f; col.b = 0.275f;
     }else{
       col.r = 0.1f; col.g = 0.3f; col.b = 0.7f;
     }
   }else if(halflifeSeconds > 7.5E4){
     if(darkTheme){
-      col.r = 1.0f; col.g = 0.85f; col.b = 0.375f;
+      col.r = 0.7f; col.g = 0.875f; col.b = 0.25f;
     }else{
       col.r = 0.125f; col.g = 0.325f; col.b = 0.725f;
     }
   }else if(halflifeSeconds > 5.0E4){
     if(darkTheme){
-      col.r = 1.0f; col.g = 0.9f; col.b = 0.35f;
+      col.r = 0.6f; col.g = 0.9f; col.b = 0.3f;
     }else{
       col.r = 0.15f; col.g = 0.35f; col.b = 0.75f;
     }
   }else if(halflifeSeconds > 3.0E4){
     if(darkTheme){
-      col.r = 1.0f; col.g = 1.0f; col.b = 0.3f;
+      col.r = 0.5f; col.g = 0.9f; col.b = 0.325f;
     }else{
       col.r = 0.175f; col.g = 0.375f; col.b = 0.775f;
     }
   }else if(halflifeSeconds > 1.0E4){
     if(darkTheme){
-      col.r = 0.975f; col.g = 0.975f; col.b = 0.325f;
+      col.r = 0.45f; col.g = 0.9f; col.b = 0.35f;
     }else{
       col.r = 0.2f; col.g = 0.4f; col.b = 0.8f;
     }
   }else if(halflifeSeconds > 7.5E3){
     if(darkTheme){
-      col.r = 0.95f; col.g = 0.95f; col.b = 0.35f;
+      col.r = 0.4f; col.g = 0.9f; col.b = 0.375f;
     }else{
       col.r = 0.225f; col.g = 0.425f; col.b = 0.8f;
     }
   }else if(halflifeSeconds > 5.0E3){
     if(darkTheme){
-      col.r = 0.975f; col.g = 0.925f; col.b = 0.375f;
+      col.r = 0.35f; col.g = 0.9f; col.b = 0.375f;
     }else{
       col.r = 0.25f; col.g = 0.45f; col.b = 0.8f;
     }
   }else if(halflifeSeconds > 3E3){
     if(darkTheme){
-      col.r = 0.95f; col.g = 0.9f; col.b = 0.4f;
+      col.r = 0.3f; col.g = 0.9f; col.b = 0.4f;
     }else{
       col.r = 0.275f; col.g = 0.475f; col.b = 0.8f;
     }
   }else if(halflifeSeconds > 1.0E3){
     if(darkTheme){
-      col.r = 0.925f; col.g = 0.9f; col.b = 0.425f;
+      col.r = 0.25f; col.g = 0.9f; col.b = 0.425f;
     }else{
       col.r = 0.3f; col.g = 0.5f; col.b = 0.8f;
     }
   }else if(halflifeSeconds > 7.5E2){
     if(darkTheme){
-      col.r = 0.9f; col.g = 0.9f; col.b = 0.45f;
+      col.r = 0.2f; col.g = 0.9f; col.b = 0.45f;
     }else{
       col.r = 0.3f; col.g = 0.55f; col.b = 0.775f;
     }
   }else if(halflifeSeconds > 5.0E2){ //text color inversion point for light theme (actually 600)
     if(darkTheme){
-      col.r = 0.875f; col.g = 0.9f; col.b = 0.475f;
+      col.r = 0.2f; col.g = 0.875f; col.b = 0.475f;
     }else{
       col.r = 0.3f; col.g = 0.6f; col.b = 0.75f;
     }
   }else if(halflifeSeconds > 3.0E2){
     if(darkTheme){
-      col.r = 0.85f; col.g = 0.9f; col.b = 0.5f;
+      col.r = 0.25f; col.g = 0.85f; col.b = 0.5f;
     }else{
       col.r = 0.3f; col.g = 0.65f; col.b = 0.75f;
     }
   }else if(halflifeSeconds > 1.0E2){
     if(darkTheme){
-      col.r = 0.8f; col.g = 0.95f; col.b = 0.55f;
+      col.r = 0.3f; col.g = 0.825f; col.b = 0.55f;
     }else{
       col.r = 0.3f; col.g = 0.7f; col.b = 0.725f;
     }
   }else if(halflifeSeconds > 7.5E1){
     if(darkTheme){
-      col.r = 0.75f; col.g = 0.9f; col.b = 0.6f;
+      col.r = 0.35f; col.g = 0.8f; col.b = 0.6f;
     }else{
       col.r = 0.3f; col.g = 0.75f; col.b = 0.7f;
     }
   }else if(halflifeSeconds > 5.0E1){
     if(darkTheme){
-      col.r = 0.7f; col.g = 0.85f; col.b = 0.65f;
+      col.r = 0.4f; col.g = 0.775f; col.b = 0.65f;
     }else{
       col.r = 0.3f; col.g = 0.8f; col.b = 0.7f;
     }
   }else if(halflifeSeconds > 3.0E1){
     if(darkTheme){
-      col.r = 0.65f; col.g = 0.8f; col.b = 0.7f;
+      col.r = 0.45f; col.g = 0.75f; col.b = 0.7f;
     }else{
       col.r = 0.3f; col.g = 0.85f; col.b = 0.7f;
     }
   }else if(halflifeSeconds > 1.0E1){
     if(darkTheme){
-      col.r = 0.6f; col.g = 0.75f; col.b = 0.7f;
+      col.r = 0.5f; col.g = 0.725f; col.b = 0.7f;
     }else{
       col.r = 0.3f; col.g = 0.9f; col.b = 0.7f;
     }
@@ -315,97 +315,97 @@ SDL_FColor getHalfLifeCol(const double halflifeSeconds, const uint8_t valueType,
     }
   }else if(halflifeSeconds > 5.0E-3){
     if(darkTheme){
-      col.r = 0.225f; col.g = 0.375f; col.b = 0.45f;
+      col.r = 0.225f; col.g = 0.375f; col.b = 0.525f;
     }else{
       col.r = 0.95f; col.g = 0.95f; col.b = 0.35f;
     }
   }else if(halflifeSeconds > 3.0E-3){
     if(darkTheme){
-      col.r = 0.1f; col.g = 0.35f; col.b = 0.425f;
+      col.r = 0.1f; col.g = 0.35f; col.b = 0.55f;
     }else{
       col.r = 0.975f; col.g = 0.975f; col.b = 0.325f;
     }
   }else if(halflifeSeconds > 1.0E-3){
     if(darkTheme){
-      col.r = 0.175f; col.g = 0.325f; col.b = 0.40f;
+      col.r = 0.175f; col.g = 0.325f; col.b = 0.575f;
     }else{
       col.r = 1.0f; col.g = 1.0f; col.b = 0.3f;
     }
   }else if(halflifeSeconds > 7.5E-4){
     if(darkTheme){
-      col.r = 0.15f; col.g = 0.30f; col.b = 0.375f;
+      col.r = 0.15f; col.g = 0.30f; col.b = 0.6f;
     }else{
       col.r = 1.0f; col.g = 0.95f; col.b = 0.325f;
     }
   }else if(halflifeSeconds > 5.0E-4){
     if(darkTheme){
-      col.r = 0.125f; col.g = 0.25f; col.b = 0.35f;
+      col.r = 0.125f; col.g = 0.275f; col.b = 0.6f;
     }else{
       col.r = 1.0f; col.g = 0.9f; col.b = 0.35f;
     }
   }else if(halflifeSeconds > 3.0E-4){
     if(darkTheme){
-      col.r = 0.1f; col.g = 0.225f; col.b = 0.325f;
+      col.r = 0.1f; col.g = 0.25f; col.b = 0.575f;
     }else{
       col.r = 1.0f; col.g = 0.85f; col.b = 0.375f;
     }
   }else if(halflifeSeconds > 1.0E-4){
     if(darkTheme){
-       col.r = 0.1f; col.g = 0.20f; col.b = 0.30f;
+       col.r = 0.1f; col.g = 0.225f; col.b = 0.55f;
     }else{
       col.r = 1.0f; col.g = 0.8f; col.b = 0.4f;
     }
   }else if(halflifeSeconds > 5.0E-5){
     if(darkTheme){
-      col.r = 0.1f; col.g = 0.175f; col.b = 0.275f;
+      col.r = 0.1f; col.g = 0.2f; col.b = 0.525f;
     }else{
       col.r = 1.0f; col.g = 0.75f; col.b = 0.5f;
     }
   }else if(halflifeSeconds > 1.0E-5){
     if(darkTheme){
-      col.r = 0.1f; col.g = 0.15f; col.b = 0.25f;
+      col.r = 0.1f; col.g = 0.175f; col.b = 0.5f;
     }else{
       col.r = 1.0f; col.g = 0.7f; col.b = 0.6f;
     }
   }else if(halflifeSeconds > 5.0E-6){
     if(darkTheme){
-      col.r = 0.1f; col.g = 0.125f; col.b = 0.225f;
+      col.r = 0.1f; col.g = 0.15f; col.b = 0.45f;
     }else{
       col.r = 1.0f; col.g = 0.65f; col.b = 0.65f;
     }
   }else if(halflifeSeconds > 1.0E-6){
     if(darkTheme){
-      col.r = 0.1f; col.g = 0.10f; col.b = 0.20f;
+      col.r = 0.1f; col.g = 0.125f; col.b = 0.4f;
     }else{
       col.r = 1.0f; col.g = 0.6f; col.b = 0.7f;
     }
   }else if(halflifeSeconds > 5.0E-7){
     if(darkTheme){
-      col.r = 0.0f; col.g = 0.075f; col.b = 0.175f;
+      col.r = 0.0f; col.g = 0.1f; col.b = 0.375f;
     }else{
       col.r = 1.0f; col.g = 0.65f; col.b = 0.7f;
     }
   }else if(halflifeSeconds > 1.0E-7){
     if(darkTheme){
-      col.r = 0.1f; col.g = 0.05f; col.b = 0.15f;
+      col.r = 0.1f; col.g = 0.075f; col.b = 0.35f;
     }else{
       col.r = 1.0f; col.g = 0.7f; col.b = 0.7f;
     }
   }else if(halflifeSeconds > 1.0E-8){
     if(darkTheme){
-      col.r = 0.0f; col.g = 0.025f; col.b = 0.125f;
+      col.r = 0.0f; col.g = 0.05f; col.b = 0.325f;
     }else{
       col.r = 1.0f; col.g = 0.7f; col.b = 0.8f;
     }
   }else if(halflifeSeconds > 1.0E-9){
     if(darkTheme){
-      col.r = 0.0f; col.g = 0.0f; col.b = 0.10f;
+      col.r = 0.0f; col.g = 0.025f; col.b = 0.3f;
     }else{
       col.r = 1.0f; col.g = 0.8f; col.b = 0.8f;
     }
   }else if(halflifeSeconds > 1.0E-11){
     if(darkTheme){
-      col.r = 0.0f; col.g = 0.00f; col.b = 0.05f;
+      col.r = 0.0f; col.g = 0.00f; col.b = 0.1f;
     }else{
       col.r = 1.0f; col.g = 0.9f; col.b = 0.9f;
     }
