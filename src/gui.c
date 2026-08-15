@@ -69,157 +69,157 @@ SDL_FColor getHalfLifeCol(const double halflifeSeconds, const uint8_t valueType,
   col.a = 1.0f;
   if((halflifeSeconds >= 1.0E40)||((halflifeSeconds > 1.0E15) && ((valueType == VALUETYPE_GREATERTHAN) || (valueType == VALUETYPE_GREATEROREQUALTHAN)))){
     if(darkTheme){
-      col.r = 1.0f; col.g = 1.0f; col.b = 0.9f;
+      col.r = 1.0f; col.g = 0.9f; col.b = 0.9f;
     }else{
       col.r = 0.0f; col.g = 0.0f; col.b = 0.0f;
     }
   }else if(halflifeSeconds > 1.0E15){
     if(darkTheme){
-      col.r = 1.0f; col.g = 1.0f; col.b = 0.8f;
+      col.r = 1.0f; col.g = 0.875f; col.b = 0.85f;
     }else{
       col.r = 0.0f; col.g = 0.05f; col.b = 0.25f;
     }
   }else if(halflifeSeconds > 1.0E10){
     if(darkTheme){
-      col.r = 1.0f; col.g = 0.95f; col.b = 0.8f;
+      col.r = 1.0f; col.g = 0.85f; col.b = 0.8f;
     }else{
       col.r = 0.0f; col.g = 0.1f; col.b = 0.4f;
     }
   }else if(halflifeSeconds > 1.0E8){
     if(darkTheme){
-      col.r = 1.0f; col.g = 0.9f; col.b = 0.75f;
+      col.r = 1.0f; col.g = 0.825f; col.b = 0.8f;
     }else{
       col.r = 0.0f; col.g = 0.1f; col.b = 0.5f;
     }
   }else if(halflifeSeconds > 5.0E7){
     if(darkTheme){
-      col.r = 1.0f; col.g = 0.875f; col.b = 0.7f;
+      col.r = 1.0f; col.g = 0.8f; col.b = 0.8f;
     }else{
       col.r = 0.1f; col.g = 0.15f; col.b = 0.5f;
     }
   }else if(halflifeSeconds > 1.0E7){
     if(darkTheme){
-      col.r = 0.975f; col.g = 0.85f; col.b = 0.65f;
+      col.r = 0.975f; col.g = 0.8f; col.b = 0.75f;
     }else{
       col.r = 0.1f; col.g = 0.2f; col.b = 0.5f;
     }
   }else if(halflifeSeconds > 5.0E6){
     if(darkTheme){
-      col.r = 0.95f; col.g = 0.825f; col.b = 0.6f;
+      col.r = 0.975f; col.g = 0.8f; col.b = 0.7f;
     }else{
       col.r = 0.1f; col.g = 0.2f; col.b = 0.55f;
     }
   }else if(halflifeSeconds > 1.0E6){
     if(darkTheme){
-      col.r = 0.925f; col.g = 0.8f; col.b = 0.55f;
+      col.r = 0.95f; col.g = 0.75f; col.b = 0.65f;
     }else{
       col.r = 0.1f; col.g = 0.2f; col.b = 0.6f;
     }
   }else if(halflifeSeconds > 7.5E5){
     if(darkTheme){
-      col.r = 0.9f; col.g = 0.775f; col.b = 0.4f;
+      col.r = 0.95f; col.g = 0.75f; col.b = 0.6f;
     }else{
       col.r = 0.1f; col.g = 0.225f; col.b = 0.625f;
     }
   }else if(halflifeSeconds > 5.0E5){
     if(darkTheme){
-      col.r = 0.9f; col.g = 0.8f; col.b = 0.35f;
+      col.r = 0.925f; col.g = 0.75f; col.b = 0.55f;
     }else{
       col.r = 0.1f; col.g = 0.25f; col.b = 0.65f;
     }
   }else if(halflifeSeconds > 3.0E5){
     if(darkTheme){
-      col.r = 0.9f; col.g = 0.825f; col.b = 0.3f;
+      col.r = 0.925f; col.g = 0.75f; col.b = 0.5f;
     }else{
       col.r = 0.1f; col.g = 0.275f; col.b = 0.675f;
     }
   }else if(halflifeSeconds > 1.0E5){
     if(darkTheme){
-      col.r = 0.8f; col.g = 0.85f; col.b = 0.275f;
+      col.r = 0.9f; col.g = 0.75f; col.b = 0.45f;
     }else{
       col.r = 0.1f; col.g = 0.3f; col.b = 0.7f;
     }
   }else if(halflifeSeconds > 7.5E4){
     if(darkTheme){
-      col.r = 0.7f; col.g = 0.875f; col.b = 0.25f;
+      col.r = 0.8f; col.g = 0.75f; col.b = 0.4f;
     }else{
       col.r = 0.125f; col.g = 0.325f; col.b = 0.725f;
     }
   }else if(halflifeSeconds > 5.0E4){
     if(darkTheme){
-      col.r = 0.6f; col.g = 0.9f; col.b = 0.3f;
+      col.r = 0.7f; col.g = 0.75f; col.b = 0.35f;
     }else{
       col.r = 0.15f; col.g = 0.35f; col.b = 0.75f;
     }
   }else if(halflifeSeconds > 3.0E4){
     if(darkTheme){
-      col.r = 0.5f; col.g = 0.9f; col.b = 0.325f;
+      col.r = 0.65f; col.g = 0.75f; col.b = 0.35f;
     }else{
       col.r = 0.175f; col.g = 0.375f; col.b = 0.775f;
     }
   }else if(halflifeSeconds > 1.0E4){
     if(darkTheme){
-      col.r = 0.45f; col.g = 0.9f; col.b = 0.35f;
+      col.r = 0.6f; col.g = 0.775f; col.b = 0.35f;
     }else{
       col.r = 0.2f; col.g = 0.4f; col.b = 0.8f;
     }
   }else if(halflifeSeconds > 7.5E3){
     if(darkTheme){
-      col.r = 0.4f; col.g = 0.9f; col.b = 0.375f;
+      col.r = 0.55f; col.g = 0.8f; col.b = 0.375f;
     }else{
       col.r = 0.225f; col.g = 0.425f; col.b = 0.8f;
     }
   }else if(halflifeSeconds > 5.0E3){
     if(darkTheme){
-      col.r = 0.35f; col.g = 0.9f; col.b = 0.375f;
+      col.r = 0.5f; col.g = 0.8f; col.b = 0.375f;
     }else{
       col.r = 0.25f; col.g = 0.45f; col.b = 0.8f;
     }
   }else if(halflifeSeconds > 3E3){
     if(darkTheme){
-      col.r = 0.3f; col.g = 0.9f; col.b = 0.4f;
+      col.r = 0.4f; col.g = 0.8f; col.b = 0.4f;
     }else{
       col.r = 0.275f; col.g = 0.475f; col.b = 0.8f;
     }
   }else if(halflifeSeconds > 1.0E3){
     if(darkTheme){
-      col.r = 0.25f; col.g = 0.9f; col.b = 0.425f;
+      col.r = 0.3f; col.g = 0.8f; col.b = 0.45f;
     }else{
       col.r = 0.3f; col.g = 0.5f; col.b = 0.8f;
     }
   }else if(halflifeSeconds > 7.5E2){
     if(darkTheme){
-      col.r = 0.2f; col.g = 0.9f; col.b = 0.45f;
+      col.r = 0.2f; col.g = 0.8f; col.b = 0.5f;
     }else{
       col.r = 0.3f; col.g = 0.55f; col.b = 0.775f;
     }
   }else if(halflifeSeconds > 5.0E2){ //text color inversion point for light theme (actually 600)
     if(darkTheme){
-      col.r = 0.2f; col.g = 0.875f; col.b = 0.475f;
+      col.r = 0.2f; col.g = 0.8f; col.b = 0.55f;
     }else{
       col.r = 0.3f; col.g = 0.6f; col.b = 0.75f;
     }
   }else if(halflifeSeconds > 3.0E2){
     if(darkTheme){
-      col.r = 0.25f; col.g = 0.85f; col.b = 0.5f;
+      col.r = 0.25f; col.g = 0.8f; col.b = 0.6f;
     }else{
       col.r = 0.3f; col.g = 0.65f; col.b = 0.75f;
     }
   }else if(halflifeSeconds > 1.0E2){
     if(darkTheme){
-      col.r = 0.3f; col.g = 0.825f; col.b = 0.55f;
+      col.r = 0.3f; col.g = 0.8f; col.b = 0.65f;
     }else{
       col.r = 0.3f; col.g = 0.7f; col.b = 0.725f;
     }
   }else if(halflifeSeconds > 7.5E1){
     if(darkTheme){
-      col.r = 0.35f; col.g = 0.8f; col.b = 0.6f;
+      col.r = 0.35f; col.g = 0.8f; col.b = 0.7f;
     }else{
       col.r = 0.3f; col.g = 0.75f; col.b = 0.7f;
     }
   }else if(halflifeSeconds > 5.0E1){
     if(darkTheme){
-      col.r = 0.4f; col.g = 0.775f; col.b = 0.65f;
+      col.r = 0.4f; col.g = 0.775f; col.b = 0.75f;
     }else{
       col.r = 0.3f; col.g = 0.8f; col.b = 0.7f;
     }
@@ -2570,13 +2570,25 @@ void drawChartOfNuclides(const app_data *restrict dat, app_state *restrict state
                         //make isomer box colors slightly different, to distinguish them from
                         //ground states of similar half-life
                         if(getNuclGSHalfLifeSeconds(&dat->ndat,(uint16_t)i) > isomerHl){
-                          iboxCol.r *= 1.10f; if(iboxCol.r > 1.0f){iboxCol.r = 1.0f;} //color range check prevents discolored boxes when running MSYS2 builds in Wine
-                          iboxCol.g *= 1.10f; if(iboxCol.g > 1.0f){iboxCol.g = 1.0f;} //color range check prevents discolored boxes when running MSYS2 builds in Wine
-                          iboxCol.b *= 1.10f; if(iboxCol.b > 1.0f){iboxCol.b = 1.0f;} //color range check prevents discolored boxes when running MSYS2 builds in Wine
+                          if(dat->rules.themeRules.uiColorTheme == UITHEME_DARK){
+                            iboxCol.r *= 0.91f;
+                            iboxCol.g *= 0.91f;
+                            iboxCol.b *= 0.91f;
+                          }else{
+                            iboxCol.r *= 1.10f; if(iboxCol.r > 1.0f){iboxCol.r = 1.0f;} //color range check prevents discolored boxes when running MSYS2 builds in Wine
+                            iboxCol.g *= 1.10f; if(iboxCol.g > 1.0f){iboxCol.g = 1.0f;} //color range check prevents discolored boxes when running MSYS2 builds in Wine
+                            iboxCol.b *= 1.10f; if(iboxCol.b > 1.0f){iboxCol.b = 1.0f;} //color range check prevents discolored boxes when running MSYS2 builds in Wine
+                          }
                         }else{
-                          iboxCol.r *= 0.91f;
-                          iboxCol.g *= 0.91f;
-                          iboxCol.b *= 0.91f;
+                          if(dat->rules.themeRules.uiColorTheme == UITHEME_DARK){
+                            iboxCol.r *= 1.10f; if(iboxCol.r > 1.0f){iboxCol.r = 1.0f;} //color range check prevents discolored boxes when running MSYS2 builds in Wine
+                            iboxCol.g *= 1.10f; if(iboxCol.g > 1.0f){iboxCol.g = 1.0f;} //color range check prevents discolored boxes when running MSYS2 builds in Wine
+                            iboxCol.b *= 1.10f; if(iboxCol.b > 1.0f){iboxCol.b = 1.0f;} //color range check prevents discolored boxes when running MSYS2 builds in Wine
+                          }else{
+                            iboxCol.r *= 0.91f;
+                            iboxCol.g *= 0.91f;
+                            iboxCol.b *= 0.91f;
+                          }
                         }
                       }
                       if(state->ds.chartZoomScale < CHARTZOOM_LVL1){
