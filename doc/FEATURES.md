@@ -9,12 +9,14 @@ Currently implemented features include:
   - Atomic masses, separation energies, Q-values.
   - Additional ENSDF comment data.
 - Search interface for nuclide, level, gamma, and gamma cascade data.
-- Runs locally, doesn't connect to the internet at all.
+- Light and dark UI themes, configurable UI scaling, HiDPI support.
 - Mouse, keyboard, and gamepad (!) support.
+- Runs locally, doesn't connect to the internet at all.
+
 
 # Technical info and other musings
 
-The overall goal of this project is to make a simple, performant, and multiplatform tool that will be useful in both professional (nuclear structure research) and educational contexts. The reason I made this is that there was no other way to browse isotope data that was both usable offline and suitable for a normal person to use (IMHO).
+The overall goal of this project is to make a simple, performant, and multiplatform tool that will be useful in both professional (nuclear structure research) and educational contexts. The reason I made this is that there was no other way to browse isotope data that was both usable offline ([NNDC](https://www.nndc.bnl.gov/) is great, but its server often flakes out...) and suitable for a normal person to use.
 
 The program is written in portable [C99](https://en.wikipedia.org/wiki/C99) using [SDL](https://github.com/libsdl-org/SDL) (so you can browse nuclear half-lives using some of the same code that powers [Half-Life](https://www.pcgamingwiki.com/wiki/Half-Life#Middleware)). It uses several of SDL's built-in features including fast hardware accelerated rendering and native HI-DPI scaling support.
 
