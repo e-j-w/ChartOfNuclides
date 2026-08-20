@@ -2024,6 +2024,9 @@ void cleanCommentStr(char *comBuff){
 	modComBuff = findReplaceAllUTF8("]:}","]:",comBuff);
 	SDL_strlcpy(comBuff,modComBuff,ENSDF_LINE_SIZE-10);
 	SDL_free(modComBuff);
+	modComBuff = findReplaceAllUTF8("{B[","[",comBuff);
+	SDL_strlcpy(comBuff,modComBuff,ENSDF_LINE_SIZE-10);
+	SDL_free(modComBuff);
 	modComBuff = findReplaceAllUTF8("%|e+%|b","%ε/β",comBuff);
 	SDL_strlcpy(comBuff,modComBuff,ENSDF_LINE_SIZE-10);
 	SDL_free(modComBuff);
@@ -2163,6 +2166,9 @@ void cleanCommentStr(char *comBuff){
 	SDL_strlcpy(comBuff,modComBuff,ENSDF_LINE_SIZE-10);
 	SDL_free(modComBuff);
 	modComBuff = findReplaceAllUTF8(" kev "," keV ",comBuff);
+	SDL_strlcpy(comBuff,modComBuff,ENSDF_LINE_SIZE-10);
+	SDL_free(modComBuff);
+	modComBuff = findReplaceAllUTF8("~"," ",comBuff); //LaTeX-style notation used in 229mTh comments
 	SDL_strlcpy(comBuff,modComBuff,ENSDF_LINE_SIZE-10);
 	SDL_free(modComBuff);
 
