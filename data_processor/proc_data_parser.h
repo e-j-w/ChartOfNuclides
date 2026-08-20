@@ -30,6 +30,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #define MAXRXNSPERNUCL   64
 #define MAX_RXN_STRLEN   128
 #define MAXCHARSPERRXN   8
+#define ENSDF_LINE_SIZE 128
 
 #define MAX_NUM_ASSETS   1024
 

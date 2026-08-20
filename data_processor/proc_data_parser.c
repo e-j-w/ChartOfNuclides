@@ -996,7 +996,7 @@ void parseLevelE(valWithErr * levelEVal, const nucl *nuclideData, const char * e
 	char *saveptr = NULL;
 	char eVal[11];
   eVal[0] = '\0';
-  memcpy(eVal,&estring[0],10);
+  SDL_memcpy(eVal,&estring[0],10);
 	eVal[10] = '\0'; //terminate string
 
 	float levelE = -1.0f;
@@ -1056,7 +1056,7 @@ void parseLevelE(valWithErr * levelEVal, const nucl *nuclideData, const char * e
 			SDL_Log("ERROR: parseLevelE - bad XX+number level energy string: %s\n",estring);
 			exit(-1);
 		}
-		memcpy(eVal,&estring[0],10); //re-constitute original buffer
+		SDL_memcpy(eVal,&estring[0],10); //re-constitute original buffer
 		eVal[10] = '\0'; //terminate string
 	}else if((levEStartPos < 10)&&(SDL_isalpha(eVal[levEStartPos]))&&(eVal[levEStartPos+1]=='+')){
 		//level energy in X+number format
@@ -1076,7 +1076,7 @@ void parseLevelE(valWithErr * levelEVal, const nucl *nuclideData, const char * e
 			SDL_Log("ERROR: parseLevelE - bad X+number level energy string: %s\n",estring);
 			exit(-1);
 		}
-		memcpy(eVal,&estring[0],10); //re-constitute original buffer
+		SDL_memcpy(eVal,&estring[0],10); //re-constitute original buffer
 		eVal[10] = '\0'; //terminate string
 		levelEVal->format |= (uint16_t)(eVal[levEStartPos] << 9);
 	}else if((levEStrLen > 1)&&(eVal[levEStrLen-2]=='+')&&(SDL_isalpha(eVal[levEStrLen-1]))){
@@ -1093,7 +1093,7 @@ void parseLevelE(valWithErr * levelEVal, const nucl *nuclideData, const char * e
 				//SDL_Log("variable: %c\n",tok[0]);
 			}
 		}
-		memcpy(eVal,&estring[0],10); //re-constitute original buffer
+		SDL_memcpy(eVal,&estring[0],10); //re-constitute original buffer
 		eVal[10] = '\0'; //terminate string
 	}else{
 		//normal level energy
@@ -1135,7 +1135,7 @@ void parseLevelE(valWithErr * levelEVal, const nucl *nuclideData, const char * e
 				}
 			}else{
 				//potentially an exponent form value with no decimal place
-				memcpy(eVal,&estring[0],10); //re-constitute original buffer
+				SDL_memcpy(eVal,&estring[0],10); //re-constitute original buffer
 				eVal[10] = '\0'; //terminate string
 				tok = SDL_strtok_r(eVal,"E",&saveptr);
 				//SDL_Log("eVal: %s\n",eVal);
@@ -1176,7 +1176,7 @@ void parseHalfLife(level * lev, const char * hlstring){
   hlVal[0] = '\0';
   hlUnitVal[0] = '\0';
   hlErrVal[0] = '\0';
-  memcpy(hlAndUnitVal,&hlstring[0],10);
+  SDL_memcpy(hlAndUnitVal,&hlstring[0],10);
   hlAndUnitVal[10] = '\0'; //terminate string
   tok = SDL_strtok_r(hlAndUnitVal, " ",&saveptr);
   if(tok!=NULL){
@@ -1200,7 +1200,7 @@ void parseHalfLife(level * lev, const char * hlstring){
 	for(size_t i=0; i<SDL_strlen(hlUnitVal); i++){
 		hlUnitVal[i] = (char)SDL_toupper(hlUnitVal[i]);
 	}
-  memcpy(hlErrVal,&hlstring[10],6);
+  SDL_memcpy(hlErrVal,&hlstring[10],6);
   hlErrVal[6] = '\0'; //terminate string
 
 	lev->halfLife.val = -1.0f;
@@ -1545,7 +1545,7 @@ void parseSpinPar(ndata *nd, level * lev, sp_var_data * varDat, char * spstring)
 						char varValType[3];
 						uint8_t varValTypePos = 255;
 						for(int j=2;j<=((int)SDL_strlen(tmpstr2));j++){
-							memcpy(varValType, &tmpstr2[j-2], 2);
+							SDL_memcpy(varValType, &tmpstr2[j-2], 2);
 							tmpstr2[2] = '\0';
 							if(SDL_strcmp(varValType,"GT")==0){
 								nd->spv[nd->numSpinParVals].format |= (VALUETYPE_GREATERTHAN << 1U);
@@ -1598,7 +1598,7 @@ void parseSpinPar(ndata *nd, level * lev, sp_var_data * varDat, char * spstring)
 							if(varValTypePos<=16){
 								//get substring corresponding to variable name
 								char varName[16];
-								memcpy(varName,&tmpstr2,varValTypePos);
+								SDL_memcpy(varName,&tmpstr2,varValTypePos);
 								//SDL_Log("variable name (no offset, special value type): %s\n",varName);
 								//check variable name
 								for(int j=0;j<(varDat->numSpVars);j++){
@@ -2018,146 +2018,152 @@ void cleanCommentStr(char *comBuff){
 	//SDL_Log("cleaning string: %s\n",comBuff);
 	char *modComBuff;
 	
+	modComBuff = findReplaceAllUTF8("${B[","[",comBuff);
+	SDL_strlcpy(comBuff,modComBuff,ENSDF_LINE_SIZE-10);
+	SDL_free(modComBuff);
+	modComBuff = findReplaceAllUTF8("]:}","]:",comBuff);
+	SDL_strlcpy(comBuff,modComBuff,ENSDF_LINE_SIZE-10);
+	SDL_free(modComBuff);
 	modComBuff = findReplaceAllUTF8("%|e+%|b","%ε/β",comBuff);
-	SDL_strlcpy(comBuff,modComBuff,118);
+	SDL_strlcpy(comBuff,modComBuff,ENSDF_LINE_SIZE-10);
 	SDL_free(modComBuff);
 	modComBuff = findReplaceAllUTF8("|b","β",comBuff);
-	SDL_strlcpy(comBuff,modComBuff,118);
+	SDL_strlcpy(comBuff,modComBuff,ENSDF_LINE_SIZE-10);
 	SDL_free(modComBuff);
 	modComBuff = findReplaceAllUTF8("E|g","E(γ)",comBuff);
-	SDL_strlcpy(comBuff,modComBuff,118);
+	SDL_strlcpy(comBuff,modComBuff,ENSDF_LINE_SIZE-10);
 	SDL_free(modComBuff);
 	modComBuff = findReplaceAllUTF8("I|g","I(γ)",comBuff);
-	SDL_strlcpy(comBuff,modComBuff,118);
+	SDL_strlcpy(comBuff,modComBuff,ENSDF_LINE_SIZE-10);
 	SDL_free(modComBuff);
 	modComBuff = findReplaceAllUTF8("ce|g","CEγ",comBuff);
-	SDL_strlcpy(comBuff,modComBuff,118);
+	SDL_strlcpy(comBuff,modComBuff,ENSDF_LINE_SIZE-10);
 	SDL_free(modComBuff);
 	modComBuff = findReplaceAllUTF8("|g","γ",comBuff);
-	SDL_strlcpy(comBuff,modComBuff,118);
+	SDL_strlcpy(comBuff,modComBuff,ENSDF_LINE_SIZE-10);
 	SDL_free(modComBuff);
 	modComBuff = findReplaceAllUTF8("|D","Δ",comBuff);
-	SDL_strlcpy(comBuff,modComBuff,118);
+	SDL_strlcpy(comBuff,modComBuff,ENSDF_LINE_SIZE-10);
 	SDL_free(modComBuff);
 	modComBuff = findReplaceAllUTF8("|d","δ",comBuff);
-	SDL_strlcpy(comBuff,modComBuff,118);
+	SDL_strlcpy(comBuff,modComBuff,ENSDF_LINE_SIZE-10);
 	SDL_free(modComBuff);
 	modComBuff = findReplaceAllUTF8("|p","π",comBuff);
-	SDL_strlcpy(comBuff,modComBuff,118);
+	SDL_strlcpy(comBuff,modComBuff,ENSDF_LINE_SIZE-10);
 	SDL_free(modComBuff);
 	modComBuff = findReplaceAllUTF8("|n","ν",comBuff);
-	SDL_strlcpy(comBuff,modComBuff,118);
+	SDL_strlcpy(comBuff,modComBuff,ENSDF_LINE_SIZE-10);
 	SDL_free(modComBuff);
 	modComBuff = findReplaceAllUTF8("|e","ε",comBuff);
-	SDL_strlcpy(comBuff,modComBuff,118);
+	SDL_strlcpy(comBuff,modComBuff,ENSDF_LINE_SIZE-10);
 	SDL_free(modComBuff);
 	modComBuff = findReplaceAllUTF8("|m","μ",comBuff);
-	SDL_strlcpy(comBuff,modComBuff,118);
+	SDL_strlcpy(comBuff,modComBuff,ENSDF_LINE_SIZE-10);
 	SDL_free(modComBuff);
 	modComBuff = findReplaceAllUTF8("|q","θ",comBuff);
-	SDL_strlcpy(comBuff,modComBuff,118);
+	SDL_strlcpy(comBuff,modComBuff,ENSDF_LINE_SIZE-10);
 	SDL_free(modComBuff);
 	modComBuff = findReplaceAllUTF8("|a","α",comBuff);
-	SDL_strlcpy(comBuff,modComBuff,118);
+	SDL_strlcpy(comBuff,modComBuff,ENSDF_LINE_SIZE-10);
 	SDL_free(modComBuff);
 	modComBuff = findReplaceAllUTF8("|s","σ",comBuff);
-	SDL_strlcpy(comBuff,modComBuff,118);
+	SDL_strlcpy(comBuff,modComBuff,ENSDF_LINE_SIZE-10);
 	SDL_free(modComBuff);
 	modComBuff = findReplaceAllUTF8("|*","×",comBuff);
-	SDL_strlcpy(comBuff,modComBuff,118);
+	SDL_strlcpy(comBuff,modComBuff,ENSDF_LINE_SIZE-10);
 	SDL_free(modComBuff);
 	modComBuff = findReplaceAllUTF8("|?","≈",comBuff);
-	SDL_strlcpy(comBuff,modComBuff,118);
+	SDL_strlcpy(comBuff,modComBuff,ENSDF_LINE_SIZE-10);
 	SDL_free(modComBuff);
 	modComBuff = findReplaceAllUTF8("|h","χ",comBuff);
-	SDL_strlcpy(comBuff,modComBuff,118);
+	SDL_strlcpy(comBuff,modComBuff,ENSDF_LINE_SIZE-10);
 	SDL_free(modComBuff);
 	modComBuff = findReplaceAllUTF8("|l","λ",comBuff);
-	SDL_strlcpy(comBuff,modComBuff,118);
+	SDL_strlcpy(comBuff,modComBuff,ENSDF_LINE_SIZE-10);
 	SDL_free(modComBuff);
 	modComBuff = findReplaceAllUTF8("|w","ω",comBuff);
-	SDL_strlcpy(comBuff,modComBuff,118);
+	SDL_strlcpy(comBuff,modComBuff,ENSDF_LINE_SIZE-10);
 	SDL_free(modComBuff);
 	modComBuff = findReplaceAllUTF8("|t","τ",comBuff);
-	SDL_strlcpy(comBuff,modComBuff,118);
+	SDL_strlcpy(comBuff,modComBuff,ENSDF_LINE_SIZE-10);
 	SDL_free(modComBuff);
 	modComBuff = findReplaceAllUTF8("T{-1/2}","t½",comBuff);
-	SDL_strlcpy(comBuff,modComBuff,118);
+	SDL_strlcpy(comBuff,modComBuff,ENSDF_LINE_SIZE-10);
 	SDL_free(modComBuff);
 	modComBuff = findReplaceAllUTF8("|^","↑",comBuff);
-	SDL_strlcpy(comBuff,modComBuff,118);
+	SDL_strlcpy(comBuff,modComBuff,ENSDF_LINE_SIZE-10);
 	SDL_free(modComBuff);
 	modComBuff = findReplaceAllUTF8("|<","≤",comBuff);
-	SDL_strlcpy(comBuff,modComBuff,118);
+	SDL_strlcpy(comBuff,modComBuff,ENSDF_LINE_SIZE-10);
 	SDL_free(modComBuff);
 	modComBuff = findReplaceAllUTF8("|>","≥",comBuff);
-	SDL_strlcpy(comBuff,modComBuff,118);
+	SDL_strlcpy(comBuff,modComBuff,ENSDF_LINE_SIZE-10);
 	SDL_free(modComBuff);
 	modComBuff = findReplaceAllUTF8("og|","og",comBuff);
-	SDL_strlcpy(comBuff,modComBuff,118);
+	SDL_strlcpy(comBuff,modComBuff,ENSDF_LINE_SIZE-10);
 	SDL_free(modComBuff);
 	modComBuff = findReplaceAllUTF8("s{-","s(",comBuff);
-	SDL_strlcpy(comBuff,modComBuff,118);
+	SDL_strlcpy(comBuff,modComBuff,ENSDF_LINE_SIZE-10);
 	SDL_free(modComBuff);
 	modComBuff = findReplaceAllUTF8("p{-","p(",comBuff);
-	SDL_strlcpy(comBuff,modComBuff,118);
+	SDL_strlcpy(comBuff,modComBuff,ENSDF_LINE_SIZE-10);
 	SDL_free(modComBuff);
 	modComBuff = findReplaceAllUTF8("d{-","d(",comBuff);
-	SDL_strlcpy(comBuff,modComBuff,118);
+	SDL_strlcpy(comBuff,modComBuff,ENSDF_LINE_SIZE-10);
 	SDL_free(modComBuff);
 	modComBuff = findReplaceAllUTF8("f{-","f(",comBuff);
-	SDL_strlcpy(comBuff,modComBuff,118);
+	SDL_strlcpy(comBuff,modComBuff,ENSDF_LINE_SIZE-10);
 	SDL_free(modComBuff);
 	modComBuff = findReplaceAllUTF8("g{-","g(",comBuff);
-	SDL_strlcpy(comBuff,modComBuff,118);
+	SDL_strlcpy(comBuff,modComBuff,ENSDF_LINE_SIZE-10);
 	SDL_free(modComBuff);
 	modComBuff = findReplaceAllUTF8("h{-","h(",comBuff);
-	SDL_strlcpy(comBuff,modComBuff,118);
+	SDL_strlcpy(comBuff,modComBuff,ENSDF_LINE_SIZE-10);
 	SDL_free(modComBuff);
 	modComBuff = findReplaceAllUTF8("i{-","i(",comBuff);
-	SDL_strlcpy(comBuff,modComBuff,118);
+	SDL_strlcpy(comBuff,modComBuff,ENSDF_LINE_SIZE-10);
 	SDL_free(modComBuff);
 	modComBuff = findReplaceAllUTF8("}{-","}(",comBuff);
-	SDL_strlcpy(comBuff,modComBuff,118);
+	SDL_strlcpy(comBuff,modComBuff,ENSDF_LINE_SIZE-10);
 	SDL_free(modComBuff);
 	modComBuff = findReplaceAllUTF8(" ce "," CE ",comBuff);
-	SDL_strlcpy(comBuff,modComBuff,118);
+	SDL_strlcpy(comBuff,modComBuff,ENSDF_LINE_SIZE-10);
 	SDL_free(modComBuff);
 	modComBuff = findReplaceAllUTF8("$Ce ","$CE ",comBuff);
-	SDL_strlcpy(comBuff,modComBuff,118);
+	SDL_strlcpy(comBuff,modComBuff,ENSDF_LINE_SIZE-10);
 	SDL_free(modComBuff);
 	modComBuff = findReplaceAllUTF8(" Ms "," μs ",comBuff);
-	SDL_strlcpy(comBuff,modComBuff,118);
+	SDL_strlcpy(comBuff,modComBuff,ENSDF_LINE_SIZE-10);
 	SDL_free(modComBuff);
 	modComBuff = findReplaceAllUTF8("%EC","%ε",comBuff);
-	SDL_strlcpy(comBuff,modComBuff,118);
+	SDL_strlcpy(comBuff,modComBuff,ENSDF_LINE_SIZE-10);
 	SDL_free(modComBuff);
 	modComBuff = findReplaceAllUTF8("%B+$","%β⁺: ",comBuff);
-	SDL_strlcpy(comBuff,modComBuff,118);
+	SDL_strlcpy(comBuff,modComBuff,ENSDF_LINE_SIZE-10);
 	SDL_free(modComBuff);
 	modComBuff = findReplaceAllUTF8("%B+","%β⁺",comBuff);
-	SDL_strlcpy(comBuff,modComBuff,118);
+	SDL_strlcpy(comBuff,modComBuff,ENSDF_LINE_SIZE-10);
 	SDL_free(modComBuff);
 	modComBuff = findReplaceAllUTF8("%B-","%β⁻",comBuff);
-	SDL_strlcpy(comBuff,modComBuff,118);
+	SDL_strlcpy(comBuff,modComBuff,ENSDF_LINE_SIZE-10);
 	SDL_free(modComBuff);
 	modComBuff = findReplaceAllUTF8("%B","%β",comBuff);
-	SDL_strlcpy(comBuff,modComBuff,118);
+	SDL_strlcpy(comBuff,modComBuff,ENSDF_LINE_SIZE-10);
 	SDL_free(modComBuff);
 	modComBuff = findReplaceAllUTF8("%A","%α",comBuff);
-	SDL_strlcpy(comBuff,modComBuff,118);
+	SDL_strlcpy(comBuff,modComBuff,ENSDF_LINE_SIZE-10);
 	SDL_free(modComBuff);
 	modComBuff = findReplaceAllUTF8(")~#",")",comBuff);
-	SDL_strlcpy(comBuff,modComBuff,118);
+	SDL_strlcpy(comBuff,modComBuff,ENSDF_LINE_SIZE-10);
 	SDL_free(modComBuff);
 	modComBuff = findReplaceAllUTF8("$from"," from",comBuff);
-	SDL_strlcpy(comBuff,modComBuff,118);
+	SDL_strlcpy(comBuff,modComBuff,ENSDF_LINE_SIZE-10);
 	SDL_free(modComBuff);
 	modComBuff = findReplaceAllUTF8("CONF ","Configuration: ",comBuff);
-	SDL_strlcpy(comBuff,modComBuff,118);
+	SDL_strlcpy(comBuff,modComBuff,ENSDF_LINE_SIZE-10);
 	SDL_free(modComBuff);
 	modComBuff = findReplaceAllUTF8(" kev "," keV ",comBuff);
-	SDL_strlcpy(comBuff,modComBuff,118);
+	SDL_strlcpy(comBuff,modComBuff,ENSDF_LINE_SIZE-10);
 	SDL_free(modComBuff);
 
 	//handle superscript/subscript sequences
@@ -2235,7 +2241,7 @@ void cleanCommentStr(char *comBuff){
 			SDL_strlcpy(ssReplace,modssBuff,CCS_MAXBUFSIZE*4);
 			SDL_free(modssBuff);
 			modComBuff = findReplaceAllUTF8(ssBuff,ssReplace,comBuff);
-			SDL_strlcpy(comBuff,modComBuff,118);
+			SDL_strlcpy(comBuff,modComBuff,ENSDF_LINE_SIZE-10);
 			SDL_free(modComBuff);
 			i += ((int)SDL_strlen(ssReplace)); //jump forward in string until after the superscript sequence
 			len = (int)SDL_strlen(comBuff); //recalculate
@@ -2300,7 +2306,7 @@ void cleanCommentStr(char *comBuff){
 			SDL_strlcpy(ssReplace,modssBuff,CCS_MAXBUFSIZE*4);
 			SDL_free(modssBuff);
 			modComBuff = findReplaceAllUTF8(ssBuff,ssReplace,comBuff);
-			SDL_strlcpy(comBuff,modComBuff,118);
+			SDL_strlcpy(comBuff,modComBuff,ENSDF_LINE_SIZE-10);
 			SDL_free(modComBuff);
 			i += ((int)SDL_strlen(ssReplace)); //jump forward in string until after the subscript sequence
 			len = (int)SDL_strlen(comBuff); //recalculate
@@ -2358,7 +2364,7 @@ void cleanCommentStr(char *comBuff){
 				SDL_free(modssBuff);
 			}
 			modComBuff = findReplaceAllUTF8(ssBuff,ssReplace,comBuff);
-			SDL_strlcpy(comBuff,modComBuff,118);
+			SDL_strlcpy(comBuff,modComBuff,ENSDF_LINE_SIZE-10);
 			SDL_free(modComBuff);
 			i += ((int)SDL_strlen(ssReplace)); //jump forward in string until after the superscript sequence
 			len = (int)SDL_strlen(comBuff); //recalculate
@@ -2367,10 +2373,10 @@ void cleanCommentStr(char *comBuff){
 
 	//clean up any remaining brackets
 	modComBuff = findReplaceAllUTF8("{","(",comBuff);
-	SDL_strlcpy(comBuff,modComBuff,118);
+	SDL_strlcpy(comBuff,modComBuff,ENSDF_LINE_SIZE-10);
 	SDL_free(modComBuff);
 	modComBuff = findReplaceAllUTF8("}",")",comBuff);
-	SDL_strlcpy(comBuff,modComBuff,118);
+	SDL_strlcpy(comBuff,modComBuff,ENSDF_LINE_SIZE-10);
 	SDL_free(modComBuff);
 
 }
@@ -2382,10 +2388,10 @@ uint8_t parseDcyModeSubstr(ndata *nd, const uint16_t dcyModeInd, const char *sub
 	
 	char *tok, *tok2;
 	char *saveptr = NULL;
-	char substrCpy[128], valBuff[16], errBuff[16];
+	char substrCpy[ENSDF_LINE_SIZE], valBuff[16], errBuff[16];
 
 	//SDL_Log("Parsing decay mode substring: %s\n",substr);
-	SDL_strlcpy(substrCpy,substr,128);
+	SDL_strlcpy(substrCpy,substr,ENSDF_LINE_SIZE);
 	tok = SDL_strtok_r(substrCpy," =><",&saveptr);
 	if(tok!=NULL){
 		uint8_t dcyMode = getDcyModeFromENSDFSubstr(tok);
@@ -2396,14 +2402,14 @@ uint8_t parseDcyModeSubstr(ndata *nd, const uint16_t dcyModeInd, const char *sub
 			return 0;
 		}
 		//check for decay modes using '>' or '<'
-		SDL_strlcpy(substrCpy,substr,128);
+		SDL_strlcpy(substrCpy,substr,ENSDF_LINE_SIZE);
 		tok = SDL_strtok_r(substrCpy,">",&saveptr);
 		tok = SDL_strtok_r(NULL,"$ ,",&saveptr);
 		if(tok!=NULL){
 			//SDL_Log("Parsing decay mode with '>'.\n");
 			nd->dcyMode[dcyModeInd].prob.unit = VALUETYPE_GREATERTHAN;
 		}else{
-			SDL_strlcpy(substrCpy,substr,128);
+			SDL_strlcpy(substrCpy,substr,ENSDF_LINE_SIZE);
 			tok = SDL_strtok_r(substrCpy,"<",&saveptr);
 			tok = SDL_strtok_r(NULL,"$ ,",&saveptr);
 			if(tok!=NULL){
@@ -2411,7 +2417,7 @@ uint8_t parseDcyModeSubstr(ndata *nd, const uint16_t dcyModeInd, const char *sub
 				nd->dcyMode[dcyModeInd].prob.unit = VALUETYPE_LESSTHAN;
 			}
 		}
-		SDL_strlcpy(substrCpy,substr,128);
+		SDL_strlcpy(substrCpy,substr,ENSDF_LINE_SIZE);
 		tok = SDL_strtok_r(substrCpy," =><",&saveptr);
 		tok = SDL_strtok_r(NULL,"$ ,",&saveptr);
 		if(tok!=NULL){
@@ -2699,7 +2705,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 			
 			//increment the nucleus if a new nucleus is found
 			char hbuff[15];
-			memcpy(hbuff, &line[9], 14);
+			SDL_memcpy(hbuff, &line[9], 14);
 			hbuff[14] = '\0';
 			if(SDL_strcmp(hbuff,"ADOPTED LEVELS")==0){
 				//new nuclide
@@ -2836,7 +2842,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 					nd->nuclData[nd->numNucl].firstRxn = nd->numRxns;
 					SDL_memset(&varDat,0,sizeof(sp_var_data));
 					//SDL_Log("Adding gamma data for nucleus %s\n",val[0]);
-					memcpy(nuclNameStr,val[0],10);
+					SDL_memcpy(nuclNameStr,val[0],10);
 					nuclNameStr[9] = '\0'; //terminate string
 					getNuclNZ(&nd->nuclData[nd->numNucl],nuclNameStr); //get N and Z
 					if((nd->nuclData[nd->numNucl].N > MAX_NEUTRON_NUM)||(nd->nuclData[nd->numNucl].Z > MAX_PROTON_NUM)){
@@ -2845,7 +2851,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 					}
 					//check for unobserved/inferred/tentative nuclei
 					char obsbuff[8];
-					memcpy(obsbuff, &line[23], 7);
+					SDL_memcpy(obsbuff, &line[23], 7);
 					obsbuff[7] = '\0';
 					if(SDL_strcmp(obsbuff,":NOT OB")==0){
 						nd->nuclData[nd->numNucl].flags = OBSFLAG_UNOBSERVED;
@@ -2890,12 +2896,12 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 			}
 			/*//parse the nucleus name
 			char nbuff[7];
-			memcpy(nbuff, &line[0], 6);
+			SDL_memcpy(nbuff, &line[0], 6);
 			nbuff[6] = '\0';*/
 
 			//parse the line type
 			char typebuff[4];
-			memcpy(typebuff, &line[5], 3);
+			SDL_memcpy(typebuff, &line[5], 3);
 			typebuff[3] = '\0';
 
 			
@@ -2911,7 +2917,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 							rxnMap.numRxnChars[nd->nuclData[nd->numNucl].numRxns] = 1;
 							rxnMap.rxnPopulatedLvls[nd->nuclData[nd->numNucl].numRxns] = 0;
 							char rxnBuff[31];
-							memcpy(rxnBuff, &line[9], 30);
+							SDL_memcpy(rxnBuff, &line[9], 30);
 							for(uint8_t i=29; 1; i--){
 								if(!(SDL_isspace(rxnBuff[i]))){
 									rxnBuff[i+1] = '\0'; //terminate string at end, without trailing whitespace
@@ -2966,13 +2972,13 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 					}else if((SDL_strcmp(&typebuff[1]," L")==0)&&(!(SDL_isspace(typebuff[0])))){
 						if(nd->numLvls > 0){
 							char hdbuff[6];
-							memcpy(hdbuff, &line[9], 5);
+							SDL_memcpy(hdbuff, &line[9], 5);
 							hdbuff[5] = '\0';
 							if(SDL_strcmp(hdbuff,"XREF=")==0){
 								//reaction list for the last parsed level
 								//SDL_Log("Found reaction list for level %u.\n",nd->numLvls);
-								char rxnListBuf[128];
-								memcpy(rxnListBuf, &line[14], 127);
+								char rxnListBuf[ENSDF_LINE_SIZE];
+								SDL_memcpy(rxnListBuf, &line[14], ENSDF_LINE_SIZE-1);
 								for(uint8_t i=126; 1; i--){
 									if(!(SDL_isspace(rxnListBuf[i]))){
 										rxnListBuf[i+1] = '\0'; //terminate string at end, without trailing whitespace
@@ -3057,12 +3063,12 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 
 							//parse the energy
 							char ebuff[11];
-							memcpy(ebuff, &line[9], 10);
+							SDL_memcpy(ebuff, &line[9], 10);
 							ebuff[10] = '\0';
 
 							//parse the energy error
 							char eeBuff[3];
-							memcpy(eeBuff, &line[19], 2);
+							SDL_memcpy(eeBuff, &line[19], 2);
 							eeBuff[2] = '\0';
 
 							//check for ambiguity
@@ -3097,13 +3103,13 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 							nd->levels[nd->numLvls-1].firstDecMode = nd->numDecModes;
 							//parse the level spin and parity
 							char spbuff[16];
-							memcpy(spbuff, &line[21], 15);
+							SDL_memcpy(spbuff, &line[21], 15);
 							spbuff[15] = '\0';
 							//SDL_Log("%s\n",spbuff);
 							parseSpinPar(nd,&nd->levels[nd->numLvls-1],&varDat,spbuff);
 							//parse the half-life information
 							char hlBuff[18];
-							memcpy(hlBuff, &line[39], 17);
+							SDL_memcpy(hlBuff, &line[39], 17);
 							hlBuff[17] = '\0';
 							//SDL_Log("%s\n",hlBuff);
 							parseHalfLife(&nd->levels[nd->numLvls-1],hlBuff);
@@ -3218,14 +3224,14 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 							if(line[decStrStart]=='%'){
 								//line contains decay mode info
 								//SDL_Log("dec mode found: %s\n",line);
-								char dmBuffOrig[128], dmBuff[128];
-								memcpy(dmBuffOrig, &line[decStrStart], 127-decStrStart);
-								dmBuffOrig[127-decStrStart] = '\0';
+								char dmBuffOrig[ENSDF_LINE_SIZE], dmBuff[ENSDF_LINE_SIZE];
+								SDL_memcpy(dmBuffOrig, &line[decStrStart], ENSDF_LINE_SIZE-1-decStrStart);
+								dmBuffOrig[ENSDF_LINE_SIZE-1-decStrStart] = '\0';
 								//SDL_Log("Original decay mode buffer: %s\n",dmBuffOrig);
 								tok = SDL_strtok_r(dmBuffOrig,"$,;",&saveptr);
 								while(tok!=NULL){
 									//SDL_Log("tok: %s\n",tok);
-									SDL_strlcpy(dmBuff,tok,128);
+									SDL_strlcpy(dmBuff,tok,ENSDF_LINE_SIZE);
 									if(nd->numDecModes >= MAXNUMDECAYMODES){
 										SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"Maximum number of decay modes (%i) exceeded!\n",MAXNUMDECAYMODES);
 										return -1;
@@ -3237,8 +3243,8 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 										nd->numDecModes++;
 
 										//reconstitute buffer
-										memcpy(dmBuffOrig, &line[decStrStart], 127-decStrStart);
-										dmBuffOrig[127-decStrStart] = '\0';
+										SDL_memcpy(dmBuffOrig, &line[decStrStart], ENSDF_LINE_SIZE-1-decStrStart);
+										dmBuffOrig[ENSDF_LINE_SIZE-1-decStrStart] = '\0';
 										//SDL_Log("Decay mode buffer after: %s\n",dmBuffOrig);
 										tok = SDL_strtok_r(dmBuffOrig,"$,;",&saveptr);
 										if(tok!=NULL){
@@ -3292,9 +3298,9 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 						//to that decay mode
 						if(nd->nuclData[nd->numNucl].numLevels == 0){
 							//SDL_Log("line: %s\n",line);
-							char dmBuff[128];
-							memcpy(dmBuff, &line[9], 118);
-							dmBuff[118] = '\0';
+							char dmBuff[ENSDF_LINE_SIZE];
+							SDL_memcpy(dmBuff, &line[9], ENSDF_LINE_SIZE-10);
+							dmBuff[ENSDF_LINE_SIZE-10] = '\0';
 							//SDL_Log("dmBuff: %s\n",dmBuff);
 							tok = SDL_strtok_r(dmBuff," =",&saveptr);
 							if(tok!=NULL){
@@ -3340,9 +3346,10 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 									}
 								}
 
-								char comBuff[128], tmpComBuff[128];
-								SDL_memcpy(comBuff, &line[9+comBufStart], 118);
-								comBuff[118] = '\0';
+								char *comBuff=(char*)SDL_calloc(1,ENSDF_LINE_SIZE);
+								char *tmpComBuff=(char*)SDL_calloc(1,ENSDF_LINE_SIZE);
+								SDL_memcpy(comBuff, &line[9+comBufStart], ENSDF_LINE_SIZE-10);
+								comBuff[ENSDF_LINE_SIZE-10] = '\0';
 								len = (int32_t)SDL_strlen(comBuff); //length of the comment
 
 								//remove all repeat spaces from the comment (some are formatted very weirdly)
@@ -3368,7 +3375,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 								if(len > 0){
 									char *modComBuff;
 									modComBuff = findReplaceAllUTF8("CONF$","J$",comBuff);
-									SDL_strlcpy(comBuff,modComBuff,118);
+									SDL_strlcpy(comBuff,modComBuff,ENSDF_LINE_SIZE-10);
 									SDL_free(modComBuff);
 									len = (int32_t)SDL_strlen(comBuff); //new length of the comment
 								}
@@ -3410,6 +3417,12 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 										}else{
 											lvlComLineIsGood = 0;
 										}
+									}else if(SDL_strncmp(comBuff,"${B[",4)==0){
+										//expression such as ${B[direct ce detection]:}
+										//intended to be a bold header in the comment
+										if(lvlComLineIsGood != 0){
+											lvlComLineIsGood = 1; //continue previous comment
+										}
 									}else if(SDL_strncmp(comBuff,"$",1)==0){
 										lvlComLineIsGood = 0;
 									}else if(SDL_strncmp(comBuff,"MOM",3)==0){
@@ -3429,8 +3442,8 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 										if(!(nd->levels[nd->numLvls-1].hasComment & (uint8_t)(1U << LCOMMENT_DECAYMODE))){
 											nd->levels[nd->numLvls-1].hasComment |= (uint8_t)(1U << LCOMMENT_DECAYMODE);
 											lvlComLineIsGood = 2; //new comment
-											SDL_strlcpy(tmpComBuff,comBuff,128);
-											SDL_snprintf(comBuff,128,"D$%s",tmpComBuff);
+											SDL_strlcpy(tmpComBuff,comBuff,ENSDF_LINE_SIZE);
+											SDL_snprintf(comBuff,ENSDF_LINE_SIZE,"D$%s",tmpComBuff);
 											comBuff[strcspn(comBuff,"\r\n")] = 0; //strips newline characters from the string
 											//SDL_Log("decay mode comment: %s",comBuff);
 										}else{
@@ -3499,6 +3512,10 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 
 									}
 								}
+
+								SDL_free(comBuff);
+								SDL_free(tmpComBuff);
+
 							}else{
 								lvlComLineIsGood = 0; //possible non-comment line in-between two comments
 							}
@@ -3518,39 +3535,39 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 							
 							//parse the gamma intensity
 							char iBuff[9];
-							memcpy(iBuff, &line[21], 8);
+							SDL_memcpy(iBuff, &line[21], 8);
 							iBuff[8] = '\0';
 							//parse the gamma intensity error
 							char ieBuff[3];
-							memcpy(ieBuff, &line[29], 2);
+							SDL_memcpy(ieBuff, &line[29], 2);
 							ieBuff[2] = '\0';
 							//parse the gamma multipolarity
 							char mBuff[11];
-							memcpy(mBuff, &line[31], 10);
+							SDL_memcpy(mBuff, &line[31], 10);
 							mBuff[10] = '\0';
 							//parse the internal conversion coefficient
 							char iccBuff[8];
-							memcpy(iccBuff, &line[55], 7);
+							SDL_memcpy(iccBuff, &line[55], 7);
 							iccBuff[7] = '\0';
 							//parse the internal conversion coefficient error
 							char icceBuff[3];
-							memcpy(icceBuff, &line[62], 2);
+							SDL_memcpy(icceBuff, &line[62], 2);
 							icceBuff[2] = '\0';
 							//parse the mixing ratio
 							char deltaBuff[9];
-							memcpy(deltaBuff, &line[41], 8);
+							SDL_memcpy(deltaBuff, &line[41], 8);
 							deltaBuff[8] = '\0';
 							//parse the internal mixing ratio error
 							char deltaeBuff[7];
-							memcpy(deltaeBuff, &line[49], 6);
+							SDL_memcpy(deltaeBuff, &line[49], 6);
 							deltaeBuff[6] = '\0';
 							//parse the energy
 							char ebuff[11];
-							memcpy(ebuff, &line[9], 10);
+							SDL_memcpy(ebuff, &line[9], 10);
 							ebuff[10] = '\0';
 							//parse the energy error
 							char eeBuff[3];
-							memcpy(eeBuff, &line[19], 2);
+							SDL_memcpy(eeBuff, &line[19], 2);
 							eeBuff[2] = '\0';
 							
 							uint8_t tentativeE = 0;
@@ -3609,7 +3626,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 										nd->tran[tranInd].energy.format |= (uint16_t)(VALUETYPE_PLUSX << 5U);
 									}
 								}
-								memcpy(ebuff, &line[9], 10); //re-constitute original buffer
+								SDL_memcpy(ebuff, &line[9], 10); //re-constitute original buffer
 								ebuff[10] = '\0';
 								nd->tran[tranInd].energy.format |= (uint16_t)(ebuff[gamEStartPos] << 9U);
 							}else if((gamEStrLen > 1)&&(ebuff[gamEStrLen-2]=='+')&&(SDL_isalpha(ebuff[gamEStrLen-1]))){
@@ -3626,7 +3643,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 										//SDL_Log("variable: %c\n",tok[0]);
 									}
 								}
-								memcpy(ebuff, &line[9], 10); //re-constitute original buffer
+								SDL_memcpy(ebuff, &line[9], 10); //re-constitute original buffer
 								ebuff[10] = '\0';
 							}else{
 								//normal gamma energy
@@ -3668,7 +3685,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 									}
 								}else{
 									//potentially an exponent form value with no decimal place
-									memcpy(ebuff, &line[9], 10); //re-copy buffer
+									SDL_memcpy(ebuff, &line[9], 10); //re-copy buffer
 									ebuff[10] = '\0';
 									//SDL_Log("ebuff (no decimal): %s\n",ebuff);
 									tok = SDL_strtok_r(ebuff,"E",&saveptr);
@@ -3918,7 +3935,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 										//we missed parsing the exponent...
 										//assume value was something like '3.E9', in which case the exponent was
 										//earlier parsed as the format instead
-										memcpy(iccBuff, &line[55], 7); //remake iccBuff
+										SDL_memcpy(iccBuff, &line[55], 7); //remake iccBuff
 										iccBuff[7] = '\0';
 										tok = SDL_strtok_r(iccBuff,".",&saveptr);
 										if(tok!=NULL){
@@ -3935,7 +3952,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 								}else if(hasExp){
 									//we missed parsing the exponent...
 									//assume value was something like '3E9'
-									memcpy(iccBuff, &line[55], 7); //remake iccBuff
+									SDL_memcpy(iccBuff, &line[55], 7); //remake iccBuff
 									iccBuff[7] = '\0';
 									tok = SDL_strtok_r(iccBuff,"E",&saveptr);
 									if(tok!=NULL){
@@ -4036,7 +4053,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 								//SDL_Log("Number of multipoles: %u\n",nd->tran[tranInd].numMultipoles);
 							}else{
 								//recopy buffer
-								memcpy(mBuff, &line[31], 10);
+								SDL_memcpy(mBuff, &line[31], 10);
 								mBuff[10] = '\0';
 								if(!SDL_isspace(mBuff[0])){
 									//string with no preceding or trailing spaces
@@ -4087,7 +4104,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 										//we missed parsing the exponent...
 										//assume value was something like '3.E9', in which case the exponent was
 										//earlier parsed as the format instead
-										memcpy(deltaBuff, &line[41], 8); //remake deltaBuff
+										SDL_memcpy(deltaBuff, &line[41], 8); //remake deltaBuff
 										deltaBuff[8] = '\0';
 										tok = SDL_strtok_r(deltaBuff,".",&saveptr);
 										if(tok!=NULL){
@@ -4371,9 +4388,9 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 									}
 								}
 
-								char comBuff[128];
-								memcpy(comBuff, &line[9+comBufStart], 118);
-								comBuff[118] = '\0';
+								char *comBuff=(char*)SDL_calloc(1,ENSDF_LINE_SIZE);
+								SDL_memcpy(comBuff, &line[9+comBufStart], SDL_strlen(line) - 9);
+								comBuff[SDL_strlen(line) - 9] = '\0';
 								len = (int32_t)SDL_strlen(comBuff); //length of the comment
 								//SDL_Log("comBuff: %s, len: %u\n",comBuff,len);
 
@@ -4400,10 +4417,10 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 								if(len > 0){
 									char *modComBuff;
 									modComBuff = findReplaceAllUTF8("M,MR$","M$",comBuff);
-									SDL_strlcpy(comBuff,modComBuff,118);
+									SDL_strlcpy(comBuff,modComBuff,ENSDF_LINE_SIZE-10);
 									SDL_free(modComBuff);
 									modComBuff = findReplaceAllUTF8("M,MR ","M$",comBuff);
-									SDL_strlcpy(comBuff,modComBuff,118);
+									SDL_strlcpy(comBuff,modComBuff,ENSDF_LINE_SIZE-10);
 									SDL_free(modComBuff);
 									len = (int32_t)SDL_strlen(comBuff); //new length of the comment
 								}
@@ -4509,6 +4526,9 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 
 									}
 								}
+
+								SDL_free(comBuff);
+
 							}else{
 								tranComLineIsGood = 0; //possible non-comment line in-between two comments
 							}
@@ -4523,7 +4543,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 						if(firstQLine==1){
 							//parse the beta Q-value
 							char qbBuff[11];
-							memcpy(qbBuff, &line[9], 10);
+							SDL_memcpy(qbBuff, &line[9], 10);
 							for(uint8_t i=1;i<10;i++){
 								if((SDL_isspace(qbBuff[i])) && (!(SDL_isspace(qbBuff[i-1])))){
 									qbBuff[i] = '\0'; //terminate string at first trailing space
@@ -4532,7 +4552,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 								}
 							}
 							char qbErrBuff[3];
-							memcpy(qbErrBuff, &line[19], 2);
+							SDL_memcpy(qbErrBuff, &line[19], 2);
 							qbErrBuff[2] = '\0';
 
 							nd->nuclData[nd->numNucl].qbeta.val = (float)SDL_atof(qbBuff);
@@ -4589,7 +4609,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 
 							//parse the neutron sep energy
 							char nsBuff[9];
-							memcpy(nsBuff, &line[21], 8);
+							SDL_memcpy(nsBuff, &line[21], 8);
 							for(uint8_t i=1;i<8;i++){
 								if((SDL_isspace(nsBuff[i])) && (!(SDL_isspace(nsBuff[i-1])))){
 									nsBuff[i] = '\0'; //terminate string at first trailing space
@@ -4598,7 +4618,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 								}
 							}
 							char nsErrBuff[3];
-							memcpy(nsErrBuff, &line[29], 2);
+							SDL_memcpy(nsErrBuff, &line[29], 2);
 							nsErrBuff[2] = '\0';
 
 							nd->nuclData[nd->numNucl].sn.val = (float)SDL_atof(nsBuff);
@@ -4671,7 +4691,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 
 							//parse the proton sep energy
 							char psBuff[9];
-							memcpy(psBuff, &line[31], 8);
+							SDL_memcpy(psBuff, &line[31], 8);
 							for(uint8_t i=1;i<8;i++){
 								if((SDL_isspace(psBuff[i])) && (!(SDL_isspace(psBuff[i-1])))){
 									psBuff[i] = '\0'; //terminate string at first trailing space
@@ -4680,7 +4700,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 								}
 							}
 							char psErrBuff[3];
-							memcpy(psErrBuff, &line[39], 2);
+							SDL_memcpy(psErrBuff, &line[39], 2);
 							psErrBuff[2] = '\0';
 
 							nd->nuclData[nd->numNucl].sp.val = (float)SDL_atof(psBuff);
@@ -4744,7 +4764,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 
 							//parse the alpha Q-value
 							char qaBuff[9];
-							memcpy(qaBuff, &line[41], 8);
+							SDL_memcpy(qaBuff, &line[41], 8);
 							for(uint8_t i=1;i<8;i++){
 								if((SDL_isspace(qaBuff[i])) && (!(SDL_isspace(qaBuff[i-1])))){
 									qaBuff[i] = '\0'; //terminate string at first trailing space
@@ -4753,7 +4773,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 								}
 							}
 							char qaErrBuff[9];
-							memcpy(qaErrBuff, &line[49], 2);
+							SDL_memcpy(qaErrBuff, &line[49], 2);
 							qaErrBuff[2] = '\0';
 							
 							nd->nuclData[nd->numNucl].qalpha.val = (float)SDL_atof(qaBuff);
@@ -5092,10 +5112,10 @@ int parseMassData(const char * filePath, ndata * nd){
 			SDL_strlcpy(line,str,256); //store the entire line
 			//SDL_Log("%s\n",line);
 
-			memcpy(tmpVal,&line[6],3);
+			SDL_memcpy(tmpVal,&line[6],3);
 			tmpVal[3] = '\0'; //terminate string
 			N = (int16_t)SDL_atoi(tmpVal);
-			memcpy(tmpVal,&line[11],3);
+			SDL_memcpy(tmpVal,&line[11],3);
 			tmpVal[3] = '\0'; //terminate string
 			Z = (int16_t)SDL_atoi(tmpVal);
 
@@ -5104,7 +5124,7 @@ int parseMassData(const char * filePath, ndata * nd){
 
 				//mass excess
 				uint8_t systematic = 0;
-				memcpy(tmpVal,&line[29],12);
+				SDL_memcpy(tmpVal,&line[29],12);
 				tmpVal[12] = '\0'; //terminate string
 				for(uint8_t i=0; i<12; i++){
 					if(tmpVal[i] == '#'){
@@ -5114,7 +5134,7 @@ int parseMassData(const char * filePath, ndata * nd){
 				}
 				double rawVal = SDL_atof(tmpVal);
 
-				memcpy(tmpVal,&line[43],12);
+				SDL_memcpy(tmpVal,&line[43],12);
 				tmpVal[12] = '\0'; //terminate string
 				for(uint8_t i=0; i<12; i++){
 					if(tmpVal[i] == '#'){
@@ -5155,7 +5175,7 @@ int parseMassData(const char * filePath, ndata * nd){
 
 				//BE/A
 				systematic = 0;
-				memcpy(tmpVal,&line[56],12);
+				SDL_memcpy(tmpVal,&line[56],12);
 				tmpVal[12] = '\0'; //terminate string
 				for(uint8_t i=0; i<12; i++){
 					if(tmpVal[i] == '#'){
@@ -5165,7 +5185,7 @@ int parseMassData(const char * filePath, ndata * nd){
 				}
 				rawVal = SDL_atof(tmpVal);
 
-				memcpy(tmpVal,&line[68],12);
+				SDL_memcpy(tmpVal,&line[68],12);
 				tmpVal[12] = '\0'; //terminate string
 				for(uint8_t i=0; i<12; i++){
 					if(tmpVal[i] == '#'){
@@ -5206,10 +5226,10 @@ int parseMassData(const char * filePath, ndata * nd){
 
 				//mass in amu
 				systematic = 0;
-				memcpy(tmpVal,&line[106],3);
+				SDL_memcpy(tmpVal,&line[106],3);
 				tmpVal[3] = '\0'; //terminate string
 				rawVal = SDL_atof(tmpVal);
-				memcpy(tmpVal,&line[110],13);
+				SDL_memcpy(tmpVal,&line[110],13);
 				tmpVal[13] = '\0'; //terminate string
 				for(uint8_t i=0; i<13; i++){
 					if(tmpVal[i] == '#'){
@@ -5219,7 +5239,7 @@ int parseMassData(const char * filePath, ndata * nd){
 				}
 				rawVal += SDL_atof(tmpVal)/1000000.0;
 
-				memcpy(tmpVal,&line[124],12);
+				SDL_memcpy(tmpVal,&line[124],12);
 				tmpVal[12] = '\0'; //terminate string
 				for(uint8_t i=0; i<12; i++){
 					if(tmpVal[i] == '#'){

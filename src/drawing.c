@@ -565,8 +565,20 @@ SDL_FRect getTooltipRect(const drawing_state *restrict ds, resource_data *restri
     TTF_GetTextSize(ttxt,&textW,&textH);
   }
   TTF_DestroyText(ttxt);
-  float width = ((float)textW/rdat->uiDPIScale) + 8.0f*UI_PADDING_SIZE*rdat->uiScale/rdat->uiDPIScale;
   float height = ((float)textH/rdat->uiDPIScale) + 8.0f*UI_PADDING_SIZE*rdat->uiScale/rdat->uiDPIScale;
+  while(height > ds->windowYRes - 4.0f*UI_PADDING_SIZE*rdat->uiScale/rdat->uiDPIScale){
+    //too much text, tooltip is too large to show
+    txtMaxWidth *= 1.5f;
+    ttxt = TTF_CreateText(rdat->te,rdat->font[FONTSIZE_NORMAL],txt,0);
+    TTF_SetTextWrapWidth(ttxt,(int)(SDL_ceilf(txtMaxWidth*rdat->uiDPIScale)));
+    TTF_GetTextSize(ttxt,&textW,&textH);
+    TTF_DestroyText(ttxt);
+    height = ((float)textH/rdat->uiDPIScale) + 8.0f*UI_PADDING_SIZE*rdat->uiScale/rdat->uiDPIScale;
+    if(txtMaxWidth > 3.0f*TOOLTIP_MAX_WIDTH){
+      break; //safety valve
+    }
+  }
+  float width = ((float)textW/rdat->uiDPIScale) + 8.0f*UI_PADDING_SIZE*rdat->uiScale/rdat->uiDPIScale;
   float xPosOut = xPos;
   float yPosOut = yPos;
   if(xPos + width > ds->windowXRes){
@@ -585,7 +597,7 @@ SDL_FRect getTooltipRect(const drawing_state *restrict ds, resource_data *restri
 
 void drawTooltipBox(const ui_theme_rules *restrict uirules, resource_data *restrict rdat, const SDL_FRect rect, const float alpha, const char *txt){
 
-  float txtMaxWidth = SDL_ceilf((TOOLTIP_MAX_WIDTH - 8.0f*UI_PADDING_SIZE)*rdat->uiScale/rdat->uiDPIScale);
+  float txtMaxWidth = SDL_ceilf(rect.w - 8.0f*UI_PADDING_SIZE*rdat->uiScale/rdat->uiDPIScale);
   drawPanelBG(uirules,rdat,rect,alpha);
   drawTextAlignedSized(rdat,rect.x + 4*UI_PADDING_SIZE*rdat->uiScale/rdat->uiDPIScale,rect.y + 4*UI_PADDING_SIZE*rdat->uiScale/rdat->uiDPIScale,uirules->textColNormal[uirules->uiColorTheme],FONTSIZE_NORMAL,(Uint8)(alpha*255.0f),txt,ALIGN_LEFT,(Uint16)txtMaxWidth);
 

@@ -237,9 +237,9 @@ static const SDL_FColor listHighlightColDark = {0.2f,0.2f,0.2f,0.1f};
 static const SDL_FColor listHighlightColLight = {0.8f,0.8f,0.8f,0.4f};
 
 static const SDL_Color whiteCol8Bit = {255,255,255,255};
-static const SDL_Color lightGrayCol8Bit = {235,235,235,255};
+static const SDL_Color lightGrayTxtCol8Bit = {175,175,175,255};
 static const SDL_Color grayCol8Bit = {127,127,127,255};
-static const SDL_Color darkGrayCol8Bit = {80,80,80,255};
+static const SDL_Color darkGrayTxtCol8Bit = {120,120,120,255};
 static const SDL_Color blackCol8Bit = {0,0,0,255};
 static const SDL_Color lightGreenTxtCol8Bit = {20,220,20,255};
 static const SDL_Color lightRedTxtCol8Bit = {255,70,70,255};

@@ -3288,21 +3288,21 @@ void drawNuclFullInfoBox(const app_data *restrict dat, app_state *restrict state
       //setup fonts and text color
       uint8_t lvlFontInd = FONTSIZE_NORMAL;
       SDL_Color lvlTxtCol = isHlTxtLight(hl,dat->rules.themeRules.uiColorTheme == UITHEME_DARK) ? whiteCol8Bit : blackCol8Bit;
-      if((darkTheme)&&(hl <= HL_LL_NOCOL_VAL)){
+      /*if((darkTheme)&&(hl <= HL_LL_NOCOL_VAL)){
         lvlTxtCol = whiteCol8Bit; //handle dark themes when levels have no color highlights
-      }
+      }*/
       SDL_Color lvlTxtColBlue = isHlTxtLight(hl,dat->rules.themeRules.uiColorTheme == UITHEME_DARK) ? lightBlueCol8Bit : darkBlueCol8Bit;
-      if((darkTheme)&&(hl <= HL_LL_NOCOL_VAL)){
+      /*if((darkTheme)&&(hl <= HL_LL_NOCOL_VAL)){
         lvlTxtColBlue = lightBlueCol8Bit; //handle dark themes when levels have no color highlights
-      }
+      }*/
       if((state->ds.reactionModeInd == REACTIONMODE_HIGHLIGHT)&&(state->ds.selectedRxn > 0)&&(state->ds.selectedRxn < 254)){
         if(dat->ndat.levels[lvlInd].populatingRxns & ((uint64_t)(1) << (state->ds.selectedRxn-1))){
           lvlFontInd = FONTSIZE_NORMAL_BOLD;
         }else{
-          lvlTxtCol = isHlTxtLight(hl,dat->rules.themeRules.uiColorTheme == UITHEME_DARK) ? lightGrayCol8Bit : darkGrayCol8Bit;
-          if((darkTheme)&&(hl <= HL_LL_NOCOL_VAL)){
+          lvlTxtCol = isHlTxtLight(hl,dat->rules.themeRules.uiColorTheme == UITHEME_DARK) ? lightGrayTxtCol8Bit : darkGrayTxtCol8Bit;
+          /*if((darkTheme)&&(hl <= HL_LL_NOCOL_VAL)){
             lvlTxtCol = lightGrayCol8Bit; //handle dark themes when levels have no color highlights
-          }
+          }*/
           lvlTxtColBlue = lvlTxtCol;
         }
       }else if(state->ds.selectedRxn >= 254){

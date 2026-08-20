@@ -3855,7 +3855,7 @@ uint16_t getMaxNumLvlDispLines(const ndata *restrict nd, const app_state *restri
 uint32_t getENSDFLvlCommentStrInd(const ndata *restrict nd, const uint32_t lvlInd, const uint8_t commentType){
 	if(nd->levels[lvlInd].hasComment & (uint8_t)(1U << commentType)){
 		uint32_t strBufPos = nd->levels[lvlInd].commentStrBufStartPos;
-		while(strBufPos < nd->levels[lvlInd].commentStrBufStartPos + 2048){
+		while(strBufPos < nd->levels[lvlInd].commentStrBufStartPos + 8192){
 			switch(commentType){
 				case LCOMMENT_ELEVEL:
 					if(SDL_strncmp(&nd->ensdfStrBuf[strBufPos],"E$",2)==0){

@@ -45,7 +45,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //text selection parameters
 #define MAX_SELECTABLE_STRS      1024 //maximum number of onscreen text strings that can be selectable at once
 #define MAX_SELECTABLE_STR_LEN   256 //maximum length of selectable text strings (should be larger than 32, which is the size used by some string composition functions in data_ops.c)
-#define MAX_COPY_STR_LEN         1024 //size of the cliboard text buffer, also the maximum ENSDF comment size that can be displayed
+#define MAX_COPY_STR_LEN         4096 //size of the cliboard text buffer, also the maximum ENSDF comment size that can be displayed
 
 //context menu parameters
 #define MAX_CONTEXT_MENU_ITEMS   4 //maximum number of items in the context menu
