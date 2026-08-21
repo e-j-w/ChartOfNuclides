@@ -2681,7 +2681,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 		return 0;
 	}
 
-	SDL_Log("Reading file: %s\n",filePath);
+	SDL_Log("Parsing file: %s\n",filePath);
 
   while(!(feof(efile))){ //go until the end of file is reached
 
@@ -5089,7 +5089,7 @@ int parseAbundanceData(const char * filePath, ndata * nd){
 	}
 	fclose(afile);
 	
-	SDL_Log("Finished reading abundance data file: %s\n",filePath);
+	SDL_Log("Finished parsing abundance data file: %s\n",filePath);
   return 0;
 }
 
@@ -5517,7 +5517,7 @@ int parseMassData(const char * filePath, ndata * nd){
 	}
 	
 	
-	SDL_Log("Finished reading mass data file: %s\n",filePath);
+	SDL_Log("Finished parsing mass data file: %s\n",filePath);
   return 0;
 }
 
