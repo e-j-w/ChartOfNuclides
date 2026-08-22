@@ -1244,19 +1244,23 @@ void processInputFlags(app_data *restrict dat, app_state *restrict state, resour
         }
       }else if((state->uiState == UISTATE_CHARTONLY)||(state->uiState == UISTATE_INFOBOX)){
         //check for mouseover of axis labels
-        if((state->mouseXPx >= 0.0f)&&(state->mouseXPx < (CHART_AXIS_DEPTH*state->ds.uiUserScale))){
+        if((state->mouseXPx >= (state->ds.uiElemPosX[UIELEM_RECENTER_BUTTON]))&&(state->mouseXPx < (state->ds.uiElemPosX[UIELEM_RECENTER_BUTTON]+state->ds.uiElemWidth[UIELEM_RECENTER_BUTTON]+state->ds.uiElemExtPlusX[UIELEM_RECENTER_BUTTON]))&&(state->mouseYPx >= (state->ds.uiElemPosY[UIELEM_RECENTER_BUTTON]-state->ds.uiElemExtMinusY[UIELEM_RECENTER_BUTTON]))&&(state->mouseYPx < (state->ds.uiElemPosY[UIELEM_RECENTER_BUTTON]+state->ds.uiElemHeight[UIELEM_RECENTER_BUTTON]+state->ds.uiElemExtPlusY[UIELEM_RECENTER_BUTTON]))){
+          //mouse over re-center button
+          state->ds.showingTooltip = 1;
+          state->ds.tooltipPar = CHARTTT_CENTERCHART;
+        }else if((state->mouseXPx >= 0.0f)&&(state->mouseXPx < (CHART_AXIS_DEPTH*state->ds.uiUserScale))){
           if((state->mouseYPx >= 0.0f)&&(state->mouseYPx < (CHART_AXIS_DEPTH*state->ds.uiUserScale))){
             //mouse over 'Z' label
             //SDL_Log("Mouse over 'Z'\n");
             state->ds.showingTooltip = 1;
-            state->ds.tooltipPar = 0;
+            state->ds.tooltipPar = CHARTTT_NUMPROTONS;
           }
         }else if((state->mouseXPx > (state->ds.windowXRes - (CHART_AXIS_DEPTH*state->ds.uiUserScale)))&&(state->mouseXPx <= state->ds.windowXRes)){
           if((state->mouseYPx > (state->ds.windowYRes - (CHART_AXIS_DEPTH*state->ds.uiUserScale)))&&(state->mouseYPx <= state->ds.windowYRes)){
             //mouse over 'N' label
             //SDL_Log("Mouse over 'N'\n");
             state->ds.showingTooltip = 1;
-            state->ds.tooltipPar = 1;
+            state->ds.tooltipPar = CHARTTT_NUMNEUTRONS;
           }
         }
       }

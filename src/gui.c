@@ -69,7 +69,7 @@ SDL_FColor getHalfLifeCol(const double halflifeSeconds, const uint8_t valueType,
   col.a = 1.0f;
   if((halflifeSeconds >= 1.0E40)||((halflifeSeconds > 1.0E15) && ((valueType == VALUETYPE_GREATERTHAN) || (valueType == VALUETYPE_GREATEROREQUALTHAN)))){
     if(darkTheme){
-      col.r = 1.0f; col.g = 0.9f; col.b = 0.9f;
+      col.r = 1.0f; col.g = 0.95f; col.b = 0.95f;
     }else{
       col.r = 0.0f; col.g = 0.0f; col.b = 0.0f;
     }
@@ -339,85 +339,85 @@ SDL_FColor getHalfLifeCol(const double halflifeSeconds, const uint8_t valueType,
     }
   }else if(halflifeSeconds > 5.0E-4){
     if(darkTheme){
-      col.r = 0.125f; col.g = 0.275f; col.b = 0.6f;
+      col.r = 0.125f; col.g = 0.275f; col.b = 0.625f;
     }else{
       col.r = 1.0f; col.g = 0.9f; col.b = 0.35f;
     }
   }else if(halflifeSeconds > 3.0E-4){
     if(darkTheme){
-      col.r = 0.1f; col.g = 0.25f; col.b = 0.575f;
+      col.r = 0.1f; col.g = 0.25f; col.b = 0.6f;
     }else{
       col.r = 1.0f; col.g = 0.85f; col.b = 0.375f;
     }
   }else if(halflifeSeconds > 1.0E-4){
     if(darkTheme){
-       col.r = 0.1f; col.g = 0.225f; col.b = 0.55f;
+       col.r = 0.1f; col.g = 0.225f; col.b = 0.575f;
     }else{
       col.r = 1.0f; col.g = 0.8f; col.b = 0.4f;
     }
   }else if(halflifeSeconds > 5.0E-5){
     if(darkTheme){
-      col.r = 0.1f; col.g = 0.2f; col.b = 0.525f;
+      col.r = 0.1f; col.g = 0.2f; col.b = 0.55f;
     }else{
       col.r = 1.0f; col.g = 0.75f; col.b = 0.5f;
     }
   }else if(halflifeSeconds > 1.0E-5){
     if(darkTheme){
-      col.r = 0.1f; col.g = 0.175f; col.b = 0.5f;
+      col.r = 0.1f; col.g = 0.175f; col.b = 0.525f;
     }else{
       col.r = 1.0f; col.g = 0.7f; col.b = 0.6f;
     }
   }else if(halflifeSeconds > 5.0E-6){
     if(darkTheme){
-      col.r = 0.1f; col.g = 0.15f; col.b = 0.45f;
+      col.r = 0.1f; col.g = 0.15f; col.b = 0.5f;
     }else{
       col.r = 1.0f; col.g = 0.65f; col.b = 0.65f;
     }
   }else if(halflifeSeconds > 1.0E-6){
     if(darkTheme){
-      col.r = 0.1f; col.g = 0.125f; col.b = 0.4f;
+      col.r = 0.1f; col.g = 0.125f; col.b = 0.475f;
     }else{
       col.r = 1.0f; col.g = 0.6f; col.b = 0.7f;
     }
   }else if(halflifeSeconds > 5.0E-7){
     if(darkTheme){
-      col.r = 0.0f; col.g = 0.1f; col.b = 0.375f;
+      col.r = 0.0f; col.g = 0.1f; col.b = 0.45f;
     }else{
       col.r = 1.0f; col.g = 0.65f; col.b = 0.7f;
     }
   }else if(halflifeSeconds > 1.0E-7){
     if(darkTheme){
-      col.r = 0.1f; col.g = 0.075f; col.b = 0.35f;
+      col.r = 0.05f; col.g = 0.075f; col.b = 0.425f;
     }else{
       col.r = 1.0f; col.g = 0.7f; col.b = 0.7f;
     }
   }else if(halflifeSeconds > 1.0E-8){
     if(darkTheme){
-      col.r = 0.0f; col.g = 0.05f; col.b = 0.325f;
+      col.r = 0.1f; col.g = 0.05f; col.b = 0.4f;
     }else{
       col.r = 1.0f; col.g = 0.7f; col.b = 0.8f;
     }
   }else if(halflifeSeconds > 1.0E-9){
     if(darkTheme){
-      col.r = 0.0f; col.g = 0.025f; col.b = 0.3f;
+      col.r = 0.15f; col.g = 0.025f; col.b = 0.35f;
     }else{
       col.r = 1.0f; col.g = 0.8f; col.b = 0.8f;
     }
   }else if(halflifeSeconds > 1.0E-11){
     if(darkTheme){
-      col.r = 0.0f; col.g = 0.00f; col.b = 0.1f;
+      col.r = 0.15f; col.g = 0.01f; col.b = 0.3f;
     }else{
       col.r = 1.0f; col.g = 0.9f; col.b = 0.9f;
     }
   }else if(halflifeSeconds > 1.0E-13){
     if(darkTheme){
-      col.r = 0.0f; col.g = 0.0f; col.b = 0.0f;
+      col.r = 0.1f; col.g = 0.0f; col.b = 0.2f;
     }else{
       col.r = 1.0f; col.g = 0.95f; col.b = 0.95f;
     }
   }else{
     if(darkTheme){
-      col.r = 0.0f; col.g = 0.05f; col.b = 0.25f;
+      col.r = 0.0f; col.g = 0.0f; col.b = 0.15f;
     }else{
       col.r = 1.0f; col.g = 0.9f; col.b = 0.9f;
     }
@@ -3068,6 +3068,11 @@ void drawNuclFullInfoBox(const app_data *restrict dat, app_state *restrict state
     txtAlpha = (uint8_t)(255.0f*juice_smoothStart2(1.0f - state->ds.timeLeftInUIAnimation[UIANIM_NUCLINFOBOX_TXTFADEIN]/UI_ANIM_LENGTH));
   }
 
+  if(darkTheme){
+    drawFlatBG(&state->ds,rdat,blackCol);
+  }
+  
+
   SDL_Color defaultTextCol = dat->rules.themeRules.textColNormal[dat->rules.themeRules.uiColorTheme];
 
   if(state->ds.fcScrollInProgress){
@@ -3269,7 +3274,7 @@ void drawNuclFullInfoBox(const app_data *restrict dat, app_state *restrict state
       
       //setup box color based on half-life
       const double hl = getLevelHalfLifeSeconds(&dat->ndat,lvlInd);
-      if(hl > 1.0E-13){
+      if(hl > HL_LL_NOCOL_VAL){
         //highlight isomers and stable states
         //first check that the lifetime is not an upper limit
         if((((dat->ndat.levels[lvlInd].halfLife.format >> 5U) & 15U) != VALUETYPE_LESSTHAN)&&(((dat->ndat.levels[lvlInd].halfLife.format >> 5U) & 15U) != VALUETYPE_LESSOREQUALTHAN)){
@@ -3277,32 +3282,24 @@ void drawNuclFullInfoBox(const app_data *restrict dat, app_state *restrict state
           rect.w = listWidth;
           rect.h = (NUCL_INFOBOX_SMALLLINE_HEIGHT*numLines)*state->ds.uiUserScale;
           rect.y = drawYPos;
-          SDL_FColor rectCol = getHalfLifeCol(hl,(uint8_t)((dat->ndat.levels[lvlInd].halfLife.format >> 5U) & 15U),dat->rules.themeRules.uiColorTheme == UITHEME_DARK);
+          SDL_FColor rectCol = getHalfLifeCol(hl,(uint8_t)((dat->ndat.levels[lvlInd].halfLife.format >> 5U) & 15U),darkTheme);
           if(txtAlpha != 255){
             rectCol.a *= txtAlpha/255.0f;
           }
+          //SDL_Log("col: %.3f %.3f %.3f %.3f\n",(double)rectCol.r,(double)rectCol.g,(double)rectCol.b,(double)rectCol.a);
           drawFlatRect(rdat,rect,rectCol);
         }
       }
 
       //setup fonts and text color
       uint8_t lvlFontInd = FONTSIZE_NORMAL;
-      SDL_Color lvlTxtCol = isHlTxtLight(hl,dat->rules.themeRules.uiColorTheme == UITHEME_DARK) ? whiteCol8Bit : blackCol8Bit;
-      /*if((darkTheme)&&(hl <= HL_LL_NOCOL_VAL)){
-        lvlTxtCol = whiteCol8Bit; //handle dark themes when levels have no color highlights
-      }*/
-      SDL_Color lvlTxtColBlue = isHlTxtLight(hl,dat->rules.themeRules.uiColorTheme == UITHEME_DARK) ? lightBlueCol8Bit : darkBlueCol8Bit;
-      /*if((darkTheme)&&(hl <= HL_LL_NOCOL_VAL)){
-        lvlTxtColBlue = lightBlueCol8Bit; //handle dark themes when levels have no color highlights
-      }*/
+      SDL_Color lvlTxtCol = isHlTxtLight(hl,darkTheme) ? whiteCol8Bit : blackCol8Bit;
+      SDL_Color lvlTxtColBlue = isHlTxtLight(hl,darkTheme) ? lightBlueCol8Bit : darkBlueCol8Bit;
       if((state->ds.reactionModeInd == REACTIONMODE_HIGHLIGHT)&&(state->ds.selectedRxn > 0)&&(state->ds.selectedRxn < 254)){
         if(dat->ndat.levels[lvlInd].populatingRxns & ((uint64_t)(1) << (state->ds.selectedRxn-1))){
           lvlFontInd = FONTSIZE_NORMAL_BOLD;
         }else{
-          lvlTxtCol = isHlTxtLight(hl,dat->rules.themeRules.uiColorTheme == UITHEME_DARK) ? lightGrayTxtCol8Bit : darkGrayTxtCol8Bit;
-          /*if((darkTheme)&&(hl <= HL_LL_NOCOL_VAL)){
-            lvlTxtCol = lightGrayCol8Bit; //handle dark themes when levels have no color highlights
-          }*/
+          lvlTxtCol = isHlTxtLight(hl,darkTheme) ? lightGrayTxtCol8Bit : darkGrayTxtCol8Bit;
           lvlTxtColBlue = lvlTxtCol;
         }
       }else if(state->ds.selectedRxn >= 254){
@@ -3356,7 +3353,7 @@ void drawNuclFullInfoBox(const app_data *restrict dat, app_state *restrict state
                     rect.y = drawYPos;
                   }
                   rect.x -= (NUCL_FULLINFOBOX_COL_MOUSEOVER_OFFSET*state->ds.uiUserScale);
-                  drawFlatRect(rdat,rect,isHlTxtLight(hl,dat->rules.themeRules.uiColorTheme == UITHEME_DARK) ? listHighlightColLight : listHighlightColDark);
+                  drawFlatRect(rdat,rect,isHlTxtLight(hl,darkTheme) ? listHighlightColLight : listHighlightColDark);
                 }
                 break;
               case LLCOLUMN_EGAMMA:
@@ -3373,7 +3370,7 @@ void drawNuclFullInfoBox(const app_data *restrict dat, app_state *restrict state
                   rect.y = drawYPos + (hoverLvlRow*NUCL_INFOBOX_SMALLLINE_HEIGHT)*state->ds.uiUserScale;
                   rect.x -= (NUCL_FULLINFOBOX_COL_MOUSEOVER_OFFSET*state->ds.uiUserScale);
                   rect.w += (2.0f*NUCL_FULLINFOBOX_COL_MOUSEOVER_OFFSET*state->ds.uiUserScale);
-                  drawFlatRect(rdat,rect,isHlTxtLight(hl,dat->rules.themeRules.uiColorTheme == UITHEME_DARK) ? listHighlightColLight : listHighlightColDark);
+                  drawFlatRect(rdat,rect,isHlTxtLight(hl,darkTheme) ? listHighlightColLight : listHighlightColDark);
                 }
                 break;
                 break;
@@ -3703,11 +3700,13 @@ void drawNuclFullInfoBox(const app_data *restrict dat, app_state *restrict state
   rect.y = 0.0f;
   rect.w = state->ds.windowXRes;
   rect.h = NUCL_FULLINFOBOX_LEVELLIST_POS_Y*state->ds.uiUserScale;
-  drawFlatRect(rdat,rect,dat->rules.themeRules.themeBgCol[dat->rules.themeRules.uiColorTheme]);
+  SDL_FColor rectCol = dat->rules.themeRules.themeBgCol[dat->rules.themeRules.uiColorTheme];
+  rectCol.a = (float)(txtAlpha/255.0f);
+  drawFlatRect(rdat,rect,rectCol);
 
   //rect underneath column titles
   SDL_FColor tableHeaderRectCol = {0.92f,0.92f,0.92f,txtAlpha/255.0f};
-  if(dat->rules.themeRules.uiColorTheme == UITHEME_DARK){
+  if(darkTheme){
     tableHeaderRectCol.r = 0.14f; tableHeaderRectCol.g = 0.14f; tableHeaderRectCol.b = 0.14f;
   }
   rect.y = (NUCL_FULLINFOBOX_LEVELLIST_HEADER_POS_Y - 2*UI_PADDING_SIZE)*state->ds.uiUserScale + txtYOffset;
@@ -5078,12 +5077,15 @@ void drawENSDFCommentTooltip(const ui_theme_rules *restrict uirules, const app_d
   }
 }
 void drawChartTooltip(const ui_theme_rules *restrict uirules, const app_data *restrict dat, const app_state *restrict state, resource_data *restrict rdat){
-  if(state->ds.tooltipPar < 2){
+  if(state->ds.tooltipPar < CHARTTT_ENUM_LENGTH){
     switch(state->ds.tooltipPar){
-      case 1:
+      case CHARTTT_CENTERCHART:
+        SDL_snprintf(ttTxt,MAX_COPY_STR_LEN,"%s",dat->strings[dat->locStringIDs[LOCSTR_CENTERCHART]]);
+        break;
+      case CHARTTT_NUMNEUTRONS:
         SDL_snprintf(ttTxt,MAX_COPY_STR_LEN,"%s",dat->strings[dat->locStringIDs[LOCSTR_NUMNEUTRONS]]);
         break;
-      case 0:
+      case CHARTTT_NUMPROTONS:
       default:
         SDL_snprintf(ttTxt,MAX_COPY_STR_LEN,"%s",dat->strings[dat->locStringIDs[LOCSTR_NUMPROTONS]]);
         break;

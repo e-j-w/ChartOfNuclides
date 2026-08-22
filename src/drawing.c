@@ -586,7 +586,7 @@ SDL_FRect getTooltipRect(const drawing_state *restrict ds, resource_data *restri
       xPosOut -= (width + 2.0f*UI_PADDING_SIZE*rdat->uiScale/rdat->uiDPIScale);
     }
   }
-  if(yPos + height > ds->windowYRes){
+  if((yPos + height > ds->windowYRes)||(yPos > 0.8f*ds->windowYRes)){
     yPosOut -= (height + 2.0f*UI_PADDING_SIZE*rdat->uiScale/rdat->uiDPIScale);
     if(yPosOut < 2.0f*UI_PADDING_SIZE*rdat->uiScale/rdat->uiDPIScale){
       yPosOut = 2.0f*UI_PADDING_SIZE*rdat->uiScale/rdat->uiDPIScale;

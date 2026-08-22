@@ -132,6 +132,7 @@ decay|decay
 same_jpi_as|Same Jπ as the
 num_protons|Z – number of protons
 num_neutrons|N – number of neutrons
+center_chart|Re-center the chart
 is|is
 of|of
 on_earth|on Earth
