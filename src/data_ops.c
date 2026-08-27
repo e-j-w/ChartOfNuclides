@@ -101,6 +101,9 @@ void initializeTempState(const app_data *restrict dat, app_state *restrict state
 	state->ds.searchEntryDispNumChars = 65535U; //default value specifying no text has been input yet
 	state->ds.interfaceSizeInd = UISCALE_NORMAL;
 	state->ds.infoBoxPrevX = -1.0f;
+	state->ds.windowXRestoreRes = 0;
+	state->ds.windowYRestoreRes = 0;
+	state->ds.windowFullscreenMode = 0;
 	state->cms.useHeaderText = 0;
 	state->cms.numContextMenuItems = 0;
 	state->ss.numResults = 0;
@@ -6650,7 +6653,21 @@ void updateUIcolorTheme(app_data *restrict dat, app_state *restrict state, resou
 }
 
 void updateWindowRes(app_data *restrict dat, app_state *restrict state, resource_data *restrict rdat){
-  int wwidth, wheight;
+  
+	//handle remembering the previous windowed resolution
+	if(state->ds.windowMaximized || state->ds.windowFullscreenMode){
+		if(state->ds.windowXRestoreRes == 0){
+			//save previous window resolution
+			state->ds.windowXRestoreRes = state->ds.windowXRes;
+			state->ds.windowYRestoreRes = state->ds.windowYRes;
+			SDL_Log("Set window restore resolution to: [%u %u].\n",state->ds.windowXRestoreRes,state->ds.windowYRestoreRes);
+		}
+	}else{
+		state->ds.windowXRestoreRes = 0; //unset
+		state->ds.windowYRestoreRes = 0; //unset
+	}
+	
+	int wwidth, wheight;
   int rwidth, rheight;
   SDL_GetWindowSize(rdat->window, &wwidth, &wheight);
   SDL_GetWindowSizeInPixels(rdat->window, &rwidth, &rheight);
@@ -6683,7 +6700,7 @@ void handleScreenGraphicsMode(app_data *restrict dat, app_state *restrict state,
     if(SDL_SetWindowFullscreen(rdat->window,1) == 0){
       SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,"cannot set fullscreen mode - %s\n",SDL_GetError());
     }
-    updateWindowRes(dat,state,rdat);
+		updateWindowRes(dat,state,rdat);
     //SDL_Log("Full screen display mode.  Window resolution: %u x %u.\n",state->ds.windowXRes,state->ds.windowYRes);
   }else{
     if(SDL_SetWindowFullscreen(rdat->window,0) == 0){

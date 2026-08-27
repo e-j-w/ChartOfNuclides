@@ -2162,6 +2162,14 @@ void processSingleEvent(app_data *restrict dat, app_state *restrict state, resou
       state->searchCursorPos = evt.edit.start; //seems to reset to 0 when changing workspace
       state->searchSelectionLen = evt.edit.length;
       break;*/
+    case SDL_EVENT_WINDOW_MAXIMIZED:
+      SDL_Log("Window maximized.\n");
+      state->ds.windowMaximized = 1;
+      break;
+    case SDL_EVENT_WINDOW_RESTORED:
+      SDL_Log("Window restored.\n");
+      state->ds.windowMaximized = 0;
+      break;
     default:
       break;
   }

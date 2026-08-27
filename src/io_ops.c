@@ -55,12 +55,6 @@ static int readConfigFile(FILE *file, app_state *restrict state){
         }else{
           state->ds.drawPerformanceStats = 0;
         }
-      }else if(strcmp(par,"fullscreen") == 0){
-        if(strcmp(val,"yes") == 0){
-          state->ds.windowFullscreenMode = 1;
-        }else{
-          state->ds.windowFullscreenMode = 0;
-        }
       }else if(strcmp(par,"window_res_x") == 0){
         int res = atoi(val);
         if(res>=MIN_RENDER_WIDTH){
@@ -191,13 +185,13 @@ static int writeConfigFile(FILE *file, const app_rules *restrict rules, const ap
   fprintf(file,"### %s Configuration File\n",rules->appName);
 
   fprintf(file,"\n### Video Settings\n");
-  if(state->ds.windowFullscreenMode){
-    fprintf(file,"fullscreen=yes\n");
+  if(((state->ds.windowFullscreenMode || state->ds.windowMaximized)) && (state->ds.windowXRestoreRes > 0)){
+    fprintf(file,"window_res_x=%u\n",state->ds.windowXRestoreRes);
+    fprintf(file,"window_res_y=%u\n",state->ds.windowYRestoreRes);
   }else{
-    fprintf(file,"fullscreen=no\n");
+    fprintf(file,"window_res_x=%u\n",state->ds.windowXRes);
+    fprintf(file,"window_res_y=%u\n",state->ds.windowYRes);
   }
-  fprintf(file,"window_res_x=%u\n",state->ds.windowXRes);
-  fprintf(file,"window_res_y=%u\n",state->ds.windowYRes);
 
   fprintf(file,"\n### Display Settings\n");
   fprintf(file,"chart_pos_x=%0.3f\n",(double)state->ds.chartPosX);
