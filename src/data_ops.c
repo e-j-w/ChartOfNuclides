@@ -5996,7 +5996,11 @@ SDL_FRect getContextMenuButtonRect(const app_state *restrict state, const uint8_
 	SDL_FRect rect;
 	rect.x = (float)state->ds.uiElemPosX[UIELEM_CONTEXT_MENU] + (2.0f*PANEL_EDGE_SIZE*state->ds.uiUserScale);
 	rect.y = (float)state->ds.uiElemPosY[UIELEM_CONTEXT_MENU] + (2.0f*PANEL_EDGE_SIZE + menuItem*CONTEXT_MENU_ITEM_SPACING)*state->ds.uiUserScale;
-	rect.w = (CONTEXT_MENU_WIDTH - (4.0f*PANEL_EDGE_SIZE))*state->ds.uiUserScale;
+	if((state->uiState == UISTATE_CHARTONLY)||(state->uiState == UISTATE_INFOBOX)){
+		rect.w = (NUCLIDE_CONTEXT_MENU_WIDTH - (4.0f*PANEL_EDGE_SIZE))*state->ds.uiUserScale;
+	}else{
+		rect.w = (CONTEXT_MENU_WIDTH - (4.0f*PANEL_EDGE_SIZE))*state->ds.uiUserScale;
+	}
 	rect.h = CONTEXT_MENU_ITEM_SPACING*state->ds.uiUserScale;
 	if(state->cms.useHeaderText){
 		rect.y += (float)(CONTEXT_MENU_HEADER_HEIGHT*state->ds.uiUserScale);
@@ -6111,7 +6115,11 @@ void updateSingleUIElemPosition(const app_data *restrict dat, app_state *restric
 		case UIELEM_CONTEXT_MENU:
 			state->ds.uiElemPosX[uiElemInd] = (int16_t)(state->mouseRightClickPosXPx);
 			state->ds.uiElemPosY[uiElemInd] = (int16_t)(state->mouseRightClickPosYPx);
-			state->ds.uiElemWidth[uiElemInd] = (int16_t)(CONTEXT_MENU_WIDTH*state->ds.uiUserScale);
+			if((state->uiState == UISTATE_CHARTONLY)||(state->uiState == UISTATE_INFOBOX)){
+				state->ds.uiElemWidth[uiElemInd] = (int16_t)(NUCLIDE_CONTEXT_MENU_WIDTH*state->ds.uiUserScale);
+			}else{
+				state->ds.uiElemWidth[uiElemInd] = (int16_t)(CONTEXT_MENU_WIDTH*state->ds.uiUserScale);
+			}
 			if((state->ds.uiElemPosX[uiElemInd] + state->ds.uiElemWidth[uiElemInd]) > state->ds.windowXRes){
 				state->ds.uiElemPosX[uiElemInd] = (int16_t)(state->ds.uiElemPosX[uiElemInd] - state->ds.uiElemWidth[uiElemInd]);
 			}
