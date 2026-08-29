@@ -2046,6 +2046,9 @@ void cleanCommentStr(char *comBuff){
 	modComBuff = findReplaceAllUTF8("|g","γ",comBuff);
 	SDL_strlcpy(comBuff,modComBuff,ENSDF_LINE_SIZE-10);
 	SDL_free(modComBuff);
+	modComBuff = findReplaceAllUTF8("|G","Γ",comBuff);
+	SDL_strlcpy(comBuff,modComBuff,ENSDF_LINE_SIZE-10);
+	SDL_free(modComBuff);
 	modComBuff = findReplaceAllUTF8("|D","Δ",comBuff);
 	SDL_strlcpy(comBuff,modComBuff,ENSDF_LINE_SIZE-10);
 	SDL_free(modComBuff);
@@ -3400,7 +3403,7 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 										}else{
 											lvlComLineIsGood = 0;
 										}
-									}else if((len >=5)&&(SDL_strncmp(comBuff,"J,T$",2)==0)){
+									}else if((len >=5)&&(SDL_strncmp(comBuff,"J,T$",4)==0)){
 										if(!(nd->levels[nd->numLvls-1].hasComment & (uint8_t)(1U << LCOMMENT_JPI))){
 											nd->levels[nd->numLvls-1].hasComment |= (uint8_t)(1U << LCOMMENT_JPI);
 											lvlComLineIsGood = 2; //new comment
@@ -3421,6 +3424,14 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 											nd->levels[nd->numLvls-1].hasComment |= (uint8_t)(1U << LCOMMENT_HALFLIFE);
 											lvlComLineIsGood = 2; //new comment
 											comBuff[1] = '$'; comBuff[2] = (char)SDL_toupper(comBuff[2]); //enforce standard formatting
+										}else{
+											lvlComLineIsGood = 0;
+										}
+									}else if((len >=7)&&((SDL_strncmp(comBuff,"WIDTH$",6)==0)||(SDL_strncmp(comBuff,"WIDTH ",6)==0))){
+										if(!(nd->levels[nd->numLvls-1].hasComment & (uint8_t)(1U << LCOMMENT_HALFLIFE))){
+											nd->levels[nd->numLvls-1].hasComment |= (uint8_t)(1U << LCOMMENT_HALFLIFE);
+											lvlComLineIsGood = 2; //new comment
+											comBuff[5] = '$'; comBuff[6] = (char)SDL_toupper(comBuff[6]); //enforce standard formatting
 										}else{
 											lvlComLineIsGood = 0;
 										}

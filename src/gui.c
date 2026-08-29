@@ -69,25 +69,25 @@ SDL_FColor getHalfLifeCol(const double halflifeSeconds, const uint8_t valueType,
   col.a = 1.0f;
   if((halflifeSeconds >= 1.0E40)||((halflifeSeconds > 1.0E15) && ((valueType == VALUETYPE_GREATERTHAN) || (valueType == VALUETYPE_GREATEROREQUALTHAN)))){
     if(darkTheme){
-      col.r = 1.0f; col.g = 0.95f; col.b = 0.95f;
+      col.r = 1.0f; col.g = 0.99f; col.b = 0.99f;
     }else{
       col.r = 0.0f; col.g = 0.0f; col.b = 0.0f;
     }
   }else if(halflifeSeconds > 1.0E15){
     if(darkTheme){
-      col.r = 1.0f; col.g = 0.875f; col.b = 0.85f;
+      col.r = 1.0f; col.g = 0.95f; col.b = 0.925f;
     }else{
       col.r = 0.0f; col.g = 0.05f; col.b = 0.25f;
     }
   }else if(halflifeSeconds > 1.0E10){
     if(darkTheme){
-      col.r = 1.0f; col.g = 0.85f; col.b = 0.8f;
+      col.r = 1.0f; col.g = 0.9f; col.b = 0.85f;
     }else{
       col.r = 0.0f; col.g = 0.1f; col.b = 0.4f;
     }
   }else if(halflifeSeconds > 1.0E8){
     if(darkTheme){
-      col.r = 1.0f; col.g = 0.825f; col.b = 0.8f;
+      col.r = 1.0f; col.g = 0.85f; col.b = 0.8f;
     }else{
       col.r = 0.0f; col.g = 0.1f; col.b = 0.5f;
     }
@@ -2776,6 +2776,9 @@ void drawChartOfNuclides(const app_data *restrict dat, app_state *restrict state
   //some fudging of line positions was needed to fix alignment with fractional scaling
   if(state->ds.drawShellClosures){
     SDL_FColor scCol = darkGrayCol;
+    if(dat->rules.themeRules.uiColorTheme == UITHEME_DARK){
+      scCol = lightGrayCol;
+    }
     scCol.a = (state->ds.chartZoomScale/0.5f) - 3.0f;
     if(scCol.a > 0.0f){
       if(scCol.a > 1.0f){
@@ -2848,6 +2851,9 @@ void drawChartOfNuclides(const app_data *restrict dat, app_state *restrict state
       alpha = (float)(juice_smoothStop2(1.0f - state->ds.timeLeftInUIAnimation[UIANIM_NUCLHIGHLIGHT_SHOW]/UI_ANIM_LENGTH));
     }
     SDL_FColor selectionCol = whiteCol;
+    if(dat->rules.themeRules.uiColorTheme == UITHEME_DARK){
+      selectionCol = blackCol;
+    }
     selectionCol.a = alpha;
     if(state->ds.chartZoomScale >= 2.0f){
       rect.x = ((float)dat->ndat.nuclData[state->chartSelectedNucl].N - minX)*nuclBoxWidth - CHART_SHELLCLOSURELINE_THICKNESS*state->ds.uiUserScale;

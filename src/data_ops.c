@@ -3875,6 +3875,8 @@ uint32_t getENSDFLvlCommentStrInd(const ndata *restrict nd, const uint32_t lvlIn
 				case LCOMMENT_HALFLIFE:
 					if(SDL_strncmp(&nd->ensdfStrBuf[strBufPos],"T$",2)==0){
 						return strBufPos+2;
+					}else if(SDL_strncmp(&nd->ensdfStrBuf[strBufPos],"WIDTH$",6)==0){
+						return strBufPos+6;
 					}
 					break;
 				case LCOMMENT_DECAYMODE:
