@@ -425,55 +425,48 @@ SDL_FColor getHalfLifeCol(const double halflifeSeconds, const uint8_t valueType,
   return col;
 }
 
-SDL_FColor getDecayModeCol(const uint8_t dcyMode){
+SDL_FColor getDecayModeCol(const uint8_t dcyMode, const uint8_t darkTheme){
   SDL_FColor col;
-  col.r = 1.0f;
-  col.g = 1.0f;
-  col.b = 1.0f;
-  col.a = 1.0f;
+  col.r = 1.0f; col.g = 1.0f; col.b = 1.0f; col.a = 1.0f;
   switch(dcyMode){
     case DECAYMODE_BETAPLUS:
-      col.r = 0.8f;
-      col.g = 0.6f;
-      col.b = 1.0f;
+      col.r = 0.8f; col.g = 0.6f; col.b = 1.0f;
       break;
     case DECAYMODE_2BETAPLUS:
-      col.r = 0.4f;
-      col.g = 0.3f;
-      col.b = 0.5f;
+      if(darkTheme){
+        col.r = 0.9f; col.g = 0.9f; col.b = 1.0f;
+      }else{
+        col.r = 0.4f; col.g = 0.3f; col.b = 0.5f;
+      }
       break;
     case DECAYMODE_EC:
-      col.r = 0.6f;
-      col.g = 0.8f;
-      col.b = 1.0f;
+      col.r = 0.6f; col.g = 0.8f; col.b = 1.0f;
       break;
     case DECAYMODE_2EC:
-      col.r = 0.3f;
-      col.g = 0.4f;
-      col.b = 0.5f;
+      if(darkTheme){
+        col.r = 0.8f; col.g = 0.9f; col.b = 1.0f;
+      }else{
+        col.r = 0.3f; col.g = 0.4f; col.b = 0.5f;
+      }
       break;
     case DECAYMODE_ECANDBETAPLUS:
-      col.r = 0.8f;
-      col.g = 0.8f;
-      col.b = 1.0f;
+      col.r = 0.8f; col.g = 0.8f; col.b = 1.0f;
       break;
     case DECAYMODE_BETAMINUS:
-      col.r = 1.0f;
-      col.g = 0.6f;
-      col.b = 1.0f;
+      col.r = 1.0f; col.g = 0.6f; col.b = 1.0f;
       break;
     case DECAYMODE_2BETAMINUS:
-      col.r = 0.5f;
-      col.g = 0.3f;
-      col.b = 0.5f;
+      if(darkTheme){
+        col.r = 1.0f; col.g = 0.8f; col.b = 1.0f;
+      }else{
+        col.r = 0.5f; col.g = 0.3f; col.b = 0.5f;
+      }
       break;
     case DECAYMODE_ALPHA:
     case DECAYMODE_BETAMINUS_ALPHA:
     case DECAYMODE_BETAPLUS_ALPHA:
     case DECAYMODE_EC_ALPHA:
-      col.r = 1.0f;
-      col.g = 1.0f;
-      col.b = 0.6f;
+      col.r = 1.0f; col.g = 1.0f; col.b = 0.6f;
       break;
     case DECAYMODE_PROTON:
     case DECAYMODE_TWOPROTON:
@@ -484,48 +477,44 @@ SDL_FColor getDecayModeCol(const uint8_t dcyMode){
     case DECAYMODE_EC_TWOPROTON:
     case DECAYMODE_EC_THREEPROTON:
     case DECAYMODE_BETAMINUS_PROTON:
-      col.r = 1.0f;
-      col.g = 0.6f;
-      col.b = 0.6f;
+      col.r = 1.0f; col.g = 0.6f; col.b = 0.6f;
       break;
     case DECAYMODE_NEUTRON:
     case DECAYMODE_TWONEUTRON:
     case DECAYMODE_BETAMINUS_NEUTRON:
     case DECAYMODE_BETAMINUS_TWONEUTRON:
-      col.r = 0.6f;
-      col.g = 0.6f;
-      col.b = 1.0f;
+      col.r = 0.6f; col.g = 0.6f; col.b = 1.0f;
       break;
     case DECAYMODE_IT:
-      col.r = 1.0f;
-      col.g = 0.5f;
-      col.b = 0.5f;
+      col.r = 1.0f; col.g = 0.5f; col.b = 0.5f;
       break;
     case DECAYMODE_SPONTANEOUSFISSION:
     case DECAYMODE_BETAMINUS_SPONTANEOUSFISSION:
-      col.r = 0.6f;
-      col.g = 1.0f;
-      col.b = 0.6f;
+      if(darkTheme){
+        col.r = 0.1f; col.g = 0.75f; col.b = 0.1f;
+      }else{
+        col.r = 0.6f; col.g = 1.0f; col.b = 0.6f;
+      }
       break;
     case (DECAYMODE_ENUM_LENGTH+1):
       //stable
-      col.r = 0.0f;
-      col.g = 0.0f;
-      col.b = 0.0f;
+      if(darkTheme){
+        col.r = 1.0f; col.g = 1.0f; col.b = 1.0f;
+      }else{
+        col.r = 0.0f; col.g = 0.0f; col.b = 0.0f;
+      }
       break;
     case DECAYMODE_ENUM_LENGTH:
     default:
       //no decay mode found
-      col.r = 0.7f;
-      col.g = 0.7f;
-      col.b = 0.7f;
+      col.r = 0.7f; col.g = 0.7f; col.b = 0.7f;
       break;
   }
   return col;
 }
 
-SDL_Color getDecayModeTextCol(const uint8_t dcyMode){
-  const SDL_FColor bgCol = getDecayModeCol(dcyMode);
+SDL_Color getDecayModeTextCol(const uint8_t dcyMode, const uint8_t darkTheme){
+  const SDL_FColor bgCol = getDecayModeCol(dcyMode,darkTheme);
   if((bgCol.r + bgCol.g + bgCol.b) < 2.0f){
     return whiteCol8Bit;
   }
@@ -2509,7 +2498,7 @@ void drawChartOfNuclides(const app_data *restrict dat, app_state *restrict state
               if(state->chartView == CHARTVIEW_HALFLIFE){
                 boxCol = getHalfLifeCol(getNuclGSHalfLifeSeconds(&dat->ndat,(uint16_t)i),getNuclGSHalfLifeValueType(&dat->ndat,(uint16_t)i),dat->rules.themeRules.uiColorTheme == UITHEME_DARK);
               }else if(state->chartView == CHARTVIEW_DECAYMODE){
-                boxCol = getDecayModeCol(getNuclGSMostProbableDcyMode(&dat->ndat,(uint16_t)i));
+                boxCol = getDecayModeCol(getNuclGSMostProbableDcyMode(&dat->ndat,(uint16_t)i),dat->rules.themeRules.uiColorTheme == UITHEME_DARK);
               }else if(state->chartView == CHARTVIEW_2PLUS){
                 boxCol = get2PlusCol(get2PlusEnergy(&dat->ndat,(uint16_t)i),getNuclGSHalfLifeSeconds(&dat->ndat,(uint16_t)i));
               }else if(state->chartView == CHARTVIEW_R42){
@@ -2609,7 +2598,7 @@ void drawChartOfNuclides(const app_data *restrict dat, app_state *restrict state
                       uint8_t isomerDcyMode = getLevelMostProbableDcyMode(&dat->ndat,dat->ndat.nuclData[i].longestIsomerLevel);
                       if(isomerDcyMode < (DECAYMODE_ENUM_LENGTH+1)){
                         drawingLowBox = 1;
-                        SDL_FColor iboxCol = getDecayModeCol(isomerDcyMode);
+                        SDL_FColor iboxCol = getDecayModeCol(isomerDcyMode,dat->rules.themeRules.uiColorTheme == UITHEME_DARK);
                         if((iboxCol.r == boxCol.r)&&(iboxCol.g == iboxCol.g)&&(iboxCol.b == boxCol.b)){
                           //make isomer box colors slightly different, to distinguish them from
                           //ground states of the same decay mode
@@ -2633,7 +2622,7 @@ void drawChartOfNuclides(const app_data *restrict dat, app_state *restrict state
                           iboxCol.a =  1.0f - (CHARTZOOM_LVL1-state->ds.chartZoomScale);
                         }
                         drawFlatRect(rdat,lowBoxRect,iboxCol);
-                        drawIsomerDecayModeBoxLabel(dat,state,rdat,lowBoxRect.x,lowBoxRect.y,lowBoxRect.w,lowBoxRect.h,getDecayModeTextCol(isomerDcyMode),(uint16_t)i,isomerLvl,dat->ndat.nuclData[i].longestIsomerMVal,isomerDcyMode);
+                        drawIsomerDecayModeBoxLabel(dat,state,rdat,lowBoxRect.x,lowBoxRect.y,lowBoxRect.w,lowBoxRect.h,getDecayModeTextCol(isomerDcyMode,dat->rules.themeRules.uiColorTheme == UITHEME_DARK),(uint16_t)i,isomerLvl,dat->ndat.nuclData[i].longestIsomerMVal,isomerDcyMode);
                       }else if((isomerHl > 1.0E15)&&((isomerHlType == VALUETYPE_GREATERTHAN) || (isomerHlType == VALUETYPE_GREATEROREQUALTHAN))){
                         //'stable' isomer with no known decay mode
                         //draw its box using the half-life color
@@ -2651,7 +2640,7 @@ void drawChartOfNuclides(const app_data *restrict dat, app_state *restrict state
                           iboxCol.a =  1.0f - (CHARTZOOM_LVL1-state->ds.chartZoomScale);
                         }
                         drawFlatRect(rdat,lowBoxRect,iboxCol);
-                        drawIsomerDecayModeBoxLabel(dat,state,rdat,lowBoxRect.x,lowBoxRect.y,lowBoxRect.w,lowBoxRect.h,getDecayModeTextCol(isomerDcyMode),(uint16_t)i,isomerLvl,dat->ndat.nuclData[i].longestIsomerMVal,isomerDcyMode);
+                        drawIsomerDecayModeBoxLabel(dat,state,rdat,lowBoxRect.x,lowBoxRect.y,lowBoxRect.w,lowBoxRect.h,getDecayModeTextCol(isomerDcyMode,dat->rules.themeRules.uiColorTheme == UITHEME_DARK),(uint16_t)i,isomerLvl,dat->ndat.nuclData[i].longestIsomerMVal,isomerDcyMode);
                       }
                     }
                   }
@@ -2707,7 +2696,7 @@ void drawChartOfNuclides(const app_data *restrict dat, app_state *restrict state
                   if(state->chartView == CHARTVIEW_HALFLIFE){
                     drawNuclBoxLabel(dat,state,rdat,rect.x,rect.y,rect.w,(rect.h-lowBoxHeight-(2.0f*lowBoxPadding)),isHlTxtLight(getNuclGSHalfLifeSeconds(&dat->ndat,(uint16_t)i),dat->rules.themeRules.uiColorTheme == UITHEME_DARK) ? whiteCol8Bit : blackCol8Bit,(uint16_t)i);
                   }else if(state->chartView == CHARTVIEW_DECAYMODE){
-                    drawNuclBoxLabel(dat,state,rdat,rect.x,rect.y,rect.w,(rect.h-lowBoxHeight-(2.0f*lowBoxPadding)),getDecayModeTextCol(getNuclGSMostProbableDcyMode(&dat->ndat,(uint16_t)i)),(uint16_t)i);
+                    drawNuclBoxLabel(dat,state,rdat,rect.x,rect.y,rect.w,(rect.h-lowBoxHeight-(2.0f*lowBoxPadding)),getDecayModeTextCol(getNuclGSMostProbableDcyMode(&dat->ndat,(uint16_t)i),dat->rules.themeRules.uiColorTheme == UITHEME_DARK),(uint16_t)i);
                   }else if(state->chartView == CHARTVIEW_SPIN){
                     double spin = getMostProbableSpin(&dat->ndat,dat->ndat.nuclData[i].firstLevel + dat->ndat.nuclData[i].gsLevel);
                     drawNuclBoxLabel(dat,state,rdat,rect.x,rect.y,rect.w,(rect.h-lowBoxHeight-(2.0f*lowBoxPadding)),(spin <= SPIN_COL_INV_VAL) ? whiteCol8Bit : blackCol8Bit,(uint16_t)i);
@@ -2721,7 +2710,7 @@ void drawChartOfNuclides(const app_data *restrict dat, app_state *restrict state
                   if(state->chartView == CHARTVIEW_HALFLIFE){
                     drawNuclBoxLabel(dat,state,rdat,rect.x,rect.y,rect.w,rect.h,isHlTxtLight(getNuclGSHalfLifeSeconds(&dat->ndat,(uint16_t)i),dat->rules.themeRules.uiColorTheme == UITHEME_DARK) ? whiteCol8Bit : blackCol8Bit,(uint16_t)i);
                   }else if(state->chartView == CHARTVIEW_DECAYMODE){
-                    drawNuclBoxLabel(dat,state,rdat,rect.x,rect.y,rect.w,rect.h,getDecayModeTextCol(getNuclGSMostProbableDcyMode(&dat->ndat,(uint16_t)i)),(uint16_t)i);
+                    drawNuclBoxLabel(dat,state,rdat,rect.x,rect.y,rect.w,rect.h,getDecayModeTextCol(getNuclGSMostProbableDcyMode(&dat->ndat,(uint16_t)i),dat->rules.themeRules.uiColorTheme == UITHEME_DARK),(uint16_t)i);
                   }else if(state->chartView == CHARTVIEW_2PLUS){
                     drawNuclBoxLabel(dat,state,rdat,rect.x,rect.y,rect.w,rect.h,(get2PlusEnergy(&dat->ndat,(uint16_t)i) >= 2000.0) ? whiteCol8Bit : blackCol8Bit,(uint16_t)i);
                   }else if(state->chartView == CHARTVIEW_R42){
@@ -2777,7 +2766,7 @@ void drawChartOfNuclides(const app_data *restrict dat, app_state *restrict state
   if(state->ds.drawShellClosures){
     SDL_FColor scCol = darkGrayCol;
     if(dat->rules.themeRules.uiColorTheme == UITHEME_DARK){
-      scCol = lightGrayCol;
+      scCol = lighterGrayCol;
     }
     scCol.a = (state->ds.chartZoomScale/0.5f) - 3.0f;
     if(scCol.a > 0.0f){
@@ -3092,6 +3081,9 @@ void drawNuclFullInfoBox(const app_data *restrict dat, app_state *restrict state
   char tmpStr[32];
   SDL_FRect rect;
   SDL_FColor dividerLineCol = lightGrayCol;
+  if(darkTheme){
+    dividerLineCol = darkGrayCol;
+  }
   dividerLineCol.a = txtAlpha/255.0f;
   state->ds.nuclFullInfoShownColumns = 65535U; //by default, show all columns
   float allColWidth = 0.0f;

@@ -228,6 +228,7 @@ static const float uiScales[UISCALE_ENUM_LENGTH] = {1.0f,1.20f,1.60f,1.85f};
 static const SDL_FColor blackCol = {0.0f,0.0f,0.0f,1.0f};
 static const SDL_FColor blackTransparentCol = {0.1f,0.1f,0.1f,0.85f};
 static const SDL_FColor lightGrayCol = {0.8f,0.8f,0.8f,1.0f};
+static const SDL_FColor lighterGrayCol = {0.95f,0.95f,0.95f,1.0f};
 static const SDL_FColor grayCol = {0.5f,0.5f,0.5f,1.0f};
 static const SDL_FColor darkGrayCol = {0.2f,0.2f,0.2f,1.0f};
 static const SDL_FColor redCol = {1.0f,0.0f,0.0f,1.0f};
