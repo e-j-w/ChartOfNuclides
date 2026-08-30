@@ -136,7 +136,12 @@ int main(int argc, char *argv[]){
   SDL_SetCursor(gdat->rdat.defaultCursor);
   
   //setup splash screen
-  drawFlatBG(&gdat->state.ds,&gdat->rdat,gdat->dat.rules.themeRules.themeBgCol[gdat->state.ds.uiColorTheme]); //use drawing state since UI theme index in app rules is not synced until after data import
+  //(theme background colors haven't been imported yet, so use hardcoded values) 
+  if(gdat->state.ds.uiColorTheme == UITHEME_DARK){
+    drawFlatBG(&gdat->state.ds,&gdat->rdat,blackCol);
+  }else{
+    drawFlatBG(&gdat->state.ds,&gdat->rdat,whiteCol);
+  }
   SDL_RenderPresent(gdat->rdat.renderer); //tell the renderer to actually show the image
 
   //import game data and resources
