@@ -87,7 +87,7 @@ SDL_FColor getHalfLifeCol(const double halflifeSeconds, const uint8_t valueType,
     }
   }else if(halflifeSeconds > 1.0E8){
     if(darkTheme){
-      col.r = 1.0f; col.g = 0.85f; col.b = 0.8f;
+      col.r = 1.0f; col.g = 0.85f; col.b = 0.85f;
     }else{
       col.r = 0.0f; col.g = 0.1f; col.b = 0.5f;
     }
@@ -99,49 +99,49 @@ SDL_FColor getHalfLifeCol(const double halflifeSeconds, const uint8_t valueType,
     }
   }else if(halflifeSeconds > 1.0E7){
     if(darkTheme){
-      col.r = 0.975f; col.g = 0.8f; col.b = 0.75f;
+      col.r = 0.975f; col.g = 0.75f; col.b = 0.75f;
     }else{
       col.r = 0.1f; col.g = 0.2f; col.b = 0.5f;
     }
   }else if(halflifeSeconds > 5.0E6){
     if(darkTheme){
-      col.r = 0.975f; col.g = 0.8f; col.b = 0.7f;
+      col.r = 0.975f; col.g = 0.7f; col.b = 0.6f;
     }else{
       col.r = 0.1f; col.g = 0.2f; col.b = 0.55f;
     }
   }else if(halflifeSeconds > 1.0E6){
     if(darkTheme){
-      col.r = 0.95f; col.g = 0.75f; col.b = 0.65f;
+      col.r = 0.95f; col.g = 0.675f; col.b = 0.45f;
     }else{
       col.r = 0.1f; col.g = 0.2f; col.b = 0.6f;
     }
   }else if(halflifeSeconds > 7.5E5){
     if(darkTheme){
-      col.r = 0.95f; col.g = 0.75f; col.b = 0.6f;
+      col.r = 0.95f; col.g = 0.65f; col.b = 0.5f;
     }else{
       col.r = 0.1f; col.g = 0.225f; col.b = 0.625f;
     }
   }else if(halflifeSeconds > 5.0E5){
     if(darkTheme){
-      col.r = 0.925f; col.g = 0.75f; col.b = 0.55f;
+      col.r = 0.925f; col.g = 0.625f; col.b = 0.45f;
     }else{
       col.r = 0.1f; col.g = 0.25f; col.b = 0.65f;
     }
   }else if(halflifeSeconds > 3.0E5){
     if(darkTheme){
-      col.r = 0.925f; col.g = 0.75f; col.b = 0.5f;
+      col.r = 0.925f; col.g = 0.6f; col.b = 0.4f;
     }else{
       col.r = 0.1f; col.g = 0.275f; col.b = 0.675f;
     }
   }else if(halflifeSeconds > 1.0E5){
     if(darkTheme){
-      col.r = 0.9f; col.g = 0.75f; col.b = 0.45f;
+      col.r = 0.9f; col.g = 0.65f; col.b = 0.45f;
     }else{
       col.r = 0.1f; col.g = 0.3f; col.b = 0.7f;
     }
   }else if(halflifeSeconds > 7.5E4){
     if(darkTheme){
-      col.r = 0.8f; col.g = 0.75f; col.b = 0.4f;
+      col.r = 0.8f; col.g = 0.7f; col.b = 0.4f;
     }else{
       col.r = 0.125f; col.g = 0.325f; col.b = 0.725f;
     }
@@ -521,12 +521,13 @@ SDL_Color getDecayModeTextCol(const uint8_t dcyMode, const uint8_t darkTheme){
   return blackCol8Bit;
 }
 
-SDL_FColor get2PlusCol(const double e2PlusKeV, const double halflifeSeconds){
+SDL_FColor get2PlusCol(const double e2PlusKeV, const double halflifeSeconds, const uint8_t darkTheme){
   SDL_FColor col;
-  col.r = 0.9f;
-  col.g = 0.9f;
-  col.b = 0.9f;
-  col.a = 1.0f;
+  if(darkTheme){
+    col.r = 0.7f; col.g = 0.7f; col.b = 0.7f; col.a = 1.0f;
+  }else{
+    col.r = 0.9f; col.g = 0.9f; col.b = 0.9f; col.a = 1.0f;
+  }
   if(e2PlusKeV >= 4000.0){
     col.r = 0.3f;
     col.g = 0.0f;
@@ -614,19 +615,22 @@ SDL_FColor get2PlusCol(const double e2PlusKeV, const double halflifeSeconds){
   }
   //slightly darken stable nuclides
   if((halflifeSeconds > 1.0E40)&&(e2PlusKeV <= 0.0)){
-    col.r -= 0.1f;
-    col.g -= 0.1f;
-    col.b -= 0.1f;
+    if(darkTheme){
+      col.r += 0.1f; col.g += 0.1f; col.b += 0.1f;
+    }else{
+      col.r -= 0.1f; col.g -= 0.1f; col.b -= 0.1f;
+    }
   }
   return col;
 }
 
-SDL_FColor get2nd0PlusCol(const double e0PlusKeV, const double halflifeSeconds){
+SDL_FColor get2nd0PlusCol(const double e0PlusKeV, const double halflifeSeconds, const uint8_t darkTheme){
   SDL_FColor col;
-  col.r = 0.9f;
-  col.g = 0.9f;
-  col.b = 0.9f;
-  col.a = 1.0f;
+  if(darkTheme){
+    col.r = 0.7f; col.g = 0.7f; col.b = 0.7f; col.a = 1.0f;
+  }else{
+    col.r = 0.9f; col.g = 0.9f; col.b = 0.9f; col.a = 1.0f;
+  }
   if(e0PlusKeV >= 6000.0){
     col.r = 0.3f;
     col.g = 0.0f;
@@ -714,19 +718,22 @@ SDL_FColor get2nd0PlusCol(const double e0PlusKeV, const double halflifeSeconds){
   }
   //slightly darken stable nuclides
   if((halflifeSeconds > 1.0E40)&&(e0PlusKeV <= 0.0)){
-    col.r -= 0.1f;
-    col.g -= 0.1f;
-    col.b -= 0.1f;
+    if(darkTheme){
+      col.r += 0.1f; col.g += 0.1f; col.b += 0.1f;
+    }else{
+      col.r -= 0.1f; col.g -= 0.1f; col.b -= 0.1f;
+    }
   }
   return col;
 }
 
-SDL_FColor getR42Col(const double r42, const double halflifeSeconds){
+SDL_FColor getR42Col(const double r42, const double halflifeSeconds, const uint8_t darkTheme){
   SDL_FColor col;
-  col.r = 0.9f;
-  col.g = 0.9f;
-  col.b = 0.9f;
-  col.a = 1.0f;
+  if(darkTheme){
+    col.r = 0.7f; col.g = 0.7f; col.b = 0.7f; col.a = 1.0f;
+  }else{
+    col.r = 0.9f; col.g = 0.9f; col.b = 0.9f; col.a = 1.0f;
+  }
   if(r42 >= 5.0){
     col.r = 0.2f;
     col.g = 0.0f;
@@ -806,19 +813,22 @@ SDL_FColor getR42Col(const double r42, const double halflifeSeconds){
   }
   //slightly darken stable nuclides
   if((halflifeSeconds > 1.0E40)&&(r42 < 0.0)){
-    col.r -= 0.1f;
-    col.g -= 0.1f;
-    col.b -= 0.1f;
+    if(darkTheme){
+      col.r += 0.1f; col.g += 0.1f; col.b += 0.1f;
+    }else{
+      col.r -= 0.1f; col.g -= 0.1f; col.b -= 0.1f;
+    }
   }
   return col;
 }
 
-SDL_FColor getBeta2Col(const double beta2, const double halflifeSeconds){
+SDL_FColor getBeta2Col(const double beta2, const double halflifeSeconds, const uint8_t darkTheme){
   SDL_FColor col;
-  col.r = 0.9f;
-  col.g = 0.9f;
-  col.b = 0.9f;
-  col.a = 1.0f;
+  if(darkTheme){
+    col.r = 0.7f; col.g = 0.7f; col.b = 0.7f; col.a = 1.0f;
+  }else{
+    col.r = 0.9f; col.g = 0.9f; col.b = 0.9f; col.a = 1.0f;
+  }
   if(beta2 >= 0.8){
     col.r = 0.0f;
     col.g = 0.0f;
@@ -894,20 +904,23 @@ SDL_FColor getBeta2Col(const double beta2, const double halflifeSeconds){
   }
   //slightly darken stable nuclides
   if((halflifeSeconds > 1.0E40)&&(beta2 < 0.0)){
-    col.r -= 0.1f;
-    col.g -= 0.1f;
-    col.b -= 0.1f;
+    if(darkTheme){
+      col.r += 0.1f; col.g += 0.1f; col.b += 0.1f;
+    }else{
+      col.r -= 0.1f; col.g -= 0.1f; col.b -= 0.1f;
+    }
   }
   return col;
 }
 
 #define SPIN_COL_INV_VAL 3.5 //box color inversion point
-SDL_FColor getSpinCol(const double spin){
+SDL_FColor getSpinCol(const double spin, const uint8_t darkTheme){
   SDL_FColor col;
-  col.r = 0.9f;
-  col.g = 0.9f;
-  col.b = 0.9f;
-  col.a = 1.0f;
+  if(darkTheme){
+    col.r = 0.7f; col.g = 0.7f; col.b = 0.7f; col.a = 1.0f;
+  }else{
+    col.r = 0.9f; col.g = 0.9f; col.b = 0.9f; col.a = 1.0f;
+  }
   if(spin <= 0.0){
     col.r = 0.0f;
     col.g = 0.1f;
@@ -1025,11 +1038,8 @@ SDL_FColor getSpinCol(const double spin){
   return col;
 }
 
-SDL_FColor getParCol(const int8_t par){
+SDL_FColor getParCol(const int8_t par, const uint8_t darkTheme){
   SDL_FColor col;
-  col.r = 0.9f;
-  col.g = 0.9f;
-  col.b = 0.9f;
   col.a = 1.0f;
   if(par <= -1.0){
     col.r = 0.2f;
@@ -1041,20 +1051,23 @@ SDL_FColor getParCol(const int8_t par){
     col.b = 0.8f;
   }else{
     //unknown parity
-    col.r = 0.9f;
-    col.g = 0.9f;
-    col.b = 0.9f;
+    if(darkTheme){
+      col.r = 0.6f; col.g = 0.6f; col.b = 0.6f;
+    }else{
+      col.r = 0.9f; col.g = 0.9f; col.b = 0.9f;
+    }
   }
   return col;
 }
 
 #define BEA_COL_INV_VAL 8000.0 //box color inversion point
-SDL_FColor getBEACol(const double beA){
+SDL_FColor getBEACol(const double beA, const uint8_t darkTheme){
   SDL_FColor col;
-  col.r = 0.9f;
-  col.g = 0.9f;
-  col.b = 0.9f;
-  col.a = 1.0f;
+  if(darkTheme){
+    col.r = 0.7f; col.g = 0.7f; col.b = 0.7f; col.a = 1.0f;
+  }else{
+    col.r = 0.9f; col.g = 0.9f; col.b = 0.9f; col.a = 1.0f;
+  }
   if(beA >= 8750.0){
     col.r = 0.0f;
     col.g = 0.0f;
@@ -1313,12 +1326,6 @@ SDL_FColor getSnpCol(const double snpKeV, const uint8_t darkTheme){
     col.g = 0.7f;
     col.b = 1.0f;
   }
-  //slightly darken stable nuclides
-  /*if(halflifeSeconds > 1.0E40){
-    col.r -= 0.1f;
-    col.g -= 0.1f;
-    col.b -= 0.1f;
-  }*/
   return col;
 }
 
@@ -1472,12 +1479,6 @@ SDL_FColor getQaCol(const double qaKeV, const uint8_t darkTheme){
     col.g = 0.0f;
     col.b = 0.0f;
   }
-  //slightly darken stable nuclides
-  /*if(halflifeSeconds > 1.0E40){
-    col.r -= 0.1f;
-    col.g -= 0.1f;
-    col.b -= 0.1f;
-  }*/
   return col;
 }
 
@@ -1571,21 +1572,16 @@ SDL_FColor getQbCol(const double qbKeV, const uint8_t darkTheme){
     col.g = 0.0f;
     col.b = 0.0f;
   }
-  //slightly darken stable nuclides
-  /*if(halflifeSeconds > 1.0E40){
-    col.r -= 0.1f;
-    col.g -= 0.1f;
-    col.b -= 0.1f;
-  }*/
   return col;
 }
 
 SDL_FColor getNumLvlsCol(const uint16_t numLvls, const double halflifeSeconds, const uint8_t darkTheme){
   SDL_FColor col;
-  col.r = 0.9f;
-  col.g = 0.9f;
-  col.b = 0.9f;
-  col.a = 1.0f;
+  if(darkTheme){
+    col.r = 0.7f; col.g = 0.7f; col.b = 0.7f; col.a = 1.0f;
+  }else{
+    col.r = 0.9f; col.g = 0.9f; col.b = 0.9f; col.a = 1.0f;
+  }
   if(numLvls >= 500){
     col.r = 0.0f;
     col.g = 0.0f;
@@ -1713,9 +1709,11 @@ SDL_FColor getNumLvlsCol(const uint16_t numLvls, const double halflifeSeconds, c
   }
   //slightly darken stable nuclides
   if(halflifeSeconds > 1.0E40){
-    col.r -= 0.1f;
-    col.g -= 0.1f;
-    col.b -= 0.1f;
+    if(darkTheme){
+      col.r += 0.1f; col.g += 0.1f; col.b += 0.1f;
+    }else{
+      col.r -= 0.1f; col.g -= 0.1f; col.b -= 0.1f;
+    }
   }
   if(darkTheme){
     if(col.r >= 0.8f){ col.r -= 0.1f; }
@@ -1725,12 +1723,13 @@ SDL_FColor getNumLvlsCol(const uint16_t numLvls, const double halflifeSeconds, c
   return col;
 }
 
-SDL_FColor getNumIsomersCol(const uint16_t numIsomers, const double halflifeSeconds){
+SDL_FColor getNumIsomersCol(const uint16_t numIsomers, const double halflifeSeconds, const uint8_t darkTheme){
   SDL_FColor col;
-  col.r = 0.9f;
-  col.g = 0.9f;
-  col.b = 0.9f;
-  col.a = 1.0f;
+  if(darkTheme){
+    col.r = 0.7f; col.g = 0.7f; col.b = 0.7f; col.a = 1.0f;
+  }else{
+    col.r = 0.9f; col.g = 0.9f; col.b = 0.9f; col.a = 1.0f;
+  }
   if(numIsomers == 0){
     col.r = 0.9f;
     col.g = 0.9f;
@@ -1778,20 +1777,23 @@ SDL_FColor getNumIsomersCol(const uint16_t numIsomers, const double halflifeSeco
   }
   //slightly darken stable nuclides
   if((halflifeSeconds > 1.0E40)&&(numIsomers == 0)){
-    col.r -= 0.1f;
-    col.g -= 0.1f;
-    col.b -= 0.1f;
+    if(darkTheme){
+      col.r += 0.1f; col.g += 0.1f; col.b += 0.1f;
+    }else{
+      col.r -= 0.1f; col.g -= 0.1f; col.b -= 0.1f;
+    }
   }
   return col;
 }
 
 
-SDL_FColor getUnknownLvlsCol(const uint16_t unknownLvls, const double halflifeSeconds){
+SDL_FColor getUnknownLvlsCol(const uint16_t unknownLvls, const double halflifeSeconds, const uint8_t darkTheme){
   SDL_FColor col;
-  col.r = 0.9f;
-  col.g = 0.9f;
-  col.b = 0.9f;
-  col.a = 1.0f;
+  if(darkTheme){
+    col.r = 0.7f; col.g = 0.7f; col.b = 0.7f; col.a = 1.0f;
+  }else{
+    col.r = 0.9f; col.g = 0.9f; col.b = 0.9f; col.a = 1.0f;
+  }
   if(unknownLvls == 0){
     col.r = 0.9f;
     col.g = 0.9f;
@@ -1823,9 +1825,11 @@ SDL_FColor getUnknownLvlsCol(const uint16_t unknownLvls, const double halflifeSe
   }
   //slightly darken stable nuclides
   if((halflifeSeconds > 1.0E40)&&(unknownLvls == 0)){
-    col.r -= 0.1f;
-    col.g -= 0.1f;
-    col.b -= 0.1f;
+    if(darkTheme){
+      col.r += 0.1f; col.g += 0.1f; col.b += 0.1f;
+    }else{
+      col.r -= 0.1f; col.g -= 0.1f; col.b -= 0.1f;
+    }
   }
   return col;
 }
@@ -2500,19 +2504,19 @@ void drawChartOfNuclides(const app_data *restrict dat, app_state *restrict state
               }else if(state->chartView == CHARTVIEW_DECAYMODE){
                 boxCol = getDecayModeCol(getNuclGSMostProbableDcyMode(&dat->ndat,(uint16_t)i),dat->rules.themeRules.uiColorTheme == UITHEME_DARK);
               }else if(state->chartView == CHARTVIEW_2PLUS){
-                boxCol = get2PlusCol(get2PlusEnergy(&dat->ndat,(uint16_t)i),getNuclGSHalfLifeSeconds(&dat->ndat,(uint16_t)i));
+                boxCol = get2PlusCol(get2PlusEnergy(&dat->ndat,(uint16_t)i),getNuclGSHalfLifeSeconds(&dat->ndat,(uint16_t)i),dat->rules.themeRules.uiColorTheme == UITHEME_DARK);
               }else if(state->chartView == CHARTVIEW_R42){
-                boxCol = getR42Col(getR42(&dat->ndat,(uint16_t)i),getNuclGSHalfLifeSeconds(&dat->ndat,(uint16_t)i));
+                boxCol = getR42Col(getR42(&dat->ndat,(uint16_t)i),getNuclGSHalfLifeSeconds(&dat->ndat,(uint16_t)i),dat->rules.themeRules.uiColorTheme == UITHEME_DARK);
               }else if(state->chartView == CHARTVIEW_BETA2){
-                boxCol = getBeta2Col(getBeta2(&dat->ndat,(uint16_t)i),getNuclGSHalfLifeSeconds(&dat->ndat,(uint16_t)i));
+                boxCol = getBeta2Col(getBeta2(&dat->ndat,(uint16_t)i),getNuclGSHalfLifeSeconds(&dat->ndat,(uint16_t)i),dat->rules.themeRules.uiColorTheme == UITHEME_DARK);
               }else if(state->chartView == CHARTVIEW_0PLUS){
-                boxCol = get2nd0PlusCol(get2nd0PlusEnergy(&dat->ndat,(uint16_t)i),getNuclGSHalfLifeSeconds(&dat->ndat,(uint16_t)i));
+                boxCol = get2nd0PlusCol(get2nd0PlusEnergy(&dat->ndat,(uint16_t)i),getNuclGSHalfLifeSeconds(&dat->ndat,(uint16_t)i),dat->rules.themeRules.uiColorTheme == UITHEME_DARK);
               }else if(state->chartView == CHARTVIEW_SPIN){
-                boxCol = getSpinCol(getMostProbableSpin(&dat->ndat,dat->ndat.nuclData[i].firstLevel + dat->ndat.nuclData[i].gsLevel));
+                boxCol = getSpinCol(getMostProbableSpin(&dat->ndat,dat->ndat.nuclData[i].firstLevel + dat->ndat.nuclData[i].gsLevel),dat->rules.themeRules.uiColorTheme == UITHEME_DARK);
               }else if(state->chartView == CHARTVIEW_PARITY){
-                boxCol = getParCol(getMostProbableParity(&dat->ndat,dat->ndat.nuclData[i].firstLevel + dat->ndat.nuclData[i].gsLevel));
+                boxCol = getParCol(getMostProbableParity(&dat->ndat,dat->ndat.nuclData[i].firstLevel + dat->ndat.nuclData[i].gsLevel),dat->rules.themeRules.uiColorTheme == UITHEME_DARK);
               }else if(state->chartView == CHARTVIEW_BEA){
-                boxCol = getBEACol(getBEA(&dat->ndat,(uint16_t)i));
+                boxCol = getBEACol(getBEA(&dat->ndat,(uint16_t)i),dat->rules.themeRules.uiColorTheme == UITHEME_DARK);
               }else if(state->chartView == CHARTVIEW_SN){
                 boxCol = getSnpCol(getRawValFromDB(&dat->ndat.nuclData[i].sn),dat->rules.themeRules.uiColorTheme == UITHEME_DARK);
               }else if(state->chartView == CHARTVIEW_SP){
@@ -2528,15 +2532,15 @@ void drawChartOfNuclides(const app_data *restrict dat, app_state *restrict state
               }else if(state->chartView == CHARTVIEW_NUMLVLS){
                 boxCol = getNumLvlsCol(dat->ndat.nuclData[i].numLevels,getNuclGSHalfLifeSeconds(&dat->ndat,(uint16_t)i),dat->rules.themeRules.uiColorTheme == UITHEME_DARK);
               }else if(state->chartView == CHARTVIEW_NUMISOMERS){
-                boxCol = getNumIsomersCol(getNumIsomers(&dat->ndat,1.0E-8,(uint16_t)i),getNuclGSHalfLifeSeconds(&dat->ndat,(uint16_t)i));
+                boxCol = getNumIsomersCol(getNumIsomers(&dat->ndat,1.0E-8,(uint16_t)i),getNuclGSHalfLifeSeconds(&dat->ndat,(uint16_t)i),dat->rules.themeRules.uiColorTheme == UITHEME_DARK);
               }else if(state->chartView == CHARTVIEW_NUMISOMERS_1MIN){
-                boxCol = getNumIsomersCol(getNumIsomers(&dat->ndat,60.0,(uint16_t)i),getNuclGSHalfLifeSeconds(&dat->ndat,(uint16_t)i));
+                boxCol = getNumIsomersCol(getNumIsomers(&dat->ndat,60.0,(uint16_t)i),getNuclGSHalfLifeSeconds(&dat->ndat,(uint16_t)i),dat->rules.themeRules.uiColorTheme == UITHEME_DARK);
               }else if(state->chartView == CHARTVIEW_NUMBETADCY){
-                boxCol = getNumIsomersCol(getNumBetaDecayingLvls(&dat->ndat,(uint16_t)i),getNuclGSHalfLifeSeconds(&dat->ndat,(uint16_t)i));
+                boxCol = getNumIsomersCol(getNumBetaDecayingLvls(&dat->ndat,(uint16_t)i),getNuclGSHalfLifeSeconds(&dat->ndat,(uint16_t)i),dat->rules.themeRules.uiColorTheme == UITHEME_DARK);
               }else if(state->chartView == CHARTVIEW_NUMPARTDCY){
-                boxCol = getNumIsomersCol(getNumParticleDecayingLvls(&dat->ndat,(uint16_t)i),getNuclGSHalfLifeSeconds(&dat->ndat,(uint16_t)i));
+                boxCol = getNumIsomersCol(getNumParticleDecayingLvls(&dat->ndat,(uint16_t)i),getNuclGSHalfLifeSeconds(&dat->ndat,(uint16_t)i),dat->rules.themeRules.uiColorTheme == UITHEME_DARK);
               }else if(state->chartView == CHARTVIEW_UNKNOWN_ENERGY){
-                boxCol = getUnknownLvlsCol(getNumUnknownLvls(&dat->ndat,(uint16_t)i),getNuclGSHalfLifeSeconds(&dat->ndat,(uint16_t)i));
+                boxCol = getUnknownLvlsCol(getNumUnknownLvls(&dat->ndat,(uint16_t)i),getNuclGSHalfLifeSeconds(&dat->ndat,(uint16_t)i),dat->rules.themeRules.uiColorTheme == UITHEME_DARK);
               }
               drawFlatRect(rdat,rect,boxCol);
               
@@ -2652,7 +2656,7 @@ void drawChartOfNuclides(const app_data *restrict dat, app_state *restrict state
                     if((isomerHl >= 1.0E-1)||(isomerHl > getNuclGSHalfLifeSeconds(&dat->ndat,(uint16_t)i))){ //only show 'important' isomers on chart
                       double isomerSpin = getMostProbableSpin(&dat->ndat,dat->ndat.nuclData[i].longestIsomerLevel);
                       drawingLowBox = 1;
-                      SDL_FColor iboxCol = getSpinCol(isomerSpin);
+                      SDL_FColor iboxCol = getSpinCol(isomerSpin,dat->rules.themeRules.uiColorTheme == UITHEME_DARK);
                       if(state->ds.chartZoomScale < CHARTZOOM_LVL1){
                         //handle fading in of isomer boxes
                         iboxCol.a =  1.0f - (CHARTZOOM_LVL1-state->ds.chartZoomScale);
@@ -2669,7 +2673,7 @@ void drawChartOfNuclides(const app_data *restrict dat, app_state *restrict state
                     if((isomerHl >= 1.0E-1)||(isomerHl > getNuclGSHalfLifeSeconds(&dat->ndat,(uint16_t)i))){ //only show 'important' isomers on chart
                       int8_t isomerPar = getMostProbableParity(&dat->ndat,dat->ndat.nuclData[i].longestIsomerLevel);
                       drawingLowBox = 1;
-                      SDL_FColor iboxCol = getParCol(isomerPar);
+                      SDL_FColor iboxCol = getParCol(isomerPar,dat->rules.themeRules.uiColorTheme == UITHEME_DARK);
                       if((iboxCol.r == boxCol.r)&&(iboxCol.g == iboxCol.g)&&(iboxCol.b == boxCol.b)){
                         //make isomer box colors slightly different, to distinguish them from
                         //ground states of the same parity
