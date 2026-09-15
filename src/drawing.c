@@ -19,7 +19,6 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "drawing.h"
 #include "gui_constants.h"
-#include "juicer.h" //contains easing functions used in animations
 #include "data_ops.h"
 
 //sets color and alpha modulation for the texture atlas

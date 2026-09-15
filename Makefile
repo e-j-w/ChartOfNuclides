@@ -73,7 +73,7 @@ search_ops.o: src/search_ops.c include/search_ops.h $(COMMON)
 	$(CC) src/search_ops.c $(INC) $(CFLAGS) -c -o search_ops.o
 
 drawing.o: src/drawing.c include/drawing.h $(COMMON)
-	$(CC) src/drawing.c $(INC) -I./lib/juicer $(CFLAGS) -c -o drawing.o
+	$(CC) src/drawing.c $(INC) $(CFLAGS) -c -o drawing.o
 
 gui.o: src/gui.c include/gui.h $(COMMON)
 	$(CC) src/gui.c $(INC) -I./lib/strops -I./lib/juicer $(CFLAGS) -c -o gui.o
