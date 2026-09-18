@@ -2301,31 +2301,6 @@ void drawChartOfNuclides(const app_data *restrict dat, app_state *restrict state
                     if((isomerHl >= 1.0E-1)||(isomerHl > getNuclGSHalfLifeSeconds(&dat->ndat,(uint16_t)i))){ //only show 'important' isomers on chart
                       drawingLowBox = 1;
                       SDL_FColor iboxCol = getHalfLifeCol(isomerHl,(uint8_t)((dat->ndat.levels[isomerLvl].halfLife.format >> 5U) & 15U),dat->rules.themeRules.uiColorTheme == UITHEME_DARK);
-                      if((iboxCol.r == boxCol.r)&&(iboxCol.g == iboxCol.g)&&(iboxCol.b == boxCol.b)){
-                        //make isomer box colors slightly different, to distinguish them from
-                        //ground states of similar half-life
-                        if(getNuclGSHalfLifeSeconds(&dat->ndat,(uint16_t)i) > isomerHl){
-                          if(dat->rules.themeRules.uiColorTheme == UITHEME_DARK){
-                            iboxCol.r *= 0.91f;
-                            iboxCol.g *= 0.91f;
-                            iboxCol.b *= 0.91f;
-                          }else{
-                            iboxCol.r *= 1.10f; if(iboxCol.r > 1.0f){iboxCol.r = 1.0f;} //color range check prevents discolored boxes when running MSYS2 builds in Wine
-                            iboxCol.g *= 1.10f; if(iboxCol.g > 1.0f){iboxCol.g = 1.0f;} //color range check prevents discolored boxes when running MSYS2 builds in Wine
-                            iboxCol.b *= 1.10f; if(iboxCol.b > 1.0f){iboxCol.b = 1.0f;} //color range check prevents discolored boxes when running MSYS2 builds in Wine
-                          }
-                        }else{
-                          if(dat->rules.themeRules.uiColorTheme == UITHEME_DARK){
-                            iboxCol.r *= 1.10f; if(iboxCol.r > 1.0f){iboxCol.r = 1.0f;} //color range check prevents discolored boxes when running MSYS2 builds in Wine
-                            iboxCol.g *= 1.10f; if(iboxCol.g > 1.0f){iboxCol.g = 1.0f;} //color range check prevents discolored boxes when running MSYS2 builds in Wine
-                            iboxCol.b *= 1.10f; if(iboxCol.b > 1.0f){iboxCol.b = 1.0f;} //color range check prevents discolored boxes when running MSYS2 builds in Wine
-                          }else{
-                            iboxCol.r *= 0.91f;
-                            iboxCol.g *= 0.91f;
-                            iboxCol.b *= 0.91f;
-                          }
-                        }
-                      }
                       if(state->ds.chartZoomScale < CHARTZOOM_LVL1){
                         //handle fading in of isomer boxes
                         iboxCol.a =  1.0f - (CHARTZOOM_LVL1-state->ds.chartZoomScale);
