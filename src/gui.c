@@ -82,28 +82,28 @@ SDL_FColor getHalfLifeCol(const double halflifeSeconds, const uint8_t valueType,
   }else if(halflifeSeconds > 5.0E7){
     float colChangeFactor = (float)(SDL_log10(halflifeSeconds - 5.0E7)/SDL_log10(1.0E15 - 5.0E7)); //value from 0 to 1
     if(darkTheme){
-      col.r = 1.0f; col.g = 0.8f + 0.15f*colChangeFactor; col.b = 0.8f + 0.125f*colChangeFactor;
+      col.r = 1.0f; col.g = 0.7f + 0.25f*colChangeFactor; col.b = 0.8f + 0.125f*colChangeFactor;
     }else{
       col.r = 0.1f; col.g = 0.15f - 0.10f*colChangeFactor; col.b = 0.5f - 0.25f*colChangeFactor;
     }
   }else if(halflifeSeconds > 3.0E5){
     float colChangeFactor = (float)(SDL_log10(halflifeSeconds - 3.0E5)/SDL_log10(5.0E7 - 3.0E5)); //value from 0 to 1
     if(darkTheme){
-      col.r = 0.925f + 0.075f*colChangeFactor; col.g = 0.6f + 0.2f*colChangeFactor; col.b = 0.6f + 0.2f*colChangeFactor;
+      col.r = 0.925f + 0.075f*colChangeFactor; col.g = 0.6f + 0.1f*colChangeFactor; col.b = 0.6f + 0.2f*colChangeFactor;
     }else{
       col.r = 0.1f; col.g = 0.275f - 0.125f*colChangeFactor; col.b = 0.675f - 0.175f*colChangeFactor;
     }
   }else if(halflifeSeconds > 7.5E3){
     float colChangeFactor = (float)(SDL_log10(halflifeSeconds - 7.5E3)/SDL_log10(3.0E5 - 7.5E3)); //value from 0 to 1
     if(darkTheme){
-      col.r = 0.55f + 0.375f*colChangeFactor; col.g = 0.7f - 0.1f*colChangeFactor; col.b = 0.375f + 0.225f*colChangeFactor;
+      col.r = 0.55f + 0.375f*colChangeFactor; col.g = 0.85f - 0.25f*colChangeFactor; col.b = 0.375f + 0.225f*colChangeFactor;
     }else{
       col.r = 0.225f - 0.125f*colChangeFactor; col.g = 0.425f - 0.15f*colChangeFactor; col.b = 0.8f - 0.125f*colChangeFactor;
     }
   }else if(halflifeSeconds > 5.0E2){ //text color inversion point for light theme (actually 600)
     float colChangeFactor = (float)(SDL_log10(halflifeSeconds - 5.0E2)/SDL_log10(7.5E3 - 5.0E2)); //value from 0 to 1
     if(darkTheme){
-      col.r = 0.4f + 0.15f*colChangeFactor; col.g = 0.8f - 0.1f*colChangeFactor; col.b = 0.55f - 0.175f*colChangeFactor;
+      col.r = 0.4f + 0.15f*colChangeFactor; col.g = 0.8f + 0.05f*colChangeFactor; col.b = 0.55f - 0.175f*colChangeFactor;
     }else{
       col.r = 0.3f - 0.075f*colChangeFactor; col.g = 0.6f - 0.175f*colChangeFactor; col.b = 0.75f + 0.05f*colChangeFactor;
     }
@@ -117,7 +117,7 @@ SDL_FColor getHalfLifeCol(const double halflifeSeconds, const uint8_t valueType,
   }else if(halflifeSeconds > 3.0E-2){
     float colChangeFactor = (float)(SDL_log10(1.0 + halflifeSeconds - 3.0E-2)/SDL_log10(1.0 + 1.0 - 3.0E-2)); //value from 0 to 1
     if(darkTheme){
-      col.r = 0.3f; col.g = 0.45f + 0.175f*colChangeFactor; col.b = 0.525f + 0.175f*colChangeFactor;
+      col.r = 0.3f; col.g = 0.45f + 0.175f*colChangeFactor; col.b = 0.675f + 0.025f*colChangeFactor;
     }else{
       col.r = 0.85f - 0.35f*colChangeFactor; col.g = 0.9f + 0.1f*colChangeFactor; col.b = 0.425f + 0.275f*colChangeFactor;
     }
@@ -125,35 +125,35 @@ SDL_FColor getHalfLifeCol(const double halflifeSeconds, const uint8_t valueType,
   }else if(halflifeSeconds > 5.0E-3){
     float colChangeFactor = (float)(SDL_log10(1.0 + halflifeSeconds - 5.0E-3)/SDL_log10(1.0 + 3.0E-2 - 5.0E-3)); //value from 0 to 1
     if(darkTheme){
-      col.r = 0.225f + 0.075f*colChangeFactor; col.g = 0.375f + 0.075f*colChangeFactor; col.b = 0.525f - 0.1f*colChangeFactor;
+      col.r = 0.225f + 0.075f*colChangeFactor; col.g = 0.375f + 0.075f*colChangeFactor; col.b = 0.65f - 0.025f*colChangeFactor;
     }else{
       col.r = 0.95f - 0.1f*colChangeFactor; col.g = 0.95f - 0.05f*colChangeFactor; col.b = 0.35f + 0.075f*colChangeFactor;
     }
   }else if(halflifeSeconds > 1.0E-3){
     float colChangeFactor = (float)(SDL_log10(1.0 + halflifeSeconds - 1.0E-3)/SDL_log10(1.0 + 5.0E-3 - 1.0E-3)); //value from 0 to 1
     if(darkTheme){
-      col.r = 0.175f + 0.05f*colChangeFactor; col.g = 0.325f + 0.05f*colChangeFactor; col.b = 0.575f - 0.05f*colChangeFactor;
+      col.r = 0.175f + 0.05f*colChangeFactor; col.g = 0.325f + 0.05f*colChangeFactor; col.b = 0.625f + 0.025f*colChangeFactor;
     }else{
       col.r = 1.0f - 0.05f*colChangeFactor; col.g = 1.0f - 0.05f*colChangeFactor; col.b = 0.3f + 0.05f*colChangeFactor;
     }
   }else if(halflifeSeconds > 1.0E-6){
     float colChangeFactor = (float)(SDL_log10(1.0 + halflifeSeconds - 1.0E-6)/SDL_log10(1.0 + 1.0E-3 - 1.0E-6)); //value from 0 to 1
     if(darkTheme){
-      col.r = 0.0f + 0.175f*colChangeFactor; col.g = 0.1f + 0.225f*colChangeFactor; col.b = 0.45f + 0.125f*colChangeFactor;
+      col.r = 0.0f + 0.175f*colChangeFactor; col.g = 0.1f + 0.225f*colChangeFactor; col.b = 0.575f + 0.05f*colChangeFactor;
     }else{
       col.r = 1.0f; col.g = 0.65f + 0.35f*colChangeFactor; col.b = 0.7f - 0.4f*colChangeFactor;
     }
   }else if(halflifeSeconds > 1.0E-9){
     float colChangeFactor = (float)(SDL_log10(1.0 + halflifeSeconds - 1.0E-9)/SDL_log10(1.0 + 1.0E-6 - 1.0E-9)); //value from 0 to 1
     if(darkTheme){
-      col.r = 0.15f - 0.15f*colChangeFactor; col.g = 0.025f + 0.075f*colChangeFactor; col.b = 0.35f + 0.1f*colChangeFactor;
+      col.r = 0.15f - 0.15f*colChangeFactor; col.g = 0.025f + 0.075f*colChangeFactor; col.b = 0.45f + 0.125f*colChangeFactor;
     }else{
       col.r = 1.0f; col.g = 0.8f - 0.15f*colChangeFactor; col.b = 0.8f - 0.1f*colChangeFactor;
     }
   }else if(halflifeSeconds > 1.0E-13){
     float colChangeFactor = (float)(SDL_log10(1.0 + halflifeSeconds - 1.0E-13)/SDL_log10(1.0 + 1.0E-9 - 1.0E-13)); //value from 0 to 1
     if(darkTheme){
-      col.r = 0.1f + 0.05f*colChangeFactor; col.g = 0.0f + 0.025f*colChangeFactor; col.b = 0.2f + 0.15f*colChangeFactor;
+      col.r = 0.1f + 0.05f*colChangeFactor; col.g = 0.0f + 0.025f*colChangeFactor; col.b = 0.2f + 0.25f*colChangeFactor;
     }else{
       col.r = 1.0f; col.g = 0.95f - 0.15f*colChangeFactor; col.b = 0.95f - 0.15f*colChangeFactor;
     }
