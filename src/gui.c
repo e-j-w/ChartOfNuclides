@@ -75,28 +75,28 @@ SDL_FColor getHalfLifeCol(const double halflifeSeconds, const uint8_t valueType,
     }
   }else if(halflifeSeconds > 1.0E15){
     if(darkTheme){
-      col.r = 1.0f; col.g = 0.95f; col.b = 0.925f;
+      col.r = 1.0f; col.g = 0.90f; col.b = 0.875f;
     }else{
       col.r = 0.0f; col.g = 0.05f; col.b = 0.25f;
     }
   }else if(halflifeSeconds > 5.0E7){
     float colChangeFactor = (float)(SDL_log10(halflifeSeconds - 5.0E7)/SDL_log10(1.0E15 - 5.0E7)); //value from 0 to 1
     if(darkTheme){
-      col.r = 1.0f; col.g = 0.7f + 0.25f*colChangeFactor; col.b = 0.8f + 0.125f*colChangeFactor;
+      col.r = 0.95f + 0.05f*colChangeFactor; col.g = 0.65f + 0.25f*colChangeFactor; col.b = 0.750f + 0.125f*colChangeFactor;
     }else{
       col.r = 0.1f; col.g = 0.15f - 0.10f*colChangeFactor; col.b = 0.5f - 0.25f*colChangeFactor;
     }
   }else if(halflifeSeconds > 3.0E5){
     float colChangeFactor = (float)(SDL_log10(halflifeSeconds - 3.0E5)/SDL_log10(5.0E7 - 3.0E5)); //value from 0 to 1
     if(darkTheme){
-      col.r = 0.925f + 0.075f*colChangeFactor; col.g = 0.6f + 0.1f*colChangeFactor; col.b = 0.6f + 0.2f*colChangeFactor;
+      col.r = 0.95f; col.g = 0.6f + 0.05f*colChangeFactor; col.b = 0.6f + 0.15f*colChangeFactor;
     }else{
       col.r = 0.1f; col.g = 0.275f - 0.125f*colChangeFactor; col.b = 0.675f - 0.175f*colChangeFactor;
     }
   }else if(halflifeSeconds > 7.5E3){
     float colChangeFactor = (float)(SDL_log10(halflifeSeconds - 7.5E3)/SDL_log10(3.0E5 - 7.5E3)); //value from 0 to 1
     if(darkTheme){
-      col.r = 0.55f + 0.375f*colChangeFactor; col.g = 0.85f - 0.25f*colChangeFactor; col.b = 0.375f + 0.225f*colChangeFactor;
+      col.r = 0.55f + 0.4f*colChangeFactor; col.g = 0.85f - 0.25f*colChangeFactor; col.b = 0.375f + 0.225f*colChangeFactor;
     }else{
       col.r = 0.225f - 0.125f*colChangeFactor; col.g = 0.425f - 0.15f*colChangeFactor; col.b = 0.8f - 0.125f*colChangeFactor;
     }
