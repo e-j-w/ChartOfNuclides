@@ -161,14 +161,39 @@ static int parseAppRules(app_data *restrict dat, asset_mapping *restrict stringI
             SDL_strlcpy(str2,tok,255);
             tok = SDL_strtok_r(str2,",",&saveptr);
             if(tok!=NULL){
-              dat->rules.themeRules.textColInactive.r = (Uint8)floor(atof(tok)*255.0);
+              dat->rules.themeRules.textColInactive[UITHEME_LIGHT].r = (Uint8)floor(atof(tok)*255.0);
               tok = SDL_strtok_r(NULL,",",&saveptr);
               if(tok!=NULL){
-                dat->rules.themeRules.textColInactive.g = (Uint8)floor(atof(tok)*255.0);
+                dat->rules.themeRules.textColInactive[UITHEME_LIGHT].g = (Uint8)floor(atof(tok)*255.0);
                 tok = SDL_strtok_r(NULL,",",&saveptr);
                 if(tok!=NULL){
-                  dat->rules.themeRules.textColInactive.b = (Uint8)floor(atof(tok)*255.0);
-                  dat->rules.themeRules.textColInactive.a = 255;
+                  dat->rules.themeRules.textColInactive[UITHEME_LIGHT].b = (Uint8)floor(atof(tok)*255.0);
+                  dat->rules.themeRules.textColInactive[UITHEME_LIGHT].a = 255;
+                }else{
+                  SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"could not parse text_col_inactive color string in file: %s.\n",filePath);
+                  return -1;
+                }
+              }else{
+                SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"could not parse text_col_inactive color string in file: %s.\n",filePath);
+                return -1;
+              }
+            }else{
+              SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"could not parse text_col_inactive color string in file: %s.\n",filePath);
+              return -1;
+            }
+          }else if(SDL_strcmp(tok,"text_col_inactive_dark") == 0){
+            tok = SDL_strtok_r(NULL,"",&saveptr); //get the rest of the string
+            SDL_strlcpy(str2,tok,255);
+            tok = SDL_strtok_r(str2,",",&saveptr);
+            if(tok!=NULL){
+              dat->rules.themeRules.textColInactive[UITHEME_DARK].r = (Uint8)floor(atof(tok)*255.0);
+              tok = SDL_strtok_r(NULL,",",&saveptr);
+              if(tok!=NULL){
+                dat->rules.themeRules.textColInactive[UITHEME_DARK].g = (Uint8)floor(atof(tok)*255.0);
+                tok = SDL_strtok_r(NULL,",",&saveptr);
+                if(tok!=NULL){
+                  dat->rules.themeRules.textColInactive[UITHEME_DARK].b = (Uint8)floor(atof(tok)*255.0);
+                  dat->rules.themeRules.textColInactive[UITHEME_DARK].a = 255;
                 }else{
                   SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"could not parse text_col_inactive color string in file: %s.\n",filePath);
                   return -1;

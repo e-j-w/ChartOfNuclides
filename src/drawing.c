@@ -333,7 +333,7 @@ void drawTextEntryBox(const ui_theme_rules *restrict uirules, resource_data *res
       drawTextAlignedSized(rdat,textX,textY,uirules->textColNormal[uirules->uiColorTheme],FONTSIZE_NORMAL,alpha,text,ALIGN_LEFT,(Uint16)w);
       break;
     case HIGHLIGHT_INACTIVE:
-      drawTextAlignedSized(rdat,textX,textY,uirules->textColInactive,FONTSIZE_NORMAL,alpha,text,ALIGN_LEFT,(Uint16)w);
+      drawTextAlignedSized(rdat,textX,textY,uirules->textColInactive[uirules->uiColorTheme],FONTSIZE_NORMAL,alpha,text,ALIGN_LEFT,(Uint16)w);
       break;
   }
 }
@@ -374,7 +374,7 @@ void drawIconAndTextEntryBox(const ui_theme_rules *restrict uirules, resource_da
       break;
     case HIGHLIGHT_INACTIVE:
       ; //suppress pedantic warning
-      drawTextAlignedSized(rdat,textX,textY,uirules->textColInactive,FONTSIZE_NORMAL,alpha,text,ALIGN_LEFT,65535U);
+      drawTextAlignedSized(rdat,textX,textY,uirules->textColInactive[uirules->uiColorTheme],FONTSIZE_NORMAL,alpha,text,ALIGN_LEFT,65535U);
       if(cursorPos >= 0){
         SDL_FColor lineCol = grayCol;
         lineCol.a = alpha/255.0f;

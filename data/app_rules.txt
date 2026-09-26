@@ -4,6 +4,7 @@ bg_col_dark 0.18,0.18,0.18
 text_col 0.0,0.0,0.0
 text_col_dark 1.0,1.0,1.0
 text_col_inactive 0.5,0.5,0.5
+text_col_inactive_dark 0.6,0.6,0.6
 mod_col_mouseover 0.96,0.96,0.96
 mod_col_selected 0.58,0.58,0.58
 mod_col_selected_and_mouseover 0.70,0.70,0.70
