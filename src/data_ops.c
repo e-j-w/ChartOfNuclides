@@ -6672,7 +6672,7 @@ void updateWindowRes(app_data *restrict dat, app_state *restrict state, resource
 			//save previous window resolution
 			state->ds.windowXRestoreRes = state->ds.windowXRes;
 			state->ds.windowYRestoreRes = state->ds.windowYRes;
-			SDL_Log("Set window restore resolution to: [%u %u].\n",state->ds.windowXRestoreRes,state->ds.windowYRestoreRes);
+			//SDL_Log("Set window restore resolution to: [%u %u].\n",state->ds.windowXRestoreRes,state->ds.windowYRestoreRes);
 		}
 	}else{
 		state->ds.windowXRestoreRes = 0; //unset

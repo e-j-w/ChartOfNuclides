@@ -2163,11 +2163,11 @@ void processSingleEvent(app_data *restrict dat, app_state *restrict state, resou
       state->searchSelectionLen = evt.edit.length;
       break;*/
     case SDL_EVENT_WINDOW_MAXIMIZED:
-      SDL_Log("Window maximized.\n");
+      //SDL_Log("Window maximized.\n");
       state->ds.windowMaximized = 1;
       break;
     case SDL_EVENT_WINDOW_RESTORED:
-      SDL_Log("Window restored.\n");
+      //SDL_Log("Window restored.\n");
       state->ds.windowMaximized = 0;
       break;
     default:
