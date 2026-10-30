@@ -15,11 +15,11 @@ For example: while [carbon](https://en.wikipedia.org/wiki/Carbon) appears as a s
 
 ## Basic navigation
 
-In this program, the chart of nuclides is shown with the number of protons on the y-axis and the number of neutrons on the x-axis. The main chart view can be panned by clicking and dragging with a mouse/touchpad, and zoomed in/out using the mouse wheel or scrolling on the touchpad. The controls are basically identical to Google Maps.
+In this program, the chart of nuclides is shown with the number of protons (Z) on the y-axis and the number of neutrons (N) on the x-axis. The controls are basically identical to Google Maps: the main chart view can be panned by clicking and dragging with a mouse/touchpad, and zoomed in/out using the mouse wheel or scrolling on the touchpad.
 
 Left click on the chart to select an isotope and show information about it, including:
 - Its natural abundance.
-- Its half-life (if it is radioactive)
+- Its half-life (if it is radioactive).
 - Other nuclear structure properties.
 
 Selecting the 'All Levels/Gammas' button for a specific isotope will show detailed nuclear structure data for all known energy levels of the nucleus.
