@@ -3522,7 +3522,9 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 												//new comment, make sure that the previous comment ends with a period
 												if(nd->ensdfStrBufLen >= 2){
 													if(nd->ensdfStrBuf[nd->ensdfStrBufLen-1] == '\0'){
-														if(nd->ensdfStrBuf[nd->ensdfStrBufLen-2] != '.'){
+														if(nd->ensdfStrBuf[nd->ensdfStrBufLen-2] == ','){
+															nd->ensdfStrBuf[nd->ensdfStrBufLen-2] = '.'; //fix comments that end with a comma (eg. 116Ag (6-) isomer spin-parity)
+														}else if(nd->ensdfStrBuf[nd->ensdfStrBufLen-2] != '.'){
 															nd->ensdfStrBuf[nd->ensdfStrBufLen-1] = '.';
 															nd->ensdfStrBuf[nd->ensdfStrBufLen] = '\0';
 															nd->ensdfStrBufLen++;
@@ -3839,8 +3841,8 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 								
 									double fudgeFactor = 3.0*SDL_sqrt(pow(getRawErrFromDB(&nd->tran[tranInd].energy),2.0) + pow(getRawErrFromDB(&nd->levels[lvlInd].energy),2.0) + pow(getRawErrFromDB(&nd->levels[nd->numLvls-1].energy),2.0));
 									fudgeFactor += pow(getRawValFromDB(&nd->tran[tranInd].energy),2.0)/(2.0E6*(nd->nuclData[nd->numNucl].Z + nd->nuclData[nd->numNucl].N)); //nuclear recoil energy approximation
-									if(fudgeFactor < 0.01){
-										fudgeFactor = 1.0; //default assumed energy resolution, when no error is reported 
+									if((fudgeFactor < 0.01)||((fudgeFactor < 2.0)&&(getRawErrFromDB(&nd->tran[tranInd].energy) <= 0.000001))){
+										fudgeFactor = 2.0; //default assumed energy resolution, when no error is reported 
 									}
 									//SDL_Log("Fudge factor: %f\n",fudgeFactor);
 									double eDiff = fabs(getRawValFromDB(&nd->levels[lvlInd].energy) - (getRawValFromDB(&nd->levels[nd->numLvls-1].energy) - getRawValFromDB(&nd->tran[tranInd].energy)));
@@ -4086,6 +4088,12 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 										nd->tran[tranInd].multipole[nd->tran[tranInd].numMultipoles] &= (uint8_t)(~(uint8_t)(1U)); //unset
 										nd->tran[tranInd].multipole[nd->tran[tranInd].numMultipoles] |= (uint8_t)((uint8_t)(2U) << 1);
 										//specify that assignment is 'Q'
+										nd->tran[tranInd].multipole[nd->tran[tranInd].numMultipoles] |= (uint8_t)(1U << 7);
+									}else if(tok[i]=='O'){
+										//set E3 as placeholder value
+										nd->tran[tranInd].multipole[nd->tran[tranInd].numMultipoles] &= (uint8_t)(~(uint8_t)(1U)); //unset
+										nd->tran[tranInd].multipole[nd->tran[tranInd].numMultipoles] |= (uint8_t)((uint8_t)(3U) << 1);
+										//specify that assignment is 'O' (octupole)
 										nd->tran[tranInd].multipole[nd->tran[tranInd].numMultipoles] |= (uint8_t)(1U << 7);
 									}else if(SDL_isdigit(tok[i])){
 										//set multipole order
@@ -4536,7 +4544,9 @@ int parseENSDFFile(const char * filePath, ndata * nd){
 												//new comment, make sure that the previous comment ends with a period
 												if(nd->ensdfStrBufLen >= 2){
 													if(nd->ensdfStrBuf[nd->ensdfStrBufLen-1] == '\0'){
-														if(nd->ensdfStrBuf[nd->ensdfStrBufLen-2] != '.'){
+														if(nd->ensdfStrBuf[nd->ensdfStrBufLen-2] == ','){
+															nd->ensdfStrBuf[nd->ensdfStrBufLen-2] = '.'; //fix comments that end with a comma (eg. 116Ag (6-) isomer spin-parity)
+														}else if(nd->ensdfStrBuf[nd->ensdfStrBufLen-2] != '.'){
 															nd->ensdfStrBuf[nd->ensdfStrBufLen-1] = '.';
 															nd->ensdfStrBuf[nd->ensdfStrBufLen] = '\0';
 															nd->ensdfStrBufLen++;
@@ -5722,6 +5732,7 @@ int buildDatabase(const char *appBasePath, ndata *nd){
 									const uint8_t mEM = (uint8_t)(nd->tran[tInd].multipole[0] & 1U);
 									const uint8_t mOrder = (uint8_t)((nd->tran[tInd].multipole[0] >> 1U) & 15U);
 									const uint8_t mDQ = (uint8_t)((nd->tran[tInd].multipole[0] >> 7U) & 1U);
+									const uint8_t mTentative = (uint8_t)((nd->tran[tInd].multipole[0] >> 5U) & 3U);
 									char strOut[32], strOut2[32];
 									getNuclNameStr(strOut,&nd->nuclData[i],255);
 									getGammaEnergyStr(strOut2,nd,tInd,1);
@@ -5749,24 +5760,22 @@ int buildDatabase(const char *appBasePath, ndata *nd){
 										}
 										uint32_t lvlSearchInd = (uint32_t)((int32_t)finalLvlInd + lvlSearch);
 										if(nd->levels[lvlSearchInd].numSpinParVals == 1){
-											if(nd->levels[lvlSearchInd].energy.unit == nd->levels[finalLvlInd].energy.unit){
-												uint8_t eValueType1 = (uint8_t)((nd->levels[lvlSearchInd].energy.format >> 5U) & 15U);
-												uint8_t eValueType2 = (uint8_t)((nd->levels[finalLvlInd].energy.format >> 5U) & 15U);
-												if(eValueType1 == eValueType2){
-													if(SDL_fabsf(nd->levels[lvlSearchInd].energy.val - nd->levels[finalLvlInd].energy.val) < 1.0f){
-														//this is a possible candidate for the correct final level
-														spinDiff = (uint8_t)SDL_abs(initSpin - ((int)(nd->spv[nd->levels[lvlSearchInd].firstSpinParVal].spinVal)));
-														spinSum = (uint8_t)(initSpin + ((int)(nd->spv[nd->levels[lvlSearchInd].firstSpinParVal].spinVal)));
-														if(halfInt){spinDiff = spinDiff / 2;}
-														if(halfInt){spinSum = spinSum / 2;}
-														parChange = (!(((int)nd->spv[nd->levels[lvlSearchInd].firstSpinParVal].parVal) == initPar));
-														correctMult = isTranMulipolarityCorrect(nd->tran[tInd].multipole[0],spinDiff,spinSum,parChange);
-														if(correctMult){
-															//re-assign the final transition
-															SDL_Log("  Correcting final level of transition by %i.\n",lvlSearch);
-															nd->tran[tInd].finalLvlOffset = (uint16_t)((int)nd->tran[tInd].finalLvlOffset - lvlSearch);
-															break;
-														}
+											uint8_t eValueType1 = (uint8_t)((nd->levels[lvlSearchInd].energy.format >> 5U) & 15U);
+											uint8_t eValueType2 = (uint8_t)((nd->levels[finalLvlInd].energy.format >> 5U) & 15U);
+											if(eValueType1 == eValueType2){
+												if(SDL_fabs(getLevelEnergykeV(nd,lvlSearchInd) - getLevelEnergykeV(nd,finalLvlInd)) < 1.0){
+													//this is a possible candidate for the correct final level
+													spinDiff = (uint8_t)SDL_abs(initSpin - ((int)(nd->spv[nd->levels[lvlSearchInd].firstSpinParVal].spinVal)));
+													spinSum = (uint8_t)(initSpin + ((int)(nd->spv[nd->levels[lvlSearchInd].firstSpinParVal].spinVal)));
+													if(halfInt){spinDiff = spinDiff / 2;}
+													if(halfInt){spinSum = spinSum / 2;}
+													parChange = (!(((int)nd->spv[nd->levels[lvlSearchInd].firstSpinParVal].parVal) == initPar));
+													correctMult = isTranMulipolarityCorrect(nd->tran[tInd].multipole[0],spinDiff,spinSum,parChange);
+													if(correctMult){
+														//re-assign the final transition
+														SDL_Log("  Correcting final level of transition by %i.\n",lvlSearch);
+														nd->tran[tInd].finalLvlOffset = (uint16_t)((int)nd->tran[tInd].finalLvlOffset - lvlSearch);
+														break;
 													}
 												}
 											}
@@ -5801,6 +5810,59 @@ int buildDatabase(const char *appBasePath, ndata *nd){
 											}
 										}
 									}
+
+									if(correctMult == 0){
+										if(mTentative == TENTATIVEMULT_DERIVED){
+											//multipolarity probably incorrectly derived by the evaluator
+											spinDiff = (uint8_t)SDL_abs(initSpin - finalSpin);
+											spinSum = (uint8_t)(initSpin + finalSpin);
+											if(halfInt){spinDiff = spinDiff / 2;}
+											if(halfInt){spinSum = spinSum / 2;}
+											parChange = (!(finalPar == initPar));
+											//change derived multipolarity
+											nd->tran[tInd].multipole[0] = 0; //reset value
+											nd->tran[tInd].multipole[0] |= (uint8_t)(TENTATIVEMULT_DERIVED << 5);
+											if(spinDiff > 0){
+												nd->tran[tInd].multipole[0] |= (uint8_t)((uint8_t)(spinDiff) << 1);
+												if(parChange){
+													if((spinDiff%2) == 0){
+														nd->tran[tInd].multipole[0] |= (uint8_t)(1U); //magnetic
+													}else{
+														nd->tran[tInd].multipole[0] &= (uint8_t)(~(uint8_t)(1U)); //electric
+													}
+												}else{
+													if((spinDiff%2) == 0){
+														nd->tran[tInd].multipole[0] &= (uint8_t)(~(uint8_t)(1U)); //electric
+													}else{
+														nd->tran[tInd].multipole[0] |= (uint8_t)(1U); //magnetic
+													}
+												}
+												SDL_Log("  Modified derived spin-parity.\n");
+											}else{
+												if((spinSum == 0)&&(parChange == 0)){
+													//E0 transition if 0+ -> 0+
+													nd->tran[tInd].multipole[0] &= (uint8_t)(~(uint8_t)(1U)); //electric
+													nd->tran[tInd].multipole[0] |= (uint8_t)((uint8_t)(0U) << 1);
+													SDL_Log("  Modified derived spin-parity to E0.\n");
+												}else if(spinSum == 0){
+													//magnetic monopole? IMPOSSIBURU
+													SDL_Log("  Transition appears to be M0, not possible!\n");
+												}else{
+													//assume E1 or M1
+													nd->tran[tInd].multipole[0] |= (uint8_t)((uint8_t)(1U) << 1);
+													if(parChange){
+														nd->tran[tInd].multipole[0] &= (uint8_t)(~(uint8_t)(1U)); //electric
+														SDL_Log("  Modified derived spin-parity to E1.\n");
+													}else{
+														nd->tran[tInd].multipole[0] |= (uint8_t)(1U); //magnetic
+														SDL_Log("  Modified derived spin-parity to M1.\n");
+													}
+												}
+											}
+											
+										}
+									}
+
 
 								}
 							}

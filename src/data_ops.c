@@ -2141,10 +2141,10 @@ void getGammaMultipolarityStr(char strOut[32], const ndata *restrict nd, const u
 	uint8_t derived = 0;
 
 	for(uint8_t i=0; i<nd->tran[tranInd].numMultipoles; i++){
-		uint8_t mTentative = (uint8_t)((nd->tran[tranInd].multipole[i] >> 5U) & 3U);
-		uint8_t mOrder = (uint8_t)((nd->tran[tranInd].multipole[i] >> 1U) & 15U);
-		uint8_t mEM = (uint8_t)(nd->tran[tranInd].multipole[i] & 1U);
-		uint8_t mDQ = (uint8_t)((nd->tran[tranInd].multipole[i] >> 7U) & 1U);
+		const uint8_t mTentative = (uint8_t)((nd->tran[tranInd].multipole[i] >> 5U) & 3U);
+		const uint8_t mOrder = (uint8_t)((nd->tran[tranInd].multipole[i] >> 1U) & 15U);
+		const uint8_t mEM = (uint8_t)(nd->tran[tranInd].multipole[i] & 1U);
+		const uint8_t mDQ = (uint8_t)((nd->tran[tranInd].multipole[i] >> 7U) & 1U);
 		if(mTentative == TENTATIVEMULT_YES){
 			if(tentative == 0){
 				tentative = 1;
@@ -2176,7 +2176,9 @@ void getGammaMultipolarityStr(char strOut[32], const ndata *restrict nd, const u
 		if(mDQ){
 			//dipole/quadrupole assignment
 			//check placeholder multipole values to determine which is which
-			if((mEM == 0)&&(mOrder == 2)){
+			if((mEM == 0)&&(mOrder == 3)){
+				SDL_strlcat(strOut,"O",32);
+			}else if((mEM == 0)&&(mOrder == 2)){
 				SDL_strlcat(strOut,"Q",32);
 			}else if((mEM == 1)&&(mOrder == 1)){
 				SDL_strlcat(strOut,"D",32);
